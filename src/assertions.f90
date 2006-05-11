@@ -1,5 +1,8 @@
 !======================================================================
-! This contains a few useful bits and pieces, some of which are  from NR
+! This contains a few useful bits and pieces, some of which are from NR.
+! The parts from NR (assertions) are in the public domain (see section
+! C1.2 of "Numerical Recipes in Fortran 90" by Press et al.)
+!
 ! $Id: assertions.f90,v 1.1 2001/06/27 13:40:16 gsalam Exp $
 !
 !======================================================================
