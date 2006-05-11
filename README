@@ -1,0 +1,87 @@
+README for the pdf-conv directory
+---------------------------------
+
+This is a version of the PDFevln package that additionally provides a
+f77 interface to allow a simple determination of convolutions of
+splitting functions with a given pdf set. This is useful in various
+contexts such as inclusion of factorization scale dependence in
+a-posteriori inclusion of PDFs for jet calculations; or for matching
+between fixed-order and resummed calculations.
+
+To see what routines are available, and which other parameters are
+around, examine src/f77_pdftab.f90
+
+Note that compilation requires a fortran 90 compiler -- those that
+have been tested (to varying extents) include ifort, lf95, g95 and
+gfortran, some of which (all but lf95) are available freely to varying
+extents; for initialisation g95 is found to be quite a bit slower than
+the other compilers.
+
+Complaints and questions should be addressed to
+Gavin Salam <salam@lpthe.jussieu.fr>
+
+On request the f77 interface may be extended to include easy access to
+the evolution part of the package.
+
+#-----------------------------------------------------------------
+# To compile library:
+#-------------------
+> cd src
+# edit fortran 90 compiler in Makefile if need be
+> make 
+
+# then to compile example program
+#--------------------------------
+> cd ../example_f77
+# edit Makefile so as to include the appropriate f90 and LHAPDF libraries
+> make 
+
+# then run it as follows and check output against what is below
+> ./convolution_example
+ *************************************
+ *       LHAPDF Version 5.0          *
+ *************************************
+
+ >>>>>> PDF description: <<<<<<
+ CTEQ6.1
+ Reference:
+ J. Pumplin, D.R. Stump, J. Huston, H.L. Lai
+ W.K. Tung, S. Kuhlmann, J. Owens
+ hep-ph/0303013
+ This set has 41 member PDF
+     mem=0 --> central value (cteq61m)
+     mem=1-40 --> 20 sets of +ve/-ve error values
+ >>>>>>                   <<<<<<
+
+ -----------------------------------------------------------
+              This is the PDFevln package
+
+         Written by Gavin P. Salam (2001-2006)
+
+  It is made available under the GNU public license,
+  with the additional restriction that if you use it or any
+  derivative of it then you should cite:
+  M. Dasgupta and G.P. Salam, Eur.Phys.J.C24:213-236,2002.
+
+  You are also encouraged to cite the original references,
+  for LO, NLO and NNLO splitting functions, the QCD
+  1, 2 and 3 loop beta functions and the coupling and
+  PDF mass threshold matching functions.
+ -----------------------------------------------------------
+
+ x =   0.1,   Q =   30.
+ iflv           lhapdf           ourpdf  PLO_conv_ourpdf PNLO_conv_ourpdf
+   -6        0.0000000        0.0000000        0.0000000        0.0000000
+   -5        0.0148786        0.0148821        0.0921542        0.1938882
+   -4        0.0314312        0.0314340        0.0528865        0.0249562
+   -3        0.0608825        0.0608848       -0.0095773       -0.2567813
+   -2        0.0885760        0.0885775       -0.0763528       -0.5440898
+   -1        0.1214880        0.1214896       -0.1300409       -0.8175595
+    0        0.9779542        0.9779997       -2.2731258        1.6135916
+    1        0.3832341        0.3832380       -0.3130459       -2.1597162
+    2        0.6185498        0.6185565       -0.2770019       -2.6512379
+    3        0.0608825        0.0608848       -0.0095773       -0.2567813
+    4        0.0314312        0.0314340        0.0528865        0.0249562
+    5        0.0148786        0.0148821        0.0921542        0.1938882
+    6        0.0000000        0.0000000        0.0000000        0.0000000
+

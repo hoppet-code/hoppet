@@ -1,0 +1,2 @@
+#!/bin/sh
+makePNEW.perl  testcteq6 -lcern -L../src -lpdfconv -L$LHAPDFDIR -lLHAPDF -I../src

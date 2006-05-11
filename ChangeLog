@@ -1,0 +1,182 @@
+2006-05-11  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* fixed another bug in sort routine (didn't seem to affect
+	results, but was dodgy anyway).
+
+2006-05-10  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* fixed bug in sort routine; more to come...
+	* added various facilities to tests/determine_accuracies.f90 
+	  (but probably needs more work) (still need to add dy_min?)
+	
+	* Changed some more names (ev_Setdu -> SetDefaultEvolutionDu)
+	* Allowed eps to be made an argument of a grid initialisation
+	* Introduced query functions for eps and du
+	  (DefaultConvolutionEps, DefaultEvolutionDu)
+	* Introduced GetGridInfoString(grid,string) to get a 
+	  description string for one's run...
+
+	* Changed default global access to be via hoppet_v1 module
+	* Changed default Qmax in f77_pdftab to 28TeV (2*LHC rts)
+	* Added: src/welcome_message.f90 + introduced "HOPPET" name
+	* Added: corresponding mods in convolution.
+
+2006-05-09  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* Added tests/determine_accuracies.f90 
+	* swtiched some errors in convolution.f90 (and elsewhere) over to
+	the "official" warnings_and_errors handling.
+
+2006-05-07  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+  	* Implemented deletion of grid_def's + some more name changes
+	(notably, pdfset -> pdf in evolution.f90
+	
+        * implemented direction=-1 for mass thresholds and tested that it
+	works properly, using the tests/birectional_mass_thresholds
+	program (and running it with various alphas values).
+
+	* more name changes (extra "Delete") + introduced InitEvlnOperator(...)
+	
+	* switched warnings_and_errors over to a new version.
+	
+	* changed interfaces in evolution.f90 and pdf_tabulate.f90 so as
+	to make nloop an optional argument, with the default number of
+	loops being deduced from the running_coupling object; also
+	introduced NumberOfLoops(coupling) function for the
+	running_coupling, allowing other routines to find out what is
+	going on.
+
+  	* changed directory structure (for now), with a new directory
+	tests/, while the old testing directory has become testing-other
+	(devoted to testing things that are not directly related the
+	program development).
+	
+	* some name changes in evolution.f90 designed to make things more
+	uniform wrt rest of program.
+
+2006-05-05  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* moved some arguments around for the running_coupling type, and
+	introduced an optional quark_masses(4:6) argument for setting the
+	charm, bottom and top (pole) masses.
+
+	* major name changes related to running coupling handling --
+	hopefully it should all become somwhat more logical...
+
+	
+2006-05-04  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* moved holders.f90 -> dglap_holders.f90 (so its name now
+	coincides with module name).
+
+	* various name changes in holders.f90 (and global name changes,
+	such that gd -> grid and sh -> dh).
+
+2006-05-02  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+   	* some more name changes in dglap_objects; removed limitation in
+	MTM convolution on absence of heavy flavour (necessary to allow
+	crossing of threshold when evolving downwards, where there is
+	almost bound to be some residual heavy-quark piece).
+
+	* one internal name change in convolution.f90 to avoid subsequent
+	problems with SetToCommutator.
+	
+	* merged dglap_objects and dglap_objects hidden (which were
+	separated only for support of legacy f90 compilers, hopefully no
+	longer in existence). Added SetToZero, SetToConvolution,
+	SetToCommutator. 
+	
+	* removed number of loops from the split_mat type (it wasn't being
+	used).
+
+2006-05-01  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+        * started work on giving consistent names to routines for
+	working with splitting functions in dglap_objects.f90
+	
+        * Moved conv_objects.f90 to dglap_objects.f90, changed 
+	  PMat -> split_mat
+	  CMat -> coeff_mat
+	  MassThresholdMat -> mass_threshold_mat
+	  
+	* Put some case-insensitivity into the convert.pl script.
+	
+        * Added version of CopyHumanPdfToEvln etc. where first argument
+	is nf (integer) rather than a pdf_rep -- that should makes its use
+	a bit more transparent to people. Also switched the rest of the
+	code to make use of the new call and removed all prep information
+	from sigma_holder. [Tested that answers are unchanged!]
+	
+	* further name changes throughout
+
+	* added Delete function for sigma_holder
+	
+        * convolution.f90: fixed various potential memory leaks automatic
+	detection of need to allocate grid_conv objects.
+	
+	* pdf_representation.f90: representation changes now leave decoupled
+	heavy flavours unchanged, rather than setting them to zero.
+
+2006-04-30  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* various name changes to simplify life for the user (mainly
+	removal of prefixes which add little information and just make for
+	more things to remember)
+
+	* added scripts/convert.pl which carries out most of the name
+	changes automatically (sometimes one or two resulting name clashes
+	then had to be fixed by hand). Hopefully this script can also be
+	used for conversion of existing example programs
+	
+	* documentation moving forwards. Section 3 on one-flavour problems
+	is now at the first draft stage. Should probably next move on to
+	section 4 for dealing with flavour problems.
+
+2006-04-28  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* switched sort.f90 to be my own version.
+  	* removed unused interpolation routines from interpolation.f90
+	
+2006-04-07  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* Added the example_f90/small_fast_tab.f90 program to examine
+	timings and accuracies for a (by default) small tabulation.
+
+	Default parameters give 10^{-4} accuracy at 3 ms/evolution over
+	the small region (Rojo's request: 9-e3<x<0.75, Q<50). Timings
+	increase to about 8.5ms/evolution for a larger range (1e-6<x,
+	Q<14000) and I haven't checked accuracies (NB 6ms with better
+	ifort optimization). Note also that eps dependence in integrations
+	still needs to be checked.
+
+        Timings below are for small table, with default parameters (see
+	svn of this date!), on tycho and gaia (3.4GHz P4).
+	
+	                          init (s)   evln (ms)     x,Q point (mu s)
+	ifort -O                     2.2       3.0               2.8
+	ifort -O3 -axP               2.1       2.1               2.6
+        lf95 -O                      2.7       2.2               2.2 
+        gfortran -O3 -march=i686     5.9     130               180  
+	g95 -O3 -march=i686          7.8      21                22            
+	
+	* increased default interpolation order in the pdf_tabulation to 3
+	(2 was definitely too low and 4 might be better). Found that a
+	slightly small spacing than used in the f77 routine could be
+	beneficial (e.g. 0.07). NB: haven't checked correctness of results
+	with -axP on intel (there are reports [banfi] of sporadic
+	non-understood problems).
+	
+
+2006-04-06  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	Version 1.0
+	
+	* imported sources from the PDFevln package, with the addition of
+	some f77 hooks and the removal of all the main programs; also a
+	directory structure has been introduced so that the library source
+	in is src/ while the example and testing programs are in separate
+	directories.
+
+	

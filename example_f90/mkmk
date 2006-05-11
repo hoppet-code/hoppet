@@ -1,0 +1,2 @@
+#!/bin/sh
+makePNEW.perl  small_fast_tab -lcern -L../src -ldglap -L$LHAPDFDIR -lLHAPDF -I../src

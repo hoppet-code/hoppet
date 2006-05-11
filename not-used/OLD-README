@@ -1,0 +1,60 @@
+
+======================================================================
+----------------------------------------------------------------------
+Manual
+------
+
+The routines intended to be publicly accessible to the user are to be
+found in src/f77_pdf_access.f90. They are as follows
+
+
+subroutine pdfconv_start(dy,nf)
+  ! this runs the initialisation.
+  !   dy = internal grid spacing (0.1d0 is a recommended value)
+  !   nf = number of flavours    (5 for most calculations)
+
+
+integer function pdfconv_new_pdf(pdf_subroutine,Q)
+  ! this returns an integer which is a "handle" to the internally
+  ! represented pdf.
+  !   pdf_subroutine: some subroutine with an identical interface
+  !                   to LHAPDF's evolvePDF 
+  !                   [i.e. evolvePDF(x,Q,f(-6:6))]            
+  !   Q = Q scale that is passed to pdf_subroutine
+
+
+integer function pdfconv_P_LO(pdf_handle)
+  ! returns an integer handle to the result of the convolution
+  !   P_LO \otimes pdf_handle
+  ! 
+  ! where P_LO is the leading order splitting function matrix with the
+  ! normalisation such that the LO DGLAP equation is
+  !
+  !       d pdf / dln Q^2 = alphas/2pi * P_LO \otimes pdf
+  
+
+integer function pdfconv_P_NLO(pdf_handle)
+  ! returns an integer handle to the result of the convolution
+  !   P_NLO \otimes pdf_handle
+  ! 
+  ! where P_NLO is the NLO splitting function matrix with the
+  ! normalisation such that the NLO DGLAP equation is
+  !
+  !       d pdf / dln Q^2 = alphas/2pi * P_LO \otimes pdf
+  !                              + (alphas/2pi)^2 * P_NLO \otimes pdf
+  
+
+subroutine pdfconv_eval_pdf(handle, x, f)
+  ! Places in f(-6:6) the quantity x*f(x) for each of the flavours
+  ! ranging from -6:6
+
+
+subroutine pdfconv_release_pdf(handle)
+  ! Declare the PDF referred to via the supplied handle to be no longer
+  ! needed, allowing the memory to be released back to the system. (It
+  ! is important to make use of this if you are examining many
+  ! different PDFs, one after another, otherwise memory consumption
+  ! will grow to be very large).
+
+
+
