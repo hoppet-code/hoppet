@@ -36,7 +36,7 @@
 #   avoids dependencies on one's self.
 #
 #----------------------------------------------------------------------
-# O 
+# Old info and incomplete changelog.
 #
 # Generate a Makefile from the sources in the current directory.  The source
 # files may be in either C, FORTRAN 77, Fortran 90 or some combination of
