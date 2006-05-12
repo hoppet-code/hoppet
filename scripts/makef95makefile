@@ -1,0 +1,751 @@
+#! /usr/bin/perl
+#
+# Usage: makemake {<program name> {<F90 compiler or fc or f77 or cc or c>}}
+#
+# Generate a Makefile from the sources in the current directory.  The source
+# files may be in either C, FORTRAN 77, Fortran 90 or some combination of
+# these languages.  If the F90 compiler specified is cray or parasoft, then
+# the Makefile generated will conform to the conventions of these compilers.
+# To run makemake, it will be necessary to modify the first line of this script
+# to point to the actual location of Perl on your system.
+#
+# Written by Michael Wester <wester@math.unm.edu> February 16, 1995
+# Cotopaxi (Consulting), Albuquerque, New Mexico
+#
+# Modified 28/03/2000 by Gavin Salam to ???
+#
+# Modified 16/12/2000 by GPS to be a single script for a range of op sys
+#
+# Modified ??/??/2004 by GPS to allow one to make libraries
+#
+# Modified 14/02/2005 by GPS so that Makefile now allows one to type
+#           make progname [rather than make PROG=progname]
+#           make ALL      [all programs and libraries]
+#           make make     [to regenerate the makefile]
+#
+# Modified 12/08/2005 (and a bit in between) 
+#           added -srcdir option
+#------------------------------------------------------------------
+# USAGE: make default_progname [options]
+#
+#   first arg = PROGNAME (or a library name, for making a lib of all OBJ)
+#   Subsequent options: 
+#        -comp xxx       sets compiler
+#
+#        -lcern          sets cernlib options
+#
+#        -lpcern         sets cernlib + packlib options
+#
+#        -lio            sets options for using libiof90.a
+#
+#        -lla95          sets options for using lapack95 (only lf95 supported)
+#
+#        -post x.f90     file x.f90 is added after all libs 
+#                        (only one file allowed for time being)
+#
+#        -remake "a non-default command for regenerating makefile"
+#
+#        -srcdir dir     adds the directory to the list of places
+#                        to search for files
+#
+#        -postlib        adds command after all else
+#
+#   allows presence of multiple (up to 7) "use module_x" on one line, 
+#   separated by semi-colons 
+#
+#   avoids dependencies on one's self.
+#
+#
+# following allows use of meaningful names for predefined vars
+use English;
+
+
+#-- work out a default compiler according to the operating system, hostname
+if    ($OSNAME eq 'dec_osf')  { 
+  $compiler="compaq";
+  $make="make";  }
+elsif ($OSNAME eq 'linux')  { 
+  $hostname = `hostname`;
+  chomp($hostname);
+  print "We are on: ".$hostname."\n";
+  #if ($hostname eq "pcth70") { $compiler="portland";}
+  ($libg2cDIR = `locate libg2c.a | head -1`) =~ s/\/libg2c.a//;
+  chomp($libg2cDIR);
+  print "libg2cDIR is $libg2cDIR\n";
+  if ($hostname =~ "pcth[0-9]+" || $hostname =~ "lxplus.*") {
+    $compiler="portland";}
+  elsif ($hostname =~ ".*lpthe.*" || $hostname =~ "thalie" ){
+    $compiler="intel";
+  }
+  else {
+    #$compiler = "absoft";
+    $compiler="laheycern";
+  }
+  $make="gmake"; }
+
+# not always in the obvious place
+# need to work around the fact that thalie does not give lpthe in hostname...
+$LPTHE=($hostname =~ ".*lpthe.*"  || $hostname =~ "thalie" );
+$LAPTOP=($hostname =~ "localhost.*" || $hostname =~ "voltaire");
+if ($LPTHE){ $CERNLIBLOC = "/maia/cern/2000/lib";}
+else { $CERNLIBLOC = "/cern/pro/lib";}
+
+
+#-- allow compiler to be specified as a dot file.
+if (open(COMPILER, "<.compiler")) {
+  if ($comptemp = <COMPILER>) {
+    chomp($comptemp);
+    $compiler = $comptemp; }
+  close(COMPILER);
+}
+
+#-- parse command line; very basic for now ---
+$PROG = $ARGV[0];
+$MAKELIB = ($PROG =~ /\.a$/);
+if ($MAKELIB) {
+  $LIBNAME = $PROG;
+  $PROG = ''}
+else {
+  $LIBNAME = '';
+}
+
+#-- possible libraries to be included
+$cernlib = "";
+$g77libs = 0;
+$iolib=0;
+$lapack=0;
+$xtralibs="";
+$xtraincl="";
+$postlibs="";
+$remake="";
+#--
+$i=1;
+
+# extra directories
+@extra_dirs=();
+
+while ($i <= $#ARGV) {
+  $OPT = $ARGV[$i++];
+  chomp($OPT);
+  if    ($OPT eq '-comp')   { $compiler = $ARGV[$i++];}
+  elsif ($OPT eq '-lcern')  { $cernlib = "-lmathlib -lkernlib"; }
+  elsif ($OPT eq '-lpcern') { $cernlib = "-lmathlib -lkernlib -lpacklib"; }
+  elsif ($OPT eq "-g77libs"){ $g77libs=1; }
+  elsif ($OPT eq "-lio")    { $iolib=1; }
+  elsif ($OPT eq "-lla95")  { $lapack=1; }
+  elsif ($OPT eq "-post")   { $postfile=$ARGV[$i++]; }
+  elsif ($OPT eq "-remake") { $remake=$ARGV[$i++];}
+  elsif ($OPT eq "-srcdir") { push @extra_dirs,$ARGV[$i++]."/";}
+  elsif ($OPT eq "-postlib"){ $postlibs .= $ARGV[$i++]." ";}
+  elsif ($OPT =~ "^-I")     { $xtraincl .= $OPT." ";}
+  else                      { $xtralibs .= $OPT." "; }
+}
+#print "Compiler is ".$compiler."\n";
+
+
+
+
+#======================================================================
+# here we define the properties of various compilers
+if ($compiler eq 'absoft') {
+  $FC         = "f90";
+  $FFLAGS     = "-YEXT_NAMES=ASIS -B108 -B100 -O";
+  $F90        = "f90";
+  $F90FLAGS   = "-YEXT_NAMES=ASIS -B108 -B100 -O";
+  $LDFLAGS    = "-YEXT_NAMES=ASIS -B108 -B100 -O";
+  $IOINC      = "-p".$ENV{HOME}."/utils/libf90";
+  $IOLIB      = "-L".$ENV{HOME}."/utils/libf90 -liof90";
+  $IOPOST     = 0;
+  $CRNLIBPRE  = "-L$CERNLIBLOC";
+  $CRNLIBPOST = 
+    "-L$libg2cDIR -lg2c -lm";
+  $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
+  $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
+}
+elsif ($compiler eq 'lf95' || $compiler eq 'lahey' || $compiler eq 'laheycern') {
+  $FC         = "lf95";
+  $F90        = "lf95";
+  #$FFLAGS     = "-O --tp4 --x - --prefetch 2 --sse2 --trap";
+  #$F90FLAGS   = "-O --tp4 --x - --prefetch 2 --sse2 --trap";
+  #$FFLAGS     = "-O --tp4 --x - --prefetch 2 --sse2";
+  #$F90FLAGS   = "-O --tp4 --x - --prefetch 2 --sse2";
+  $FFLAGS     = "-O";
+  $F90FLAGS   = "-O";
+  if ($LPTHE || $LAPTOP) { 
+    #$LDFLAGS    = "--staticlink";
+    $LDFLAGS    = "";
+    $CRNLIBPOST = "-lfj9i6 -L$libg2cDIR -lg2c -lm";
+  }
+  else {
+    $LDFLAGS    = "";
+    #$CRNLIBPOST = "-L/usr/lib/ -lf2c -lm";
+    $CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
+  }
+  $IOINC      = "-I".$ENV{HOME}."/utils/libf90-lh";
+  $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-lh -liof90";
+  $IOPOST     = 1;
+  $CRNLIBPRE  = "-L$CERNLIBLOC";
+  # need to include the lapack libraries statically for command line 
+  # parameters to have an effect 
+  $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
+  $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
+}
+elsif ($compiler eq 'compaq') {
+  $FC         = "f95";
+  $FFLAGS     = "-O";
+  $F90        = "f95";
+  $F90FLAGS   = "-O";
+  $LDFLAGS    = "";
+  $IOINC      = "-I".$ENV{HOME}."/utils/libf90";
+  $IOLIB      = "-L".$ENV{HOME}."/utils/libf90 -liof90";
+  $IOPOST     = 0;
+  $CRNLIBPRE  = "-L$CERNLIBLOC";
+  $CRNLIBPOST = "";
+  $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
+  $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
+}
+elsif ($compiler eq 'g95') {
+  $FC         = "g95";
+  $FFLAGS     = "-g -O3 -march=i686";
+  $F90        = "g95";
+  $F90FLAGS   = "-g -O3 -march=i686";
+  $LDFLAGS    = "";
+  $IOINC      = "-I".$ENV{HOME}."/utils/libf90-g95";
+  $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-g95 -liof90";
+  $IOPOST     = 0;
+  $CRNLIBPRE  = "-L$CERNLIBLOC";
+  $CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
+  $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
+  $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
+}
+elsif ($compiler eq 'gfortran') {
+  $FC         = "gfortran";
+  $FFLAGS     = "-O3 -march=i686";
+  $F90        = "gfortran";
+  $F90FLAGS   = "-O3 -march=i686";
+  $LDFLAGS    = "";
+  $IOINC      = "-I".$ENV{HOME}."/utils/libf90-gfortran";
+  $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-gfortran -liof90";
+  $IOPOST     = 0;
+  $CRNLIBPRE  = "-L$CERNLIBLOC";
+  $CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
+  $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
+  $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
+}
+elsif ($compiler eq 'nag') {
+  $FC         = "f95";
+  $FFLAGS     = "-O3  -w=x95 -maxcontin=99 -dcfuns";
+  $F90        = "f95";
+  $F90FLAGS   = "-O3 -w=x95";
+  $LDFLAGS    = "";
+  $IOINC      = "-I".$ENV{HOME}."/utils/libf90-nag";
+  $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-nag -liof90";
+  $IOPOST     = 0;
+  $CRNLIBPRE  = "-L$CERNLIBLOC";
+  $CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
+  $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
+  $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
+}
+elsif ($compiler eq 'intel' || $compiler eq 'ifort') {
+  # -fp_port seems to solve various problems, but can slow things down
+  # enormously; so one may want to include it, but only on restricted 
+  # occasions.
+  if (`which ifort` =~ /no ifort/) {
+    $FC         = "ifc";
+    $FFLAGS     = "-O";
+    $F90        = "ifc";
+    $F90FLAGS   = "-O";
+    $LDFLAGS    = "";
+    $IOINC      = "-I".$ENV{HOME}."/utils/libf90-ifc";
+    $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-ifc -liof90 -lPEPCF90";
+    $IOPOST     = 0;
+    $CRNLIBPRE  = "-L$CERNLIBLOC";
+    $CRNLIBPOST = "-L$libg2cDIR -lg2c";
+    $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
+    $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
+    $POSTLIB    = "";
+  } else {
+    $FC         = "ifort";
+    $FFLAGS     = "-O";
+    $F90        = "ifort";
+    $F90FLAGS   = "-O";
+    $LDFLAGS    = "";
+    $IOINC      = "-I".$ENV{HOME}."/utils/libf90-ifc";
+    $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-ifc -liof90";
+    $IOPOST     = 0;
+    $CRNLIBPRE  = "-L$CERNLIBLOC";
+    $CRNLIBPOST = "-L$libg2cDIR -lg2c";
+    $LAPACKINC  = "-I".$ENV{HOME}."/utils/LAPACK95/lapack95_modules";
+    # NB: lapack and blas are installed by default on the system...
+    $LAPACKLIB  = "-L".$ENV{HOME}."/utils/LAPACK95/ -llapack95 -llapack -lblas";
+    $POSTLIB    = "";
+  }
+}
+elsif ($compiler eq 'portland') {
+  $FC         = "pgf77";
+  $FFLAGS     = "-O";
+  $F90        = "pgf90";
+  $F90FLAGS   = "-O";
+  $LDFLAGS    = "";
+  $IOINC      = "-I".$ENV{HOME}."/utils/libf90";
+  $IOLIB      = "-L".$ENV{HOME}."/utils/libf90 -liof90";
+  $IOPOST     = 0;
+  $CRNLIBPRE  = "-L$CERNLIBLOC";
+  $CRNLIBPOST = "-g77libs";
+  $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
+  $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
+}
+else {
+#======================================================================
+  die "unknown compiler: ".$compiler.". Cannot procede\n";}
+
+#---------------------------------------------
+print "Using '".$compiler."' compiler\n";
+
+
+# now build things up
+$INCLUDE=$xtraincl;
+$LIBS="";
+#-- where should these go?
+if ($iolib && !($IOPOST)) {
+  print "iolibs will be included\n";
+  $INCLUDE = $INCLUDE.$IOINC." "; 
+  $LIBS = $LIBS.$IOLIB." "; }
+#-- not sure of best place to put these?
+#$LIBS = $LIBS.$xtralibs." ";
+#-- order is a nightmare
+if ($cernlib || $lapack || $g77libs) {
+  if ($cernlib) {$LIBS = $LIBS.$CRNLIBPRE." ";}
+  $LIBS = $LIBS.$xtralibs." ";
+  if ($cernlib) {
+    print "cernlib will be included\n";
+    $LIBS = $LIBS.$cernlib." "; }
+  if ($lapack) {
+    print "lapack will be included\n";
+    $LIBS = $LIBS.$LAPACKLIB." ";
+    $INCLUDE = $INCLUDE.$LAPACKINC." ";}
+  # $CRNLIBPOST actually contains things needed for linking with g77
+  $LIBS = $LIBS.$CRNLIBPOST." ";}
+else { $LIBS = $LIBS.$xtralibs." "; }
+
+if ($iolib && $IOPOST) {
+  print "iolibs will be included\n";
+  $INCLUDE = $INCLUDE.$IOINC." "; 
+  $LIBS = $LIBS.$IOLIB." "; }
+  
+# finally add any libraries that MUST go at the end
+$LIBS .= $postlibs;
+
+
+#print $LAPACKINC."\n";
+
+# if ($cernlib) {
+#   $LIBS = $LIBS.$CRNLIBPRE." ".$xtralibs." ".$cernlib." ".$CRNLIBPOST; } else {
+#     $LIBS = $LIBS.$xtralibs." ";}
+# 
+
+#-- make a copy of any old Makefile
+if ( -e 'Makefile') {
+  if ( -e 'Makefile.bak') {unlink 'Makefile.bak';}
+  print "Moving old Makefile to Makefile.bak\n";
+  rename('Makefile', 'Makefile.bak');}
+
+
+open(MAKEFILE, "> Makefile");
+#-- first document things (there MUST be a better way of doing this...)
+print MAKEFILE "# Makefile generated automatically with\n";
+print MAKEFILE "# ".$0;
+$i = 0;
+$commandArgs = "";
+while ($i <= $#ARGV) {
+  $commandArgs .= " ".$ARGV[$i++]
+}
+print MAKEFILE $commandArgs;
+print MAKEFILE "\n";
+if ($remake eq "") {
+  $remake = $0." $commandArgs";
+}
+
+#-- wince use ARGV[0] to set the compiler, want to remove this line
+print MAKEFILE "# default program to compile\n";
+print MAKEFILE "PROG =\t$ARGV[0]\n\n";
+#
+# Source listing
+#
+# want files containing program to not be included in list
+if (@extra_dirs) {print MAKEFILE "VPATH = ".join(":",@extra_dirs)."\n";}
+push @extra_dirs, "";
+foreach (@extra_dirs) {push @ffiles,<$_*.f $_*.f90 $_*.F>}
+
+# now get object name for each source name
+foreach (@ffiles) {
+  ($ofile = $_) =~ s/(.*\/)*(.+)\.\w{1,3}$/$2.o/;
+  $objname{$_} = $ofile;
+  #print "$_ $ofile\n";
+}
+
+foreach $file (@ffiles) {
+  #$file = $_;
+  if ($file eq $postfile) {push @postsrcs,$file;}
+  else {
+  open(FILE,$file) || warn "Cannot open $file: $!\n";
+  $nprog = 0;
+  while (<FILE>) { if (/^\s*program/i) { $nprog = $nprog + 1;}}
+  if ($nprog == 0) {push @srcs,$file;}
+  else {push @allprog,$file;}}
+}
+
+#-- get program objects
+@allprog_obj = @allprog;
+foreach (@allprog_obj) { s/(.*\/)*(.+)\.\w{1,3}$/$2.o/ };
+# get list of program names...
+@allprog_exec = @allprog_obj;
+foreach (@allprog_exec) { s/\.o$// };
+print MAKEFILE "ALLPROG = \t";
+&PrintWords(8, 0, @allprog_exec);
+print MAKEFILE "\n\n";
+#-- will be used later on in time to remove executables with realclean
+print MAKEFILE "# This will be used one day...\n";
+print MAKEFILE "ALLPROGSRC =\t";
+&PrintWords(8, 0, @allprog);
+print MAKEFILE "\n\n";
+print MAKEFILE "ALLPROGOBJ =\t";
+&PrintWords(8, 0, @allprog_obj);
+print MAKEFILE "\n\n";
+
+
+print MAKEFILE "SRCS =\t";
+#push @srcs,'$(PROG).f90' unless $MAKELIB;
+foreach (<*.c>) {push @srcs,$_};
+
+&PrintWords(8, 0, @srcs);
+print MAKEFILE "\n\n";
+
+print MAKEFILE "POSTSRCS =\t";
+&PrintWords(8, 0, @postsrcs);
+print MAKEFILE "\n\n";
+
+
+#
+# Object listing
+#
+print MAKEFILE "OBJS =\t";
+@objs = @srcs;
+#foreach (@objs) { s/\.[^.]+$/.o/ };
+foreach (@objs) { s/(.*\/)*(.+)\.\w{1,3}$/$2.o/ };
+&PrintWords(8, 0, @objs);
+print MAKEFILE "\n\n";
+# other object listing
+print MAKEFILE "POSTOBJS =\t";
+@postobjs = @postsrcs;
+foreach (@postobjs) { s/(.*\/)*(.+)\.\w{1,3}$/$2.o/ };
+&PrintWords(8, 0, @postobjs);
+print MAKEFILE "\n";
+print MAKEFILE "POSTLIB = ".$POSTLIB;
+print MAKEFILE "\n\n";
+#
+# Define common macros
+#
+#print MAKEFILE "LIBS =\t\n\n";
+print MAKEFILE "LIBS = ".$LIBS."\n\n";
+
+print MAKEFILE "CC = cc\n";
+print MAKEFILE "CFLAGS = -O\n";
+# was f77
+
+
+print MAKEFILE "FC = ".$FC."\n";
+print MAKEFILE "FFLAGS = ".$FFLAGS." ".$INCLUDE."\n";
+print MAKEFILE "F90 = ".$F90."\n";
+print MAKEFILE "F90FLAGS = ".$F90FLAGS." ".$INCLUDE."\n";
+print MAKEFILE "LDFLAGS = ".$LDFLAGS." \n\n"; 
+
+
+
+
+# make
+#
+$ALLXTRAS='';
+if ($MAKELIB) {
+  print MAKEFILE "all: $LIBNAME\n\n";
+  print MAKEFILE "$LIBNAME: \$(OBJS)\n";
+  print MAKEFILE "\tar cru $LIBNAME \$(OBJS)\n";
+  print MAKEFILE "\tranlib $LIBNAME\n\n";
+  $ALLXTRAS = "$LIBNAME ";
+} else {
+  #print MAKEFILE "all: \$(PROG)\n\n";
+  #
+  #print MAKEFILE "\$(PROG): \$(PROG).o \$(OBJS) \$(POSTOBJS) \n";
+  #print MAKEFILE "\t\$(", &LanguageCompiler($ARGV[1], @srcs);
+  #print MAKEFILE ") \$(LDFLAGS) -o \$@ \$(PROG).o \$(OBJS) \$(LIBS) \$(POSTOBJS) \$(POSTLIB)\n\n";
+
+  print MAKEFILE "# Trick to enable old 'make PROG=xxx' form to still work\n";
+  print MAKEFILE "all: \$(PROG)__\n\n";
+
+  print MAKEFILE "\$(PROG)__: \$(PROG)\n\n";
+
+}
+
+print MAKEFILE "ALL: $ALLXTRAS \$(ALLPROG)\n\n";
+foreach (@allprog_exec) {
+  print MAKEFILE "$_: $_.o \$(OBJS) \$(POSTOBJS) \n";
+  print MAKEFILE "\t\$(", &LanguageCompiler($ARGV[1], @srcs);
+  print MAKEFILE ") \$(LDFLAGS) -o $_ $_.o \$(OBJS) \$(LIBS) \$(POSTOBJS) \$(POSTLIB)\n\n";
+}
+
+
+
+#
+# make for libraries (keep .mod files)
+#
+print MAKEFILE "libclean:\n";
+print MAKEFILE "\trm -f  \$(ALLPROGOBJS) \$(OBJS) \$(POSTOBJS) \n\n";
+#
+# make clean
+#
+print MAKEFILE "clean:\n";
+print MAKEFILE "\trm -f  \$(ALLPROGOBJS) \$(OBJS) \$(POSTOBJS) *.mod *.d\n\n";
+#
+# make realclean
+#
+print MAKEFILE "realclean:\n";
+print MAKEFILE "\trm -f $LIBNAME \$(ALLPROG) \$(ALLPROGOBJ) \$(OBJS) \$(POSTOBJS) *.mod *.d\n\n";
+#
+#
+# make make
+#
+print MAKEFILE "make:\n";
+print MAKEFILE "\t$remake\n\n";
+
+#
+# Make .f90 a valid suffix
+#
+print MAKEFILE ".SUFFIXES: \$(SUFFIXES) .f90\n\n";
+#
+# .f90 -> .o
+#
+# this does not seem to work on linux:
+#print MAKEFILE ".f90.o:\n";
+# so change to
+if ($make eq 'gmake') {
+  print MAKEFILE "%.o: %.f90 \n";
+  print MAKEFILE "\t\$(F90) \$(F90FLAGS) -c \$<\n\n";}
+else {
+  print MAKEFILE ".f90.o:\n";
+  print MAKEFILE "\t\$(F90) \$(F90FLAGS) -c \$<\n\n";}
+
+#
+# Dependency listings
+#
+#&MakeDependsf90($ARGV[1]);
+&MakeDependsf90(@ffiles);
+# these things should now be checked for in MakeDependsf90($ARGV[1])
+# let us hope nothing goes too haywire!
+#&MakeDepends("*.f *.F", '^\s*include\s+["\']([^"\']+)["\']');
+&MakeDepends("*.c",     '^\s*#\s*include\s+["\']([^"\']+)["\']');
+
+#
+# &PrintWords(current output column, extra tab?, word list); --- print words
+#    nicely
+#
+sub PrintWords {
+   local($columns) = 78 - shift(@_);
+   local($extratab) = shift(@_);
+   local($wordlength);
+   #
+   print MAKEFILE @_[0];
+   $columns -= length(shift(@_));
+   foreach $word (@_) {
+      $wordlength = length($word);
+      if ($wordlength + 1 < $columns) {
+         print MAKEFILE " $word";
+         $columns -= $wordlength + 1;
+         }
+      else {
+         #
+         # Continue onto a new line
+         #
+         if ($extratab) {
+            print MAKEFILE " \\\n\t\t$word";
+            $columns = 62 - $wordlength;
+            }
+         else {
+            print MAKEFILE " \\\n\t$word";
+            $columns = 70 - $wordlength;
+            }
+         }
+      }
+   }
+
+#
+# &LanguageCompiler(compiler, sources); --- determine the correct language
+#    compiler
+#
+sub LanguageCompiler {
+   local($compiler) = &toLower(shift(@_));
+   local(@srcs) = @_;
+   #
+   if (length($compiler) > 0) {
+      CASE: {
+         grep(/^$compiler$/, ("fc", "f77")) &&
+            do { $compiler = "FC"; last CASE; };
+         grep(/^$compiler$/, ("cc", "c"))   &&
+            do { $compiler = "CC"; last CASE; };
+         $compiler = "F90";
+         }
+      }
+   else {
+      CASE: {
+         grep(/\.f90$/, @srcs)   && do { $compiler = "F90"; last CASE; };
+         grep(/\.(f|F)$/, @srcs) && do { $compiler = "FC";  last CASE; };
+         grep(/\.c$/, @srcs)     && do { $compiler = "CC";  last CASE; };
+         $compiler = "???";
+         }
+      }
+   $compiler;
+   }
+
+#
+# &toLower(string); --- convert string into lower case
+#
+sub toLower {
+   local($string) = @_[0];
+   $string =~ tr/A-Z/a-z/;
+   $string;
+   }
+
+#
+# &uniq(sorted word list); --- remove adjacent duplicate words
+#
+sub uniq {
+   local(@words);
+   foreach $word (@_) {
+      if ($word ne $words[$#words]) {
+         push(@words, $word);
+         }
+      }
+   @words;
+   }
+
+#
+# &MakeDepends(language pattern, include file sed pattern); --- dependency
+#    maker
+#
+sub MakeDepends {
+   local(@incs);
+   local($lang) = @_[0];
+   local($pattern) = @_[1];
+   #
+   foreach $file (<${lang}>) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+         /$pattern/i && push(@incs, $1);
+         }
+      if (defined @incs) {
+         $file =~ s/\.[^.]+$/.o/;
+         print MAKEFILE "$file: ";
+         &PrintWords(length($file) + 2, 0, @incs);
+         print MAKEFILE "\n";
+         undef @incs;
+         }
+      }
+   }
+
+#
+# &MakeDependsf90(f90 compiler); --- FORTRAN 90 dependency maker
+#
+sub MakeDependsf90 {
+   #local($compiler) = &toLower(@_[0]);
+   #local(@files) = @_;
+   @files = @_;
+   local(@dependencies);
+   local(%filename);
+   local(@incs);
+   local(@modules);
+   local($objfile);
+   #
+   # Associate each module with the name of the file that contains it
+   #
+   #foreach $file (<*.f90 *.f>) {
+   foreach $file (@files) {
+      open(FILE, $file) || warn "Cannot open $file: $!\n";
+      while (<FILE>) {
+	if (/^\s*module\s+([^\s!]+)/i) {
+	  $modname = $1;
+	  ($filename{&toLower($modname)} = $file) =~ s/(.*\/)*(.+)\.\w{1,3}$/$2.o/;
+          #&& 
+	  # ($filename{&toLower($1)} = $file) =~ s/(.*\/)*(.+)\.\w{1,3}$/$2.o/ &&
+	    
+         }
+      }
+    }
+   #
+   # Print the dependencies of each file that has one or more include's or
+   # references one or more modules
+   #
+   $a='[^!;]*;';
+   foreach $file (@files) {
+      open(FILE, $file);
+      while (<FILE>) {
+	# method used for modules is a very nasty hack -- but do not
+	# quite know what else to do...
+	# will actually break in the case of something like "print ' ; use x'"
+	/^\s*include\s+["\']([^"\']+)["\']/i && push(@incs, $1);
+        #" #add this comment to get font-lock-fontify working again
+        /^\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
+	/^$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
+	/^$a$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
+	/^$a$a$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
+	/^$a$a$a$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
+	/^$a$a$a$a$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
+	/^$a$a$a$a$a$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
+	/^$a$a$a$a$a$a$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
+	  }
+      if (defined @incs || defined @modules) {
+	 # very nasty hack to get .f .F and .f90 
+	 # it will also get .f90000000, .F99999990 etc...
+	 # but this shouldn't matter because there should be no
+	 # files with those names.
+         ($objfile = $file) =~ s/(.*\/)*(.+)\.\w{1,3}$/$2.o/;
+         print MAKEFILE "$objfile: ";
+         undef @dependencies;
+         foreach $module (@modules) {
+            if ($filename{$module} ne $objfile) 
+               {push(@dependencies, $filename{$module});}
+            }
+         @dependencies = &uniq(sort(@dependencies));
+         &PrintWords(length($objfile) + 2, 0,
+                     @dependencies, &uniq(sort(@incs)));
+         print MAKEFILE "\n";
+         undef @incs;
+         undef @modules;
+         # #
+         # # Cray F90 compiler
+         # #
+         # if ($compiler eq "cray") {
+         #    print MAKEFILE "\t\$(F90) \$(F90FLAGS) -c ";
+         #    foreach $depend (@dependencies) {
+         #       push(@modules, "-p", $depend);
+         #       }
+         #    push(@modules, $file);
+         #    &PrintWords(30, 1, @modules);
+         #    print MAKEFILE "\n";
+         #    undef @modules;
+         #    }
+         # #
+         # # ParaSoft F90 compiler
+         # #
+         # if ($compiler eq "parasoft") {
+         #    print MAKEFILE "\t\$(F90) \$(F90FLAGS) -c ";
+         #    foreach $depend (@dependencies) {
+         #       $depend =~ s/\.o$/.f90/;
+         #       push(@modules, "-module", $depend);
+         #       }
+         #    push(@modules, $file);
+         #    &PrintWords(30, 1, @modules);
+         #    print MAKEFILE "\n";
+         #    undef @modules;
+         #    }
+         }
+      }
+   }
