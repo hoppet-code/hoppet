@@ -1,32 +1,10 @@
 #! /usr/bin/perl
-#
-# Usage: makemake {<program name> {<F90 compiler or fc or f77 or cc or c>}}
-#
-# Generate a Makefile from the sources in the current directory.  The source
-# files may be in either C, FORTRAN 77, Fortran 90 or some combination of
-# these languages.  If the F90 compiler specified is cray or parasoft, then
-# the Makefile generated will conform to the conventions of these compilers.
-# To run makemake, it will be necessary to modify the first line of this script
-# to point to the actual location of Perl on your system.
-#
-# Written by Michael Wester <wester@math.unm.edu> February 16, 1995
-# Cotopaxi (Consulting), Albuquerque, New Mexico
-#
-# Modified 28/03/2000 by Gavin Salam to ???
-#
-# Modified 16/12/2000 by GPS to be a single script for a range of op sys
-#
-# Modified ??/??/2004 by GPS to allow one to make libraries
-#
-# Modified 14/02/2005 by GPS so that Makefile now allows one to type
-#           make progname [rather than make PROG=progname]
-#           make ALL      [all programs and libraries]
-#           make make     [to regenerate the makefile]
-#
-# Modified 12/08/2005 (and a bit in between) 
-#           added -srcdir option
-#------------------------------------------------------------------
-# USAGE: make default_progname [options]
+#----------------------------------------------------------------------
+# Generates a Makefile from the f95/f95 and f77 sources in the current
+# directory (and optionally other directories) and includes specific
+# options to help linking with g77 libs for a range of compilers.
+# 
+# USAGE: makef95makefile default_progname [options]
 #
 #   first arg = PROGNAME (or a library name, for making a lib of all OBJ)
 #   Subsequent options: 
@@ -57,6 +35,34 @@
 #
 #   avoids dependencies on one's self.
 #
+#----------------------------------------------------------------------
+# O 
+#
+# Generate a Makefile from the sources in the current directory.  The source
+# files may be in either C, FORTRAN 77, Fortran 90 or some combination of
+# these languages.  If the F90 compiler specified is cray or parasoft, then
+# the Makefile generated will conform to the conventions of these compilers.
+# To run makemake, it will be necessary to modify the first line of this script
+# to point to the actual location of Perl on your system.
+#
+# Written by Michael Wester <wester@math.unm.edu> February 16, 1995
+# Cotopaxi (Consulting), Albuquerque, New Mexico
+#
+# Modified 28/03/2000 by Gavin Salam to ???
+#
+# Modified 16/12/2000 by GPS to be a single script for a range of op sys
+#
+# Modified ??/??/2004 by GPS to allow one to make libraries
+#
+# Modified 14/02/2005 by GPS so that Makefile now allows one to type
+#           make progname [rather than make PROG=progname]
+#           make ALL      [all programs and libraries]
+#           make make     [to regenerate the makefile]
+#
+# Modified 12/08/2005 (and a bit in between) 
+#           added -srcdir option
+#----------------------------------------------------------------------
+
 #
 # following allows use of meaningful names for predefined vars
 use English;

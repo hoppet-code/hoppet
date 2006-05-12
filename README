@@ -27,7 +27,7 @@ summaries of changes between releases are in ReleaseNotes.
 F95 compilers
 -------------
 
-You need a Fortran 95 compiler to compile this package. 
+You will need a Fortran 95 compiler to compile this package. 
 
 The free g95 (www.g95.org) compiler is one option, though its
 executables are fairly slow. It is very easy to install if you don't
