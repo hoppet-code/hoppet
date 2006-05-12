@@ -36,6 +36,8 @@
 #
 #        -lpcern         sets cernlib + packlib options
 #
+#        -g77libs        includes the g77 libraries
+#
 #        -lio            sets options for using libiof90.a
 #
 #        -lla95          sets options for using lapack95 (only lf95 supported)
@@ -72,15 +74,17 @@ elsif ($OSNAME eq 'linux')  {
   ($libg2cDIR = `locate libg2c.a | head -1`) =~ s/\/libg2c.a//;
   chomp($libg2cDIR);
   print "libg2cDIR is $libg2cDIR\n";
-  if ($hostname =~ "pcth[0-9]+" || $hostname =~ "lxplus.*") {
-    $compiler="portland";}
-  elsif ($hostname =~ ".*lpthe.*" || $hostname =~ "thalie" ){
-    $compiler="intel";
-  }
-  else {
-    #$compiler = "absoft";
-    $compiler="laheycern";
-  }
+  # set the default compiler to be g95
+  $compiler = "g95";
+  #if ($hostname =~ "pcth[0-9]+" || $hostname =~ "lxplus.*") {
+  #  $compiler="portland";}
+  #elsif ($hostname =~ ".*lpthe.*" || $hostname =~ "thalie" ){
+  #  $compiler="intel";
+  #}
+  #else {
+  #  #$compiler = "absoft";
+  #  $compiler="laheycern";
+  #}
   $make="gmake"; }
 
 # not always in the obvious place

@@ -1,6 +1,97 @@
-README for the pdf-conv directory
----------------------------------
+HOPPET: Higher Order Perturbative Parton Evolution Toolkit
+----------------------------------------------------------
+HOPPET is a Fortran 95 package for carrying out DGLAP evolution and
+other common manipulations of parton distribution functions (PDFs).
 
+The latest version can always be obtained from
+
+    http://hepforge.cedar.ac.uk/hoppet/
+
+Within HOPPET, PDFs are represented on a grid in x-space so as to
+avoid limitations on the functional form of input
+distributions. Decent speed and accuracy are obtained through the
+representation of splitting functions in terms of their convolution
+with a set of piecewise polynomial basis functions, and Runge-Kutta
+techniques are used for the evolution in Q.
+
+Unpolarised evolution is provided in the MSbar scheme to NNLO in the
+coupling, including heavy-quark thresholds, and polarised evolution to
+NLO. The code is structured so as to provide simple access to the
+objects representing splitting function and PDFs, making it possible
+for a user to extend the facilities already provided.
+
+
+F95 compilers
+-------------
+
+You need a Fortran 95 compiler to compile this package. 
+
+The free g95 (www.g95.org) compiler is one option, though its
+executables are fairly slow. It is very easy to install if you don't
+already have a recent version on your system. At the time of writing
+the free gfortran compiler produces very slow exectuables and is not
+recommended.
+
+The intel (ifort) compiler (versions 8.1.033 upwards) exists in a
+semi-free version for non-commercial use under linux and produces fast
+executables.
+
+The release has also been tested with the lahey lf95 commercial
+compiler, which also generates fast code.
+
+
+Compilation
+-----------
+
+Makefiles for f90/95 are generated automatically using the perl script
+scripts/makef95makefile -- each f90/f95 directory contains a small
+small shell script "mkmk" to coordinate the options for the Makefile
+generation. Run this the first time you unpack the library, and also
+if you have added any new programs or modified the "use" commands in
+files.
+
+To compile the hoppet_v1 library
+
+     cd src/
+     # <first edit the file "mkmk" according to your preferences>
+     # then generate the Makefile
+     ./mkmk
+     # compile the library
+     make
+
+To compile the f90 example program [not yet written...!]
+
+     cd ../example_f90
+     # <first edit the file "mkmk" according to your preferences>
+     # then generate the Makefile
+     ./mkmk
+     # compile the program
+     make example
+
+     # <or "make program_name" for some other program>
+
+Compiling f77 example programs (using g77) is a little trickier
+because of the need to include the correct f95 libraries. Accordingly
+the Makefile is not generated automatically -- look inside the
+suppplied Makefile to see what needs doing.
+
+     cd ../example_f77
+     # <edit the Makefile directly>
+     # compile
+     make program_name
+
+
+Documentation
+-------------
+
+HOPPET is (in the process of being) documented in doc/
+directory. Latex the file "HOPPET-v1-doc.tex" to get the information.
+
+
+
+======================================================================
+ OLD INFORMATION
+======================================================================
 This is a version of the PDFevln package that additionally provides a
 f77 interface to allow a simple determination of convolutions of
 splitting functions with a given pdf set. This is useful in various

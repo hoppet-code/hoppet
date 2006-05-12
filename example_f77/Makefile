@@ -28,7 +28,7 @@ F90LIB= -L`which lf95 | sed s:bin/lf95:lib:` -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
 #F90LIB=  -L$(HOME)/software/gfortran/lib -lgfortran
 
 
-LIBS = -L$(LHAPDFDIR) -lLHAPDF -L../src -ldglap $(F90LIB)
+LIBS = -L$(LHAPDFDIR) -lLHAPDF -L../src -lhoppet_v1 $(F90LIB)
 
 
 convolution_example: convolution_example.o

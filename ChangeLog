@@ -1,3 +1,10 @@
+2006-05-12  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* Ensured that makefiles can be generated entirely locally
+	  (including addition of a copy of makePNEW.perl as
+	  scripts/makef95makefile)
+	* Updated README to reflect current installation procedure
+
 2006-05-11  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* fixed another bug in sort routine (didn't seem to affect
