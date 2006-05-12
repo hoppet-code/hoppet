@@ -1,8 +1,22 @@
 #!/usr/bin/perl -w
+#======================================================================
+# script to convert files from old naming schemes to new ones.
 #
-# script to convert files from old naming schemes to new ones
+# Usage:
+#  update-hoppet-names.pl file.f90
 #
-
+# If there are any names to be modified, the original file will be copied
+# to file.f90.bak and file.f90 will be modified to contain new names.
+#
+# Note: if you are using this for the first time on you own programs
+# check that nothing too strange has happened before throwing away the
+# backup... Note two very short names are renamed: sh (->dh) and gd
+# (-> grid) they could conceivably conflict with something a user
+# program.
+#
+# Author: Gavin Salam, 2006
+# License: GNU Public license
+#======================================================================
 
 # names that are probably OK, but could do with removal
 # of the _conv prefix
