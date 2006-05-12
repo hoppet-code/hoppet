@@ -1,5 +1,7 @@
 2006-05-12  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* Added the RelaseNotes file
+	
 	* Ensured that makefiles can be generated entirely locally
 	  (including addition of a copy of makePNEW.perl as
 	  scripts/makef95makefile)

@@ -1,0 +1,19 @@
+======================================================================
+                Release notes for HOPPET (v1)
+======================================================================
+
+----------------------------------------------------------------------
+Release 1.1 (in preparation)
+-----------
+
+. Name changed to hoppet
+. Many internal name changes to provide more consistent user-interface
+. Some changes in setting of default grid and evolution parameters
+. Documentation written
+
+----------------------------------------------------------------------
+Release 1.0 (named pdf-conv) (6 April 2006)
+----------------------------
+
+Imported from the PDFevln sources, with modifications of the directory
+structure and addition of some f77 hooks.

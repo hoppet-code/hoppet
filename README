@@ -3,10 +3,6 @@ HOPPET: Higher Order Perturbative Parton Evolution Toolkit
 HOPPET is a Fortran 95 package for carrying out DGLAP evolution and
 other common manipulations of parton distribution functions (PDFs).
 
-The latest version can always be obtained from
-
-    http://hepforge.cedar.ac.uk/hoppet/
-
 Within HOPPET, PDFs are represented on a grid in x-space so as to
 avoid limitations on the functional form of input
 distributions. Decent speed and accuracy are obtained through the
@@ -19,6 +15,13 @@ coupling, including heavy-quark thresholds, and polarised evolution to
 NLO. The code is structured so as to provide simple access to the
 objects representing splitting function and PDFs, making it possible
 for a user to extend the facilities already provided.
+
+The latest version can always be obtained from
+
+    http://hepforge.cedar.ac.uk/hoppet/
+
+Details of changes are to be found in the file ChangeLog, while
+summaries of changes between releases are in ReleaseNotes.
 
 
 F95 compilers
