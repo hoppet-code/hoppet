@@ -778,7 +778,7 @@ Allocation,
   integer         :: nf_lcl
   call AllocSplitMat(grid, P, nf_lcl)
 \end{verbatim}
-is similar to that for \ttt{dglap_objects}. The crucial difference is
+is similar to that for \ttt{dglap\_objects}. The crucial difference is
 that one must supply a value for $n_f$, so that when the splitting
 matrix acts on a PDF it knows which flavours are decoupled. From the
 point of view of subsequent initialization a \ttt{split\_mat} object
@@ -868,11 +868,11 @@ implemented to help manipulate splitting matrices:
   call InitSplitMat(PA,PB[,factor])   ! PA = PB [*factor]   (opt.alloc)
 
   call SetToZero(PA)                  ! PA = 0
-  call Multiply(PA,factor)            ! PA = PA * factor                  TEST IT
+  call Multiply(PA,factor)            ! PA = PA * factor               
   call AddWithCoeff(PA,PB[,factor])   ! PA = PA + PB [*factor]
 
-  call SetToConvolution(PA,PB,PC)     ! PA = PB*PC          (opt.alloc)   TEST IT
-  call SetToCommutator(PA,PB,PC)      ! PA = PB*PC-PC*PB    (opt.alloc)   TEST IT
+  call SetToConvolution(PA,PB,PC)     ! PA = PB*PC          (opt.alloc)
+  call SetToCommutator(PA,PB,PC)      ! PA = PB*PC-PC*PB    (opt.alloc)
   
   call Delete(split_mat)                   ! PA's memory freed
 \end{verbatim}

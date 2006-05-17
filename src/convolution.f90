@@ -1506,6 +1506,7 @@ contains
     else
        call ValidateGD(gcin%grid,gc%grid,'conv_InitGridConv_gc')
     end if
+
     if (gcin%grid%nsub /= 0) then
        do isub = 1, gcin%grid%nsub
           ! remember not to do double allocate

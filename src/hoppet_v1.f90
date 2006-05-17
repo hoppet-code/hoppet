@@ -7,6 +7,7 @@ module hoppet_v1
   use dglap_holders 
   use evolution
   use qcd_coupling
+  use qcd
   use pdf_tabulate_new
   implicit none
 end module hoppet_v1

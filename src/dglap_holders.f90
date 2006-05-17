@@ -334,12 +334,14 @@ contains
   subroutine holder_Delete(dh)
     type(dglap_holder), intent(inout) :: dh
     !--------------------------------------
-    integer :: nflcl, iloop
+    integer :: nflcl, iloop, i
 
     do nflcl = lbound(dh%allP,2), ubound(dh%allP,2)
+       do i = 1, size(dh%allC(:,nflcl))
+          call Delete(dh%allC(i,nflcl))
+       end do
        do iloop = 1, dh%nloop
           call Delete(dh%allP(iloop,nflcl))
-          call Delete(dh%allC(iloop,nflcl))
        end do
     end do
     
