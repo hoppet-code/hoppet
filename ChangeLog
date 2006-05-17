@@ -1,5 +1,7 @@
 2006-05-17  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* Added du option to the various routines in evolution.f90
+		
 	* Added test/split_mat_ops.f90 for testing operations with
 	  between splitting matrices
 

@@ -62,6 +62,7 @@ module evolution
   real(dp), parameter :: du_dt = 0.25_dp, dt_ballpark_def = 0.4_dp
   real(dp) :: dt_ballpark = dt_ballpark_def
   real(dp) :: du_ballpark = du_dt * dt_ballpark_def
+  real(dp) :: ev_tmp_du_ballpark
   !real(dp), parameter :: dt_ballpark = 0.2
 
   type(split_mat),      pointer :: ev_PLO, ev_PNLO, ev_PNNLO
@@ -121,7 +122,7 @@ contains
   !! of the various options.
   !! 
   subroutine EvolvePDF(dh, pdf, coupling, &
-       &                               Q_init, Q_end, muR_Q, nloop, untie_nf)
+       &                    Q_init, Q_end, muR_Q, nloop, untie_nf, du)
     use dglap_holders; use pdf_representation
     type(dglap_holder),     intent(in), target   :: dh
     real(dp),               intent(inout)        :: pdf(:,:)
@@ -130,9 +131,10 @@ contains
     real(dp),               intent(in), optional :: muR_Q
     integer,                intent(in), optional :: nloop
     logical,                intent(in), optional :: untie_nf
+    real(dp),               intent(in), optional :: du
 
     call EvolveGeneric(dh, coupling, Q_init, Q_end, &
-         & pdf=pdf, muR_Q = muR_Q, nloop = nloop, untie_nf = untie_nf)
+         & pdf=pdf, muR_Q = muR_Q, nloop = nloop, untie_nf = untie_nf, du=du)
   end subroutine EvolvePDF
 
 
@@ -143,7 +145,7 @@ contains
   !! of the various options.
   !! 
   subroutine InitEvlnOperator(dh, evop, coupling, &
-       &                               Q_init, Q_end, muR_Q, nloop, untie_nf)
+       &                       Q_init, Q_end, muR_Q, nloop, untie_nf, du)
     use dglap_holders; use pdf_representation
     type(dglap_holder),     intent(in), target   :: dh
     type(evln_operator),    intent(out)          :: evop
@@ -152,9 +154,10 @@ contains
     real(dp),               intent(in), optional :: muR_Q
     integer,                intent(in), optional :: nloop
     logical,                intent(in), optional :: untie_nf
+    real(dp),               intent(in), optional :: du
 
     call EvolveGeneric(dh, coupling, Q_init, Q_end, &
-         & evop=evop, muR_Q = muR_Q, nloop = nloop, untie_nf = untie_nf)
+         & evop=evop, muR_Q = muR_Q, nloop = nloop, untie_nf = untie_nf, du=du)
   end subroutine InitEvlnOperator
   
 
@@ -204,7 +207,7 @@ contains
   !!            cannot reach this nf value.
   !!
   subroutine EvolveGeneric(dh, coupling, Q_init, Q_end, &
-       & pdf, evop, muR_Q, nloop, untie_nf)
+       &                     pdf, evop, muR_Q, nloop, untie_nf, du)
     use dglap_holders; use pdf_representation
     type(dglap_holder),     intent(in), target      :: dh
     type(running_coupling), intent(in),    target   :: coupling
@@ -214,6 +217,7 @@ contains
     real(dp),               intent(in),    optional :: muR_Q
     integer,                intent(in),    optional :: nloop
     logical,                intent(in),    optional :: untie_nf
+    real(dp),               intent(in),    optional :: du
     !-----------------------------------------------------
     !real(dp)           :: pdf_ev(size(pdf,dim=1), size(pdf,dim=2))
     type(dglap_holder) :: dhcopy
@@ -292,7 +296,7 @@ contains
        
        ! do evolution
        if (present(pdf)) call ev_evolve(dhcopy, &
-            &pdf, coupling, lcl_Q_init, lcl_Q_end, muR_Q, nloop, untie_nf)
+            &pdf, coupling, lcl_Q_init, lcl_Q_end, muR_Q, nloop, untie_nf, du)
 
        ! do the fake evolutions that allow us to do an accelerated 
        ! evolution later on.
@@ -300,8 +304,8 @@ contains
           ! recall: memory management of probes is done automatically
           call GetDerivedSplitMatProbes(dh%grid,probes)
           do i = 1, size(probes,3)
-             call ev_evolve(dhcopy, &
-                  &probes(:,:,i), coupling, lcl_Q_init,lcl_Q_end, muR_Q, nloop)
+             call ev_evolve(dhcopy, probes(:,:,i), &
+                  & coupling, lcl_Q_init,lcl_Q_end, muR_Q, nloop, untie_nf, du)
           end do
           call AllocSplitMat(dh%grid, this_evop%P, nflcl)
           call SetDerivedSplitMat(this_evop%P,probes)
@@ -469,7 +473,7 @@ contains
   !! conversion to and from "evolution" format. The evolution order
   !! is set by nloop.
   subroutine ev_evolve(dh, pdf, coupling, Q_init, Q_end, muR_Q,&
-       & nloop, untie_nf)
+       & nloop, untie_nf, du)
     use dglap_holders; use pdf_representation
     type(dglap_holder), intent(in), target :: dh
     real(dp),        intent(inout)         :: pdf(iflv_min:,0:)
@@ -478,6 +482,7 @@ contains
     real(dp),        intent(in), optional  :: muR_Q
     integer,         intent(in), optional  :: nloop
     logical,         intent(in), optional  :: untie_nf
+    real(dp),        intent(in), optional  :: du
     !-----------------------------------------------------
     real(dp) :: pdf_ev(size(pdf,dim=1), size(pdf,dim=2))
     integer  :: pdfrep
@@ -526,15 +531,17 @@ contains
   !! which may be useful module-wide
   !!
   !! Is it really needed?
-  subroutine ev_SetModuleConsts(coupling, muR_Q, nloop, untie_nf)
+  subroutine ev_SetModuleConsts(coupling, muR_Q, nloop, untie_nf, du)
     type(running_coupling),    intent(in)  :: coupling
     real(dp),        intent(in), optional  :: muR_Q
     integer,         intent(in), optional  :: nloop
     logical,         intent(in), optional  :: untie_nf
+    real(dp),        intent(in), optional  :: du
 
     ev_nloop = default_or_opt(NumberOfLoops(coupling),nloop)
     ev_muR_Q = default_or_opt(one,muR_Q)
     ev_untie_nf = default_or_opt(.false., untie_nf)
+    ev_tmp_du_ballpark = default_or_opt(du_ballpark, du)
   end subroutine ev_SetModuleConsts
   
 
@@ -616,14 +623,14 @@ contains
     if (ev_force_old_dt) then
        ev_du_type = ev_du_is_dt
        u1 = t1; u2 = t2
-       n  = ceiling(abs(t2-t1)/dt_ballpark)
+       n  = ceiling(abs(t2-t1)/(ev_tmp_du_ballpark/du_dt))
     else if (abs(as1 - as2)/max(as1,as2) < ev_minalphadiff &
          &.or. as1*as2 <= zero) then
     !else if (.true.) then
        ev_du_type = ev_du_is_dtas_fixed
        ev_du_dt = max(abs(as1),abs(as2))
        u1 = t1 * ev_du_dt; u2 = t2 * ev_du_dt
-       n  = ceiling(abs(u2-u1)/du_ballpark)
+       n  = ceiling(abs(u2-u1)/ev_tmp_du_ballpark)
     else
        ev_du_type = ev_du_is_dtas_run
        ev_u_asref = as1
@@ -631,12 +638,10 @@ contains
        ev_u_bval  = (as1/as2-1)/(as1*(t2-t1))
        u1 = zero
        u2 = log(1+ev_u_bval*ev_u_asref*(t2-t1)) / ev_u_bval
-       n  = ceiling(abs(u2-u1)/du_ballpark)
+       n  = ceiling(abs(u2-u1)/ev_tmp_du_ballpark)
        !write(0,*) ev_u_asref, ev_u_bval
     end if
     
-    !n  = ceiling(abs(t2-t1)/dt_ballpark)
-    !dt = (t2 - t1)/n
     du = (u2 - u1)/n
 
     ntot = ntot + n

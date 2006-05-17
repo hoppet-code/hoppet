@@ -432,10 +432,12 @@ call
 \begin{verbatim}
   call SetDefaultConvolutionEps(eps)
 \end{verbatim}
-Note that this is just one of the parameters affecting the final
-accuracy of convolutions. In practice (unless going to extremely high
-accuracies) the grid spacing and interpolation scheme are more
-critical.
+which is to be made before creating the \ttt{grid\_def}
+object.\footnote{Alternatively, an optional \ttt{eps} argument can be
+  included in the call to \ttt{InitGridDef}.}  Note that this is just
+one of the parameters affecting the final accuracy of convolutions. In
+practice (unless going to extremely high accuracies) the grid spacing
+and interpolation scheme are more critical.
 
 Having allocated and initialised a \texttt{Pgg} splitting function, we
 can go on to use it. For example 
@@ -1396,7 +1398,7 @@ For a 1-loop running coupling one has $u = (\ln \ln
 Q^2/\Lambda)/\beta_0$, which is the variable that appears in
 analytical solutions to the $1$-loop DGLAP equation.
 %
-The step size in du can be set with the following call
+The step size in u, du, can be set with the following call
 \begin{verbatim}
   real(dp) :: du = 0.1_dp ! or some smaller value
   call SetDefaultEvolutionDu(du)
@@ -1410,7 +1412,7 @@ To actually carry out the evolution, one uses the following subroutine
 call:
 \begin{verbatim}
   call EvolvePDF(dh, pdf, coupling, Q_init, Q_end &
-                             & [, muR_Q] [, nloop] [, untie_nf] )
+                        & [, muR_Q] [, nloop] [, untie_nf] [, du] )
 \end{verbatim}
 which takes a \ttt{pdf} uses the splitting matrices in \ttt{dh}, to
 evolve it from scale \ttt{Q\_init} to scale \ttt{Q\_end}
@@ -1484,7 +1486,7 @@ to that used to evolve a PDF:
   real(dp), pointer   :: pdf_init(:,:), pdf_end(:,:)
   [...]
   call InitEvlnOperator(dh, evop, coupling, Q_init, Q_end &
-                             & [, muR_Q] [, nloop] [, untie_nf] )
+                           & [, muR_Q] [, nloop] [, untie_nf] [, du] )
 \end{verbatim}
 It can then be applied to PDF in the same way that a normal
 \ttt{split\_mat} would:
@@ -1502,7 +1504,13 @@ memory associated with an evolution operator that is no longer needed.
 \section{Tabulated PDFs}
 \label{sec:tabulated-pdfs}
 
-Lots of name changes will be needed here...
+The tools in the previous section are useful if one knows that one
+needs DGLAP evolution results at a small number of predetermined $Q$
+values. Often however one simply wishes to provide a PDF distribution
+at some initial scale and then subsequently be able to access it at
+arbitrary values of $x$ and $Q$. For this purpose it is useful to
+produce a tabulation of the PDF.
+
 
 %======================================================================
 %======================================================================
