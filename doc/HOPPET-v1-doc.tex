@@ -1509,7 +1509,26 @@ needs DGLAP evolution results at a small number of predetermined $Q$
 values. Often however one simply wishes to provide a PDF distribution
 at some initial scale and then subsequently be able to access it at
 arbitrary values of $x$ and $Q$. For this purpose it is useful to
-produce a tabulation of the PDF.
+produce a table of the PDF as a function of $Q^2$, which then allows
+for access to the PDF at arbitrary $x, Q$ using an interpolation.
+
+Name changes?
+\begin{verbatim}
+  pdftab                  -> pdf_table
+  pdftab_AllocTab         -> AllocPdfTable
+  pdftab_AssocNfInfo      -> AddNfInfoToPdfTable
+
+  pdftab_InitTabSub       -> FillPdfTable_f90sub  ???
+  pdftab_InitTab_LHAPDF   -> FillPdfTable_LHAPDF  ???
+
+  pdftab_InitTabEvolve    -> EvolvePdfTable()
+
+  pdftab_PreEvolve        -> PreEvolvePdfTable()
+
+  pdftab_ValTab_yQ/xQ     -> EvalPdfTable(...)       
+\end{verbatim}
+
+
 
 
 %======================================================================
