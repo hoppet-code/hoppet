@@ -22,6 +22,8 @@ F90LIB= -L`which lf95 | sed s:bin/lf95:lib:` -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
 # that the g77 "main"  is found before the g95 "main") -- with other compilers
 # the situation may be different.
 #F90LIB= -lfrtbegin -L`locate libf95.a | tail -1 | sed s:/libf95.a::` -lf95
+# or the following
+#F90LIB= -lfrtbegin -L$(HOME)/software/g95-install/lib/gcc-lib/i686-pc-linux-gnu/4.0.1 -lf95
 
 # for the gfortran compiler
 #F90LIB=  -L`locate libgfortran.a | tail -1 | sed s:/libgfortran.a::` -lgfortran

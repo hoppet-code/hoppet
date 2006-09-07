@@ -1,7 +1,7 @@
 # Makefile generated automatically with
-# /ada1/lpthe/salam/scripts/makePNEW.perl libdglap.a
+# ../scripts/makef95makefile libhoppet_v1.a -remake ./mkmk
 # default program to compile
-PROG =	libdglap.a
+PROG =	libhoppet_v1.a
 
 ALLPROG = 	
 
@@ -44,13 +44,13 @@ F90 = lf95
 F90FLAGS = -O 
 LDFLAGS =  
 
-all: libdglap.a
+all: libhoppet_v1.a
 
-libdglap.a: $(OBJS)
-	ar cru libdglap.a $(OBJS)
-	ranlib libdglap.a
+libhoppet_v1.a: $(OBJS)
+	ar cru libhoppet_v1.a $(OBJS)
+	ranlib libhoppet_v1.a
 
-ALL: libdglap.a  $(ALLPROG)
+ALL: libhoppet_v1.a  $(ALLPROG)
 
 libclean:
 	rm -f  $(ALLPROGOBJS) $(OBJS) $(POSTOBJS) 
@@ -59,10 +59,10 @@ clean:
 	rm -f  $(ALLPROGOBJS) $(OBJS) $(POSTOBJS) *.mod *.d
 
 realclean:
-	rm -f libdglap.a $(ALLPROG) $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d
+	rm -f libhoppet_v1.a $(ALLPROG) $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d
 
 make:
-	/ada1/lpthe/salam/scripts/makePNEW.perl  libdglap.a
+	./mkmk
 
 .SUFFIXES: $(SUFFIXES) .f90
 
@@ -87,7 +87,7 @@ evolution.o: assertions.o convolution.o dglap_choices.o dglap_holders.o \
 f77_pdftab.o: convolution.o dglap_choices.o dglap_holders.o dglap_objects.o \
 	pdf_general.o pdf_tabulate.o types.o warnings_and_errors.o
 hoppet_v1.o: convolution.o dglap_choices.o dglap_holders.o dglap_objects.o \
-	evolution.o pdf_general.o pdf_representation.o pdf_tabulate.o \
+	evolution.o pdf_general.o pdf_representation.o pdf_tabulate.o qcd.o \
 	qcd_coupling.o types.o warnings_and_errors.o
 integrator.o: types.o
 interpolation.o: types.o warnings_and_errors.o

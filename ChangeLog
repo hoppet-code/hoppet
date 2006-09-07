@@ -1,3 +1,12 @@
+ChangeLog for hoppet v1
+-----------------------
+
+2006-09-07  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+        * Added the f77_pdftab.h file (may change name at some point) to
+          provide an f77 interface to pdfs and their convolutions with
+          splitting functions.
+	
 2006-05-17  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* Added du option to the various routines in evolution.f90
