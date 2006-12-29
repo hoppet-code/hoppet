@@ -265,8 +265,8 @@ contains
     
     grid%dy   = ymax / grid%ny
     if (abs(grid%dy/dy - one) > 0.001_dp) then
-       write(string1,*) 'InitGridDef: requested dy of', dy
-       write(string2,*) '                  provided  dy of', grid%dy
+       write(string1,*) 'InitGridDef: requested dy of ', dy
+       write(string2,*) '                         provided  dy of ', grid%dy
        call wae_warn(warn_dy,trim(string1),trim(string2))
     end if
 

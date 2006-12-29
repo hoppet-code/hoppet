@@ -7,7 +7,7 @@ subroutine HoppetWelcomeMessage
   write(0,'(a)') '   Higher Order Perturbative Parton Evolution Toolkit      '
   write(0,'(a)') '            (formerly PDFEvln/HOPPER/...)   '
   write(0,'(a)') ''
-  write(0,'(a)') '        Written Gavin P. Salam (2001-2006)'
+  write(0,'(a)') '        Written by Gavin P. Salam (2001-2006)'
   write(0,'(a)') ''
   write(0,'(a)') ' It is made available under the GNU public license,'
   write(0,'(a)') ' with the additional restriction that if you use it or any'
