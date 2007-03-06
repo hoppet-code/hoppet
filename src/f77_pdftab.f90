@@ -25,20 +25,41 @@ end module f77_pdftab
 subroutine dglapStart(dy,nloop)
   use f77_pdftab
   implicit none
+  !--------------------------------------
   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
   integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=3)
+  !--------------------------------------
+  real(dp) :: ymax, Qmin, Qmax, dlnlnQ
+  integer  :: order
+  ymax = 12.0d0
+  Qmin = 1.0d0
+  Qmax = 28000d0 ! twice LHC c.o.m.
+  dlnlnQ = min(dy,0.05_dp)
+  call dglapStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order)
+end subroutine dglapStart
+
+
+!======================================================================
+!! initialise the underlying grid, splitting functions and pdf-table
+!! objects, using an extended set of parameters, as described below
+subroutine dglapStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order)
+  use f77_pdftab
+  implicit none
+  real(dp), intent(in) :: ymax   !! highest value of ln1/x user wants to access
+  real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
+  real(dp), intent(in) :: Qmin, Qmax !! range in Q
+  real(dp), intent(in) :: dlnlnQ !! internal table spacing in lnlnQ
+  integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=3)
+  integer,  intent(in) :: order  !! order of numerical interpolation (+ve v. -ve: see below)
   !-------------------------------------
-  real(dp)          :: ymax
-  integer           :: order
 
   ! initialise our grids
-  ! specify the maximum value of log(1/x)
-  ymax = 12.0_dp
+
   ! the internal interpolation order (with a minus sign allows
   ! interpolation to take fake zero points beyond x=1 -- convolution
   ! times are unchanged, initialisation time is much reduced and
   ! accuracy is slightly reduced)
-  order = -5 
+  !order = -5 
   ! Now create a nested grid
   call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
   call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
@@ -47,8 +68,8 @@ subroutine dglapStart(dy,nloop)
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
-  call pdftab_AllocTab(grid, tables(:), Qmin=1.0_dp, Qmax=28000.0_dp, & 
-       & dlnlnQ = min(dy,0.1_dp), freeze_at_Qmin=.true.)
+  call pdftab_AllocTab(grid, tables(:), Qmin, Qmax, & 
+       & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
 
   ! initialise splitting-function holder
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
@@ -58,7 +79,7 @@ subroutine dglapStart(dy,nloop)
 
   ! indicate the pdfs and convolutions have not been initialised...
   setup_done = .false.
-end subroutine dglapStart
+end subroutine dglapStartExtended
 
 
 !======================================================================
@@ -86,6 +107,50 @@ subroutine dglapAssign(pdf_subroutine)
   ! get set up "on demand" later].
   setup_done(1:) = .false.
 end subroutine dglapAssign
+
+
+!======================================================================
+!! Given a pdf_subroutine with the interface shown below, initialise
+!! our internal pdf table.
+subroutine dglapEvolve(asmz, nloop, pdf_subroutine, Q0)
+  use f77_pdftab ! this module which provides access to the array of tables
+  use qcd_coupling
+  implicit none
+  real(dp), intent(in) :: asmz, Q0
+  integer,  intent(in) :: nloop
+  interface ! indicate what "interface" pdf_subroutine is expected to have
+     subroutine pdf_subroutine(x,Q,res)
+       use types; implicit none
+       real(dp), intent(in)  :: x,Q
+       real(dp), intent(out) :: res(*)
+     end subroutine pdf_subroutine
+  end interface
+  !! hold the initial pdf
+  real(dp), pointer :: pdf0(:,:)
+  !! hold the running coupling
+  type(running_coupling) :: coupling
+
+  ! create our internal pdf object for the initial condition
+  call AllocPDF(grid, pdf0)
+  call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0)
+
+  ! get a running coupling with the desired scale
+  call InitRunningCoupling(coupling, alfas=0.118_dp, nloop=nloop)
+
+  ! create the tabulation
+  call pdftab_InitTabEvolve(tables(0), Q0, pdf0, dh, coupling, nloop=nloop)
+
+  ! indicate that table(0) has been set up
+  setup_done(0)  = .true.
+  ! indicate that table(1), table(2), etc... (which will contain the
+  ! convolutions with splitting matrices) have yet to be set up [they
+  ! get set up "on demand" later].
+  setup_done(1:) = .false.
+
+  ! clean up
+  call Delete(pdf0)
+  call Delete(coupling)
+end subroutine dglapEvolve
 
 
 !======================================================================

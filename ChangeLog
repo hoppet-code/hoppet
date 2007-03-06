@@ -1,6 +1,23 @@
-ChangeLog for hoppet v1
------------------------
+2007-03-06  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
+	* src/f77_pdftab.f90: 
+	  added dglapStartExtended(...) to give user more control over how
+	  things are initialised
+
+	  added dglapEvolve(...) to allow a user to take an initial
+	  condition at some fixed scale and create a tabulation out of it
+
+          changed default value for dlnlnQ to be 0.5 in in the plain dglapStart.
+	
+
+	* example_f90/tabulation_example.f90:  *** ADDED ***
+          a simple example program using the f90 interface for
+	  evolving PDFs
+
+	* example_f77/tabulation_example.f:    *** ADDED ***
+	  a simple example program using the new f77 interface for
+	  evolving PDFs
+	
 2006-09-07  Gavin Salam  <salam@lpthe.jussieu.fr>
 
         * Added the f77_pdftab.h file (may change name at some point) to

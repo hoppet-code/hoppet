@@ -36,6 +36,9 @@ LIBS = -L$(LHAPDFDIR) -lLHAPDF -L../src -lhoppet_v1 $(F90LIB)
 convolution_example: convolution_example.o
 	$(FC) -o convolution_example $<  $(LIBS)
 
+tabulation_example: tabulation_example.o
+	$(FC) -o tabulation_example $<  $(LIBS)
+
 conveg: conveg.o
 	$(FC) -o conveg $<  $(LIBS)
 
@@ -47,5 +50,5 @@ clean:
 	rm *.o
 
 realclean: clean
-	rm convolution_example conveg
+	rm convolution_example conveg  tabulation_example
 
