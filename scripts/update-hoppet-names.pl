@@ -125,6 +125,7 @@ $rename{qr/ev\\?_Setdu/i}            = "SetDefaultEvolutionDu";
 $rename{qr/ev\\?_Setdt/i}            = "SetDefaultEvolutionDt";
 
 # pdf tabulation
+$rename{qr/pdf_tabulate_new/i} = "pdf_tabulate";
 $rename{qr/pdftab_DelTab/i} = "Delete";
 $rename{qr/pdftab/i} = "pdf_table";
 $rename{qr/pdftab_AllocTab/i} = "AllocPdfTable";

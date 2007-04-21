@@ -19,7 +19,7 @@
 !! routines (which do not currently have this overloading for .conv.).
 !!
 !! [NB at some point maybe include nf association in some simpler manner?]
-module pdf_tabulate_new
+module pdf_tabulate
   use types; use consts_dp
   use convolution; use dglap_objects
   use pdf_representation; use pdf_general
@@ -44,7 +44,7 @@ module pdf_tabulate_new
      real(dp) :: default_dlnlnQ
      real(dp) :: lnlnQ_min, lnlnQ_max, lambda_eff
      real(dp), pointer :: tab(:,:,:)
-     real(dp), pointer :: lnlnQ_vals(:)
+     real(dp), pointer :: lnlnQ_vals(:), Q_vals(:)
      integer :: nQ, lnlnQ_order
      logical :: freeze_at_Qmin
      ! this is useful only in absence of nf info.
@@ -70,7 +70,7 @@ module pdf_tabulate_new
 
   !-- for calculating ln ln Q/lambda_eff
   real(dp), parameter :: default_lambda_eff = 0.1_dp
-  real(dp), parameter :: default_dlnlnQ = 0.1_dp
+  real(dp), parameter :: default_dlnlnQ = 0.07_dp
   real(dp), parameter :: warn_tolerance = 1e-3_dp
   ! used in various contexts for deciding when an interval is
   ! sufficiently small that it can be ignored...
@@ -151,8 +151,10 @@ contains
     !write(0,*) 'pdf_table info: Number of Q bins is ',tab%nQ
     call AllocPDF(grid,tab%tab,0,tab%nQ)
     allocate(tab%lnlnQ_vals(0:tab%nQ))
+    allocate(tab%Q_vals(0:tab%nQ))
     do iQ = 0, tab%nQ
        tab%lnlnQ_vals(iQ) = tab%lnlnQ_min + iQ * tab%dlnlnQ
+       tab%Q_vals(iQ) = invlnln(tab,tab%lnlnQ_vals(iQ))
     end do
     
   end subroutine pdftab_AllocTab_
@@ -270,6 +272,7 @@ contains
     tab%nQ = tab%seginfo(tab%nfhi)%ilnlnQ_hi
     call AllocPDF(tab%grid,tab%tab,0,tab%nQ)
     allocate(tab%lnlnQ_vals(0:tab%nQ))
+    allocate(tab%Q_vals(0:tab%nQ))
     allocate(tab%nf_int(0:tab%nQ))
     allocate(tab%as2pi(0:tab%nQ))
 
@@ -281,6 +284,7 @@ contains
           tab%nf_int(iQ) = nflcl
           tab%lnlnQ_vals(iQ) = seginfo%lnlnQ_lo &
                & + (iQ-seginfo%ilnlnQ_lo)*seginfo%dlnlnQ
+          tab%Q_vals(iQ)     = invlnln(tab,tab%lnlnQ_vals(iQ))
           tab%as2pi(iQ) = Value(coupling,invlnln(tab,tab%lnlnQ_vals(iQ)))/twopi
        end do
     end do
@@ -322,6 +326,8 @@ contains
     call AllocPDF(tab%grid,tab%tab,0,tab%nQ)
     allocate(tab%lnlnQ_vals(0:tab%nQ))
     tab%lnlnQ_vals = origtab%lnlnQ_vals
+    allocate(tab%Q_vals(0:tab%nQ))
+    tab%Q_vals = origtab%Q_vals
 
     if (origtab%nf_info_associated) then
        allocate(tab%seginfo(tab%nflo:tab%nfhi))
@@ -672,6 +678,7 @@ contains
     integer :: i
     deallocate(tab%tab)
     deallocate(tab%lnlnQ_vals)
+    deallocate(tab%Q_vals)
     if (tab%nf_info_associated) then
        deallocate(tab%seginfo)
        deallocate(tab%nf_int)
@@ -790,4 +797,4 @@ contains
 !OLD! if (tab%nf_info_associated) call wae_error('invlnln_norm')
 !OLD! invlnln_norm = invlnln(tab, lnlnQ_norm*tab%dlnlnQ + tab%lnlnQ_min)
 !OLD! end function invlnln_norm
-end module pdf_tabulate_new
+end module pdf_tabulate

@@ -1,6 +1,6 @@
 module f77_pdftab
   use types; use consts_dp
-  use pdf_tabulate_new
+  use pdf_tabulate
   use convolution; use pdf_general; use dglap_objects
   use dglap_holders; use pdf_general; use dglap_choices
   implicit none

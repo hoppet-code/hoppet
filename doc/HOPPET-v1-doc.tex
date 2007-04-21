@@ -46,9 +46,9 @@
   representation of splitting functions in terms of their convolution
   with a set of piecewise polynomial basis functions, and Runge-Kutta
   techniques are used for the evolution in $Q$.  Unpolarised evolution
-  is provided to NNLO, including heavy-quark thresholds \comment{say
-    MSbar?}, and polarised evolution to NLO. The code is structured so
-  as to provide simple access to the objects representing splitting
+  is provided to NNLO, including heavy-quark thresholds in the $\MSbar$
+  scheme, and polarised evolution to NLO. The code is structured so as
+  to provide simple access to the objects representing splitting
   function and PDFs, making it possible for a user to extend the
   facilities already provided.
   %
@@ -1510,8 +1510,11 @@ values. Often however one simply wishes to provide a PDF distribution
 at some initial scale and then subsequently be able to access it at
 arbitrary values of $x$ and $Q$. For this purpose it is useful to
 produce a table of the PDF as a function of $Q^2$, which then allows
-for access to the PDF at arbitrary $x, Q$ using an interpolation.
+for access to the PDF at arbitrary $x, Q$ using an interpolation. All
+types and routines discussed in this section are in the
+\ttt{pdf\_tabulate} module, or accessible also from \ttt{hoppet\_v1}.
 
+\subsection{Preparing a table}
 The type that contains a PDF table is \ttt{pdf\_table}. It first needs
 to be allocated,
 \begin{verbatim}
@@ -1523,21 +1526,21 @@ to be allocated,
 \end{verbatim}
 where one specifies the range of Q values to be tabulated, from
 \ttt{Qmin} to \ttt{Qmax}, and optionally the interpolation step size
-\ttt{dlnlnQ} in the variable $\ln \ln Q/(0.1\GeV)$ (default $=0.1$,
-sufficient for $10^{-3}$ accuracy), the interpolation order
-\ttt{lnlnQ\_order}, equal to $3$ by default, and finally whether PDFs
-are to be frozen below \ttt{Qmin}, or instead set to zero (the deafult
-is \ttt{freeze\_at\_Qmin=.false.}, \ie they are set to
-zero).\footnote{Note that the spacing and interpolation in $Q$ are
-  treated independently of what's done in the PDF evolution. A reason
-  for this is that in the PDF evolution one uses a variable related to
-  the running coupling, which is similar to $\ln \ln Q$ but whose
-  precise details depend on the particular value of the coupling.
-  Using this in the tabulation would have prevented one from having a
-  tabulation disconnected from any coupling. Unfortunately \ttt{du}
-  and \ttt{dlnlnQ} are not normalised equivalently --- roughly
-  speaking for $n_f = 4$ they correspond to the same spacing if
-  $\ttt{dlnlnQ} \simeq 0.7 \ttt{du}$.}
+\ttt{dlnlnQ} in the variable $\ln \ln Q/(0.1\GeV)$ (default
+$\ttt{dlnlnQ}=0.07$, sufficient for $10^{-3}$ accuracy), the
+interpolation order \ttt{lnlnQ\_order}, equal to $3$ by default, and
+finally whether PDFs are to be frozen below \ttt{Qmin}, or instead set
+to zero (the deafult is \ttt{freeze\_at\_Qmin=.false.}, \ie they are
+set to zero).\footnote{Note that the spacing and interpolation in $Q$
+  are treated independently of what's done in the PDF evolution. A
+  reason for this is that in the PDF evolution one uses a variable
+  related to the running coupling, which is similar to $\ln \ln Q$ but
+  whose precise details depend on the particular value of the
+  coupling.  Using this in the tabulation would have prevented one
+  from having a tabulation disconnected from any coupling.
+  Unfortunately \ttt{du} and \ttt{dlnlnQ} are not normalised
+  equivalently --- roughly speaking for $n_f = 4$ they correspond to
+  the same spacing if $\ttt{dlnlnQ} \simeq 0.7 \ttt{du}$.}
 
 By default a tabulation knows nothing about $n_f$ thresholds, which
 means in the neighbourhood of thresholds the tabulation would be
@@ -1565,20 +1568,106 @@ All of the above routines can be used with $1$-dimensional arrays of
 tables as well (in \ttt{AllocPdfTable} the reference table must always
 be a scalar).
 
+A table can be filled either from a routine that provides the PDFs as
+a function of $x$ and $Q$, or alternatively by evolving a PDF at an
+initial scale. The former can be achieved with
 \begin{verbatim}
-  pdftab                  -> pdf_table
-  pdftab_AllocTab         -> AllocPdfTable
-  pdftab_AssocNfInfo      -> AddNfInfoToPdfTable
-
-  pdftab_InitTabSub       -> FillPdfTable_f90sub  ???
-  pdftab_InitTab_LHAPDF   -> FillPdfTable_LHAPDF  ???
-
-  pdftab_InitTabEvolve    -> EvolvePdfTable()
-
-  pdftab_PreEvolve        -> PreEvolvePdfTable()
-
-  pdftab_ValTab_yQ/xQ     -> EvalPdfTable(...)       
+  call FillPdfTable_LHAPDF(table, LHAsub)
 \end{verbatim}
+where \ttt{LHAsub} is any subroutine with the interface shown earlier
+in \ref{sec:human-rep}.
+
+To fill a table via an evolution from an initial scale, one uses 
+\begin{verbatim}
+  type(pdf_table)        :: table
+  type(dglap_holder)     :: dh
+  type(running_coupling) :: coupling
+  real(dp), pointer      :: initial_pdf(:,:)
+  real(dp)               :: Q0
+  integer                :: nloop
+  integer                :: untie_nf
+  [...]
+  call EvolvePdfTable(table, Q0, initial_pdf, dh, coupling &
+                      & [, muR_Q] [, nloop] [, untie_nf] )
+\end{verbatim}
+which takes an the \ttt{initial\_pdf} at scale \ttt{Q0}, and evolves
+it across the whole range of $Q$ values in the table, using the
+\ttt{EvolvePDF} routine. The arguments have the same meaning as
+corresponding ones in \ttt{EvolvePDF}, explained in
+section~\ref{sec:direct-evolution}. The $\ttt{du}$ value that's used
+is the default one for \ttt{EvolvePDF} which, we recall, may be set
+using \ttt{SetDefaultEvolutionDu(du)}.
+
+One may also use the precomputed evolution facilities of
+section~\ref{sec:precomputed-evolution}, by calling the routine
+\begin{verbatim}
+  call PreEvolvePdfTable(table, Q0, dh, coupling, &
+                         & [, muR_Q] [, nloop] [, untie_nf] )
+\end{verbatim}
+prepares \ttt{evln\_operator}s for all successive $Q$ intervals in the
+table. An accelerated evolution that uses these operators instead of
+explicit Runge-Kutta steps may then be obtained by calling
+\begin{verbatim}
+  call EvolvePdfTable(table, initial_pdf)
+\end{verbatim}
+The \ttt{EvolvePdfTable} routine may be called as many times as one
+likes for the table, however if one wishes to change the parameters of
+the evolution (coupling, etc.) for a precomputed evolution, one must
+first \ttt{Delete} the table and then reprepare it.
+
+
+%......................................................................
+\subsection{Accessing a table}
+
+The main way to access a table is as follows
+\begin{verbatim}
+  double :: pdf(-6:6), y, x, Q
+  [...]
+  call EvalPdfTable_yQ(table, y, Q, pdf)
+  ! or using x
+  call EvalPdfTable_yQ(table, x, Q, pdf)
+\end{verbatim}
+There may be situations where it is useful to access the internals of
+a \ttt{pdf\_table}, for example because one would like to carry out a
+convolution systematically on the whole contents of the table. Among
+the main elements are
+\begin{verbatim}
+  type pdf_table
+    integer           :: nQ           ! arrays run from 0:nQ
+    real(dp), pointer :: tab(:,:,:)   ! the actual tabulation
+    real(dp), pointer :: Q_vals(:)    ! the Q values 
+    integer,  pointer :: nf_int(:)    ! nf values at each Q
+    real(dp), pointer :: as2pi(:)     ! alphas(Q)/2pi at each Q
+    [...]
+  end type pdf_table
+\end{verbatim}
+where the third dimension of \ttt{tab} spans the range of tabulated
+$Q$ values, and the $n_f$ and coupling information are only allocated
+and set if one has called \ttt{AddNfInfoToPdfTable} for the table.
+
+
+An example of usage of the low-level information contained in the
+table is the following, which initializes \ttt{table\_deriv\_LO} with
+the LO derivative of \ttt{table}:
+\begin{verbatim}
+  do iQ = 0, table%nQ
+    table_deriv_LO%tab(:,:,iQ) = table%as2pi(iQ) * &
+                     & ( dh%allP(1,table%nf_int(iQ)) * table%tab(:,:,iQ))
+  end do
+\end{verbatim}
+where we assume \ttt{table\_deriv\_LO} to have been allocated with an
+appropriate structure at some point, \eg via 
+\begin{verbatim}
+  call AllocPdfTable(table_deriv_LO, table)
+\end{verbatim}
+The above mechanism has found use in the a-posteriori PDF
+library~\cite{APPL} and in work matching event shapes with fixed-order
+calculations~\cite{caesar,DisResum}.
+%
+One could also imagine using it to obtain tables of
+(flavour-separated) structure functions, if one were to convolute with
+coefficient functions rather than splitting functions.
+
 
 
 
@@ -2024,5 +2113,44 @@ arXiv:hep-ph/0104013.
 
 \bibitem{GuzziThesis}
   M.~Guzzi, Ph.D. Thesis, Lecce University, 2006 [hep-ph/0612355].
+
+\bibitem{APPL}
+  T.~Carli, G.~P.~Salam and F.~Siegert,
+  %``A posteriori inclusion of PDFs in NLO QCD final-state calculations,''
+  :hep-ph/0510324;
+  %%CITATION = HEP-PH/0510324;%%
+  T.~Carli, D.~Clements, {\it et al.}, in preparation.
+
+\bibitem{DisResum}
+  M.~Dasgupta and G.~P.~Salam,
+  %``Resummation of the jet broadening in DIS,''
+  Eur.\ Phys.\ J.\  C {\bf 24} (2002) 213
+  [arXiv:hep-ph/0110213];
+  %%CITATION = EPHJA,C24,213;%%
+%\bibitem{Dasgupta:2002dc}
+  %M.~Dasgupta and G.~P.~Salam,
+  %``Resummed event-shape variables in DIS,''
+  JHEP {\bf 0208} (2002) 032
+  [arXiv:hep-ph/0208073].
+  %%CITATION = JHEPA,0208,032;%%
+
+\bibitem{caesar}
+  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
+  %``Principles of general final-state resummation and automated
+  %implementation,''
+  JHEP {\bf 0503}, 073 (2005)
+  [arXiv:hep-ph/0407286];
+  %%CITATION = JHEPA,0503,073;%%
+%
+%\cite{Banfi:2004nk}
+%\bibitem{Banfi:2004nk}
+%  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
+  %``Resummed event shapes at hadron hadron colliders,''
+  JHEP {\bf 0408}, 062 (2004)
+  [arXiv:hep-ph/0407287].
+  %%CITATION = JHEPA,0408,062;%%
+
+
+
 \end{thebibliography}
 \end{document}

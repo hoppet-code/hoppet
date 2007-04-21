@@ -8,6 +8,6 @@ module hoppet_v1
   use evolution
   use qcd_coupling
   use qcd
-  use pdf_tabulate_new
+  use pdf_tabulate
   implicit none
 end module hoppet_v1

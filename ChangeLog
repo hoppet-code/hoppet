@@ -1,9 +1,10 @@
 2007-04-21  Gavin Salam  <salam@lpthe.jussieu.fr>
 
-	* src/pdf_tabulate.f90:
-	* src/f77_pdftab.f90: 
-	  long-overdue renaming of routines for pdf tables.
-
+	* src/pdf_tabulate.f90: 
+	  Long-overdue renaming of routines for pdf tables.
+	  Added Q_vals(:) to the tabulation.
+	  Reduced default dlnlnQ to 0.07.
+	
 	* src/f77_pdftab.f90 (dglapStart): 
 	  fixed missing initialization of order
 	  
