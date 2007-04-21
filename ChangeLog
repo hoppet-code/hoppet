@@ -1,7 +1,12 @@
 2007-04-21  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* src/pdf_tabulate.f90:
+	* src/f77_pdftab.f90: 
+	  long-overdue renaming of routines for pdf tables.
+
 	* src/f77_pdftab.f90 (dglapStart): 
 	  fixed missing initialization of order
+	  
 
 2007-03-06  Gavin SALAM  <salam@lpthe.jussieu.fr>
 

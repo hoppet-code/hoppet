@@ -25,7 +25,7 @@ module pdf_tabulate_new
   use pdf_representation; use pdf_general
   use interpolation
   use warnings_and_errors
-  !-- needed only for pdftab_InitTabEvolve [separate it out one day?]
+  !-- needed only for EvolvePdfTable [separate it out one day?]
   use qcd_coupling; use evolution; use dglap_holders
   implicit none
   private
@@ -37,8 +37,8 @@ module pdf_tabulate_new
   end type pdfseginfo
   public :: pdfseginfo
 
-  type pdftab
-     ! basic elements of a pdftab, common regardless of whether we
+  type pdf_table
+     ! basic elements of a pdf_table, common regardless of whether we
      ! additionally have the nf segments...
      type(grid_def) :: grid
      real(dp) :: default_dlnlnQ
@@ -65,8 +65,8 @@ module pdf_tabulate_new
      type(evln_operator), pointer :: evops(:)
      integer                      :: StartScale_iQlo
      real(dp)                     :: StartScale
-  end type pdftab
-  public :: pdftab
+  end type pdf_table
+  public :: pdf_table
 
   !-- for calculating ln ln Q/lambda_eff
   real(dp), parameter :: default_lambda_eff = 0.1_dp
@@ -78,40 +78,40 @@ module pdf_tabulate_new
   integer, parameter :: def_lnlnQ_order = 3
   !integer, parameter :: lnlnQ_order = 2
 
-  interface pdftab_AllocTab
+  interface AllocPdfTable
      module procedure pdftab_AllocTab_, pdftab_AllocTab_fromorig,&
           & pdftab_AllocTab_1d, pdftab_AllocTab_fromorig_1d
   end interface
 
-  interface pdftab_AssocNfInfo
-     module procedure pdftab_AssocNfInfo, pdftab_AssocNfInfo_1d
+  interface AddNfInfoToPdfTable
+     module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
   end interface
 
-  interface pdftab_InitTabSub
+  interface FillPdfTable_f90sub
      module procedure pdftab_InitTabSub_, pdftab_InitTabSub_iset
   end interface
 
-  public :: pdftab_InitTab_LHAPDF
+  public :: FillPdfTable_LHAPDF
 
-  interface pdftab_InitTabEvolve
-     module procedure pdftab_InitTabEvolve_frompre, pdftab_InitTabEvolve
+  interface EvolvePdfTable
+     module procedure pdftab_InitTabEvolve_frompre, EvolvePdfTable
   end interface
 
   interface Delete
      module procedure pdftab_DelTab_0d, pdftab_DelTab_1d
   end interface
 
-  public :: pdftab_AllocTab, pdftab_InitTabSub
-  public :: pdftab_AssocNfInfo
-  public :: pdftab_InitTabEvolve, pdftab_PreEvolve
-  public :: pdftab_TabEvolveGen
-  public :: pdftab_ValTab_yQ, pdftab_ValTab_xQ
+  public :: AllocPdfTable, FillPdfTable_f90sub
+  public :: AddNfInfoToPdfTable
+  public :: EvolvePdfTable, PreEvolvePdfTable
+  public :: EvolvePdfTableGen
+  public :: EvalPdfTable_yQ, EvalPdfTable_xQ
   public :: Delete
 
 contains
 
   !---------------------------------------------------------
-  !! Allocate a pdftab, which covers a range Qmin to Qmax, using
+  !! Allocate a pdf_table, which covers a range Qmin to Qmax, using
   !! tabulation uniform in (ln ln Q/Lambda), where Lambda is currently
   !! a module parameter.
   !!
@@ -122,13 +122,13 @@ contains
   !! More sensible extrapolation beyond Q range offers scope for future 
   !! improvement here!
   !!
-  subroutine pdftab_AllocTab_(grid, tab, Qmin, Qmax, dlnlnQ, freeze_at_Qmin, lnlnQ_order)
+  subroutine pdftab_AllocTab_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
     type(grid_def),    intent(in)  :: grid
-    type(pdftab),      intent(out) :: tab
+    type(pdf_table),      intent(out) :: tab
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
-    logical,  intent(in), optional :: freeze_at_Qmin
     integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
     !----------------------------------------------
     integer :: iQ
     tab%grid = grid
@@ -148,7 +148,7 @@ contains
     nullify(tab%nf_int)
     nullify(tab%evops)
 
-    !write(0,*) 'pdftab info: Number of Q bins is ',tab%nQ
+    !write(0,*) 'pdf_table info: Number of Q bins is ',tab%nQ
     call AllocPDF(grid,tab%tab,0,tab%nQ)
     allocate(tab%lnlnQ_vals(0:tab%nQ))
     do iQ = 0, tab%nQ
@@ -160,17 +160,18 @@ contains
 
   
   !---------------------------------------------------------
-  !! 1d overloaded version of pdftab_AllocTab
-  subroutine pdftab_AllocTab_1d(grid, tab, Qmin, Qmax, dlnlnQ, freeze_at_Qmin)
+  !! 1d overloaded version of AllocPdfTable
+  subroutine pdftab_AllocTab_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
     type(grid_def), intent(in)     :: grid
-    type(pdftab),   intent(out)    :: tab(:)
+    type(pdf_table),   intent(out)    :: tab(:)
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
     logical,  intent(in), optional :: freeze_at_Qmin
     integer :: i
 
     do i = 1, size(tab)
-       call pdftab_AllocTab_(grid, tab(i), Qmin, Qmax, dlnlnQ, freeze_at_Qmin)
+       call pdftab_AllocTab_(grid, tab(i), Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
     end do
   end subroutine pdftab_AllocTab_1d
 
@@ -194,8 +195,8 @@ contains
   !!
   !! KNOWN LIMITATIONS: What happens with muM_mQ /= 1? All hell breaks
   !! loose?
-  subroutine pdftab_AssocNfInfo(tab,coupling)
-    type(pdftab), intent(inout) :: tab
+  subroutine AddNfInfoToPdfTable(tab,coupling)
+    type(pdf_table), intent(inout) :: tab
     type(running_coupling), intent(in) :: coupling
     !-----------------------------------
     integer  :: nflcl, iQ_prev, iQ
@@ -203,7 +204,7 @@ contains
     type(pdfseginfo), pointer :: seginfo
 
     
-    if (tab%nf_info_associated) call wae_error('pdftab_AssocNfInfo',&
+    if (tab%nf_info_associated) call wae_error('AddNfInfoToPdfTable',&
          &'nf info already associated: delete it first')
 
     ! We will be reallocating everything here, so first clean up
@@ -226,7 +227,7 @@ contains
        ! if one weakens this restriction, then one should think about
        ! the consequences for the determination of alpha_s/2pi, here
        ! and elsewhere....
-       if (Qhi_test /= Qhi) call wae_error('pdftab_AssocNfInfo',&
+       if (Qhi_test /= Qhi) call wae_error('AddNfInfoToPdfTable',&
          &'it seems that coupling has muM_mQ /= one. Currently unsupported.',&
          &dbleval=Qhi_test/Qhi)
 
@@ -260,7 +261,7 @@ contains
     ! case...
     if (tab%seginfo(tab%nflo)%lnlnQ_lo /= tab%lnlnQ_min .or.&
          &tab%seginfo(tab%nfhi)%lnlnQ_hi /= tab%lnlnQ_max) &
-         &call wae_error('pdftab_AssocNfInfo',&
+         &call wae_error('AddNfInfoToPdfTable',&
          & 'mismatch in segment and global lnlnQ limits.',&
          & 'Could be due coupling having more restricted range?')
 
@@ -286,19 +287,19 @@ contains
     
     ! REMEMBER TO COMPLETE FROM ORIG...
     tab%nf_info_associated = .true.
-    write(0,*) 'pdftab info: Number of Q bins changed to',tab%nQ
-  end subroutine pdftab_AssocNfInfo
+    write(0,*) 'pdf_table info: Number of Q bins changed to',tab%nQ
+  end subroutine AddNfInfoToPdfTable
 
 
   !---------------------------------------------------------------
-  !! 1d-overloaded verseion of pdftab_AssocNfInfo
+  !! 1d-overloaded verseion of AddNfInfoToPdfTable
   subroutine pdftab_AssocNfInfo_1d(tab,coupling)
-    type(pdftab), intent(inout) :: tab(:)
+    type(pdf_table), intent(inout) :: tab(:)
     type(running_coupling), intent(in) :: coupling
     !-----------------------------------
     integer :: i
     do i = 1, size(tab)
-       call pdftab_AssocNfInfo(tab(i),coupling)
+       call AddNfInfoToPdfTable(tab(i),coupling)
     end do
     
   end subroutine pdftab_AssocNfInfo_1d
@@ -313,8 +314,8 @@ contains
   !! tab are not however copied.
   !! 
   subroutine pdftab_AllocTab_fromorig(tab, origtab)
-    type(pdftab), intent(out) :: tab
-    type(pdftab), intent(in)  :: origtab
+    type(pdf_table), intent(out) :: tab
+    type(pdf_table), intent(in)  :: origtab
 
     tab = origtab
     !-- this is the only thing that is not taken care of...
@@ -335,8 +336,8 @@ contains
   !---------------------------------------------------------
   !! 1d-overloaded version of pdftab_AllocTab_fromorig
   subroutine pdftab_AllocTab_fromorig_1d(tab, origtab)
-    type(pdftab), intent(out) :: tab(:)
-    type(pdftab), intent(in)  :: origtab
+    type(pdf_table), intent(out) :: tab(:)
+    type(pdf_table), intent(in)  :: origtab
     integer :: i
     do i = 1, size(tab)
        call pdftab_AllocTab_fromorig(tab(i), origtab)
@@ -349,7 +350,7 @@ contains
   !! interface). Note that the subroutine takes y = ln1/x and Q as its
   !! arguments.
   subroutine pdftab_InitTabSub_(tab, sub)
-    type(pdftab), intent(inout) :: tab
+    type(pdf_table), intent(inout) :: tab
     interface
        subroutine sub(y, Q, res)
          use types; implicit none
@@ -374,7 +375,7 @@ contains
   !! provides several "PDF sets".
   !!
   subroutine pdftab_InitTabSub_iset(tab, sub, iset)
-    type(pdftab), intent(inout) :: tab
+    type(pdf_table), intent(inout) :: tab
     integer,      intent(in)    :: iset
     interface
        subroutine sub(y, Q, iset, res)
@@ -399,8 +400,8 @@ contains
   !! Initialise the tab with the results of a subroutine (see
   !! interface). Note that the subroutine takes y = ln1/x and Q as its
   !! arguments.
-  subroutine pdftab_InitTab_LHAPDF(tab, LHAsub)
-    type(pdftab), intent(inout) :: tab
+  subroutine FillPdfTable_LHAPDF(tab, LHAsub)
+    type(pdf_table), intent(inout) :: tab
     interface
        subroutine LHAsub(x,Q,res)
          use types; implicit none
@@ -415,7 +416,7 @@ contains
        Q = invlnln(tab,tab%lnlnQ_min + iQ*tab%dlnlnQ)
        call InitPDF_LHAPDF(tab%grid, tab%tab(:,:,iQ), LHAsub, Q)
     end do
-  end subroutine pdftab_InitTab_LHAPDF
+  end subroutine FillPdfTable_LHAPDF
 
   !---------------------------------------------------------------------
   !! Given a starting distribution, StartDist, at StartScale and an
@@ -423,9 +424,9 @@ contains
   !! the evolution of the starting distribution. Most of the arguments
   !! have meanings similar to those in the evolution routines
   !!
-  subroutine pdftab_InitTabEvolve(tab, StartScale, StartDist, &
+  subroutine EvolvePdfTable(tab, StartScale, StartDist, &
                                     & dh, coupling, muR_Q,nloop, untie_nf)
-    type(pdftab),    intent(inout) :: tab
+    type(pdf_table),    intent(inout) :: tab
     real(dp),           intent(in) :: StartScale
     real(dp),           intent(in) :: StartDist(0:,iflv_min:)
     type(dglap_holder), intent(in) :: dh
@@ -435,9 +436,9 @@ contains
     logical,  intent(in), optional :: untie_nf
     !-----------------------------------------------------
     
-    call pdftab_TabEvolveGen(tab, StartScale, dh, coupling, &
+    call EvolvePdfTableGen(tab, StartScale, dh, coupling, &
        &StartDist=StartDist, muR_Q=muR_Q, nloop=nloop, untie_nf=untie_nf)
-  end subroutine pdftab_InitTabEvolve
+  end subroutine EvolvePdfTable
   
   !---------------------------------------------------------------------
   !! Given a starting scale, precalculate the evolution operators that
@@ -445,8 +446,8 @@ contains
   !! starting scale . Most of the arguments have meanings similar
   !! to those in the evolution routines
   !!
-  subroutine pdftab_PreEvolve(tab,StartScale,dh,coupling,muR_Q,nloop,untie_nf)
-    type(pdftab),    intent(inout) :: tab
+  subroutine PreEvolvePdfTable(tab,StartScale,dh,coupling,muR_Q,nloop,untie_nf)
+    type(pdf_table),    intent(inout) :: tab
     real(dp),           intent(in) :: StartScale
     type(dglap_holder), intent(in) :: dh
     type(running_coupling),    intent(in) :: coupling
@@ -455,9 +456,9 @@ contains
     logical,  intent(in), optional :: untie_nf
     !-----------------------------------------------------
     
-    call pdftab_TabEvolveGen(tab, StartScale, dh, coupling, &
+    call EvolvePdfTableGen(tab, StartScale, dh, coupling, &
        &precalc = .true., muR_Q=muR_Q, nloop = nloop, untie_nf=untie_nf)
-  end subroutine pdftab_PreEvolve
+  end subroutine PreEvolvePdfTable
 
   !---------------------------------------------------------------------
   !! Given a starting distribution, StartDist, and assuming that the
@@ -470,7 +471,7 @@ contains
   !!     as2pi will not be correct here. SHOULD THIS BE FIXED?
   !!
   subroutine pdftab_InitTabEvolve_frompre(tab, StartDist)
-    type(pdftab),    intent(inout) :: tab
+    type(pdf_table),    intent(inout) :: tab
     real(dp),           intent(in) :: StartDist(0:,iflv_min:)
     !-----------------------------------------------------
     real(dp) :: dist(0:ubound(StartDist,1),iflv_min:ubound(StartDist,2))
@@ -499,15 +500,15 @@ contains
   !! everything to do with evolution is concentrated in a single location.
   !!
   !! For the user, this routine should probably be accessed via the more
-  !! specific routines, pdftab_InitTabEvolve and pdftab_PreCalc.
+  !! specific routines, EvolvePdfTable and pdftab_PreCalc.
   !!
   !! Given a starting distribution, StartDist, at StartScale and an
   !! "coupling" determining the behaviour of alphas, fill in the tab with
   !! the evolution of the starting distribution.
   !!
-  subroutine pdftab_TabEvolveGen(tab, StartScale, dh, coupling, &
+  subroutine EvolvePdfTableGen(tab, StartScale, dh, coupling, &
        &StartDist, precalc, muR_Q, nloop, untie_nf)
-    type(pdftab),           intent(inout) :: tab
+    type(pdf_table),           intent(inout) :: tab
     real(dp),               intent(in)    :: StartScale
     type(dglap_holder),     intent(in)    :: dh
     type(running_coupling), intent(in)    :: coupling
@@ -525,7 +526,7 @@ contains
 
     precalc_lcl = default_or_opt(.false.,precalc)
     if (precalc_lcl) then
-       if (associated(tab%evops)) call wae_error('pdftab_TabEvolveGen',&
+       if (associated(tab%evops)) call wae_error('EvolvePdfTableGen',&
             &'tab%evops has already been calculated. Delete the tab first,',&
             &'if you want to recalculated it.')
        allocate(tab%evops(0:tab%nQ))
@@ -593,14 +594,14 @@ contains
     end do
     
     if (present(StartDist)) deallocate(dist)
-  end subroutine pdftab_TabEvolveGen
+  end subroutine EvolvePdfTableGen
 
 
   !--------------------------------------------------------------------
-  !! Returns a vector val(iflv_min:iflv_max) for the PDF at this
+  !! Sets the vector val(iflv_min:iflv_max) for the PDF at this
   !! y=ln1/x,Q.
-  subroutine pdftab_ValTab_yQ(tab,y,Q,val)
-    type(pdftab), intent(in) :: tab
+  subroutine EvalPdfTable_yQ(tab,y,Q,val)
+    type(pdf_table), intent(in) :: tab
     real(dp),     intent(in) :: y, Q
     real(dp),    intent(out) :: val(iflv_min:)
     !----------------------------------------
@@ -651,23 +652,23 @@ contains
     !write(0,*) ilnlnQ_lo, ilnlnQ_hi, real(lnlnQ_wgts), val(1)
     
     deallocate(y_wgts, wgts)
-  end subroutine pdftab_ValTab_yQ
+  end subroutine EvalPdfTable_yQ
 
 
   !----------------------------------------------------------------
-  !! Returns a vector val(iflv_min:iflv_max) for the PDF at this x,Q.
-  subroutine pdftab_ValTab_xQ(tab,x,Q,val)
-    type(pdftab), intent(in) :: tab
+  !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
+  subroutine EvalPdfTable_xQ(tab,x,Q,val)
+    type(pdf_table), intent(in) :: tab
     real(dp),     intent(in) :: x, Q
     real(dp),    intent(out) :: val(iflv_min:)
-    call pdftab_ValTab_yQ(tab,-log(x),Q,val)
-  end subroutine pdftab_ValTab_xQ
+    call EvalPdfTable_yQ(tab,-log(x),Q,val)
+  end subroutine EvalPdfTable_xQ
 
   
   !-----------------------------------------------------------
   !! Deletes all allocated info associated with the tabulation
   subroutine pdftab_DelTab_0d(tab)
-    type(pdftab), intent(inout) :: tab
+    type(pdf_table), intent(inout) :: tab
     integer :: i
     deallocate(tab%tab)
     deallocate(tab%lnlnQ_vals)
@@ -685,7 +686,7 @@ contains
     end if
   end subroutine pdftab_DelTab_0d
   subroutine pdftab_DelTab_1d(tab)
-    type(pdftab), intent(inout) :: tab(:)
+    type(pdf_table), intent(inout) :: tab(:)
     integer :: i
     do i = 1, size(tab)
        call pdftab_DelTab_0d(tab(i))
@@ -704,7 +705,7 @@ contains
   !! return value of lnlnQ_norm = (lnlnQ - lnlnQ(iQ_lo))/dlnlnQ
   !!
   subroutine request_iQrange(tab, lnlnQ, nrequest, iQ_lo, iQ_hi, lnlnQ_norm)
-    type(pdftab), intent(in) :: tab
+    type(pdf_table), intent(in) :: tab
     real(dp),     intent(in) :: lnlnQ
     integer,      intent(in) :: nrequest
     integer,     intent(out) :: iQ_lo, iQ_hi
@@ -756,7 +757,7 @@ contains
   !-------------------------------------
   !! conversion from Q to lnlnQ
   function lnln(tab,Q)
-    type(pdftab), intent(in) :: tab
+    type(pdf_table), intent(in) :: tab
     real(dp),     intent(in) :: Q
     real(dp)                 :: lnln
 
@@ -765,7 +766,7 @@ contains
 
   !! conversion from lnlnQ to Q
   function invlnln(tab,lnlnQ)
-    type(pdftab), intent(in) :: tab
+    type(pdf_table), intent(in) :: tab
     real(dp),     intent(in) :: lnlnQ
     real(dp)                 :: invlnln
 
@@ -773,7 +774,7 @@ contains
   end function invlnln
 
 !OLD! function lnln_norm(tab,Q)
-!OLD! type(pdftab), intent(in) :: tab
+!OLD! type(pdf_table), intent(in) :: tab
 !OLD! real(dp), intent(in) :: Q
 !OLD! real(dp) :: lnln_norm
 !OLD!
@@ -782,7 +783,7 @@ contains
 !OLD! end function lnln_norm
 !OLD!
 !OLD! function invlnln_norm(tab,lnlnQ_norm)
-!OLD! type(pdftab), intent(in) :: tab
+!OLD! type(pdf_table), intent(in) :: tab
 !OLD! real(dp), intent(in) :: lnlnQ_norm
 !OLD! real(dp) :: invlnln_norm
 !OLD!

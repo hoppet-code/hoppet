@@ -96,7 +96,7 @@ elsif ($OSNAME eq 'linux')  {
 # not always in the obvious place
 # need to work around the fact that thalie does not give lpthe in hostname...
 $LPTHE=($hostname =~ ".*lpthe.*"  || $hostname =~ "thalie" );
-$LAPTOP=($hostname =~ "localhost.*" || $hostname =~ "voltaire");
+$LAPTOP=($hostname =~ "localhost.*" || $hostname =~ "voltaire" || $hostname =~ "bison");
 if ($LPTHE){ $CERNLIBLOC = "/maia/cern/2000/lib";}
 else { $CERNLIBLOC = "/cern/pro/lib";}
 

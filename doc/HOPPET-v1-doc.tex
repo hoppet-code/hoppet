@@ -1512,7 +1512,59 @@ arbitrary values of $x$ and $Q$. For this purpose it is useful to
 produce a table of the PDF as a function of $Q^2$, which then allows
 for access to the PDF at arbitrary $x, Q$ using an interpolation.
 
-Name changes?
+The type that contains a PDF table is \ttt{pdf\_table}. It first needs
+to be allocated,
+\begin{verbatim}
+  type(pdf_table) :: table
+  [...]
+
+  call AllocPdfTable(grid, table, Qmin, Qmax &
+                     & [, dlnlnQ ] [, lnlnQ_order ] [, freeze_at_Qmin] )
+\end{verbatim}
+where one specifies the range of Q values to be tabulated, from
+\ttt{Qmin} to \ttt{Qmax}, and optionally the interpolation step size
+\ttt{dlnlnQ} in the variable $\ln \ln Q/(0.1\GeV)$ (default $=0.1$,
+sufficient for $10^{-3}$ accuracy), the interpolation order
+\ttt{lnlnQ\_order}, equal to $3$ by default, and finally whether PDFs
+are to be frozen below \ttt{Qmin}, or instead set to zero (the deafult
+is \ttt{freeze\_at\_Qmin=.false.}, \ie they are set to
+zero).\footnote{Note that the spacing and interpolation in $Q$ are
+  treated independently of what's done in the PDF evolution. A reason
+  for this is that in the PDF evolution one uses a variable related to
+  the running coupling, which is similar to $\ln \ln Q$ but whose
+  precise details depend on the particular value of the coupling.
+  Using this in the tabulation would have prevented one from having a
+  tabulation disconnected from any coupling. Unfortunately \ttt{du}
+  and \ttt{dlnlnQ} are not normalised equivalently --- roughly
+  speaking for $n_f = 4$ they correspond to the same spacing if
+  $\ttt{dlnlnQ} \simeq 0.7 \ttt{du}$.}
+
+By default a tabulation knows nothing about $n_f$ thresholds, which
+means in the neighbourhood of thresholds the tabulation would be
+attempting to interpolate a discontinuous function (at NNLO). To
+attribute information about $n_f$ thresholds to the tabulation, set
+them up first in a running \ttt{coupling} object and then transfer
+them:
+\begin{verbatim}
+  call AddNfInfoToPdfTable(table,coupling)
+\end{verbatim}
+When interpolating the table (see below), the set of $Q$ values for
+the interpolation will be chosen to as to always have a common $n_f$
+value. Note that \ttt{AddNfInfoToPdfTable} may only be called once for
+an allocated table: if you need to change the information about $n_f$
+thresholds, \ttt{Delete} the table, reallocate it and then reset the
+$n_f$ information.
+
+Given an existing table, \ttt{ref\_table}, a new table,
+\ttt{new\_table}, can be allocated with identical properties
+(including any $n_f$ information) as follows
+\begin{verbatim}
+  call AllocPdfTable(new_table, ref_table)
+\end{verbatim}
+All of the above routines can be used with $1$-dimensional arrays of
+tables as well (in \ttt{AllocPdfTable} the reference table must always
+be a scalar).
+
 \begin{verbatim}
   pdftab                  -> pdf_table
   pdftab_AllocTab         -> AllocPdfTable

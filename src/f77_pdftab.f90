@@ -13,7 +13,7 @@ module f77_pdftab
 
   !! 0 is main pdf table, while i=1:3 contain convolutions with the
   !! i-loop splitting function
-  type(pdftab), save :: tables(0:3)
+  type(pdf_table), save :: tables(0:3)
   logical,      save :: setup_done(0:3) = .false.
   integer,      save :: setup_nf(3)     = 0
 end module f77_pdftab
@@ -69,7 +69,7 @@ subroutine dglapStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order)
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
-  call pdftab_AllocTab(grid, tables(:), Qmin, Qmax, & 
+  call AllocPdfTable(grid, tables(:), Qmin, Qmax, & 
        & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
 
   ! initialise splitting-function holder
@@ -100,7 +100,7 @@ subroutine dglapAssign(pdf_subroutine)
 
   ! set up table(0) by copying the values returned by pdf_subroutine onto 
   ! the x-Q grid in table(0)
-  call pdftab_InitTab_LHAPDF(tables(0), pdf_subroutine)
+  call FillPdfTable_LHAPDF(tables(0), pdf_subroutine)
   ! indicate that table(0) has been set up
   setup_done(0)  = .true.
   ! indicate that table(1), table(2), etc... (which will contain the
@@ -139,7 +139,7 @@ subroutine dglapEvolve(asmz, nloop, pdf_subroutine, Q0)
   call InitRunningCoupling(coupling, alfas=0.118_dp, nloop=nloop)
 
   ! create the tabulation
-  call pdftab_InitTabEvolve(tables(0), Q0, pdf0, dh, coupling, nloop=nloop)
+  call EvolvePdfTable(tables(0), Q0, pdf0, dh, coupling, nloop=nloop)
 
   ! indicate that table(0) has been set up
   setup_done(0)  = .true.
@@ -163,7 +163,7 @@ subroutine dglapEval(x,Q,f)
   real(dp), intent(in)  :: x, Q
   real(dp), intent(out) :: f(-6:6)
   
-  call pdftab_ValTab_xQ(tables(0),x,Q,f)
+  call EvalPdfTable_xQ(tables(0),x,Q,f)
 end subroutine dglapEval
 
 
@@ -213,7 +213,7 @@ subroutine dglapEvalSplit(x,Q,iloop,nf,f)
      setup_nf(iloop)   = nf
   end if
   
-  call pdftab_ValTab_xQ(tables(iloop),x,Q,f)
+  call EvalPdfTable_xQ(tables(iloop),x,Q,f)
 end subroutine dglapEvalSplit
 
 

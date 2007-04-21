@@ -92,7 +92,7 @@ program small_fast_tab
   real(dp)           :: dy, Qinit, Qmax, y, Q, pdfval(-6:6), dt, dlnlnQ
   real(dp)           :: ymax
   real(dp), pointer  :: vogt_init(:,:)
-  type(pdftab)       :: table
+  type(pdf_table)       :: table
   logical            :: output
 
   ! set the details of the y=ln1/x grid
@@ -137,9 +137,9 @@ program small_fast_tab
   ! set up the table
   dlnlnQ = dble_val_opt('-dlnlnQ',0.07_dp)
   olnlnQ = int_val_opt('-olnlnQ',4)
-  call pdftab_AllocTab(grid,table,Qinit,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
-  call pdftab_AssocNfInfo(table,coupling)
-  call pdftab_PreEvolve(table,Qinit,dh,coupling)
+  call AllocPdfTable(grid,table,Qinit,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
+  call AddNfInfoToPdfTable(table,coupling)
+  call PreEvolvePdfTable(table,Qinit,dh,coupling)
 
   nrep  = int_val_opt('-nrep',1)
   nxQ = int_val_opt('-nxQ',0); y = 3.14_dp; Q = 13.354_dp
@@ -148,32 +148,32 @@ program small_fast_tab
  
   ! output
   do i = 1, nrep
-     call pdftab_InitTabEvolve(table,vogt_init)
+     call EvolvePdfTable(table,vogt_init)
      
      nn = nxQ/3
      do j = 1, nn
         y = j*5.0_dp/nn
         Q = Qmax - j*(Qmax-Qinit)/nn
-        call pdftab_ValTab_yQ(table,y,Q,pdfval)
+        call EvalPdfTable_yQ(table,y,Q,pdfval)
         if (output .and. i==1) write(6,'(20es20.8)') y,Q,pdfval(0:3)
         !if (output .and. i==1) write(6,'(20es20.8)') y,Q,vogt_init(:,0:3).atx.(grid.with.exp(-y))
      end do
 
-     if (output) write(6,*)
-     if (output) write(6,*)
+     if (output .and. i==1) write(6,*)
+     if (output .and. i==1) write(6,*)
      do j = nn,1,-1
         y = j*5.0_dp/nn
         Q = 4.0_dp + j*5.0_dp/nn
-        call pdftab_ValTab_yQ(table,y,Q,pdfval) 
+        call EvalPdfTable_yQ(table,y,Q,pdfval) 
         if (output .and. i==1) write(6,'(20es20.8)') y,Q,pdfval(0:3)
      end do
      
-     if (output) write(6,*)
-     if (output) write(6,*)
+     if (output .and. i==1) write(6,*)
+     if (output .and. i==1) write(6,*)
      do j = nn,1,-1
         y = j*5.0_dp/nn
         Q = Qmax*(1-j*0.2_dp/nn)
-        call pdftab_ValTab_yQ(table,y,Q,pdfval) 
+        call EvalPdfTable_yQ(table,y,Q,pdfval) 
         if (output .and. i==1) write(6,'(20es20.8)') y,Q,pdfval(0:3)
      end do
   end do

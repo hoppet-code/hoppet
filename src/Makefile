@@ -38,10 +38,10 @@ LIBS =
 
 CC = cc
 CFLAGS = -O
-FC = g95
-FFLAGS = -g -O3 -march=i686 
-F90 = g95
-F90FLAGS = -g -O3 -march=i686 
+FC = lf95
+FFLAGS = -O 
+F90 = lf95
+F90FLAGS = -O 
 LDFLAGS =  
 
 all: libhoppet_v1.a

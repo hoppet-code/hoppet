@@ -126,6 +126,17 @@ $rename{qr/ev\\?_Setdt/i}            = "SetDefaultEvolutionDt";
 
 # pdf tabulation
 $rename{qr/pdftab_DelTab/i} = "Delete";
+$rename{qr/pdftab/i} = "pdf_table";
+$rename{qr/pdftab_AllocTab/i} = "AllocPdfTable";
+$rename{qr/pdftab_AssocNfInfo/i} = "AddNfInfoToPdfTable";
+
+$rename{qr/pdftab_InitTabSub/i    }  = "FillPdfTable_f90sub";
+$rename{qr/pdftab_InitTab_LHAPDF/i}  = "FillPdfTable_LHAPDF";
+$rename{qr/pdftab_InitTabEvolve/i }  = "EvolvePdfTable";
+$rename{qr/pdftab_TabEvolveGen/i }   = "EvolvePdfTableGen";
+$rename{qr/pdftab_PreEvolve/i     }  = "PreEvolvePdfTable";
+$rename{qr/pdftab_ValTab_yQ/i     }  = "EvalPdfTable_yQ";
+$rename{qr/pdftab_ValTab_xQ/i     }  = "EvalPdfTable_xQ";
 
 # outside access
 $rename{qr/pdfevln_all_public/i} = "hoppet_v1";

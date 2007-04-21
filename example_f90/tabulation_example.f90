@@ -14,7 +14,7 @@ program tabulation_example
   !! holds the splitting functions
   type(dglap_holder) :: dh
   !! hold the PDF tabulation
-  type(pdftab)       :: table
+  type(pdf_table)       :: table
   !! hold the coupling
   type(running_coupling) :: coupling
   !! hold the initial pdf
@@ -50,7 +50,7 @@ program tabulation_example
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
-  call pdftab_AllocTab(grid, table, Qmin=1.0_dp, Qmax=28000.0_dp, & 
+  call AllocPdfTable(grid, table, Qmin=1.0_dp, Qmax=28000.0_dp, & 
        & dlnlnQ = 0.05_dp, freeze_at_Qmin=.true.)
 
   ! set up LHAPDF with cteq
@@ -66,11 +66,11 @@ program tabulation_example
   call InitRunningCoupling(coupling,alfas=0.118_dp)
 
   ! create the tabulation
-  call pdftab_InitTabEvolve(table, Q0, pdf0, dh, coupling, nloop=nloop)
+  call EvolvePdfTable(table, Q0, pdf0, dh, coupling, nloop=nloop)
 
   ! get the value of the tabulation at some point
   x = 0.1_dp
   Q = 100.0_dp
-  call pdftab_ValTab_xQ(table,x,Q,pdf_at_xQ)
+  call EvalPdfTable_xQ(table,x,Q,pdf_at_xQ)
   write(6,*) "Gluon at x,Q ", x, Q, "is ", pdf_at_xQ(0)
 end program tabulation_example
