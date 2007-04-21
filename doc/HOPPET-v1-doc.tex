@@ -890,13 +890,13 @@ a \ttt{split\_mat} object that corresponds to an arbitrary series of
 value of $n_f$. One proceeds in a very similar way,
 \begin{verbatim}
   real(dp), pointer :: probes(:,:,:)
-  type(split\_mat)  :: PA, PB, Pcomm
+  type(split_mat)  :: PA, PB, Pcomm
   integer           :: i
 
   [...]
   call GetDerivedSplitMatProbes(grid,probes) ! get the probes
-  do i = 1, size(probes,dim=3)               ! carry out operations on each of the probes
-    probes(:,i) = PA*(PB*probes(:,:,i)) - PB*(PA*probes(:,:,i))
+  do i = 1, size(probes,dim=3)               ! carry out operations on each probe
+    probes(:,:,i) = PA*(PB*probes(:,:,i)) - PB*(PA*probes(:,:,i))
   end do
   call AllocSplitMat(grid,Pcomm,nf_lcl)      ! provide nf info in initialisation
   call SetDerivedConv(Pcomm,probes)          ! Presult = [Pqg,Pgq]
@@ -995,8 +995,8 @@ DGLAP splitting functions
 \end{verbatim}
 In each case the splitting function is set up for the $n_f$ and
 colour-factor values that are current in the $\ttt{qcd}$ module, as
-set with the $qcd\_SetNf$ and $qcd\_SetGroup$ subroutine calls. If one
-subsequently resets the $n_f$ or color factor values, the $split\_mat$
+set with the \ttt{qcd\_SetNf} and \ttt{qcd\_SetGroup} subroutine calls. If one
+subsequently resets the $n_f$ or color factor values, the \ttt{split\_mat}
 objects continue to correspond to the $n_f$ and colour factor values
 for which they were initially calculated.
 
