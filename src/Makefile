@@ -38,10 +38,10 @@ LIBS =
 
 CC = cc
 CFLAGS = -O
-FC = lf95
-FFLAGS = -O 
-F90 = lf95
-F90FLAGS = -O 
+FC = g95
+FFLAGS = -g -O3 -march=i686 
+F90 = g95
+F90FLAGS = -g -O3 -march=i686 
 LDFLAGS =  
 
 all: libhoppet_v1.a
@@ -85,7 +85,8 @@ evolution.o: assertions.o convolution.o dglap_choices.o dglap_holders.o \
 	dglap_objects.o pdf_representation.o qcd.o qcd_coupling.o \
 	runge_kutta.o types.o warnings_and_errors.o
 f77_pdftab.o: convolution.o dglap_choices.o dglap_holders.o dglap_objects.o \
-	pdf_general.o pdf_tabulate.o types.o warnings_and_errors.o
+	pdf_general.o pdf_tabulate.o qcd_coupling.o types.o \
+	warnings_and_errors.o
 hoppet_v1.o: convolution.o dglap_choices.o dglap_holders.o dglap_objects.o \
 	evolution.o pdf_general.o pdf_representation.o pdf_tabulate.o qcd.o \
 	qcd_coupling.o types.o warnings_and_errors.o

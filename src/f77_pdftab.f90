@@ -35,6 +35,7 @@ subroutine dglapStart(dy,nloop)
   Qmin = 1.0d0
   Qmax = 28000d0 ! twice LHC c.o.m.
   dlnlnQ = min(dy,0.05_dp)
+  order = -5
   call dglapStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order)
 end subroutine dglapStart
 

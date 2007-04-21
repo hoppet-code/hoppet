@@ -18,7 +18,7 @@ for a user to extend the facilities already provided.
 
 The latest version can always be obtained from
 
-    http://hepforge.cedar.ac.uk/hoppet/
+    svn checkout http://svn.hepforge.org/hoppet/trunk hoppet
 
 Details of changes are to be found in the file ChangeLog, while
 summaries of changes between releases are in ReleaseNotes.
