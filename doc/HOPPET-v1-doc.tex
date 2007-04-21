@@ -23,13 +23,16 @@
 \newcommand{\ttt}[1]{\texttt{#1}}
 \newcommand{\order}[1]{{\cal O}\left(#1\right)}
 
+\newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,coriano,GuzziThesis}
+
 %-----------------------------------------
 \title{Higher Order Perturbative Parton Evolution Toolkit \\
   a.k.a.\ HOPPETv1
 }
-\author{G.~P. Salam\\
-  LPTHE, Univerities of Paris 6 \& 7 and CNRS, Paris 75005, France.
-} 
+\author{G.~P. Salam\\[3pt]
+  LPTHE,   \\Universit\'e Pierre et Marie Curie -- Paris 6,\\
+  Universit\'e Denis Diderot -- Paris 7,\\
+  CNRS UMR 7589,\\ 75252 Paris cedex 05, France} 
 \date{}
 
 
@@ -57,7 +60,7 @@
   C++.  \smallskip
   
   \textbf{Note:} this document describes version~1 of the package.  A
-  far more object-oriented version (v2) has undergone substantial
+  more object-oriented version (v2) has undergone substantial
   development, making use of the so-called TR15581 part of
   Fortran~2003 (allocatable arrays as part of derived types).  While
   v2 (available on request) is more flexible and structured than v1,
@@ -75,8 +78,9 @@
 \section{Introduction}
 \label{sec:intro}
 
-There has been considerable discussion over the past years~\cite{}, of
-numerical solutions of the DGLAP equation~\cite{DGLAP} for the
+There has been considerable discussion over the past years
+(\eg~\cite{\AllDGLAP}),
+of numerical solutions of the DGLAP equation~\cite{DGLAP} for the
 evolution QCD parton distributions.
 
 
@@ -102,7 +106,7 @@ essentially non-perturbative, since they depend on physics at hadronic
 mass scales $\lesssim 1 \GeV$, where the QCD coupling is large. On the
 other hand the splitting functions are given by a perturbative
 expansion in the QCD coupling $\as(Q^2)$. Thus given partial
-experimental information on the parton densities\footnote{Actually it
+experimental information on the parton densities\footnote{Of course it
   is not the parton densities, but rather structure functions, which
   can be derived from them perturbatively, that are measured
   experimentally.} %
@@ -112,7 +116,7 @@ parton densities over the full range of $Q$ and for all flavours.
 
 The pivotal role played by the DGLAP equation has motivated a
 considerable body of literature discussing its numerical solution
-\cite{AllDGLAP}. There exist two main classes of approach: those that
+\cite{\AllDGLAP}. There exist two main classes of approach: those that
 solve the equation directly in $x$-space and those that solve it for
 Mellin transforms $q_{iN}(Q^2) = \int dx x^N q_i(x,Q^2)$, of the
 parton densities and susbequently invert the transform back to
@@ -120,24 +124,79 @@ $x$-space. The latter are of interest because the Mellin transform
 converts the convolution of eq.(\ref{eq:dglap}) into a multiplication,
 resulting in a continuum of independent matrix differential (rather
 than integro-differential) equations, one for each value of $N$,
-making the evolution very efficient numerically. The drawback of the
-method stems however from the need to know the Mellin transforms of
-both the splitting functions and the initial conditions and to a
-lesser extent subtleties associated with the inverse Mellin transform.
+making the evolution more efficient numerically. 
 
+The drawback of the Mellin method is that one needs to know the Mellin
+transforms of both the splitting functions and the initial conditions.
+There can also be subtleties associated with the inverse Mellin
+transform.
+%
 The $x$-space method is in contrast more flexible, since the inputs
 are only required in $x$-space; however it is generally considered to
-much less efficient numerically, because of the need to carry out the
+less efficient numerically, because of the need to carry out the
 convolution in eq.(\ref{eq:dglap}).
 
 To understand the question of efficiencies one should analyse the
-number of operations needed to carry out the...
+number of operations needed to carry out the evolution. Assuming that
+one needs to establish the results of the evolution at $N_x$ values of
+$x$, and $N_Q$ values of $Q$, one essentially needs $\order{N_x^2
+  N_Q}$ operations with an $x$-space method, where the $N_x^2$ factor
+comes from the convolutions. In the Mellin-space method, one needs
+$\order{N_x N_Q M}$ operations, where $M$ is the number of points used
+for Mellin inversion. One source of drawback of the $x$-space method
+is that, nearly always, $N_x \sim \ln 1/x_{\min}$ and so the method
+scales as the square of $\ln 1/x_{\min}$, where the Mellin method is
+linear (and $M$ can be kept roughly independent of $x_{\min}$). 
+%
+The other issue relates to how one goes to higher numerical
+integration and interpolation orders.
+%
+In $x$-space methods one tends to choose $x$ values that are uniformly
+distributed (be it in $\ln 1/x$ or some other more complex function)
+--- this limits one to higher-order extensions of the Trapezium and
+Simpson-rule type integrations, whose order in general is $n_p-1$
+where $n_p$ is the number of points used for the integration. The
+precision of the integration is given by $\delta^{n_p}$ where
+$\delta x$ is the grid spacing. Higher $n_p$ improves the accuracy,
+but typically $n_p$ can not be taken too large because of large
+cancellations between weights that arise for large $n_p$.
+%
+In the Mellin method one is free to position the $M$ points as one
+likes, and one can then use Gaussian type
+integration~\cite{Kosower,Weinzierl:2002mv,Pegasus}; using $n_p$
+points one manages to get a numerical order $2n_p-1$, \ie accuracy
+$\delta^{2n_p}$, and furthermore the integration weights do not suffer
+from large cancellations at large $n_p$, allowing one to increase
+$n_p$, and thus the accuracy, quite considerably.
+
+Despite it being more difficult to obtain high accuracy with $x$-space
+methods, their greater flexibility means that they are widely used,
+serving as the basis of the widely used QCDNUM program \cite{Botje},
+and being used by the CTEQ~\cite{CTEQ} and MRST~\cite{MRST}
+collaborations. Higher-order methods in $x$-space have been developed
+in \cite{Schoeffel:1998tz,Pascaud:2001bi,coriano,GuzziThesis}, and
+more recently are being incorporated also in QCDNUM.
+
+\hoppet, the program presented here, also uses higher-order methods
+both for the $x$-integrations and $Q$ evolution. It combines this with
+multiple grids in $x$-space: a high-density grid at large $x$ where it
+is hardest to obtain good accuracy, and much coarser grids at smaller
+$x$ where the smoothness of the PDFs facilitates the integrations. One
+of the other crucial features of the program is that it precalculates
+as much information as possible, so as to reduce the final concrete
+evolution of a new PDF initial condition to a modest set of addition
+and multiplication operations. Additionally, the program provides
+access to a range of low and medium-level operations on PDFs which
+should allow a user to extend the facilities already provided.
 
 
+The functonality described in this article has been present in
+\hoppet's predecessors for several years (available on request,
+starting with \cite{DisResum} and used for Benchmark comparisons with
+Pegasus~\cite{Pegasus} in \cite{Benchmarks}), but had never been
+documented.  It is the author's hope that availability of this
+documentation may make the package somewhat more useful.
 
-Each has advantages
-and drawbacks: the $x$-space method provides information over a range
-of $x$ values.
 
 %----------------------------------------------------------------------
 \section{Tricks}
@@ -147,38 +206,63 @@ of $x$ values.
 \subsection{Higher order matrix representation}
 \label{sec:highord}
 
-This is higher-order in numerical sense, not perturbative QCD sense.
-We have a lower triangular matrix.
 
-Grid points $y_\alpha$, indicated by index $\alpha$; uniform grid
-spacing: $y_\alpha = \alpha \delta y$.
+Given a set of grid points $y_\alpha$, indicated by index $\alpha$ and
+(for convenience) a uniform grid spacing, $y_\alpha = \alpha \delta
+y$, one can approximate a parton distribution function $xq(x,t)$ by
+interpolating the PDF at the grid points,
 \begin{equation}
-  q(y,t) = w_\alpha(y) q_\alpha(t)\,.
+  x q(y=\ln 1/x,t) = \sum_\alpha w_\alpha(y) q_\alpha(t)\,,
 \end{equation}
-Weights serve to interpolate: $q_\alpha = q(y_\alpha)$,
-$w_\alpha(y_\beta) = \delta_{\alpha\beta}$.
+where $w_\alpha(y)$ are the interpolation weights, $q_\alpha \equiv
+q(y_\alpha)$, and the sum over $\alpha$ runs over $n+1$ points in the
+vicinty of $y$ for an interpolation order $n$. Note that Greek
+indices represent the $y$ dimension, while later, Roman indices will
+be used to represent the flavour dimension.
+%
+The convolution of a single-flavour PDF with a splitting function
+$P(z)$ can be written as
 \begin{equation}
-  (P \otimes q)_\alpha = 
+  (P \otimes q)_\alpha = \sum P_{\alpha\beta} \, q_\beta(t)\,,
 \end{equation}
-
+where 
+\begin{equation}
+  \label{eq:Palphabeta}
+  P_{\alpha\beta} = \int dz \,P(z)\, w_\beta(y_\alpha + \ln z)\,.
+\end{equation}
+A virtue of having a uniform grid in $y = \ln 1/x$ is that the
+interpolation functions can be arranged to have a structure
+$w_\beta(y) = w(y - y_\beta)$, so that $P_{\alpha\beta}$ just depends
+on $\alpha - \beta$, and can be rewritten $P_{\alpha - \beta}$. A
+slight subtlety arises at large $x$, where if one writes $w_\beta(y) =
+w(y - y_\beta)$ one is effectively assuming an interpolation that uses
+identically zero interpolation points for $x\ge 1$~\cite{coriano},
+even though $xq(x)$ is not formally defined for $x > 1$. In practice
+this is often not too important (because PDFs drop rapidly towards
+$x=1$), but we shall include two options: one that uses effective
+zero-points beyond $x=1$ and one that ensures that the interpolation
+is based only on the physically valid domain of the PDF.
 
 %......................................................................
 \subsection{Evolution operators}
 \label{sec:evop}
-Have
+Evolution in $t = \ln Q^2$ is easily written
 \begin{equation}
-  \partial_t q_{\alpha}(t)  = \sum_{\beta} P_{\alpha\beta}(t) q_\beta(t)
+  \partial_t q_{\alpha}(t)  = \sum_{\beta} P_{\alpha\beta}(t) q_\beta(t)\,.
 \end{equation}
-Introduce $M_{\alpha\beta}(t_0) = \delta_{\alpha\beta}$. Solve 
+Introducing $M_{\alpha\beta}(t_0) = \delta_{\alpha\beta}$, one can
+alternatively solve
 \begin{equation}
   \partial_t M_{\alpha\beta}(t)  = \sum_{\gamma} P_{\alpha\gamma}(t)
-  M_{\gamma\beta}(t)
+  M_{\gamma\beta}(t)\,.
 \end{equation}
 Then 
 \begin{equation}
-  q_{\alpha}(t)  = \sum_{\beta} M_{\alpha\beta}(t) q_\beta(t_0)
+  q_{\alpha}(t)  = \sum_{\beta} M_{\alpha\beta}(t) q_\beta(t_0)\,.
 \end{equation}
-If once can rewrite $P$ as $P_{\alpha\beta} = \cal P_{\alpha-\beta}$,
+We refer to $M_{\alpha\beta}(t)$ as an evolution operator.
+%
+If one can rewrite $P$ as $P_{\alpha\beta} = \cal P_{\alpha-\beta}$,
 then similarly one can rewrite $M_{\alpha\beta} = \cal
 M_{\alpha-\beta}$, and it is as simple to determine
 $M_{\alpha\beta}(t)$ as it is to determine the evolution of a single
@@ -1961,6 +2045,29 @@ assumption that that truly is the type they're dealing with).
 
 \paragraph{Optional and keyword arguments}
 
+A feature of f90 that helps simplify user interfaces is that of
+optional and keyword arguments. Suppose we have
+\begin{verbatim}
+  subroutine hello(name, prefix, count)
+    character(len=*),  intent(in)  :: name, prefix
+    integer, optional, intent(in)  :: count
+  end subroutine hello
+\end{verbatim}
+Here the \ttt{count} argument is \ttt{optional} meaning that it need
+not be supplied --- if it is absent the subroutine is should behave
+sensibly all the same. Thus one can call the subroutine as
+\begin{verbatim}
+  call hello(name, prefix)
+  call hello(name, prefix, count)
+\end{verbatim}
+Keyword arguments are useful if one doesn't want to remember the exact
+order of a long list of arguments (or if one wants to specify just one
+of several optional arguments). For example
+\begin{verbatim}
+  call hello(name=name, prefix=prefix)
+  call hello(prefix=prefix, name=name)
+\end{verbatim}
+will do the same thing.
 
 %======================================================================
 \begin{thebibliography}{99}
@@ -2151,6 +2258,28 @@ arXiv:hep-ph/0104013.
   %%CITATION = JHEPA,0408,062;%%
 
 
+\bibitem{DGLAP}
+V.N.~Gribov and L.N.~Lipatov, 
+%\sjnp{15}{1972}{438};
+Sov.\ J.\ Nucl.\ Phys. {\bf 15} (1972) 438;
+%``Deep Inelastic E P Scattering In Perturbation Theory,''
+%[Sov.\ J.\ Nucl.\ Phys.\  {\bf 15} (1972) 438].
+%%CITATION = YAFIA,15,781;%%
+G.~Altarelli and G.~Parisi, 
+%\npb{126}{1977}{298};
+Nucl.\ Phys.\ B {\bf 126} (1977) 298;
+%``Asymptotic Freedom In Parton Language,''
+%%CITATION = NUPHA,B126,298;%%
+Yu.L.~Dokshitzer, 
+%\jetp{46}{1977}{641}.
+Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
+%``Calculation Of The Structure Functions For Deep Inelastic Scattering And E+ E- Annihilation By Perturbation Theory In Quantum Chromodynamics.
+%[Zh.\ Eksp.\ Teor.\ Fiz.\  {\bf 73} (1977) 1216].
+%%CITATION = SPHJA,46,641;%%
+
+
+\bibitem{Botje}
+  M.~Botje, QCDNUM, \url{http://www.nikhef.nl/~h24/qcdnum/}~.
 
 \end{thebibliography}
 \end{document}
