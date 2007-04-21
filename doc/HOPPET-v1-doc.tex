@@ -57,9 +57,8 @@
   function and PDFs, making it possible for a user to extend the
   facilities already provided.
   %
-  A `vanilla' interface is also available \comment{in progress},
-  facilitating use of the evolution part of the code from f77, C and
-  C++.  \smallskip
+  A `vanilla' interface is also available, facilitating use of the
+  evolution part of the code from f77, C and C++.  \smallskip
   
   \textbf{Note:} this document describes version~1 of the package.  A
   more object-oriented version (v2) has undergone substantial
@@ -177,15 +176,15 @@ serving as the basis of the widely used QCDNUM program \cite{Botje},
 and being used by the CTEQ~\cite{CTEQ} and MRST~\cite{MRST}
 collaborations. Higher-order methods in $x$-space have been developed
 in \cite{Schoeffel:1998tz,Pascaud:2001bi,coriano,GuzziThesis}, and
-more recently are being incorporated also in QCDNUM.
+more recently have been incorporated also in QCDNUM.
 
-\hoppet, the program presented here, also uses higher-order methods
-both for the $x$-integrations and $Q$ evolution. It combines this with
-multiple grids in $x$-space: a high-density grid at large $x$ where it
-is hardest to obtain good accuracy, and much coarser grids at smaller
-$x$ where the smoothness of the PDFs facilitates the integrations. One
-of the other crucial features of the program is that it precalculates
-as much information as possible, so as to reduce the final concrete
+\hoppet, the program presented here uses higher-order methods both for
+the $x$-integrations and $Q$ evolution. It combines this with multiple
+grids in $x$-space: a high-density grid at large $x$ where it is
+hardest to obtain good accuracy, and coarser grids at smaller $x$
+where the smoothness of the PDFs facilitates the integrations. One of
+the other crucial features of the program is that it precalculates as
+much information as possible, so as to reduce the final concrete
 evolution of a new PDF initial condition to a modest set of addition
 and multiplication operations. Additionally, the program provides
 access to a range of low and medium-level operations on PDFs which
@@ -297,7 +296,7 @@ be accessed indirectly through the \ttt{hoppet\_v1} module
 \begin{verbatim}
   use hoppet_v1
 \end{verbatim}
-Unless you are delving into the innards of the \hoppet, the latter is
+Unless you are delving into the innards of  \hoppet, the latter is
 more convenient since it provides access to everything you are likely
 to need.
 
@@ -305,9 +304,9 @@ to need.
 \subsection{Grid Definitions (\texttt{grid\_def})}
 \label{sec:grid}
 
-The grid is the central element of the PDF evolution. Information
-concerning the grid is stored in a derived type \texttt{grid\_def},
-which can be initialised as follows:
+The grid (in $y$) is the central element of the PDF evolution.
+Information concerning the grid is stored in a derived type
+\texttt{grid\_def}, which can be initialised as follows:
 \begin{verbatim}
   type(grid_def) :: grid
   call InitGridDef(grid,dy=0.1_dp,ymax=10.0_dp,order=3)
@@ -1019,7 +1018,7 @@ constants in QCD:
   [ ... ]
 \end{verbatim}
 Note that \ttt{nf} is in double precision\footnote{The author has
-  forgotten why, but suspects there might some good reason and is
+  forgotten why, but suspects there might be some good reason and is
   therefore nervous of changing it!} --- if you want the integer value
 of $n_f$, use \ttt{nf\_int}. 
 
@@ -1533,7 +1532,7 @@ Mass thresholds (NNLO) are implemented as
   \left(\frac{\alpha_{s,n_f}(x_\mu M)}{2\pi}\right)^2
   (\mbox{\ttt{dh\%MTM2 .conv.}}\; \ttt{pdf}_{n_f-1})\\
   %
-  \ttt{pdf}_{n_f-1} &= \ttt{pdf}_{n_f} \;\;\;\;+
+  \ttt{pdf}_{n_f-1} &= \ttt{pdf}_{n_f} \;\;\;\;-
   \left(\frac{\alpha_{s,n_f}(x_\mu M)}{2\pi}\right)^2
   (\mbox{\ttt{dh\%MTM2 .conv.}}\; \ttt{pdf}_{n_f})
 \end{align}
@@ -1545,8 +1544,8 @@ convolution differs in the two cases. The mismatch however is only of
 order $\as^4$ (NNNNLO), \ie well beyond currently known accuracies.
 
 A general remark is that crossing a flavour threshold downwards will
-nearly always result in some (physically spurious?) intrinsic
-heavy-flavour being left over below threshold.
+nearly always result in some (almost certainly physically spurious)
+intrinsic heavy-flavour being left over below threshold.
 
 %......................................................................
 \subsubsection{Precomputed evolution and the \ttt{evln\_operator}}
@@ -1830,8 +1829,23 @@ evolution is carried out with the following routine
 \end{verbatim}
 where one specifies the coupling \ttt{asQ} at a scale \ttt{Q0alphas},
 the number of loops for the evolution, \ttt{nloop}, the ratio of
-renormalisation to factorisation scales \ttt{muR\_Q}, the name of a
-subroutine \ttt{LHAsub} with interface
+renormalisation to factorisation scales \ttt{muR\_Q},\footnote{Note
+  that in the vanilla interface, with $\ttt{muR\_Q}\ne 1$, the running
+  coupling flavour thresholds are still placed at the quark masses;
+  the evolution needs the coupling for a given number of flavours
+  outside the standard range for that number of flavours (precisely
+  because $\ttt{muR\_Q}\ne 1$) and this is done automatically in the
+  evolution. In contrast in the benchmark studies~\cite{Benchmarks},
+  the flavour thresholds for the coupling were placed at $\ttt{muR\_Q}
+  \times m_Q$.  This is a perfectly valid alternative, but can
+  complicate the specification of the $\as$ value --- for example with
+  $\ttt{muR\_Q} = 0.5$ the matching for the top threshold would be
+  carried out at $\mu = 0.5 m_t \simeq 85 \GeV$, and if one specified
+  the coupling at scale $M_Z$, it wouldn't be cleaer whether this was
+  a $5$-flavour value or a $6$-flavour value. With the procedure
+  adopted in the vanilla interface the issue does not arise. (While in
+  f90 the user has the freedom to do as they prefer). } %
+the name of a subroutine \ttt{LHAsub} with interface
 \begin{verbatim}
   subroutine LHAsub(x,Q,res)
     implicit none
@@ -1936,6 +1950,11 @@ Comparisons to $N$-space codes (especially Vogt):
 \item currently no other code has the option of the exact NNLO
   splitting functions.
 \end{itemize}
+
+%======================================================================
+\section*{Acknowledgments}
+
+ANR, Andreas
 
 %======================================================================
 \appendix
