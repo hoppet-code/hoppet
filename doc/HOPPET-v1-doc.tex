@@ -10,10 +10,12 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{url}
+\usepackage{hyperref}
 \usepackage{xspace}
 
 \newcommand{\bq}{\boldsymbol{q}}
 \newcommand{\GeV}{\;\mathrm{GeV}}
+\newcommand{\TeV}{\;\mathrm{TeV}}
 \newcommand{\as}{\alpha_s}
 \newcommand{\comment}[1]{\textbf{[#1]}}
 \newcommand{\eg}{e.g.\ }
@@ -1680,7 +1682,9 @@ it across the whole range of $Q$ values in the table, using the
 corresponding ones in \ttt{EvolvePDF}, explained in
 section~\ref{sec:direct-evolution}. The $\ttt{du}$ value that's used
 is the default one for \ttt{EvolvePDF} which, we recall, may be set
-using \ttt{SetDefaultEvolutionDu(du)}.
+using \ttt{SetDefaultEvolutionDu(du)}. If the $Q$ spacing in the
+tabulation is such that steps in \ttt{du} would be too large, then the
+steps are automatically resized to the tabulation spacing.
 
 One may also use the precomputed evolution facilities of
 section~\ref{sec:precomputed-evolution}, by calling the routine
@@ -1753,13 +1757,150 @@ One could also imagine using it to obtain tables of
 coefficient functions rather than splitting functions.
 
 
-
+As with all other objets, a \ttt{pdf\_table} object can be deleted
+using
+\begin{verbatim}
+  call Delete(table) 
+\end{verbatim}
 
 
 %======================================================================
 %======================================================================
 \section{Vanilla interface}
 \label{sec:vanilla}
+
+The ``vanilla'' interface to \hoppet is intended to allow easy access
+to the essential evolution functionality from languages other than
+f90.  It hides all the object-oriented nature of the program, and
+provides access to one \ttt{pdf\_table}, based on a single grid
+definition. The description will be given as if one is calling from
+f77. 
+
+%......................................................................
+\subsection{Initialisation}
+\label{sec:vanilla_initialisation}
+
+The simplest way of initialising the vanilla interface is by calling
+\begin{verbatim}
+  call hoppetStart(dy,nloop)
+\end{verbatim}
+which will set up a compound (three different spacings) grid with
+spacing \ttt{dy} at small $x$, extending to $y = 12$, and numerical
+order $\ttt=-5$.  The $Q$ range for the tabulation will be $1\GeV <
+Q<28 \TeV$ and a reasonable choice will be made for the \ttt{dlnlnQ}
+spacing (related to \ttt{dy}). It will initialize splitting functions
+up to \ttt{nloop} loops (though one can still carry out evolutions
+with fewer loops).
+%
+If you need more control over the initialization, you should use
+\begin{verbatim}
+  call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
+\end{verbatim}
+which will again set up compound grid, but give control over the
+numerical \ttt{order} and the $y$ and $Q$ ranges and spacings (as
+before \ttt{dy} is the spacing at small $x$). It also allows one to
+choose the type of evolution according to \ttt{factscheme}:
+\begin{center}
+  \begin{tabular}{|c|l|}\hline
+    \ttt{factscheme} & Evolution\\[2pt]\hline
+    1 & unpolarised $\MSbar$ scheme\\[2pt]\hline
+    2 & unpolarised DIS scheme\\[2pt]\hline
+    3 & polarised $\MSbar$ scheme\\\hline
+  \end{tabular}
+\end{center}
+Note that the DIS scheme and polarised $\MSbar$ scheme are only
+available up to two loops and that mass thresholds are currently
+missing in the DIS scheme.
+
+%......................................................................
+\subsection{Usage}
+\label{sec:vanilla_usage}
+
+To carry out an evolution, one should first decide whether one wants a
+fixed-flavour number scheme or a variable flavour number (the
+default). Either can be set with its parameters as follows:
+\begin{verbatim}
+  call hoppetSetFFN(fixed_nf)
+  call hoppetSetVFN(mc, mb, mt)
+\end{verbatim}
+where for the VFN one specifies the pole-masses for the quarks. An
+evolution is carried out with the following routine
+\begin{verbatim}
+  call hoppetEvolve(asQ, Q0alphas, nloop, muR_Q, LHAsub, Q0pdf)
+\end{verbatim}
+where one specifies the coupling \ttt{asQ} at a scale \ttt{Q0alphas},
+the number of loops for the evolution, \ttt{nloop}, the ratio of
+renormalisation to factorisation scales \ttt{muR\_Q}, the name of a
+subroutine \ttt{LHAsub} with interface
+\begin{verbatim}
+  subroutine LHAsub(x,Q,res)
+    implicit none
+    double precision x,Q,res(-6:6)
+    [...]
+  end subroutine 
+\end{verbatim}
+to return the initial condition for the evolution and the scale
+\ttt{Q0pdf} at which one starts the PDF evolution. Note that the
+LHAsub subroutine will only be called with $\ttt{Q}=\ttt{Q0pdf}$.
+To access the coupling one uses
+\begin{verbatim}
+  alphas = hoppetAlphaS(Q)
+\end{verbatim}
+while the PDF at a given value of $\ttt{x}$ and $\ttt{Q}$ is obtained with 
+\begin{verbatim}
+  call hoppetEval(x,Q,f)
+\end{verbatim}
+which sets \ttt{f(-6:6)} (recall that it is $xg(x)$, etc., that is
+used through \hoppet).
+
+It is also possible to prepare an evolution in cached form. This is
+useful if one needs to evolve many different PDF sets with the same
+evolution properties (coupling, initial scale, etc.), because though
+the preparation may take a bit longer than a normal evolution
+($2$--$10$ times depending on the \ttt{order}), once it is done,
+cached evolutions run $3$--$4$ faster than a normal evolution. The
+preparation of the cache is carried out with
+\begin{verbatim}
+  call hoppetPreEvolve(asQ, Q0alphas, nloop, muR_Q, Q0pdf)
+\end{verbatim}
+and then the cached evolution is carried out with 
+\begin{verbatim}
+  call hoppetCachedEvolve(LHAsub)
+\end{verbatim}
+The results may be very slightly different from those in a normal
+evolution (some information is lost when caching), and the user is
+encouraged to check on a case-by-case basis that such differences
+don't matter in practice.
+
+The tabulation can also be filled with the contents of an external PDF
+package, by calling
+\begin{verbatim}
+  call hoppetAssign(LHAsub)
+\end{verbatim}
+where \ttt{LHAsub} is the name of any subroutine with the interface
+given above, which will now be called with a range of \ttt{Q} values
+corresponding to the internal tabulation scales. This essentially just
+transfers an external tabulation into \hoppet's internal
+representation. 
+
+Finally given an evolved or assigned PDF, one can obtain information
+about convolutions of the splitting functions with the PDFs:
+\begin{verbatim}
+  call hoppetEvalSplit(x,Q,iloop,nf,f)
+\end{verbatim}
+sets \ttt{f(-6:6)} equal to the value at \ttt{x}, \ttt{Q} of
+convolution of the \ttt{iloop} splitting function matrix (with
+\ttt{nf} flavours) with the currently tabulated PDF. If $\ttt{nf}<0$
+the number of flavours used is the one appropriate at the specificed
+$Q$ scale (as long as the information is available, \ie one of
+\ttt{hoppetEvolve} or \ttt{hoppetCachedEvolve} has been called). The
+first call with a given \ttt{nf} for a specified \ttt{iloop} will be
+slow ($\sim$ the time for an evolution), but subsequent calls with the
+same values will be fast. 
+
+The routines described here (and associated data storage) are to be
+found in \ttt{src/vanilla\_interface.f90} and may provide inspiration
+for the user wishing to write their own f90 code for \hoppet.
 
 
 %======================================================================

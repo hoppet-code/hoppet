@@ -12,7 +12,7 @@ FFLAGS = -O
 # libraries (-L??? -lg2c).
 
 # for the f90 (lf95) compiler libraries
-#F90LIB= -L`which lf95 | sed s:bin/lf95:lib:` -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
+F90LIB= -L`which lf95 | sed s:bin/lf95:lib:` -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
 
 # for the ifort compiler libraries
 #F90LIB= -L`which ifort | sed s:bin/ifort:lib:` -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lc -lirc_s
@@ -21,7 +21,7 @@ FFLAGS = -O
 # to the combination of a g77 main program with a g95 library (ensures
 # that the g77 "main"  is found before the g95 "main") -- with other compilers
 # the situation may be different.
-F90LIB= -lfrtbegin -L`locate libf95.a | tail -1 | sed s:/libf95.a::` -lf95
+#F90LIB= -lfrtbegin -L`locate libf95.a | tail -1 | sed s:/libf95.a::` -lf95
 # or the following
 #F90LIB= -lfrtbegin -L$(HOME)/software/g95-install/lib/gcc-lib/i686-pc-linux-gnu/4.0.1 -lf95
 

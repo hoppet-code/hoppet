@@ -12,24 +12,24 @@ ALLPROGOBJ =
 
 SRCS =	hplog.f xpij2e.f xpns2e.f assertions.f90 coefficient_functions.f90 \
 	convolution.f90 dglap_choices.f90 dglap_holders.f90 dglap_objects.f90 \
-	evolution.f90 f77_pdftab.f90 hoppet_v1.f90 integrator.f90 \
-	interpolation.f90 new_as.f90 pdf_general.f90 pdf_representation.f90 \
-	pdf_tabulate.f90 qcd.f90 qcd_coupling.f90 random.f90 runge_kutta.f90 \
-	sort.f90 special_functions.f90 splitting_functions.f90 \
-	splitting_functions_nnlo.f90 types.f90 warnings_and_errors.f90 \
-	welcome_message.f90 xa2hgp.f90 xpij2n.f90 xpij2p.f90 xpns2n.f90 \
-	xpns2p.f90
+	evolution.f90 hoppet_v1.f90 integrator.f90 interpolation.f90 \
+	new_as.f90 pdf_general.f90 pdf_representation.f90 pdf_tabulate.f90 \
+	qcd.f90 qcd_coupling.f90 random.f90 runge_kutta.f90 sort.f90 \
+	special_functions.f90 splitting_functions.f90 \
+	splitting_functions_nnlo.f90 types.f90 vanilla_interface.f90 \
+	warnings_and_errors.f90 welcome_message.f90 xa2hgp.f90 xpij2n.f90 \
+	xpij2p.f90 xpns2n.f90 xpns2p.f90
 
 POSTSRCS =	
 
 OBJS =	hplog.o xpij2e.o xpns2e.o assertions.o coefficient_functions.o \
 	convolution.o dglap_choices.o dglap_holders.o dglap_objects.o \
-	evolution.o f77_pdftab.o hoppet_v1.o integrator.o interpolation.o \
-	new_as.o pdf_general.o pdf_representation.o pdf_tabulate.o qcd.o \
+	evolution.o hoppet_v1.o integrator.o interpolation.o new_as.o \
+	pdf_general.o pdf_representation.o pdf_tabulate.o qcd.o \
 	qcd_coupling.o random.o runge_kutta.o sort.o special_functions.o \
 	splitting_functions.o splitting_functions_nnlo.o types.o \
-	warnings_and_errors.o welcome_message.o xa2hgp.o xpij2n.o xpij2p.o \
-	xpns2n.o xpns2p.o
+	vanilla_interface.o warnings_and_errors.o welcome_message.o xa2hgp.o \
+	xpij2n.o xpij2p.o xpns2n.o xpns2p.o
 
 POSTOBJS =	
 POSTLIB = 
@@ -84,9 +84,6 @@ dglap_objects.o: assertions.o convolution.o dglap_choices.o \
 evolution.o: assertions.o convolution.o dglap_choices.o dglap_holders.o \
 	dglap_objects.o pdf_representation.o qcd.o qcd_coupling.o \
 	runge_kutta.o types.o warnings_and_errors.o
-f77_pdftab.o: convolution.o dglap_choices.o dglap_holders.o dglap_objects.o \
-	pdf_general.o pdf_tabulate.o qcd_coupling.o types.o \
-	warnings_and_errors.o
 hoppet_v1.o: convolution.o dglap_choices.o dglap_holders.o dglap_objects.o \
 	evolution.o pdf_general.o pdf_representation.o pdf_tabulate.o qcd.o \
 	qcd_coupling.o types.o warnings_and_errors.o
@@ -111,4 +108,7 @@ splitting_functions_nnlo.o: convolution.o dglap_choices.o qcd.o types.o \
 	warnings_and_errors.o xpij2e.o xpij2n.o xpij2p.o xpns2e.o xpns2n.o \
 	xpns2p.o
 types.o: 
+vanilla_interface.o: convolution.o dglap_choices.o dglap_holders.o \
+	dglap_objects.o pdf_general.o pdf_tabulate.o qcd.o qcd_coupling.o \
+	types.o warnings_and_errors.o
 warnings_and_errors.o: types.o

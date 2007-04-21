@@ -1,8 +1,10 @@
-module f77_pdftab
+module vanilla_interface
   use types; use consts_dp
   use pdf_tabulate
   use convolution; use pdf_general; use dglap_objects
   use dglap_holders; use pdf_general; use dglap_choices
+  use qcd_coupling
+  use qcd, only: quark_masses_def
   implicit none
 
   !! holds information about the grid
@@ -16,14 +18,20 @@ module f77_pdftab
   type(pdf_table), save :: tables(0:3)
   logical,      save :: setup_done(0:3) = .false.
   integer,      save :: setup_nf(3)     = 0
-end module f77_pdftab
+
+  !! coupling
+  logical,                save :: coupling_initialised = .false.
+  type(running_coupling), save :: coupling
+  integer,  save :: ffn_nf = -1
+  real(dp), save :: masses(4:6) = quark_masses_def(4:6)
+end module vanilla_interface
 
 
 !======================================================================
 !! initialise the underlying grid, splitting functions and pdf-table
 !! objects, using the dy and nloop parameters as explained below.
-subroutine dglapStart(dy,nloop)
-  use f77_pdftab
+subroutine hoppetStart(dy,nloop)
+  use vanilla_interface
   implicit none
   !--------------------------------------
   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
@@ -34,17 +42,17 @@ subroutine dglapStart(dy,nloop)
   ymax = 12.0d0
   Qmin = 1.0d0
   Qmax = 28000d0 ! twice LHC c.o.m.
-  dlnlnQ = min(dy,0.05_dp)
+  dlnlnQ = min(0.5_dp*dy,0.07_dp)
   order = -5
-  call dglapStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order)
-end subroutine dglapStart
+  call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme_MSbar)
+end subroutine hoppetStart
 
 
 !======================================================================
 !! initialise the underlying grid, splitting functions and pdf-table
 !! objects, using an extended set of parameters, as described below
-subroutine dglapStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order)
-  use f77_pdftab
+subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
+  use vanilla_interface
   implicit none
   real(dp), intent(in) :: ymax   !! highest value of ln1/x user wants to access
   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
@@ -52,6 +60,7 @@ subroutine dglapStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order)
   real(dp), intent(in) :: dlnlnQ !! internal table spacing in lnlnQ
   integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=3)
   integer,  intent(in) :: order  !! order of numerical interpolation (+ve v. -ve: see below)
+  integer,  intent(in) :: factscheme !! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
   !-------------------------------------
 
   ! initialise our grids
@@ -73,21 +82,21 @@ subroutine dglapStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order)
        & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
 
   ! initialise splitting-function holder
-  call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
+  call InitDglapHolder(grid,dh,factscheme=factscheme,&
        &                      nloop=nloop,nflo=3,nfhi=6)
   ! choose a sensible default number of flavours.
   call SetNfDglapHolder(dh,nflcl=5)
 
   ! indicate the pdfs and convolutions have not been initialised...
   setup_done = .false.
-end subroutine dglapStartExtended
+end subroutine hoppetStartExtended
 
 
 !======================================================================
 !! Given a pdf_subroutine with the interface shown below, initialise
 !! our internal pdf table.
-subroutine dglapAssign(pdf_subroutine)
-  use f77_pdftab ! this module which provides access to the array of tables
+subroutine hoppetAssign(pdf_subroutine)
+  use vanilla_interface ! this module which provides access to the array of tables
   implicit none
   interface ! indicate what "interface" pdf_subroutine is expected to have
      subroutine pdf_subroutine(x,Q,res)
@@ -107,17 +116,16 @@ subroutine dglapAssign(pdf_subroutine)
   ! convolutions with splitting matrices) have yet to be set up [they
   ! get set up "on demand" later].
   setup_done(1:) = .false.
-end subroutine dglapAssign
+end subroutine hoppetAssign
 
 
 !======================================================================
 !! Given a pdf_subroutine with the interface shown below, initialise
 !! our internal pdf table.
-subroutine dglapEvolve(asmz, nloop, pdf_subroutine, Q0)
-  use f77_pdftab ! this module which provides access to the array of tables
-  use qcd_coupling
+subroutine hoppetEvolve(asQ, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
+  use vanilla_interface ! this module which provides access to the array of tables implicit none
   implicit none
-  real(dp), intent(in) :: asmz, Q0
+  real(dp), intent(in) :: asQ, Q0alphas, muR_Q, Q0pdf
   integer,  intent(in) :: nloop
   interface ! indicate what "interface" pdf_subroutine is expected to have
      subroutine pdf_subroutine(x,Q,res)
@@ -128,18 +136,26 @@ subroutine dglapEvolve(asmz, nloop, pdf_subroutine, Q0)
   end interface
   !! hold the initial pdf
   real(dp), pointer :: pdf0(:,:)
-  !! hold the running coupling
-  type(running_coupling) :: coupling
 
   ! create our internal pdf object for the initial condition
   call AllocPDF(grid, pdf0)
-  call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0)
+  call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0pdf)
 
   ! get a running coupling with the desired scale
-  call InitRunningCoupling(coupling, alfas=0.118_dp, nloop=nloop)
+  if (coupling_initialised) call Delete(coupling) 
+  if (ffn_nf > 0) then
+     call InitRunningCoupling(coupling, alfas=asQ, Q=Q0alphas, nloop=nloop, &
+          &                   fixnf=ffn_nf)
+  else 
+     call InitRunningCoupling(coupling, alfas=asQ, Q=Q0alphas, nloop=nloop, &
+          &                   quark_masses=masses)
+  end if
+  call AddNfInfoToPdfTable(tables,coupling)
+  coupling_initialised = .true.
 
   ! create the tabulation
-  call EvolvePdfTable(tables(0), Q0, pdf0, dh, coupling, nloop=nloop)
+  call EvolvePdfTable(tables(0), Q0pdf, pdf0, dh, muR_Q=muR_Q, &
+       &              coupling=coupling, nloop=nloop)
 
   ! indicate that table(0) has been set up
   setup_done(0)  = .true.
@@ -150,21 +166,117 @@ subroutine dglapEvolve(asmz, nloop, pdf_subroutine, Q0)
 
   ! clean up
   call Delete(pdf0)
-  call Delete(coupling)
-end subroutine dglapEvolve
+end subroutine hoppetEvolve
+
+
+!======================================================================
+!! Prepare a cached evolution
+subroutine hoppetPreEvolve(asQ, Q0alphas, nloop, muR_Q, Q0pdf)
+  use vanilla_interface
+  implicit none
+  real(dp), intent(in) :: asQ, Q0alphas, muR_Q, Q0pdf
+  integer,  intent(in) :: nloop
+
+  ! get a running coupling with the desired scale
+  if (coupling_initialised) call Delete(coupling) 
+  if (ffn_nf > 0) then
+     call InitRunningCoupling(coupling, alfas=asQ, Q=Q0alphas, nloop=nloop, &
+          &                   fixnf=ffn_nf)
+  else 
+     call InitRunningCoupling(coupling, alfas=asQ, Q=Q0alphas, nloop=nloop, &
+          &                   quark_masses=masses)
+  end if
+  call AddNfInfoToPdfTable(tables,coupling)
+  coupling_initialised = .true.
+
+  ! create the tabulation
+  call PreEvolvePdfTable(tables(0), Q0pdf, dh, muR_Q=muR_Q, &
+       &                 coupling=coupling, nloop=nloop)
+end subroutine hoppetPreEvolve
+
+
+!======================================================================
+!! Carry out a cached evolution based on the initial condition
+!! that can be obtained from pdf_subroutine at the scale Q0pdf set in
+!! PreEvolve
+subroutine hoppetCachedEvolve(pdf_subroutine)
+  use vanilla_interface
+  implicit none
+  interface ! indicate what "interface" pdf_subroutine is expected to have
+     subroutine pdf_subroutine(x,Q,res)
+       use types; implicit none
+       real(dp), intent(in)  :: x,Q
+       real(dp), intent(out) :: res(*)
+     end subroutine pdf_subroutine
+  end interface
+  !! hold the initial pdf
+  real(dp), pointer :: pdf0(:,:)
+
+  ! create our internal pdf object for the initial condition
+  call AllocPDF(grid, pdf0)
+  call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, tables(0)%StartScale)
+
+  ! create the tabulation
+  call EvolvePdfTable(tables(0), pdf0)
+
+  ! indicate that table(0) has been set up
+  setup_done(0)  = .true.
+  ! indicate that table(1), table(2), etc... (which will contain the
+  ! convolutions with splitting matrices) have yet to be set up [they
+  ! get set up "on demand" later].
+  setup_done(1:) = .false.
+
+  ! clean up
+  call Delete(pdf0)
+end subroutine hoppetCachedEvolve
+
+
+!======================================================================
+!! Return the coupling at scale Q
+function hoppetAlphaS(Q)
+  use vanilla_interface ! this module which provides access to the array of tables
+  implicit none
+  real(dp)             :: hoppetAlphaS
+  real(dp), intent(in) :: Q
+  hoppetAlphaS = Value(coupling, Q)
+end function hoppetAlphaS
+
+
+!======================================================================
+!! Set up things to be a fixed-flavour number scheme with the given
+!! fixed_nf number of flavours
+subroutine hoppetSetFFN(fixed_nf)
+  use vanilla_interface ! this module which provides access to the array of tables
+  implicit none
+  integer,  intent(in) :: fixed_nf
+
+  ffn_nf = fixed_nf
+end subroutine hoppetSetFFN
+
+!======================================================================
+!! Set up things to be a variable-flavour number scheme with the given
+!! quark masses
+subroutine hoppetSetVFN(mc,mb,mt)
+  use vanilla_interface ! this module which provides access to the array of tables
+  implicit none
+  real(dp) :: mc, mb, mt
+
+  ffn_nf = -1
+  masses = (/mc,mb,mt/)
+end subroutine hoppetSetVFN
 
 
 !======================================================================
 !! Return in f(-6:6) the value of the internally stored pdf at the
 !! given x,Q, with the usual LHApdf meanings for the indices -6:6.
-subroutine dglapEval(x,Q,f)
-  use f77_pdftab
+subroutine hoppetEval(x,Q,f)
+  use vanilla_interface
   implicit none
   real(dp), intent(in)  :: x, Q
   real(dp), intent(out) :: f(-6:6)
   
   call EvalPdfTable_xQ(tables(0),x,Q,f)
-end subroutine dglapEval
+end subroutine hoppetEval
 
 
 
@@ -191,29 +303,41 @@ end subroutine dglapEval
 !! each value of iloop). Multiple calls with different values for
 !! iloop can be carried out without problems.
 !!
-subroutine dglapEvalSplit(x,Q,iloop,nf,f)
-  use f77_pdftab; use warnings_and_errors
+subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
+  use vanilla_interface; use warnings_and_errors
   implicit none
   real(dp), intent(in)  :: x, Q
   integer,  intent(in)  :: iloop, nf
   real(dp), intent(out) :: f(-6:6)
-  
+  integer :: iQ
+
   if (.not. setup_done(iloop) .or. setup_nf(iloop) /= nf) then
      if (iloop > size(dh%allP,dim=1) .or. iloop < 1) &
-          &call wae_error('dglapeval_split','illegal value for iloop:',&
+          &call wae_error('hoppetEvalSplit','illegal value for iloop:',&
           &intval=iloop)
 
-     if (nf < lbound(dh%allP,dim=2) .or. nf > ubound(dh%allP,dim=2)) &
-          &call wae_error('dglapeval_split','illegal value for nf:',&
-          &intval=nf)
+     if (nf < 0) then
+        ! use whatever nf is relevant 
+        if (.not. tables(0)%nf_info_associated) call wae_error(&
+             & 'hoppetEvalSplit','automatic choice of nf (nf<0) but the tabulation has no information on nf')
+        do iQ = 0, tables(0)%nQ
+           tables(iloop)%tab(:,:,iQ) = dh%allP(iloop, tables(0)%nf_int(iQ)) &
+                &             .conv. tables(0)%tab(:,:,iQ)
+        end do
+     else
+        ! use a fixed nf
+        if (nf < lbound(dh%allP,dim=2) .or. nf > ubound(dh%allP,dim=2)) &
+             &call wae_error('hoppetEvalSplit','illegal value for nf:',&
+             &intval=nf)
+        
+        tables(iloop)%tab = dh%allP(iloop, nf) .conv. tables(0)%tab
+     end if
 
-     tables(iloop)%tab = dh%allP(iloop, nf) .conv. tables(0)%tab
-     
      setup_done(iloop) = .true.
      setup_nf(iloop)   = nf
   end if
   
   call EvalPdfTable_xQ(tables(iloop),x,Q,f)
-end subroutine dglapEvalSplit
+end subroutine hoppetEvalSplit
 
 

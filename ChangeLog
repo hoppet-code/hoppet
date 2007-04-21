@@ -1,5 +1,13 @@
 2007-04-21  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* example_f77/tabulation_example.f: 
+	  modified it so that it uses the new routines in the
+	  vanilla_interface.
+
+	* src/f77_pdftab.f90 -> src/vanilla_interface.f90 [later]: 
+          major extension of facilities offered, some renaming and chances
+	  of interface
+	
 	* src/pdf_tabulate.f90: 
 	  Long-overdue renaming of routines for pdf tables.
 	  Added Q_vals(:) to the tabulation.

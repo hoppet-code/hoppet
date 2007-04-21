@@ -11,15 +11,15 @@
       call InitPDFsetByName("cteq61.LHgrid")
       call InitPDF(0)
 
-      ! start the dglap evolution/convolution package 
+      ! start the hoppet evolution/convolution package 
       dy    = 0.1d0     ! the internal grid spacing (smaller->higher accuarcy)
                         ! 0.1 should provide at least 10^{-3} accuracy 
       nloop = 2         ! the number of loops to initialise (max=3!)
-      call dglapStart(dy, nloop)
+      call hoppetStart(dy, nloop)
 
       ! initialise our PDF using the LHAPDF subroutine for PDF-access
       ! (any other subroutine with same interface can be used in its place)
-      call dglapAssign(evolvePDF)
+      call hoppetAssign(evolvePDF)
 
       x = 0.1d0
       Q = 30.0d0
@@ -28,7 +28,7 @@
       call evolvePDF(x,Q,lhapdf)
 
       ! extract the pdf at this x,Q via our copy of the pdf
-      call dglapEval(x,Q,ourpdf)
+      call hoppetEval(x,Q,ourpdf)
 
       ! extract the convolution of the 1-loop (LO) splitting function
       ! with the currently stored pdf. The normalisation is such that to
@@ -37,10 +37,10 @@
       ! in hep-ph/0510324 is referred to as (P_0\otimes q)
       iloop = 1
       nf = 5
-      call dglapEvalSplit(x,Q,iloop,nf,PLO_conv_ourpdf)
+      call hoppetEvalSplit(x,Q,iloop,nf,PLO_conv_ourpdf)
       ! extract the convolution with the 2-loop (NLO) splitting function
       iloop = 2
-      call dglapEvalSplit(x,Q,iloop,nf,PNLO_conv_ourpdf)
+      call hoppetEvalSplit(x,Q,iloop,nf,PNLO_conv_ourpdf)
 
       ! print it all
       write(6,*) 'x = ', x, ',   Q = ', Q

@@ -206,8 +206,8 @@ contains
     type(pdfseginfo), pointer :: seginfo
 
     
-    if (tab%nf_info_associated) call wae_error('AddNfInfoToPdfTable',&
-         &'nf info already associated: delete it first')
+    !if (tab%nf_info_associated) call wae_error('AddNfInfoToPdfTable',&
+    !     &'nf info already associated: delete it first')
 
     ! We will be reallocating everything here, so first clean up
     call Delete(tab)
@@ -291,7 +291,7 @@ contains
     
     ! REMEMBER TO COMPLETE FROM ORIG...
     tab%nf_info_associated = .true.
-    write(0,*) 'pdf_table info: Number of Q bins changed to',tab%nQ
+    !write(0,*) 'pdf_table info: Number of Q bins changed to ',tab%nQ
   end subroutine AddNfInfoToPdfTable
 
 
