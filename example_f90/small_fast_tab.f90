@@ -133,6 +133,7 @@ program small_fast_tab
   Qinit = sqrt(two); Qmax = dble_val_opt('-Qmax',50.0_dp)
   call InitRunningCoupling(coupling, alfas=0.35_dp, Q=Qinit, &
        &nloop=nloop, use_nah=.true.)
+  write(0,*) Value(coupling,91.2d0)
 
   ! set up the table
   dlnlnQ = dble_val_opt('-dlnlnQ',0.07_dp)

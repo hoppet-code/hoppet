@@ -1,5 +1,8 @@
 2007-04-21  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* example_f90/benchmark.f90: *** ADDED ***
+	  added this for getting the HeraLHC benchmarks 
+
 	* example_f77/tabulation_example.f: 
 	  modified it so that it uses the new routines in the
 	  vanilla_interface.

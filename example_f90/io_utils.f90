@@ -103,10 +103,10 @@ module sub_defs_io
   end interface
 
   interface
-     integer function value(string)
+     integer function int_value(string)
         implicit none
         character(*),  intent(in)  ::   string
-     end function value
+     end function int_value
   end interface
 
   interface
@@ -690,7 +690,7 @@ integer function int_val_arg(argk, default_val)
   if (trim(string) == '-' .and. present(default_val)) then
      int_val_arg = default_val
   else
-     int_val_arg = value(string)
+     int_val_arg = int_value(string)
   end if
 
 end function int_val_arg
@@ -702,7 +702,7 @@ end function int_val_arg
 !! GPS 30/11/94+13/11/96
 !======================================================================
 
-integer function value(string)
+integer function int_value(string) result(value)
       implicit none
       character(*),  intent(in)  ::   string
       !----------------------------------------------------------------
@@ -735,7 +735,7 @@ loop: do i = 1, len(string)
          endif
       end do loop
       value = value * sgn
-end function value
+end function int_value
 
 !----------------------------------------------------------------------
 !! Return the dble value corresponding to the argk^th command line

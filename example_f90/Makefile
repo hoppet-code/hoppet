@@ -3,24 +3,23 @@
 # default program to compile
 PROG =	small_fast_tab
 
-ALLPROG = 	small_fast_tab tabulation_example
+ALLPROG = 	benchmark small_fast_tab tabulation_example
 
 # This will be used one day...
-ALLPROGSRC =	small_fast_tab.f90 tabulation_example.f90
+ALLPROGSRC =	benchmark.f90 small_fast_tab.f90 tabulation_example.f90
 
-ALLPROGOBJ =	small_fast_tab.o tabulation_example.o
+ALLPROGOBJ =	benchmark.o small_fast_tab.o tabulation_example.o
 
-SRCS =	io_utils.f90 lcl_dec.f90
+SRCS =	io_utils.f90 lcl_dec.f90 NameSelect.f90
 
 POSTSRCS =	
 
-OBJS =	io_utils.o lcl_dec.o
+OBJS =	io_utils.o lcl_dec.o NameSelect.o
 
 POSTOBJS =	
 POSTLIB = 
 
-LIBS = -L../src -lhoppet_v1 -L/home/salam/utils/LHAPDF/lib -lLHAPDF -lfj9i6  -lg2c -lm 
-#LIBS = -L../src -lhoppet_v1 
+LIBS = -L../src -lhoppet_v1 -L/home/salam/utils/LHAPDF/lib -lLHAPDF  -lfj9i6  -lg2c -lm 
 
 CC = cc
 CFLAGS = -O
@@ -36,6 +35,9 @@ all: $(PROG)__
 $(PROG)__: $(PROG)
 
 ALL:  $(ALLPROG)
+
+benchmark: benchmark.o $(OBJS) $(POSTOBJS) 
+	$(F90) $(LDFLAGS) -o benchmark benchmark.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
 
 small_fast_tab: small_fast_tab.o $(OBJS) $(POSTOBJS) 
 	$(F90) $(LDFLAGS) -o small_fast_tab small_fast_tab.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
@@ -60,6 +62,8 @@ make:
 %.o: %.f90 
 	$(F90) $(F90FLAGS) -c $<
 
+benchmark.o: NameSelect.o io_utils.o
 io_utils.o: 
+NameSelect.o: io_utils.o
 small_fast_tab.o: io_utils.o
 tabulation_example.o: 
