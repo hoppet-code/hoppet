@@ -42,8 +42,8 @@ subroutine hoppetStart(dy,nloop)
   ymax = 12.0d0
   Qmin = 1.0d0
   Qmax = 28000d0 ! twice LHC c.o.m.
-  dlnlnQ = min(0.5_dp*dy,0.07_dp)
-  order = -5
+  dlnlnQ = dy/4.0_dp  ! min(0.5_dp*dy,0.07_dp)
+  order = -6
   call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme_MSbar)
 end subroutine hoppetStart
 

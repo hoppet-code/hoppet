@@ -75,7 +75,7 @@ module pdf_tabulate
   ! used in various contexts for deciding when an interval is
   ! sufficiently small that it can be ignored...
   real(dp), parameter :: min_dlnlnQ_singleQ = 1e-10_dp
-  integer, parameter :: def_lnlnQ_order = 3
+  integer, parameter :: def_lnlnQ_order = 4
   !integer, parameter :: lnlnQ_order = 2
 
   interface AllocPdfTable

@@ -1,3 +1,11 @@
+2007-04-23  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/pdf_tabulate.f90: 
+	  changed default lnlnQ_order -> 4
+
+	* src/vanilla_interface.f90: 
+	  changed default dlnlnQ -> dy/4
+
 2007-04-22  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/vanilla_interface.f90 (hoppetStartExtended): 
