@@ -3,7 +3,7 @@
 ! a relative accuracy (on g,d,u,s) that is typically \lesssim 1e-4, though
 ! one might want to check the accuracy more systematically.
 ! 
-! ./small_fast_tab -nrep 1 -nxQ 500 -output -dy 0.25 -dlnlnQ 0.07 -dt 0.4 -olnlnQ 4 -order 6 -order2 -6
+! ./small_fast_tab -nrep 1 -nxQ 500 -output -dy 0.25 -dlnlnQ 0.07 -du 0.1 -olnlnQ 4 -order 6 -order2 -6
 !
 ! roughly speaking: evolution takes about 2.5ms and evaluations 1.5ms
 !
@@ -49,6 +49,7 @@ contains
   end function unpolarized_dummy_pdf
 
 
+  ! an alternative way of providing the same thing
   subroutine VogtInitSub(y,res)
     real(dp), intent(in)  :: y
     real(dp), intent(out) :: res(ncompmin:)
@@ -89,30 +90,36 @@ program small_fast_tab
   type(dglap_holder) :: dh
   type(running_coupling)    :: coupling
   integer            :: order, order2, nloop, i, j, nrep, nxQ,nn, olnlnQ
-  real(dp)           :: dy, Qinit, Qmax, y, Q, pdfval(-6:6), dt, dlnlnQ
+  integer            :: hires
+  real(dp)           :: dy, Qinit, Qmax, y, Q, pdfval(-6:6), du, dlnlnQ
   real(dp)           :: ymax
+  real(dp)           :: time_start, time_init_done, time_ev_done, time_end
   real(dp), pointer  :: vogt_init(:,:)
   type(pdf_table)       :: table
-  logical            :: output
+  logical            :: output, preev
 
   ! set the details of the y=ln1/x grid
   dy    = dble_val_opt('-dy',0.25_dp)
   ymax  = dble_val_opt('-ymax',5.0_dp)
   order = int_val_opt('-order',5)
   order2 = int_val_opt('-order2',order)
-  if (log_val_opt('-alt')) then
+
+  preev = log_val_opt('-preev',.true.)
+
+  if (log_val_opt('-alt7')) then
      call InitGridDef(gridarray(3),dy/7.0_dp, 1.0_dp, order=order2)
      call InitGridDef(gridarray(2),dy/2.0_dp, 3.0_dp, order=order2)
      call InitGridDef(gridarray(1),dy,        ymax, order=order)
   else
-     call InitGridDef(gridarray(3),dy/9.0_dp, 0.5_dp, order=order2)
+     hires = int_val_opt('-hires',9)
+     call InitGridDef(gridarray(3),dy/hires, 0.5_dp, order=order2)
      call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order2)
      call InitGridDef(gridarray(1),dy,        ymax,   order=order )
   end if
   call InitGridDef(grid,gridarray(1:3),locked=.true.)
   ! set parameter for evolution step in Q
-  dt = dble_val_opt('-dt',0.4_dp)
-  call SetDefaultEvolutionDt(dt)
+  du = dble_val_opt('-du',0.1_dp)
+  call SetDefaultEvolutionDu(du)
 
   ! set up the splitting functions
   nloop = int_val_opt('-nloop',3)
@@ -120,8 +127,12 @@ program small_fast_tab
        &   call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
   if (log_val_opt('-exactsp')) &
        &   call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
+
+  call cpu_time(time_start)
   call InitDglapHolder(grid, dh, factscheme=factscheme_MSbar, &
        &                              nloop=nloop, nflo=3, nfhi=6)
+  call cpu_time(time_init_done)
+
   
   ! first way to get the initial distribution
   !call AllocInitPDFSub(grid,vogt_init,VogtInitSub)
@@ -140,45 +151,73 @@ program small_fast_tab
   olnlnQ = int_val_opt('-olnlnQ',4)
   call AllocPdfTable(grid,table,Qinit,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
   call AddNfInfoToPdfTable(table,coupling)
-  call PreEvolvePdfTable(table,Qinit,dh,coupling)
+  if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
+  call cpu_time(time_ev_done)
 
   nrep  = int_val_opt('-nrep',1)
   nxQ = int_val_opt('-nxQ',0); y = 3.14_dp; Q = 13.354_dp
   output = log_val_opt('-output')
   if (output) call output_info
  
+  !-- security ----------------------
+  if (.not. CheckAllArgsUsed(0)) stop
+  !----------------------------------
+
   ! output
   do i = 1, nrep
-     call EvolvePdfTable(table,vogt_init)
+     if (preev) then
+        call EvolvePdfTable(table,vogt_init)
+     else
+        call EvolvePdfTable(table,Qinit,vogt_init,dh,coupling)
+     end if
      
-     nn = nxQ/3
+     nn = nxQ/4
      do j = 1, nn
-        y = j*5.0_dp/nn
+        y = j*ymax/nn
         Q = Qmax - j*(Qmax-Qinit)/nn
         call EvalPdfTable_yQ(table,y,Q,pdfval)
-        if (output .and. i==1) write(6,'(20es20.8)') y,Q,pdfval(0:3)
+        if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
         !if (output .and. i==1) write(6,'(20es20.8)') y,Q,vogt_init(:,0:3).atx.(grid.with.exp(-y))
      end do
 
      if (output .and. i==1) write(6,*)
      if (output .and. i==1) write(6,*)
      do j = nn,1,-1
-        y = j*5.0_dp/nn
+        y = j*ymax/nn
         Q = 4.0_dp + j*5.0_dp/nn
         call EvalPdfTable_yQ(table,y,Q,pdfval) 
-        if (output .and. i==1) write(6,'(20es20.8)') y,Q,pdfval(0:3)
+        if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
      end do
      
      if (output .and. i==1) write(6,*)
      if (output .and. i==1) write(6,*)
      do j = nn,1,-1
-        y = j*5.0_dp/nn
+        y = j*ymax/nn
         Q = Qmax*(1-j*0.2_dp/nn)
         call EvalPdfTable_yQ(table,y,Q,pdfval) 
-        if (output .and. i==1) write(6,'(20es20.8)') y,Q,pdfval(0:3)
+        if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
      end do
+
+     if (output .and. i==1) write(6,*)
+     if (output .and. i==1) write(6,*)
+     do j = nn,1,-1
+        y = j*ymax/nn
+        Q = sqrt(Qinit*Qmax)*(1+j*0.2_dp/nn)
+        call EvalPdfTable_yQ(table,y,Q,pdfval) 
+        if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
+     end do
+
   end do
-  
+  call cpu_time(time_end)
+  write(0,'(a,4f10.5)') "Timings (init, preevln, evln) = ", &
+       &   time_init_done-time_start, &
+       &   time_ev_done-time_init_done, &
+       &   (time_end-time_ev_done)/nrep
+  if (output) write(6,'(a,4f10.5)') "# Timings (init, preevln, evln) = ", &
+       &   time_init_done-time_start, &
+       &   time_ev_done-time_init_done, &
+       &   (time_end-time_ev_done)/nrep
+
   ! clean up
   call Delete(table)
   call Delete(vogt_init)  ! here can also use deallocate(vogt_init)
@@ -191,7 +230,7 @@ contains
   subroutine output_info
     write(6,'(a)') '# '//trim(command_line())
     write(6,'(a,f10.5,a,f10.5)') '# dy = ',dy,      ';    ymax = ',ymax
-    write(6,'(a,f10.5,a,f10.5)') '# dt = ',dt,      ';    Qmax = ',Qmax
+    write(6,'(a,f10.5,a,f10.5)') '# du = ',du,      ';    Qmax = ',Qmax
     write(6,'(a,i5,a,i5)')    '# order  = ',order,  ';    order2 = ',order2
     write(6,'(a,f10.5,a,i5)') '# dlnlnQ = ',dlnlnQ, ';    olnlnQ = ',olnlnQ
   end subroutine output_info

@@ -71,7 +71,7 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   ! accuracy is slightly reduced)
   !order = -5 
   ! Now create a nested grid
-  call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
+  call InitGridDef(gdarray(3),dy/15.0_dp,0.5_dp, order=order)
   call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
   call InitGridDef(grid,gdarray(1:3),locked=.true.)

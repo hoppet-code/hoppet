@@ -1,3 +1,9 @@
+2007-04-22  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/vanilla_interface.f90 (hoppetStartExtended): 
+          on basis of numerical studies, switched large-x grid to 15 times
+	  the base resolution.
+	
 2007-04-21  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* example_f90/benchmark.f90: *** ADDED ***
