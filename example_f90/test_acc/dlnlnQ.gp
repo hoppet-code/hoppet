@@ -20,7 +20,7 @@ set format y "10^{%T}"
 # makes no different here
 
 plot '< ./cycle.pl dy0.025-order6-nopre-dlnlnQXX-du0.005-olnlnQ4.res' u 1:2 w l lw 3 t 'guds, x<0.7 [o = 4]',\
-     ''   u 1:5 w l lw 3 t 'gudsc x<0.9 [o = 4]',\
+     ''   u 1:5 w l lw 3 t 'gudsc, x<0.9 [o = 4]',\
      '< ./cycle.pl dy0.025-order6-nopre-dlnlnQXX-du0.005-olnlnQ3.res' u 1:5 w l lw 3 t 'gudsc, x<0.9 [o = 3]'
 
 
