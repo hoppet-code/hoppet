@@ -86,7 +86,7 @@ program small_fast_tab
   use sub_defs_io
   implicit none
   !-------------------------------
-  type(grid_def)     :: grid, gridarray(3)
+  type(grid_def)     :: grid, gridarray(4)
   type(dglap_holder) :: dh
   type(running_coupling)    :: coupling
   integer            :: order, order1, order2, nloop, i, nrep, nxQ,olnlnQ
@@ -102,7 +102,7 @@ program small_fast_tab
   dy    = dble_val_opt('-dy',0.25_dp)
   ymax  = dble_val_opt('-ymax',5.0_dp)
   order = int_val_opt('-order',-6)
-  order2 = int_val_opt('-order2',order2)
+  order2 = int_val_opt('-order2',order)
   order1 = int_val_opt('-order1',order)
 
   preev = log_val_opt('-preev',.true.)
@@ -111,13 +111,20 @@ program small_fast_tab
      call InitGridDef(gridarray(3),dy/7.0_dp, 1.0_dp, order=order2)
      call InitGridDef(gridarray(2),dy/2.0_dp, 3.0_dp, order=order1)
      call InitGridDef(gridarray(1),dy,        ymax, order=order)
+     call InitGridDef(grid,gridarray(1:3),locked=.true.)
+  else if (log_val_opt('-4grids')) then
+     call InitGridDef(gridarray(4),dy/27.0_dp, 0.2_dp, order=order2)
+     call InitGridDef(gridarray(3),dy/9.0_dp, 0.5_dp, order=order1)
+     call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order )
+     call InitGridDef(gridarray(1),dy,        ymax,   order=order )
+     call InitGridDef(grid,gridarray(1:4),locked=.true.)
   else
      hires = int_val_opt('-hires',9)
      call InitGridDef(gridarray(3),dy/hires, 0.5_dp, order=order2)
      call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order1)
      call InitGridDef(gridarray(1),dy,        ymax,   order=order )
+     call InitGridDef(grid,gridarray(1:3),locked=.true.)
   end if
-  call InitGridDef(grid,gridarray(1:3),locked=.true.)
   ! set parameter for evolution step in Q
   du = dble_val_opt('-du',0.1_dp)
   call SetDefaultEvolutionDu(du)
@@ -205,13 +212,21 @@ program small_fast_tab
   call Delete(gridarray)
 
 contains
+
+  !---------------------------------------------------------------
+  !! some basic commentary
   subroutine output_info
     write(6,'(a)') '# '//trim(command_line())
-    write(6,'(a,f10.5,a,f10.3)') '# dy = ',dy,      ';    ymax = ',ymax
-    write(6,'(a,f10.5,a,f10.3)') '# du = ',du,      ';    Qmax = ',Qmax
-    write(6,'(a,i5,a,i5)')    '# order  = ',order,  ';    order2 = ',order2
-    write(6,'(a,i5,a,i5)')    '# order1  = ',order1
-    write(6,'(a,f10.5,a,i5)') '# dlnlnQ = ',dlnlnQ, ';    olnlnQ = ',olnlnQ
+    write(6,'(a)') '# Grid properties:'
+    write(6,'(a,4f10.6)')  '# dymax = ', maxval(grid%subgd(:)%dy)
+    write(6,'(a,4i10)')    '# dnsty = ', nint(maxval(grid%subgd(:)%dy)/grid%subgd(:)%dy)
+    write(6,'(a,4f10.6)')  '# ymax  = ', grid%subgd(:)%ymax
+         &
+    write(6,'(a,4i10)'  )  '# order = ', grid%subgd(:)%order
+    write(6,'(a,4es10.2)') '# eps   = ', grid%subgd(:)%eps
+    
+    write(6,'(a,f10.5,a,i5)') '# Evolution: du = ',du
+    write(6,'(a,f10.5,a,i5)') '# Tabulation: dlnlnQ = ',dlnlnQ, ', olnlnQ = ',olnlnQ
   end subroutine output_info
 
 

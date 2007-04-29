@@ -22,7 +22,7 @@ set xtics mirror \
           "0.7" zeta_of_x(0.7),\
           "0.8" zeta_of_x(0.8) 1,\
           "0.9" zeta_of_x(0.9),\
-          "1.0" zeta_of_x(1.0) 1\
+          "1"   zeta_of_x(1.0)\
           )
 
 

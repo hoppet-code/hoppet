@@ -1960,6 +1960,14 @@ for the user wishing to write their own f90 code for \hoppet.
 Other timing information: about $2.5\mus$ to access the full set of
 flavours at one $x,Q$ value in a tabulation.
 
+Notes:
+\begin{itemize}
+\item Protection scheme regarding sign change: if a sign change occurs
+  within $0.4$ of the point's $y$ value (decreasing gradually to
+  $0.04$ at large $x$) or in neighbouring $Q$ values, then the point
+  is discarded (for that flavour).
+\end{itemize}
+
 Comparisons to $N$-space codes (especially Vogt):
 
 \begin{itemize}

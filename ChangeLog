@@ -1,3 +1,24 @@
+2007-04-29  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	
+	* benchmarking/small_fast_tab.f90: 
+	  added -outputgrid  option for grid output (-5:5 flavours)
+	  added -4grids option for having 4 subgrids (1:3:9:27)
+
+	  modified information in output so that one gets 
+	   (a) full info about evolution grids being used
+	   (b) printout of info on the cpu(s)
+
+	* benchmarking/test_acc/compare2files_v2.f90  *** ADDED ***
+
+	  new routine for benchmarking, which includes a "-summary" option
+	  for getting the general situation and a -channel option for
+	  examining the details of a given channel (11=all) 
+	
+	* benchmarking/       *** ADDED ***
+	  moved a whole bunch of things from the example_f90 directory
+	  into this one
+
 2007-04-23  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/pdf_tabulate.f90: 
