@@ -89,7 +89,7 @@ program small_fast_tab
   type(grid_def)     :: grid, gridarray(3)
   type(dglap_holder) :: dh
   type(running_coupling)    :: coupling
-  integer            :: order, order2, nloop, i, nrep, nxQ,olnlnQ
+  integer            :: order, order1, order2, nloop, i, nrep, nxQ,olnlnQ
   integer            :: hires
   real(dp)           :: dy, Qinit, Qmax, du, dlnlnQ
   real(dp)           :: ymax
@@ -101,19 +101,20 @@ program small_fast_tab
   ! set the details of the y=ln1/x grid
   dy    = dble_val_opt('-dy',0.25_dp)
   ymax  = dble_val_opt('-ymax',5.0_dp)
-  order = int_val_opt('-order',5)
-  order2 = int_val_opt('-order2',order)
+  order = int_val_opt('-order',-6)
+  order2 = int_val_opt('-order2',order2)
+  order1 = int_val_opt('-order1',order)
 
   preev = log_val_opt('-preev',.true.)
 
   if (log_val_opt('-alt7')) then
      call InitGridDef(gridarray(3),dy/7.0_dp, 1.0_dp, order=order2)
-     call InitGridDef(gridarray(2),dy/2.0_dp, 3.0_dp, order=order2)
+     call InitGridDef(gridarray(2),dy/2.0_dp, 3.0_dp, order=order1)
      call InitGridDef(gridarray(1),dy,        ymax, order=order)
   else
      hires = int_val_opt('-hires',9)
      call InitGridDef(gridarray(3),dy/hires, 0.5_dp, order=order2)
-     call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order2)
+     call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order1)
      call InitGridDef(gridarray(1),dy,        ymax,   order=order )
   end if
   call InitGridDef(grid,gridarray(1:3),locked=.true.)
@@ -186,6 +187,10 @@ program small_fast_tab
        &   time_init_done-time_start, &
        &   time_ev_done-time_init_done, &
        &   (time_end-time_ev_done)/nrep
+  write(6,'(a)',advance='no') "# "
+  call time_stamp(6)
+  ! record info about the cpu
+  call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
   if (output) write(6,'(a,4f10.5)') "# Timings (init, preevln, evln) = ", &
        &   time_init_done-time_start, &
        &   time_ev_done-time_init_done, &
@@ -205,6 +210,7 @@ contains
     write(6,'(a,f10.5,a,f10.3)') '# dy = ',dy,      ';    ymax = ',ymax
     write(6,'(a,f10.5,a,f10.3)') '# du = ',du,      ';    Qmax = ',Qmax
     write(6,'(a,i5,a,i5)')    '# order  = ',order,  ';    order2 = ',order2
+    write(6,'(a,i5,a,i5)')    '# order1  = ',order1
     write(6,'(a,f10.5,a,i5)') '# dlnlnQ = ',dlnlnQ, ';    olnlnQ = ',olnlnQ
   end subroutine output_info
 
