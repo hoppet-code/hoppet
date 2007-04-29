@@ -23,7 +23,7 @@ compiler=""
 #compiler="-comp g95"
 
 # if you want to run a program with lhapdf, set things up here
-lhapdf="-L$LHAPDFDIR -lLHAPDF"
+#lhapdf="-L$LHAPDFDIR -lLHAPDF"
 
 # note the "-I../src" flag used to provide access to module files
 # (*.mod) in the ../src directory
