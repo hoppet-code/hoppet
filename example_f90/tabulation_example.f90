@@ -33,12 +33,12 @@ program tabulation_example
   end interface
 
   ! set up parameters for grid
-  order = -5
+  order = -6
   ymax = 12
   dy = 0.1_dp
   
   ! set up the grid itself
-  call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
+  call InitGridDef(gdarray(3),dy/15.0_dp,0.5_dp, order=order)
   call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
   call InitGridDef(grid,gdarray(1:3),locked=.true.)
