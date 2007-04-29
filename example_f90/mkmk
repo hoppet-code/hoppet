@@ -23,12 +23,12 @@ compiler=""
 #compiler="-comp g95"
 
 # if you want to run a program with lhapdf, set things up here
-lhapdf="-L$LHAPDFDIR -lLHAPDF"
+#lhapdf="-L$LHAPDFDIR -lLHAPDF -g77libs "
 
 # note the "-I../src" flag used to provide access to module files
 # (*.mod) in the ../src directory
 
-../scripts/makef95makefile  small_fast_tab  -L../src -lhoppet_v1 -I../src -g77libs   $lhapdf $compiler -remake "./mkmk"
+../scripts/makef95makefile  tabulation_example  -L../src -lhoppet_v1 -I../src   $lhapdf $compiler -remake "./mkmk"
 
 
 # old
