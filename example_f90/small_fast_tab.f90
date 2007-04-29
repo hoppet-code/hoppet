@@ -89,14 +89,14 @@ program small_fast_tab
   type(grid_def)     :: grid, gridarray(3)
   type(dglap_holder) :: dh
   type(running_coupling)    :: coupling
-  integer            :: order, order2, nloop, i, j, nrep, nxQ,nn, olnlnQ
+  integer            :: order, order2, nloop, i, nrep, nxQ,olnlnQ
   integer            :: hires
-  real(dp)           :: dy, Qinit, Qmax, y, Q, pdfval(-6:6), du, dlnlnQ
+  real(dp)           :: dy, Qinit, Qmax, du, dlnlnQ
   real(dp)           :: ymax
   real(dp)           :: time_start, time_init_done, time_ev_done, time_end
   real(dp), pointer  :: vogt_init(:,:)
   type(pdf_table)       :: table
-  logical            :: output, preev
+  logical            :: output, outputgrid, preev
 
   ! set the details of the y=ln1/x grid
   dy    = dble_val_opt('-dy',0.25_dp)
@@ -133,7 +133,7 @@ program small_fast_tab
        &                              nloop=nloop, nflo=3, nfhi=6)
   call cpu_time(time_init_done)
 
-  
+
   ! first way to get the initial distribution
   !call AllocInitPDFSub(grid,vogt_init,VogtInitSub)
   ! alternative way to get the initial distribution
@@ -154,59 +154,32 @@ program small_fast_tab
   if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
   call cpu_time(time_ev_done)
 
+  ! decide 
   nrep  = int_val_opt('-nrep',1)
-  nxQ = int_val_opt('-nxQ',0); y = 3.14_dp; Q = 13.354_dp
-  output = log_val_opt('-output')
+  nxQ = int_val_opt('-nxQ',0)
+  output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
+  outputgrid  = log_val_opt('-outputgrid')
   if (output) call output_info
- 
+
   !-- security ----------------------
   if (.not. CheckAllArgsUsed(0)) stop
   !----------------------------------
 
-  ! output
+  ! evolution & output
   do i = 1, nrep
      if (preev) then
         call EvolvePdfTable(table,vogt_init)
      else
         call EvolvePdfTable(table,Qinit,vogt_init,dh,coupling)
      end if
+
+     ! one form of output
+     if (outputgrid) then
+        call eval_output_grid()
+     else
+        call eval_output_lines()
+     end if
      
-     nn = nxQ/4
-     do j = 1, nn
-        y = j*ymax/nn
-        Q = Qmax - j*(Qmax-Qinit)/nn
-        call EvalPdfTable_yQ(table,y,Q,pdfval)
-        if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
-        !if (output .and. i==1) write(6,'(20es20.8)') y,Q,vogt_init(:,0:3).atx.(grid.with.exp(-y))
-     end do
-
-     if (output .and. i==1) write(6,*)
-     if (output .and. i==1) write(6,*)
-     do j = nn,1,-1
-        y = j*ymax/nn
-        Q = 4.0_dp + j*5.0_dp/nn
-        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-        if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
-     end do
-     
-     if (output .and. i==1) write(6,*)
-     if (output .and. i==1) write(6,*)
-     do j = nn,1,-1
-        y = j*ymax/nn
-        Q = Qmax*(1-j*0.2_dp/nn)
-        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-        if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
-     end do
-
-     if (output .and. i==1) write(6,*)
-     if (output .and. i==1) write(6,*)
-     do j = nn,1,-1
-        y = j*ymax/nn
-        Q = sqrt(Qinit*Qmax)*(1+j*0.2_dp/nn)
-        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-        if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
-     end do
-
   end do
   call cpu_time(time_end)
   write(0,'(a,4f10.5)') "Timings (init, preevln, evln) = ", &
@@ -229,10 +202,118 @@ program small_fast_tab
 contains
   subroutine output_info
     write(6,'(a)') '# '//trim(command_line())
-    write(6,'(a,f10.5,a,f10.5)') '# dy = ',dy,      ';    ymax = ',ymax
-    write(6,'(a,f10.5,a,f10.5)') '# du = ',du,      ';    Qmax = ',Qmax
+    write(6,'(a,f10.5,a,f10.3)') '# dy = ',dy,      ';    ymax = ',ymax
+    write(6,'(a,f10.5,a,f10.3)') '# du = ',du,      ';    Qmax = ',Qmax
     write(6,'(a,i5,a,i5)')    '# order  = ',order,  ';    order2 = ',order2
     write(6,'(a,f10.5,a,i5)') '# dlnlnQ = ',dlnlnQ, ';    olnlnQ = ',olnlnQ
   end subroutine output_info
+
+
+  !-------------------------------------------------------------------
+  !! output lines in the y,Q plane
+  subroutine eval_output_lines()
+    integer nn, j
+    real(dp) :: y, Q, pdfval(-6:6)
+    nn = nxQ/4
+    do j = 1, nn
+       y = j*ymax/nn
+       Q = Qmax - j*(Qmax-Qinit)/nn
+       call EvalPdfTable_yQ(table,y,Q,pdfval)
+       if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
+       !if (output .and. i==1) write(6,'(20es20.8)') y,Q,vogt_init(:,0:3).atx.(grid.with.exp(-y))
+    end do
+
+    if (output .and. i==1) write(6,*)
+    if (output .and. i==1) write(6,*)
+    do j = nn,1,-1
+       y = j*ymax/nn
+       Q = 4.0_dp + j*5.0_dp/nn
+       call EvalPdfTable_yQ(table,y,Q,pdfval) 
+       if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
+    end do
+
+    if (output .and. i==1) write(6,*)
+    if (output .and. i==1) write(6,*)
+    do j = nn,1,-1
+       y = j*ymax/nn
+       Q = Qmax*(1-j*0.2_dp/nn)
+       call EvalPdfTable_yQ(table,y,Q,pdfval) 
+       if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
+    end do
+
+    if (output .and. i==1) write(6,*)
+    if (output .and. i==1) write(6,*)
+    do j = nn,1,-1
+       y = j*ymax/nn
+       Q = sqrt(Qinit*Qmax)*(1+j*0.2_dp/nn)
+       call EvalPdfTable_yQ(table,y,Q,pdfval) 
+       if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
+    end do
+  end subroutine eval_output_lines
+
+
+  !----------------------------------------------------------------
+  !! output the results on a grid uniform in 
+  !! zeta = ln 1/x + grid_a*(1-x)
+  subroutine eval_output_grid()
+    integer  :: nz, nQ, iz, iQ
+    real(dp) :: zmax, zeta, y, Q, zQ, zQmax, pdfval(-6:6)
+    real(dp), parameter :: grid_a = 9, gridQ_a = 3
+
+    nz = nint(sqrt(four*nxQ))
+    nQ = nint(sqrt(0.25_dp*nxQ))-1
+
+    zmax = zeta_of_y(ymax, grid_a)
+    zQmax = zeta_of_y(log(Qmax/Qinit), gridQ_a)
+    do iQ = 0, nQ
+       do iz = 1, nz
+          zeta = iz * zmax/nz
+          y    = y_of_zeta(zeta, grid_a)
+          zQ = (iQ+zeta/zmax) * zQmax / nQ
+          Q = max(Qinit,min(Qmax,Qinit * exp(y_of_zeta(zQ, gridQ_a))))
+          call EvalPdfTable_yQ(table,y,Q,pdfval) 
+          if (output .and. i == 1) write(6,'(20es20.10)') y,Q,pdfval(-5:5)
+       end do
+          if (output .and. i == 1) write(6,'(a)') 
+    end do
+    
+  end subroutine eval_output_grid
+  
+
+  
+  !-----------------------------------------------------------------
+  !! return zeta = ln 1/x + a*(1-x)  (x = exp(-y))
+  function zeta_of_y(y, a) result(zeta)
+    real(dp), intent(in) :: y, a
+    real(dp)             :: zeta
+    zeta = y + a*(one - exp(-y))
+  end function zeta_of_y
+
+  
+  !-----------------------------------------------------------------
+  !! return inversion of zeta = ln 1/x + a*(1-x)  (x = exp(-y))
+  function y_of_zeta(zeta, a) result(y)
+    real(dp), intent(in) :: zeta, a
+    real(dp)             :: y, x, diff_from_zero, deriv
+    integer             :: iter
+    real(dp), parameter :: eps = 1e-12_dp
+    integer,  parameter :: maxiter = 100
+
+    ! starting condition (and soln if a = 0)
+    y = zeta 
+    if (a /= zero) then
+       do iter = 0, maxiter
+          x = exp(-y);
+          diff_from_zero = zeta - y - a*(one-x);
+          ! we have found good solution
+          if (abs(diff_from_zero) < eps) exit
+          deriv = -one  - a*x;
+          y = y - diff_from_zero / deriv;
+       end do
+    end if
+    
+    if (iter > maxiter) write(0,*) "y_of_zeta reached maxiter"
+
+  end function y_of_zeta
   
 end program small_fast_tab
