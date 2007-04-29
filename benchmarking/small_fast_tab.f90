@@ -196,6 +196,8 @@ program small_fast_tab
        &   (time_end-time_ev_done)/nrep
   write(6,'(a)',advance='no') "# "
   call time_stamp(6)
+  write(6,'(a)',advance='no') "# host: "
+  call system("hostname")
   ! record info about the cpu
   call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
   if (output) write(6,'(a,4f10.5)') "# Timings (init, preevln, evln) = ", &
