@@ -1,5 +1,6 @@
 2007-04-29  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* benchmarking/small_fast_tab.f90 -> prec_and_timing.f90 
 	
 	* benchmarking/small_fast_tab.f90: 
 	  added -outputgrid  option for grid output (-5:5 flavours)

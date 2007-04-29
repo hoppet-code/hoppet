@@ -10,8 +10,8 @@ program compare2file_v2
   integer :: idev1, idev2, iostat
   integer, parameter :: maxn = 200
 
-  real(dp) :: max07_guds, max07_gudsc, err_guds, err_gudsc
-  real(dp) :: max09_guds, max09_gudsc
+  real(dp) :: max07_guds, max07_all, err_guds, err_all
+  real(dp) :: max09_guds, max09_all
   real(dp) :: res1(maxn,maxn,-5:5) = zero
   real(dp) :: res2(maxn,maxn,-5:5) = zero
   real(dp) :: err (maxn,maxn,-5:5)
@@ -89,13 +89,13 @@ program compare2file_v2
   end where
   
   
-  max07_guds  = maxval(err(:ny,:nQ,0:3),mask07(:ny,:nQ,0:3))
-  max09_guds  = maxval(err(:ny,:nQ,0:3),mask09(:ny,:nQ,0:3))
-  max07_gudsc = maxval(err(:ny,:nQ,0:4),mask07(:ny,:nQ,0:4))
-  max09_gudsc = maxval(err(:ny,:nQ,0:4),mask09(:ny,:nQ,0:4))
+  max07_guds = maxval(err(:ny,:nQ,0:3),mask07(:ny,:nQ,0:3))
+  max09_guds = maxval(err(:ny,:nQ,0:3),mask09(:ny,:nQ,0:3))
+  max07_all  = maxval(err(:ny,:nQ,-5:5),mask07(:ny,:nQ,-5:5))
+  max09_all  = maxval(err(:ny,:nQ,-5:5),mask09(:ny,:nQ,-5:5))
 
   if (log_val_opt("-summary")) then
-     write(6,"(4es20.10)") max07_guds, max07_gudsc, max09_guds, max09_gudsc
+     write(6,"(4es20.10)") max07_guds, max07_all, max09_guds, max09_all
   end if
   
   if (log_val_opt("-channel")) then
@@ -126,19 +126,5 @@ program compare2file_v2
         write(6,*)
      end do
   end if
-  
-
-!     err(0:4) = abs(res1/res2-one)
-!     err_gudsc = maxval(err, mask=(res2 /= zero))
-!     err_guds  = maxval(err(0:3), mask=(res2(0:3)/=0))
-!     if (exp(-y) <= 0.9_dp) then
-!        max09_guds  = max(max09_guds,  err_guds)
-!        max09_gudsc = max(max09_gudsc, err_gudsc)
-!        !write(0,*) y,Q, max09_gudsc
-!     end if
-!     if (exp(-y) <= 0.7_dp) then
-!        max07_guds  = max(max07_guds,  err_guds)
-!        max07_gudsc = max(max07_gudsc, err_gudsc)
-!     end if
 
 end program compare2file_v2

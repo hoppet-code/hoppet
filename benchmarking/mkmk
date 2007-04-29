@@ -28,7 +28,7 @@ compiler=""
 # note the "-I../src" flag used to provide access to module files
 # (*.mod) in the ../src directory
 
-../scripts/makef95makefile  small_fast_tab  -L../src -lhoppet_v1 -I../src -g77libs   $lhapdf $compiler -remake "./mkmk"
+../scripts/makef95makefile  prec_and_timing  -L../src -lhoppet_v1 -I../src -g77libs   $lhapdf $compiler -remake "./mkmk"
 
 
 # old

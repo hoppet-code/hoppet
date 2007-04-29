@@ -1,22 +1,31 @@
 #!/usr/bin/perl -w
 
-$basicopts="../small_fast_tab -nrep 1 -nxQ 5000  -Qmax 1e4 -ymax 11.5 -output";
+# user option -go means we acutally run...
+$go=($#ARGV >= 0 && $ARGV[0] =~ /-go/);
 
-$highprec="-dy 0.025 -dlnlnQ 0.005 -du 0.005 -olnlnQ 4 -order 6 -nopreev";
+$basicopts="../prec_and_timing -nrep 1 -nxQ 5000  -Qmax 1e4 -ymax 11.5 -outputgrid";
 
 
 $highQ = "-dlnlnQ 0.005 -du 0.005 -olnlnQ 4";
-$highY = "-dy 0.025 -order 6 -nopreev";
-$highprec = "$highQ $highY";
+$highY = "-dy 0.025 -order 6 -nopreev -4grids";
+#$highQ = "-dlnlnQ 0.05 -du 0.5 -olnlnQ 4";
+#$highY = "-dy 0.2 -order -6 -nopreev -4grids";
+$highprec = "$highY $highQ";
 
+
+# reference run
+$name=getname("$highprec");
+$command="$basicopts $highprec > res-grid/$name";
+print $command."\n";
+if ($go) {system("$command")}
 
 # @dyvals=(0.04,0.05,0.065,0.08,0.1,0.15,0.2,0.25,0.3,0.4);
 # 
 # foreach $dy (@dyvals) {
 #   $nameQ="dlnlnQ0.005-du0.005-olnlnQ4";
-#   $nameY="dy$dy-order5-hires15-nopre";
+#   $argsY="dy$dy-order5-hires15-nopre";
 #   $name="$nameY-$nameQ.res";
-#   $command="$basicopts $highQ -dy $dy -order 5 -hires 15 -nopreev > res/$name";
+#   $command="$basicopts $highQ -dy $dy -order 5 -hires 15 -nopreev > res-grid$name";
 #   print $command."\n";
 #   system("$command")
 # }
@@ -29,36 +38,44 @@ $highprec = "$highQ $highY";
 #   $nameY="dy0.025-order6";
 #   $highY = "-dy 0.025 -order 6";
 #   $name="$nameY-$nameQ.res";
-#   $command="$basicopts -dlnlnQ $dl -du 0.005 -olnlnQ 4 $highY > res/$name";
+#   $command="$basicopts -dlnlnQ $dl -du 0.005 -olnlnQ 4 $highY > res-grid$name";
 #   print $command."\n";
 #   system("$command")
 # }
 
 
-# for time v. acc
-@dyvals=(0.04,0.05,0.065,0.08,0.1,0.15,0.2,0.25,0.3,0.4);
+# # for time v. acc
+# @dyvals=(0.04,0.05,0.065,0.08,0.1,0.15,0.2,0.25,0.3,0.4);
+# 
+# @olnlnQ=(3,4);
+# @ord=(6,-6,5,-5);
+# 
+# foreach $olnlnQ (@olnlnQ) {
+# foreach $ord (@ord) {
+# foreach $dy (@dyvals) {
+#   $dl=$dy/4; # seems like reasonable choicie
+#   $argsQ="-dlnlnQ $dl -du 0.4 -olnlnQ $olnlnQ";
+#   $argsY="-dy $dy -order $ord -hires 15";
+#   #$argsY="-dy $dy -order $ord -hires 15 -nopreev";
+#   
+#   ($name="$argsY $argsQ.res") =~ s/(^-| )//g;
+#   $command="$basicopts $argsY $argsQ > res-pair/$name";
+#   print $command."\n";
+#   system("$command");
+#   $nrep=int(2e6*$dl**3);
+#   $command =~ s/-nxQ 5000//;
+#   $command =~ s/-nrep 1/-nrep $nrep/;
+#   $command =~ s/\.res/-speed.res/;
+#   print $command."\n";
+#   system("$command");
+# }
+# }
+# }
 
-@olnlnQ=(3,4);
-@ord=(6,-6,5,-5);
 
-foreach $olnlnQ (@olnlnQ) {
-foreach $ord (@ord) {
-foreach $dy (@dyvals) {
-  $dl=$dy/4; # seems like reasonable choicie
-  $argsQ="-dlnlnQ $dl -du 0.4 -olnlnQ $olnlnQ";
-  $argsY="-dy $dy -order $ord -hires 15";
-  #$argsY="-dy $dy -order $ord -hires 15 -nopreev";
-  
-  ($name="$argsY $argsQ.res") =~ s/(^-| )//g;
-  $command="$basicopts $argsY $argsQ > res-pair/$name";
-  print $command."\n";
-  system("$command");
-  $nrep=int(2e6*$dl**3);
-  $command =~ s/-nxQ 5000//;
-  $command =~ s/-nrep 1/-nrep $nrep/;
-  $command =~ s/\.res/-speed.res/;
-  print $command."\n";
-  system("$command");
-}
-}
+# build a name from a bunch of args
+sub getname {
+  ($args) = @_;
+  ($name="$args.res") =~ s/(^-| )//g;
+  return $name;
 }
