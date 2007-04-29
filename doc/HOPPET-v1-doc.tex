@@ -1922,17 +1922,46 @@ for the user wishing to write their own f90 code for \hoppet.
 
 %======================================================================
 %======================================================================
-\section{Benchmarks and timings}
+\section{Accuracy and timings}
 \label{sec:benchmarks}
+
+Key questions in assessing the useful of a PDF evolution code include
+that of its correctness, its accuracy and its speed. \hoppet's
+correctness has been established with a reasonable degree of
+confidence in the benchmark tests~\cite{Benchmarks} where it was
+compared with QCD-Pegasus. The program used to carry out those tests
+is available as \ttt{benchmarks/benchmarks.f90}. The user should
+carefully read the comments at the beginning for usage instructions.
+
+The results used in \cite{Benchmarks} were obtained with very finely
+spaced grids, in order to guarantee high accuracies ($\sim 10^{-7}$).
+Such accuracies are useful when comparing and testing two independent
+codes, because differences or mistakes in the implementation of the
+physics (especially the higher-order parts) may only manifest
+themselves as small changes in the results.
+
+In contrast, for use in most physical applications, an accuracy in the
+range $10^{-3}$ to $10^{-4}$ is usually more than adequate, since it
+is rare for other sources of numerical uncertainty (\eg Monte
+Carlo integration errors in NLO codes, or experimental errors) to be
+comparably small.
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.48\textwidth]{../benchmarking/test_acc/slices.eps}%
-  \hfill
-  placeholder for a slice
-  \caption{Left: the lines along which the accuracy has been
-    measured.  Right: the accuracy along a line}
-  \label{fig:lines+aslice}
+  \includegraphics[width=0.7\textwidth]{../benchmarking/test_acc/grid.eps}%
+  \caption{The set of points in $x, Q$ used to determine the accuarcy
+    of the evolution. The areas shaded in grey are regions where one
+    of the flavours is in the neighbourhood of a sign-change
+    (bottom-left: $c,\bar c$, right: $\bar u$) and so is ignored in
+    the accuracy determination.  The accuracies shown here correspond
+    to a $y$ grid with a base spacing of $\ttt{dy}=0.2$, and
+    subsiduary grids with $3$, $9$ and $27$ times the resolution
+    starting at $y=2.0, 0.5, 0.2$ and interpolation order $-6$; the
+    scale grid has a spacing $\ttt{dlnlnQ}=0.05$ and an interpolation
+    order of $4$ \comment{check}. The colour coding indicates the
+    error in the least-well determined flavour channel ($\bar b \ldots
+    b$) at each point. }
+  \label{fig:grid}
 \end{figure}
 
 

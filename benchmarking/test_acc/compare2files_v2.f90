@@ -50,7 +50,6 @@ program compare2file_v2
   ! in the neighbourhood of the point then it should be eliminated.
   ! Work out dy neighbourhood
   idy = nint(0.4_dp / (yval(ny)-yval(ny-1)))
-  write(0,*) idy, (yval(ny)-yval(ny-1))
   if (log_val_opt('-protect')) then
      forall(iQ=1:nQ)
         forall(iy=1:ny)
@@ -73,8 +72,6 @@ program compare2file_v2
         end forall
      end forall
   end if
-
-  write(0,*) all(mask)
 
   ! now get masks for the x range
   xval(:ny) = exp(-yval(:ny))
