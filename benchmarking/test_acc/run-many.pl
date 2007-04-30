@@ -8,29 +8,36 @@ $basicopts="../prec_and_timing -nrep 1 -nxQ 5000  -Qmax 1e4 -ymax 11.5 -outputgr
 
 $highQ = "-dlnlnQ 0.005 -du 0.005 -olnlnQ 4";
 $highY = "-dy 0.025 -order 6 -4grids -nopreev";
+#$highY15 = "-dy 0.025 -order 6 -hires15 -nopreev";
 #$highprec = "$highY $highQ";
 
 
 # # reference run
-runit("$highY $highQ -eps 1e-9");
+#runit("$highY $highQ -eps 1e-8");
+#runit("$highY $highQ -asdt 0.1");
 
 
-# run for getting dy dependence
+# # run for getting dy dependence
 # @dyvals=(0.04,0.05,0.065,0.08,0.1,0.15,0.2,0.25,0.3,0.4);
-#
+# @opts=("-4grids -nopreev","-hires 15 -nopreev","-nopreev","-4grids","-hires 15","");
+# foreach $opt (@opts) {
 # foreach $dy (@dyvals) {
 #   #$argsY="-dy $dy -order -6 -nopreev";
-#   $argsY="-dy $dy -order -6 -4grids -nopreev";
+#   $argsY="-dy $dy -order -6 $opt";
 #   runit("$argsY $highQ");
 # }
-
-# @dlvals=(0.008,0.01,0.015,0.025,0.04,0.06,0.08,0.10,0.15);
-# 
-# foreach $dl (@dlvals) {
-#   $argsQ="-dlnlnQ $dl -du 0.005 -olnlnQ 3";
-#   runit("$highY $argsQ");
 # }
 
+# run for getting dQ dependence
+
+@dlvals=(0.008,0.01,0.015,0.025,0.04,0.06,0.08,0.10,0.15);
+@opts=("-olnlnQ 3","-olnlnQ 4");
+foreach $opt (@opts) {
+foreach $dl (@dlvals) {
+  $argsQ="-dlnlnQ $dl -du 0.005 $opt";
+  runit("$highY $argsQ");
+}
+}
 
 # # for time v. acc
 # @dyvals=(0.04,0.05,0.065,0.08,0.1,0.15,0.2,0.25,0.3,0.4);
