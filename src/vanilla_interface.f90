@@ -8,7 +8,7 @@ module vanilla_interface
   implicit none
 
   !! holds information about the grid
-  type(grid_def),     save :: grid, gdarray(3)
+  type(grid_def),     save :: grid, gdarray(4)
 
   !! holds the splitting functions
   type(dglap_holder), save :: dh
@@ -71,10 +71,11 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   ! accuracy is slightly reduced)
   !order = -5 
   ! Now create a nested grid
-  call InitGridDef(gdarray(3),dy/15.0_dp,0.5_dp, order=order)
+  call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
+  call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
   call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
-  call InitGridDef(grid,gdarray(1:3),locked=.true.)
+  call InitGridDef(grid,gdarray(1:4),locked=.true.)
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.

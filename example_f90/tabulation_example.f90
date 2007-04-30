@@ -12,7 +12,7 @@ program tabulation_example
   real(dp) :: dy, ymax
   integer  :: order, nloop
   !! holds information about the grid
-  type(grid_def) :: grid, gdarray(3)
+  type(grid_def) :: grid, gdarray(4)
   !! holds the splitting functions
   type(dglap_holder) :: dh
   !! hold the PDF tabulation
@@ -40,10 +40,11 @@ program tabulation_example
   dy = 0.1_dp
   
   ! set up the grid itself
-  call InitGridDef(gdarray(3),dy/15.0_dp,0.5_dp, order=order)
+  call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
+  call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
   call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
-  call InitGridDef(grid,gdarray(1:3),locked=.true.)
+  call InitGridDef(grid,gdarray(1:4),locked=.true.)
 
   ! initialise splitting-function holder
   nloop = 2
@@ -71,7 +72,7 @@ program tabulation_example
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
   call AllocPdfTable(grid, table, Qmin=1.0_dp, Qmax=28000.0_dp, & 
-       & dlnlnQ = 0.025_dp, freeze_at_Qmin=.true.)
+       & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
   ! add information about the nf transitions to the table (improves
   ! interpolation quality)
   call AddNfInfoToPdfTable(table,coupling)

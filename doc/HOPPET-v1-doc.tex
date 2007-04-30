@@ -20,6 +20,8 @@
 \usepackage{a4wide}
 %\marginparwidth 0 in
 
+\newcommand{\dy}{\ttt{dy}}
+\newcommand{\dlnlnQ}{\ttt{dlnlnQ}}
 \newcommand{\bq}{\boldsymbol{q}}
 \newcommand{\mus}{\;\mu\mathrm{s}}
 \newcommand{\ms}{\;\mathrm{ms}}
@@ -63,7 +65,7 @@
   is provided to NNLO, including heavy-quark thresholds in the $\MSbar$
   scheme, and polarised evolution to NLO. The code is structured so as
   to provide simple access to the objects representing splitting
-  function and PDFs, making it possible for a user to extend the
+  functions and PDFs, making it possible for a user to extend the
   facilities already provided.
   %
   A `vanilla' interface is also available, facilitating use of the
@@ -1929,7 +1931,7 @@ for the user wishing to write their own f90 code for \hoppet.
 
 %======================================================================
 %======================================================================
-\section{Accuracy and timings}
+\section{Benchmarks}
 \label{sec:benchmarks}
 
 Key questions in assessing the useful of a PDF evolution code include
@@ -1959,6 +1961,9 @@ applications.
 $y$) and the evolution and/or tabulation steps in $Q$. We shall start
 with the question of the accuracy.
 
+
+%......................................................................
+\subsection{Accuracy}
 We use the same initial condition and evolution parameters as
 in~\cite{Benchmarks}:
 \begin{subequations}
@@ -1974,12 +1979,12 @@ in~\cite{Benchmarks}:
 \end{subequations}
 where $u_v \equiv u - \bar u$, $d_v \equiv d - \bar d$, and all other
 flavours are zero. The initial scale is $Q_0 = \sqrt{2} \GeV$,
-$\as(Q_0) = 0.35$ and the charm, bottom and top pole masses are
-$\sqrt{2}$, $4.5$ and $175\GeV$ respectively. The initial condition
-and coupling are both given for three active flavours (\ie
-infinitesimally below the charm mass). The evolution is carried out to
-NNLO accuracy in a variable flavour number scheme, including the mass
-thresholds in the coupling and PDF.
+$\as(Q_0) = 0.35$ and the charm, bottom and top pole masses are kept
+at the default values, $\sqrt{2}$, $4.5$ and $175\GeV$ respectively.
+The initial condition and coupling are both given for three active
+flavours (\ie infinitesimally below the charm mass). The evolution is
+carried out to NNLO accuracy in a variable flavour number scheme,
+including the mass thresholds in the coupling and PDF.
 
 All tests here are carried out based on tabulations of the PDF
 evolution, section~\ref{sec:tabulated-pdfs}.
@@ -2011,44 +2016,137 @@ $Q$.\footnote{This procedure differs from that in \cite{Benchmarks}
     of the flavours is in the neighbourhood of a sign-change
     (bottom-left: $c,\bar c$, right: $\bar u$) and so is ignored in
     the accuracy determination.  The accuracies shown here correspond
-    to a $y$ grid with a base spacing of $\ttt{dy}=0.2$, and
-    subsiduary grids with $3$, $9$ and $27$ times the resolution
-    starting at $y=2.0, 0.5, 0.2$ and interpolation order $-6$; the
-    scale grid has a spacing $\ttt{dlnlnQ}=0.05$ and an interpolation
-    order of $4$ \comment{check}. The colour coding indicates the
-    error in the least-well determined flavour channel ($\bar b \ldots
-    b$) at each point. }
+    to a $y$ grid with a base spacing of $\ttt{dy}=0.2$ and other
+    parameters as described in the text for
+    fig.~\ref{fig:acc-fixed-dy-dlnlnQ}.
+    %, and
+    %subsiduary grids with $3$, $9$ and $27$ times the resolution,
+    %extending to $y=2.0, 0.5, 0.2$ and interpolation order $-6$; the
+    %scale grid has a spacing $\ttt{dlnlnQ}=0.05$ and an interpolation
+    %order of $4$ \comment{check}. 
+    %
+    The colour coding indicates the error in the least-well determined
+    (non-excluded) flavour channel ($\bar b \ldots b$) at each point.
+  }
   \label{fig:grid}
 \end{figure}
 
 
 One difficulty that arises when examining relative accuracies is that
-some flavours have sign changes as one varies $x$ or $Q$. Close to the
-zero the relative accuracy diverges because of the small value of the
+some flavours change sign as one varies $x$ or $Q$. Close to the zero
+the relative accuracy diverges because of the small value of the
 denominator. Therefore in global accuracy estimates, we eliminate
 flavours in the region where they change sign (within $\Delta
-\zeta=0.4$ or at a neighbouring $Q$ value). Specifically, for our
+\zeta=0.4$ and at the neighbouring $Q$ value). Specifically, for our
 initial conditions, this corresponds to $c,\bar c$ for the two lowest
-$Q$ values below $x\sim 10^{-2}$ and $\bar u$ for $x\gtrsim 0.9$. The
-exact regions are shaded in grey in fig.\ref{fig:grid}.
+$Q$ values below $x\sim 10^{-2}$ and $\bar u$ for $x\gtrsim
+0.9$.\footnote{The change in sign of the charm distribution is not
+  worrying physically since it is close to threshold where it will be
+  compensated for by finite mass effects in the coefficient functions;
+  for $\bar u$ the sign change is more surprising, though it may be
+  related to non-trivial interactions between the evolutions of the
+  $u$ and $\bar u$ components at NNLO (note that in the region of the
+  sign change they differ by many orders of magnitude).  } %
+The exact regions are shaded in grey in fig.\ref{fig:grid}.
+
+Our tabulation covers the range $10^{-5}<x<1$, $\sqrt{2} < Q<
+10^4\GeV$. The grid in $y=\ln1/x$ will consist of 4 nested subgrids:
+one covering the whole $y$ range with spacing $\ttt{dy}$ and others
+with spacings $\ttt{dy}/3, \ttt{dy}/9, \ttt{dy}/27$ extending to
+$y=2,0.5,0.2$ respectively. Except where stated we shall use
+$\ttt{order}=-6$. In $Q$ the default interpolation order will be $4$.
+The reference grids use $\dy=0.025$ and $\dlnlnQ=0.005$.
+
+Fig.\ref{fig:acc-fixed-dy-dlnlnQ} shows the relative acuracy
+$\epsilon$ as a function of $x$ for two grid-spacing choices (left
+$\dy=0.2$, right $\dy=0.05$, $\dlnlnQ=\dy/4$ in both cases). Each
+solid line corresponds to one $Q$ value and shows the error in the
+least-well-determined flavour channel at each $x$, excluding flavour
+channels close to a sign-change. The relative accuracy is poorest as
+one approaches $x=1$, where the PDFs all go to zero very rapidly and
+so have divergent logarithmic derivatives in $x$, $d\ln q/d\ln x$,
+adversely affecting the accuracy of the convolutions. This region is
+always the most difficult in $x$-space methods, however the use of
+multiple subgrids in $x$ allows to one to obtain acceptable results
+for $x<0.9$ which is likely to be the largest value of any
+phenomenological relevance. At $x\sim0.1$, $0.6$ and $0.8$ one notices
+step-like structures --- these are the points where one switches
+between subgrids, with a significant degradation in accuracy at $x$
+values below the transition. These structures are also visible in the
+colour-coded accuracy representation in fig.~\ref{fig:grid}, which
+corresponds to $\dy=0.05$ and allows one to visualize more clearly the
+$Q$ dependence of the accuracy. The effect of the grid spacing is
+clearly visible as one goes from the left to the right-hand plots,
+with the reduction in the spacings by a factor of $4$ leading to an
+improvement in accuracy by a factor $\sim 100$.
 
 
+
+For completeness we also show the parts of the charm channel that have
+been excluded because of the proximity to a sign change (dashed lines,
+lower-left shaded region of fig.\ref{fig:grid}).  One observes in
+particular a spike near $x\simeq 7 \times 10^{-3}$ where the charm
+distribution has its zero. Including this in a estimate of the global
+accuracy would be senseless since it actually corresponds to a
+divergence and the peak-value for the spike is arbitrary, depending on
+the precise choice of points used to estimate the accuracy. The
+question of the exact region to exclude is somewhat arbitrary, but the
+choice made above seems not unreasonable in the light of
+fig.\ref{fig:acc-fixed-dy-dlnlnQ}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.48\textwidth]{../benchmarking/test_acc/acc-dy0.2-dlnlnQ0.05.eps}\hfill
+  \includegraphics[width=0.48\textwidth]{../benchmarking/test_acc/acc-dy0.05-dlnlnQ0.0125.eps}
+  \caption{The relative accuracy $\epsilon$ of the least well
+    determined flavour channel at each $x, Q$ point, shown as a
+    function of $x$ for many $Q$ values. The results for the part of
+    the charm distribution excluded from the analysis (near sign
+    change) are shown separately. }
+  \label{fig:acc-fixed-dy-dlnlnQ}
+\end{figure}
+
+Figure~\ref{fig:acc-fixed-dy-dlnlnQ} is useful in order to obtain a
+detailed picture of the accuracy of the evolution with a given set of
+parameters. To quote a single, global, number for the accuracy we make
+the conservative choice of taking the largest value of $\epsilon$ that
+occurs in a chosen $x$ range. We will examine a restricted range,
+$x<0.7$, studying just the $g,u,d,s$ flavours, and also a wider range,
+$x<0.9$ with all flavours.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.48\textwidth]{../benchmarking/test_acc/dy.eps}%
   \hfill
   \includegraphics[width=0.495\textwidth]{../benchmarking/test_acc/dlnlnQ.eps}%
-  \caption{Left: the relative accuracy as a function of the base
-    $y$-grid resolution parameter, \ttt{dy}, measured by taking the
-    maximum error found on any of the $x,Q$ slices shown in
-    fig.\ref{fig:lines+aslice}.  Right: the relative accuracy as a
-    function of the resolution in $\ln \ln Q$ of the tabulation,
-    \ttt{dlnlnQ}.}
+  \caption{Left: the (globally) worst relative accuracy $\epsilon$ as
+    a function of the base $y$-grid resolution parameter, \ttt{dy} ---
+    shown for two $y$-grid configurations and two $x$-ranges and
+    flavour-sets.  Right: the relative accuracy as a function of the
+    resolution in $\ln \ln Q$ of the tabulation, \ttt{dlnlnQ}, for
+    diferent $x$/flavour ranges and for different $\ttt{lnlnQ\_order}$
+    values (\ttt{o}).}
   \label{fig:dy+dlnlnQ}
 \end{figure}
 
+Figure~\ref{fig:dy+dlnlnQ} shows the effect of varying the base $\dy$
+and $\dlnlnQ$ separately, while the other is fixed at the reference
+value. The `guds' flavours in the $x<0.7$ range are generally better
+determined, for a given set of grid parameters, than the full set of
+flavours up to $x<0.9$. This is as one would expect since the
+large-$x$ region is usually the hardest and the `guds' flavours are
+generally somewhat smoother than the the others. Using only three $y$
+subgrids worsens the situation when including the largest $x$ values,
+and reducing the order in the $Q$ interpolation also adversely affects
+the accuracy (also for $x<0.7$, not shown).
 
+From figure~\ref{fig:dy+dlnlnQ}, we deduce that innacuracies from the
+$Q$ and $y$ parts of the grid are similar when $\dlnlnQ = \dy /4$.
+This is the combination that we shall use as standard.
+
+
+%......................................................................
+\subsection{Timing}
 \begin{figure}
   \centering
   \includegraphics[width=0.7\textwidth]{../benchmarking/test_acc/acc-v-time.eps}%
@@ -2057,6 +2155,70 @@ exact regions are shaded in grey in fig.\ref{fig:grid}.
 \end{figure}
 Other timing information: about $2.5\mus$ to access the full set of
 flavours at one $x,Q$ value in a tabulation.
+
+
+The time spent in \hoppet for a given analysis can expressed as
+follows, according to whether or not one carries out pre-evolution:
+\begin{subequations}
+  \label{eq:timing}
+  \begin{align}
+    t_\text{no pre-ev}   &= t_s + n_\alpha t_\alpha + n_i (t_i  + n_{xQ}\, t_{xQ})\,,\\
+    t_\text{with pre-ev} &= t_s + n_\alpha (t_\alpha + t_p) + n_i (t_c + n_{xQ}\,
+    t_{xQ})\,,
+  \end{align}
+\end{subequations}
+where $t_s$ is the time for setting up the splitting functions,
+$n_\alpha$ is the number of different running couplings that one has,
+$t_\alpha$ is the time for initializing the coupling,
+%
+$n_i$ is the number of PDF initial conditions that one wishes to
+consider, $t_i$ is the time to carry out the tabulation for a single
+initial condition, $n_{xQ}$ is the number of points in $x,Q$ that one
+evaluates per PDF initial condition; in the case with preprepared
+cached evolution, $t_p$ is the time for a preparing a cached evolution
+and $t_c$ is the time for performing the cached evolution.
+
+
+\begin{table}
+  \centering
+  \begin{tabular}{|ll|c|c|c|c|}\hline
+          &&  Lahey   &  Intel   & g95   & gfortran \\\hline
+   $t_s$ &[s]  &  0.9 &          &       &          \\
+   $t_\alpha$ &  
+               &      &          &       &          \\
+   $t_i$ &[ms] &  37  &          &       &          \\
+   $t_p$ &[ms] &  51  &          &       &          \\
+   $t_c$ &[ms] &  8.8 &          &       &          \\
+   $t_{xQ}$ &[$\mu$s]
+               &  2.7 &          &       &          \\
+   \hline
+  \end{tabular}
+  \caption{Timings }
+  \label{tab:timings}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{|l|c|c|l|} \hline
+    Parameter & Default & Affects & Notes \\ \hline
+    \ttt{dy}  &  $-$    &   $t_s, t_i, t_p, t_c$    & also other $y$ grid params \\
+    \ttt{order} &  $[-6]$    &   $t_s, t_p, t_{xQ} (t_i, t_c)$ & \\ 
+    \ttt{DefaultConvolutionEps} & $10^{-7}$ & $t_s$ & final acc.\
+    limited by $\sim$ twice this.\\ \hline
+    \ttt{du}  &  $0.1$ &  $t_i, t_p$ & immaterial if $\gtrsim 1.4\,
+    \ttt{dlnlnQ}$\\
+    \ttt{dlnlnQ}       &  $[\ttt{dy}/4] $ &  $t_i, t_p, t_c$ & should be $\sim
+    \ttt{dy}/4$ \\
+    \ttt{lnlnQ\_order} &  $4$ &  $t_{xQ}$ &  \\ \hline
+    \ttt{DefaultCouplingDt} & $0.2$ & $t_\alpha$ & sufficient for $\epsilon < 10^{-9}$\\
+    \hline
+  \end{tabular}
+  \caption{parameters involved in accuracy. Default values shown in square
+    brackets are to be specified by hand in the f90 interface, but are
+    automatically set in the simpler of the initialisation calls with
+    the vanilla interface.}
+  \label{tab:acc-param}
+\end{table}
 
 Notes:
 \begin{itemize}

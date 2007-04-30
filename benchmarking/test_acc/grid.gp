@@ -20,7 +20,7 @@ set size  0.8
 set label 4 "{/ZapfDingbats n} {/Symbol e}&,>10^{-4}" at graph 1.0,1.05 right tc ls 4 font myfont
 set label 5 "{/ZapfDingbats n} 10^{-5}<&,{/Symbol e}&,<10^{-4}" at graph 0.52,1.05 tc ls 5 font myfont
 set label 6 "{/ZapfDingbats n} 10^{-6}<&,{/Symbol e}&,<10^{-5}" at graph 0.20,1.05 tc ls 6 font myfont
-set label 7 "{/ZapfDingbats n} {/Symbol e}&,>10^{-6}" at graph 0.0,1.05 tc ls 7 font myfont
+set label 7 "{/ZapfDingbats n} {/Symbol e}&,<10^{-6}" at graph 0.0,1.05 tc ls 7 font myfont
 
 set style line 10 lt 1 pt 5 lc rgb "#c0c0c0"
 set style line 4 lt 2 pt 5 ps 0.3
