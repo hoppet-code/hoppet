@@ -107,6 +107,9 @@ program small_fast_tab
 
   preev = log_val_opt('-preev',.true.)
 
+  if (log_val_opt('-eps')) call SetDefaultConvolutionEps(dble_val_opt('-eps'))
+  if (log_val_opt('-asdt')) call SetDefaultCouplingDt(dble_val_opt('-asdt'))
+
   if (log_val_opt('-alt7')) then
      call InitGridDef(gridarray(3),dy/7.0_dp, 1.0_dp, order=order2)
      call InitGridDef(gridarray(2),dy/2.0_dp, 3.0_dp, order=order1)
@@ -151,7 +154,7 @@ program small_fast_tab
   ! set up the coupling
   Qinit = sqrt(two); Qmax = dble_val_opt('-Qmax',50.0_dp)
   call InitRunningCoupling(coupling, alfas=0.35_dp, Q=Qinit, &
-       &nloop=nloop, use_nah=.true.)
+       &nloop=nloop)
   write(0,*) Value(coupling,91.2d0)
 
   ! set up the table
@@ -226,7 +229,7 @@ contains
     write(6,'(a,4i10)'  )  '# order = ', grid%subgd(:)%order
     write(6,'(a,4es10.2)') '# eps   = ', grid%subgd(:)%eps
     
-    write(6,'(a,f10.5,a,i5)') '# Evolution: du = ',du
+    write(6,'(a,f10.5,a,f10.5)') '# Evolution: du = ',du, ",   coupling dt = ", DefaultCouplingDt()
     write(6,'(a,f10.5,a,i5)') '# Tabulation: dlnlnQ = ',dlnlnQ, ', olnlnQ = ',olnlnQ
   end subroutine output_info
 

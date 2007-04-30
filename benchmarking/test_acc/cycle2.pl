@@ -1,10 +1,16 @@
 #!/usr/bin/perl -w
 
+$command=$0." ".join(" ",@ARGV);
+print "# $command\n";
+
 $runfile=$ARGV[0];
 
-$reffile="res/dy0.025-order6-nopre-dlnlnQ0.005-du0.005-olnlnQ4.res";
+#$reffile="res/dy0.025-order6-nopre-dlnlnQ0.005-du0.005-olnlnQ4.res";
+$reffile="res-grid/reference.res";
 #$reffile=$ARGV[1];
 
+$refls=`ls -l $reffile`;
+print "# Reffile: $refls";
 
 ($runfileA = $runfile ) =~ s/(.*)XX.*XX.*/$1/;
 ($runfileB = $runfile ) =~ s/.*XX(.*)XX.*/$1/;
@@ -25,7 +31,7 @@ while ($file=<LS>) {
     $dyval = $1;
     $dlval = $2;
     print "$dyval $dlval";
-    $command="./compare2files $dir/$file $reffile";
+    $command="./compare2files_v2 $dir/$file $reffile -protect -summary";
     #print "$command\n";
     $res=`$command`;
     chomp $res;

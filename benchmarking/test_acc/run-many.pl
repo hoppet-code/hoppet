@@ -12,8 +12,8 @@ $highY = "-dy 0.025 -order 6 -4grids -nopreev";
 
 
 # # reference run
-# runit("$highY $highQ");
-# $command="$basicopts $highprec > res-grid/$name";
+runit("$highY $highQ -eps 1e-9");
+
 
 # run for getting dy dependence
 # @dyvals=(0.04,0.05,0.065,0.08,0.1,0.15,0.2,0.25,0.3,0.4);
@@ -32,28 +32,28 @@ $highY = "-dy 0.025 -order 6 -4grids -nopreev";
 # }
 
 
-# for time v. acc
-@dyvals=(0.04,0.05,0.065,0.08,0.1,0.15,0.2,0.25,0.3,0.4);
-
-#@olnlnQ=(3,4);
-@olnlnQ=(4);
-@ord=(6,-6,-5);
-
-foreach $olnlnQ (@olnlnQ) {
-foreach $ord (@ord) {
-foreach $dy (@dyvals) {
-  $dl=$dy/4; # seems like reasonable choicie
-  $argsQ="-dlnlnQ $dl -du 0.4 -olnlnQ $olnlnQ";
-  #$argsY="-dy $dy -order $ord";
-  #$argsY="-dy $dy -order $ord -hires 15 -nopreev";
-  $argsY="-dy $dy -order $ord -4grids -nopreev";
-
-  $nrep=int(2e6*$dl**3);
-  runit("$argsY $argsQ", $nrep);
-}
-}
-}
-
+# # for time v. acc
+# @dyvals=(0.04,0.05,0.065,0.08,0.1,0.15,0.2,0.25,0.3,0.4);
+# 
+# #@olnlnQ=(3,4);
+# @olnlnQ=(4);
+# @ord=(6,-6,-5);
+# 
+# foreach $olnlnQ (@olnlnQ) {
+# foreach $ord (@ord) {
+# foreach $dy (@dyvals) {
+#   $dl=$dy/4; # seems like reasonable choicie
+#   $argsQ="-dlnlnQ $dl -du 0.4 -olnlnQ $olnlnQ";
+#   #$argsY="-dy $dy -order $ord";
+#   #$argsY="-dy $dy -order $ord -hires 15 -nopreev";
+#   $argsY="-dy $dy -order $ord -4grids -nopreev";
+# 
+#   $nrep=int(2e6*$dl**3);
+#   runit("$argsY $argsQ", $nrep);
+# }
+# }
+# }
+# 
 
 # build a name from a bunch of args
 sub getname {

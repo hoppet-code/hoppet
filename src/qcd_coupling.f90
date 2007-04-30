@@ -9,8 +9,10 @@
 !! Original core based on BRW (analytical NLO running coupling)
 !! Tested 25/04/00
 !!
-!! Subsequently updated to makes use of the new_as module which implements
-!! running coupling via the solution of the QCD differential equation.
+!! NB: Subsequently updated to makes use of the new_as module which
+!! implements running coupling via the solution of the QCD
+!! differential equation. Therefore the code present in this module is
+!! mostly redundant and the real work is being done in new_as.f90
 !!  
 !-------------------------------------------------------------------
 module qcd_coupling
@@ -49,6 +51,7 @@ module qcd_coupling
      module procedure NumLoops_in_coupling
   end interface
   public :: NumberOfLoops
+  public :: SetDefaultCouplingDt, DefaultCouplingDt
 
   ! A public instance of the coupling (as far as an outside user is
   ! concerned). This is set if the user calls the initialisation

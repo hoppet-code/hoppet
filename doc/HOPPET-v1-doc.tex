@@ -6,13 +6,19 @@
 %%  - Check expl of +ve v -ve order
 %%  - Sort out ack.
 
-\usepackage{a4wide}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{url}
 \usepackage{hyperref}
 \usepackage{xspace}
 \usepackage{graphicx}
+
+% \textwidth 21cm
+% \linewidth 21cm
+% \columnwidth 21cm
+% 
+\usepackage{a4wide}
+%\marginparwidth 0 in
 
 \newcommand{\bq}{\boldsymbol{q}}
 \newcommand{\mus}{\;\mu\mathrm{s}}
@@ -76,6 +82,7 @@
 \newpage
 
 \tableofcontents
+
 
 %======================================================================
 %======================================================================
@@ -1912,8 +1919,8 @@ the number of flavours used is the one appropriate at the specificed
 $Q$ scale (as long as the information is available, \ie one of
 \ttt{hoppetEvolve} or \ttt{hoppetCachedEvolve} has been called). The
 first call with a given \ttt{nf} for a specified \ttt{iloop} will be
-slow ($\sim$ the time for an evolution), but subsequent calls with the
-same values will be fast. 
+slow ($\sim$ the time for a cached evolution), but subsequent calls
+with the same values will be fast.
 
 The routines described here (and associated data storage) are to be
 found in \ttt{src/vanilla\_interface.f90} and may provide inspiration
@@ -1934,17 +1941,67 @@ is available as \ttt{benchmarks/benchmarks.f90}. The user should
 carefully read the comments at the beginning for usage instructions.
 
 The results used in \cite{Benchmarks} were obtained with very finely
-spaced grids, in order to guarantee high accuracies ($\sim 10^{-7}$).
-Such accuracies are useful when comparing and testing two independent
-codes, because differences or mistakes in the implementation of the
-physics (especially the higher-order parts) may only manifest
-themselves as small changes in the results.
+spaced grids, in order to guarantee small numerical errors ($\lesssim
+10^{-7}$).  Such accuracies are useful when comparing and testing two
+independent codes, because differences or mistakes in the
+implementation of the physics (especially the higher-order parts) may
+only manifest themselves as small changes in the results.
 
 In contrast, for use in most physical applications, an accuracy in the
 range $10^{-3}$ to $10^{-4}$ is usually more than adequate, since it
-is rare for other sources of numerical uncertainty (\eg Monte
-Carlo integration errors in NLO codes, or experimental errors) to be
-comparably small.
+is rare for other sources of numerical uncertainty (\eg Monte Carlo
+integration errors in NLO codes, or experimental errors) to be
+comparably small. The critical issue in such cases is more likely to
+be the speed of the code, for example in PDF fitting
+applications.
+
+\hoppet's accuracy and speed both depend on the choice of grid (in
+$y$) and the evolution and/or tabulation steps in $Q$. We shall start
+with the question of the accuracy.
+
+We use the same initial condition and evolution parameters as
+in~\cite{Benchmarks}:
+\begin{subequations}
+  \label{eq:init}
+  \begin{align}
+    x u_v(x)   &= 5.107200 x^{0.8} (1-x)^3\,,\\
+    x d_v(x)   &= 3.064320 x^{0.8} (1-x)^4\,,\\
+    x\bar d(x) &= 0.1939875 x^{-0.1} (1-x)^6\,,\\
+    x\bar u(x) &= x\bar d(x) (1-x)\,,\\
+    x     s(x) &= x\bar s(x) = 0.2(x\bar d(x) + x\bar u(x))\,,\\
+    x g(x) &= 1.7 x^{-0.1} (1-x)^5\,,
+  \end{align}
+\end{subequations}
+where $u_v \equiv u - \bar u$, $d_v \equiv d - \bar d$, and all other
+flavours are zero. The initial scale is $Q_0 = \sqrt{2} \GeV$,
+$\as(Q_0) = 0.35$ and the charm, bottom and top pole masses are
+$\sqrt{2}$, $4.5$ and $175\GeV$ respectively. The initial condition
+and coupling are both given for three active flavours (\ie
+infinitesimally below the charm mass). The evolution is carried out to
+NNLO accuracy in a variable flavour number scheme, including the mass
+thresholds in the coupling and PDF.
+
+All tests here are carried out based on tabulations of the PDF
+evolution, section~\ref{sec:tabulated-pdfs}.
+%
+We first run \hoppet with a very fine grid spacing to provide a
+reference result. Then one runs the evolution for a coarser grid ---
+the accuracy of the coarser grid is determined by comparing its
+results with those from the reference grid. We determine the relative
+accuracy for each flavour at $5000$ points in the $x, Q$ plane, as
+shown in fig.~\ref{fig:grid}. The points are uniformly spaced in
+$\zeta = \ln 1/x + 9(1-x)$ so as to obtain fine coverage at small and
+large $x$. The $Q$ values are chosen more closely spaced at low $Q$
+where the evolution is fastest and they are taken slightly correlated
+with $\zeta$ so as to cover a nearly continuous range of
+$Q$.\footnote{This procedure differs from that in \cite{Benchmarks}
+  where fewer (500) points were used and one compared not individual
+  flavours, but combinations intended to be more directly revealing of
+  any deficiencies in the evolution. This reflects the difference in
+  needs between obtaining a global measure of the accuracy and
+  providing benchmarks intended in part to facilitate the debugging of
+  independent codes.}
+
 
 \begin{figure}
   \centering
@@ -1963,6 +2020,18 @@ comparably small.
     b$) at each point. }
   \label{fig:grid}
 \end{figure}
+
+
+One difficulty that arises when examining relative accuracies is that
+some flavours have sign changes as one varies $x$ or $Q$. Close to the
+zero the relative accuracy diverges because of the small value of the
+denominator. Therefore in global accuracy estimates, we eliminate
+flavours in the region where they change sign (within $\Delta
+\zeta=0.4$ or at a neighbouring $Q$ value). Specifically, for our
+initial conditions, this corresponds to $c,\bar c$ for the two lowest
+$Q$ values below $x\sim 10^{-2}$ and $\bar u$ for $x\gtrsim 0.9$. The
+exact regions are shaded in grey in fig.\ref{fig:grid}.
+
 
 
 \begin{figure}

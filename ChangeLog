@@ -1,3 +1,14 @@
+2007-04-30  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/new_as.f90: 
+	* src/qcd_coupling.f90: 
+	  Added SetDefaultCouplingDt(dt) and DefaultCouplingDt() in order
+	  to set and retrieve information about the coupling dt.
+	
+	* benchmarking/prec_and_timing.f90 (output_info): 
+          added -asdt and -eps options for setting DefaultCouplingDt and
+	  DefaultConvolutionEps.
+	
 2007-04-29  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* benchmarking/small_fast_tab.f90 -> prec_and_timing.f90 

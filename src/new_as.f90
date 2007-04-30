@@ -39,6 +39,12 @@ module new_as
 
   type(na_segment), pointer :: seg
 
+  interface SetDefaultCouplingDt
+     module procedure na_Set_dt_base
+  end interface
+  public :: SetDefaultCouplingDt, DefaultCouplingDt
+     
+
 contains
   
   !======================================================================
@@ -48,6 +54,16 @@ contains
     real(dp) :: new_dt_base
     dt_base = new_dt_base
   end subroutine na_Set_dt_base
+  
+
+
+  !---------------------------------------------------
+  !! Set the value of dt_base (used to decide spacings for new coupling
+  !! instances).
+  function DefaultCouplingDt() 
+    real(dp) :: DefaultCouplingDt
+    DefaultCouplingDt = dt_base
+  end function DefaultCouplingDt
   
 
   !---------------------------------------------------
