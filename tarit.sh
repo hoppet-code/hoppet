@@ -1,33 +1,67 @@
 #!/bin/zsh
 # create a tar archive
 
-#version=0.9.0c-20050929-1200
-version=1.0
+# deduce version automatically from the appropriate include file
+version=`grep HOPPET src/welcome_message.f90 | sed 's/.*HOPPET v. *//' | sed "s/ *' *//"`
+
 origdir=`pwd | sed 's/.*\///'`
 echo "Will make an archive of $origdir/"
-dir=$origdir-$version
-tarname=$dir.tgz
+dirhere=hoppet
+dirtar=hoppet-$version
+tarname=$dirtar.tgz
+tmptarname=tmp-$tarname
 
-pushd ..
+# make sure we have Makefile with use CGAL=no
 
-if [[ -e $tarname ]]
+if [[ -e ../$tarname ]]
 then
   echo "Tarfile $tarname already exists. Not proceeding."
+elif [[ -e /tmp/$dirtar ]]
+then
+  echo "/tmp/$dirtar already exists, not proceeding"
 else
-  echo "Creating $tarname:"
-  if [[ -e $dir ]] 
-  then
-    echo "Could not create $dir as link to $origdir (former exists already)"
-  else
-    ln -s $origdir $dir
-    tar zcvhf $tarname $dir/**/*.(f90|f|h|alg|sh|c|cc) \
-                      $dir/(src|example_f77|testing)/(Makefile|*.pl) \
-                      $dir/**/READM*[A-Z] $dir/ChangeLog
-    rm $dir
-  fi
+  pushd ..
+
+  echo "Creating tmp-$tarname"
+  tar --exclude '.svn*' --exclude '*~' -zcf $tmptarname \
+                      $dirhere/(src|example_f77|example_f90|benchmarking|benchmarking)/**/*.(f90|f|h|hh|alg|c|cc|C|tex|eps|cpp) \
+                      $dirhere/doc/*.(tex|eps|sty) \
+                      $dirhere/(src|example_f77|example_f90|benchmarking)/**/Makefile \
+                      $dirhere/**/(README|INSTALL|Doxyfile|ReleaseNotes|COPYING|mkmk) \
+  
+  fulltarloc=`pwd`
+  pushd /tmp
+  echo "Unpacking it as /tmp/$dirhere"
+  tar zxf $fulltarloc/$tmptarname
+  mv -v /tmp/$dirhere /tmp/$dirtar
+  echo "Repacking it with directory name $dirtar"
+  tar zcvf $fulltarloc/$tarname $dirtar
+  echo 
+  echo "Removing /tmp/$dirhere"
+  rm -rf $dirtar
+  popd
+  rm -v $tmptarname
+
+  echo ""
+    # if it's gavin running this then automatically copy the tarfile
+    # to the web-space
+  # webdir=~salam/www/repository/software/fastjet/
+  # if [[ $USER = salam && -e $webdir ]]
+  #     then
+  #     echo "Copying .tgz file to web-site"
+  #     cp -vp $tarname $webdir
+  #     echo "************   Remember to edit web page **********"
+  # fi
+
+  popd
+
+  # reminders about what to do for svn
+  URL=`svn info | grep URL | sed 's/^.*URL: //'`
+  tagURL=`echo $URL | sed "s/trunk/tags\/hoppet-$version/"`
+  echo "Remember to tag the version:"
+  echo "svn copy  -m 'tagged release of release $version' $URL $tagURL"
 fi
 
 #tar zcf $tarname
-popd
 
 
