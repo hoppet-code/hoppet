@@ -1,0 +1,65 @@
+# Makefile generated automatically with
+# ../scripts/makef95makefile prec_and_timing -L../src -lhoppet_v1 -I../src -g77libs -remake ./mkmk
+# default program to compile
+PROG =	prec_and_timing
+
+ALLPROG = 	benchmark prec_and_timing
+
+# This will be used one day...
+ALLPROGSRC =	benchmark.f90 prec_and_timing.f90
+
+ALLPROGOBJ =	benchmark.o prec_and_timing.o
+
+SRCS =	io_utils.f90 lcl_dec.f90 NameSelect.f90
+
+POSTSRCS =	
+
+OBJS =	io_utils.o lcl_dec.o NameSelect.o
+
+POSTOBJS =	
+POSTLIB = 
+
+LIBS = -L../src -lhoppet_v1  -lfj9i6 -L/home/salam/lib/gcc-lib/i386-redhat-linux/3.2.3 -lg2c -lm 
+
+CC = cc
+CFLAGS = -O
+FC = lf95
+FFLAGS = -O -I../src 
+F90 = lf95
+F90FLAGS = -O -I../src 
+LDFLAGS =  
+
+# Trick to enable old 'make PROG=xxx' form to still work
+all: $(PROG)__
+
+$(PROG)__: $(PROG)
+
+ALL:  $(ALLPROG)
+
+benchmark: benchmark.o $(OBJS) $(POSTOBJS) 
+	$(F90) $(LDFLAGS) -o benchmark benchmark.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
+
+prec_and_timing: prec_and_timing.o $(OBJS) $(POSTOBJS) 
+	$(F90) $(LDFLAGS) -o prec_and_timing prec_and_timing.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
+
+libclean:
+	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) 
+
+clean:
+	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d
+
+realclean:
+	rm -f  $(ALLPROG) $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d
+
+make:
+	./mkmk
+
+.SUFFIXES: $(SUFFIXES) .f90
+
+%.o: %.f90 
+	$(F90) $(F90FLAGS) -c $<
+
+benchmark.o: NameSelect.o io_utils.o
+io_utils.o: 
+NameSelect.o: io_utils.o
+prec_and_timing.o: io_utils.o
