@@ -216,9 +216,14 @@ elsif ($compiler eq 'compaq') {
 }
 elsif ($compiler eq 'g95') {
   $FC         = "g95";
-  $FFLAGS     = "-g -O3 -march=i686";
+  $FFLAGS     = "-g -O3";
   $F90        = "g95";
-  $F90FLAGS   = "-g -O3 -march=i686";
+  $F90FLAGS   = "-g -O3";
+  # automatically include flags for i686 where relevant
+  if (-x "/bin/uname" && `/bin/uname -a` =~ /-686 /) {
+    $FFLAGS   .= " -march=i686";
+    $F90FLAGS .= " -march=i686";
+  }		
   $LDFLAGS    = "";
   $IOINC      = "-I".$ENV{HOME}."/utils/libf90-g95";
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-g95 -liof90";
