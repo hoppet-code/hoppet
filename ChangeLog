@@ -2,7 +2,7 @@
 
 	* scripts/makef95makefile: 
 	  eliminated -march=i686 option unless uname -a reveals it to be
-	  necessary
+	  allowed
 	
 	* src/convolution.f90: 
 	  tidied up a bunch of things highlighted with -Wall (unused
