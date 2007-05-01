@@ -11,6 +11,12 @@ Journal-ref: Comput.Phys.Commun. 160 (2004) 213-242
 
     We illustrate the implementation of a method based on the use of recursion relations in (Bjorken) $x-$space for the solution of the evolution equations of QCD for all the leading twist distributions. The algorithm has the advantage of being very fast. The implementation that we release is written in C and is performed to next-to-leading order in $\alpha_s$. 
 
+
+e-Print: hep-ph/0512358
+ Nnlo logarithmic expansions and exact solutions of the DGLAP equations from x-space: New algorithms for precision studies at the lhc.
+Alessandro Cafarella (Crete U.) , Claudio Coriano' (Lecce U. & INFN, Lecce & Liverpool U., Dept. Math.) , Marco Guzzi (Liverpool U., Dept. Math.) . LTH-679, Dec 2005. 56pp.
+Published in Nucl.Phys.B748:253-308,2006.
+
 hep-ph/0510295 [abs, ps, pdf, other] :
     Title: DGLAP evolution of truncated moments of parton densities within two different approaches
     Authors: D. Kotlorz, A. Kotlorz

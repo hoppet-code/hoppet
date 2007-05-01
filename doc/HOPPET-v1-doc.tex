@@ -5,6 +5,7 @@
 %%  - Mention flavour reps are preserved under linear operations
 %%  - Check expl of +ve v -ve order
 %%  - Sort out ack.
+%%  - document SetCouplingDt
 
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -19,6 +20,12 @@
 % 
 \usepackage{a4wide}
 %\marginparwidth 0 in
+
+%\textheight 22.5cm \textwidth 16cm
+%\oddsidemargin 0.0cm \evensidemargin 0.0cm
+%\topmargin -2.3cm  % for nikhef
+%\topmargin -0.5cm  % for hep-ph
+
 
 \newcommand{\dy}{\ttt{dy}}
 \newcommand{\dlnlnQ}{\ttt{dlnlnQ}}
@@ -54,23 +61,24 @@
 
 \maketitle 
 
-\abstract{This document describes a Fortran~95 package for carrying
-  out DGLAP evolution and other common manipulations of parton
-  distribution functions (PDFs). The PDFs are represented on a grid in
-  $x$-space so as to avoid limitations on the functional form of input
+\begin{abstract}
+  This document describes a Fortran~95 package for carrying out DGLAP
+  evolution and other common manipulations of parton distribution
+  functions (PDFs). The PDFs are represented on a grid in $x$-space so
+  as to avoid limitations on the functional form of input
   distributions.  Good speed and accuracy are obtained through the
   representation of splitting functions in terms of their convolution
   with a set of piecewise polynomial basis functions, and Runge-Kutta
   techniques are used for the evolution in $Q$.  Unpolarised evolution
-  is provided to NNLO, including heavy-quark thresholds in the $\MSbar$
-  scheme, and polarised evolution to NLO. The code is structured so as
-  to provide simple access to the objects representing splitting
-  functions and PDFs, making it possible for a user to extend the
-  facilities already provided.
-  %
+  is provided to NNLO, including heavy-quark thresholds in the
+  $\MSbar$ scheme, and longitudinally polarised evolution to NLO. The
+  code is structured so as to provide simple access to the objects
+  representing splitting functions and PDFs, making it possible for a
+  user to extend the facilities already provided.
+%
   A `vanilla' interface is also available, facilitating use of the
   evolution part of the code from f77, C and C++.  \smallskip
-  
+
   \textbf{Note:} this document describes version~1 of the package.  A
   more object-oriented version (v2) has undergone substantial
   development, making use of the so-called TR15581 part of
@@ -79,10 +87,54 @@
   it is also considerably larger, not quite as fast, less tolerant of
   all but the most recent compilers, and currently lacking the
   tabulation feature. For this reason it was deemed worthwhile to
-  provide a documented version of v1.}
+  provide a documented version of v1.
+\end{abstract}
 
 \newpage
 
+
+\noindent {\Large \textbf{Program Summary}}\\
+
+\noindent {\em Title of program\/}: \hoppet \\[2mm]
+{\em Version\/}: 1.1 \\[2mm]
+{\em Catalogue identifier\/}: \\[2mm]
+{\em Program obtainable from\/}: \url{http://projects.hepforge.org/hoppet/}
+\\[2mm]
+{\em Distribution format\/}: compressed tar file \\[2mm]
+{\em E-mail\/}: {\tt salam@lpthe.jussieu.fr} \\[2mm]
+{\em License\/}: GNU Public License \\[2mm]
+{\em Computers\/}: all \\[2mm]
+{\em Operating systems\/}: all \\[2mm]
+{\em Program language\/}: Fortran 90 \\[2mm]
+{\em Memory required to execute\/}:  $\lesssim$ 10 MB) \\[2mm]
+{\em Other programs called\/}: none \\[2mm]
+{\em External files needed\/}: none \\[2mm]
+{\em Number of bytes in distributed program, including test data 
+     etc.\/}: ?????????\\[2mm]
+{\em Keywords\/}: unpolarized and longitudinally polarized parton 
+distributions, DGLAP evolution equations, $x$-space 
+solutions
+\\[2mm]
+{\em Nature of the physical problem\/}:
+% solution of the evolution equations for the unpolarized and polarized
+% parton distributions of hadrons at leading order (LO), next-to-leading 
+% order and next-to-next-to-leading order of perturbative QCD. Evolution 
+% performed either with a fixed number $\nf$ of effectively massless 
+% quark flavours or in the variable-$\nf$ scheme. The calculation of
+% observables from the parton distributions is not part of the
+% present~package.
+\\[2mm]
+%
+{\em Method of solution\/}:
+\\[2mm]
+{\em Restrictions on complexity of the problem\/}: ???
+\\[2mm]
+{\em Typical running time\/}: a few seconds for initialisation, then
+$\sim 10$~ms for creating a tabulation with a relative accuracy of
+$10^{-4}$ from a new initial condition (on a 3.4~GHz Pentium~IV
+processor).
+
+\newpage
 \tableofcontents
 
 
@@ -204,11 +256,11 @@ should allow a user to extend the facilities already provided.
 
 
 The functonality described in this article has been present in
-\hoppet's predecessors for several years (available on request,
-starting with \cite{DisResum} and used for Benchmark comparisons with
-Pegasus~\cite{Pegasus} in \cite{Benchmarks}), but had never been
-documented.  It is the author's hope that availability of this
-documentation may make the package somewhat more useful.
+\hoppet's predecessors for several years (they were available on
+request, starting with \cite{DisResum} and used for Benchmark
+comparisons with Pegasus~\cite{Pegasus} in \cite{Benchmarks}), but had
+never been documented.  It is the author's hope that availability of
+this documentation may make the package somewhat more useful.
 
 
 %----------------------------------------------------------------------
@@ -2147,14 +2199,6 @@ This is the combination that we shall use as standard.
 
 %......................................................................
 \subsection{Timing}
-\begin{figure}
-  \centering
-  \includegraphics[width=0.7\textwidth]{../benchmarking/test_acc/acc-v-time.eps}%
-  \caption{relative accuracy obtained as a function of the time taken to perform the evolution (lf95, 2.1GHz Intel Core Duo).}
-  \label{fig:acc-v-time}
-\end{figure}
-Other timing information: about $2.5\mus$ to access the full set of
-flavours at one $x,Q$ value in a tabulation.
 
 
 The time spent in \hoppet for a given analysis can expressed as
@@ -2173,93 +2217,211 @@ $t_\alpha$ is the time for initializing the coupling,
 %
 $n_i$ is the number of PDF initial conditions that one wishes to
 consider, $t_i$ is the time to carry out the tabulation for a single
-initial condition, $n_{xQ}$ is the number of points in $x,Q$ that one
-evaluates per PDF initial condition; in the case with preprepared
-cached evolution, $t_p$ is the time for a preparing a cached evolution
-and $t_c$ is the time for performing the cached evolution.
-
+initial condition, $n_{xQ}$ is the number of points in $x,Q$ at which
+one evaluates the full set of flavours once per PDF initial condition;
+in the case with preprepared cached evolution, $t_p$ is the time for a
+preparing a cached evolution and $t_c$ is the time for performing the
+cached evolution.
 
 \begin{table}
   \centering
-  \begin{tabular}{|ll|c|c|c|c|}\hline
-          &&  Lahey   &  Intel   & g95   & gfortran \\\hline
-   $t_s$ &[s]  &  0.9 &          &       &          \\
-   $t_\alpha$ &  
-               &      &          &       &          \\
-   $t_i$ &[ms] &  37  &          &       &          \\
-   $t_p$ &[ms] &  51  &          &       &          \\
-   $t_c$ &[ms] &  8.8 &          &       &          \\
-   $t_{xQ}$ &[$\mu$s]
-               &  2.7 &          &       &          \\
+  \begin{tabular}{|ll|c|c|c|}\hline
+          &&     lf95  &  ifort   & g95    \\\hline
+   $t_s$ &[s]  &  0.9  &  0.66    & 2.8    \\
+   $t_\alpha$ & [ms]                
+               &  0.16 &  0.12    & 0.13   \\
+   $t_i$ &[ms] &  37   &   38     & 330    \\
+   $t_p$ &[ms] &  51   &   44     & 310    \\
+   $t_c$ &[ms] &  8.8  &   9.8    & 110    \\
+   $t_{xQ}$ &[$\mu$s]           
+               &  2.7  &   3.1    &  25    \\
    \hline
   \end{tabular}
-  \caption{Timings }
+  \caption{Contributions to the run time in eq.(\ref{eq:timing}) for
+    $\dy=0.2$ and 
+    $\dlnlnQ=0.05$ and standard values for the other parameters 
+    (on a 3.4GHz Pentium IV (D) with 2~MB cache).}
   \label{tab:timings}
+% &Intel81 & gfortran
+% &  0.7   &         
+%                    
+% &        &         
+% &   44   &         
+% &   58   &         
+% &  12.1  &         
+%                    
+% &   3.2  &         
 \end{table}
+
+The various contributions to the run-time are shown in
+table~\ref{tab:timings} for $\dy=0.2$ and $\dlnlnQ=0.05$ (giving an
+accuracy $\sim 10^{-4}$), for various compilers.  In a typical
+analysis where run-times matter, such as a PDF fit, it is to be
+expected that the time will be dominated by $t_c$ (or $t_i$), unless
+the number of $x,Q$ points is very large ($\gtrsim 3000$), in which
+case it will be $n_{xQ} t_{xQ}$ that takes the most time. We note that
+considerably speed advantage that is to be had with commercial
+compilers.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{../benchmarking/test_acc/acc-v-time.eps}%
+  \caption{relative accuracy obtained as a function of the time taken
+    to perform the evolution (lf95, 3.4GHz Pentium IV (D) with 2~MB
+    cache).}
+  \label{fig:acc-v-time}
+\end{figure}
+
+We study $t_c$ and $t_i$ in more detail in fig.\ref{fig:acc-v-time},
+where we relate them to the accuracy obtained from the evolution. As
+one would expect, studying just the `guds' flavours for $x<0.7$ one
+obtains better accuracy for a given speed than with all flavours for
+$x<0.9$. Overall one can obtain $10^{-4}$ accuracy with $t_c \simeq
+10^{-2}$\,s and $10^{-6}$ accuracy with $t_c \simeq 10^{-1}$\,s. In
+general $t_i$ is about $4-5$ larger than $t_c$, highlighting the
+advantage of the cached evolution. 
+
+We note that the time $t_{xQ}$ for evaluating each point is
+essentially independent of $\dy$ and $\dlnlnQ$. If a computation is
+dominanted by $t_{xQ}$, then it can be made somewhat faster by
+lowering the interpolation orders, at the expense of needing a finer
+grid (and so longer evolution times).
+
+The timings shown here are roughly comparable for accuracies $\sim
+10^{-4}$ to those obtained with the $N$-space code
+Pegasus~\cite{Pegasus}, when the number of $x,Q$ points to be
+evaluated is $\order{10^3}$. For much smaller numbers of points
+Pegasus becomes superior (because of the significantly smaller ratio
+$t_c/t_{xQ}$), while for much larger numbers of points \hoppet becomes
+better. Other NNLO evolution codes published in recent years that,
+\cite{Weinzierl:2002mv,coriano,Botje} are generally less competitive
+either in terms of accuracy or speed.
+
+To close this section, we summarise in table~\ref{tab:acc-param} the
+different parameters that are relevant in determining the accuracy of
+the evolution and tabulation, together with comments about the
+components of the timing affected by each parameter.
+
 
 \begin{table}
   \centering
   \begin{tabular}{|l|c|c|l|} \hline
-    Parameter & Default & Affects & Notes \\ \hline
-    \ttt{dy}  &  $-$    &   $t_s, t_i, t_p, t_c$    & also other $y$ grid params \\
+    Parameter & Default & Timing impact & Notes \\ \hline
+    base \ttt{dy}  &  $-$    &   $t_s, t_i, t_p, t_c$    & Subgrids
+    in ratio 1:3:9:27 \\
     \ttt{order} &  $[-6]$    &   $t_s, t_p, t_{xQ} (t_i, t_c)$ & \\ 
     \ttt{DefaultConvolutionEps} & $10^{-7}$ & $t_s$ & final acc.\
     limited by $\sim$ twice this.\\ \hline
     \ttt{du}  &  $0.1$ &  $t_i, t_p$ & immaterial if $\gtrsim 1.4\,
     \ttt{dlnlnQ}$\\
-    \ttt{dlnlnQ}       &  $[\ttt{dy}/4] $ &  $t_i, t_p, t_c$ & should be $\sim
-    \ttt{dy}/4$ \\
+    \ttt{dlnlnQ}       &  $[\ttt{dy}/4] $ &  $t_i, t_p, t_c$ &  \\
     \ttt{lnlnQ\_order} &  $4$ &  $t_{xQ}$ &  \\ \hline
-    \ttt{DefaultCouplingDt} & $0.2$ & $t_\alpha$ & sufficient for $\epsilon < 10^{-9}$\\
+    \ttt{DefaultCouplingDt} & $0.2$ & $t_\alpha$ & default sufficient for $\epsilon \sim 10^{-9}$\\
     \hline
   \end{tabular}
   \caption{parameters involved in accuracy. Default values shown in square
     brackets are to be specified by hand in the f90 interface, but are
     automatically set in the simpler of the initialisation calls with
-    the vanilla interface.}
+    the vanilla interface. \comment{new section for subgrids? Exact
+      v. Param}}
   \label{tab:acc-param}
 \end{table}
 
-Notes:
-\begin{itemize}
-\item Protection scheme regarding sign change: if a sign change occurs
-  within $0.4$ of the point's $y$ value (decreasing gradually to
-  $0.04$ at large $x$) or in neighbouring $Q$ values, then the point
-  is discarded (for that flavour).
-\end{itemize}
+%% Notes:
+%% \begin{itemize}
+%% \item Protection scheme regarding sign change: if a sign change occurs
+%%   within $0.4$ of the point's $y$ value (decreasing gradually to
+%%   $0.04$ at large $x$) or in neighbouring $Q$ values, then the point
+%%   is discarded (for that flavour).
+%% \end{itemize}
+%% 
+%% Comparisons to $N$-space codes (especially Vogt):
+%% 
+%% \begin{itemize}
+%% \item $N$-space is good for a moderate (few hundred) number of $x$-$Q$
+%%   points (for lots of points, better to convert it to tabulation)
+%% %
+%% \item For $\sim 500$ points, $N$-space is faster for the same
+%%   accuracy, and its running times probably scale much more tamely when
+%%   you try to go to extremely high accuracies.
+%% %
+%% \item Nevertheless, for reference purposes the $x$-space code can also
+%%   go to high accuracies ($10^{-7}$) if you're willing to accept slow
+%%   runs.
+%% %
+%% \item At accuracies that are acceptable for phenomenology ($10^{-3} -
+%%   10^{-4}$) the $x$-space code runs nearly as fast as Vogt's $N$-space
+%%   code in its lower accuracy option (which is still better accuracy
+%%   than the $x$-space code). But overheads are different --- evolution
+%%   is a one-off operation, accessing points is then done using
+%%   interpolation.
+%% %
+%% \item $N$-space isn't an option if you don't have a simple analytic
+%%   form for your initial parton distributions.
+%% %
+%% \item currently no other code has the option of the exact NNLO
+%%   splitting functions.
+%% \end{itemize}
 
-Comparisons to $N$-space codes (especially Vogt):
+%======================================================================
+\section{Example program}
 
-\begin{itemize}
-\item $N$-space is good for a moderate (few hundred) number of $x$-$Q$
-  points (for lots of points, better to convert it to tabulation)
+%======================================================================
+\section{Conclusions}
+
+\hoppet is an $x$-space evolution code that is novel both in terms of
+the accuracy and speed that it provides compared to other $x$-space
+codes, and in terms of its interface, designed to provide a
+straightforward and physical way of manipulating PDFs beyond the
+built-in task of DGLAP evolution.
+
+While \hoppet's ancestors have already seen use in a number of
+contexts~\cite{DisResum,Benchmarks,caesar,smallx,APPL}, the code had
+not hitherto been released in a documented form.
+
+Features that might be envisaged for future releases include DIS
+coefficient functions, full support for the DIS factorization scheme,
+and the addition of time-like evolution.  In principle, the
+information presented here is sufficient to allow a user to implement
+the coefficient functions themselves, while the DIS scheme and
+timelike evolution would require somewhat more knowledge of the
+internals of the program.
+
+More ambitious possible extensions cover a wide range of physics.
+Just within QCD, a general physical feature absent from mainstream PDF
+evolution codes is that of evolution that includes matching between
+resummed (both small $x$ and large $x$), and fixed (NLO, NNLO) order
+splitting functions, both in the time-like and space-like case. 
+
+Also of interest are non-QCD effects. Evolutions with QED radiation
+have been presented in \cite{QED+QCD}, however so far no public code
+exists for evolution including both QCD and eletroweak (EW) effects.
+This is of particular relevance at LHC energies, since flavour is
+associated with an SU(2) charge and so soft divergences (above $M_W$)
+do not cancel in the PDF evolution between real and virtual
+contributions~\cite{BNviol,EWDGLAP}, leading one to expect
+non-negligible effects in the flavour structure of the PDFs at high
+scales.
 %
-\item For $\sim 500$ points, $N$-space is faster for the same
-  accuracy, and its running times probably scale much more tamely when
-  you try to go to extremely high accuracies.
-%
-\item Nevertheless, for reference purposes the $x$-space code can also
-  go to high accuracies ($10^{-7}$) if you're willing to accept slow
-  runs.
-%
-\item At accuracies that are acceptable for phenomenology ($10^{-3} -
-  10^{-4}$) the $x$-space code runs nearly as fast as Vogt's $N$-space
-  code in its lower accuracy option (which is still better accuracy
-  than the $x$-space code). But overheads are different --- evolution
-  is a one-off operation, accessing points is then done using
-  interpolation.
-%
-\item $N$-space isn't an option if you don't have a simple analytic
-  form for your initial parton distributions.
-%
-\item currently no other code has the option of the exact NNLO
-  splitting functions.
-\end{itemize}
+The full QCD+EW evolution is a rather task complicated because of the
+need to include the EW flavour couplings, including the CKM matrix,
+and polarization. For this kind of problem a code such as \hoppet
+provides a good starting point, since it has a clean separation of the
+numerical and flavour aspects of evolution, and verified unpolarized
+and polarized evolution.
+
 
 %======================================================================
 \section*{Acknowledgments}
 
-ANR, Andreas
+This work was initiated in the context of DIS event shape resummation
+and matching studies \cite{DisResum} with Mrinal Dasgupta. Its
+subsequent development into a fully-featured NNLO evolution code owes
+much to Andreas Vogt's regular encouragement, and his suggestions
+about features that would be useful to include for benchmark tests.
+%
+This work was supported in part by grant ANR-05-JCJC-0046-01 from the
+French Agence Nationale de la Recherche.
 
 %======================================================================
 \appendix
@@ -2537,13 +2699,29 @@ will do the same thing.
 %======================================================================
 \begin{thebibliography}{99}
 
+\bibitem{Ratcliffe:2000kp}
+  P.~G.~Ratcliffe,
+  %``A matrix approach to numerical solution of the DGLAP evolution
+  %equations,''
+  Phys.\ Rev.\  D {\bf 63}, 116004 (2001)
+  [arXiv:hep-ph/0012376].
+  %%CITATION = PHRVA,D63,116004;%%
+
 % about 1 minute at NLO.
 \bibitem{coriano} A.~Cafarella and C.~Coriano,
 %``Direct solution of renormalization group equations of QCD in x-space: NLO
 %implementations at leading twist,''
 Comput.\ Phys.\ Commun.\  {\bf 160} (2004) 213
-[arXiv:hep-ph/0311313].
+[arXiv:hep-ph/0311313];
 %%CITATION = HEP-PH 0311313;%%
+%\bibitem{Cafarella:2005zj}
+  A.~Cafarella, C.~Coriano' and M.~Guzzi,
+  %``NNLO logarithmic expansions and exact solutions of the DGLAP equations from
+  %x-space: New algorithms for precision studies at the LHC,''
+  Nucl.\ Phys.\  B {\bf 748} (2006) 253
+  [arXiv:hep-ph/0512358].
+  %%CITATION = NUPHA,B748,253;%%
+
 
 % Uses decomposition on Laguerre polynomials -- about
 % 30 of them, remains Y^2 * T method. Initialisation

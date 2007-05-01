@@ -28,9 +28,9 @@ set arrow from acc,tc to acc,tc*8 nohead
 set label 2 'dy=0.1, dlnlnQ=0.025' at acc,tc*10
 
 plot \
-     '<./cycle2.pl res-grid/dyXX-order-6-4grids-nopreev-dlnlnQXX-du0.4-olnlnQ4.res' u 6:9 w l lt 2 lw 3 t 't_i, all, x<0.9',\
-     '<./cycle2.pl res-grid/dyXX-order-6-4grids-dlnlnQXX-du0.4-olnlnQ4.res' u 6:9 w l lt 1 lw 3 t 't_c, , all, x<0.9',\
-     '' u 3:9 w l lt 3 lw 3 t 't_c, guds, x<0.7'
+     '<./cycle2.pl res-grid/dyXX-order-6-4grids-nopreev-dlnlnQXX-du0.4-olnlnQ4.res' u 6:9 w l lt 2 lw 3 t 't_i , all, x<0.9',\
+     '<./cycle2.pl res-grid/dyXX-order-6-4grids-dlnlnQXX-du0.4-olnlnQ4.res' u 6:9 w l lt 1 lw 3 t 't_c , all, x<0.9',\
+     '' u 3:9 w l lt 3 lw 3 t 't_c , guds, x<0.7'
 
 #     '<./cycle2.pl res-pair/dyXX-order-6-hires15-nopreev-dlnlnQXX-du0.4-olnlnQ4.res' u 6:9 w l lw 3 t 'gudsc, x<0.9 (h15 o:-6:4)'
 
