@@ -295,8 +295,7 @@ contains
     type(grid_def), intent(in)  :: gdarray(:)
     logical,        intent(in), optional :: locked
     !----------------------------------
-    integer :: i,j, indx(size(gdarray))
-    logical :: used(size(gdarray))
+    integer :: i,indx(size(gdarray))
     real(dp) :: dyratio, approx_ny, new_ymax
     type(grid_def), pointer :: subgd(:) ! shorthand
     ! temp needed for workaround on ifort 8.0.039
@@ -456,7 +455,6 @@ contains
   !! Delete the memory associated with a grid definition
   recursive subroutine Delete_grid_def_0d(grid)
     type(grid_def), intent(inout) :: grid
-    integer :: isub
 
     if (grid%nsub /= 0) then
        call Delete(grid%subgd(:)) 
@@ -561,7 +559,7 @@ contains
   subroutine conv_AllocGridQuant_1d(grid,gq)
     type(grid_def), intent(in) :: grid
     real(dp),       pointer    :: gq(:)
-    integer :: istat
+    !integer :: istat
     ! this form of deallocate ought to be OK (?), but on lahey,
     ! compaq+condor (and perhaps elsewhere) it causes problems
     !deallocate(gq,stat=istat)
@@ -574,7 +572,7 @@ contains
     type(grid_def), intent(in) :: grid
     real(dp),       pointer    :: gq(:,:)
     integer,        intent(in) :: nl,nh
-    integer :: istat
+    !integer :: istat
     ! this form of deallocate ought to be OK (?), but on lahey,
     ! compaq+condor (and perhaps elsewhere) it causes problems
     !deallocate(gq,stat=istat)
@@ -587,7 +585,7 @@ contains
     type(grid_def), intent(in) :: grid
     real(dp),       pointer    :: gq(:,:,:)
     integer,        intent(in) :: nl2,nh2,nl3,nh3
-    integer :: istat
+    !integer :: istat
     ! this form of deallocate ought to be OK (?), but on lahey,
     ! compaq+condor (and perhaps elsewhere) it causes problems
     !deallocate(gq,stat=istat)
@@ -1041,7 +1039,6 @@ contains
     !-----------------------------------------
     integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: i, ny, npnt, isub
-    real(dp) :: ey, df
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
 
@@ -1087,7 +1084,7 @@ contains
     !-----------------------------------------
     integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: i, j, ny, npnt, isub
-    real(dp) :: ey, df
+    !real(dp) :: ey, df
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
 
@@ -1240,7 +1237,7 @@ contains
     real(dp), intent(in) :: gq(0:)
     real(dp), intent(in), optional :: dy
     integer,  intent(in), optional :: dev
-    real(dp) :: dy_local, y, x, q
+    real(dp) :: dy_local, y, q
     integer :: ny, i, dev_local
     
     ny = assert_eq(grid%ny,ubound(gq,dim=1),'PrintGridQuant')
@@ -1267,7 +1264,7 @@ contains
     real(dp), intent(in) :: gq(0:),gq2(0:)
     real(dp), intent(in), optional :: dy
     integer,  intent(in), optional :: dev
-    real(dp) :: dy_local, y, x, q,q2
+    real(dp) :: dy_local, y,  q,q2
     integer :: ny, i, dev_local
     
     ny = assert_eq(grid%ny,ubound(gq,dim=1),&
@@ -1327,7 +1324,7 @@ contains
     real(dp), intent(in) :: gq(0:),gq2(0:),gq3(0:),gq4(0:)
     real(dp), intent(in), optional :: dy
     integer,  intent(in), optional :: dev
-    real(dp) :: dy_local, y, x, q,q2,q3, q4
+    real(dp) :: dy_local, y, q,q2,q3, q4
     integer :: ny, i, dev_local
     
     ny = assert_eq(grid%ny,ubound(gq,dim=1),&
@@ -1568,7 +1565,6 @@ contains
     end interface
     logical,         intent(in), optional :: alloc
     !-------------------------------------------
-    integer :: isub
 
     !if (default_or_opt(.not.GridConvAllocated(gc),alloc)) call conv_InitGridConv_zero(grid,gc)
     call conv_InitGridConv_zero(grid,gc)
@@ -1585,7 +1581,6 @@ contains
     type(grid_conv),  intent(in)    :: gca, gcb
     logical,          intent(in), optional :: alloc
     !-------------------------------------------
-    integer :: isub
 
     if (default_or_opt(.not.GridConvAllocated(gc),alloc)) then
        call AllocGridConv(gca%grid,gc)
@@ -1686,7 +1681,7 @@ contains
     type(grid_conv), intent(inout) :: gc
     real(dp),        intent(in)    :: fact
     !-------------------------------------------
-    integer :: istat, isub
+    integer :: isub
 
     if (gc%grid%nsub /= 0) then
        do isub = 1, gc%grid%nsub
@@ -1742,7 +1737,7 @@ contains
     integer  :: i,j, k
     !------------------------------------------------------
     real(dp) :: res,eps!, nodes(gc%grid%order+1)
-    integer  :: inode_one, il, ih, iy, jy, inode
+    integer  :: il, ih, iy, jy
     real(dp), allocatable :: nodes(:)
     !------------------------------------------------------
     integer :: isub
@@ -1982,11 +1977,11 @@ contains
   !--------------------------------------------------------------
   ! Carry out the convolution of gc on gq
   recursive function conv_ConvGridQuant_scalar(gc,gq) result(gqout)
-    type(grid_conv),  intent(in),target    :: gc
+    type(grid_conv),  intent(in)    :: gc
     real(dp),         intent(in)    :: gq(0:)
     real(dp)                        :: gqout(0:ubound(gq,dim=1))
     !---------------------------------------------
-    integer :: i, ny, j
+    integer :: i, ny !, j
     integer :: order
     integer :: isub, iy, dy_ratio
 
@@ -2089,11 +2084,10 @@ contains
   !     result.
   recursive subroutine conv_ConvGridConv_0d(gc,gca, gcb, reorder)
     type(grid_conv),  intent(inout) :: gc
-    type(grid_conv),  intent(in), target   :: gca, gcb
+    type(grid_conv),  intent(in)    :: gca, gcb
     logical,          intent(in), optional :: reorder
     !---------------------------------------------
-    type(grid_conv), pointer :: gcap, gcbp
-    integer :: i, ny, j, order, ix
+    integer :: i, j, order, ix
     !-- these might be better if on the fly, given recursive nature?
     real(dp) :: deltafn(0:gca%grid%ny), res(0:gca%grid%ny)
     integer :: isub
@@ -2300,7 +2294,7 @@ contains
     real(dp),         intent(in)    :: gq(0:,:)
     real(dp)                        :: gqout(0:ubound(gq,dim=1),size(gc,dim=1))
     !---------------------------------------------
-    integer :: i, ny, ic, ir, ncol, nrow
+    integer :: ny, ic, ir, ncol, nrow
 
     ny = assert_eq(gc(1,1)%grid%ny,ubound(gq,dim=1),"conv_ConvGridQuant")
     ncol = assert_eq(size(gc,dim=2),size(gq,dim=2),"conv_ConvGridQuant")
