@@ -1,3 +1,22 @@
+2007-05-01  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* example_f90/tabulation_example.f90: 
+	* example_f77/tabulation_example.f: 
+
+	  modified both of these so that they now provide the output of a
+	  subset of table 15 of hep-ph/0511119, for ease of
+	  comparison. Parameters for the evolution grids now match those
+	  given in the documentation.
+
+	* example_f90/tabulation_example.default_output  *** ADDED *** 
+	  default output from the two above example programs.
+	
+	* example_f77/compare_lhapdf_hoppet.f: *** ADDED ***
+          example showing comparisons with LHAPDF.
+	
+	* scripts/makef95makefile: 
+	  corrected a bug in make clean
+	
 2007-04-30  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/vanilla_interface.f90: 

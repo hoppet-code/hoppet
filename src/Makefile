@@ -53,10 +53,10 @@ libhoppet_v1.a: $(OBJS)
 ALL: libhoppet_v1.a  $(ALLPROG)
 
 libclean:
-	rm -f  $(ALLPROGOBJS) $(OBJS) $(POSTOBJS) 
+	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) 
 
 clean:
-	rm -f  $(ALLPROGOBJS) $(OBJS) $(POSTOBJS) *.mod *.d
+	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d
 
 realclean:
 	rm -f libhoppet_v1.a $(ALLPROG) $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d

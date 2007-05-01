@@ -43,10 +43,10 @@ compare2files_v2: compare2files_v2.o $(OBJS) $(POSTOBJS)
 	$(F90) $(LDFLAGS) -o compare2files_v2 compare2files_v2.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
 
 libclean:
-	rm -f  $(ALLPROGOBJS) $(OBJS) $(POSTOBJS) 
+	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) 
 
 clean:
-	rm -f  $(ALLPROGOBJS) $(OBJS) $(POSTOBJS) *.mod *.d
+	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d
 
 realclean:
 	rm -f  $(ALLPROG) $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d

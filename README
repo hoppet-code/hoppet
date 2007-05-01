@@ -30,7 +30,7 @@ F95 compilers
 You will need a Fortran 95 compiler to compile this package. 
 
 The free g95 (www.g95.org) compiler is one option, though its
-executables are fairly slow. It is very easy to install if you don't
+executables are fairly slow. It is easy to install if you don't
 already have a recent version on your system. At the time of writing
 the free gfortran compiler produces very slow exectuables and is not
 recommended.

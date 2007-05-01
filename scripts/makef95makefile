@@ -509,12 +509,12 @@ foreach (@allprog_exec) {
 # make for libraries (keep .mod files)
 #
 print MAKEFILE "libclean:\n";
-print MAKEFILE "\trm -f  \$(ALLPROGOBJS) \$(OBJS) \$(POSTOBJS) \n\n";
+print MAKEFILE "\trm -f  \$(ALLPROGOBJ) \$(OBJS) \$(POSTOBJS) \n\n";
 #
 # make clean
 #
 print MAKEFILE "clean:\n";
-print MAKEFILE "\trm -f  \$(ALLPROGOBJS) \$(OBJS) \$(POSTOBJS) *.mod *.d\n\n";
+print MAKEFILE "\trm -f  \$(ALLPROGOBJ) \$(OBJS) \$(POSTOBJS) *.mod *.d\n\n";
 #
 # make realclean
 #

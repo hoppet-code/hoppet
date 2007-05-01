@@ -30,14 +30,18 @@ F90LIB= -L`which lf95 | sed s:bin/lf95:lib:` -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
 #F90LIB=  -L$(HOME)/software/gfortran/lib -lgfortran
 
 
-LIBS = -L$(LHAPDFDIR) -lLHAPDF -L../src -lhoppet_v1 $(F90LIB)
-
-
-convolution_example: convolution_example.o
-	$(FC) -o convolution_example $<  $(LIBS)
+LIBS = -L../src -lhoppet_v1 $(F90LIB)
+LHAPDFLIBS = -L$(LHAPDFDIR) -lLHAPDF 
 
 tabulation_example: tabulation_example.o
-	$(FC) -o tabulation_example $<  $(LIBS)
+	$(FC) -o tabulation_example $<  $(LIBS) 
+
+compare_lhapdf_hoppet: compare_lhapdf_hoppet.o
+	$(FC) -o compare_lhapdf_hoppet $< $(LHAPDFLIBS)  $(LIBS)
+
+convolution_example: convolution_example.o
+	$(FC) -o convolution_example $< $(LHAPDFLIBS)  $(LIBS)
+
 
 conveg: conveg.o
 	$(FC) -o conveg $<  $(LIBS)
