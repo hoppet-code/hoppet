@@ -24,10 +24,12 @@ else
 
   echo "Creating tmp-$tarname"
   tar --exclude '.svn*' --exclude '*~' -zcf $tmptarname \
-                      $dirhere/(src|example_f77|example_f90|benchmarking|benchmarking)/**/*.(f90|f|h|hh|alg|c|cc|C|tex|eps|cpp) \
+                      $dirhere/(src|example_f77|example_f90|benchmarking|benchmarking)/**/*.(f90|f|h|hh|alg|c|cc|C|tex|eps|cpp|gp) \
                       $dirhere/doc/*.(tex|eps|sty) \
                       $dirhere/(src|example_f77|example_f90|benchmarking)/**/Makefile \
                       $dirhere/**/(README|INSTALL|Doxyfile|ReleaseNotes|COPYING|mkmk) \
+                      $dirhere/scripts/*[a-z] \
+                      $dirhere/example_f90/*.default_output
   
   fulltarloc=`pwd`
   pushd /tmp

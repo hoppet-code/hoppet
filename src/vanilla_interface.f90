@@ -121,12 +121,13 @@ end subroutine hoppetAssign
 
 
 !======================================================================
-!! Given a pdf_subroutine with the interface shown below, initialise
-!! our internal pdf table.
-subroutine hoppetEvolve(asQ, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
+!! Given a pdf_subroutine with the interface shown below, fill the 
+!! table by evolving the PDF from scale Q0pdf, with alphas provided 
+!! at scale Q0alphas
+subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
   use vanilla_interface ! this module which provides access to the array of tables implicit none
   implicit none
-  real(dp), intent(in) :: asQ, Q0alphas, muR_Q, Q0pdf
+  real(dp), intent(in) :: asQ0, Q0alphas, muR_Q, Q0pdf
   integer,  intent(in) :: nloop
   interface ! indicate what "interface" pdf_subroutine is expected to have
      subroutine pdf_subroutine(x,Q,res)
@@ -145,10 +146,10 @@ subroutine hoppetEvolve(asQ, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
   ! get a running coupling with the desired scale
   if (coupling_initialised) call Delete(coupling) 
   if (ffn_nf > 0) then
-     call InitRunningCoupling(coupling, alfas=asQ, Q=Q0alphas, nloop=nloop, &
+     call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
           &                   fixnf=ffn_nf)
   else 
-     call InitRunningCoupling(coupling, alfas=asQ, Q=Q0alphas, nloop=nloop, &
+     call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
           &                   quark_masses=masses)
   end if
   call AddNfInfoToPdfTable(tables,coupling)
@@ -172,19 +173,19 @@ end subroutine hoppetEvolve
 
 !======================================================================
 !! Prepare a cached evolution
-subroutine hoppetPreEvolve(asQ, Q0alphas, nloop, muR_Q, Q0pdf)
+subroutine hoppetPreEvolve(asQ0, Q0alphas, nloop, muR_Q, Q0pdf)
   use vanilla_interface
   implicit none
-  real(dp), intent(in) :: asQ, Q0alphas, muR_Q, Q0pdf
+  real(dp), intent(in) :: asQ0, Q0alphas, muR_Q, Q0pdf
   integer,  intent(in) :: nloop
 
   ! get a running coupling with the desired scale
   if (coupling_initialised) call Delete(coupling) 
   if (ffn_nf > 0) then
-     call InitRunningCoupling(coupling, alfas=asQ, Q=Q0alphas, nloop=nloop, &
+     call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
           &                   fixnf=ffn_nf)
   else 
-     call InitRunningCoupling(coupling, alfas=asQ, Q=Q0alphas, nloop=nloop, &
+     call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
           &                   quark_masses=masses)
   end if
   call AddNfInfoToPdfTable(tables,coupling)

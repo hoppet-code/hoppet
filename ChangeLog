@@ -1,8 +1,18 @@
 2007-05-01  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* src/hoppet_v1.h:    *** ADDED ***
+	  added the defines needed for a C++ interface covering the
+	  contents of the vanilla interface.
+
+	* example_f77/cpp_tabulation_example.cc:   *** ADDED ***
+	  added example program that uses the C++ interface
+
+	* tarit.sh            *** ADDED ***
+          for making a tar archive to disttribute
+	
 	* scripts/makef95makefile: 
-	  eliminated -march=i686 option unless uname -a reveals it to be
-	  allowed
+	  eliminated -march=i686 with g95 option unless uname -a reveals
+	  it to be allowed.
 	
 	* src/convolution.f90: 
 	  tidied up a bunch of things highlighted with -Wall (unused

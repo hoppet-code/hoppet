@@ -17,6 +17,7 @@ e-Print: hep-ph/0512358
 Alessandro Cafarella (Crete U.) , Claudio Coriano' (Lecce U. & INFN, Lecce & Liverpool U., Dept. Math.) , Marco Guzzi (Liverpool U., Dept. Math.) . LTH-679, Dec 2005. 56pp.
 Published in Nucl.Phys.B748:253-308,2006.
 
+
 hep-ph/0510295 [abs, ps, pdf, other] :
     Title: DGLAP evolution of truncated moments of parton densities within two different approaches
     Authors: D. Kotlorz, A. Kotlorz

@@ -12,9 +12,10 @@
 !!     you will also need to link with LHAPDF
 !!
 program tabulation_example
-  !! use hoppet_v1, and rename a couple of internal functions which
-  !! would otherwise conflict with LHAPDF (if one uses it)
-  use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  use hoppet_v1
+  !! if using LHAPDF, rename a couple of hoppet functions which
+  !! would otherwise conflict with LHAPDF 
+  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   implicit none
   real(dp) :: dy, ymax
   integer  :: order, nloop
@@ -91,7 +92,7 @@ program tabulation_example
   ! interpolation quality)
   call AddNfInfoToPdfTable(table,coupling)
 
-  ! create the tabulation
+  ! create the tabulation based on the evolution of pdf0 from scale Q0
   call EvolvePdfTable(table, Q0, pdf0, dh, coupling, nloop=nloop)
   ! alternatively "pre-evolve" so that subsequent evolutions are faster
   !call PreEvolvePdfTable(table, Q0, dh, coupling)

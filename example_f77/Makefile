@@ -36,6 +36,9 @@ LHAPDFLIBS = -L$(LHAPDFDIR) -lLHAPDF
 tabulation_example: tabulation_example.o
 	$(FC) -o tabulation_example $<  $(LIBS) 
 
+cpp_tabulation_example: cpp_tabulation_example.o
+	$(CXX) -o cpp_tabulation_example $<  $(LIBS) -lm
+
 compare_lhapdf_hoppet: compare_lhapdf_hoppet.o
 	$(FC) -o compare_lhapdf_hoppet $< $(LHAPDFLIBS)  $(LIBS)
 

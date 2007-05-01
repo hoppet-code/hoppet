@@ -80,7 +80,7 @@
   user to extend the facilities already provided.
 %
   A `vanilla' interface is also available, facilitating use of the
-  evolution part of the code from f77, C and C++.  \smallskip
+  evolution part of the code from f77 and C++.  \smallskip
 
 %%   \textbf{Note:} this document describes version~1 of the package.  A
 %%   more object-oriented version (v2) has undergone substantial
@@ -101,41 +101,46 @@
 \noindent {\em Title of program\/}: \hoppet \\[2mm]
 {\em Version\/}: 1.1 \\[2mm]
 {\em Catalogue identifier\/}: \\[2mm]
-{\em Program obtainable from\/}: \url{http://projects.hepforge.org/hoppet/}
+{\em Program obtainable from\/}:
+\url{http://projects.hepforge.org/hoppet/}
 \\[2mm]
 {\em Distribution format\/}: compressed tar file \\[2mm]
 {\em E-mail\/}: {\tt salam@lpthe.jussieu.fr} \\[2mm]
 {\em License\/}: GNU Public License \\[2mm]
 {\em Computers\/}: all \\[2mm]
 {\em Operating systems\/}: all \\[2mm]
-{\em Program language\/}: Fortran 90 \\[2mm]
-{\em Memory required to execute\/}:  $\lesssim$ 10 MB) \\[2mm]
+{\em Program language\/}: Fortran 95 \\[2mm]
+{\em Memory required to execute\/}:  $\lesssim$ 10 MB \\[2mm]
 {\em Other programs called\/}: none \\[2mm]
 {\em External files needed\/}: none \\[2mm]
-{\em Number of bytes in distributed program, including test data 
-     etc.\/}: ?????????\\[2mm]
-{\em Keywords\/}: unpolarized and longitudinally polarized parton 
-distributions, DGLAP evolution equations, $x$-space 
-solutions
+{\em Number of bytes in distributed program, including test data
+  etc.\/}: $\sim 270$~kB\\[2mm]
+{\em Keywords\/}: unpolarized and longitudinally polarized parton
+space-like distribution functions (PDFs), DGLAP evolution equations,
+$x$-space solutions
 \\[2mm]
-{\em Nature of the physical problem\/}:
-% solution of the evolution equations for the unpolarized and polarized
-% parton distributions of hadrons at leading order (LO), next-to-leading 
-% order and next-to-next-to-leading order of perturbative QCD. Evolution 
-% performed either with a fixed number $\nf$ of effectively massless 
-% quark flavours or in the variable-$\nf$ scheme. The calculation of
-% observables from the parton distributions is not part of the
-% present~package.
+{\em Nature of the physical problem\/}: Solution of the DGLAP
+evolution equations up to NNLO (NLO) for unpolarised (longitudinally
+polarised) PDFs, and provision of tools to facilitate manipulation
+(convolutions, etc.) of PDFs with user-defined coefficient and
+splitting functions.
 \\[2mm]
 %
 {\em Method of solution\/}:
+representation of PDFs on a grid in $x$, adaptive integration of
+splitting functions to reduce them to discretize so as to obtain fast
+convolutions that are equivalent to integration with an interpolated
+form of the PDFs; Runge Kutta solution of the $Q$ evolution, and
+its caching so as to speed up repeated evolution with different
+initial conditions.
 \\[2mm]
-{\em Restrictions on complexity of the problem\/}: ???
+{\em Restrictions on complexity of the problem\/}: PDFs should be
+smooth on the scale of the discretization in $x$.
 \\[2mm]
 {\em Typical running time\/}: a few seconds for initialisation, then
 $\sim 10$~ms for creating a tabulation with a relative accuracy of
 $10^{-4}$ from a new initial condition (on a 3.4~GHz Pentium~IV
-processor).
+processor). Further details in section~\ref{sec:Timing}.
 
 \newpage
 \tableofcontents
@@ -1841,7 +1846,11 @@ to the essential evolution functionality from languages other than
 f90.  It hides all the object-oriented nature of the program, and
 provides access to one \ttt{pdf\_table}, based on a single grid
 definition. The description will be given as if one is calling from
-f77. 
+f77. An include file \ttt{src/hoppet\_v1.h} is provided for calling
+from C++ --- the interface is essentially identical to the fortran
+one, with the caveat that names are case sensitive (the cases are as
+given below), and that PDF components referred to below as
+\ttt{pdf(-6:6)} become \ttt{pdf[0..12]}.
 
 %......................................................................
 \subsection{Initialisation}
@@ -2020,6 +2029,7 @@ with the question of the accuracy.
 
 %......................................................................
 \subsection{Accuracy}
+\label{sec:Accuracy}
 We use the same initial condition and evolution parameters as
 in~\cite{Benchmarks}:
 \begin{subequations}
@@ -2203,6 +2213,7 @@ This is the combination that we shall use as standard.
 
 %......................................................................
 \subsection{Timing}
+\label{sec:Timing}
 
 
 The time spent in \hoppet for a given analysis can expressed as
@@ -2367,8 +2378,6 @@ components of the timing affected by each parameter.
 %%   splitting functions.
 %% \end{itemize}
 
-%======================================================================
-\section{Example program}
 
 %======================================================================
 \section{Conclusions}
@@ -2429,6 +2438,161 @@ French Agence Nationale de la Recherche.
 
 %======================================================================
 \appendix
+
+
+%======================================================================
+\section{Example program}
+\label{sec:example_program}
+
+The program below generates a subset of table~15 of the NNLO benchmark
+evolution in the second reference of~\cite{Benchmarks}. It is to be
+found (in a slightly more commented form) in
+\ttt{example\_f90/tabulation\_example.f90}. Compilation instructions
+are to be found in the \ttt{README} file in the main directory of the
+release. A program that has the same functionality but in f77, using
+the vanilla interface of section~\ref{sec:vanilla}, is to be found as
+\ttt{example\_f77/tabulation\_example.f}.
+
+{\footnotesize
+\begin{verbatim}
+program tabulation_example
+  use hoppet_v1
+  implicit none
+  real(dp)         :: dy, ymax, quark_masses(4:6)
+  integer          :: order, nloop, ix
+  type(grid_def)   :: grid, gdarray(4) ! holds information about the grid
+  type(dglap_holder)     :: dh         ! holds the splitting functions
+  type(pdf_table)        :: table      ! holds the PDF tabulation
+  type(running_coupling) :: coupling  
+  real(dp), pointer      :: pdf0(:,:)  ! holds the initial pdf
+  real(dp)               :: Q0, Q, pdf_at_xQ(-6:6)
+  real(dp), parameter :: heralhc_xvals(9) = &
+       & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
+
+  ! set up parameters for grid
+  order = -6
+  ymax  = 12.0_dp
+  dy    = 0.1_dp
+  
+  ! set up the grid itself -- we use 4 nested subgrids
+  call InitGridDef(gdarray(4),dy/27.0_dp, 0.2_dp, order=order)
+  call InitGridDef(gdarray(3),dy/9.0_dp,  0.5_dp, order=order)
+  call InitGridDef(gdarray(2),dy/3.0_dp,  2.0_dp, order=order)
+  call InitGridDef(gdarray(1),dy,          ymax , order=order)
+  call InitGridDef(grid,gdarray(1:4),locked=.true.)
+
+  ! initialise the splitting-function holder
+  nloop = 3
+  call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
+       &                      nloop=nloop,nflo=3,nfhi=6)
+
+  ! initialise a PDF from the function below (must be contained,
+  ! in a "used" module, or with an explicitly defined interface)
+  call AllocPDF(grid, pdf0)
+  pdf0 = unpolarized_dummy_pdf(xValues(grid))
+  Q0 = sqrt(2.0_dp)  ! the initial scale
+
+  ! allocate and initialise the running coupling with a given
+  ! set of quark masses (NB: charm mass just above Q0).
+  quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
+  call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
+       &                   quark_masses = quark_masses)
+
+  ! create the tables that will contain our copy of the user's pdf
+  ! as well as the convolutions with the pdf.
+  call AllocPdfTable(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
+       & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
+  ! add information about the nf transitions to the table (improves
+  ! interpolation quality)
+  call AddNfInfoToPdfTable(table,coupling)
+
+  ! create the tabulation based on the evolution of pdf0 from scale Q0
+  call EvolvePdfTable(table, Q0, pdf0, dh, coupling, nloop=nloop)
+  ! alternatively "pre-evolve" so that subsequent evolutions are faster
+  !call PreEvolvePdfTable(table, Q0, dh, coupling)
+  !call EvolvePdfTable(table,pdf0)
+
+  ! get the value of the tabulation at some point
+  Q = 100.0_dp
+  write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
+  write(6,'(a5,2a12,a14,a10,a12)') "x",&
+       & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
+  do ix = 1, size(heralhc_xvals)
+     call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
+     write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
+          &  pdf_at_xQ(2)-pdf_at_xQ(-2),  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+          &  pdf_at_xQ(0)
+  end do
+  
+  ! some cleaning up (not strictly speaking needed, but illustratative)
+  call Delete(table); call Delete(pdf0); call Delete(dh)
+  call Delete(coupling);  call Delete(grid)
+
+contains 
+  !======================================================================
+  !! The dummy PDF suggested by Vogt as the initial condition for the 
+  !! unpolarized evolution (as used in hep-ph/0511119).
+  function unpolarized_dummy_pdf(xvals) result(pdf)
+    real(dp), intent(in) :: xvals(:)
+    real(dp)             :: pdf(size(xvals),-6:7) ! note upper bound!
+    real(dp) :: uv(size(xvals)), dv(size(xvals))
+    real(dp) :: ubar(size(xvals)), dbar(size(xvals))
+    !---------------------
+    real(dp), parameter :: N_g = 1.7_dp, N_ls = 0.387975_dp
+    real(dp), parameter :: N_uv=5.107200_dp, N_dv = 3.064320_dp
+    real(dp), parameter :: N_db = half*N_ls
+  
+    pdf = zero
+
+    !-- remember that these are all xvals*q(xvals)
+    uv = N_uv * xvals**0.8_dp * (1-xvals)**3
+    dv = N_dv * xvals**0.8_dp * (1-xvals)**4
+    dbar = N_db * xvals**(-0.1_dp) * (1-xvals)**6
+    ubar = dbar * (1-xvals)
+
+    ! labels iflv_g, etc., come from the hoppet_v1 module
+    pdf(:, iflv_g) = N_g * xvals**(-0.1_dp) * (1-xvals)**5
+    pdf(:,-iflv_s) = 0.2_dp*(dbar + ubar)
+    pdf(:, iflv_s) = pdf(:,-iflv_s)
+    pdf(:, iflv_u) = uv + ubar
+    pdf(:,-iflv_u) = ubar
+    pdf(:, iflv_d) = dv + dbar
+    pdf(:,-iflv_d) = dbar
+  end function unpolarized_dummy_pdf
+
+end program tabulation_example
+\end{verbatim}
+}
+
+\noindent The expected output from the program is:
+{\small
+\begin{verbatim}
+           Evaluating PDFs at Q =  100.000 GeV
+    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon
+1.0E-05  3.1907E-03  1.9532E-03  3.4732E+01  1.5875E+01  2.2012E+02
+1.0E-04  1.4023E-02  8.2749E-03  1.5617E+01  6.7244E+00  8.8804E+01
+1.0E-03  6.0019E-02  3.4519E-02  6.4173E+00  2.4494E+00  3.0404E+01
+1.0E-02  2.3244E-01  1.3000E-01  2.2778E+00  6.6746E-01  7.7912E+00
+1.0E-01  5.4993E-01  2.7035E-01  3.8526E-01  6.4466E-02  8.5266E-01
+3.0E-01  3.4622E-01  1.2833E-01  3.4600E-02  4.0134E-03  7.8898E-02
+5.0E-01  1.1868E-01  3.0811E-02  2.3198E-03  2.3752E-04  7.6398E-03
+7.0E-01  1.9486E-02  2.9901E-03  5.2352E-05  5.6038E-06  3.7080E-04
+9.0E-01  3.3522E-04  1.6933E-05  2.5735E-08  4.3368E-09  1.1721E-06
+\end{verbatim}
+}
+
+\noindent The file
+\ttt{example\_f90/tabulation\_example.default\_output} contains a copy
+of these results, so as to allow easy comparison. The numbers
+correspond to evolution with variable flavour number, $\mu_F = \mu_R$,
+and the parametrised versions of the NNLO splitting functions and mass
+threshold terms.
+%
+The reader may verify that theey correspond to those given in the top
+panel of table~15 of the second reference of \cite{Benchmarks} ($\mu_F
+= \mu_R$).
+
 
 %======================================================================
 \section{Useful tips on fortran~95}
