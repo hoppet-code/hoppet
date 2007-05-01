@@ -115,6 +115,14 @@ program tabulation_example
           &  pdf_at_xQ(0)
   end do
   
+  ! some cleaning up (not strictly speaking needed, but illustrates
+  ! how it's done)
+  call Delete(table)
+  call Delete(pdf0)
+  call Delete(dh)
+  call Delete(coupling)
+  call Delete(grid)
+
 contains 
   !======================================================================
   !! The dummy PDF suggested by Vogt as the initial condition for the 

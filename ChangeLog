@@ -1,5 +1,13 @@
 2007-05-01  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* scripts/makef95makefile: 
+	  eliminated -march=i686 option unless uname -a reveals it to be
+	  necessary
+	
+	* src/convolution.f90: 
+	  tidied up a bunch of things highlighted with -Wall (unused
+	  variables mostly).
+	
 	* example_f90/tabulation_example.f90: 
 	* example_f77/tabulation_example.f: 
 
