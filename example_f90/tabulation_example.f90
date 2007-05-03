@@ -105,7 +105,6 @@ program tabulation_example
 
   ! get the value of the tabulation at some point
   Q = 100.0_dp
-  !Q = sqrt(2.0d0)
   write(6,'(a)')
   write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
   write(6,'(a5,2a12,a14,a10,a12)') "x",&

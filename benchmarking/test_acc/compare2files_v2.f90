@@ -20,7 +20,7 @@ program compare2file_v2
   logical  :: mask07(maxn,maxn,-5:5)=.false.
   logical  :: mask09(maxn,maxn,-5:5)=.false.
   real(dp) :: y,Q, minerr, maxerr, this_err, true_err
-  integer  :: iy, iQ, ny, nQ, ic, idy
+  integer  :: iy, iQ, ny, nQ, ic, idy, ml(3)
 
   idev1 = idev_open_arg(1,status='old')
   idev2 = idev_open_arg(2,status='old')
@@ -90,6 +90,9 @@ program compare2file_v2
   max09_guds = maxval(err(:ny,:nQ,0:3),mask09(:ny,:nQ,0:3))
   max07_all  = maxval(err(:ny,:nQ,-5:5),mask07(:ny,:nQ,-5:5))
   max09_all  = maxval(err(:ny,:nQ,-5:5),mask09(:ny,:nQ,-5:5))
+
+  ml = maxloc(err(:ny,:nQ,0:3),mask09(:ny,:nQ,0:3));
+  !write(0,*) yval(ml(1)), Qval(ml(1),ml(2)), ml(3)-1
 
   if (log_val_opt("-summary")) then
      write(6,"(4es20.10)") max07_guds, max07_all, max09_guds, max09_all
