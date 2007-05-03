@@ -38,13 +38,17 @@ program tabulation_example
   integer  :: ix
 
   !! define the interfaces for LHA pdf (by default not used)
-  interface
-     subroutine EvolvePDF(x,Q,res)
-       use types; implicit none
-       real(dp), intent(in)  :: x,Q
-       real(dp), intent(out) :: res(*)
-     end subroutine EvolvePDF
-  end interface
+  !! (NB: unfortunately this conflicts with an internal hoppet name,
+  !! so make sure that you "redefine" the internal hoppet name, 
+  !! as illustrated in the commented "use" line above:
+  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
+  ! interface
+  !    subroutine EvolvePDF(x,Q,res)
+  !      use types; implicit none
+  !      real(dp), intent(in)  :: x,Q
+  !      real(dp), intent(out) :: res(*)
+  !    end subroutine EvolvePDF
+  ! end interface
 
   ! set up parameters for grid
   order = -6

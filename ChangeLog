@@ -1,3 +1,9 @@
+2007-05-03  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* example_f90/tabulation_example.f90: 
+	  resolved name conflict with LHAPDF that had somehow been left
+	  in.
+
 2007-05-01  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/hoppet_v1.h:    *** ADDED ***

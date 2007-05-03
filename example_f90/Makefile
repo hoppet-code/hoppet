@@ -3,12 +3,12 @@
 # default program to compile
 PROG =	tabulation_example
 
-ALLPROG = 	tabulation_example
+ALLPROG = 	lha_check_thresh tabulation_example
 
 # This will be used one day...
-ALLPROGSRC =	tabulation_example.f90
+ALLPROGSRC =	lha_check_thresh.f90 tabulation_example.f90
 
-ALLPROGOBJ =	tabulation_example.o
+ALLPROGOBJ =	lha_check_thresh.o tabulation_example.o
 
 SRCS =	
 
@@ -23,9 +23,9 @@ LIBS = -L../src -lhoppet_v1
 
 CC = cc
 CFLAGS = -O
-FC = lf95
+FC = ifort
 FFLAGS = -O -I../src 
-F90 = lf95
+F90 = ifort
 F90FLAGS = -O -I../src 
 LDFLAGS =  
 
@@ -35,6 +35,9 @@ all: $(PROG)__
 $(PROG)__: $(PROG)
 
 ALL:  $(ALLPROG)
+
+lha_check_thresh: lha_check_thresh.o $(OBJS) $(POSTOBJS) 
+	$(F90) $(LDFLAGS) -o lha_check_thresh lha_check_thresh.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
 
 tabulation_example: tabulation_example.o $(OBJS) $(POSTOBJS) 
 	$(F90) $(LDFLAGS) -o tabulation_example tabulation_example.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
@@ -56,4 +59,5 @@ make:
 %.o: %.f90 
 	$(F90) $(F90FLAGS) -c $<
 
+lha_check_thresh.o: 
 tabulation_example.o: 

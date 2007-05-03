@@ -38,9 +38,9 @@ LIBS =
 
 CC = cc
 CFLAGS = -O
-FC = lf95
+FC = ifort
 FFLAGS = -O 
-F90 = lf95
+F90 = ifort
 F90FLAGS = -O 
 LDFLAGS =  
 

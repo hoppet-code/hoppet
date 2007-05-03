@@ -1,5 +1,5 @@
 # Makefile generated automatically with
-# ../scripts/makef95makefile prec_and_timing -L../src -lhoppet_v1 -I../src -g77libs -remake ./mkmk
+# ../scripts/makef95makefile prec_and_timing -L../src -lhoppet_v1 -I../src -remake ./mkmk
 # default program to compile
 PROG =	prec_and_timing
 
@@ -19,13 +19,13 @@ OBJS =	io_utils.o lcl_dec.o NameSelect.o
 POSTOBJS =	
 POSTLIB = 
 
-LIBS = -L../src -lhoppet_v1  -lfj9i6 -L/home/salam/lib/gcc-lib/i386-redhat-linux/3.2.3 -lg2c -lm 
+LIBS = -L../src -lhoppet_v1  
 
 CC = cc
 CFLAGS = -O
-FC = lf95
+FC = ifort
 FFLAGS = -O -I../src 
-F90 = lf95
+F90 = ifort
 F90FLAGS = -O -I../src 
 LDFLAGS =  
 
