@@ -1,5 +1,15 @@
 2007-05-03  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
+	* benchmarking/test_acc/acc-pegasus.gp|eps:  *** ADDED ***
+	  results of accuracy tests with pegasus 
+
+	* benchmarking/prec_and_timing_pegasus.f90:  *** ADDED ***
+	  tool for running the accuracy and timing tests of pegasus.
+
+	* benchmarking/prec_and_timing.f90: 
+	  modified the comments at the beginning to reflect the current
+	  usage, and changed some default options.
+
 	* example_f90/tabulation_example.f90: 
 	  resolved name conflict with LHAPDF that had somehow been left
 	  in.

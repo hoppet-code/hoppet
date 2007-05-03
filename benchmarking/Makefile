@@ -3,12 +3,12 @@
 # default program to compile
 PROG =	prec_and_timing
 
-ALLPROG = 	benchmark prec_and_timing
+ALLPROG = 	benchmark prec_and_timing prec_and_timing_pegasus
 
 # This will be used one day...
-ALLPROGSRC =	benchmark.f90 prec_and_timing.f90
+ALLPROGSRC =	benchmark.f90 prec_and_timing.f90 prec_and_timing_pegasus.f90
 
-ALLPROGOBJ =	benchmark.o prec_and_timing.o
+ALLPROGOBJ =	benchmark.o prec_and_timing.o prec_and_timing_pegasus.o
 
 SRCS =	io_utils.f90 lcl_dec.f90 NameSelect.f90
 
@@ -42,6 +42,9 @@ benchmark: benchmark.o $(OBJS) $(POSTOBJS)
 prec_and_timing: prec_and_timing.o $(OBJS) $(POSTOBJS) 
 	$(F90) $(LDFLAGS) -o prec_and_timing prec_and_timing.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
 
+prec_and_timing_pegasus: prec_and_timing_pegasus.o $(OBJS) $(POSTOBJS) 
+	$(F90) $(LDFLAGS) -o prec_and_timing_pegasus prec_and_timing_pegasus.o $(OBJS) $(LIBS) ~/software/Pegasus/Objects2/*[^old]*.o $(POSTOBJS) $(POSTLIB)
+
 libclean:
 	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) 
 
@@ -63,3 +66,4 @@ benchmark.o: NameSelect.o io_utils.o
 io_utils.o: 
 NameSelect.o: io_utils.o
 prec_and_timing.o: io_utils.o
+prec_and_timing_pegasus.o: io_utils.o

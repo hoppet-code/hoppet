@@ -29,3 +29,5 @@ plot \
  '<./compare2files_v2 res-grid/dy0.05-order-6-4grids-dlnlnQ0.0125-du0.4-olnlnQ4.res res-grid/reference.res -channel 4 -minerr -1 -maxerr -1 -protect' u (zeta_of_y($1)):4 w  l lt 3 lw 2 t 'charm near sign-change'
 
 `gnupr acc-dy0.05-dlnlnQ0.0125.eps cld`
+
+

@@ -1,16 +1,32 @@
-
-! on tycho the following combination runs in 4ms per pdf and has
-! a relative accuracy (on g,d,u,s) that is typically \lesssim 1e-4, though
-! one might want to check the accuracy more systematically.
-! 
-! ./small_fast_tab -nrep 1 -nxQ 500 -output -dy 0.25 -dlnlnQ 0.07 -du 0.1 -olnlnQ 4 -order 6 -order2 -6
+!======================================================================
 !
-! roughly speaking: evolution takes about 2.5ms and evaluations 1.5ms
+! Program for preparing info for accuracy tests and for carrying out
+! timing tests.
 !
-! Funny thing is that earlier it seemed that runs were much faster
-! (factor of two for evolution) and I can't figure out what has
-! changed...
-
+! A high-accuracy reference grid as used in the documentation can be
+! prepared with the instructions
+!
+!   ./prec_and_timing -nrep 1 -nxQ 5000 -outputgrid -dy 0.025 -order 6 \
+!                     -nopreev -4grids -dlnlnQ 0.005 -du 0.005 -olnlnQ 4
+!
+! Fig. 1 and fig.2(left) of the doc have been obtained by comparing
+! this with the output from 
+!
+!   ./prec_and_timing -nrep 1 -nxQ 5000 -outputgrid -dy 0.2 -order -6 \
+!                     -nopreev -4grids -dlnlnQ 0.05 -du 0.4 -olnlnQ 4
+!
+! using the command
+!
+!   test_acc/compare2files_v2 resA resB -channel 11 [-protect]
+!
+! Other options of interest in prec_and_timing include
+!
+!   -eps [1e-7]       precision of adaptive integration for preparing split.fn.
+!   -asdt [0.2]       step for evolution of alpha_s
+!   -exactsp          use exact 3-loop split-fns
+!   -exactth          use exact 3-loop mass thresholds
+!
+!======================================================================
 module pdf_initial_condition
   use hoppet_v1
   implicit none
@@ -80,7 +96,7 @@ end module pdf_initial_condition
 
 
 !======================================================================
-program small_fast_tab
+program prec_and_timing
   use hoppet_v1
   use pdf_initial_condition
   use sub_defs_io
@@ -100,7 +116,7 @@ program small_fast_tab
 
   ! set the details of the y=ln1/x grid
   dy    = dble_val_opt('-dy',0.25_dp)
-  ymax  = dble_val_opt('-ymax',5.0_dp)
+  ymax  = dble_val_opt('-ymax',11.5_dp)
   order = int_val_opt('-order',-6)
   order2 = int_val_opt('-order2',order)
   order1 = int_val_opt('-order1',order)
@@ -152,7 +168,7 @@ program small_fast_tab
   vogt_init = unpolarized_dummy_pdf(xValues(grid))
 
   ! set up the coupling
-  Qinit = sqrt(two); Qmax = dble_val_opt('-Qmax',50.0_dp)
+  Qinit = sqrt(two); Qmax = dble_val_opt('-Qmax',1e4_dp)
   do i = 1, int_val_opt("-nas",1)
      if (i /= 1) call Delete(coupling)
      call InitRunningCoupling(coupling, alfas=0.35_dp, Q=Qinit, &
@@ -344,4 +360,4 @@ contains
 
   end function y_of_zeta
   
-end program small_fast_tab
+end program prec_and_timing
