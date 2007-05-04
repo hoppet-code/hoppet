@@ -54,7 +54,7 @@ program tabulation_example
   order = -6
   ymax  = 12.0_dp
   dy    = 0.1_dp
-  
+
   ! set up the grid itself -- we use 4 nested subgrids
   call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
   call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)

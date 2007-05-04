@@ -43,7 +43,7 @@ prec_and_timing: prec_and_timing.o $(OBJS) $(POSTOBJS)
 	$(F90) $(LDFLAGS) -o prec_and_timing prec_and_timing.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
 
 prec_and_timing_pegasus: prec_and_timing_pegasus.o $(OBJS) $(POSTOBJS) 
-	$(F90) $(LDFLAGS) -o prec_and_timing_pegasus prec_and_timing_pegasus.o $(OBJS) $(LIBS) ~/software/Pegasus/Objects2/*[^old]*.o $(POSTOBJS) $(POSTLIB)
+	$(F90) $(LDFLAGS) -o prec_and_timing_pegasus prec_and_timing_pegasus.o $(OBJS) $(LIBS) $(POSTOBJS) $(POSTLIB)
 
 libclean:
 	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) 

@@ -62,6 +62,8 @@ else
   tagURL=`echo $URL | sed "s/trunk/tags\/hoppet-$version/"`
   echo "Remember to tag the version:"
   echo "svn copy  -m 'tagged release of release $version' $URL $tagURL"
+  echo "Copy it to hepforge:"
+  echo "scp -p $fulltarloc/$tarname hepforge:hoppet/public_html/downloads/"
 fi
 
 #tar zcf $tarname
