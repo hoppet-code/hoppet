@@ -29,8 +29,9 @@ else
                       $dirhere/(src|example_f77|example_f90|benchmarking)/**/Makefile \
                       $dirhere/**/(README|INSTALL|Doxyfile|ReleaseNotes|COPYING|mkmk) \
                       $dirhere/scripts/*[a-z] \
-                      $dirhere/example_f90/*.default_output
-  
+                      $dirhere/example_f90/*.default_output \
+                      $dirhere/test.sh
+
   fulltarloc=`pwd`
   pushd /tmp
   echo "Unpacking it as /tmp/$dirhere"
