@@ -265,7 +265,7 @@ contains
          &tab%seginfo(tab%nfhi)%lnlnQ_hi /= tab%lnlnQ_max) &
          &call wae_error('AddNfInfoToPdfTable',&
          & 'mismatch in segment and global lnlnQ limits.',&
-         & 'Could be due coupling having more restricted range?')
+         & 'Could be due to coupling having more restricted range?')
 
 
     ! now reallocate things?
