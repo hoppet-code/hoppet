@@ -1,3 +1,9 @@
+2008-01-19  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/dglap_objects.f90 (dglap_objects): 
+	  make some internal things non-public in the hope of eliminating
+	  some issues with ifort on windows reported by Wu-Ki
+
 2007-05-04  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 ==================== tagged release 1.1.0b1 ==============================

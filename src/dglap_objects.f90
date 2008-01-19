@@ -96,7 +96,7 @@ module dglap_objects
   !public :: AddWithCoeff_sm, Multiply_sm
   !public :: cobj_PConv, cobj_PConv_1d
 
-  public :: InitMTMNNLO, SetNfMTM, cobj_ConvMTM, cobj_DelMTM
+  public :: InitMTMNNLO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
 
   !-------- things for splitting functions --------------------
   interface cobj_InitCoeff
@@ -104,7 +104,7 @@ module dglap_objects
   end interface
   public :: cobj_InitCoeff, cobj_InitCoeffLO, cobj_InitCoeffHO
   !public :: cobj_CConv
-  public :: cobj_AddCoeff, cobj_DelCoeff
+  !public :: cobj_AddCoeff, cobj_DelCoeff
   public :: GetDerivedSplitMatProbes, AllocSplitMat, SetDerivedSplitMat
 
 
