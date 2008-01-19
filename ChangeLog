@@ -1,5 +1,9 @@
 2008-01-19  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* src/SConstruct:       *** ADDED ***
+	  example build script for scons (should work with scons >= 0.97,
+	  maybe earlier too).
+
 	* src/dglap_objects.f90 (dglap_objects): 
 	  make some internal things non-public in the hope of eliminating
 	  some issues with ifort on windows reported by Wu-Ki

@@ -1,0 +1,13 @@
+# example SConstruct file that can be used in place of the make
+# procedure. Note that you need a recent version of scons for things
+# to work (tests have been carried out with v0.97).
+#
+# set your preferred fortran compiler below
+#
+fortran="ifort"
+
+import glob
+import os
+env = Environment(ENV = os.environ, FORTRAN=fortran)
+HoppetFiles=[glob.glob("*.f90"), glob.glob("*.f")]
+env.Library(target="hoppet_v1",source=HoppetFiles)
