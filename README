@@ -80,7 +80,11 @@ To compile the f90 example program
 
 The output should be compared to the file
 "tabulation_example.default_output", which contains the correct
-results.
+results. 
+
+An equivalent program with the startup, pdf initialisation and
+evolution spread across different subroutines is given as
+tabulation_example_2.
 
 Compiling f77 example programs (using g77) is a little trickier
 because of the need to include the correct f95 libraries. Accordingly

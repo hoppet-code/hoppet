@@ -1,3 +1,20 @@
+2008-01-28  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* **/Makefile
+	  removed all f90 makefiles from svn, since they are generated
+	  automatically 
+
+	* mkmk: 
+	  switched from sh to bash in order to deal with systems where sh
+	  is a more elementary shell
+
+	* README: 
+	* example_f90/tabulation_example_2.f90: 
+	  added this alternative example which does the same as
+	  tabulation_example.f90, but with the information accessed across
+	  several different modules. Noted this in the README
+	
+
 2008-01-19  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/SConstruct:       *** ADDED ***
