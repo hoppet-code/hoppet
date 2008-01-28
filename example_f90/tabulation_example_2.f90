@@ -88,33 +88,36 @@ Program main
   real(dp) :: Q, pdf_at_xQ(-6:6)
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
-  integer  :: ix
+  integer  :: ix, iloop
 
   ! do the common initialisation (including allocating a table)
   ! (call this just once)
   call tabulation_example_startup
 
-  ! evolve an initial condition to fill the table
-  ! (do this for each initial condition)
-  do ix = 1, 100
-     call tabulation_example_evolve_table
-  end do
+  ! the following might be replaced by the "evolve and calculate
+  ! chi^2" loop in a fit program; here we just loop over it once.
+  ! NB: if you do plan to run a fit program, then you'd be advised
+  !     to use the precalculated evolution (see below)
+  do iloop = 1, 1
+    ! evolve an initial condition to fill the table
+    ! (do this for each initial condition)
+    call tabulation_example_evolve_table
   
-
-  ! get the value of the tabulation at some point
-  Q = 100.0_dp
-  write(6,'(a)')
-  write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
-  write(6,'(a5,2a12,a14,a10,a12)') "x",&
-       & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
-  do ix = 1, size(heralhc_xvals)
-     call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
-     write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
-          &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
-          &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
-          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
-          &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
-          &  pdf_at_xQ(0)
+    ! get the value of the tabulation at some point
+    Q = 100.0_dp
+    write(6,'(a)')
+    write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
+    write(6,'(a5,2a12,a14,a10,a12)') "x",&
+         & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
+    do ix = 1, size(heralhc_xvals)
+       call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
+       write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
+            &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+            &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+            &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+            &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+            &  pdf_at_xQ(0)
+    end do
   end do
 
   !! deallocate things where relevant (right at end of program,
