@@ -1,3 +1,12 @@
+2008-01-30  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* scripts/makef95makefile: 
+	  modified it so that make all will now compile all programs.
+
+	* benchmarking/4pegasus    *** ADDED ***
+	  created this directory for tests with pegasus and moved some
+	  files into here
+	
 2008-01-28  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* **/Makefile

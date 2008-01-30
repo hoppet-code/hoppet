@@ -494,10 +494,11 @@ if ($MAKELIB) {
   #print MAKEFILE "\t\$(", &LanguageCompiler($ARGV[1], @srcs);
   #print MAKEFILE ") \$(LDFLAGS) -o \$@ \$(PROG).o \$(OBJS) \$(LIBS) \$(POSTOBJS) \$(POSTLIB)\n\n";
 
-  print MAKEFILE "# Trick to enable old 'make PROG=xxx' form to still work\n";
-  print MAKEFILE "all: \$(PROG)__\n\n";
+  #print MAKEFILE "# Trick to enable old 'make PROG=xxx' form to still work\n";
+  #print MAKEFILE "all: \$(PROG)__\n\n";
+  print MAKEFILE "all: \$(ALLPROG)\n\n";
 
-  print MAKEFILE "\$(PROG)__: \$(PROG)\n\n";
+  #print MAKEFILE "\$(PROG)__: \$(PROG)\n\n";
 
 }
 
