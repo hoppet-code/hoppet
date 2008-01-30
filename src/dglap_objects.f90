@@ -583,7 +583,13 @@ contains
     end if
 
     pdfr = GetPdfRep(q_in)
-    if (pdfr == pdfr_Evln) then
+    if (pdfr /= pdfr_Human) then
+       ! check we have the right number of flavours
+       if (GetPdfRep(q_in) /= p%nf_int) then
+          call wae_error('cobj_Pconv:',&
+               &'n-flavours of q_in representation /= n-flavours for splitting function = ', &
+               &intval=p%nf_int)
+       end if
        q => q_in
     else
        allocate(q_ev(0:ubound(q_in,dim=1),ncompmin:ncompmax))
@@ -609,7 +615,8 @@ contains
        PxQ(:,-i) = zero
     end do
 
-    call LabelPdfAsRep(Pxq,pdfr_Evln)
+    !call LabelPdfAsRep(Pxq,pdfr_Evln)
+    call LabelPdfAsRep(Pxq,P%nf_int)
     if (pdfr == pdfr_Human) then
        q_ev = Pxq ! avoid an extra temporary... (real cleverness might
                   ! have been to avoid this copy...?)
@@ -662,8 +669,9 @@ contains
   !-----------------------------------------------------------------
   !! Returns the set of probes needed to establish a matrix of
   !! "derived" effective splitting functions.
-  subroutine GetDerivedSplitMatProbes(grid,probes)
+  subroutine GetDerivedSplitMatProbes(grid, nf_in, probes)
     type(grid_def), intent(in) :: grid
+    integer,        intent(in) :: nf_in
     real(dp),       pointer    :: probes(:,:,:)
     !-----------
     real(dp), pointer :: probes_1d(:,:)
@@ -684,7 +692,8 @@ contains
     probes = zero
     do iprobe = 1, nprobes
        ! make sure representation is correct...
-       call LabelPdfAsRep(probes(:,:,iprobe),pdfr_Evln)
+       !call LabelPdfAsRep(probes(:,:,iprobe),pdfr_Evln)
+       call LabelPdfAsRep(probes(:,:,iprobe),nf_in)
     end do
 
     probes(:,iflv_V, 1:nprobes_1d) = probes_1d       ! NS_V

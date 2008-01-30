@@ -1,3 +1,20 @@
+2008-01-30  Gavin SALAM  <salam@lpthe.jussieu.fr> + Juan
+
+	* src/evolution.f90 (EvolveGeneric): 
+	* src/dglap_objects.f90: 
+	* src/pdf_representation.f90: 
+
+	  changed pdf representation information, so that it now holds
+	  also the value for nf (to avoid incompatible PDF and spliting
+	  function nf values)
+
+	  Changes needed in manual:
+	      pdfr_Evln  ->   no longer exists
+	      GetPdfRep and LabelPdfAsRep now return number of flavours
+	                      for evolution representations
+	      GetDerivedSplitMatProbes requires an nf argument
+	                 
+	
 2008-01-30  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* scripts/makef95makefile: 

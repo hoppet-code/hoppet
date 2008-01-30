@@ -302,7 +302,8 @@ contains
        ! evolution later on.
        if (present(evop)) then
           ! recall: memory management of probes is done automatically
-          call GetDerivedSplitMatProbes(dh%grid,probes)
+          !call GetDerivedSplitMatProbes(dh%grid,probes)
+          call GetDerivedSplitMatProbes(dh%grid,nflcl,probes)
           do i = 1, size(probes,3)
              call ev_evolve(dhcopy, probes(:,:,i), &
                   & coupling, lcl_Q_init,lcl_Q_end, muR_Q, nloop, untie_nf, du)

@@ -31,8 +31,8 @@ module pdf_representation
   integer, parameter, public :: ncompmin = iflv_min
   integer, parameter, public :: ncompmax = iflv_info
 
-  integer, parameter, public :: pdfr_Human = 0
-  integer, parameter, public :: pdfr_Evln  = 1
+  integer, parameter, public :: pdfr_Human = -1000001
+  !integer, parameter, public :: pdfr_Evln  = 1
 
   integer, parameter :: default_ibase = 1
 
@@ -132,7 +132,8 @@ contains
     do i = 1, n
        call pdfr_HumanToEvln_sc(prep, qh(i,:), qe(i,:))
     end do
-    call LabelPdfAsRep(qe,pdfr_Evln)
+    !call LabelPdfAsRep(qe,pdfr_Evln)
+    call LabelPdfAsRep(qe,prep%nf)
   end subroutine pdfr_HumanToEvln_1d
   
 
@@ -188,8 +189,9 @@ contains
     real(dp),      intent(out) :: qh(:,ncompmin:)
     integer :: n, i
     n = assert_eq(size(qh,dim=1),size(qe,dim=1),'pdfr_EvlnToHuman_1d')
-    if (GetPdfRep(qe) /= pdfr_Evln) call wae_error('pdf_EvlnToHuman_1d',&
-         &'qe is not in "Evln" format')
+    !if (GetPdfRep(qe) /= pdfr_Evln) &
+    if (GetPdfRep(qe) /= prep%nf) &
+         &call wae_error('pdf_EvlnToHuman_1d', 'qe is not in correct "Evln" format')
     do i = 1, n
        call pdfr_EvlnToHuman_sc(prep, qe(i,:), qh(i,:))
     end do
@@ -242,15 +244,23 @@ contains
          &'upper bound of q does not correspond to ncompmax; it is:',&
          &intval=ubound(q,dim=2))
 
+    if (ubound(q,dim=1) < 4) call wae_error('LabelPdfAsRep',&
+         &'grid is too small to hold pdf flavour representation info; size is:',&
+         &intval=ubound(q,dim=1))
+
     ! very wasteful labelling, but in f90 it is hard to see 
     ! what else can be done...
     select case(irep)
-    case(pdfr_Human)
+    case(pdfr_Human)  
        q(:,iflv_info) = zero
-    case(pdfr_Evln)
-       q(0,iflv_info)  = pi*1e-1_dp
-       q(1,iflv_info)  = one+ran()
-       q(2:,iflv_info) = zero
+    case(1:iflv_max)
+       !q(0,iflv_info)  = pi*1e-1_dp
+       !q(1,iflv_info)  = one+ran()
+       !q(2:,iflv_info) = zero
+       q(0,iflv_info)   = pi*1e-1_dp
+       q(1,iflv_info)   = one+ran()
+       q(2:3,iflv_info) = irep*q(0:1,iflv_info)
+       q(4:,iflv_info) = zero
     case default
        call wae_error('LabelPdfAsRep','Unrecognized irep:',intval=irep)
     end select
@@ -265,10 +275,16 @@ contains
   end subroutine LabelPdfAsHuman
   
   !-------------------------------------------------------------
-  !! This tells us what representation it is in
+  !! This tells us what representation it is in.
+  !! 
+  !! If it is in hte human representation, then it will return
+  !! pdfr_Human, otherwise it will return the number of flavours
+  !! associated with the current representation
   function GetPdfRep(q) result(irep)
     real(dp), intent(in) :: q(0:,ncompmin:)
     integer              :: irep
+    real(dp)             :: drep
+    real(dp), parameter  :: rep_tolerance = 1e-7_dp
 
     if (ubound(q,dim=2) /= ncompmax) call wae_error('GetPdfRep',&
          &'upper bound of q does not correspond to ncompmax; it is:',&
@@ -280,7 +296,18 @@ contains
     if (q(0,iflv_info) == zero .and. q(1,iflv_info) == zero) then
        irep = pdfr_Human
     else
-       irep = pdfr_Evln
+       !irep = pdfr_Evln
+       ! we now get the number of flavours as a ratio of different
+       ! entries in index ncompmax, to help distinguish the different
+       ! representation for each separate nf value
+       drep = (abs(q(2,iflv_info))+abs(q(3,iflv_info)))/&
+            & (abs(q(0,iflv_info))+abs(q(1,iflv_info)))
+       irep = nint(drep)
+       if (abs(drep - irep) > rep_tolerance) then
+          call wae_error('GetPdfRep',&
+               &'representation seems to be inconsistent (non-integer):',&
+               &dbleval=drep)
+       end if
     end if
   end function GetPdfRep
   
