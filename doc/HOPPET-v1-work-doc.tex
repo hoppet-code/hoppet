@@ -1,13 +1,18 @@
 \documentclass[12pt]{article}
-%%  TO DO:
-%%
-%%  - Make sure hoppet name is used consistently
-%%  - Mention flavour reps are preserved under linear operations
+
+%%  TO DO - Documentation:
+%% 
 %%  - Check expl of +ve v -ve order
-%%  - Sort out ack.
 %%  - document SetCouplingDt
 %%  - add 3 new methods for accessing tabulation
-%%  - sort out example programs
+%%                       
+
+%%  TO DO - Program
+%%
+%% - Implement DIS scheme at NNLO
+%% - Add coefficient functions at NNLO 
+%% - Time-like evolution
+%%
 
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -28,6 +33,27 @@
 %\topmargin -2.3cm  % for nikhef
 %\topmargin -0.5cm  % for hep-ph
 
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\la}{\left\langle}
+\newcommand{\ra}{\right\rangle}
+\newcommand{\lc}{\left[}
+\newcommand{\rc}{\right]}
+\newcommand{\lp}{\left(}
+\newcommand{\rp}{\right)}
+\newcommand{\aq}{\alpha_s\left( Q^2 \right)}
+\newcommand{\amz}{\alpha_s\left( M_Z^2 \right)}
+\newcommand{\aqq}{\alpha_s \left( Q^2_0 \right)}
+\newcommand{\aqz}{\alpha_s \left( Q^2_0 \right)}
+\newcommand{\nf}{n_f)}
+\newcommand{\nn}{\nonumber}
+\newcommand{\nin}{\noindent}
 
 \newcommand{\dy}{\ttt{dy}}
 \newcommand{\dlnlnQ}{\ttt{dlnlnQ}}
@@ -45,14 +71,44 @@
 \newcommand{\ttt}[1]{\texttt{#1}}
 \newcommand{\order}[1]{{\cal O}\left(#1\right)}
 
-\newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,coriano,GuzziThesis}
+\newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,coriano,GuzziThesis,nnpdf,Kosower:1997hg}
+
+% Define special colors
+\usepackage{color}
+\definecolor{comment}{rgb}{0,0.3,0}
+\definecolor{identifier}{rgb}{0.0,0,0.3}
+
+\usepackage{listings}
+\lstset{language=Fortran}
+\lstset{
+  columns=flexible,
+  basicstyle=\tt,
+  keywordstyle=,
+ identifierstyle=\color{black},
+  commentstyle=\tt\color{comment},
+  mathescape=true,
+  escapebegin=\color{comment},
+  showstringspaces=false,
+  keepspaces=true
+}
+
+%% \lstset{% general command to set parameter(s)
+%%   columns=fullflexible
+%%   basicstyle=\tt, % print whole listing small
+%%   keywordstyle=\color{black},
+%%   % underlined bold black keywords
+%%   identifierstyle=, % nothing happens
+%%   commentstyle=\color{comment}, % white comments
+%%   stringstyle=\ttfamily, % typewriter type for strings
+%%   showstringspaces=false} % no special string spaces
+
 
 %-----------------------------------------
 \title{A Higher Order Perturbative Parton Evolution Toolkit \\
 (\hoppet)
 %  a.k.a.\ HOPPETv1
 }
-\author{G.~P. Salam\\[3pt]
+\author{G.~P. Salam and J.~Rojo\\[3pt]
   LPTHE,   \\Universit\'e Pierre et Marie Curie -- Paris 6,\\
   Universit\'e Denis Diderot -- Paris 7,\\
   CNRS UMR 7589,\\ 75252 Paris cedex 05, France} 
@@ -105,11 +161,12 @@
 \url{http://projects.hepforge.org/hoppet/}
 \\[2mm]
 {\em Distribution format\/}: compressed tar file \\[2mm]
-{\em E-mail\/}: {\tt salam@lpthe.jussieu.fr} \\[2mm]
+{\em E-mail\/}: {\tt salam@lpthe.jussieu.fr}, 
+{\tt rojo@lpthe.jussieu.fr} \\[2mm]
 {\em License\/}: GNU Public License \\[2mm]
 {\em Computers\/}: all \\[2mm]
 {\em Operating systems\/}: all \\[2mm]
-{\em Program language\/}: Fortran 95 \\[2mm]
+{\em Program language\/}: Fortran~95 \\[2mm]
 {\em Memory required to execute\/}:  $\lesssim$ 10 MB \\[2mm]
 {\em Other programs called\/}: none \\[2mm]
 {\em External files needed\/}: none \\[2mm]
@@ -152,8 +209,8 @@ processor). Further details in section~\ref{sec:Timing}.
 \label{sec:intro}
 
 There has been considerable discussion over the past years
-(\eg~\cite{\AllDGLAP}),
-of numerical solutions of the DGLAP equation~\cite{DGLAP} for the
+(\eg~\cite{\AllDGLAP,Ratcliffe:2000kp}), of numerical solutions of the 
+DGLAP equation~\cite{DGLAP} for the
 evolution QCD parton distributions.
 
 
@@ -168,8 +225,9 @@ predictions for hadron-hadron and lepton-hadron colliders.
 Technically, it is a matrix integro-differential equation,
 \begin{equation}
   \label{eq:dglap}
-  \frac{\partial q_i(x,Q^2)}{\partial \ln Q^2} = \int \frac{dz}{z}
-  P_{ij}(z,Q^2) q_j(x,Q^2)\,,
+  \frac{\partial q_i(x,Q^2)}{\partial \ln Q^2} = \frac{\aq}{2\pi}
+ \int_x^1 \frac{dz}{z}
+  P_{ij}\lp z,\aq\rp q_j\lp \frac{x}{z},Q^2\rp\,,
 \end{equation}
 whose kernel elements $P_{ij}(z,Q^2)$ are known as splitting
 functions, since they describe the splitting of a parton of kind $j$
@@ -191,13 +249,19 @@ The pivotal role played by the DGLAP equation has motivated a
 considerable body of literature discussing its numerical solution
 \cite{\AllDGLAP}. There exist two main classes of approach: those that
 solve the equation directly in $x$-space and those that solve it for
-Mellin transforms $q_{iN}(Q^2) = \int dx x^N q_i(x,Q^2)$, of the
-parton densities and susbequently invert the transform back to
+Mellin transforms of the
+parton densities, defined as
+\be
+q_{N}\lp N,Q^2\rp = \int_0^1 dx x^N q_i(x,Q^2) \ ,
+\ee 
+ and subsequently invert the transform back to
 $x$-space. The latter are of interest because the Mellin transform
 converts the convolution of eq.(\ref{eq:dglap}) into a multiplication,
 resulting in a continuum of independent matrix differential (rather
 than integro-differential) equations, one for each value of $N$,
-making the evolution more efficient numerically. 
+making the evolution more efficient numerically. Recently,
+a novel approach has been proposed which combines
+advantages of the $N-$space and $x-$space methods \cite{nnpdf}.
 
 The drawback of the Mellin method is that one needs to know the Mellin
 transforms of both the splitting functions and the initial conditions.
@@ -221,9 +285,9 @@ is that, nearly always, $N_x \sim \ln 1/x_{\min}$ and so the method
 scales as the square of $\ln 1/x_{\min}$, where the Mellin method is
 linear (and $M$ can be kept roughly independent of $x_{\min}$). 
 %
+
 The other issue relates to how one goes to higher numerical
 integration and interpolation orders.
-%
 In $x$-space methods one tends to choose $x$ values that are uniformly
 distributed (be it in $\ln 1/x$ or some other more complex function)
 --- this limits one to higher-order extensions of the Trapezium and
@@ -234,9 +298,10 @@ $\delta x$ is the grid spacing. Higher $n_p$ improves the accuracy,
 but typically $n_p$ can not be taken too large because of large
 cancellations between weights that arise for large $n_p$.
 %
+%
 In the Mellin method one is free to position the $M$ points as one
 likes, and one can then use Gaussian type
-integration~\cite{Kosower,Weinzierl:2002mv,Pegasus}; using $n_p$
+integration~\cite{Weinzierl:2002mv,Pegasus,Kosower:1997hg}; using $n_p$
 points one manages to get a numerical order $2n_p-1$, \ie accuracy
 $\delta^{2n_p}$, and furthermore the integration weights do not suffer
 from large cancellations at large $n_p$, allowing one to increase
@@ -245,17 +310,18 @@ $n_p$, and thus the accuracy, quite considerably.
 Despite it being more difficult to obtain high accuracy with $x$-space
 methods, their greater flexibility means that they are widely used,
 serving as the basis of the widely used QCDNUM program \cite{Botje},
-and being used by the CTEQ~\cite{CTEQ} and MRST~\cite{MRST}
+and being used by the CTEQ~\cite{CTEQ} and MRST/MRSW~\cite{MRST}
+global fitting
 collaborations. Higher-order methods in $x$-space have been developed
 in \cite{Schoeffel:1998tz,Pascaud:2001bi,coriano,GuzziThesis}, and
 more recently have been incorporated also in QCDNUM.
 
-\hoppet, the program presented here uses higher-order methods both for
+\hoppet, the program presented here, uses higher-order methods both for
 the $x$-integrations and $Q$ evolution. It combines this with multiple
 grids in $x$-space: a high-density grid at large $x$ where it is
 hardest to obtain good accuracy, and coarser grids at smaller $x$
 where the smoothness of the PDFs facilitates the integrations. One of
-the other crucial features of the program is that it precalculates as
+the other crucial features of the program is that it pre-calculates as
 much information as possible, so as to reduce the final concrete
 evolution of a new PDF initial condition to a modest set of addition
 and multiplication operations. Additionally, the program provides
@@ -263,135 +329,360 @@ access to a range of low and medium-level operations on PDFs which
 should allow a user to extend the facilities already provided.
 
 
-The functonality described in this article has been present in
-\hoppet's predecessors for several years (they were available on
-request, starting with \cite{DisResum} and used for Benchmark
-comparisons with Pegasus~\cite{Pegasus} in \cite{Benchmarks}), but had
-never been documented.  It is the author's hope that availability of
+The functionality described in this article has been present in
+\hoppet's predecessors for several years (which were available on
+request), but had
+never been documented. 
+\hoppet's ancestors have  been used in a number of different
+contexts, like resummation of event shapes
+in DIS \cite{DisResum}, automated resummation
+of event shapes \cite{caesar}, studies of
+resummation in the small-$x$ limit \cite{Ciafaloni:2003rd}, 
+and in a posteriori inclusion
+of PDFs in NLO final-state calculations \cite{APPL}, as well
+as  used for benchmark
+comparisons with Pegasus~\cite{Pegasus} in \cite{Benchmarks}.
+Since the code had
+not hitherto been released in a documented form, 
+it is the author's hope that availability of
 this documentation may make the package somewhat more useful.
 
 
 %----------------------------------------------------------------------
-\section{Tricks}
+
+\section{Perturbative QCD}
+\label{sec:pqcd}
+In this first section we set up the notation and
+conventions that are used through \hoppet. The DGLAP
+equation for a non-singlet parton distribution reads
+\begin{equation}
+  \label{eq:dglap-ns}
+  \frac{\partial q(x,Q^2)}{\partial \ln Q^2} = 
+\frac{\aq}{2\pi}\int_x^1 \frac{dz}{z}
+  P(z,\aq) q\lp \frac{x}{z},Q^2\rp \equiv 
+\frac{\aq}{2\pi}  P(x,\aq) \otimes q\lp x,Q^2\rp \ ,
+\end{equation}
+where the splitting functions are known up to NNLO:
+\begin{equation}
+  \label{eq:dpdf}
+   P(z,\aq)=P^{(0)}(z)+\frac{\aq}{2\pi}P^{(1)}(z)+
+\lp \frac{\aq}{2\pi} \rp^2 P^{(2)}(z) \ .
+\end{equation}
+The generalization to the singlet case is straightforward.
+The related variable $t\equiv \ln Q^2/Q_0^2$ is also used
+through \hoppet.
+
+As with the splitting functions, all perturbative quantities in
+\hoppet are defined to be a coefficient of $\as/2\pi$. The one
+exception is the $\beta$-function coefficients of the running
+coupling equation:
+\begin{equation}
+  \label{eq:as-ev}
+  \frac{d\as}{d\ln Q^2} = \beta\lp \aq\rp = -\as (\beta_0\as +
+  \beta_1\as^2 + 
+  \beta_2\as^3) \ .
+\end{equation}
+
+The evolution of the strong coupling and the parton distributions can
+be performed in both the fixed flavour-number scheme (FFNS) and the 
+variable flavour-number scheme (VFNS). In the VFNS case we 
+need the matching conditions between the effective
+theories with $n_f$ and $n_{f+1}$ light flavours for both the strong 
+coupling $\aq$ and the parton distributions at the heavy quark
+mass threshold $m_h^2$.
+
+These matching conditions for the parton distributions
+receive non-trivial contributions beginning at NNLO.
+For light quarks $q_{l,i}$ (quarks which are considered massless
+below the heavy quark mass threshold $m_h^2$) the matching reads:
+\be
+\label{eq:lp-nf1}
+  q_{l,i}^{\,(n_f+1)}(x,m_h^2) \: = \:  q_{l,i}^{\,(\nf}(x,m_h^2) +
+\lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
+   A^{\rm ns,(2)}_{qq,h}(x) \otimes
+  q_{l,i}^{\, (\nf}(x,m_h^2) \ ,
+\ee
+where  $i = 1,\ldots n_f$, while for the gluon
+distribution and the heavy quark PDF $q_h$ one has a coupled matching 
+condition:
+\bea
+\label{eq:hp-nf1}
+  g^{(n_f+1)}(x,m_h^2) \:\:\: &\! = \!\! &
+    g^{\, (\nf}(x,m_h^2) 
+\\ &+& \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2 \Big[
+    A_{\rm gq,h}^{S,(2)}(x) \otimes \Sigma^{(\nf}(x,m_h^2) +
+    A_{\rm gg,h}^{S,(2)}(x) \otimes g^{(\nf}(x,m_h^2) \Big ]\ ,
+  \nn \\[0.5mm] 
+  (q_h+\bar{q}_{h})^{(n_f+1)}(x,m_h^2) \! &\! =\!\! &
+   \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2 \Big [
+    \tilde{A}_{\rm hq}^{S,(2)}(x)\otimes \Sigma^{(\nf}(x,m_h^2) 
+    + \tilde{A}_{\rm hg}^{S,(2)}(x)\otimes g^{(\nf}(x,m_h^2) \Big  ] \ ,
+  \quad \nonumber
+\eea
+with $q_h=\bar{q}_h$, and the singlet PDF $\Sigma(x,Q^2)$ is defined
+below. 
+The NNLO matching coefficients were
+computed in \cite{NNLO-MTM}\footnote{The authors are thanked 
+for the code corresponding to the
+calculation.}.
+Notice that the above conditions will lead to small discontinuities
+of the PDFs in its evolution in $Q^2$, 
+which are cancelled by similar matching terms
+in the coefficient functions resulting in continuous physical
+observables. In particular, the heavy quark PDFs start from a non-zero
+value at threshold at NNLO.
+
+The corresponding NNLO relation for the matching of the coupling constant 
+at the heavy quark threshold $m^2_h$ is given by
+\be
+\label{eq:as-nf1}
+  \as^{\, (n_f+1)}(m_h^2) \: = \:
+  \as^{\, (\nf} (m_h^2) +   C_2 \lp \frac{\as^{\, (\nf} (m_h^2)}{2\pi} \rp^3
+   \:\: ,
+\ee
+where the matching coefficient $C_2$ was computed in \cite{Chetyrkin:1997sg}.
+
+
+The default basis for the PDFs, called the \ttt{human} 
+representation through \hoppet, is such that 
+ the entries in an array
+\ttt{pdf(-6:6)} of PDFs correspond to:
+\bea 
+\bar t={-6} \ ,  \bar b={-5} \ ,  \bar c={-4}
+\ , \nn   \bar s&=&{-3} \ , \nn  \bar u={-2} \ , \nn
+ \bar d={-1} \ , \\  g&=&{0} \ , \\ \nn   d={1} \ , \nn  u={2} 
+\ , \nn  
+s={3} \ , \nn   c&=&{4} \ , \nn b={5} \ , \nn  t={6} \ . \nn 
+\eea
+ This representation is the
+same as the one used through the \ttt{LHAPDF} library. 
+However, this representation leads
+to a complicated form of the evolution equations.
+The splitting matrix can be simplified considerably (made diagonal
+except for a $2\times2$ singlet block) by switching to a different
+flavour representation, which is named
+the \ttt{evln} representation, for the PDF basis, as explained in detail in
+\cite{vanNeerven:1999ca,vanNeerven:2000uj}. This representation
+is described in Table \ref{eq:diag_split}.
+
+In this basis, the gluon evolves coupled to the singlet  PDF $\Sigma$,
+and all valence PDFs evolve independently.
+Notice that the representations of the PDFs
+are preserved under linear operations, so in particular
+they are preserved under DGLAP evolution.
+The conversion from the \ttt{human} to the \ttt{evln}
+representations of PDFs requires the number of
+active quark flavours $n_f$, as described in
+Sect. \ref{sec:evln-rep}.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|r | c | l |}
+\hline
+     i & \mbox{name} & $q_i$ \\ \hline
+     $ -6\ldots-(n_f+1)$ & $q_i$ & $q_i$\\
+     $-n_f\ldots -2$ & $q_{\mathrm{NS},i}^{-}$ & 
+$(q_i -  {\bar q}_i) - (q_1 - {\bar q}_1)$\\
+      -1           & $q_{\mathrm{NS}}^{V}$ & 
+$\sum_{j=1}^{n_f} (q_j -  {\bar q}_j)$\\
+       0           & g & \textrm{gluon} \\
+       1           & $\Sigma$ & $\sum_{j=1}^{n_f} (q_j +  {\bar q}_j)$\\
+     $2\ldots n_f$ & $q_{\mathrm{NS},i}^{+}$ &
+$ (q_i +  {\bar q}_i) - (q_1 + {\bar q}_1)$\\
+      $(n_f+1)\ldots6$ & $q_i$ & $q_i$ \\
+\hline
+\end{tabular}
+\caption{}{\label{eq:diag_split} The evolution representation (through
+\hoppet called \ttt{evln})
+of PDFs in terms of the \ttt{human} representation.}  
+\end{center}
+\end{table}
+
+In \hoppet unpolarised DGLAP evolution is available up to NNLO
+in the $\MSbar$ scheme, while for the DIS scheme
+only evolution up to NLO is available. For polarized evolution only
+the $\MSbar$ scheme is available. The variable \ttt{factscheme}
+takes different values for each factorization scheme:
+\begin{center}
+  \begin{tabular}{|c|l|}\hline
+    \ttt{factscheme} & Evolution\\[2pt]\hline
+    1 & unpolarised $\MSbar$ scheme\\[2pt]\hline
+    2 & unpolarised DIS scheme\\[2pt]\hline
+    3 & polarised $\MSbar$ scheme\\\hline
+  \end{tabular}
+\end{center}
+Note that mass thresholds are currently
+missing in the DIS scheme.
+
+%-----------------------------------------------------------------
+\section{Numerical techniques}
 \label{tricks}
+We briefly introduce now the numerical techniques used to perform
+parton evolution: the discretization of PDFs and
+its convolutions with splitting functions on a grid in $x$,
+and the subsequent DGLAP evolution in $Q^2$. 
+
+The first one to be discussed is how to represent PDFs
+and associated convolutions in terms of an interpolating grid
+in $x-$space.
+Note that this technique can be applied to any quantity
+which appears through convolutions, so it is not restricted
+by any means to parton distributions. Then we will describe how
+to
+obtain the solution of the DGLAP evolution equations.
 
 %......................................................................
 \subsection{Higher order matrix representation}
 \label{sec:highord}
 
 
-Given a set of grid points $y_\alpha$, indicated by index $\alpha$ and
+Given a set of $N$ grid points $y_\alpha$, labelled by an
+index $\alpha$ and
 (for convenience) a uniform grid spacing, $y_\alpha = \alpha \delta
-y$, one can approximate a parton distribution function $xq(x,t)$ by
+y$, one can approximate a parton distribution function 
+$xq \lp x,t \rp$\footnote{From the numerical point of view, it is
+advantageous to interpolate $xq$ rather than $q$ itself because
+the former distributions are in general smoother.} by
 interpolating the PDF at the grid points,
 \begin{equation}
-  x q(y=\ln 1/x,t) = \sum_\alpha w_\alpha(y) q_\alpha(t)\,,
+  xq(y=\ln 1/x,t) = \sum_\alpha w_\alpha(y) q_\alpha(t)\,,
 \end{equation}
-where $w_\alpha(y)$ are the interpolation weights, $q_\alpha \equiv
-q(y_\alpha)$, and the sum over $\alpha$ runs over $n+1$ points in the
-vicinty of $y$ for an interpolation order $n$. Note that Greek
+where $w_\alpha(y)$ are the interpolation weights, 
+we have defined
+\begin{equation}
+ q_{\alpha}(t) \equiv
+x_{\alpha}q(y_\alpha,t) \ ,
+\end{equation}
+and the sum over $\alpha$ runs over $n+1$ points in the
+vicinity of $y$ for an interpolation order $n$. Note that Greek
 indices represent the $y$ dimension, while later, Roman indices will
 be used to represent the flavour dimension.
-%
+
+
 The convolution of a single-flavour PDF with a splitting function
-$P(z)$ can be written as
+$P(z,t)$ can be written as
 \begin{equation}
-  (P \otimes q)_\alpha = \sum P_{\alpha\beta} \, q_\beta(t)\,,
+  (P \otimes q)(z,t) = \sum_{\alpha} \omega_{\alpha}(t)
+ (P \otimes q)_\alpha(t) \ ,
 \end{equation}
-where 
+where we have replaced the convolution by its grid representation,
+\begin{equation}
+  (P \otimes q)_\alpha(t) = \sum_{\beta} P_{\alpha\beta}(t) \, q_\beta(t)\,,
+\end{equation}
+where $\beta$ runs over $\mathcal{O}\lp N \rp$ points of the grid and we have
+defined
 \begin{equation}
   \label{eq:Palphabeta}
-  P_{\alpha\beta} = \int dz \,P(z)\, w_\beta(y_\alpha + \ln z)\,.
+  P_{\alpha\beta}(t) = \int_{e^{-y_{\alpha}}}^1 dz
+ \,P(z,t)\, w_\beta(y_\alpha + \ln z)\  .
 \end{equation}
-A virtue of having a uniform grid in $y = \ln 1/x$ is that the
+
+
+A virtue
+ of having a uniform grid in $y = \ln 1/x$ is that the
 interpolation functions can be arranged to have a structure
-$w_\beta(y) = w(y - y_\beta)$, so that $P_{\alpha\beta}$ just depends
+$w_\beta(y) = w_{\beta}(y - y_\beta)$, so that $P_{\alpha\beta}$ just depends
 on $\alpha - \beta$, and can be rewritten $P_{\alpha - \beta}$. A
 slight subtlety arises at large $x$, where if one writes $w_\beta(y) =
-w(y - y_\beta)$ one is effectively assuming an interpolation that uses
+w_{\beta}(y - y_\beta)$ one is effectively assuming an interpolation that uses
 identically zero interpolation points for $x\ge 1$~\cite{coriano},
 even though $xq(x)$ is not formally defined for $x > 1$. In practice
 this is often not too important (because PDFs drop rapidly towards
 $x=1$), but we shall include two options: one that uses effective
 zero-points beyond $x=1$ and one that ensures that the interpolation
-is based only on the physically valid domain of the PDF.
+is based only on the physically valid domain of the PDFs.
 
 %......................................................................
 \subsection{Evolution operators}
 \label{sec:evop}
-Evolution in $t = \ln Q^2$ is easily written
+The DGLAP evolution equation, eq.~(\ref{eq:dglap-ns}), is easily 
+approximated in terms of its grid representation by
 \begin{equation}
-  \partial_t q_{\alpha}(t)  = \sum_{\beta} P_{\alpha\beta}(t) q_\beta(t)\,.
+\label{eq:evol}
+  \partial_t q_{\alpha}(t)  = \frac{\alpha_s(t)}{2\pi}
+\sum_{\beta} P_{\alpha\beta}(t) q_\beta(t) \ ,
 \end{equation}
+where notice that again the sum over $\beta$ extends over
+$\mathcal{O}\lp N \rp$ points of the grid.
 Introducing $M_{\alpha\beta}(t_0) = \delta_{\alpha\beta}$, one can
 alternatively solve
 \begin{equation}
-  \partial_t M_{\alpha\beta}(t)  = \sum_{\gamma} P_{\alpha\gamma}(t)
+  \partial_t M_{\alpha\beta}(t)  = \frac{\alpha_s(t)}{2\pi}
+\sum_{\gamma} P_{\alpha\gamma}(t)
   M_{\gamma\beta}(t)\,.
 \end{equation}
-Then 
+Then the evolved parton distribution at the grid points is
+given by
 \begin{equation}
   q_{\alpha}(t)  = \sum_{\beta} M_{\alpha\beta}(t) q_\beta(t_0)\,.
 \end{equation}
-We refer to $M_{\alpha\beta}(t)$ as an evolution operator.
-%
-If one can rewrite $P$ as $P_{\alpha\beta} = \cal P_{\alpha-\beta}$,
-then similarly one can rewrite $M_{\alpha\beta} = \cal
+We refer to $M_{\alpha\beta}(t)$ as the evolution operator. From 
+a practical point of view, we will solve eq.~(\ref{eq:evol})
+with higher order iterative Runge-Kutta methods, as described in
+Sect. \ref{sec:direct-evolution}.
+
+A further simplification occurs 
+if one can rewrite the splitting functions $P$ as
+a translation invariant object. Using the properties
+discussed in the previous subsection, 
+we can rewrite $P_{\alpha\beta} = \cal P_{\alpha-\beta}$,
+and then similarly one can rewrite $M_{\alpha\beta} = \cal
 M_{\alpha-\beta}$, and it is as simple to determine
 $M_{\alpha\beta}(t)$ as it is to determine the evolution of a single
 vector $q_\alpha$, i.e.\ one just evolves a single column, $\beta =
 0$, of $M_{\alpha\beta}(t)$.
 
 
+
 %----------------------------------------------------------------------
 \section{Single-flavour grids and convolutions}
 
-The software package is written in f90. This has considerable
-advantages compared to f77, as will be seen in the discussion of the
+The software package is written in Fortran~95 (F95). This has considerable
+advantages compared to F77, as will be seen in the discussion of the
 program, though it does lack a number of fully object-oriented
 features and this sometimes restricts the scope for expressiveness.
-Fortran~90 perhaps not being the best known language in the
+Fortran~95 perhaps not being the best known language in the
 high-energy community, occasionally some indications will be give to
 help the reader with less-known language constructs, with further
-information in appendix~\ref{sec:f95appendix}.
+information in Appendix~\ref{sec:f95appendix}.
 
 All routines described in this section need access to the
 \texttt{convolution} module, which can either be obtained directly by
 adding a 
-\begin{verbatim}
+\begin{lstlisting}
   use convolution
-\end{verbatim}
+\end{lstlisting}
 statement at the beginning of the relevant subprogram (before
 any \ttt{implicit none} or similar declarations). Alternatively, as
 with the rest of the routines described in this documentation, it can
 be accessed indirectly through the \ttt{hoppet\_v1} module
-\begin{verbatim}
+\begin{lstlisting}
   use hoppet_v1
-\end{verbatim}
+\end{lstlisting}
 Unless you are delving into the innards of  \hoppet, the latter is
 more convenient since it provides access to everything you are likely
 to need.
 
 %......................................................................
-\subsection{Grid Definitions (\texttt{grid\_def})}
+\subsection{Grid definitions (\texttt{grid\_def})}
 \label{sec:grid}
 
 The grid (in $y$) is the central element of the PDF evolution.
 Information concerning the grid is stored in a derived type
 \texttt{grid\_def}, which can be initialised as follows:
-\begin{verbatim}
+\begin{lstlisting}
   type(grid_def) :: grid
   call InitGridDef(grid,dy=0.1_dp,ymax=10.0_dp,order=3)
-\end{verbatim}
+\end{lstlisting}
 This initialises a grid between $x=1$ and down to $x =
-e^{-\texttt{ymax}}$, with grid spacing in $y = \ln 1/x$ of
-\texttt{dy}. The grid will use 3rd order interpolation.
-
-One notes the use of keyword arguments --- the keywords are not
+e^{-\texttt{ymax}}$, with uniform grid spacing in $y = \ln 1/x$ of
+\texttt{dy}. This grid will use 3rd order interpolation,
+the user can modify this choice to better
+suit his particular needs. One notes 
+the use of keyword arguments --- the keywords are not
 mandatory in this case, but have been included to improve the
-legibility. 
-
-Having defined a grid, the user need not worry about the details of
+legibility. Having defined a grid, 
+the user need not worry about the details of
 the grid representation.
 
 In line with the convention set out in the Fortran~90 edition of
@@ -401,11 +692,25 @@ double precision variables. The integer parameter \ttt{dp} is defined
 in the \texttt{module types} (and available indirectly through
 \ttt{module hoppet\_v1}).
 
-As discussed above, it is often useful to have multiple grids, with
-coarse coverage at small $x$ and fine coverage at high $x$. To support
-this we can first defined an array of sub-grids, and then use it
-initialise a combined grid
-\begin{verbatim}
+It is often useful to have multiple grids, with
+coarser coverage at small $x$ and finer coverage at high $x$, to
+improve the precision the convolution at large-$x$\footnote{
+The reason that denser grids are required at large-$x$ is that
+if a typical parton distributions goes like
+\be
+\lim_{x\to 1} q(x,Q^2) \sim (1-x)^m \ ,
+\ee
+then its logarithmic derivative is divergent,
+\be
+\lim_{x \to 1} \frac{\partial  \ln q(x,Q^2) }{\partial \ln x} = 
+\lim_{x \to 1} \frac{-mx}{1-x} \to -\infty \ ,
+\ee
+and therefore to maintain the accuracy of the evolution, grids
+with denser coverage at large-$x$ are required.}. 
+To support
+this we can first define an array of sub-grids, and then use them to
+initialise a combined grid as follows:
+\begin{lstlisting}
   type(grid_def) :: grid, subgrids(3)
 
   ! define the various sub-grids
@@ -415,7 +720,7 @@ initialise a combined grid
 
   ! put them together into a single combined grid
   call InitGridDef(grid, subgrids, locked=.true.)
-\end{verbatim}
+\end{lstlisting}
 When combining them the \ttt{locked=.true.} option has been specified,
 which ensures that after any convolution, information from the finer
 grids is propagated into the coarser ones. This places some
@@ -426,11 +731,13 @@ provided, then new similar, but more suitable subgrids are
 automatically generated. 
 
 Note that the two kinds of invocation of \ttt{InitGridDef} actually
-correspond to different subroutines. The fortran~90 compiler
+correspond to different (overloaded) subroutines. The Fortran~95 compiler
 automatically selects the correct one on the basis of the types of
 arguments passed.
 
-Though only grids that are uniform in $y$ have been implemented,
+Though only grids that are uniform in $y$ have been implemented
+(although several of these uniform grids, each with different
+spacing and different coverage in $x$ can be combined simultaneously),
 nearly all of the description that follows and all code outside the
 \texttt{convolution} module are independent of this detail (the only
 exception being certain statements about timings). Therefore were
@@ -442,115 +749,112 @@ rest of the library (and its interfaces) would remain unchanged.
 \subsection{$x$-space functions}
 \label{sec:xspc}
 
-Here we encounter our first difficulties, and departure from an
-object-oriented `ideal'. Normal $x$-space functions (such as PDFs) are
+Normal $x$-space functions (such as PDFs) are
 held in double precision arrays, which are to be allocated as follows
-\begin{verbatim}
+\begin{lstlisting}
   real(dp), pointer :: gluon(:)
   call AllocGridQuant(grid,gluon)
-\end{verbatim}
+\end{lstlisting}
 Note that for this to work, \texttt{gluon(:)} should be a
-\texttt{pointer} not just have the \texttt{allocatable} attribute. To
-deallocate a grid quantity, one may safely use the f90
+\texttt{pointer}, and not just 
+have the \texttt{allocatable} attribute. To
+deallocate a grid quantity, one may safely use the F95
 \texttt{deallocate} command.
 
 Since \texttt{gluon(:)} is just an array, it carries no information
 about the \texttt{grid}. Therefore to set and access its value, one
 must always provide the information about the \texttt{grid}. This is
 not entirely satisfactory, and is one of the drawbacks of the use of
-f90, as will be explained later on.
+F95, as will be explained later on.
 
-There are a number of ways of setting a grid quantity. Suppose we have
-a subroutine
-\begin{verbatim}
-  subroutine example_gluon(y,g)
+There are a number of ways of setting a grid quantity. Suppose 
+for example  that we have
+a function
+\begin{lstlisting}
+  function example_gluon(y)
     use types                !! defines "dp" (double precision) kind
     implicit none
     real(dp), intent(in)  :: y
-    real(dp), intent(out) :: g
     real(dp) :: x
     
     x = exp(-y)
-    g = 1.7_dp * x**(-0.1_dp) * (1-x)**5 
-  end subroutine example_gluon
-\end{verbatim}
+    example_gluon = 1.7_dp * x**(-0.1_dp) * (1-x)**5 
+  end function example_gluon
+\end{lstlisting}
+
 Then we can call
-\begin{verbatim}
-  call InitGridQuantSub(grid,gluon,example_gluon)
-\end{verbatim}
+\begin{lstlisting}
+  call InitGridQuant(grid,gluon,example_gluon)
+\end{lstlisting}
 to initialise \texttt{gluon} with a representation of the return value
-from the subroutine \texttt{example\_gluon}. An alternative way is to
-make use of functions \texttt{xValues} or \texttt{yValues} that
-respectively return the $x$ or $y$ values of all points on the grid:
-\begin{verbatim}
-  real(dp), poitner :: gluon,xvals
-  call AllocGridQuant(grid,gluon)
-  call AllocGridQuant(grid,xvals)
-  xvals = xValues(grid)
-  gluon = 1.7_dp * xvals**(-0.1_dp) * (1-xvals)**5 
-  deallocate(xvals)
-\end{verbatim}
-Though more laborious insofar as one has to worry about some extra
-allocation and deallocation, it has the advantage that one no longer
-has to write a separate subroutine.
- 
+from the function \texttt{example\_gluon}.
+Alternative methods for initializing grid quantities
+are described in Appendix \ref{sec:gridinit}.
 
 To then access the gluon at a given value of $y = \ln 1/x$, one
 proceeds as follows
-\begin{verbatim}
+\begin{lstlisting}
   real(dp) :: y, gluon_at_y
   ...
   y = 5.0_dp
   gluon_at_y = EvalGridQuant(grid,gluon,y)
-\end{verbatim}
-We have to supply the \texttt{grid} argument to \ttt{EvalGridQuant}
+\end{lstlisting}
+Note that again we have to supply 
+the \texttt{grid} argument to \ttt{EvalGridQuant}
 because the \ttt{gluon} array itself carries no information about the
 grid (other than its size).
 
 A less efficient, but perhaps more `object-oriented' way of accessing
-the gluon is via the notation \comment{make it more efficient and
-  safe: get \texttt{y.with.grid} to return a structure directly
-  containing weights? Should see how inefficient it really is...}
-\begin{verbatim}
+the gluon is via the notation 
+%\footnote{make it more efficient and
+%  safe: get \texttt{y.with.grid} to return a structure directly
+%  containing weights? Should see how inefficient it really is...}
+\begin{lstlisting}
   gluon_at_y = gluon .aty. (y.with.grid)
-\end{verbatim}
+\end{lstlisting}
 There also exists an \ttt{.atx.} operator for evaluating the PDF at a
 given $x$ value.  Many of these procedures and operators are
 overloaded so as to work with higher-dimensional arrays of grid
-quantities, for example a \texttt{pdf(:,:)}. The first index will
+quantities, for example a multi-flavour
+PDF array \texttt{pdf(:,:)}. The first index will
 always correspond to the representation on the grid, while the second
 index would here indicate the flavour.
 
 Note that arithmetic operators all have higher precedence than
 library-defined operators such as \texttt{.aty.}; accordingly some
 ways of writing things are more efficient than others:
-\begin{verbatim}
-  gluon_at_y = 2 * gluon .aty. (y.with.grid)   ! very inefficient
-  gluon_at_y = 2 * (gluon .aty. (y.with.grid)) ! fairly efficient
-  gluon_at_y = 2 * EvalGridQuant(grid,gluon,y) ! most efficient
-\end{verbatim}
+\begin{lstlisting}
+  gluon_at_y_times_2 = 2 * gluon .aty. (y.with.grid)   ! very inefficient
+  gluon_at_y_times_2 = 2 * (gluon .aty. (y.with.grid)) ! fairly efficient
+  gluon_at_y_times_2 = 2 * EvalGridQuant(grid,gluon,y) ! most efficient
+\end{lstlisting}
 In the first case the whole of the array \texttt{gluon} is multiplied
 by 2, and then the result is evaluated at $y$, whereas in the second
-case only the result of the gluon at $y$ is multiplied by 2.
+and third
+cases only the result of the gluon at $y$ is multiplied by 2.
 
 %......................................................................
-\subsection{Grid Convolution operators}
+\subsection{Grid convolution operators}
 \label{sec:conv}
 
 While it is relatively straightforward internally to represent a
-grid-quantity (e.g.\ parton distribution) as an array, for convolution
+grid-quantity (e.g. a PDF) as an array, for convolution
 operators, it is generally useful to have certain extra
 information. Accordingly a derived type has been defined to hold a
 convolution operator, and routines are provided for allocation and
 initialisation of splitting functions.
-\begin{verbatim}
+% call InitGridConv(Pgg, Pgg_func)
+The following example describes how the $gg$ LO splitting function
+would be used to initialize the corresponding 
+convolution operator:
+\begin{lstlisting}
   type(grid_conv) :: Pgg
   call AllocGridConv(grid,Pgg)
-  call InitGridConv(Pgg, Pgg_func)
-\end{verbatim}
+  call InitGridConv(grid,Pgg, Pgg_func)
+\end{lstlisting}
 where the $P_{gg}$ splitting function is provided in the form of the
 function \texttt{Pgg\_func}
-\begin{verbatim}
+\begin{lstlisting}
   ! returns various components of exp(-y) P_gg (exp(-y))
   real(dp) function Pgg_func(y)
     use types
@@ -561,17 +865,17 @@ function \texttt{Pgg\_func}
     real(dp)             :: x
 
     x = exp(-y); Pgg_func = zero
-    if (cc_piece == cc_DELTA) then 
+    if (cc_piece == cc_DELTA) then   ! Delta function term
        Pgg_func = (11*CA - 4*nf*TR)/6.0_dp
     else
        if (cc_piece == cc_REAL .or. cc_piece == cc_REALVIRT) & 
-           & Pgg_func = 2*CA*(x/(one-x) + (one-x)/x + x*(1-x))
+           & Pgg_func = 2*CA*(x/(one-x) + (one-x)/x + x*(one-x))
        if (cc_piece == cc_VIRT .or. cc_piece == cc_REALVIRT) & 
            & Pgg_func = Pgg_func - 2*CA*one/(one-x)
        Pgg_func = Pgg_func * x       ! remember to return x * Pgg
     end if
   end function Pgg_func
-\end{verbatim}
+\end{lstlisting}
 To address the issue that convolution operators can involve
 plus-distributions and delta functions, the module
 \texttt{convolution\_communicator} contains a variable
@@ -586,42 +890,50 @@ calculate the convolution of the splitting function with trial weight
 functions. The default accuracy for these integrations is $10^{-7}$.
 It can be modified to value \texttt{eps} with the following subroutine
 call
-\begin{verbatim}
+\begin{lstlisting}
   call SetDefaultConvolutionEps(eps)
-\end{verbatim}
+\end{lstlisting}
 which is to be made before creating the \ttt{grid\_def}
-object.\footnote{Alternatively, an optional \ttt{eps} argument can be
-  included in the call to \ttt{InitGridDef}.}  Note that this is just
+object.Alternatively, an optional \ttt{eps} argument can be
+  included in the call to \ttt{InitGridDef} as follows:
+\begin{lstlisting}
+type(grid_def) :: grid
+real(dp) :: eps
+[ ... set eps ... ]
+  call InitGridDef(grid,dy=0.1_dp,ymax=10.0_dp,order=3,eps)
+ \end{lstlisting}
+Note that this is just
 one of the parameters affecting the final accuracy of convolutions. In
 practice (unless going to extremely high accuracies) the grid spacing
 and interpolation scheme are more critical.
 
 Having allocated and initialised a \texttt{Pgg} splitting function, we
 can go on to use it. For example 
-\begin{verbatim}
+\begin{lstlisting}
   real(dp), pointer :: Pgg_x_gluon(:)
   ...
   call AllocGridQuant(grid,Pgg_x_gluon)
   Pgg_x_gluon = Pgg .conv. gluon
-\end{verbatim}  
-Since the return value of \texttt{Pgg .conv.\ gluon} is just an f90
+\end{lstlisting}  
+Since the return value of \texttt{Pgg .conv.\ gluon} is just an F95
 array, one can also write more complex expressions. Supposing we had
 defined also a \texttt{Pgq} splitting function and a singlet
-\texttt{quark} distribution, as well as $\texttt{as2pi} = \as/2\pi$,
+\texttt{quark} distribution \ttt{quark}, 
+as well as $\texttt{as2pi} = \as/2\pi$,
 then to first order in $\as$ we could write the gluon evolution
 through a step \texttt{dt} in $\ln Q^2$ as
-\begin{verbatim}
+\begin{lstlisting}
   gluon = gluon + (as2pi*dt) * ((Pgg .conv. gluon) + (Pgq .conv. quark))
-\end{verbatim}
+\end{lstlisting}
 Note that like \texttt{.aty.}, \texttt{.conv.} has a low precedence,
 so the use of brackets is important to ensure that the above
 expressions are sensible. Alternatively, the issues of precedence can
 be addressed by using \texttt{*} (also defined as convolution when it
 appears between a splitting function and a PDF) instead of
 \texttt{.conv.}:
-\begin{verbatim}
+\begin{lstlisting}
   gluon = gluon + (as2pi*dt) * (Pgg*gluon + Pgq*quark)
-\end{verbatim}
+\end{lstlisting}
 
 
 %......................................................................
@@ -630,7 +942,7 @@ appears between a splitting function and a PDF) instead of
 %
 It is marginally less transparent to manipulate \texttt{grid\_conv} types
 than PDF distributions, but still fairly simple:
-\begin{verbatim}
+\begin{lstlisting}
   call AllocGridConv(grid,Pab)         ! Pab memory allocated 
   call InitGridConv(grid,Pab)          ! Pab = 0             (opt.alloc)
   call InitGridConv(Pab,Pcd[,factor])  ! Pab = Pcd [*factor] (opt.alloc)
@@ -649,7 +961,7 @@ than PDF distributions, but still fairly simple:
                                        !         -matmul(Pb(:,:),Pa(:,:))    
 
   call Delete(Pab)                     ! Pab memory freed
-\end{verbatim}
+\end{lstlisting}
 Routines labelled ``\texttt{(opt.alloc.)}'' allocate the memory for
 the \texttt{grid\_conv} object if the memory has not already been
 allocated. (If it has already been allocated it is assumed to
@@ -660,7 +972,7 @@ no way for the subroutine to deduce which grid is being used.
 
 When creating a \texttt{grid\_conv} object for temporary use, it is
 important to remember to \texttt{Delete} it afterwards, so as to avoid
-memory leaks.
+memory leaks as in the previous example.
 
 Nearly all the routines are partially overloaded so as to be able to
 deal with one and two-dimensional arrays of \texttt{grid\_conv}
@@ -679,7 +991,7 @@ objects directly, for example when trying to create a
 \texttt{grid\_conv} that represents not a fixed order splitting
 function, but the resummed evolution from one scale to another. For
 such situations the following approach can be used
-\begin{verbatim}
+\begin{lstlisting}
   real(dp), pointer :: probes(:,:)
   type(grid_conv)   :: Pqg, Pgq, Presult
   integer           :: i
@@ -690,7 +1002,7 @@ such situations the following approach can be used
   end do
   call AllocGridConv(grid,Presult)
   call SetDerivedConv(Presult,probes) ! Presult = [Pqg,Pgq]
-\end{verbatim}
+\end{lstlisting}
 Here \texttt{GetDerivedProbes} allocates and sets up an array of probe
 parton distributions. Since a single-flavour parton distribution is a
 one-dimensional array of \texttt{real(dp)}, the array of probes is a
@@ -716,7 +1028,7 @@ emulate this with a single \texttt{grid\_def} object, and the locking
 would actually confuse the reconstruction of resulting
 \texttt{grid\_def} object. So when the user requests the probes,
 locking is temporarily turned off globally and then reestablished
-after the derived \texttt{grid\_object} has been contructed. Among
+after the derived \texttt{grid\_object} has been constructed. Among
 other things this means that acting with a derived
 \texttt{grid\_object} will not be fully equivalent to carrying out the
 individual operations separately. In particular the accuracy may be
@@ -733,7 +1045,9 @@ locking).
 \section{Multi-flavour grids and convolutions}
 \label{sec:dglapstructs}
 
-The above discussion holds for any kind of problem involving
+The discussion in the previous section 
+about how to represent functions and associated convolutions
+in a general $x-$space grid holds for any kind of problem involving
 convolutions, even if the examples were given in the context of DGLAP
 evolution. In this section we shall examine the tools made available
 specifically to address the DGLAP evolution problem.
@@ -743,7 +1057,8 @@ specifically to address the DGLAP evolution problem.
 \subsection{Full-flavour PDFs and flavour representations}
 \label{sec:pdf-objects}
 
-The routines described here are available from the \ttt{pdf\_general}
+The routines described in this section
+ are available from the \ttt{pdf\_general}
 and \ttt{pdf\_representation} modules, or via the \ttt{hoppet\_v1}
 general module.
 
@@ -753,29 +1068,41 @@ want \hoppet to deal with allocation for you, they should be pointer
 arrays. One can allocate a single PDF (two dimensional
 \texttt{real(dp)} array) or an array of PDFs (three-dimensional
 \texttt{real(dp)} array)
-\begin{verbatim}
+\begin{lstlisting}
   real(dp), pointer :: PDF(:,:), PDFarray(:,:,:)
   call AllocPDF(grid,PDF)            ! allocates PDF(0:,-6:7)
   call AllocPDF(grid,PDFarray,0,10)  ! allocates PDFarray(0:,-6:7,0:10)
-\end{verbatim}
+\end{lstlisting}
 The first dimension corresponds to the grid in $y$; the second
 dimension corresponds to the flavour index. Its lower bound is $-6$,
-as one would expect. What takes a bit more getting used to is that its
+as one would expect. 
+
+What takes a bit more getting used to is that its
 upper bound is \textbf{7}. The reason is as follows: the flavour
 information can be represented in different ways, for example each
 flavour separately, or alternatively as singlet and non-singlet
 combinations. In practice both are used inside the program and it is
 useful for a PDF distribution to have information about the
-representation it is in --- it is this that is stored in
-\texttt{PDF(:,7)}.
+representation, that is stored in
+\texttt{PDF(:,7)}\footnote{
+In the current release of \hoppet, 
+in particular, for PDFs in the \ttt{human} representation one
+has \texttt{PDF(:,7)=0}, while for PDFs in the \ttt{evln}
+representation, the information on the active number of flavours
+is encoded as
+\ttt{nf = (abs(q(2,7))+abs(q(3,7)))/(abs(q(0,7))+abs(q(1,7)))}.
+
+However this feature might be modified in future
+versions of the program.
+}.
+
 
 %......................................................................
 \subsubsection{Human representation.}
 \label{sec:human-rep}
 When a PDF is allocated it is automatically labelled as being in the
-\ttt{human} representation, in which $\bar t={-6}, \bar b={-5}, \bar
-c={-4}, \bar s={-3}, \bar u={-2}, \bar d={-1}, g={0}, d={1}, u={2},
-s={3}, c={4}, b={5}, t={6} $. Constants with names like
+\ttt{human} representation, described in
+Sect. \ref{sec:pqcd}. Constants with names like
 \ttt{iflv\_bbar}, \ttt{iflv\_g}, \ttt{iflv\_b}, are defined in
 \ttt{module pdf\_representation}, to facilitate symbolic access to the
 different flavours.
@@ -786,7 +1113,7 @@ a function that returns a PDF, then you should label it yourself as
 being in the \ttt{human} representation, either with the the
 \ttt{LabelPdfAsHuman(pdf)} subroutine call, or by setting
 \ttt{pdf(:,7)} to zero:
-\begin{verbatim}
+\begin{lstlisting}
 module pdf_initial_condition
   use hoppet_v1; implicit none
 contains
@@ -805,56 +1132,57 @@ contains
     [... set other flavours here ...]
   end function unpolarized_dummy_pdf
 end module pdf_initial_condition
-\end{verbatim}
+\end{lstlisting}
 The function has been placed in a module so as to provide an easy way
 for a calling routine to have access to its interface (this is needed
 for the dimension of \ttt{xvals} to be correctly passed).  Writing a
 function such as that above is probably the easiest way of
 initialising a pdf:
-\begin{verbatim}
+\begin{lstlisting}
   use hoppet_v1; use pdf_initial_condition; implicit none
   type(grid_def)    :: grid
   real(dp), pointer :: pdf(:,:)
   [...]
   call AllocPDF(grid,pdf)
   pdf = unpolarized_dummy_pdf(xValues(grid))
-\end{verbatim}
+\end{lstlisting}
 There exist a number of other options, which can be found by browsing
 through \ttt{src/pdf\_general.f90}. Of these a sometimes handy one is
-\begin{verbatim}
+\begin{lstlisting}
   call AllocPDF(grid,pdf)
   call InitPDF_LHAPDF(grid, pdf, LHAsub, Q)
-\end{verbatim}
+\end{lstlisting}
 where \texttt{LHAsub} is the name of a subroutine 
 %(to be declared
 %\ttt{external} if an explicit interface is not available?) 
 with the same interface as LHAPDF's \ttt{evolvePDF} \cite{LHAPDF}:
-\begin{verbatim}
+\begin{lstlisting}
   subroutine LHAsub(x,Q,res)
     use types; implicit none
     real(dp), intent(in)  :: x,Q
     real(dp), intent(out) :: res(*) ! on output contains flavours -6:6 at x,Q
     [...]
   end subroutine LHAsub
-\end{verbatim}
+\end{lstlisting}
 
 
 Having initialised a PDF, to then extract it at a given $y$ value, one
 can either examine a particular flavour using the methods described in
-section~\ref{sec:xspc}
-\begin{verbatim}
+Sect~\ref{sec:xspc}
+% gluon_at_y = 2 * EvalGridQuant(grid,pdf(:,iflv_g),y) 
+\begin{lstlisting}
   real(dp) :: y, gluon_at_y
   gluon_at_y = pdf(:,iflv_g) .aty. (y.with.grid)
   ! OR
-  gluon_at_y = 2 * EvalGridQuant(grid,pdf(:,iflv_g),y) 
-\end{verbatim}
+ gluon_at_y = EvalGridQuant(grid,pdf(:,iflv_g),y) 
+\end{lstlisting}
 or one can extract all flavours simultaneously
-\begin{verbatim}
+\begin{lstlisting}
   real(dp) :: pdf_at_y(-6:6)
   pdf_at_y = pdf(:,-6:6) .aty. (y.with.grid)
   ! OR
-  pdf_at_y = 2 * EvalGridQuant(grid,pdf(:,-6:6),y) 
-\end{verbatim}
+  pdf_at_y =  EvalGridQuant(grid,pdf(:,-6:6),y) 
+\end{lstlisting}
 with the latter being more efficient if one needs to extract all
 flavours simultaneously. Note that here we have explicitly specified
 the flavours, here \ttt{-6:6}, that we want.\footnote{If instead we had
@@ -864,10 +1192,10 @@ the flavours, here \ttt{-6:6}, that we want.\footnote{If instead we had
 
 
 %......................................................................
-\subsubsection{Evolution representation.} 
+\subsubsection{Evolution representation} 
 \label{sec:evln-rep}
 %
-For the purpose of carrying out convolutions the \ttt{human}
+For the purpose of carrying out convolutions, the \ttt{human}
 representation is not very advantageous because the splitting matrix
 in flavour space is quite complicated. Accordingly \hoppet uses a
 different representation of the flavour internally when carrying out
@@ -879,24 +1207,9 @@ repeated convolutions for a fixed $n_f$ value (appropriate manual
 changes of the flavour representation can speed things up).
 
 
-The splitting matrix can be simplied considerably (made diagonal
-except for a $2\times2$ singlet block) by switching to a different
-flavour representation for \ttt{pdf(:,i)}, as explained in detail in
-\cite{vanNeerven:1999ca,vanNeerven:2000uj}
-\begin{equation}
-  \label{eq:diag_split}
-  \begin{array}{r | l| l }
-     i & \mbox{name} & q_i \\ \hline
-      -6\ldots-(n_f+1) & q_i & q_i\\
-     -n_f\ldots -2 & q_{\mathrm{NS},i}^{-} & (q_i -  {\bar q}_i) - (q_1 - {\bar q}_1)\\
-      -1           & q_{\mathrm{NS}}^{V} & \sum_{j=1}^{n_f} (q_j -  {\bar q}_j)\\
-       0           & g & \textrm{gluon} \\
-       1           & \Sigma & \sum_{j=1}^{n_f} (q_j +  {\bar q}_j)\\
-     2\ldots n_f & q_{\mathrm{NS},i}^{+} & (q_i +  {\bar q}_i) - (q_1 + {\bar q}_1)\\
-      (n_f+1)\ldots6 & q_i & q_i
-  \end{array}
-\end{equation}
-When carrying out a convolution, the only non-diagonal part is the
+The splitting matrix can be simplified considerably by switching to a different
+flavour representation, as can be seen in Table \ref{eq:diag_split}. 
+ When carrying out a convolution, the only non-diagonal part is the
 block containing indices $0,1$. This representation is referred to as
 the \ttt{evln} representation. Whereas the \ttt{human} representation
 is $n_f$-independent the \ttt{evln} depends on $n_f$ through the
@@ -906,19 +1219,34 @@ inactive for evolution with $n_f$ flavours).
 
 To take a PDF in the \ttt{human} representation and make a copy in an
 \ttt{evln} representation, one uses the \ttt{CopyHumanPdfToEvln} routine
-\begin{verbatim}
+\begin{lstlisting}
   real(dp), pointer :: pdf_human(:,:), pdf_evln(:,:)
+  type(pdf_rep)     :: prep
   integer           :: nf_lcl
-
   [... setting up pdf_human, nf_lcl, etc. ...] 
   call AllocPDF(grid,pdf_evln)  ! or it might be an automatic array
   call CopyHumanPdfToEvln(nf_lcl, pdf_human, pdf_evln)
-\end{verbatim}
+  prep%nf=nf_lcl
+  call CopyHumanPdfToEvln(prep, pdf_human, pdf_evln) ! Alternative use
+\end{lstlisting}
 where one specifies the $n_f$ value for the \ttt{evln} representation.
 One can go in the opposite direction with
-\begin{verbatim}
+\begin{lstlisting}
   call CopyEvlnPdfToHuman(nf_lcl, pdf_evln, pdf_human)
-\end{verbatim}
+\end{lstlisting}
+At any time one can check which is the representation of a given
+PDF using the \ttt{GetPdfRep} function,
+\begin{lstlisting}
+  integer nf_rep
+  real(dp), pointer :: pdf(:,:),
+
+  [... set up pdf, ...]
+  nf_rep = GetPdfRep(pdf)
+\end{lstlisting}
+which returns the number of active flavours if the PDF is in the
+\ttt{evln} representation, or an negative integer if 
+the PDF is in the
+\ttt{human} representation.
 
 
 %----------------------------------------------------------------------
@@ -927,25 +1255,25 @@ One can go in the opposite direction with
 \label{sec:splitt-funct-matr}
 
 Splitting function matrices and their actions on PDFs are defined in
-\ttt{module dglap\_objects} (accessible as usual from \ttt{module
+   ~\ttt{module dglap\_objects} (accessible as usual from \ttt{module
   hoppet\_v1}). They have type \ttt{split\_mat}. Below we shall discuss
 routines for creating specific predefined DGLAP splitting matrices,
 but for now we consider a general splitting matrix.
 
-Allocation,
-\begin{verbatim}
+The allocation of \ttt{split\_mat} objects,
+\begin{lstlisting}
   type(split_mat) :: P
   integer         :: nf_lcl
   call AllocSplitMat(grid, P, nf_lcl)
-\end{verbatim}
-is similar to that for \ttt{dglap\_objects}. The crucial difference is
+\end{lstlisting}
+is similar to that for \ttt{grid\_conv} objects. The crucial difference is
 that one must supply a value for $n_f$, so that when the splitting
 matrix acts on a PDF it knows which flavours are decoupled. From the
 point of view of subsequent initialization a \ttt{split\_mat} object
-just consists of a set of splitting functions, which act on the
-components given in eq.(\ref{eq:diag_split}). If need be, they can be
+just consists of a set of splitting functions. 
+If need be, they can be
 initialized by hand, for example
-\begin{verbatim}
+\begin{lstlisting}
   call InitGridConv(grid,P%qq      , P_function_qq      )
   call InitGridConv(grid,P%qg      , P_function_qg      )
   call InitGridConv(grid,P%gq      , P_function_gq      )
@@ -953,15 +1281,15 @@ initialized by hand, for example
   call InitGridConv(grid,P%NS_plus , P_function_NS_plus )
   call InitGridConv(grid,P%NS_minus, P_function_NS_minus)
   call InitGridConv(grid,P%NS_V    , P_function_NS_V    )
-\end{verbatim}
+\end{lstlisting}
 We can then write
-\begin{verbatim}
+\begin{lstlisting}
   real(dp), pointer :: q(:,:), delta_q(:,:)
   [... allocations, etc. ...]
   delta_q = P .conv. q
   ! OR
   delta_q = P * q
-\end{verbatim}
+\end{lstlisting}
 and $\ttt{delta\_q}$ will have the following components
 \begin{align}
   \label{eq:Pmat_on_q}
@@ -1012,19 +1340,19 @@ advantageous to manually change into the appropriate \ttt{evln}
 representation, carry out all the convolutions and then change back to
 the \ttt{human} manually representation at the end.
 %
-\comment{Caveat: currently the internal information in \ttt{q(:,7)}
-  does not distinguish between \ttt{evln} representations for
-  different $n_f$ values; so if \ttt{q} is in the \ttt{evln}
-  representation for the wrong $n_f$ value you will get a wrong
-  answer. This is bad and should be fixed!}
+%  \comment{Caveat: currently the internal information in \ttt{q(:,7)}
+%  does not distinguish between \ttt{evln} representations for
+%  different $n_f$ values; so if \ttt{q} is in the \ttt{evln}
+%  representation for the wrong $n_f$ value you will get a wrong
+%  answer. This is bad and should be fixed! Trivial modification: add
+%  the information in q(:,7).}
 
 As for \ttt{grid\_conv} objects, a variety of routines have been
 implemented to help manipulate splitting matrices:
-\begin{verbatim}
+\begin{lstlisting}
   type(split_mat) :: PA, PB, PC
   real(dp) :: factor
 
-  -- InitSplitMat(grid, PA) ???
   call InitSplitMat(PA,PB[,factor])   ! PA = PB [*factor]   (opt.alloc)
 
   call SetToZero(PA)                  ! PA = 0
@@ -1035,7 +1363,7 @@ implemented to help manipulate splitting matrices:
   call SetToCommutator(PA,PB,PC)      ! PA = PB*PC-PC*PB    (opt.alloc)
   
   call Delete(split_mat)                   ! PA's memory freed
-\end{verbatim}
+\end{lstlisting}
 
 
 %......................................................................
@@ -1045,21 +1373,24 @@ implemented to help manipulate splitting matrices:
 As with \ttt{grid\_conv} objects, \hoppet provides means to construct
 a \ttt{split\_mat} object that corresponds to an arbitrary series of
 \ttt{split\_mat} operations, as long as they all involve the same
-value of $n_f$. One proceeds in a very similar way,
-\begin{verbatim}
+value of $n_f$. One proceeds in a very similar way than
+in Sect. \ref{sec:derived_grid_conv},
+\begin{lstlisting}
   real(dp), pointer :: probes(:,:,:)
   type(split_mat)  :: PA, PB, Pcomm
   integer           :: i
 
-  [...]
-  call GetDerivedSplitMatProbes(grid,probes) ! get the probes
+  [...set nf_lcl,...]
+  call GetDerivedSplitMatProbes(grid,nf_lcl,probes) ! get the probes
   do i = 1, size(probes,dim=3)               ! carry out operations on each probe
     probes(:,:,i) = PA*(PB*probes(:,:,i)) - PB*(PA*probes(:,:,i))
   end do
   call AllocSplitMat(grid,Pcomm,nf_lcl)      ! provide nf info in initialisation
   call SetDerivedConv(Pcomm,probes)          ! Presult = [Pqg,Pgq]
-\end{verbatim}
-As in section~\ref{sec:derived_grid_conv}, we first need to set up
+\end{lstlisting}
+Notice that we need to provide the number of active quark flavours
+to \ttt{GetDerivedSplitMatProbes}.
+As in Sect~\ref{sec:derived_grid_conv}, we first need to set up
 some `probe' PDFs (note the extra dimension compared to earlier, since
 we also have flavour information; the probe index always corresponds
 to the last dimension); then we act on those probes; finally we
@@ -1083,53 +1414,47 @@ summarize how they are dealt with within the program.
 The treatment of the QCD constants is \emph{not} object oriented.
 There is a module (\ttt{qcd}) that provides access to commonly used
 constants in QCD:
-\begin{verbatim}
+\begin{lstlisting}
   real(dp) :: ca, cf, tr, nf
   integer  :: nf_int
   
   real(dp) :: beta0, beta1, beta2
   [ ... ]
-\end{verbatim}
-Note that \ttt{nf} is in double precision\footnote{The author has
-  forgotten why, but suspects there might be some good reason and is
-  therefore nervous of changing it!} --- if you want the integer value
-of $n_f$, use \ttt{nf\_int}. 
+\end{lstlisting}
+Note that \ttt{nf} is in double precision
+%\footnote{The author has
+%  forgotten why, but suspects there might be some good reason and is
+%  therefore nervous of changing it!}
+ --- if you want the integer value of $n_f$, use \ttt{nf\_int}. 
 
 To set the value of $n_f$, call
-\begin{verbatim}
+\begin{lstlisting}
   integer :: nf_lcl
   call qcd_SetNf(nf_lcl)  
-\end{verbatim}
-where we've used the variable \ttt{nf\_lcl} to avoid conflicting with
+\end{lstlisting}
+where we have used the local 
+variable \ttt{nf\_lcl} to avoid conflicting with
 the \ttt{nf} variable provided by the \ttt{qcd} module. Whatever you
 do, do not simply modify the value of the \ttt{nf} variable by hand
---- when you call \ttt{qcd\_SetNf} is adjusts a whole set of other
+--- when you call \ttt{qcd\_SetNf} it adjusts a whole set of other
 constants (\eg the $\beta$ function coefficients) appropriately.
 
 There are situations in which it's of interest to vary the other
-colour factors of QCD --- for that purpose, use
-\begin{verbatim}
+colour factors of QCD, for example, if these
+color factors are to be determined from a fit
+to deep-inelastic scattering experimental data. For that purpose, use
+\begin{lstlisting}
   real(dp) :: ca_lcl, cf_lcl, tr_lcl
   call qcd_SetGroup(ca_lcl, cf_lcl, tr_lcl)
-\end{verbatim}
+\end{lstlisting}
 Again all other constants in the \ttt{qcd} module will be adjusted. A
 word of caution: the NNLO splitting functions actually depend on a
 colour structure that goes beyond the usual $C_A$, $C_F$ and $T_R$,
-namely $d_{abc}d^{abc}$. The means for setting this have yet to be
-implemented. \comment{Fix this?}
+namely $d_{abc}d^{abc}$, which in the present version of \hoppet
+is hard-wired to its default QCD value.
 
 
-A comment regarding normalizations: nearly everything perturbative in
-\hoppet is defined to be a coefficient of $\as/2\pi$. The one
-exception is the $\beta$-function coefficients:
-\begin{equation}
-  \label{eq:as-ev}
-  \frac{d\as}{d\ln Q^2} = -\as (\ttt{beta0}\cdot \as +
-  \ttt{beta1}\cdot \as^2 + 
-  \ttt{beta2} \cdot\as^3).
-\end{equation}
-There's no good reason for this. \comment{But now's not the time to
-  change it.}
+
 
 %......................................................................
 \subsubsection{DGLAP splitting matrices}
@@ -1138,7 +1463,7 @@ There's no good reason for this. \comment{But now's not the time to
 The module \ttt{dglap\_objects} includes a number of routines for
 providing access to the \ttt{split\_mat} objects corresponding to
 DGLAP splitting functions
-\begin{verbatim}
+\begin{lstlisting}
   type(split_mat) :: P_LO, P_NLO, P_NNLO
   type(split_mat) :: Pp_LO, Pp_NLO        ! polarized
 
@@ -1150,98 +1475,56 @@ DGLAP splitting functions
   ! the MSbar polarized case...
   call InitSplitMatPolLO (grid, Pp_LO)
   call InitSplitMatPolNLO(grid, Pp_NLO)
-\end{verbatim}
+\end{lstlisting}
 In each case the splitting function is set up for the $n_f$ and
 colour-factor values that are current in the $\ttt{qcd}$ module, as
 set with the \ttt{qcd\_SetNf} and \ttt{qcd\_SetGroup} subroutine calls. If one
 subsequently resets the $n_f$ or color factor values, the \ttt{split\_mat}
 objects continue to correspond to the $n_f$ and colour factor values
 for which they were initially calculated.
-
 With the above subroutines for initializing DGLAP splitting functions,
-the normalisation is such that 
-\begin{equation}
-  \label{eq:dpdf}
-  \frac{dq}{d\ln Q^2} \equiv \frac{dq}{dt} = \frac{\as}{2\pi}\,
-  \ttt{P\_LO} \otimes q +  
-                        \left(\frac{\as}{2\pi}\right)^2 \ttt{P\_NLO}
-                        \otimes q + \ldots
-\end{equation}
-In practice because convolutions take a time $\order{N^2}$ whereas
+the normalisation is given in eq.~(\ref{eq:dpdf}).
+
+In practice, because convolutions take a time $\order{N^2}$, where
+$N$ is the number of points in the grid, whereas
 additions and multiplications take a time $\order{N}$, in a program it
-is better to first sum the splitting matrices and then carry out the
+is more efficient to first sum the splitting matrices and then carry out the
 convolution,
-\begin{verbatim}
+\begin{lstlisting}
   type(split_mat)   :: P_sum
-  real(dp), pointer :: q(:,:), dq
+  real(dp), pointer :: q(:,:), dq(:,:)
   [ ... ]
   call InitSplitMat(P_sum, P_LO)            ! P_sum = P_LO
   call AddWithCoeff(P_sum, P_NLO, as2pi)    ! P_sum = P_sum + as2pi * P_NLO
-  dq = (as2pi * dt) * (P_sum .conv. q)
-  call Delete(P_sum)
-\end{verbatim}
+  dq = (as2pi * dt) * (P_sum .conv. q)      ! Step dt in evolution
+  call Delete(P_sum)                        ! Memory freed
+\end{lstlisting}
 Note the use of brackets in the line setting \ttt{dq}: all scalar
 factors are first multiplied together ($\order{1}$) so that we only
 have one multiplication of a PDF ($\order{N}$). Note also that we have
 chosen to include the \ttt{(as2pi * dt)} factor as multiplying the
 pdf, rather than the other option of multiplying {P\_sum}, \ie 
-\begin{verbatim}
+\begin{lstlisting}
   call Multiply(P_sum, (as2pi * dt))
   dq =  P_sum .conv. q
-\end{verbatim}
+\end{lstlisting}
 The result would have been identical, but splitting matrices with
 positive interpolation \ttt{order} essentially amount to an
 $\order{7\times \ttt{order} \times N}$ sized array, whereas the PDF is
 an $\order{13 N}$ sized array and the for high positive orders that
-are sometimes used, it is cheaper to multiply the latter.
+are sometimes used, it is cheaper to multiply the latter. 
 
-A remark concerning NNLO splitting functions: the exact NNLO splitting
-functions derived by Moch, Vermaseren and Vogt
-\cite{NNLO-NS,NNLO-singlet} involve long (multi-page) expressions in
-terms of harmonic polylogarithms of up to weight 4. Very conveniently,
-refs.~\cite{NNLO-NS,NNLO-singlet} provide the expressions directly in
-terms of fortran code.
-%
-The harmonic polylogarithms can be evaluated using the \ttt{hplog}
-package of Gehrmann and Remiddi \cite{FortranPolyLog}, a copy of which
-is included with the \hoppet package. 
+The default for the NNLO splitting functions are the interpolated
+expressions, which are very fast
+to evaluate. Other possibilities, like
+the exact splitting functions or a previous set of approximated NNLO
+splitting functions which was used before the full
+calculation was available are described in Appendix \ref{sect:nnlo}.
+Notice that the QCD color factors introduced in Sect. \ref{sec:qcd}
+cannot be modified if the interpolated NNLO splitting functions
+are used, since these expressions use the default QCD values.
 
-The initial integrations needed to create the \ttt{split\_mat} objects
-for the exact NNLO splitting functions for the full range of $n_f$
-take of the order of minutes.  Since currently there is no option of
-storing the splitting matrices in a file, this can be a bit
-bothersome. So instead, by default, the program uses the approximate,
-parameterized NNLO splitting functions also provided in
-\cite{NNLO-NS,NNLO-singlet}. The parameterized splitting functions are
-guaranteed to be accurate to within $0.1\%$ --- in practice since they
-come in relatively suppressed by two powers of $\as$, the impact on
-the evolution tends to be of the order $10^{-5}$ relative effect
-\cite{Benchmarks}.
 
-The user can choose whether to obtain the exact or parameterized NNLO
-splitting functions using the following calls (to be made before
-initialising the splitting matrices)
-\begin{verbatim}
-  integer :: splitting_variant
-  call dglap_Set_nnlo_splitting(splitting_variant)
-\end{verbatim}
-with the following variants defined (as integer parameters) in the
-module \ttt{dglap\_choices}:
-\begin{verbatim}
-  nnlo_splitting_exact
-  nnlo_splitting_param                   [default]
-  nnlo_splitting_Nfitav
-  nnlo_splitting_Nfiterr1
-  nnlo_splitting_Nfiterr2
-\end{verbatim}
-The last 3 are the parameterizations based on fits to reduced moment
-information carried out in \cite{vanNeerven:1999ca,vanNeerven:2000uj}.
-Though at the time they represented a valuable (and much used) step on
-the way to full NNLO results, nowadays their interest is mainly
-historical.
-
-Note that only for the \ttt{nnlo\_splitting\_exact} can the colour
-constants be varied (with the caveat about $d^{abc}d_{abc}$).
 
 
 
@@ -1250,19 +1533,18 @@ constants be varied (with the caveat about $d^{abc}d_{abc}$).
 \label{sec:mtm}
 
 Still in the \ttt{dglap\_objects} module, we have a type dedicated to
-crossing mass thresholds.
-\begin{verbatim}
+crossing heavy quark mass thresholds.
+\begin{lstlisting}
   type(grid_def)           :: grid
   type(mass_threshold_mat) :: MTM_NNLO
 
   call InitMTMNNLO(grid, MTM_NNLO)   ! MTM_NNLO is coeff of (as/2pi)**2
-\end{verbatim}
-This is the coefficient, calculated by Buza et al. \cite{NNLO-MTM}
-(the authors are thanked for the code corresponding to the
-calculation), of $(\as/2\pi)^2$ for the convolution matrix that
+\end{lstlisting}
+This is the coefficient  of $(\as/2\pi)^2$ for the convolution matrix that
 accounts for crossing a heavy flavour threshold in $\MSbar$
-factorization scheme, at $\mu_F = M_H^\mathrm{pole}$, where
-$M_H^\mathrm{pole}$ is the heavy-quark pole mass. Since the
+factorization scheme, at $\mu_F = m_h$, where
+$m_h$ is the heavy-quark pole mass, as has
+been described in Sect. \ref{sec:pqcd}. Since the
 corresponding NLO term is zero, the number of flavours in $\as$ is
 immaterial at NNLO (even at NNNLO).
 
@@ -1277,24 +1559,28 @@ require that before using a \ttt{mass\_threshold\_mat}, you should
 explicitly indicate the number of flavours (defined as including the
 new heavy flavour). This is done using a call to the
 \ttt{SetNfMTM(MTM\_NNLO,nf\_incl\_heavy)} subroutine. So for example
-to take a pdf from 3 flavours to 4 at $\mu_F = M_H^\mathrm{pole}$ one
+to take a PDF in the effective theory with
+$n_f=3$ active flavours \ttt{pdf\_nf3}, and convert it
+to the corresponding PDF in the effective theory with
+$n_f=4$ active flavours \ttt{pdf\_nf4} at $m_h^2$, one
 uses code analogous to the following
-\begin{verbatim}
+\begin{lstlisting}
   real(dp) :: pdf_nf3(:,:), pdf_nf4(:,:)
   [ ... ]
   call SetNfMTM(MTM, 4)
   pdf_nf4 = pdf_nf3 + (as2pi)**2 * (MTM_NNLO.conv.pdf_nf3)
-\end{verbatim}
+\end{lstlisting}
 The convolution only works if the \ttt{pdf}'s are in the \ttt{human}
 representation and an error is given if this is not the case. Any
-heavy flavour (charm) present in \ttt{pdf\_nf3} is ignored.
+heavy flavour (like for example intrinsic charm) 
+present in \ttt{pdf\_nf3} would be ignored.
 
 Note that this type is not currently suitable for general changes of
 flavour-number. For example if you wish to carry out a change in the
-DIS scheme or at a scale $\mu_F \neq M_H^\mathrm{pole}$ then you have
+DIS scheme or at a scale $\mu_F \neq m_h$ then you have
 to combine a series of different convolutions (essentially correcting
 with the lower number of flavours to the $\MSbar$ factorization scheme
-at $\mu_F = M_H^\mathrm{pole}$ before changing the number of flavours
+at $\mu_F = m_h$ before changing the number of flavours
 and then correcting back to the original scheme and scale using the
 higher number of flavours).
 
@@ -1309,16 +1595,16 @@ component of the mass-threshold function that is complex enough to
 warrant parameterization). The variant can be chosen by the user
 before initialising the \ttt{mass\_threshold\_mat} by making the
 following subroutine call:
-\begin{verbatim}
+\begin{lstlisting}
   integer :: threshold_variant
   call dglap_Set_nnlo_nfthreshold(threshold_variant)
-\end{verbatim}
+\end{lstlisting}
 with the following variants defined (as integer parameters), again in
 the module \ttt{dglap\_choices}:
-\begin{verbatim}
+\begin{lstlisting}
   nnlo_nfthreshold_exact
   nnlo_nfthreshold_param                 [default]
-\end{verbatim}
+\end{lstlisting}
 
 
 %......................................................................
@@ -1337,37 +1623,39 @@ type, $\ttt{dglap\_holder}$ which holds all the components needed for
 a given kind of evolution. To initialize all information for a
 fixed-flavour number evolution, one does as follows
 %
-\begin{verbatim}
+\begin{lstlisting}
   use hoppet_v1
   type(dglap_holder) :: dglap_h
   integer            :: factscheme, nloop, nf_lcl  
 
   nloop      = 3                 ! NNLO
   factscheme = factscheme_MSbar  ! or: factscheme_DIS; factscheme_PolMSbar
-  call qcd_SetNf(4)              ! set the fixed number of flavours
+  nf_lcl = 4
+  call qcd_SetNf(nf_lcl)         ! set the fixed number of flavours
   ! call qcd_SetGroup(...)       ! if you want different colour factors
 
   ! now do the initialization
   call InitDglapHolder(grid, dglap_h, factscheme, nloop)
-\end{verbatim}
+\end{lstlisting}
 The constants \ttt{factscheme\_*} are defined in \ttt{module
   dglap\_choices}. %
 The corrections to the splitting functions to get the DIS scheme are
 implemented by carrying out appropriate convolutions of the $\MSbar$
 splitting and coefficient functions. Currently the DIS scheme is only
-implemented to NLO. (It's NNLO implementation would actually be fairly
+implemented to NLO\footnote{It's NNLO implementation would actually be fairly
 straightforward given the parameterizations provided in
-\cite{White:2005wm}) The polarised splitting functions are only known
-to NLO.
+\cite{White:2005wm}, and will be performed in
+future releases of \hoppet}.
+ The polarised splitting functions are only known to NLO.
 
 Initialization can also be carried out with a single call go for a range of
 different numbers of flavours:
-\begin{verbatim}
+\begin{lstlisting}
   integer :: nflo, nfhi
   [...]
   nflo = 3; nfhi = 6    ! [calls to qcd_SetNf handled automatically]
   call InitDglapHolder(grid, dglap_h, factscheme, nloop, nflo, nfhi)
-\end{verbatim}
+\end{lstlisting}
 Mass thresholds are not currently correctly supported in the DIS
 scheme.
 
@@ -1375,11 +1663,11 @@ For all the above calls, at NNLO the choice of exact of parameterized
 splitting functions and mass thresholds is determined by the calls to
 \ttt{dglap\_Set\_nnlo\_splitting} and
 \ttt{dglap\_Set\_nnlo\_nfthreshold}, as described in
-sections~\ref{sec:dglap-split}, \ref{sec:mtm} respectively. These
+Sect~\ref{sec:dglap-split} and \ref{sec:mtm} respectively. These
 calls must be made prior to the call to \ttt{InitDglapHolder}.
 
 Having initialised a \ttt{dglap\_holder} one has access to various components:
-\begin{verbatim}
+\begin{lstlisting}
   type dglap_holder
     type(split_mat), pointer :: allP(1:nloop, nflo:nfhi)  ! FFNS: nflo=nfhi=nf_lcl
     type(split_mat), pointer :: P_LO, P_NLO, P_NNLO
@@ -1389,7 +1677,7 @@ Having initialised a \ttt{dglap\_holder} one has access to various components:
     integer                  :: nf
     [ ... ]
   end type dglap holder
-\end{verbatim}
+\end{lstlisting}
 Some just record information passed on initialisation, for example
 \ttt{factscheme} and \ttt{nloop}. Other parts are set up once and for
 all on initialisation, notably the \ttt{allP} matrix, which contains
@@ -1398,15 +1686,15 @@ range.
 
 Yet other parts of the \ttt{dglap\_holder} type depend on $n_f$.
 Before accessing these, one should first perform the following call:
-\begin{verbatim}
-  call SetNfDglapHolder(dh, nf_lcl)
-\end{verbatim}
+\begin{lstlisting}
+  call SetNfDglapHolder(dglap_h, nf_lcl)
+\end{lstlisting}
 This creates links:
-\begin{verbatim}
-  dh%P_LO   => dh%allP(1,nf_lcl)
-  dh%P_NLO  => dh%allP(2,nf_lcl)
-  dh%P_NNLO => dh%allP(3,nf_lcl)
-\end{verbatim}
+\begin{lstlisting}
+  dglap_h%P_LO   => dglap_h%allP(1,nf_lcl)
+  dglap_h%P_NLO  => dglap_h%allP(2,nf_lcl)
+  dglap_h%P_NNLO => dglap_h%allP(3,nf_lcl)
+\end{lstlisting}
 for convenient named access to the various splitting matrices, and it
 also sets the global (\ttt{qcd}) $n_f$ value (via a call to
 \ttt{qcd\_SetNf}) and where relevant updates the internal $n_f$ value
@@ -1414,15 +1702,18 @@ associated with \ttt{MTM2} (via a call to \ttt{SetNfMTM}).
 
 As with other types that allocate memory for derived types, that
 memory can be freed via a call to the \ttt{Delete} subroutine,
-\begin{verbatim}
-  call Delete(dh)
-\end{verbatim}
+\begin{lstlisting}
+  call Delete(dglap_h)
+\end{lstlisting}
 
 %======================================================================
 %======================================================================
-\section{Renormalisation Group Evolution}
-
-\comment{We slowly approach our objective}
+%\section{Renormalisation Group Evolution}
+\section{DGLAP evolution}
+Until now we have described all the tools that are required
+to perform a DGLAP evolution of PDFs, and in this section
+we describe how the different ingredients are put together
+to perform the actual evolution.
 
 
 %----------------------------------------------------------------------
@@ -1432,7 +1723,7 @@ memory can be freed via a call to the \ttt{Delete} subroutine,
 Before carrying out any DGLAP evolutions, one first needs to set up a
 a \ttt{running\_coupling} object (defined in \ttt{module
   qcd\_coupling}):
-\begin{verbatim}
+\begin{lstlisting}
   type(running_coupling) :: coupling
   real(dp) :: alfas, Q, quark_masses(4:6), muMatch_mQuark
   integer  :: nloop, fixnf
@@ -1440,10 +1731,10 @@ a \ttt{running\_coupling} object (defined in \ttt{module
   [... set parameters ...]
   call InitRunningCoupling(coupling [, alfas] [, Q] [, nloop] [, fixnf]&
                           & [, quark_masses] [, muMatch_mQuark])
-\end{verbatim}
+\end{lstlisting}
 As can be seen, many of the arguments are optional. Their default
 values are as follows:
-\begin{verbatim}
+\begin{lstlisting}
   alfas = 0.118_dp
   Q     = 91.2_dp
   nloop = 2
@@ -1451,30 +1742,32 @@ values are as follows:
                        !     charm,      bottom,   top
   quark_masses(4:6) = (/ 1.414213563_dp, 4.5_dp, 175.0_dp /)
   muMatch_mQuark    = 1.0_dp
-\end{verbatim}
+\end{lstlisting}
 The running coupling object is initialised so that at scale \ttt{Q}
 the coupling is equal to \ttt{alfas}. The running is carried out with
 the \ttt{nloop} $\beta$-function. If the \ttt{fixnf} argument is
 present, then the number of flavours is kept fixed at that
 value. Otherwise flavour thresholds are implemented at scales
-\begin{verbatim}
+\begin{lstlisting}
   muMatch_mQuark * quark_masses(4:6)
-\end{verbatim}
+\end{lstlisting}
 where the quark masses are \emph{pole} masses. The choice to use pole
 masses (and their particular default values) is inspired by the
 benchmark runs~\cite{Benchmarks} in which \hoppet results were
 compared to those of Vogt's moment-space code
-QCD-Pegasus~\cite{Pegasus}.
+QCD-Pegasus~\cite{Pegasus}. The default value of the
+QCD coupling is taken to be close
+to the present world average \cite{Bethke:2006ac}.
 
 To access the coupling at some scale \ttt{Q} one uses the following
 function call:
-\begin{verbatim}
+\begin{lstlisting}
   alfas = Value(coupling, Q [, fixnf])
-\end{verbatim}
+\end{lstlisting}
 This is the value of the coupling as obtained from the Runge-Kutta
 solution of the \ttt{nloop} version of eq.(\ref{eq:as-ev}) (the
-evolution is actually carried out for $1/\as$), together with the
-appropriate mass thresholds \cite{coupling_mass_thresholds}. For
+numerical solution is actually carried out for $1/\as$), together with the
+appropriate mass thresholds. For
 typical values of $\as(M_Z)$ the coupling is guaranteed to be reliably
 determined in the range $0.5 \GeV < Q < 10^{19}\GeV$. The values of
 the $\beta$ function coefficients used in the evolution correspond to
@@ -1498,22 +1791,22 @@ obtained from the \ttt{running\_coupling} type.
 
 The quark pole mass for flavour \ttt{iflv} can be obtained with the
 call
-\begin{verbatim}
+\begin{lstlisting}
   pole_mass = QuarkMass(coupling, iflv)
-\end{verbatim}
+\end{lstlisting}
 The range of scales, $\ttt{Qlo} < Q < \ttt{Qhi}$ for which \ttt{iflv}
 is the heaviest active flavour is obtained by the subroutine call
-\begin{verbatim}
+\begin{lstlisting}
   call QRangeAtNf(coupling, iflv, Qlo, Qhi [, muM_mQ])
-\end{verbatim}
+\end{lstlisting}
 The optional argument \ttt{muM\_mQ} allows one to obtain the answer as
 if one had initialised the coupling with a different value of
 \ttt{muMatch\_mQuark} than that actually used. One can also establish
 the number of active flavours, \ttt{nf\_active}, at a given scale
 \ttt{Q} with the following function:
-\begin{verbatim}
+\begin{lstlisting}
   nf_active = NfAtQ(coupling, Q [, Qlo, Qhi] [, muM_mQ])
-\end{verbatim}
+\end{lstlisting}
 As well as returning the number of active flavours, it can also set
 \ttt{Qlo} and \ttt{Qhi}, which correspond to the range of scales in
 which the number of active flavours is unchanged. The optional
@@ -1521,16 +1814,16 @@ which the number of active flavours is unchanged. The optional
 subroutine. The last of the enquiry functions allows one to obtain the
 range of number of flavours covered in this coupling, $\ttt{nflo} \le
 n_f \le \ttt{nfhi}$:
-\begin{verbatim}
+\begin{lstlisting}
   call NfRange(coupling, nflo, nfhi)
-\end{verbatim}
+\end{lstlisting}
 
 Finally, as usual, once you no longer need a \ttt{running\_coupling}
 object, you may free the memory associated with it using the
 \ttt{Delete} call:
-\begin{verbatim}
+\begin{lstlisting}
   call Delete(coupling)
-\end{verbatim}
+\end{lstlisting}
 
 
 
@@ -1543,37 +1836,45 @@ object, you may free the memory associated with it using the
 \subsubsection{Direct evolution}
 \label{sec:direct-evolution}
 
-We are now ready to evolve a PDF. This is done by breaking the
+We are now ready to evolve a multi-flavour PDF. This is done by breaking the
 evolution into steps, and for each one using a Runge-Kutta
 approximation for the solution of a first-order matrix differential
 equation. The steps are of uniform size in a variable $u$ that
 satisfies the following approximate relation
 \begin{equation}
   \label{eq:du}
-  \frac{du}{d\ln Q^2} \simeq \as(Q^2)
+  \frac{du}{d\ln Q^2} \simeq \as(Q^2) \ .
 \end{equation}
 For a 1-loop running coupling one has $u = (\ln \ln
 Q^2/\Lambda)/\beta_0$, which is the variable that appears in
 analytical solutions to the $1$-loop DGLAP equation.
 %
 The step size in u, du, can be set with the following call
-\begin{verbatim}
+\begin{lstlisting}
   real(dp) :: du = 0.1_dp ! or some smaller value
   call SetDefaultEvolutionDu(du)
-\end{verbatim}
+\end{lstlisting}
 The error on the evolution from the finite step size should scale as
 $(\ttt{du})^4$. With the default value of $\ttt{du}=0.1$, errors are
 typically somewhat smaller than $10^{-3}$ (see
-section~\ref{sec:benchmarks} for the detailed benchmarks).
+Sect~\ref{sec:benchmarks} for the detailed benchmarks).
 
 To actually carry out the evolution, one uses the following subroutine
 call:
-\begin{verbatim}
-  call EvolvePDF(dh, pdf, coupling, Q_init, Q_end &
+\begin{lstlisting}
+  type(dglap_holder)     :: dglap_h
+  type(running_coupling) :: coupling
+  real(dp), pointer      :: initial_pdf(:,:)
+  real(dp)               :: Q_init, Q_end
+  integer                :: nloop
+  integer                :: untie_nf
+  [...]
+  call EvolvePDF(dglap_h, initial_pdf, coupling, Q_init, Q_end &
                         & [, muR_Q] [, nloop] [, untie_nf] [, du] )
-\end{verbatim}
-which takes a \ttt{pdf} uses the splitting matrices in \ttt{dh}, to
-evolve it from scale \ttt{Q\_init} to scale \ttt{Q\_end}
+\end{lstlisting}
+which takes a PDF array 
+\ttt{pdf} and uses the splitting matrices in \ttt{dglap\_h}  to
+evolve it from scale \ttt{Q\_init} to scale \ttt{Q\_end}.
 %
 By default the renormalisation to factorisation scale ratio is
 $\ttt{muR\_Q} = 1.0$ and the number of loops in the evolution is the
@@ -1583,13 +1884,13 @@ flavour-number switching takes place at the pole masses (maybe one day
 this restriction will be lifted) as associated with the
 \ttt{coupling}. 
 
-If the \ttt{dglap\_holder} object \ttt{dh} does not support the
+If the \ttt{dglap\_holder} object \ttt{dglap\_h} does not support the
 relevant number of loops or flavours, the program will give an error
 message and stop. With the \ttt{untie\_nf} option you can request that
 the number of flavours in the evolution be `untied' from that in the
-coupling in the regions where \ttt{dh} does not support the number of
+coupling in the regions where \ttt{dglap\_h} does not support the number of
 flavours used in the coupling. Instead the closest number of flavours
-will be used.\footnote{For example if \ttt{dh} was initialised with
+will be used.\footnote{For example if \ttt{dglap\_h} was initialised with
   $n_f = 3\ldots5$ while the coupling has $n_f = 3\ldots 6$, then
   variable flavour number evolution will be used up to $n_f = 5$, but
   beyond the top mass the evolution will carry on with $5$ flavours,
@@ -1597,17 +1898,18 @@ will be used.\footnote{For example if \ttt{dh} was initialised with
   good reasons for doing this (other than for examining how much it
   differs from a `proper' procedure).}
 
-Mass thresholds (NNLO) are implemented as
+Mass thresholds (NNLO) are implemented as described in
+Sect. \ref{sec:pqcd}:
 \begin{subequations}
 \label{eq:mass_threshold}
 \begin{align}
   \ttt{pdf}_{n_f} &= \ttt{pdf}_{n_f-1} +
-  \left(\frac{\alpha_{s,n_f}(x_\mu M)}{2\pi}\right)^2
-  (\mbox{\ttt{dh\%MTM2 .conv.}}\; \ttt{pdf}_{n_f-1})\\
+  \left(\frac{\alpha_{s}^{(n_f)}(x_\mu m_h^2)}{2\pi}\right)^2
+  (\mbox{\ttt{dglap\_h\%MTM2 .conv.}}\; \ttt{pdf}_{n_f-1}) \ ,\\
   %
   \ttt{pdf}_{n_f-1} &= \ttt{pdf}_{n_f} \;\;\;\;-
-  \left(\frac{\alpha_{s,n_f}(x_\mu M)}{2\pi}\right)^2
-  (\mbox{\ttt{dh\%MTM2 .conv.}}\; \ttt{pdf}_{n_f})
+  \left(\frac{\alpha_{s}^{(n_f)}(x_\mu m_h^2)}{2\pi}\right)^2
+  (\mbox{\ttt{dglap\_h\%MTM2 .conv.}}\; \ttt{pdf}_{n_f}) \ ,
 \end{align}
 \end{subequations}
 when crossing the threshold upwards and downwards, respectively. Note
@@ -1625,7 +1927,7 @@ intrinsic heavy-flavour being left over below threshold.
 \label{sec:precomputed-evolution}
 
 Each Runge-Kutta evolution step involves multiple evaluations of the
-derivative of the PDF, and the evolution between two scales may be
+derivative of the PDFs, and the evolution between two scales may be
 broken up into multiple Runge-Kutta steps. This amounts to a large
 number of convolutions. It can therefore be useful to create a single
 \emph{derived} splitting matrix that is equivalent to the whole
@@ -1639,20 +1941,20 @@ matrices, breaking an evolution into a chain of interleaved
 fixed-flavour evolution steps and flavour changing steps. An
 \ttt{evln\_operator} is created with a call that is almost identical
 to that used to evolve a PDF:
-\begin{verbatim}
+\begin{lstlisting}
   type(evln_operator) :: evop
   real(dp), pointer   :: pdf_init(:,:), pdf_end(:,:)
   [...]
-  call InitEvlnOperator(dh, evop, coupling, Q_init, Q_end &
+  call InitEvlnOperator(dglap_h, evop, coupling, Q_init, Q_end &
                            & [, muR_Q] [, nloop] [, untie_nf] [, du] )
-\end{verbatim}
+\end{lstlisting}
 It can then be applied to PDF in the same way that a normal
 \ttt{split\_mat} would:
-\begin{verbatim}
+\begin{lstlisting}
   pdf_end = evop * pdf_init       ! assume both pdfs already allocated
-  ! OR (alternate form) 
+  ! OR (alternative form) 
   pdf_end = evop .conv. pdf_init  
-\end{verbatim}
+\end{lstlisting}
 As usual the \ttt{Delete} subroutine can be used to clean up any
 memory associated with an evolution operator that is no longer needed.
 
@@ -1666,7 +1968,8 @@ The tools in the previous section are useful if one knows that one
 needs DGLAP evolution results at a small number of predetermined $Q$
 values. Often however one simply wishes to provide a PDF distribution
 at some initial scale and then subsequently be able to access it at
-arbitrary values of $x$ and $Q$. For this purpose it is useful to
+arbitrary values of $x$ and $Q$. For this purpose it is useful 
+(and more efficient) to
 produce a table of the PDF as a function of $Q^2$, which then allows
 for access to the PDF at arbitrary $x, Q$ using an interpolation. All
 types and routines discussed in this section are in the
@@ -1675,20 +1978,20 @@ types and routines discussed in this section are in the
 \subsection{Preparing a table}
 The type that contains a PDF table is \ttt{pdf\_table}. It first needs
 to be allocated,
-\begin{verbatim}
+\begin{lstlisting}
   type(pdf_table) :: table
   [...]
 
   call AllocPdfTable(grid, table, Qmin, Qmax &
                      & [, dlnlnQ ] [, lnlnQ_order ] [, freeze_at_Qmin] )
-\end{verbatim}
+\end{lstlisting}
 where one specifies the range of Q values to be tabulated, from
 \ttt{Qmin} to \ttt{Qmax}, and optionally the interpolation step size
 \ttt{dlnlnQ} in the variable $\ln \ln Q/(0.1\GeV)$ (default
 $\ttt{dlnlnQ}=0.07$, sufficient for $10^{-3}$ accuracy), the
 interpolation order \ttt{lnlnQ\_order}, equal to $3$ by default, and
 finally whether PDFs are to be frozen below \ttt{Qmin}, or instead set
-to zero (the deafult is \ttt{freeze\_at\_Qmin=.false.}, \ie they are
+to zero (the default is \ttt{freeze\_at\_Qmin=.false.}, \ie they are
 set to zero).\footnote{Note that the spacing and interpolation in $Q$
   are treated independently of what's done in the PDF evolution. A
   reason for this is that in the PDF evolution one uses a variable
@@ -1706,9 +2009,9 @@ attempting to interpolate a discontinuous function (at NNLO). To
 attribute information about $n_f$ thresholds to the tabulation, set
 them up first in a running \ttt{coupling} object and then transfer
 them:
-\begin{verbatim}
+\begin{lstlisting}
   call AddNfInfoToPdfTable(table,coupling)
-\end{verbatim}
+\end{lstlisting}
 When interpolating the table (see below), the set of $Q$ values for
 the interpolation will be chosen to as to always have a common $n_f$
 value. Note that \ttt{AddNfInfoToPdfTable} may only be called once for
@@ -1719,9 +2022,9 @@ $n_f$ information.
 Given an existing table, \ttt{ref\_table}, a new table,
 \ttt{new\_table}, can be allocated with identical properties
 (including any $n_f$ information) as follows
-\begin{verbatim}
+\begin{lstlisting}
   call AllocPdfTable(new_table, ref_table)
-\end{verbatim}
+\end{lstlisting}
 All of the above routines can be used with $1$-dimensional arrays of
 tables as well (in \ttt{AllocPdfTable} the reference table must always
 be a scalar).
@@ -1729,69 +2032,73 @@ be a scalar).
 A table can be filled either from a routine that provides the PDFs as
 a function of $x$ and $Q$, or alternatively by evolving a PDF at an
 initial scale. The former can be achieved with
-\begin{verbatim}
+\begin{lstlisting}
   call FillPdfTable_LHAPDF(table, LHAsub)
-\end{verbatim}
-where \ttt{LHAsub} is any subroutine with the interface shown earlier
+\end{lstlisting}
+where \ttt{LHAsub} is any subroutine with the LHAPDF interface,
+as the one shown earlier
 in \ref{sec:human-rep}.
 
 To fill a table via an evolution from an initial scale, one uses 
-\begin{verbatim}
+\begin{lstlisting}
   type(pdf_table)        :: table
-  type(dglap_holder)     :: dh
+  type(dglap_holder)     :: dglap_h
   type(running_coupling) :: coupling
   real(dp), pointer      :: initial_pdf(:,:)
   real(dp)               :: Q0
   integer                :: nloop
   integer                :: untie_nf
   [...]
-  call EvolvePdfTable(table, Q0, initial_pdf, dh, coupling &
+  call EvolvePdfTable(table, Q0, initial_pdf, dglap_h, coupling &
                       & [, muR_Q] [, nloop] [, untie_nf] )
-\end{verbatim}
+\end{lstlisting}
 which takes an the \ttt{initial\_pdf} at scale \ttt{Q0}, and evolves
 it across the whole range of $Q$ values in the table, using the
 \ttt{EvolvePDF} routine. The arguments have the same meaning as
 corresponding ones in \ttt{EvolvePDF}, explained in
-section~\ref{sec:direct-evolution}. The $\ttt{du}$ value that's used
+Sect~\ref{sec:direct-evolution}. The $\ttt{du}$ value that's used
 is the default one for \ttt{EvolvePDF} which, we recall, may be set
 using \ttt{SetDefaultEvolutionDu(du)}. If the $Q$ spacing in the
 tabulation is such that steps in \ttt{du} would be too large, then the
 steps are automatically resized to the tabulation spacing.
 
 One may also use the precomputed evolution facilities of
-section~\ref{sec:precomputed-evolution}, by calling the routine
-\begin{verbatim}
-  call PreEvolvePdfTable(table, Q0, dh, coupling, &
+Sect~\ref{sec:precomputed-evolution}, by calling the routine
+\begin{lstlisting}
+  call PreEvolvePdfTable(table, Q0, dglap_h, coupling, &
                          & [, muR_Q] [, nloop] [, untie_nf] )
-\end{verbatim}
+\end{lstlisting}
 prepares \ttt{evln\_operator}s for all successive $Q$ intervals in the
 table. An accelerated evolution that uses these operators instead of
 explicit Runge-Kutta steps may then be obtained by calling
-\begin{verbatim}
+\begin{lstlisting}
   call EvolvePdfTable(table, initial_pdf)
-\end{verbatim}
+\end{lstlisting}
 The \ttt{EvolvePdfTable} routine may be called as many times as one
-likes for the table, however if one wishes to change the parameters of
-the evolution (coupling, etc.) for a precomputed evolution, one must
-first \ttt{Delete} the table and then reprepare it.
+likes, for different initial PDFs for example, while for the table, 
+however, if one wishes to change the parameters of
+the evolution (coupling, perturbative order, etc.) 
+in the precomputed option, one must
+first \ttt{Delete} the table and then prepare again it.
 
 
 %......................................................................
 \subsection{Accessing a table}
+\label{sec:acc_table}
 
 The main way to access a table is as follows
-\begin{verbatim}
-  double :: pdf(-6:6), y, x, Q
+\begin{lstlisting}
+real(dp) :: pdf(-6:6), y, x, Q
   [...]
   call EvalPdfTable_yQ(table, y, Q, pdf)
   ! or using x
-  call EvalPdfTable_yQ(table, x, Q, pdf)
-\end{verbatim}
+  call EvalPdfTable_xQ(table, x, Q, pdf)
+\end{lstlisting}
 There may be situations where it is useful to access the internals of
 a \ttt{pdf\_table}, for example because one would like to carry out a
 convolution systematically on the whole contents of the table. Among
 the main elements are
-\begin{verbatim}
+\begin{lstlisting}
   type pdf_table
     integer           :: nQ           ! arrays run from 0:nQ
     real(dp), pointer :: tab(:,:,:)   ! the actual tabulation
@@ -1800,7 +2107,7 @@ the main elements are
     real(dp), pointer :: as2pi(:)     ! alphas(Q)/2pi at each Q
     [...]
   end type pdf_table
-\end{verbatim}
+\end{lstlisting}
 where the third dimension of \ttt{tab} spans the range of tabulated
 $Q$ values, and the $n_f$ and coupling information are only allocated
 and set if one has called \ttt{AddNfInfoToPdfTable} for the table.
@@ -1809,17 +2116,17 @@ and set if one has called \ttt{AddNfInfoToPdfTable} for the table.
 An example of usage of the low-level information contained in the
 table is the following, which initializes \ttt{table\_deriv\_LO} with
 the LO derivative of \ttt{table}:
-\begin{verbatim}
+\begin{lstlisting}
   do iQ = 0, table%nQ
     table_deriv_LO%tab(:,:,iQ) = table%as2pi(iQ) * &
-                     & ( dh%allP(1,table%nf_int(iQ)) * table%tab(:,:,iQ))
+                     & ( dglap_h%allP(1,table%nf_int(iQ)) * table%tab(:,:,iQ))
   end do
-\end{verbatim}
+\end{lstlisting}
 where we assume \ttt{table\_deriv\_LO} to have been allocated with an
 appropriate structure at some point, \eg via 
-\begin{verbatim}
+\begin{lstlisting}
   call AllocPdfTable(table_deriv_LO, table)
-\end{verbatim}
+\end{lstlisting}
 The above mechanism has found use in the a-posteriori PDF
 library~\cite{APPL} and in work matching event shapes with fixed-order
 calculations~\cite{caesar,DisResum}.
@@ -1829,11 +2136,21 @@ One could also imagine using it to obtain tables of
 coefficient functions rather than splitting functions.
 
 
-As with all other objets, a \ttt{pdf\_table} object can be deleted
+As with all other objects, a \ttt{pdf\_table} object can be deleted
 using
-\begin{verbatim}
+\begin{lstlisting}
   call Delete(table) 
-\end{verbatim}
+\end{lstlisting}
+Notice that a table is a local variable in each procedure and so 
+effectively a different variable each time. It needs to be defined
+in a given module and then use that module in each
+independent procedure. In Appendix \ref{sec:example_program}, 
+there is a detailed example of different ways of
+accessing a table. 
+
+
+
+
 
 
 %======================================================================
@@ -1843,11 +2160,11 @@ using
 
 The ``vanilla'' interface to \hoppet is intended to allow easy access
 to the essential evolution functionality from languages other than
-f90.  It hides all the object-oriented nature of the program, and
+F95.  It hides all the object-oriented nature of the program, and
 provides access to one \ttt{pdf\_table}, based on a single grid
 definition. The description will be given as if one is calling from
-f77. An include file \ttt{src/hoppet\_v1.h} is provided for calling
-from C++ --- the interface is essentially identical to the fortran
+F77. An include file \ttt{src/hoppet\_v1.h} is provided for calling
+from C++ --- the interface is essentially identical to the Fortran
 one, with the caveat that names are case sensitive (the cases are as
 given below), and that PDF components referred to below as
 \ttt{pdf(-6:6)} become \ttt{pdf[0..12]}.
@@ -1857,9 +2174,9 @@ given below), and that PDF components referred to below as
 \label{sec:vanilla_initialisation}
 
 The simplest way of initialising the vanilla interface is by calling
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetStart(dy,nloop)
-\end{verbatim}
+\end{lstlisting}
 which will set up a compound (three different spacings) grid with
 spacing \ttt{dy} at small $x$, extending to $y = 12$, and numerical
 order $\ttt=-5$.  The $Q$ range for the tabulation will be $1\GeV <
@@ -1869,41 +2186,31 @@ up to \ttt{nloop} loops (though one can still carry out evolutions
 with fewer loops).
 %
 If you need more control over the initialization, you should use
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
-\end{verbatim}
+\end{lstlisting}
 which will again set up compound grid, but give control over the
 numerical \ttt{order} and the $y$ and $Q$ ranges and spacings (as
 before \ttt{dy} is the spacing at small $x$). It also allows one to
-choose the type of evolution according to \ttt{factscheme}:
-\begin{center}
-  \begin{tabular}{|c|l|}\hline
-    \ttt{factscheme} & Evolution\\[2pt]\hline
-    1 & unpolarised $\MSbar$ scheme\\[2pt]\hline
-    2 & unpolarised DIS scheme\\[2pt]\hline
-    3 & polarised $\MSbar$ scheme\\\hline
-  \end{tabular}
-\end{center}
-Note that the DIS scheme and polarised $\MSbar$ scheme are only
-available up to two loops and that mass thresholds are currently
-missing in the DIS scheme.
+choose the type of evolution according to \ttt{factscheme}.
+
 
 %......................................................................
 \subsection{Usage}
 \label{sec:vanilla_usage}
 
 To carry out an evolution, one should first decide whether one wants a
-fixed-flavour number scheme or a variable flavour number (the
+fixed-flavour number scheme or a variable flavour number scheme (the
 default). Either can be set with its parameters as follows:
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetSetFFN(fixed_nf)
   call hoppetSetVFN(mc, mb, mt)
-\end{verbatim}
+\end{lstlisting}
 where for the VFN one specifies the pole-masses for the quarks. An
 evolution is carried out with the following routine
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetEvolve(asQ, Q0alphas, nloop, muR_Q, LHAsub, Q0pdf)
-\end{verbatim}
+\end{lstlisting}
 where one specifies the coupling \ttt{asQ} at a scale \ttt{Q0alphas},
 the number of loops for the evolution, \ttt{nloop}, the ratio of
 renormalisation to factorisation scales \ttt{muR\_Q},\footnote{Note
@@ -1918,46 +2225,47 @@ renormalisation to factorisation scales \ttt{muR\_Q},\footnote{Note
   complicate the specification of the $\as$ value --- for example with
   $\ttt{muR\_Q} = 0.5$ the matching for the top threshold would be
   carried out at $\mu = 0.5 m_t \simeq 85 \GeV$, and if one specified
-  the coupling at scale $M_Z$, it wouldn't be cleaer whether this was
+  the coupling at scale $M_Z$, it wouldn't be clearer whether this was
   a $5$-flavour value or a $6$-flavour value. With the procedure
   adopted in the vanilla interface the issue does not arise. (While in
-  f90 the user has the freedom to do as they prefer). } %
+  F95 the user has the freedom to do as they prefer). } %
 the name of a subroutine \ttt{LHAsub} with interface
-\begin{verbatim}
+\begin{lstlisting}
   subroutine LHAsub(x,Q,res)
     implicit none
     double precision x,Q,res(-6:6)
     [...]
   end subroutine 
-\end{verbatim}
+\end{lstlisting}
 to return the initial condition for the evolution and the scale
 \ttt{Q0pdf} at which one starts the PDF evolution. Note that the
 LHAsub subroutine will only be called with $\ttt{Q}=\ttt{Q0pdf}$.
 To access the coupling one uses
-\begin{verbatim}
+\begin{lstlisting}
   alphas = hoppetAlphaS(Q)
-\end{verbatim}
+\end{lstlisting}
 while the PDF at a given value of $\ttt{x}$ and $\ttt{Q}$ is obtained with 
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetEval(x,Q,f)
-\end{verbatim}
+\end{lstlisting}
 which sets \ttt{f(-6:6)} (recall that it is $xg(x)$, etc., that is
 used through \hoppet).
 
 It is also possible to prepare an evolution in cached form. This is
 useful if one needs to evolve many different PDF sets with the same
-evolution properties (coupling, initial scale, etc.), because though
+evolution properties (coupling, initial scale, etc.), as in the
+usual situation in global determinations of PDFs, because though
 the preparation may take a bit longer than a normal evolution
 ($2$--$10$ times depending on the \ttt{order}), once it is done,
 cached evolutions run $3$--$4$ faster than a normal evolution. The
 preparation of the cache is carried out with
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetPreEvolve(asQ, Q0alphas, nloop, muR_Q, Q0pdf)
-\end{verbatim}
+\end{lstlisting}
 and then the cached evolution is carried out with 
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetCachedEvolve(LHAsub)
-\end{verbatim}
+\end{lstlisting}
 The results may be very slightly different from those in a normal
 evolution (some information is lost when caching), and the user is
 encouraged to check on a case-by-case basis that such differences
@@ -1965,9 +2273,9 @@ don't matter in practice.
 
 The tabulation can also be filled with the contents of an external PDF
 package, by calling
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetAssign(LHAsub)
-\end{verbatim}
+\end{lstlisting}
 where \ttt{LHAsub} is the name of any subroutine with the interface
 given above, which will now be called with a range of \ttt{Q} values
 corresponding to the internal tabulation scales. This essentially just
@@ -1976,13 +2284,13 @@ representation.
 
 Finally given an evolved or assigned PDF, one can obtain information
 about convolutions of the splitting functions with the PDFs:
-\begin{verbatim}
+\begin{lstlisting}
   call hoppetEvalSplit(x,Q,iloop,nf,f)
-\end{verbatim}
+\end{lstlisting}
 sets \ttt{f(-6:6)} equal to the value at \ttt{x}, \ttt{Q} of
 convolution of the \ttt{iloop} splitting function matrix (with
 \ttt{nf} flavours) with the currently tabulated PDF. If $\ttt{nf}<0$
-the number of flavours used is the one appropriate at the specificed
+the number of flavours used is the one appropriate at the specified
 $Q$ scale (as long as the information is available, \ie one of
 \ttt{hoppetEvolve} or \ttt{hoppetCachedEvolve} has been called). The
 first call with a given \ttt{nf} for a specified \ttt{iloop} will be
@@ -1991,7 +2299,7 @@ with the same values will be fast.
 
 The routines described here (and associated data storage) are to be
 found in \ttt{src/vanilla\_interface.f90} and may provide inspiration
-for the user wishing to write their own f90 code for \hoppet.
+for the user wishing to write their own F95 code for \hoppet.
 
 
 %======================================================================
@@ -1999,11 +2307,13 @@ for the user wishing to write their own f90 code for \hoppet.
 \section{Benchmarks}
 \label{sec:benchmarks}
 
-Key questions in assessing the useful of a PDF evolution code include
+Key questions in assessing the usefulness of a PDF evolution code include
 that of its correctness, its accuracy and its speed. \hoppet's
 correctness has been established with a reasonable degree of
 confidence in the benchmark tests~\cite{Benchmarks} where it was
-compared with QCD-Pegasus. The program used to carry out those tests
+compared with the Mellin space based
+evolution code QCD-Pegasus \cite{Pegasus}. 
+The program used to carry out those tests
 is available as \ttt{benchmarks/benchmarks.f90}. The user should
 carefully read the comments at the beginning for usage instructions.
 
@@ -2077,7 +2387,7 @@ $Q$.\footnote{This procedure differs from that in \cite{Benchmarks}
 \begin{figure}
   \centering
   \includegraphics[width=0.7\textwidth]{../benchmarking/test_acc/grid.eps}%
-  \caption{The set of points in $x, Q$ used to determine the accuarcy
+  \caption{The set of points in $x, Q$ used to determine the accuracy
     of the evolution. The areas shaded in grey are regions where one
     of the flavours is in the neighbourhood of a sign-change
     (bottom-left: $c,\bar c$, right: $\bar u$) and so is ignored in
@@ -2123,7 +2433,7 @@ $y=2,0.5,0.2$ respectively. Except where stated we shall use
 $\ttt{order}=-6$. In $Q$ the default interpolation order will be $4$.
 The reference grids use $\dy=0.025$ and $\dlnlnQ=0.005$.
 
-Fig.\ref{fig:acc-fixed-dy-dlnlnQ} shows the relative acuracy
+Fig.\ref{fig:acc-fixed-dy-dlnlnQ} shows the relative accuracy
 $\epsilon$ as a function of $x$ for two grid-spacing choices (left
 $\dy=0.2$, right $\dy=0.05$, $\dlnlnQ=\dy/4$ in both cases). Each
 solid line corresponds to one $Q$ value and shows the error in the
@@ -2172,7 +2482,7 @@ fig.\ref{fig:acc-fixed-dy-dlnlnQ}.
   \label{fig:acc-fixed-dy-dlnlnQ}
 \end{figure}
 
-Figure~\ref{fig:acc-fixed-dy-dlnlnQ} is useful in order to obtain a
+Fig.~\ref{fig:acc-fixed-dy-dlnlnQ} is useful in order to obtain a
 detailed picture of the accuracy of the evolution with a given set of
 parameters. To quote a single, global, number for the accuracy we make
 the conservative choice of taking the largest value of $\epsilon$ that
@@ -2190,12 +2500,12 @@ $x<0.9$ with all flavours.
     shown for two $y$-grid configurations and two $x$-ranges and
     flavour-sets.  Right: the relative accuracy as a function of the
     resolution in $\ln \ln Q$ of the tabulation, \ttt{dlnlnQ}, for
-    diferent $x$/flavour ranges and for different $\ttt{lnlnQ\_order}$
+    different $x$/flavour ranges and for different $\ttt{lnlnQ\_order}$
     values (\ttt{o}).}
   \label{fig:dy+dlnlnQ}
 \end{figure}
 
-Figure~\ref{fig:dy+dlnlnQ} shows the effect of varying the base $\dy$
+Fig.~\ref{fig:dy+dlnlnQ} shows the effect of varying the base $\dy$
 and $\dlnlnQ$ separately, while the other is fixed at the reference
 value. The `guds' flavours in the $x<0.7$ range are generally better
 determined, for a given set of grid parameters, than the full set of
@@ -2206,7 +2516,7 @@ subgrids worsens the situation when including the largest $x$ values,
 and reducing the order in the $Q$ interpolation also adversely affects
 the accuracy (also for $x<0.7$, not shown).
 
-From figure~\ref{fig:dy+dlnlnQ}, we deduce that innacuracies from the
+From Fig.~\ref{fig:dy+dlnlnQ}, we deduce that inaccuracies from the
 $Q$ and $y$ parts of the grid are similar when $\dlnlnQ = \dy /4$.
 This is the combination that we shall use as standard.
 
@@ -2234,9 +2544,11 @@ $n_i$ is the number of PDF initial conditions that one wishes to
 consider, $t_i$ is the time to carry out the tabulation for a single
 initial condition, $n_{xQ}$ is the number of points in $x,Q$ at which
 one evaluates the full set of flavours once per PDF initial condition;
-in the case with preprepared cached evolution, $t_p$ is the time for a
+in the case with pre-prepared cached evolution, $t_p$ is the time for a
 preparing a cached evolution and $t_c$ is the time for performing the
-cached evolution.
+cached evolution. Finally $t_{xQ}$ is the time it takes to evaluate
+the PDFs at a given value of $(x,Q^2)$ once the tabulation has
+been performed.
 
 \begin{table}
   \centering
@@ -2252,8 +2564,8 @@ cached evolution.
                &  2.7  &   3.1    &  25    \\
    \hline
   \end{tabular}
-  \caption{Contributions to the run time in eq.(\ref{eq:timing}) for
-    $\dy=0.2$ and 
+  \caption{Contributions to the run time in eqs.~(\ref{eq:timing})
+ for    $\dy=0.2$ and 
     $\dlnlnQ=0.05$ and standard values for the other parameters 
     (on a 3.4GHz Pentium IV (D) with 2~MB cache).}
   \label{tab:timings}
@@ -2272,10 +2584,12 @@ The various contributions to the run-time are shown in
 table~\ref{tab:timings} for $\dy=0.2$ and $\dlnlnQ=0.05$ (giving an
 accuracy $\sim 10^{-4}$), for various compilers.  In a typical
 analysis where run-times matter, such as a PDF fit, it is to be
-expected that the time will be dominated by $t_c$ (or $t_i$), unless
-the number of $x,Q$ points is very large ($\gtrsim 3000$), in which
-case it will be $n_{xQ} t_{xQ}$ that takes the most time. We note that
-considerably speed advantage that is to be had with commercial
+expected that the time will be dominated by $t_c$ (or $t_i$). However,
+in the typical case of global PDF fits for which
+the number of $x,Q$ points is rather large ($\gtrsim 3000$), 
+ it will be $n_{xQ} t_{xQ}$ that takes the most time. We note that
+considerably speed advantage (almost an order
+of magnitude) that is to be had with commercial
 compilers.
 
 \begin{figure}
@@ -2287,7 +2601,7 @@ compilers.
   \label{fig:acc-v-time}
 \end{figure}
 
-We study $t_c$ and $t_i$ in more detail in fig.\ref{fig:acc-v-time},
+We study $t_c$ and $t_i$ in more detail in Fig.~\ref{fig:acc-v-time},
 where we relate them to the accuracy obtained from the evolution. As
 one would expect, studying just the `guds' flavours for $x<0.7$ one
 obtains better accuracy for a given speed than with all flavours for
@@ -2298,7 +2612,7 @@ advantage of the cached evolution.
 
 We note that the time $t_{xQ}$ for evaluating each point is
 essentially independent of $\dy$ and $\dlnlnQ$. If a computation is
-dominanted by $t_{xQ}$, then it can be made somewhat faster by
+dominated by $t_{xQ}$, then it can be made somewhat faster by
 lowering the interpolation orders, at the expense of needing a finer
 grid (and so longer evolution times).
 
@@ -2335,10 +2649,11 @@ components of the timing affected by each parameter.
     \hline
   \end{tabular}
   \caption{parameters involved in accuracy. Default values shown in square
-    brackets are to be specified by hand in the f90 interface, but are
+    brackets are to be specified by hand in the F95 interface, but are
     automatically set in the simpler of the initialisation calls with
-    the vanilla interface. \comment{new section for subgrids? Exact
-      v. Param}}
+    the vanilla interface.} 
+%\comment{new section for subgrids? Exact
+%      v. Param}}
   \label{tab:acc-param}
 \end{table}
 
@@ -2388,31 +2703,50 @@ codes, and in terms of its interface, designed to provide a
 straightforward and physical way of manipulating PDFs beyond the
 built-in task of DGLAP evolution.
 
-While \hoppet's ancestors have already seen use in a number of
-contexts~\cite{DisResum,Benchmarks,caesar,smallx,APPL}, the code had
-not hitherto been released in a documented form.
-
 Features that might be envisaged for future releases include DIS
 coefficient functions, full support for the DIS factorization scheme,
-and the addition of time-like evolution.  In principle, the
+and the addition of time-like evolution, relevant
+for phenomenological fits to fragmentation functions
+like in \cite{de Florian:2007hc}.  
+In principle, the
 information presented here is sufficient to allow a user to implement
 the coefficient functions themselves, while the DIS scheme and
 timelike evolution would require somewhat more knowledge of the
-internals of the program.
+internals of the program. 
 
 More ambitious possible extensions cover a wide range of physics.
 Just within QCD, a general physical feature absent from mainstream PDF
 evolution codes is that of evolution that includes matching between
-resummed (both small $x$ and large $x$), and fixed (NLO, NNLO) order
-splitting functions, both in the time-like and space-like case. 
+resummed. Although studies in this direction
+have already been performed, both for small $x$ resummations, 
+like in \cite{White:2005wm}
+ and for large $x$ resummation, like in \cite{Corcella:2005us},
+no general public code exists which performs a matching between
+resummed 
+ and fixed (NLO, NNLO) order
+splitting functions, either in the time-like case or in
+the space-like case. 
+
+Another interesting extension of \hoppet would be to
+implement a more general mass treatment of heavy quarks.
+A proper treatment of heavy quark mass effects is required to
+obtain a good description of heavy flavour structure function
+as measured in HERA. Although there are by now several studies
+of the effect of heavy quark masses in global analysis
+of PDFs \cite{Martin:2007bv,Tung:2006tb},
+ which show sizable effects on predictions for
+LHC observables, there does not exist right now a public code
+were this GM heavy quark schemes are implemented.
 
 Also of interest are non-QCD effects. Evolutions with QED radiation
-have been presented in \cite{QED+QCD}, however so far no public code
-exists for evolution including both QCD and eletroweak (EW) effects.
+have been presented in \cite{Weinzierl:2002mv,Martin:2004dh}, 
+however so far no public code
+exists for evolution including both QCD and electroweak (EW) effects
+\cite{Ciafaloni:2000df,Ciafaloni:2005fm}.
 This is of particular relevance at LHC energies, since flavour is
 associated with an SU(2) charge and so soft divergences (above $M_W$)
 do not cancel in the PDF evolution between real and virtual
-contributions~\cite{BNviol,EWDGLAP}, leading one to expect
+contributions, leading one to expect
 non-negligible effects in the flavour structure of the PDFs at high
 scales.
 %
@@ -2434,14 +2768,14 @@ much to Andreas Vogt's regular encouragement, and his suggestions
 about features that would be useful to include for benchmark tests.
 %
 This work was supported in part by grant ANR-05-JCJC-0046-01 from the
-French Agence Nationale de la Recherche.
+French Agence Nationale de la Recherche. 
 
 %======================================================================
 \appendix
 
 
 %======================================================================
-\section{Example program}
+\section{Example programs}
 \label{sec:example_program}
 
 The program below generates a subset of table~15 of the NNLO benchmark
@@ -2449,12 +2783,12 @@ evolution in the second reference of~\cite{Benchmarks}. It is to be
 found (in a slightly more commented form) in
 \ttt{example\_f90/tabulation\_example.f90}. Compilation instructions
 are to be found in the \ttt{README} file in the main directory of the
-release. A program that has the same functionality but in f77, using
-the vanilla interface of section~\ref{sec:vanilla}, is to be found as
+release. A program that has the same functionality but in F77, using
+the vanilla interface of Sect~\ref{sec:vanilla}, is to be found as
 \ttt{example\_f77/tabulation\_example.f}.
 
 {\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 program tabulation_example
   use hoppet_v1
   implicit none
@@ -2525,7 +2859,7 @@ program tabulation_example
           &  pdf_at_xQ(0)
   end do
   
-  ! some cleaning up (not strictly speaking needed, but illustratative)
+  ! some cleaning up (not strictly speaking needed, but illustrative)
   call Delete(table); call Delete(pdf0); call Delete(dh)
   call Delete(coupling);  call Delete(grid)
 
@@ -2562,12 +2896,12 @@ contains
   end function unpolarized_dummy_pdf
 
 end program tabulation_example
-\end{verbatim}
+\end{lstlisting}
 }
 
 \noindent The expected output from the program is:
 {\small
-\begin{verbatim}
+\begin{lstlisting}
            Evaluating PDFs at Q =  100.000 GeV
     x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon
 1.0E-05  3.1907E-03  1.9532E-03  3.4732E+01  1.5875E+01  2.2012E+02
@@ -2579,7 +2913,7 @@ end program tabulation_example
 5.0E-01  1.1868E-01  3.0811E-02  2.3198E-03  2.3752E-04  7.6398E-03
 7.0E-01  1.9486E-02  2.9901E-03  5.2352E-05  5.6038E-06  3.7080E-04
 9.0E-01  3.3522E-04  1.6933E-05  2.5735E-08  4.3368E-09  1.1721E-06
-\end{verbatim}
+\end{lstlisting}
 }
 
 \noindent The file
@@ -2589,18 +2923,215 @@ correspond to evolution with variable flavour number, $\mu_F = \mu_R$,
 and the parametrised versions of the NNLO splitting functions and mass
 threshold terms.
 %
-The reader may verify that theey correspond to those given in the top
+The reader may verify that they correspond to those given in the top
 panel of table~15 of the second reference of \cite{Benchmarks} ($\mu_F
 = \mu_R$).
 
+As has been mentioned in Sect.~\ref{sec:acc_table}, 
+there are several ways to define, initialize
+and access a user defined table, for example 
+as in the example below:
+\begin{lstlisting}
+module external_table_module ! common location for your table
+   use hoppet_v1
+   implicit none
+   type(pdf_table) :: table
+   type(dglap_holder) :: dh
+   type(running_coupling) :: coupling
+   type(grid_def) :: grid   ! Optional
+end module external_table_module
+\end{lstlisting}
+Notice one might need to include in the common module objects
+like \texttt{dh} or \ttt{coupling}, since these are
+required in other procedures:
+\begin{lstlisting}
+
+subroutine A
+   use external_table_module
+   call PreEvolvePdfTable(table, Q0, dh, coupling)
+end subroutine A
+
+subroutine B
+   use external_table_module
+   ...
+   call EvolvePdfTable(table,pdf0)
+end subroutine B
+
+subroutine C
+   use external_table_module
+   ...
+   call EvalPdfTable_xQ(table, x, Q, pdf)
+end subroutine C
+
+\end{lstlisting}
+
+A more detailed description of the above technique 
+can be found in a 
+second example program, called \ttt{tabulation\_example\_2.f90},
+which is available at the same directory as the
+previous one. It generates exactly
+the same output as the previous example program, however it
+provides an example of how to access a table from
+external procedures, as explained in Sect. \ref{sec:acc_table}.
+
+%===================================================================
+
+
+%==========================================================
+% In future releases of the documentation
+
+%\section{Public objects}
+%In this Appendix we list some of the
+%most important public objects that are
+%accessible through the common {\tt hoppet\_v1} module. For
+%simplicity we describe here only the public procedures and
+%not the public variables.
+
+%\begin{table}
+%\scriptsize
+%\begin{center}
+%\begin{tabular}{|c|c|c|c|}
+%\hline
+%{\bf module}  & {\bf procedure}  &  {\bf arguments}  & {\bf description} \\
+%\hline
+%\ttt{pdf\_tabulate}  &   & & \\
+%  &  \ttt{AllocPdfTable} & &\\
+%\hline
+%\ttt{pdf\_representation} && &\\
+%\hline
+%\end{tabular}
+%\end{center}
+%\end{table}
+
+%=======================================================
+
+\section{Initialization of grid quantities}
+\label{sec:gridinit}
+As has been mentioned in
+Sect. \ref{sec:xspc},  
+there exist several ways of setting a grid quantity. In this
+Appendix we describe the most important methods for initializing
+a grid quantity, which we take to be a parton distribution.
+
+There are a number of ways of setting a grid quantity. Suppose we have
+a subroutine
+\begin{lstlisting}
+  subroutine example_gluon(y,g)
+    use types                !! defines "dp" (double precision) kind
+    implicit none
+    real(dp), intent(in)  :: y
+    real(dp), intent(out) :: g
+    real(dp) :: x
+    
+    x = exp(-y)
+    g = 1.7_dp * x**(-0.1_dp) * (1-x)**5 
+  end subroutine example_gluon
+\end{lstlisting}
+Then we can call
+\begin{lstlisting}
+call InitGridQuantSub(grid,gluon,example_gluon)
+\end{lstlisting}
+to initialise \texttt{gluon} with a representation of the return value
+from the subroutine \texttt{example\_gluon}.
+
+An alternative way is to
+make use of functions \texttt{xValues} or \texttt{yValues} that
+respectively return the $x$ or $y$ values of all points on the grid:
+\begin{lstlisting}
+  real(dp), pointer :: gluon,xvals
+  call AllocGridQuant(grid,gluon)
+  call AllocGridQuant(grid,xvals)
+  xvals = xValues(grid)
+  gluon = 1.7_dp * xvals**(-0.1_dp) * (1-xvals)**5 
+  deallocate(xvals)
+\end{lstlisting}
+Though more laborious insofar as one has to worry about some extra
+allocation and deallocation, it has the advantage that one no longer
+has to write a separate subroutine.
+
+Finally, there is one option to initialize a multi-flavour
+PDF grid with a subroutine with the same format as
+\ttt{evolvePDF} from the \ttt{LHAPDF} library. This
+option works as follows:
+
+\begin{lstlisting}
+real(dp),pointer :: pdf_set(:,:)
+real(dp)         :: y,Q
+real(dp)         :: pdf_at_y(-6:6)
+
+Q=2   ! Initial scale
+
+! Initialize with LHAPDF-like routine
+call AllocPDF(grid,pdf_set)
+call InitGridQuantLHAPDF(grid, pdf_set, LHAsub, Q)
+
+! Evaluate the multi-flavor pdf at y
+pdf_at_y = EvalGridQuant(grid,pdf_set(:,-6:6),y)
+
+\end{lstlisting}
+where an example of  the \ttt{LHAsub} subroutine can be found in
+Sect. \ref{sec:human-rep}
+
+\section{NNLO splitting functions}
+\label{sect:nnlo}
+A remark concerning NNLO splitting functions: the exact NNLO splitting
+functions derived by Moch, Vermaseren and Vogt
+\cite{NNLO-NS,NNLO-singlet} involve long (multi-page) expressions in
+terms of harmonic polylogarithms of up to weight 4. Very conveniently,
+refs.~\cite{NNLO-NS,NNLO-singlet} provide the expressions directly in
+terms of Fortran code.
+%
+The harmonic polylogarithms can be evaluated using the \ttt{hplog}
+package of Gehrmann and Remiddi \cite{FortranPolyLog}, a copy of which
+is included with the \hoppet package. 
+
+The initial integrations needed to create the \ttt{split\_mat} objects
+for the exact NNLO splitting functions for the full range of $n_f$
+take of the order of minutes.  Since currently there is no option of
+storing the splitting matrices in a file, this can be a bit
+bothersome. So instead, by default, the program uses the approximate,
+parametrized NNLO splitting functions also provided in
+\cite{NNLO-NS,NNLO-singlet}. The parametrized splitting functions are
+guaranteed to be accurate to within $0.1\%$ --- in practice since they
+come in relatively suppressed by two powers of $\as$, the impact on
+the evolution tends to be of the order $10^{-5}$ relative effect
+\cite{Benchmarks}.
+
+The user can choose whether to obtain the exact or parametrized NNLO
+splitting functions using the following calls (to be made before
+initialising the splitting matrices)
+\begin{lstlisting}
+  integer :: splitting_variant
+  call dglap_Set_nnlo_splitting(splitting_variant)
+\end{lstlisting}
+with the following variants defined (as integer parameters) in the
+module \ttt{dglap\_choices}:
+\begin{lstlisting}
+  nnlo_splitting_exact
+  nnlo_splitting_param                   [default]
+  nnlo_splitting_Nfitav
+  nnlo_splitting_Nfiterr1
+  nnlo_splitting_Nfiterr2
+\end{lstlisting}
+The last 3 are the parametrizations based on fits to reduced moment
+information carried out in \cite{vanNeerven:1999ca,vanNeerven:2000uj}.
+Though at the time they represented a valuable (and much used) step on
+the way to full NNLO results, nowadays their interest is mainly
+historical.
+
+Note that only for the \ttt{nnlo\_splitting\_exact} can the colour
+constants be varied (with the caveat about $d^{abc}d_{abc}$ , as is
+described in Sect. \ref{sec:qcd}). For the other options the
+NNLO splitting functions have been computed using the QCD values
+for the color factors.
 
 %======================================================================
 \section{Useful tips on fortran~95}
 \label{sec:f95appendix}
 
-As fortran~95's use in high-energy physics is not as widespread as
-that of other languages such as fortran~77 and C++, it is useful to
-summarise some key novelties compared to fortran~77, as well as some
+As Fortran~95's use in high-energy physics is not as widespread as
+that of other languages such as Fortran~77 and C++, it is useful to
+summarise some key novelties compared to Fortran~77, as well as some
 points that might otherwise cause confusion. For further information
 the reader is referred both to books about the language such as
 \cite{F95Explained} and to web resources~\cite{F95WebResources}.
@@ -2614,14 +3145,14 @@ one must append an append an ampersand, \ttt{\&}, to the line to be
 continued. One may optionally include an ampersand as the first
 non-space character of the continuation line.
 
-For readibility, many of the subprogram names in this documentation
+For readability, many of the subprogram names in this documentation
 are written with capitals at the start of each word. Note however that
-free-form fortran~95, like its fixed-form predecessors, is case
+free-form Fortran~95, like its fixed-form predecessors, is case
 insensitive.
 
-\paragraph{Modules, and features relating to arrays.} Fortran~90/95
+\paragraph{Modules, and features relating to arrays.} Fortran~95
 allows one to package variables and subroutines into modules
-\begin{verbatim}
+\begin{lstlisting}
 module test_module
   implicit none
   integer :: some_integer
@@ -2636,11 +3167,11 @@ contains
     end do
   end subroutine hello_world
 end module test_module
-\end{verbatim}
+\end{lstlisting}
 The variable \texttt{some\_integer} and the subroutine
 \texttt{print\_array} are invisible to other routines unless they
 explicitly \texttt{use} the module as in the following example:
-\begin{verbatim}
+\begin{lstlisting}
 program test_program
   use test_module
   implicit none
@@ -2657,7 +3188,7 @@ program test_program
   print *, "Printing array 2"
   call print_array(array2)
 end program test_program
-\end{verbatim}
+\end{lstlisting}
 Constants can be assigned to arrays (\texttt{array1}) or array
 subsections (\texttt{array2(-2:0)}), arrays can be assigned to arrays
 of the same size (as is done for \texttt{array2(-2:0)}) and
@@ -2671,7 +3202,7 @@ about the lower bound is \emph{not} passed, so that for both
 \texttt{array1} and \texttt{array2}, \texttt{print\_array} will see
 arrays whose valid indices will run from $1\ldots5$. Thus the output
 from the program will be
-\begin{verbatim}
+\begin{lstlisting}
  Printing array 1
  1 0
  2 0
@@ -2684,12 +3215,12 @@ from the program will be
  3 99
  4 198
  5 198
-\end{verbatim}
+\end{lstlisting}
 If \texttt{print\_array} wants \texttt{array} to have a different lower
 bound it must specify it in the declaration, for example
-\begin{verbatim}
+\begin{lstlisting}
   integer, intent(in) :: array(-2:) ! size is known, first element is -2
-\end{verbatim}
+\end{lstlisting}
 While it may initially seem bizarre, there are good reasons for such
 behaviour (for example in allowing a subroutine to manipulate multiple
 arrays of the same size without having to worry about whether they all
@@ -2698,27 +3229,27 @@ have the same lower bounds).
 \paragraph{Dynamic memory allocation, pointers.} One of the major
 additions of f95 compared to f77 is that of dynamic memory allocation,
 for example with pointers
-\begin{verbatim}
+\begin{lstlisting}
   integer, pointer :: dynamic_array(:)
   allocate(dynamic_array(-6:6))
   ! .. work with it ..
   deallocate(dynamic_array)
-\end{verbatim}
+\end{lstlisting}
 This is fundamental to our ability to decide parameters of the PDF
-grid(s) at runtime. Pointers can be passed as arguments to subprograms.
+grid(s) at run-time. Pointers can be passed as arguments to subprograms.
 If the subprogram does not specify the \texttt{pointer} attribute for
 the dummy argument
-\begin{verbatim}
+\begin{lstlisting}
 subroutine xyz(dummy_array)
   integer, intent(in) :: dummy_array(:)
-\end{verbatim}
+\end{lstlisting}
 then everything behaves as if the argument were a normal array (\eg
 the default lower bound is $1$). Alternatively the subroutine can
 specify that it expects a pointer argument
-\begin{verbatim}
+\begin{lstlisting}
 subroutine xyz(dummy_pointer_array)
   integer, pointer :: dummy_pointer_array(:)
-\end{verbatim}
+\end{lstlisting}
 In this case the subroutine has the freedom to allocate and deallocate
 the array. Note also that because a pointer to the full array
 information is being passed, the lower bound of \texttt{dummy\_pointer\_array}
@@ -2728,37 +3259,37 @@ can allocate a dummy pointer array with bounds that are passed back to
 the calling subroutine (we need this for the flavour dimension of
 PDFs, whose lower bound is most naturally $-6$). 
 
-Note that in contrast to \ttt{C}/\ttt{C++} pointers, f90 pointers do
+Note that in contrast to \ttt{C}/\ttt{C++} pointers, F95 pointers do
 not explicitly need to be dereferenced --- in this respect they are
 more like \ttt{C++} \emph{references}. To associate a pointer with an
 object, one uses the \ttt{=>} syntax:
-\begin{verbatim}
+\begin{lstlisting}
   integer, target  :: target_object(10)
   integer, pointer :: pointer_to_object(:)
   pointer_to_object => target_object
   pointer_to_object(1:10) = 0        ! sets target_object(1:10)
-\end{verbatim}
+\end{lstlisting}
 One notes that the object that was pointed to had the \ttt{target}
 attribute --- this is mandatory (unless the object is itself a
 pointer).
 
 
-\paragraph{Derived types.} Another feature of f95 that has been
+\paragraph{Derived types.} Another feature of F95 that has been
 heavily used is that of derived types (analogous to C's
 \texttt{struct}):
-\begin{verbatim}
+\begin{lstlisting}
   type pair
     integer first, second
   end type pair 
-\end{verbatim}
+\end{lstlisting}
 Variables of this type can then be created and used as follows
-\begin{verbatim}
+\begin{lstlisting}
   type(pair) :: pair_object, another_pair_object
   pair_object%first  = 1
   pair_object%second = 2
   another_pair_object = pair_object
   print *, another_pair_object%second
-\end{verbatim}
+\end{lstlisting}
 where one sees that the entirety of the object can be copied with the
 assignment (\texttt{=}) operator. Note that many of the derived types
 used in \hoppet contain pointers and when such a derived type object
@@ -2775,12 +3306,12 @@ as expected by default with derived types (it can actually be modified
 if one wants to), other operators do not have default definitions. So
 if one wants to define, say, a multiplication of objects one may
 associate a function with a given operator, using an interface block:
-\begin{verbatim}
+\begin{lstlisting}
 module test_module
   interface operator(*)        ! provide access to dot_pairs through 
     module procedure dot_pairs ! the normal multiplication symbol
   end interface 
-  interface operator(.dot.)    ! provide acecss to dot_pairs through
+  interface operator(.dot.)    ! provide access to dot_pairs through
     module procedure dot_pairs ! a specially named operator
   end interface 
 contains
@@ -2789,16 +3320,16 @@ contains
     dot_pairs = pair1%first*pair2%first + pair1%second*pair2%second
   end function dot_pairs
 end module
-\end{verbatim}
+\end{lstlisting}
 given which we can then write
-\begin{verbatim}
+\begin{lstlisting}
   integer    :: i
   type(pair) :: pair1, pair2
   [... some code to set up pair values ...]
   ! now multiply them
   i = pair1 * pair2
   i = pair1 .dot. pair2  ! equivalent to previous statement
-\end{verbatim}
+\end{lstlisting}
 Since the the multiplication operator (\texttt{*}) already exists for
 all the default types, by defining it for a new type we have
 \emph{overloaded} it. Note that there are some subtleties with
@@ -2806,11 +3337,11 @@ precedences of user-defined operators: operators (like \texttt{*})
 that already exist have the same precedence as they have is usual
 operators; operators that do not exist by default (\texttt{.dot}) have
 the lowest possible preference, so, given the above definitions,
-\begin{verbatim}
+\begin{lstlisting}
   i = 2 + pair1 * pair2       ! legal
   i = 2 + pair1 .dot. pair2   ! illegal, means: (2+pair1).dot.pair2
   i = 2 + (pair1 .dot. pair2) ! legal
-\end{verbatim}
+\end{lstlisting}
 where the second line is illegal because we have not defined any
 operator for adding an integer and a pair. Similarly care is needed
 when using the \hoppet's operator \texttt{.conv.}.
@@ -2818,13 +3349,13 @@ when using the \hoppet's operator \texttt{.conv.}.
 \paragraph{Floating point precision:}
 A final point concerns floating point variable types. Throughout we
 have used definitions such as
-\begin{verbatim}
+\begin{lstlisting}
   real(dp), pointer :: pdf(:,:)
-\end{verbatim}
+\end{lstlisting}
 and written numbers with a trailing \texttt{\_dp}
-\begin{verbatim}
+\begin{lstlisting}
   param = 1.7_dp
-\end{verbatim}
+\end{lstlisting}
 Here \texttt{dp} is an integer parameter (defined in the
 \texttt{types} module and accessible also through the
 \texttt{hoppet\_v1} module), which specifies the \texttt{kind} of real
@@ -2833,47 +3364,88 @@ have written \texttt{double precision} everywhere, but this is less
 compact, and the use of a kind parameter has the advantage that we
 can just modify its definition in one point in the program and the
 precision will be modified everywhere. (Well, almost, since some
-special functions are written in fortran~77 using \texttt{double
+special functions are written in Fortran~77 using \texttt{double
   precision} declarations and do their numerics based on the
 assumption that that truly is the type they're dealing with).
 
 
 \paragraph{Optional and keyword arguments}
 
-A feature of f90 that helps simplify user interfaces is that of
+A feature of F95 that helps simplify user interfaces is that of
 optional and keyword arguments. Suppose we have
-\begin{verbatim}
+\begin{lstlisting}
   subroutine hello(name, prefix, count)
     character(len=*),  intent(in)  :: name, prefix
     integer, optional, intent(in)  :: count
   end subroutine hello
-\end{verbatim}
+\end{lstlisting}
 Here the \ttt{count} argument is \ttt{optional} meaning that it need
 not be supplied --- if it is absent the subroutine is should behave
 sensibly all the same. Thus one can call the subroutine as
-\begin{verbatim}
+\begin{lstlisting}
   call hello(name, prefix)
   call hello(name, prefix, count)
-\end{verbatim}
+\end{lstlisting}
 Keyword arguments are useful if one doesn't want to remember the exact
 order of a long list of arguments (or if one wants to specify just one
 of several optional arguments). For example
-\begin{verbatim}
+\begin{lstlisting}
   call hello(name=name, prefix=prefix)
   call hello(prefix=prefix, name=name)
-\end{verbatim}
+\end{lstlisting}
 will do the same thing.
 
-%======================================================================
+
+%=============================================================
+
+
 \begin{thebibliography}{99}
 
-\bibitem{Ratcliffe:2000kp}
-  P.~G.~Ratcliffe,
-  %``A matrix approach to numerical solution of the DGLAP evolution
-  %equations,''
-  Phys.\ Rev.\  D {\bf 63}, 116004 (2001)
-  [arXiv:hep-ph/0012376].
-  %%CITATION = PHRVA,D63,116004;%%
+\bibitem{Botje}
+  M.~Botje, QCDNUM, \url{http://www.nikhef.nl/~h24/qcdnum/}~.
+
+% Uses decomposition on Laguerre polynomials -- about
+% 30 of them, remains Y^2 * T method. Initialisation
+% (transform of splitting functions takes 15s on thalie)
+% (didn't try evolution; didn't check accuracy; evolution
+% times and accuracy are not mentioned; seemed fixed nf)
+\bibitem{Schoeffel:1998tz}
+L.~Schoeffel,
+%``An elegant and fast method to solve QCD evolution equations,  application to
+%the determination of the gluon content of the pomeron,''
+Nucl.\ Instrum.\ Meth.\ A {\bf 423} (1999) 439.
+%%CITATION = NUIMA,A423,439;%%
+See also \url{http://www.desy.de/~schoffel/L_qcd98.html},
+\url{http://www-spht.cea.fr/pisp/gelis/Soft/DGLAP/index.html}
+
+\bibitem{Pegasus}
+  A.~Vogt,
+  %``Efficient evolution of unpolarized and polarized parton distributions  with
+  %QCD-PEGASUS,''
+  Comput.\ Phys.\ Commun.\  {\bf 170} (2005) 65
+  [arXiv:hep-ph/0408244].
+  %%CITATION = HEP-PH 0408244;%%
+
+\bibitem{Pascaud:2001bi}
+C.~Pascaud and F.~Zomer,
+%``A fast and precise method to solve the Altarelli-Parisi equations in x
+%space,''
+arXiv:hep-ph/0104013.
+%%CITATION = HEP-PH 0104013;%%
+
+
+\bibitem{Weinzierl:2002mv}
+S.~Weinzierl,
+%``Fast evolution of parton distributions,''
+Comput.\ Phys.\ Commun.\  {\bf 148} (2002) 314
+[arXiv:hep-ph/0203112];
+%%CITATION = HEP-PH 0203112;%%
+%\bibitem{Roth:2004ti}
+M.~Roth and S.~Weinzierl,
+%``QED corrections to the evolution of parton distributions,''
+Phys.\ Lett.\ B {\bf 590} (2004) 190
+[arXiv:hep-ph/0403200].
+%%CITATION = HEP-PH 0403200;%%
 
 % about 1 minute at NLO.
 \bibitem{coriano} A.~Cafarella and C.~Coriano,
@@ -2890,51 +3462,142 @@ Comput.\ Phys.\ Commun.\  {\bf 160} (2004) 213
   [arXiv:hep-ph/0512358].
   %%CITATION = NUPHA,B748,253;%%
 
+\bibitem{GuzziThesis}
+  M.~Guzzi, Ph.D. Thesis, Lecce University, 2006 [hep-ph/0612355].
 
-% Uses decomposition on Laguerre polynomials -- about
-% 30 of them, remains Y^2 * T method. Initialisation
-% (transform of splitting functions takes 15s on thalie)
-% (didn't try evolution; didn't check accuracy; evolution
-% times and accuracy are not mentioned; seemed fixed nf)
-\bibitem{Schoeffel:1998tz}
-L.~Schoeffel,
-%``An elegant and fast method to solve QCD evolution equations,  application to
-%the determination of the gluon content of the pomeron,''
-Nucl.\ Instrum.\ Meth.\ A {\bf 423} (1999) 439.
-%%CITATION = NUIMA,A423,439;%%
-See also \url{http://www.desy.de/~schoffel/L_qcd98.html},
-\url{http://www-spht.cea.fr/pisp/gelis/Soft/DGLAP/index.html}
+\bibitem{nnpdf}
+  L.~Del Debbio, S.~Forte, J.~I.~Latorre, A.~Piccione and J.~Rojo  [NNPDF
+                  Collaboration],
+  %``Neural network determination of parton distributions: The nonsinglet
+  %case,''
+  JHEP {\bf 0703} (2007) 039
+  [arXiv:hep-ph/0701127].
+
+\bibitem{Kosower:1997hg}
+  D.~A.~Kosower,
+  %``Evolution of parton distributions,''
+  Nucl.\ Phys.\  B {\bf 506} (1997) 439
+  [arXiv:hep-ph/9706213].
+
+\bibitem{Ratcliffe:2000kp}
+  P.~G.~Ratcliffe,
+  %``A matrix approach to numerical solution of the DGLAP evolution
+  %equations,''
+  Phys.\ Rev.\  D {\bf 63}, 116004 (2001)
+  [arXiv:hep-ph/0012376].
+  %%CITATION = PHRVA,D63,116004;%%
+
+\bibitem{DGLAP}
+V.N.~Gribov and L.N.~Lipatov, 
+%\sjnp{15}{1972}{438};
+Sov.\ J.\ Nucl.\ Phys. {\bf 15} (1972) 438;
+%``Deep Inelastic E P Scattering In Perturbation Theory,''
+%[Sov.\ J.\ Nucl.\ Phys.\  {\bf 15} (1972) 438].
+%%CITATION = YAFIA,15,781;%%
+G.~Altarelli and G.~Parisi, 
+%\npb{126}{1977}{298};
+Nucl.\ Phys.\ B {\bf 126} (1977) 298;
+%``Asymptotic Freedom In Parton Language,''
+%%CITATION = NUPHA,B126,298;%%
+Yu.L.~Dokshitzer, 
+%\jetp{46}{1977}{641}.
+Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
+%``Calculation Of The Structure Functions For Deep Inelastic Scattering And E+ E- Annihilation By Perturbation Theory In Quantum Chromodynamics.
+%[Zh.\ Eksp.\ Teor.\ Fiz.\  {\bf 73} (1977) 1216].
+%%CITATION = SPHJA,46,641;%%
+
+\bibitem{CTEQ}
+  J.~Pumplin, D.~R.~Stump, J.~Huston, H.~L.~Lai, P.~Nadolsky and W.~K.~Tung,
+  %``New generation of parton distributions with uncertainties from global  QCD
+  %analysis,''
+  JHEP {\bf 0207}, 012 (2002)
+  [arXiv:hep-ph/0201195].
+
+%\cite{Martin:2002dr}
+\bibitem{MRST}
+  A.~D.~Martin, R.~G.~Roberts, W.~J.~Stirling and R.~S.~Thorne,
+  %``NNLO global parton analysis,''
+  Phys.\ Lett.\  B {\bf 531} (2002) 216
+  [arXiv:hep-ph/0201127].
+  %%CITATION = PHLTA,B531,216;%%
+
+\bibitem{DisResum}
+  M.~Dasgupta and G.~P.~Salam,
+  %``Resummation of the jet broadening in DIS,''
+  Eur.\ Phys.\ J.\  C {\bf 24} (2002) 213
+  [arXiv:hep-ph/0110213];
+  %%CITATION = EPHJA,C24,213;%%
+%\bibitem{Dasgupta:2002dc}
+  %M.~Dasgupta and G.~P.~Salam,
+  %``Resummed event-shape variables in DIS,''
+  JHEP {\bf 0208} (2002) 032
+  [arXiv:hep-ph/0208073].
+  %%CITATION = JHEPA,0208,032;%%
 
 
-\bibitem{Weinzierl:2002mv}
-S.~Weinzierl,
-%``Fast evolution of parton distributions,''
-Comput.\ Phys.\ Commun.\  {\bf 148} (2002) 314
-[arXiv:hep-ph/0203112];
-%%CITATION = HEP-PH 0203112;%%
-%\bibitem{Roth:2004ti}
-M.~Roth and S.~Weinzierl,
-%``QED corrections to the evolution of parton distributions,''
-Phys.\ Lett.\ B {\bf 590} (2004) 190
-[arXiv:hep-ph/0403200].
-%%CITATION = HEP-PH 0403200;%%
+
+\bibitem{caesar}
+  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
+  %``Principles of general final-state resummation and automated
+  %implementation,''
+  JHEP {\bf 0503}, 073 (2005)
+  [arXiv:hep-ph/0407286];
+  %%CITATION = JHEPA,0503,073;%%
+%
+%\cite{Banfi:2004nk}
+%\bibitem{Banfi:2004nk}
+%  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
+  %``Resummed event shapes at hadron hadron colliders,''
+  JHEP {\bf 0408}, 062 (2004)
+  [arXiv:hep-ph/0407287].
+  %%CITATION = JHEPA,0408,062;%%
+
+\bibitem{Ciafaloni:2003rd}
+  M.~Ciafaloni, D.~Colferai, G.~P.~Salam and A.~M.~Stasto,
+  %``Renormalisation group improved small-x Green's function,''
+  Phys.\ Rev.\  D {\bf 68}, 114003 (2003)
+  [arXiv:hep-ph/0307188].
 
 
+\bibitem{APPL}
+  T.~Carli, G.~P.~Salam and F.~Siegert,
+  %``A posteriori inclusion of PDFs in NLO QCD final-state calculations,''
+  :hep-ph/0510324;
+  %%CITATION = HEP-PH/0510324;%%
+  T.~Carli, D.~Clements, {\it et al.}, in preparation.
 
-\bibitem{Pascaud:2001bi}
-C.~Pascaud and F.~Zomer,
-%``A fast and precise method to solve the Altarelli-Parisi equations in x
-%space,''
-arXiv:hep-ph/0104013.
-%%CITATION = HEP-PH 0104013;%%
 
-\bibitem{F95Explained}
-  M. Metcalf and J. Reid, \emph{Fortran 90/95 Explained}, Oxford
-  University Press, 1996.
+\bibitem{Benchmarks} 
+  W.~Giele {\it et al.},
+  ``Les Houches 2001, the QCD/SM working group: Summary report,''
+  hep-ph/0204316, section 1.3;\\
+  %%CITATION = HEP-PH 0204316;%%
+  M.~Dittmar {\it et al.},
+  ``Parton distributions: Summary report for the HERA-LHC workshop,''
+  hep-ph/0511119, section 4.4.
+  %%CITATION = HEP-PH 0511119;%%
 
-\bibitem{F95WebResources} Many introductions and tutorials about
-  fortran~90 may be found at
-  \url{http://dmoz.org/Computers/Programming/Languages/Fortran/Tutorials/Fortran_90_and_95/}
+
+\bibitem{NNLO-MTM}
+  M.~Buza, Y.~Matiounine, J.~Smith, R.~Migneron and W.~L.~van Neerven,
+  %``Heavy quark coefficient functions at asymptotic values $Q~2 \gg m~2$,''
+  Nucl.\ Phys.\ B {\bf 472}, 611 (1996)
+  [arXiv:hep-ph/9601302];\\
+  %%CITATION = HEP-PH 9601302;%%
+%
+  M.~Buza, Y.~Matiounine, J.~Smith and W.~L.~van Neerven,
+  %``Charm electroproduction viewed in the variable-flavour number scheme
+  %versus fixed-order perturbation theory,''
+  Eur.\ Phys.\ J.\ C {\bf 1}, 301 (1998)
+  [arXiv:hep-ph/9612398].
+  %%CITATION = HEP-PH 9612398;%%
+
+\bibitem{Chetyrkin:1997sg}
+  K.~G.~Chetyrkin, B.~A.~Kniehl and M.~Steinhauser,
+  %``Strong coupling constant with flavour thresholds at four loops in the
+  %MS-bar scheme,''
+  Phys.\ Rev.\ Lett.\  {\bf 79}, 2184 (1997)
+  [arXiv:hep-ph/9706430].
 
 \bibitem{vanNeerven:1999ca}
   W.~L.~van Neerven and A.~Vogt,
@@ -2957,6 +3620,77 @@ arXiv:hep-ph/0104013.
 
 \bibitem{LHAPDF} W.~Giele and M.~R.~Whalley,
 \url{http://hepforge.cedar.ac.uk/lhapdf/}
+  
+\bibitem{VogtMTMParam} A.~Vogt, private communication.
+
+
+\bibitem{White:2005wm}
+  C.~D.~White and R.~S.~Thorne,
+  %``Comparison of NNLO DIS scheme splitting functions with results from exact
+  %gluon kinematics at small x,''
+  Eur.\ Phys.\ J.\ C {\bf 45} (2006) 179
+  [arXiv:hep-ph/0507244].
+  %%CITATION = HEP-PH 0507244;%%
+
+%\cite{Bethke:2006ac}
+\bibitem{Bethke:2006ac}
+  S.~Bethke,
+  %``Experimental tests of asymptotic freedom,''
+  Prog.\ Part.\ Nucl.\ Phys.\  {\bf 58}, 351 (2007)
+  [arXiv:hep-ex/0606035].
+  %%CITATION = PPNPD,58,351;%%
+
+%\cite{de Florian:2007hc}
+\bibitem{de Florian:2007hc}
+  D.~de Florian, R.~Sassot and M.~Stratmann,
+  %``Global Analysis of Fragmentation Functions for Protons and Charged
+  %Hadrons,''
+  Phys.\ Rev.\  D {\bf 76}, 074033 (2007)
+  [arXiv:0707.1506 [hep-ph]].
+  %%CITATION = PHRVA,D76,074033;%%
+
+
+\bibitem{Corcella:2005us}
+  G.~Corcella and L.~Magnea,
+  %``Soft-gluon resummation effects on parton distributions,''
+  Phys.\ Rev.\  D {\bf 72} (2005) 074017
+  [arXiv:hep-ph/0506278].
+
+\bibitem{Martin:2007bv}
+  A.~D.~Martin, W.~J.~Stirling, R.~S.~Thorne and G.~Watt,
+  %``Update of Parton Distributions at NNLO,''
+  Phys.\ Lett.\  B {\bf 652}, 292 (2007)
+  [arXiv:0706.0459 [hep-ph]].
+
+%\cite{Tung:2006tb}
+\bibitem{Tung:2006tb}
+  W.~K.~Tung, H.~L.~Lai, A.~Belyaev, J.~Pumplin, D.~Stump and C.~P.~Yuan,
+  %``Heavy quark mass effects in deep inelastic scattering and global QCD
+  %analysis,''
+  JHEP {\bf 0702}, 053 (2007)
+  [arXiv:hep-ph/0611254].
+  %%CITATION = JHEPA,0702,053;%%
+
+\bibitem{Martin:2004dh}
+  A.~D.~Martin, R.~G.~Roberts, W.~J.~Stirling and R.~S.~Thorne,
+  %``Parton distributions incorporating QED contributions,''
+  Eur.\ Phys.\ J.\  C {\bf 39}, 155 (2005)
+  [arXiv:hep-ph/0411040].
+
+\bibitem{Ciafaloni:2000df}
+  M.~Ciafaloni, P.~Ciafaloni and D.~Comelli,
+  %``Bloch-Nordsieck violating electroweak corrections to inclusive TeV  scale
+  %hard processes,''
+  Phys.\ Rev.\ Lett.\  {\bf 84}, 4810 (2000)
+  [arXiv:hep-ph/0001142].
+
+
+\bibitem{Ciafaloni:2005fm}
+  P.~Ciafaloni and D.~Comelli,
+  %``Electroweak evolution equations,''
+  JHEP {\bf 0511}, 022 (2005)
+  [arXiv:hep-ph/0505047].
+  %%CITATION = JHEPA,0511,022;%%
 
 
 %\cite{Moch:2004pa}
@@ -2983,114 +3717,21 @@ arXiv:hep-ph/0104013.
   %[hep-ph/0111255].
   %%CITATION = HEP-PH 0111255;%%
 
+\bibitem{F95Explained}
+  M. Metcalf and J. Reid, \emph{Fortran 90/95 Explained}, Oxford
+  University Press, 1996.
 
-\bibitem{NNLO-MTM}
-  M.~Buza, Y.~Matiounine, J.~Smith, R.~Migneron and W.~L.~van Neerven,
-  %``Heavy quark coefficient functions at asymptotic values $Q~2 \gg m~2$,''
-  Nucl.\ Phys.\ B {\bf 472}, 611 (1996)
-  [arXiv:hep-ph/9601302];\\
-  %%CITATION = HEP-PH 9601302;%%
-%
-  M.~Buza, Y.~Matiounine, J.~Smith and W.~L.~van Neerven,
-  %``Charm electroproduction viewed in the variable-flavour number scheme
-  %versus fixed-order perturbation theory,''
-  Eur.\ Phys.\ J.\ C {\bf 1}, 301 (1998)
-  [arXiv:hep-ph/9612398].
-  %%CITATION = HEP-PH 9612398;%%
-  
-\bibitem{VogtMTMParam} A.~Vogt, private communication.
+\bibitem{F95WebResources} Many introductions and tutorials about
+  fortran~90 may be found at
+  \url{http://dmoz.org/Computers/Programming/Languages/Fortran/Tutorials/Fortran_90_and_95/}
 
 
-\bibitem{White:2005wm}
-  C.~D.~White and R.~S.~Thorne,
-  %``Comparison of NNLO DIS scheme splitting functions with results from exact
-  %gluon kinematics at small x,''
-  Eur.\ Phys.\ J.\ C {\bf 45} (2006) 179
-  [arXiv:hep-ph/0507244].
-  %%CITATION = HEP-PH 0507244;%%
-
-\bibitem{Benchmarks} 
-  W.~Giele {\it et al.},
-  ``Les Houches 2001, the QCD/SM working group: Summary report,''
-  hep-ph/0204316, section 1.3;\\
-  %%CITATION = HEP-PH 0204316;%%
-  M.~Dittmar {\it et al.},
-  ``Parton distributions: Summary report for the HERA-LHC workshop,''
-  hep-ph/0511119, section 4.4.
-  %%CITATION = HEP-PH 0511119;%%
-
-
-\bibitem{Pegasus}
-  A.~Vogt,
-  %``Efficient evolution of unpolarized and polarized parton distributions  with
-  %QCD-PEGASUS,''
-  Comput.\ Phys.\ Commun.\  {\bf 170} (2005) 65
-  [arXiv:hep-ph/0408244].
-  %%CITATION = HEP-PH 0408244;%%
-
-
-\bibitem{GuzziThesis}
-  M.~Guzzi, Ph.D. Thesis, Lecce University, 2006 [hep-ph/0612355].
-
-\bibitem{APPL}
-  T.~Carli, G.~P.~Salam and F.~Siegert,
-  %``A posteriori inclusion of PDFs in NLO QCD final-state calculations,''
-  :hep-ph/0510324;
-  %%CITATION = HEP-PH/0510324;%%
-  T.~Carli, D.~Clements, {\it et al.}, in preparation.
-
-\bibitem{DisResum}
-  M.~Dasgupta and G.~P.~Salam,
-  %``Resummation of the jet broadening in DIS,''
-  Eur.\ Phys.\ J.\  C {\bf 24} (2002) 213
-  [arXiv:hep-ph/0110213];
-  %%CITATION = EPHJA,C24,213;%%
-%\bibitem{Dasgupta:2002dc}
-  %M.~Dasgupta and G.~P.~Salam,
-  %``Resummed event-shape variables in DIS,''
-  JHEP {\bf 0208} (2002) 032
-  [arXiv:hep-ph/0208073].
-  %%CITATION = JHEPA,0208,032;%%
-
-\bibitem{caesar}
-  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
-  %``Principles of general final-state resummation and automated
-  %implementation,''
-  JHEP {\bf 0503}, 073 (2005)
-  [arXiv:hep-ph/0407286];
-  %%CITATION = JHEPA,0503,073;%%
-%
-%\cite{Banfi:2004nk}
-%\bibitem{Banfi:2004nk}
-%  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
-  %``Resummed event shapes at hadron hadron colliders,''
-  JHEP {\bf 0408}, 062 (2004)
-  [arXiv:hep-ph/0407287].
-  %%CITATION = JHEPA,0408,062;%%
-
-
-\bibitem{DGLAP}
-V.N.~Gribov and L.N.~Lipatov, 
-%\sjnp{15}{1972}{438};
-Sov.\ J.\ Nucl.\ Phys. {\bf 15} (1972) 438;
-%``Deep Inelastic E P Scattering In Perturbation Theory,''
-%[Sov.\ J.\ Nucl.\ Phys.\  {\bf 15} (1972) 438].
-%%CITATION = YAFIA,15,781;%%
-G.~Altarelli and G.~Parisi, 
-%\npb{126}{1977}{298};
-Nucl.\ Phys.\ B {\bf 126} (1977) 298;
-%``Asymptotic Freedom In Parton Language,''
-%%CITATION = NUPHA,B126,298;%%
-Yu.L.~Dokshitzer, 
-%\jetp{46}{1977}{641}.
-Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
-%``Calculation Of The Structure Functions For Deep Inelastic Scattering And E+ E- Annihilation By Perturbation Theory In Quantum Chromodynamics.
-%[Zh.\ Eksp.\ Teor.\ Fiz.\  {\bf 73} (1977) 1216].
-%%CITATION = SPHJA,46,641;%%
-
-
-\bibitem{Botje}
-  M.~Botje, QCDNUM, \url{http://www.nikhef.nl/~h24/qcdnum/}~.
 
 \end{thebibliography}
+
+
+%=====================================================================
+
+
+
 \end{document}
