@@ -3420,6 +3420,37 @@ with LHAPDF-like interface\\
 %\scalebox{0.01}{
 \begin{tabular}{|c|c|}
 \hline
+\bf TYPES  & \bf DESCRIPTION \\
+\hline
+\texttt{real(dp), pointer :: gluon(:)} & Grid representation of a 
+single PDF \\
+\hline
+\texttt{real(dp), pointer :: PDFset(:,:)} & 
+Grid representation of a PDF set \\
+\hline
+\texttt{type(grid\_def) :: grid} & Grid in $x-$space\\ 
+\hline
+\texttt{type(grid\_conv) :: Pgg} 
+ & Convolution operator ({\it i.e.} splitting functions) \\ 
+\hline
+\texttt{ type(split\_mat) :: P}
+ & Splitting matrices \\ 
+\hline
+ \texttt{type(mass\_threshold\_mat) :: MTM\_NNLO}
+ & Heavy quark threshold mass matrices\\ 
+\hline
+\texttt{ type(dglap\_holder) :: dglap\_h} & DGLAP holder \\
+\hline
+\texttt{type(running\_coupling) :: coupling} & Running coupling \\
+\hline
+\texttt{type(evln\_operator) :: evop} & Evolution operator \\
+\hline
+\texttt{type(pdf\_table) :: table} & PDF tabulation \\
+\hline
+\end{tabular}
+\vspace{0.7cm}
+\begin{tabular}{|c|c|}
+\hline
 \bf METHOD  & \bf DESCRIPTION \\
 \hline
 \bf Initialization & \\
@@ -3521,37 +3552,7 @@ Fill a table starting from an initial condition\\
 \hline
 \end{tabular} \\
 %}
-\vspace{0.7cm}
-\begin{tabular}{|c|c|}
-\hline
-\bf TYPES  & \bf DESCRIPTION \\
-\hline
-\texttt{real(dp), pointer :: gluon(:)} & Grid representation of a 
-single PDF \\
-\hline
-\texttt{real(dp), pointer :: PDFset(:,:)} & 
-Grid representation of a PDF set \\
-\hline
-\texttt{type(grid\_def) :: grid} & Grid in $x-$space\\ 
-\hline
-\texttt{type(grid\_conv) :: Pgg} 
- & Convolution operator ({\it i.e.} splitting functions) \\ 
-\hline
-\texttt{ type(split\_mat) :: P}
- & Splitting matrices \\ 
-\hline
- \texttt{type(mass\_threshold\_mat) :: MTM\_NNLO}
- & Heavy quark threshold mass matrices\\ 
-\hline
-\texttt{ type(dglap\_holder) :: dglap\_h} & DGLAP holder \\
-\hline
-\texttt{type(running\_coupling) :: coupling} & Running coupling \\
-\hline
-\texttt{type(evln\_operator) :: evop} & Evolution operator \\
-\hline
-\texttt{type(pdf\_table) :: table} & PDF tabulation \\
-\hline
-\end{tabular}
+%\vspace{0.7cm}
 \end{center}
 \caption{\label{tab:general}
 Reference guide for the general interface.
