@@ -3,7 +3,7 @@
 !
 subroutine HoppetWelcomeMessage
   write(0,'(a)') '-----------------------------------------------------------'
-  write(0,'(a)') '             Welcome to HOPPET v. 1.1.0b1                  '
+  write(0,'(a)') '             Welcome to HOPPET v. 1.1.0                    '
   write(0,'(a)') '   Higher Order Perturbative Parton Evolution Toolkit      '
   write(0,'(a)') '            (formerly PDFEvln/HOPPER/...)   '
   write(0,'(a)') ''

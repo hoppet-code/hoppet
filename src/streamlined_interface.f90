@@ -1,4 +1,4 @@
-module vanilla_interface
+module streamlined_interface
   use types; use consts_dp
   use pdf_tabulate
   use convolution; use pdf_general; use dglap_objects
@@ -24,14 +24,14 @@ module vanilla_interface
   type(running_coupling), save :: coupling
   integer,  save :: ffn_nf = -1
   real(dp), save :: masses(4:6) = quark_masses_def(4:6)
-end module vanilla_interface
+end module streamlined_interface
 
 
 !======================================================================
 !! initialise the underlying grid, splitting functions and pdf-table
 !! objects, using the dy and nloop parameters as explained below.
 subroutine hoppetStart(dy,nloop)
-  use vanilla_interface
+  use streamlined_interface
   implicit none
   !--------------------------------------
   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
@@ -52,7 +52,7 @@ end subroutine hoppetStart
 !! initialise the underlying grid, splitting functions and pdf-table
 !! objects, using an extended set of parameters, as described below
 subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
-  use vanilla_interface
+  use streamlined_interface
   implicit none
   real(dp), intent(in) :: ymax   !! highest value of ln1/x user wants to access
   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
@@ -97,7 +97,7 @@ end subroutine hoppetStartExtended
 !! Given a pdf_subroutine with the interface shown below, initialise
 !! our internal pdf table.
 subroutine hoppetAssign(pdf_subroutine)
-  use vanilla_interface ! this module which provides access to the array of tables
+  use streamlined_interface ! this module which provides access to the array of tables
   implicit none
   interface ! indicate what "interface" pdf_subroutine is expected to have
      subroutine pdf_subroutine(x,Q,res)
@@ -125,7 +125,7 @@ end subroutine hoppetAssign
 !! table by evolving the PDF from scale Q0pdf, with alphas provided 
 !! at scale Q0alphas
 subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
-  use vanilla_interface ! this module which provides access to the array of tables implicit none
+  use streamlined_interface ! this module which provides access to the array of tables implicit none
   implicit none
   real(dp), intent(in) :: asQ0, Q0alphas, muR_Q, Q0pdf
   integer,  intent(in) :: nloop
@@ -174,7 +174,7 @@ end subroutine hoppetEvolve
 !======================================================================
 !! Prepare a cached evolution
 subroutine hoppetPreEvolve(asQ0, Q0alphas, nloop, muR_Q, Q0pdf)
-  use vanilla_interface
+  use streamlined_interface
   implicit none
   real(dp), intent(in) :: asQ0, Q0alphas, muR_Q, Q0pdf
   integer,  intent(in) :: nloop
@@ -202,7 +202,7 @@ end subroutine hoppetPreEvolve
 !! that can be obtained from pdf_subroutine at the scale Q0pdf set in
 !! PreEvolve
 subroutine hoppetCachedEvolve(pdf_subroutine)
-  use vanilla_interface
+  use streamlined_interface
   implicit none
   interface ! indicate what "interface" pdf_subroutine is expected to have
      subroutine pdf_subroutine(x,Q,res)
@@ -236,7 +236,7 @@ end subroutine hoppetCachedEvolve
 !======================================================================
 !! Return the coupling at scale Q
 function hoppetAlphaS(Q)
-  use vanilla_interface ! this module which provides access to the array of tables
+  use streamlined_interface ! this module which provides access to the array of tables
   implicit none
   real(dp)             :: hoppetAlphaS
   real(dp), intent(in) :: Q
@@ -248,7 +248,7 @@ end function hoppetAlphaS
 !! Set up things to be a fixed-flavour number scheme with the given
 !! fixed_nf number of flavours
 subroutine hoppetSetFFN(fixed_nf)
-  use vanilla_interface ! this module which provides access to the array of tables
+  use streamlined_interface ! this module which provides access to the array of tables
   implicit none
   integer,  intent(in) :: fixed_nf
 
@@ -259,7 +259,7 @@ end subroutine hoppetSetFFN
 !! Set up things to be a variable-flavour number scheme with the given
 !! quark masses
 subroutine hoppetSetVFN(mc,mb,mt)
-  use vanilla_interface ! this module which provides access to the array of tables
+  use streamlined_interface ! this module which provides access to the array of tables
   implicit none
   real(dp) :: mc, mb, mt
 
@@ -272,7 +272,7 @@ end subroutine hoppetSetVFN
 !! Return in f(-6:6) the value of the internally stored pdf at the
 !! given x,Q, with the usual LHApdf meanings for the indices -6:6.
 subroutine hoppetEval(x,Q,f)
-  use vanilla_interface
+  use streamlined_interface
   implicit none
   real(dp), intent(in)  :: x, Q
   real(dp), intent(out) :: f(-6:6)
@@ -306,7 +306,7 @@ end subroutine hoppetEval
 !! iloop can be carried out without problems.
 !!
 subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
-  use vanilla_interface; use warnings_and_errors
+  use streamlined_interface; use warnings_and_errors
   implicit none
   real(dp), intent(in)  :: x, Q
   integer,  intent(in)  :: iloop, nf

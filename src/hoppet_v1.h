@@ -33,7 +33,7 @@ extern "C" {
   /// an extended interface for starting hoppet
   void hoppetStartExtended(
        const double & ymax,   //< highest value of ln1/x user wants to access
-       const double & dy,     //< internal grid spacing: 0.1 is a sensible value
+       const double & dy,     //< internal ln1/x grid spacing: 0.1-0.25 is a sensible range
        const double & Qmin,   //< lower limit of Q range
        const double & Qmax,   //< upper limit of Q range
        const double & dlnlnQ, //< internal table spacing in lnlnQ (e.g. dy/4)

@@ -1,3 +1,13 @@
+2008-04-23  Gavin SALAM  <salam@lpthe.jussieu.fr> + Juan
+
+	* src/welcome_message.f90 (HoppetWelcomeMessage): 
+	  update the version number to 1.1.0
+
+2008-04-22  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* src/vanilla_interface.f90 -> src/streamlined_interface.f90: 
+	  remaned this so as to correspond to name used in docs.
+
 2008-01-30  Gavin SALAM  <salam@lpthe.jussieu.fr> + Juan
 
 	* src/evolution.f90 (EvolveGeneric): 
