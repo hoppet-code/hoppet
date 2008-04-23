@@ -1,5 +1,9 @@
 2008-04-23  Gavin SALAM  <salam@lpthe.jussieu.fr> + Juan
 
+	* example_f90/tabulation_example_streamlined.f90: 
+          [ added previously by Juan ]
+	  tidied up some details.
+	
 	* src/welcome_message.f90 (HoppetWelcomeMessage): 
 	  update the version number to 1.1.0
 
