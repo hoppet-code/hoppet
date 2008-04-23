@@ -5,7 +5,7 @@
 	  tidied up some details.
 	
 	* src/welcome_message.f90 (HoppetWelcomeMessage): 
-	  update the version number to 1.1.0
+	  updated the banner text and put the version number at 1.1.0
 
 2008-04-22  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
