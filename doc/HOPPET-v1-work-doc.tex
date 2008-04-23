@@ -66,11 +66,12 @@
 \newcommand{\comment}[1]{\textbf{[#1]}}
 \newcommand{\eg}{e.g.\ }
 \newcommand{\ie}{i.e.\ }
+\newcommand{\cf}{cf.\ }
 \newcommand{\MSbar}{\overline{\mathrm{MS}}}
 \newcommand{\hoppet}{\textsc{hoppet}\xspace}
 \newcommand{\ttt}[1]{\texttt{#1}}
 \newcommand{\order}[1]{{\cal O}\left(#1\right)}
-\newcommand{\fn}[1]{\scriptsize}
+\newcommand{\fn}{\scriptsize}
 
 \newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,coriano,GuzziThesis,nnpdf,Kosower:1997hg,Ratcliffe:2000kp}
 
@@ -382,7 +383,7 @@ whose interest is to use \hoppet to perform
 fast and efficient evolution of PDFs 
 % we suggest him to move
 % he/she 
-may whish to skip 
+may wish to skip 
 Sects.~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}
 and move directly to
  Sect.~\ref{sec:vanilla}, which describes the 
@@ -391,14 +392,16 @@ accessible from F95, F77 and C/C++, and which contains the essential
 functionalities of \hoppet. He/she is also encouraged to go through the
 various example programs which contain detailed 
 descriptions and explanations. 
-On the other hand, if the reader is interested in the
+On the other hand, a reader interested in the
 more flexible and general 
-functionalities of \hoppet, he/she should read in detail
-Sects.~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}. Note also
+functionalities of \hoppet, should also consult
+Sects.~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}. 
+
+Note 
 that throughout this documentation, a PDF refers always to a momentum
 density rather than a parton density, that is, when we refer to
 a gluon, we mean $xg(x)$ rather than $g(x)$, the same convention
-used in the LHAPDF PDF library \cite{LHAPDF}.
+as used in the LHAPDF PDF library \cite{LHAPDF}.
 
 
 %----------------------------------------------------------------------
@@ -431,7 +434,7 @@ is the generalization of eq.~(\ref{eq:dglap-ns}) to the case
 of time-like evolution\footnote{
 The general structure of the relation between space-like
 and time-like evolution and splitting functions
- has been investigated in \cite{Dokshitzer:2005bf,Mitov:2006ic,Dokshitzer:2006nm,Beccaria:2007bb}.}, 
+ has been investigated in \cite{Dokshitzer:2005bf,Mitov:2006ic,Basso:2006nk,Dokshitzer:2006nm,Beccaria:2007bb}.}, 
 relevant for example for fragmentation function analysis,
 where partial NNLO results
 are also available \cite{Mitov:2006ic}.
@@ -674,15 +677,23 @@ $x=1$), but we shall include two options: one that uses effective
 zero-points beyond $x=1$ and one that ensures that the interpolation
 is based only on the physically valid domain of the PDFs.
 
-These two options are represented in Fig.~\ref{fig:interpolation-orders}.
-For an interpolation of order $n$ (that is, which uses information
-from $n+1$ grid points), the option of using only points with
-$x\le 1$ is denoted by $\tt order=n$, while the option
-of using artificial points at $x>1$ is denoted by  
- $\tt order=-n$. Note that the interpolation in the vicinity
-of a point $x_{\beta}\le x \le x_{\beta+1}$ when possible
-uses information from grid points with $\alpha \ge \beta$, as represented
-in Fig.~\ref{fig:interpolation-orders}. 
+These two choices are represented in
+Fig.~\ref{fig:interpolation-orders}.  For an interpolation of order
+$n$ (that is, which uses information from $n+1$ grid points), the
+option of using only points with $x\le 1$ is denoted by $\tt order=n$.
+This has the consequence that for $\beta \le n$ we cannot write
+$P_{\alpha\beta} = \mathcal{P}_{\alpha-\beta}$, and so must explicitly
+store $\order{N_x n}$ distinct $P_{\alpha\beta}$ entries.
+%
+The option of using artificial (zero-valued) points at $x>1$ is denoted by $\tt
+order=-n$, and does allow us to write $P_{\alpha\beta} =
+\mathcal{P}_{\alpha-\beta}$ (thus we store only $\order{N_x}$
+entries), with $\mathcal{P}_{\alpha-\beta} = 0$ for $\alpha < \beta$.
+
+%  (and implies $P_. Note that the interpolation in the vicinity
+% of a point $x_{\beta}\le x \le x_{\beta+1}$ when possible
+% uses information from grid points with $\alpha \ge \beta$, as represented
+% in Fig.~\ref{fig:interpolation-orders}. 
 
 % We would also
 % like to emphasize that convolution operators, like splitting functions
@@ -691,9 +702,12 @@ in Fig.~\ref{fig:interpolation-orders}.
 \begin{figure}
   \centering
   \includegraphics[width=0.72\textwidth]{interpolation-order.eps}%
-  \caption{The different strategies for interpolation of $x$ points
-in the grid near $x=1$.
-  }
+  \caption{The different strategies (+ve and $-$ve order) for
+    interpolation of the grid near $x=1$. The dotted (blue, red) boxes
+    indicate two regions in which we illustrate the interpolation of
+    the PDF, while the (blue, red) lines with arrows indicate the
+    corresponding range of grid points on which the interpolation is
+    based.}
   \label{fig:interpolation-orders}
 \end{figure}
 
@@ -909,11 +923,14 @@ a function
     example_xgluon = 1.7_dp * x**(-0.1_dp) * (1-x)**5 !! returns xg(x)  
   end function example_xgluon
 \end{lstlisting}
-where note that this function returns the gluon
-momentum density $xg(x)$ instead of
-$g(x)$ (since \hoppet works with momentum densities,
-as explained in Sect.~\ref{sec:highord})
-
+which
+%where note that this function 
+returns the gluon
+momentum density $xg(x)$ (\cf Sect.~\ref{sec:highord}).
+% instead of
+%$g(x)$ (since \hoppet works with momentum densities,
+%as explained in Sect.~\ref{sec:highord})
+%
 Then we can call
 \begin{lstlisting}
   call InitGridQuant(grid,xgluon,example_xgluon)
@@ -1068,8 +1085,8 @@ appears between a splitting function and a PDF) instead of
 \begin{lstlisting}
   xgluon = xgluon + (as2pi*dt) * (xPgg*xgluon + xPgq*xquark)
 \end{lstlisting}
-Note that from now on we will drop the explicit use of
-$x$ in front of PDF names and convolution operators.
+Note that, for brevity, from now on we will drop the explicit use of
+$x$ in front of names PDF and convolution operator variables.
 
 
 %......................................................................
@@ -1106,7 +1123,7 @@ in the same subroutine call). Some calls require that one specify the
 grid definition being used (\texttt{grid}), because otherwise there is
 no way for the subroutine to deduce which grid is being used.
 
-When creating a \texttt{grid\_conv} object for temporary use, it is
+If repeatedly creating a \texttt{grid\_conv} object for temporary use, it is
 important to remember to \texttt{Delete} it afterwards, so as to avoid
 memory leaks.
 
@@ -1249,26 +1266,26 @@ decided not by the allocation routine, but on the fly), for example in
 a function that returns a PDF, then you should label it yourself as
 being in the \ttt{human} representation, either with the
 \ttt{LabelPdfAsHuman(pdf)} subroutine call, or by setting
-\ttt{xpdf(:,7)} to zero:
+\ttt{pdf(:,7)} to zero:
 \begin{lstlisting}
 module pdf_initial_condition
   use hoppet_v1; implicit none
 contains
-  function unpolarized_dummy_xpdf(xvals) result(xpdf)
+  function unpolarized_dummy_pdf(xvals) result(pdf)
     real(dp), intent(in) :: xvals(:)
-    real(dp)             :: xpdf(size(xvals),-6:7)
+    real(dp)             :: pdf(size(xvals),-6:7)
 
     ! clean method for labelling as PDF as being in the human representation
-    call LabelPdfAsHuman(xpdf)
+    call LabelPdfAsHuman(pdf)
     ! Alternatively, by setting everything to zero 
-    ! (notably xpdf(:,7)), the PDF representation
+    ! (notably pdf(:,7)), the PDF representation
     ! is automatically set to be human
-    xpdf(:,:) = 0
+    pdf(:,:) = 0
     
     ! iflv_g is pre-defined integer parameter (=0) for symbolic ref. to gluon
-    xpdf(:,iflv_g) = 1.7_dp * xvals**(-0.1_dp) * (1-xvals)**5 ! Returns x*g(x)
+    pdf(:,iflv_g) = 1.7_dp * xvals**(-0.1_dp) * (1-xvals)**5 ! Returns x*g(x)
     [... set other flavours here ...]
-  end function unpolarized_dummy_xpdf
+  end function unpolarized_dummy_pdf
 end module pdf_initial_condition
 \end{lstlisting}
 The function has been placed in a module so as to provide an easy way
@@ -1279,16 +1296,16 @@ initialising a PDF:
 \begin{lstlisting}
   use hoppet_v1; use pdf_initial_condition; implicit none
   type(grid_def)    :: grid
-  real(dp), pointer :: xpdf(:,:)
+  real(dp), pointer :: pdf(:,:)
   [...]
-  call AllocPDF(grid,xpdf)
-  xpdf = unpolarized_dummy_xpdf(xValues(grid))
+  call AllocPDF(grid,pdf)
+  pdf = unpolarized_dummy_pdf(xValues(grid))
 \end{lstlisting}
 There exist a number of other options, which can be found by browsing
 through \ttt{src/pdf\_general.f90}. Of these a sometimes handy one is
 \begin{lstlisting}
-  call AllocPDF(grid,xpdf)
-  call InitPDF_LHAPDF(grid, xpdf, LHAsub, Q)
+  call AllocPDF(grid,pdf)
+  call InitPDF_LHAPDF(grid, pdf, LHAsub, Q)
 \end{lstlisting}
 where \texttt{LHAsub} is the name of a subroutine 
 %(to be declared
@@ -1311,22 +1328,22 @@ can either examine a particular flavour using the methods described in
 Sect.~\ref{sec:xspc}
 % gluon_at_y = 2 * EvalGridQuant(grid,pdf(:,iflv_g),y) 
 \begin{lstlisting}
-  real(dp) :: y, xgluon_at_y
-  xgluon_at_y = xpdf(:,iflv_g) .aty. (y.with.grid)
+  real(dp) :: y, gluon_at_y
+  gluon_at_y = pdf(:,iflv_g) .aty. (y.with.grid)
   ! OR
- xgluon_at_y = EvalGridQuant(grid,xpdf(:,iflv_g),y) 
+ gluon_at_y = EvalGridQuant(grid,pdf(:,iflv_g),y) 
 \end{lstlisting}
 or one can extract all flavours simultaneously
 \begin{lstlisting}
-  real(dp) :: xpdf_at_y(-6:6)
-  xpdf_at_y = xpdf(:,-6:6) .aty. (y.with.grid)
+  real(dp) :: pdf_at_y(-6:6)
+  pdf_at_y = pdf(:,-6:6) .aty. (y.with.grid)
   ! OR
-  xpdf_at_y =  EvalGridQuant(grid,xpdf(:,-6:6),y) 
+  pdf_at_y =  EvalGridQuant(grid,pdf(:,-6:6),y) 
 \end{lstlisting}
 with the latter being more efficient if one needs to extract all
 flavours simultaneously. Note that here we have explicitly specified
 the flavours, \ttt{-6:6}, that we want.\footnote{If instead we had
-  said \ttt{xpdf(:,:)} the result would have corresponded to a slice of
+  said \ttt{pdf(:,:)} the result would have corresponded to a slice of
   flavours \ttt{-6:7}, \ie including an interpolation of the
   representation labelling information, which would be meaningless.}
 
@@ -1361,7 +1378,7 @@ To take a PDF in the \ttt{human} representation and make a copy in an
 \ttt{evln} representation, one uses the \ttt{CopyHumanPdfToEvln} routine
 \begin{lstlisting}
   real(dp), pointer :: pdf_human(:,:), pdf_evln(:,:)
-  integer           :: nf_lcl ! nf conflicts with global variable
+  integer           :: nf_lcl ! NB: nf would conflict with global variable
   [... setting up pdf_human, nf_lcl, etc. ...] 
   call AllocPDF(grid,pdf_evln)  ! or it might be an automatic array
   call CopyHumanPdfToEvln(nf_lcl, pdf_human, pdf_evln) ! From human to evolution representation
@@ -2387,10 +2404,10 @@ renormalisation to factorisation scales \ttt{muR\_Q},\footnote{Note
   F95 the user has the freedom to do as they prefer). } %
 the name of a subroutine \ttt{LHAsub} with interface
 \begin{lstlisting}
-  subroutine LHAsub(x,Q,xpdf)
+  subroutine LHAsub(x,Q,pdf)
     implicit none
-    double precision x,Q,xpdf(-6:6)
-    [...]   ! Returns xpdf, momentum fractions
+    double precision x,Q,pdf(-6:6)
+    [...]   ! sets pdf to be momentum densities, e.g. pdf(0) = xg(x)
   end subroutine 
 \end{lstlisting}
 to return the initial condition for the evolution and the scale
@@ -2404,7 +2421,8 @@ while the PDF at a given value of $\ttt{x}$ and $\ttt{Q}$ is obtained with
 \begin{lstlisting}
   call hoppetEval(x,Q,f)
 \end{lstlisting}
-which sets \ttt{f(-6:6)} (recall that it is $xg(x)$, etc., that is
+which sets \ttt{f(-6:6)} (recall that it is $xg(x)$, etc., that are
+returned, since this is what is
 used through \hoppet).
 
 It is also possible to prepare an evolution in cached form. This is
@@ -3132,7 +3150,7 @@ program tabulation_example_streamlined
   !! holds information about the grid
   type(grid_def) :: grid, gdarray(4)
   !! hold results at some x, Q
-  real(dp) :: Q, xpdf_at_xQ(-6:6)
+  real(dp) :: Q, pdf_at_xQ(-6:6)
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   integer  :: ix
@@ -3183,18 +3201,18 @@ program tabulation_example_streamlined
   write(6,'(a5,2a12,a14,a10,a12)') "x",&
        & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
   do ix = 1, size(heralhc_xvals)
-     call hoppetEval(heralhc_xvals(ix),Q,xpdf_at_xQ)
+     call hoppetEval(heralhc_xvals(ix),Q,pdf_at_xQ)
      write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
-          &  xpdf_at_xQ(2)-xpdf_at_xQ(-2), &
-          &  xpdf_at_xQ(1)-xpdf_at_xQ(-1), &
-          &  2*(xpdf_at_xQ(-1)+xpdf_at_xQ(-2)), &
-          &  (xpdf_at_xQ(-4)+xpdf_at_xQ(4)), &
-          &  xpdf_at_xQ(0)
+          &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+          &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+          &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+          &  pdf_at_xQ(0)
   end do
   
 contains 
  
-  subroutine LHAsub(x,Q,xpdf)
+  subroutine LHAsub(x,Q,pdf)
     ! Same as in the previous example program
   end subroutine LHAsub
 
@@ -3307,11 +3325,11 @@ Table  \ref{tab:general}.
 \end{lstlisting} 
 & \scriptsize
 Sets up a compound grid with
-spacing \ttt{dy} at small $x$,\\ &
+spacing in $\ln 1/x$ of \ttt{dy} at small $x$,\\ &
 \fn~  extending to $y = 12$ and numerical
 order $\ttt=-5$. \\ & \fn~  The $Q$ range for the tabulation will be $1\GeV <
 Q<28 \TeV$, \\
-& \fn~ \ttt{dlnlnQ=dy/4} and the scheme is ${\overline{\rm MS}}$\\
+& \fn~ \ttt{dlnlnQ=dy/4} and the factorisation scheme is ${\overline{\rm MS}}$\\
 \hline
 \begin{lstlisting}
  hoppetStartExtended(ymax,dy,Qmin,
@@ -3330,50 +3348,53 @@ Q<28 \TeV$, \\
   alphas = hoppetAlphaS(Q)
 \end{lstlisting} &
 \fn~Accessing the coupling \\
-\hline
+\hline&\\[-0.5em]
 \bf Normal evolution & \\
 \hline
-\texttt{\fn~
+\texttt{\footnotesize
  hoppetEvolve(asQ,Q0alphas,}
-& \fn ~ PDF evolution: specifies the coupling \ttt{asQ} at a 
+& \fn\ PDF evolution: specifies the coupling \ttt{asQ} at a 
 scale \ttt{Q0alphas}, \\
- \texttt{\fn~nloop,muR\_Q,LHAsub,Q0pdf)}&
- \fn ~the number of loops for  evol., \ttt{nloop}, the ratio of
-ren. to fact. scales. \\ 
-&  \fn~ the name of a subroutine \ttt{LHAsub} with LHAPDF-like interface \\
-&  \fn~and the scale
+ \texttt{\footnotesize nloop,muR\_Q,LHAsub,Q0pdf)}&
+ \fn the number of loops for  evol., \ttt{nloop}, \\
+&\fn the ratio (\ttt{muR\_Q}) of ren. to fact. scales. \\ 
+&  \fn the name of a subroutine \ttt{LHAsub} with an LHAPDF-like interface \\
+&  \fn and the scale
 \ttt{Q0pdf} at which one starts the PDF evolution \\
-&  \fn~Notice  \ttt{LHAsub} only called at scale \ttt{Q0pdf}\\
+&  \fn Note:  \ttt{LHAsub} only called at scale \ttt{Q0pdf}\\
 \hline
 \begin{lstlisting}
  hoppetEval(x,Q,f)
 \end{lstlisting} &
-\fn~ The PDF at a given value of $\ttt{x}$ and $\ttt{Q}$ is obtained \\
+\fn On return, \ttt{f(-6:6)} contains all flavours of the PDF set\\ 
+%The PDF at a given value of  is obtained \\
 & \fn ~
-Recall that it returns $xq(x)$, the convention used through \hoppet\\
-\hline
+(multiplied by $x$) at the given $\ttt{x}$ and $\ttt{Q}$ values \\
+\hline&\\[-0.5em]
 \bf Cached evolution & \\
 \hline
 \begin{lstlisting}
  hoppetPreEvolve(asQ,Q0alphas, 
- nloop, muR_Q, Q0pdf)
+          nloop, muR_Q, Q0pdf)
 \end{lstlisting} & \fn ~
  Preparation of the cached evolution\\
 \hline
 \begin{lstlisting}
  hoppetCachedEvolve(LHAsub)
 \end{lstlisting} &
-\fn ~ Perform cached evolution with the initial condition\\
-& \fn~ at \ttt{Q0pdf} from a routine \ttt{LHAsub} 
+\fn  Perform cached evolution with the initial condition\\
+& \fn at \ttt{Q0pdf} from a routine \ttt{LHAsub} 
 with LHAPDF-like interface\\
-&  \fn~ Notice  \ttt{LHAsub} only called at scale \ttt{Q0pdf}\\
+&  \fn Notice  \ttt{LHAsub} only called at scale \ttt{Q0pdf}\\
 \hline
 \begin{lstlisting}
  hoppetEval(x,Q,f)
 \end{lstlisting} &
-\fn~ The PDF at a given value of $\ttt{x}$ and $\ttt{Q}$ is obtained \\
+\fn On return, \ttt{f(-6:6)} contains all flavours of the PDF set\\ 
+%The PDF at a given value of  is obtained \\
 & \fn ~
-Recall that it returns $xq(x)$, the convention used through \hoppet\\
+(multiplied by $x$) at the given $\ttt{x}$ and $\ttt{Q}$ values \\
+& \fn [as for normal evolution]\\
 \hline
 \end{tabular}
 \end{center}
@@ -3455,7 +3476,7 @@ InitDglapHolder(grid, dglap\_h, factscheme, nloop)
 \bf Evaluation & \\
 \hline
 \texttt{
-EvalGridQuant(grid,xgluon,y)
+EvalGridQuant(grid,gluon,y)
 }
  & ~~Evaluation of a grid quantity at $y=\ln 1/x$\\
 \hline
@@ -3485,7 +3506,7 @@ GetPdfRep(pdf)
 Check PDF representation \\
 \hline
 \texttt{
- EvolvePDF(dglap\_h, initial\_xpdf, coupling,}
+ EvolvePDF(dglap\_h, initial\_pdf, coupling,}
  & ~~
 Evolution of an initial condition for a PDF \\
 \texttt{ Q\_init,Q\_end ,[, muR\_Q] [, nloop] [,du])} 
@@ -4153,12 +4174,20 @@ Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
   [arXiv:hep-ph/0511302].
   %%CITATION = PHLTA,B634,504;%%
 
+
 \bibitem{Mitov:2006ic}
   A.~Mitov, S.~Moch and A.~Vogt,
   %``Next-to-next-to-leading order evolution of non-singlet fragmentation
   %functions,''
   Phys.\ Lett.\  B {\bf 638} (2006) 61
   [arXiv:hep-ph/0604053].
+
+\bibitem{Basso:2006nk}
+  B.~Basso and G.~P.~Korchemsky,
+  %``Anomalous dimensions of high-spin operators beyond the leading order,''
+  Nucl.\ Phys.\  B {\bf 775} (2007) 1
+  [arXiv:hep-th/0612247].
+  %%CITATION = NUPHA,B775,1;%%
 
 \bibitem{Dokshitzer:2006nm}
   Yu.~L.~Dokshitzer and G.~Marchesini,
