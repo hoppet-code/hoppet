@@ -174,7 +174,7 @@
 {\em External files needed\/}: none \\[2mm]
 {\em Number of bytes in distributed program, including test data
   etc.\/}: $\sim 270$~kB\\[2mm]
-{\em Keywords\/}: unpolarized and longitudinally polarized parton
+{\em Keywords\/}: unpolarised and longitudinally polarised parton
 space-like distribution functions (PDFs), DGLAP evolution equations,
 $x$-space solutions.
 \\[2mm]
@@ -187,7 +187,7 @@ splitting functions.
 %
 {\em Method of solution\/}:
 representation of PDFs on a grid in $x$, adaptive integration of
-splitting functions to reduce them to a discretized
+splitting functions to reduce them to a discretised
 form, obtaining fast
 convolutions that are equivalent to integration with an interpolated
 form of the PDFs; Runge Kutta solution of the $Q$ evolution, and
@@ -195,7 +195,7 @@ its caching so as to speed up repeated evolution with different
 initial conditions.
 \\[2mm]
 {\em Restrictions on complexity of the problem\/}: PDFs should be
-smooth on the scale of the discretization in $x$.
+smooth on the scale of the discretisation in $x$.
 \\[2mm]
 {\em Typical running time\/}: a few seconds for initialisation, then
 $\sim 10$~ms for creating a tabulation with a relative accuracy of
@@ -355,7 +355,7 @@ it is the authors' hope that availability of
 this documentation may make the package somewhat more useful.
 
 This manual is structured as follows: Sect.~\ref{sec:pqcd}
-briefly summarizes the perturbative QCD ingredients contained in
+briefly summarises the perturbative QCD ingredients contained in
 \hoppet, while Sect.~\ref{tricks} describes the numerical techniques
 used to solve the DGLAP equation. 
 Sects.~\ref{sec:singleflav}-\ref{sec:tabulated-pdfs} present in detail the capabilities
@@ -406,7 +406,7 @@ as used in the LHAPDF PDF library \cite{LHAPDF}.
 
 %----------------------------------------------------------------------
 
-\section{Perturbative QCD}
+\section{Perturbative evolution in QCD}
 \label{sec:pqcd}
 First of all we set up the notation and
 conventions that are used through \hoppet. The DGLAP
@@ -422,15 +422,15 @@ Note that the related variable $t\equiv \ln Q^2$ is also used
 through \hoppet.
 The splitting functions in  eq.~(\ref{eq:dglap-ns})
 are known up to NNLO in the 
-unpolarized case \cite{NNLO-NS,NNLO-singlet}:
+unpolarised case \cite{NNLO-NS,NNLO-singlet}:
 \begin{equation}
   \label{eq:dpdf}
    P(z,\aq)=P^{(0)}(z)+\frac{\aq}{2\pi}P^{(1)}(z)+
 \lp \frac{\aq}{2\pi} \rp^2 P^{(2)}(z) \ ,
 \end{equation}
-and up to NLO in the polarized case.
-The generalization to the singlet case is straightforward, as it
-is the generalization of eq.~(\ref{eq:dglap-ns}) to the case
+and up to NLO in the polarised case.
+The generalisation to the singlet case is straightforward, as it
+is the generalisation of eq.~(\ref{eq:dglap-ns}) to the case
 of time-like evolution\footnote{
 The general structure of the relation between space-like
 and time-like evolution and splitting functions
@@ -574,9 +574,9 @@ in terms of the \ttt{human} representation.}
 
 In \hoppet unpolarised DGLAP evolution is available up to NNLO
 in the $\MSbar$ scheme, while for the DIS scheme
-only evolution up to NLO is available. For polarized evolution only
+only evolution up to NLO is available. For polarised evolution only
 the $\MSbar$ scheme is available. The variable \ttt{factscheme}
-takes different values for each factorization scheme:
+takes different values for each factorisation scheme:
 \begin{center}
   \begin{tabular}{|c|l|}\hline
     \ttt{factscheme} & Evolution\\[2pt]\hline
@@ -592,7 +592,7 @@ missing in the DIS scheme.
 \section{Numerical techniques}
 \label{tricks}
 We briefly introduce now the numerical techniques used to perform
-parton evolution: the discretization of PDFs and
+parton evolution: the discretisation of PDFs and
 their convolutions with splitting functions on a grid in $x$,
 and the subsequent DGLAP evolution in $Q^2$. 
 
@@ -888,7 +888,7 @@ it would suffice to modify the \texttt{convolution} module, while the
 rest of the library (and its interfaces) would remain unchanged.
 
 %......................................................................
-\subsection{$\bf x$-space functions}
+\subsection[$x$-space functions]{$\boldsymbol{x}$-space functions}
 \label{sec:xspc}
 
 Normal $x$-space functions (such as PDFs) are
@@ -937,7 +937,7 @@ Then we can call
 \end{lstlisting}
 to initialise \texttt{xgluon} with a representation of the return value
 from the function \texttt{example\_xgluon}.
-Alternative methods for initializing grid quantities
+Alternative methods for initialising grid quantities
 are described in Appendix \ref{sec:gridinit}.
 
 To then access the gluon at a given value of $y = \ln 1/x$, one
@@ -994,7 +994,7 @@ convolution operator, and routines are provided for allocation and
 initialisation of splitting functions.
 % call InitGridConv(Pgg, Pgg_func)
 The following example describes how the $gg$ LO splitting function
-would be used to initialize the corresponding 
+would be used to initialise the corresponding 
 convolution operator:
 \begin{lstlisting}
   type(grid_conv) :: xPgg
@@ -1423,10 +1423,10 @@ The allocation of \ttt{split\_mat} objects,
 is similar to that for \ttt{grid\_conv} objects. The crucial difference is
 that one must supply a value for $n_f$, so that when the splitting
 matrix acts on a PDF it knows which flavours are decoupled. From the
-point of view of subsequent initialization a \ttt{split\_mat} object
+point of view of subsequent initialisation a \ttt{split\_mat} object
 just consists of a set of splitting functions. 
 If need be, they can be
-initialized by hand, for example
+initialised by hand, for example
 \begin{lstlisting}
   call InitGridConv(grid,P%qq      , P_function_qq      )
   call InitGridConv(grid,P%qg      , P_function_qg      )
@@ -1564,7 +1564,7 @@ probes, which are then automatically deallocated.
 
 The splitting functions that we set up will depend on various QCD
 constants ($n_f$, colour factors), so it is useful to here to
-summarize how they are dealt with within the program.
+summarise how they are dealt with within the program.
 
 The treatment of the QCD constants is \emph{not} object oriented.
 There is a module (\ttt{qcd}) that provides access to commonly used
@@ -1620,14 +1620,14 @@ providing access to the \ttt{split\_mat} objects corresponding to
 DGLAP splitting functions
 \begin{lstlisting}
   type(split_mat) :: P_LO, P_NLO, P_NNLO
-  type(split_mat) :: Pp_LO, Pp_NLO        ! polarized
+  type(split_mat) :: Pp_LO, Pp_NLO        ! polarised
 
-  ! MSbar unpolarized case
+  ! MSbar unpolarised case
   call InitSplitMatLO  (grid, P_LO)
   call InitSplitMatNLO (grid, P_NLO)
   call InitSplitMatNNLO(grid, P_NNLO)
 
-  ! the MSbar polarized case...
+  ! the MSbar polarised case...
   call InitSplitMatPolLO (grid, Pp_LO)
   call InitSplitMatPolNLO(grid, Pp_NLO)
 \end{lstlisting}
@@ -1637,7 +1637,7 @@ set with the \ttt{qcd\_SetNf} and \ttt{qcd\_SetGroup} subroutine calls. If one
 subsequently resets the $n_f$ or colour factor values, the \ttt{split\_mat}
 objects continue to correspond to the $n_f$ and colour factor values
 for which they were initially calculated.
-With the above subroutines for initializing DGLAP splitting functions,
+With the above subroutines for initialising DGLAP splitting functions,
 the normalisation is as given in eq.~(\ref{eq:dpdf}).
 
 In practice, because convolutions take a time $\order{N^2}$, where
@@ -1697,7 +1697,7 @@ crossing heavy quark mass thresholds.
 \end{lstlisting}
 This is the coefficient  of $(\as/2\pi)^2$ for the convolution matrix that
 accounts for crossing a heavy flavour threshold in $\MSbar$
-factorization scheme, at $\mu_F = m_h$, where
+factorisation scheme, at $\mu_F = m_h$, where
 $m_h$ is the heavy-quark pole mass, as has
 been described in Sect.~\ref{sec:pqcd}. Since the
 corresponding NLO term is zero, the number of flavours in $\as$ is
@@ -1705,7 +1705,7 @@ immaterial at NNLO.
 %(even at NNNLO).
 
 The treatment of $n_f$ in the \ttt{mass\_threshold\_mat} is very
-specific because at NNLO, the only order in the $\MSbar$ factorization
+specific because at NNLO, the only order in the $\MSbar$ factorisation
 scheme at which it's non-zero and currently known, it is independent of $n_f$.
 Its action does of course however depend on $n_f$. Since, as for
 \ttt{split\_mat} objects, we don't want to the action of of the
@@ -1736,20 +1736,20 @@ is not currently suitable for general changes of
 flavour-number. For example if you wish to carry out a change in the
 DIS scheme or at a scale $\mu_F \neq m_h$ then you have
 to combine a series of different convolutions (essentially correcting
-with the lower number of flavours to the $\MSbar$ factorization scheme
+with the lower number of flavours to the $\MSbar$ factorisation scheme
 at $\mu_F = m_h$ before changing the number of flavours
 and then correcting back to the original scheme and scale using the
 higher number of flavours).
 
 
 As for the NNLO splitting functions, the mass threshold corrections
-come in exact and parameterized variants. By default it is the latter
+come in exact and parametrised variants. By default it is the latter
 that is used (provided by Vogt \cite{VogtMTMParam}).  The cost of
-initializing with the exact variants of the mass thresholds is much
+initialising with the exact variants of the mass thresholds is much
 lower than for the exact NNLO splitting functions (partly because
 there is no $n_f$ dependence, partly because it is only one flavour
 component of the mass-threshold function that is complex enough to
-warrant parameterization). The variant can be chosen by the user
+warrant parametrisation). The variant can be chosen by the user
 before initialising the \ttt{mass\_threshold\_mat} by making the
 following subroutine call:
 \begin{lstlisting}
@@ -1778,7 +1778,7 @@ DGLAP evolution framework, and so will prefer not need to manage
 all these components individually. Accordingly \hoppet provides a
 type, $\ttt{dglap\_holder}$ which holds all the components 
 required for
-a given kind of evolution. To initialize all information for a
+a given kind of evolution. To initialise all information for a
 fixed-flavour number evolution, one does as follows
 %
 \begin{lstlisting}
@@ -1792,7 +1792,7 @@ fixed-flavour number evolution, one does as follows
   call qcd_SetNf(nf_lcl)         ! set the fixed number of flavours
   ! call qcd_SetGroup(...)       ! if you want different colour factors
 
-  ! now do the initialization
+  ! now do the initialisation
   call InitDglapHolder(grid, dglap_h, factscheme, nloop)
 \end{lstlisting}
 The constants \ttt{factscheme\_*} are defined in \ttt{module
@@ -1801,12 +1801,12 @@ The corrections to the splitting functions to get the DIS scheme are
 implemented by carrying out appropriate convolutions of the $\MSbar$
 splitting and coefficient functions. Currently the DIS scheme is only
 implemented to NLO\footnote{It's NNLO implementation would actually be fairly
-straightforward given the parameterizations provided in
+straightforward given the parametrisation provided in
 \cite{White:2005wm}, and may be performed in
 future releases of \hoppet.}.
  The polarised splitting functions are only currently known to NLO.
 
-Initialization can also be carried out with a single call for a range of
+Initialisation can also be carried out with a single call for a range of
 different numbers of flavours:
 \begin{lstlisting}
   integer :: nflo, nfhi
@@ -1817,7 +1817,7 @@ different numbers of flavours:
 Mass thresholds are not currently correctly supported in the DIS
 scheme.
 
-For all the above calls, at NNLO the choice of exact of parameterized
+For all the above calls, at NNLO the choice of exact of parametrised
 splitting functions and mass thresholds is determined by the calls to
 \ttt{dglap\_Set\_nnlo\_splitting} and
 \ttt{dglap\_Set\_nnlo\_nfthreshold}, as described in
@@ -1931,7 +1931,7 @@ typical values of $\as(M_Z)$ the coupling is guaranteed to be reliably
 determined in the range $0.5 \GeV < Q < 10^{19}\GeV$. The values of
 the $\beta$ function coefficients used in the evolution correspond to
 those obtained with the values of the QCD colour factors that were in
-vigor at the moment of initialisation of the coupling.
+vigour at the moment of initialisation of the coupling.
 
 In the variable flavour-number case, the \ttt{fixnf} argument allows
 one to obtain the coupling for \ttt{fixnf} flavours even outside the
@@ -1940,7 +1940,7 @@ really intended to be used close to the natural range of scales, and
 can be slow if one goes far from that range (a warning message will be
 output). If one is interested in a coupling that (say) never has more
 than 5 active flavours, then rather than using the \ttt{fixnf} option
-in the \ttt{Value} subroutine, it is best to initialize the coupling
+in the \ttt{Value} subroutine, it is best to initialise the coupling
 with a fictitious large value for the top mass.
 
 Often it is convenient to be able to enquire about the mass information
@@ -2275,7 +2275,7 @@ and set if one has called \ttt{AddNfInfoToPdfTable} for the table.
 
 
 An example of usage of the low-level information contained in the
-table is the following, which initializes \ttt{table\_deriv\_LO} with
+table is the following, which initialises \ttt{table\_deriv\_LO} with
 the LO derivative of \ttt{table}:
 \begin{lstlisting}
   do iQ = 0, table%nQ
@@ -2354,11 +2354,11 @@ which will set up a compound (four different spacings) grid with
 spacing \ttt{dy} at small $x$, extending to $y = 12$, and numerical
 order $\ttt=-5$.  The $Q$ range for the tabulation will be $1\GeV <
 Q<28 \TeV$ and a reasonable choice will be made for the \ttt{dlnlnQ}
-spacing (related to \ttt{dy}). It will initialize splitting functions
+spacing (related to \ttt{dy}). It will initialise splitting functions
 up to \ttt{nloop} loops (though one can still carry out evolutions
 with fewer loops).
 %
-If you need more control over the initialization, you should use
+If you need more control over the initialisation, you should use
 \begin{lstlisting}
   call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
 \end{lstlisting}
@@ -2637,7 +2637,7 @@ step-like structures --- these are the points where one switches
 between subgrids, with a significant degradation in accuracy at $x$
 values below the transition. These structures are also visible in the
 colour-coded accuracy representation in Fig.~\ref{fig:grid}, which
-corresponds to $\dy=0.2$ and allows one to visualize more clearly the
+corresponds to $\dy=0.2$ and allows one to visualise more clearly the
 $Q$ dependence of the accuracy. The effect of the grid spacing is
 clearly visible as one goes from the left to the right-hand plots of
 Fig.~\ref{fig:acc-fixed-dy-dlnlnQ},
@@ -2728,7 +2728,7 @@ follows, according to whether or not one carries out pre-evolution:
 \end{subequations}
 where $t_s$ is the time for setting up the splitting functions,
 $n_\alpha$ is the number of different running couplings that one has,
-$t_\alpha$ is the time for initializing the coupling,
+$t_\alpha$ is the time for initialising the coupling,
 %
 $n_i$ is the number of PDF initial conditions that one wishes to
 consider, $t_i$ is the time to carry out the tabulation for a single
@@ -2809,9 +2809,9 @@ dominated by $t_{xQ}$, then it can be made somewhat faster by
 lowering the interpolation orders, at the expense of needing a finer
 grid (and so longer evolution times).
 
-The timings shown here are roughly similar for accuracies $\sim
-10^{-4}$ to those obtained with the $N$-space code
-Pegasus~\cite{Pegasus}, when the number of $x,Q$ points to be
+The timings shown here are roughly similar, for accuracies $\sim
+10^{-4}$, to those obtained with the $N$-space code
+Pegasus~\cite{Pegasus} when the number of $x,Q$ points to be
 evaluated is $\order{10^3}$. For much smaller numbers of points
 Pegasus becomes superior (because of the significantly smaller ratio
 $t_c/t_{xQ}$), while for much larger numbers of points \hoppet becomes
@@ -2900,7 +2900,7 @@ straightforward and physical way of manipulating PDFs beyond the
 built-in task of DGLAP evolution.
 
 Features that might be envisaged for future releases include DIS
-coefficient functions, full support for the DIS factorization scheme,
+coefficient functions, full support for the DIS factorisation scheme,
 and the addition of time-like evolution, relevant
 for phenomenological fits to fragmentation functions
 as in \cite{de Florian:2007hc}.  
@@ -2948,14 +2948,14 @@ scales.
 %
 The full QCD+EW evolution is a rather task complicated because of the
 need to include the EW flavour couplings, including the CKM matrix,
-and polarization. For this kind of problem a code such as \hoppet
+and polarisation. For this kind of problem a code such as \hoppet
 provides a good starting point, since it has a clean separation of the
-numerical and flavour aspects of evolution, and verified unpolarized
-and polarized evolution.
+numerical and flavour aspects of evolution, and verified unpolarised
+and polarised evolution.
 
 
 %======================================================================
-\section*{Acknowledgments}
+\section*{Acknowledgements}
 
 This work was initiated in the context of DIS event shape resummation
 and matching studies \cite{DisResum} with Mrinal Dasgupta. Its
@@ -3168,7 +3168,7 @@ program tabulation_example_streamlined
   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
   call InitGridDef(grid,gdarray(1:4),locked=.true.)
 
-  ! Streamlined initialization
+  ! Streamlined initialisation
   Qmin=1_dp
   Qmax=28000_dp
   dlnlnQ = dy/4.0_dp
@@ -3224,7 +3224,7 @@ end program tabulation_example_streamlined
 \subsection{Accessing tables}
 
 As has been mentioned in Sect.~\ref{sec:acc_table}, 
-there are several ways to define, initialize
+there are several ways to define, initialise
 and access a user defined table, for example 
 as in the example below:
 \begin{lstlisting}
@@ -3319,7 +3319,7 @@ Table  \ref{tab:general}.
 \hline
 \bf METHOD  & \bf DESCRIPTION \\
 \hline
-\bf Initialization & \\
+\bf Initialisation & \\
 \hline
 \begin{lstlisting}
  hoppetStart(dy,nloop)
@@ -3336,7 +3336,7 @@ Q<28 \TeV$, \\
  hoppetStartExtended(ymax,dy,Qmin,
  Qmax,dlnlnQ,nloop,order,factscheme)
 \end{lstlisting} & \fn
-  ~More general initialization \\
+  ~More general initialisation \\
 \hline 
 \begin{lstlisting}
  hoppetSetFFN(fixed_nf)
@@ -3584,7 +3584,7 @@ derived types defined in \hoppet.
 The lower table summarises some of the most relevant methods. Note that arguments
 between \texttt{[...]} are optional. For grid quantities and PDF sets
 the user must explicitly make memory allocation calls; in other cases
-(marked with a (*)), initalisation routines automatically
+(marked with a (*)), initialisation routines automatically
 allocate the memory. For all types, allocated memory may be freed with
 a call to the \ttt{Delete(...)} subroutine. }
 \end{table}
@@ -3598,7 +3598,7 @@ a call to the \ttt{Delete(...)} subroutine. }
 As has been mentioned in
 Sect.~\ref{sec:xspc},  
 there exist several ways of setting a grid quantity. In this
-Appendix we describe the most important methods for initializing
+Appendix we describe the most important methods for initialising
 a grid quantity, which we take to be a parton distribution.
 
 There are a number of ways of setting a grid quantity. Suppose we have
@@ -3678,14 +3678,14 @@ for the exact NNLO splitting functions for the full range of $n_f$
 take of the order of minutes.  Since currently there is no option of
 storing the splitting matrices in a file, this can be a bit
 bothersome. So instead, by default, the program uses the approximate,
-parametrized NNLO splitting functions also provided in
-\cite{NNLO-NS,NNLO-singlet}. The parametrized splitting functions are
+parametrised NNLO splitting functions also provided in
+\cite{NNLO-NS,NNLO-singlet}. The parametrised splitting functions are
 guaranteed to be accurate to within $0.1\%$ --- in practice since they
 come in relatively suppressed by two powers of $\as$, the impact on
 the evolution tends to be of the order of a  $10^{-5}$ relative effect
 \cite{Benchmarks}.
 
-The user can choose whether to obtain the exact or parametrized NNLO
+The user can choose whether to obtain the exact or parametrised NNLO
 splitting functions using the following calls (to be made before
 initialising the splitting matrices)
 \begin{lstlisting}
