@@ -3422,133 +3422,152 @@ with LHAPDF-like interface\\
 \hline
 \bf TYPES  & \bf DESCRIPTION \\
 \hline
-\texttt{real(dp), pointer :: gluon(:)} & Grid representation of a 
-single PDF \\
+\texttt{type(grid\_def) :: grid} & $x-$space grid definition \\ 
+\hline
+\texttt{real(dp), pointer :: gluon(:)} & Holds a 
+`grid quantity' (\eg gluon PDF) \\
 \hline
 \texttt{real(dp), pointer :: PDFset(:,:)} & 
-Grid representation of a PDF set \\
-\hline
-\texttt{type(grid\_def) :: grid} & Grid in $x-$space\\ 
+Grid representation of a (13-flavour) PDF set \\
 \hline
 \texttt{type(grid\_conv) :: Pgg} 
- & Convolution operator ({\it i.e.} splitting functions) \\ 
+ & Convolution operator ({\it i.e.} splitting function) \\ 
 \hline
-\texttt{ type(split\_mat) :: P}
- & Splitting matrices \\ 
+\texttt{ type(split\_mat) :: Pmat}
+ & Splitting matrix (with full flavour structure)\\ 
 \hline
  \texttt{type(mass\_threshold\_mat) :: MTM\_NNLO}
- & Heavy quark threshold mass matrices\\ 
+ & Heavy quark mass-threshold matrix\\ 
 \hline
-\texttt{ type(dglap\_holder) :: dglap\_h} & DGLAP holder \\
+\texttt{ type(dglap\_holder) :: dglap\_h} & DGLAP holder (\ie all
+splitting and mass-threshold matrices) \\
 \hline
 \texttt{type(running\_coupling) :: coupling} & Running coupling \\
 \hline
-\texttt{type(evln\_operator) :: evop} & Evolution operator \\
+\texttt{type(evln\_operator) :: evop} & Evolution operator (linked
+list of split \& mass-threshold matrices)\\
 \hline
-\texttt{type(pdf\_table) :: table} & PDF tabulation \\
+\texttt{type(pdf\_table) :: table} & PDF set tabulated in $x$ \& $Q$\\
 \hline
 \end{tabular}
-\vspace{0.7cm}
+\vspace{0.7cm}\\
 \begin{tabular}{|c|c|}
 \hline
 \bf METHOD  & \bf DESCRIPTION \\
-\hline
-\bf Initialization & \\
+\hline &\\[-0.5em]
+\bf Initialisation & \\[0.3em]
 \hline
 \texttt{
  InitGridDef(grid,dy=0.1\_dp,ymax=10.0\_dp,order=3)
 }
  &
-~ ~Initialize a grid derived type \\
+~ ~Initialise a grid definition \\
 \hline
 \texttt{
-InitGridDef(grid,subgrids,locked=.true.)
+InitGridDef(grid,subgrids(:),locked=.true.)
 }
  &
-~ ~Combine subgrids in a single grid \\
+~ ~Combine subgrids into a single grid \\
 \hline
 \texttt{
- InitGridQuant(grid,gluon,example\_gluon)
-}
+ AllocGridQuant(grid,gluon)
+} 
  &
-~ ~Initialization of a grid quantity \\
+Allocate memory for a grid quantity (\eg gluon PDF) \\
+\hline
+\texttt{
+ InitGridQuant(grid,gluon,example\_gluon\_fn)
+} 
+ &
+~ ~Initialisation of a grid quantity (\eg gluon PDF) \\
+\hline
+\texttt{
+ AllocPDF(grid,pdfset)
+} 
+ &
+Allocate memory for a 13-flavour PDF set \\
+\hline
+\texttt{InitPDF\_LHAPDF(grid,pdfset,LHAsub,Q)} 
+ &
+   Initialisation of a (13-flavour) PDF set from LHAPDF \\
+&  type routine. Note: it only calls \ttt{LHAsub} at the scale \ttt{Q}\\
 \hline
 \texttt{
 InitGridConv(grid,Pgg,Pgg\_func)
-}
+}  (*)
  &
-~ ~Initialization of a convolution operator \\
-\hline
-\texttt{InitPDF\_LHAPDF(grid,pdf,LHAsub,Q)}
- &
-~ ~Initialization of a PDF grid from LHAPDF-like routine \\
-& ~~ Notice it only calls \ttt{LHAsub} at the scale \ttt{Q}\\
+~ ~Initialisation of a convolution operator \\
 \hline
 \texttt{
 InitDglapHolder(grid, dglap\_h, factscheme, nloop)
-}
+}  (*)
 &
-~ ~Initialization of a {\tt dglap\_holder} type \\
+~ ~Initialisation of a {\tt dglap\_holder} type \\
 \hline
 \texttt{
- InitRunningCoupling(coupling [, alfas] [, Q]}
+ InitRunningCoupling(coupling [, alfas] [, Q]} 
 &
-~ ~Initialization of a {\tt running\_coupling} type \\
-\texttt{[, nloop] [, fixnf] [, quark\_masses] )} &
+~ ~Initialisation of a {\tt running\_coupling} type \\
+\texttt{[, nloop] [, fixnf] [, quark\_masses] )}  (*)&
 \\
 \hline
 \texttt{
- AllocPdfTable(grid, table, Qmin, Qmax} 
+ AllocPdfTable(grid, table, Qmin, Qmax}  
 &
 ~ ~Allocate space for a {\tt pdf\_table} type \\
 \texttt{[, dlnlnQ ] [, lnlnQ\_order ] [, freeze\_at\_Qmin] )
-} & \\
-\hline
-\bf Evaluation & \\
+} (*) & \\
+\hline &\\[-0.5em]
+\bf Evaluation \& manipulation & \\[0.3em]
 \hline
 \texttt{
 EvalGridQuant(grid,gluon,y)
 }
  & ~~Evaluation of a grid quantity at $y=\ln 1/x$\\
 \hline
+\texttt{Pgg.conv.gluon} & Convolution of a splitting function with a
+(1-flav) PDF  \\
+\hline
+\texttt{Pmat.conv.PDFset} & Convolution of a splitting matrix
+with a PDF set  \\
+\hline
 \texttt{
 SetToConvolution(Pab,Pac,Pcb) 
 }
- & ~~Convolution of splitting functions \\
-\hline
-\texttt{Pgg.conv.gluon} & Convolution of a PDF and a splitting function \\
+ & ~~Convolution of splitting functions, \ttt{Pab = Pac Pcb} \\
 \hline
 \texttt{
  EvalPdfTable\_yQ(table, y, Q, pdf)
 }
- & ~~Evaluate a tabulated PDF \\
-\hline
-\bf Evolution and manipulation & \\
-\hline
+ & Evaluate the 13 flavours, \ttt{pdf(-6:6)}, of a tabulated \\
+ & PDF set at $y$ and $Q$\\
+\hline&\\[-0.5em]
+\bf Evolution  & \\[0.3em]
+\hline 
 \texttt{
  CopyHumanPdfToEvln(nf\_lcl, pdf\_human, pdf\_evln)
 } & ~~
-Transform PDF from {\tt human} to {\tt evln}
+Transform PDF set from {\tt human} to {\tt evln}
 representation \\
 \hline
 \texttt{
-GetPdfRep(pdf)
+GetPdfRep(pdfset)
 } & ~~
-Check PDF representation \\
+Check PDF set representation \\
 \hline
 \texttt{
- EvolvePDF(dglap\_h, initial\_pdf, coupling,}
+ EvolvePDF(dglap\_h, initial\_pdfset, coupling,}
  & ~~
-Evolution of an initial condition for a PDF \\
+Evolution of an initial condition for a PDF set \\
 \texttt{ Q\_init,Q\_end ,[, muR\_Q] [, nloop] [,du])} 
 & at {\tt Q\_init} to  {\tt Q\_end} \\
 \hline
 \texttt{
- EvolvePdfTable(table, Q0, initial\_pdf, dglap\_h,} 
+ EvolvePdfTable(table, Q0, initial\_pdfset, dglap\_h,} 
  & ~~ 
-Fill a table starting from an initial condition\\
+Fill a table starting from an initial condition,\\
 \texttt{ coupling  [, muR\_Q] [, nloop] [, untie\_nf])} 
-& \ttt{initial\_pdf} at the scale {\tt Q0} \\ 
+& \ttt{initial\_pdfset}, at the scale {\tt Q0} \\ 
 \hline
 \end{tabular} \\
 %}
@@ -3556,18 +3575,22 @@ Fill a table starting from an initial condition\\
 \end{center}
 \caption{\label{tab:general}
 Reference guide for the general interface.
-The first table summarizes some of the most relevant methods with
-its description, while the second one describes the various
-derives types defined in the program. Note that arguments
-between \texttt{[...]} are optional. Derived types in
-F95 are described in Appendix \ref{sec:f95appendix}.}
+The upper table describes the main
+derived types defined in \hoppet.
+%
+The lower table summarises some of the most relevant methods. Note that arguments
+between \texttt{[...]} are optional. For Grid quantities and PDF sets
+the user must explicitly make memory allocation calls; in other cases
+(marked with a (*)), initalisation routines automatically
+allocate the memory. For all types, allocated memory may be freed with
+a call to the \ttt{Delete(...)} subroutine. }
 \end{table}
 
 
 %------------------------------------------------------
 
 
-\section{Initialization of grid quantities}
+\section{Initialisation of grid quantities}
 \label{sec:gridinit}
 As has been mentioned in
 Sect.~\ref{sec:xspc},  
@@ -3611,7 +3634,7 @@ Though more laborious insofar as one has to worry about some extra
 allocation and deallocation, it has the advantage that one no longer
 has to write a separate subroutine.
 
-Finally, there is an option to initialize a multi-flavour
+Finally, there is an option to initialise a multi-flavour
 PDF grid with a subroutine with the same format as
 \ttt{evolvePDF} from the \ttt{LHAPDF} library. This
 option works as follows:
@@ -3623,7 +3646,7 @@ real(dp)         :: pdf_at_y(-6:6)
 
 Q=2   ! Initial scale
 
-! Initialize with LHAPDF-like routine
+! Initialise with LHAPDF-like routine
 call AllocPDF(grid,pdf_set)
 call InitGridQuantLHAPDF(grid, pdf_set, LHAsub, Q)
 
@@ -3675,7 +3698,7 @@ module \ttt{dglap\_choices}:
   nnlo_splitting_Nfiterr1
   nnlo_splitting_Nfiterr2
 \end{lstlisting}
-The last 3 are the parametrizations based on fits to reduced moment
+The last 3 are the parametrisations based on fits to reduced moment
 information carried out in \cite{vanNeerven:1999ca,vanNeerven:2000uj}.
 Though at the time they represented a valuable (and much used) step on
 the way to full NNLO results, nowadays their interest is mainly
