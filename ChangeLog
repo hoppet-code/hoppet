@@ -1,3 +1,9 @@
+2008-04-28  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* src/streamlined_interface.f90 (hoppetAlphaS): 
+	  added error if hoppetAlphaS is called before coupling has been
+	  initialised. 
+
 2008-04-23  Gavin SALAM  <salam@lpthe.jussieu.fr> + Juan
 
 	* example_f90/tabulation_example_streamlined.f90: 

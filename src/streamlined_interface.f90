@@ -237,9 +237,14 @@ end subroutine hoppetCachedEvolve
 !! Return the coupling at scale Q
 function hoppetAlphaS(Q)
   use streamlined_interface ! this module which provides access to the array of tables
+  use warnings_and_errors
   implicit none
   real(dp)             :: hoppetAlphaS
   real(dp), intent(in) :: Q
+
+  if (.not. coupling_initialised) call wae_error('hoppetAlphaS',&
+       &'coupling is not yet initialised (and will remain so until',&
+       &'first call to an evolution routine).')
   hoppetAlphaS = Value(coupling, Q)
 end function hoppetAlphaS
 
