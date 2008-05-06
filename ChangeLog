@@ -1,3 +1,9 @@
+2008-05-06  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* mkmk: 
+	  replaced cp -pv with cp -p to get it to work on Solaris and
+	  added explicit verbose output.
+
 2008-04-28  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* src/streamlined_interface.f90 (hoppetAlphaS): 

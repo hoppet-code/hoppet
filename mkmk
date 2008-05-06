@@ -15,7 +15,8 @@ if [[ -e .compiler ]]
 then
   for dir in $dirs
   do
-    cp -pv .compiler $dir/
+    echo copying .compiler to $dir/
+    cp -p .compiler $dir/
   done
 fi
 
