@@ -154,6 +154,11 @@ subroutine tabulation_example_startup
        &                      nloop=nloop,nflo=3,nfhi=6)
   write(6,'(a)') "Splitting functions initialised!"
 
+  !--- if doing many evolutions with different couplings, the
+  !    following lines should be placed inside
+  !    tabulation_example_evolve_table, and the coupling should be
+  !    deleted each time around once you're done with it.
+  !
   ! allocate and initialise the running coupling with a given
   ! set of quark masses (NB: charm mass just above Q0).
   quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
