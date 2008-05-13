@@ -24,8 +24,16 @@ module dglap_holders
   ! in which case they are NLO.
   type dglap_holder
      type(grid_def) :: grid
+     !*********** for interpolated splitting functions ****************
+     !* type(split_mat), pointer :: interpP(:, :)  ![alphas,nf]
+     !* real(dp),        pointer :: alphas_values(:,:) ![alphas,nf]
+     !* type(split_max), pointer :: currentP => null()
+     !* logical                  :: using_interp
+     !*********** for interpolated splitting functions ****************
+
      !-----------------------  nloop, nf  --------------
-     type(split_mat), pointer :: allP(:,   :)
+     type(split_mat), pointer :: allP(:,   :)  
+     
      type(split_mat), pointer :: P_LO, P_NLO, P_NNLO
      type(coeff_mat), pointer :: allC(:,:)
      type(coeff_mat), pointer :: C2, C2_1, CL_1
@@ -50,6 +58,14 @@ module dglap_holders
   public :: Delete
 
 contains
+
+  !*********** for interpolated splitting functions ****************
+  !!!! MEMBER FUNCTIONS !!!!!
+  !!! InitDglapHolder_from_table(...)
+  !!!
+  !!! SetCurrentP(alphas [,nf])  -> sets currentP
+  !!!
+  !*********** for interpolated splitting functions ****************
   
   !-------------------------------------------------------
   ! Sets up eveything needed to calculate cross sections

@@ -14,8 +14,9 @@ module evolution
 
   public :: EvolvePDF, EvolveGeneric
   public :: SetDefaultEvolutionDt, SetDefaultEvolutionDu
-  public :: ev_MSBar2DIS, ev_evolve
   public :: DefaultEvolutionDu
+
+  public :: ev_MSBar2DIS, ev_evolve  ! should these be public
 
   !!
   !! A type that allows one to store the result of the evolution as an
@@ -80,6 +81,7 @@ module evolution
   integer,  parameter :: ev_du_is_dtas_run   = 3
   integer             :: ev_du_type
   real(dp)            :: ev_u_asref, ev_u_tref, ev_u_bval, ev_du_dt
+  integer,  parameter :: ev_nloop_interp = -1
 
 contains
 
@@ -543,6 +545,13 @@ contains
     ev_muR_Q = default_or_opt(one,muR_Q)
     ev_untie_nf = default_or_opt(.false., untie_nf)
     ev_tmp_du_ballpark = default_or_opt(du_ballpark, du)
+
+    !* !**** Additional for interpolated splitting-function sets
+    !* if (dhcopy%using_interp) then
+    !*    nloop = ev_nloop_interp
+    !*    if (ev_muR_Q /= one) call wae_error('ev_SetModuleConsts',&
+    !*         & "muR_Q must be 1 for interpolated evln; it was ",&
+    !*         & dble_val=ev_muR_Q)
   end subroutine ev_SetModuleConsts
   
 
@@ -719,6 +728,14 @@ contains
        end if
        dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
        call Delete(Pfull)
+    case(ev_nloop_interp)
+       ! *** SetCurrentP
+       !
+       ! dpdf = jacobian * (dhcopy%currentP .conv. pdf)
+       stop ! not yet programmed !!!
+    case default
+       call wae_error('ev_conv','unrecognised value for ev_nloop',&
+            &         intval=ev_nloop)
     end select
   end subroutine ev_conv
   
