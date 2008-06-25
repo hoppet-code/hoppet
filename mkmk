@@ -2,7 +2,7 @@
 
 # Usage: ./mkmk [compiler-name]
 
-dirs="src example_f90 benchmarking benchmarking/test_acc"
+dirs="src example_f90 benchmarking benchmarking/test_acc resum"
 
 if [[ $# == 1 ]]
 then

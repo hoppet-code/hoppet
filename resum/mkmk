@@ -1,0 +1,36 @@
+#!/bin/sh
+# Script to coordinate generation of makefiles.
+#
+# To first  a makefile in this directory for the first time, type
+#
+#   ./mkmk
+#
+# Subsequently typing "make make" will update the makefile
+# 
+# To compiler a program, type
+#
+#   make program_name
+#
+# Configuration information for LHAPDF and the compiler are set below.
+# Note that the compiler can also be set via a file ".compiler" in this
+# directory containing the name of your preferred f95 compiler.
+
+
+# default compiler (g95, or that specified in .compiler)
+compiler=""
+
+# alternatively set the compiler here "-comp <compiler_name>"
+#compiler="-comp g95"
+
+# if you want to run a program with lhapdf, set things up here
+#lhapdf="-L$LHAPDFDIR -lLHAPDF -g77libs "
+
+# note the "-I../src" flag used to provide access to module files
+# (*.mod) in the ../src directory
+
+../scripts/makef95makefile  tabulation_example  -L../src -lhoppet_v1 -I../src   $lhapdf $compiler -remake "./mkmk"
+
+
+# old
+#makePNEW.perl  small_fast_tab -lcern -L../src -ldglap -L$LHAPDFDIR -lLHAPDF -I../src
+

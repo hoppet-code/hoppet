@@ -12,7 +12,7 @@
 !
 !
 module splitting_functions
-  use types; use consts_dp; use convolution_communicator
+  use types; use consts_dp; use convolution_communicator; use resum_kfact
   use coefficient_functions; use qcd; use warnings_and_errors
   !! early estimate of splitting function based on fit to moments
   !!use splitting_functions_nnlo_n
@@ -20,6 +20,9 @@ module splitting_functions
   !!use splitting_functions_nnlo_p
   ! this one gives a set that depends on imod.
   use splitting_functions_nnlo
+  use interpolation
+
+  
   implicit none
   private
 
@@ -42,6 +45,20 @@ module splitting_functions
 !!$  ! these are of help elsewhere in identifying (run-time) the sets of 
 !!$  ! splitting functions that have been used?
 !!$  public :: name_xpij2, name_xpns2
+
+  !! Resummed splitting functions
+  public :: sf_Pres_qg 
+  public :: sf_Pres_qq,  sf_Pres_gq 
+
+  ! Is this the correct way of proceeding
+  ! to have 2d interpolated splitting functions?
+  ! How interfaces defined in F95?
+  
+  ! interface sf_Pres_gg
+  !   module procedure sf_Pres_gg_y 
+  ! end interface
+  public :: sf_Pres_gg
+ 
 
   real(dp),  parameter :: four_thirds = four/three
 
@@ -217,6 +234,7 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
            & /3._dp) + 2*pggmx*S2x + (27*(1 - x))/2._dp + 4*lnx**2*(1 + x)&
            & + (67*(-(1/x) + x**2))/9._dp - lnx*(8.333333333333334_dp -&
            & (11*x)/3._dp + (44*x**2)/3._dp))
+
     end select
     select case(cc_piece)
     case(cc_VIRT,cc_REALVIRT)
@@ -998,6 +1016,262 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
     if (cc_piece /= cc_DELTA) res = res * x
     
   end function sf_DP1gg
+
+  !-------------------------------------------------------
+  ! The difference between the resummed NLO and the
+  ! NLO splitting function for gg
+  ! Note no delta function nor plus prescriptions
+  ! Note that this resturns x*Pres, in order to
+  ! follow the hoppet convention
+  ! 
+  !function sf_Pres_gg_y(y) result(res)
+  function sf_Pres_gg(y) result(res)
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x
+    integer,parameter    :: ialpha=25
+
+    ! Order of resummed SF interpolation
+    integer, parameter ::  n_interp=6
+    integer  :: ix_interp(0:n_interp),i_interp
+    real(dp) :: x_interp(0:n_interp),weights(0:n_interp)
+    real(dp) :: split_res_gg_interp
+  
+    x = exp(-y)
+    res = zero
+
+    ! Set to zero for x > xgrid(1)
+    if(x.lt.xgrid(1)) then
+
+    ! Get interpolation grid
+       call interpolation_grid(n_interp, x, xgrid, ix_interp, x_interp)
+       ! write(6,*) x,ix_interp(0),x_interp(0),x_interp(1)
+       ! Determine weights
+       call general_interpolation_weights(x, x_interp, weights)
+       
+       ! Compute NLO resummed interpolated K factor for gg splitting function 
+       split_res_gg_interp = 0_dp
+       do i_interp = 0, n_interp
+          
+          split_res_gg_interp = split_res_gg_interp  + weights(i_interp) * &
+               & kfact_splresggnlo( ialpha,ix_interp(i_interp) )
+          
+          !       write(6,"(a,1x,E12.5,1x,E12.5,1x,i3,1x,f6.3)") &
+          !            "x, xint, ix, kfact, = ",x,x_interp(i_interp), &
+          !            & ix_interp(i_interp), &
+          !            & kfact_splresggnlo( ialpha,ix_interp(i_interp) )
+
+       enddo      
+              
+    else
+       
+       split_res_gg_interp = zero
+
+    endif
+
+    ! Select case for Ps
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+       res =  split_res_gg_interp
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+       res = res - zero
+    case(cc_DELTA)
+       res = zero
+    end select
+
+    ! No need to multiply by x
+    ! if (cc_piece /= cc_DELTA) res = res * x
+
+  !end function sf_Pres_gg_y
+  end function sf_Pres_gg
+
+  !------------------------------------------------
+
+  !-------------------------------------------------------
+  ! The difference between the resummed NLO and the
+  ! NLO splitting function for the qg
+  ! Note no delta function nor plus prescriptions
+  ! Note that this resturns x*Pres, in order to
+  ! follow the hoppet convention
+  ! Note the treatment of active flavours: value of nf
+  ! hardwired in the grids
+  ! 
+  function sf_Pres_qg(y) result(res)
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x
+    integer,parameter    :: ialpha=25
+
+    ! Order of resummed SF interpolation
+    integer, parameter ::  n_interp=6
+    integer  :: ix_interp(0:n_interp),i_interp
+    real(dp) :: x_interp(0:n_interp),weights(0:n_interp)
+    real(dp) :: split_res_qg_interp
+  
+    x = exp(-y)
+    res = zero
+
+    ! Set to zero for x > xgrid(1)
+    if(x.lt.xgrid(1)) then
+
+    ! Get interpolation grid
+       call interpolation_grid(n_interp, x, xgrid, ix_interp, x_interp)
+       ! write(6,*) x,ix_interp(0),x_interp(0),x_interp(1)
+       ! Determine weights
+       call general_interpolation_weights(x, x_interp, weights)
+       
+       ! Compute NLO resummed interpolated K factor for gg splitting function 
+       split_res_qg_interp = 0_dp
+       do i_interp = 0, n_interp
+          
+          split_res_qg_interp = split_res_qg_interp  + weights(i_interp) * &
+               & kfact_splresqgnlo( ialpha,ix_interp(i_interp) )
+          
+       enddo
+              
+    else
+       
+       split_res_qg_interp = zero
+
+    endif
+
+    ! Select case for Ps
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+       res =  split_res_qg_interp
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+       res = res - zero
+    case(cc_DELTA)
+       res = zero
+    end select
+
+  end function sf_Pres_qg
+
+  !-----------------------------------------------------
+
+ !-------------------------------------------------------
+  ! The difference between the resummed NLO and the
+  ! NLO splitting function for the qq channel
+  ! 
+  function sf_Pres_qq(y) result(res)
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x
+    integer,parameter    :: ialpha=25
+
+    ! Order of resummed SF interpolation
+    integer, parameter ::  n_interp=6
+    integer  :: ix_interp(0:n_interp),i_interp
+    real(dp) :: x_interp(0:n_interp),weights(0:n_interp)
+    real(dp) :: split_res_qq_interp
+  
+    x = exp(-y)
+    res = zero
+
+    ! Set to zero for x > xgrid(1)
+    if(x.lt.xgrid(1)) then
+
+    ! Get interpolation grid
+       call interpolation_grid(n_interp, x, xgrid, ix_interp, x_interp)
+       ! write(6,*) x,ix_interp(0),x_interp(0),x_interp(1)
+       ! Determine weights
+       call general_interpolation_weights(x, x_interp, weights)
+       
+       ! Compute NLO resummed interpolated K factor for gg splitting function 
+       split_res_qq_interp = 0_dp
+       do i_interp = 0, n_interp
+          
+          split_res_qq_interp = split_res_qq_interp  + weights(i_interp) * &
+               & kfact_splresqqnlo( ialpha,ix_interp(i_interp) )
+          
+       enddo
+              
+    else
+       
+       split_res_qq_interp = zero
+
+    endif
+
+    ! Select case for Ps
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+       res =  split_res_qq_interp
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+       res = res - zero
+    case(cc_DELTA)
+       res = zero
+    end select
+
+  end function sf_Pres_qq
+
+ !-----------------------------------------------------
+
+ !-------------------------------------------------------
+  ! The difference between the resummed NLO and the
+  ! NLO splitting function for the qq channel
+  ! 
+  function sf_Pres_gq(y) result(res)
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x
+    integer,parameter    :: ialpha=25
+    
+    ! Order of resummed SF interpolation
+    integer, parameter ::  n_interp=6
+    integer  :: ix_interp(0:n_interp),i_interp
+    real(dp) :: x_interp(0:n_interp),weights(0:n_interp)
+    real(dp) :: split_res_gq_interp
+  
+    x = exp(-y)
+    res = zero
+
+    ! Set to zero for x > xgrid(1)
+    if(x.lt.xgrid(1)) then
+
+    ! Get interpolation grid
+       call interpolation_grid(n_interp, x, xgrid, ix_interp, x_interp)
+       ! write(6,*) x,ix_interp(0),x_interp(0),x_interp(1)
+       ! Determine weights
+       call general_interpolation_weights(x, x_interp, weights)
+       
+       ! Compute NLO resummed interpolated K factor for gg splitting function 
+       split_res_gq_interp = 0_dp
+       do i_interp = 0, n_interp
+          
+          split_res_gq_interp = split_res_gq_interp  + weights(i_interp) * &
+               & kfact_splresgqnlo( ialpha,ix_interp(i_interp) )
+          
+       enddo
+       
+    else
+       
+       split_res_gq_interp = zero
+
+    endif
+
+    ! Select case for Ps
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+       res =  split_res_gq_interp
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+       res = res - zero
+    case(cc_DELTA)
+       res = zero
+    end select
+
+  end function sf_Pres_gq
+
+!----------------------------------------
+
+ 
 
 end module splitting_functions
 
