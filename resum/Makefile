@@ -40,8 +40,7 @@ libclean:
 	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) 
 
 clean:
-	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d *.res *~ *.eps \
-	$(ALLPROG) *.ps
+	rm -f  $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d
 
 realclean:
 	rm -f  $(ALLPROG) $(ALLPROGOBJ) $(OBJS) $(POSTOBJS) *.mod *.d
