@@ -301,7 +301,7 @@ $n_p$, and thus the accuracy, quite considerably.
 Despite it being more difficult to obtain high accuracy with $x$-space
 methods, their greater flexibility means that they are widespread,
 serving as the basis of the well-known  QCDNUM program \cite{Botje},
-and  used also by the CTEQ~\cite{CTEQ} and MRST/MRSW~\cite{MRST}
+and  used also by the CTEQ~\cite{CTEQ} and MRST/MSTW~\cite{MRST}
 global fitting
 collaborations. Higher-order methods in $x$-space have been developed
 in \cite{Schoeffel:1998tz,Pascaud:2001bi,coriano,GuzziThesis,DisResum}, and
@@ -440,8 +440,9 @@ coupling $\aq$ and the parton distributions at the heavy quark
 mass threshold $m_h^2$.
 
 These matching conditions for the parton distributions
-receive non-trivial contributions beginning at NNLO.
-For light quarks $q_{l,i}$ of flavour $i$ 
+receive non-trivial contributions at higher orders. In the $\MSbar$
+(factorisation) scheme, for example, these begin at NNLO:
+or light quarks $q_{l,i}$ of flavour $i$ 
 (quarks that are considered massless
 below the heavy quark mass threshold $m_h^2$) the matching between
 their values in the $n_f$ and
@@ -554,7 +555,8 @@ in terms of the \ttt{human} representation.}
 
 In \hoppet unpolarised DGLAP evolution is available up to NNLO
 in the $\MSbar$ scheme, while for the DIS scheme
-only evolution up to NLO is available. For polarised evolution only
+only evolution up to NLO is available, but without the NLO heavy-quark
+threshold matching conditions. For polarised evolution only
 the $\MSbar$ scheme is available. The variable \ttt{factscheme}
 takes different values for each factorisation scheme:
 \begin{center}
@@ -2017,7 +2019,7 @@ convolution differs in the two cases. The mismatch however is only of
 order $\as^4$ (NNNNLO), \ie well beyond currently known accuracies.
 
 A general remark is that crossing a flavour threshold downwards will
-nearly always result in some (almost certainly physically spurious)
+result in some (almost certainly physically spurious)
 intrinsic heavy-flavour being left over below threshold.
 
 %......................................................................

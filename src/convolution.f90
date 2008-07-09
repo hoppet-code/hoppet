@@ -122,6 +122,15 @@ module convolution
   
   !public :: Delete
 
+  !-- for calculating moments ---
+  real(dp)       :: conv_moment_index
+  type(grid_def) :: conv_moment_gd
+  real(dp), allocatable :: conv_moment_gq(:)
+  interface GetTruncMoment
+    module procedure conv_GetTruncMoment_1d
+  end interface
+  public :: GetTruncMoment
+
   !-- convolution routines -------------------------------------------
   interface AllocGridConv
      module procedure conv_AllocGridConv_0d, conv_AllocGridConv_1d, &
@@ -1349,6 +1358,40 @@ contains
     
   end subroutine conv_PrintGridQuant_4
 
+
+  !======================================================================
+  ! Routines related to calculations of moments
+  !======================================================================
+  function conv_GetTruncMoment_1d(gd, gq, moment_index, y) result(res)
+    type(grid_def), intent(in) :: gd
+    real(dp),       intent(in) :: gq(0:), moment_index
+    real(dp), intent(in), optional :: y
+    real(dp)                   :: res, ymax
+    !-----------------------------------------------------
+    res = zero
+    stop
+    ! inefficient to make copies, but works around impossibility
+    ! of having pointers to intent(in) objects???
+    ! conv_moment_index = moment_index
+    ! conv_moment_gd    = gd
+    ! assert(gd%ny == ubound(gq,1))
+    ! allocate(conv_moment_gq(0:gd%ny)
+    ! conv_moment_gq = gq
+    ! ymax = default_or_opt(gd%ymax, y)
+    !if (ymax > gd%ymax) call wae_error(...)
+    !check ymax > 2
+    !res = integral(y=0..y=min(two,ymax))
+    !res = res + integral(y=min(two,ymax)..y=ymax)
+    
+  end function conv_GetTruncMoment_1d
+  
+  function conv_GetTruncMoment_helper(y) result(res)
+    real(dp), intent(in) :: y 
+    real(dp) :: res
+    res = zero
+    stop
+  end function conv_GetTruncMoment_helper
+  
 
   !======================================================================
   ! Routines related to convolutions

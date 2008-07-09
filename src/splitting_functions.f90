@@ -53,6 +53,13 @@ module splitting_functions
   ! Is this the correct way of proceeding
   ! to have 2d interpolated splitting functions?
   ! How interfaces defined in F95?
+
+  ! To interpolate in x and alphas the splitting functions, the
+  ! following procedure must be followed
+  ! i) Interpolate in x for all values of alphas
+  ! ii) Define the splitting function object
+  ! iii) Interpolate in alphas the splitting function objects
+
   
   ! interface sf_Pres_gg
   !   module procedure sf_Pres_gg_y 

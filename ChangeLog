@@ -1,3 +1,9 @@
+2008-07-09  Gavin Salam  <salam@lpthe.jussieu.fr> & JR
+
+	* src/convolution.f90: 
+	  started work on one way of introducing calculation of moments of
+	  grid_quants.
+
 2008-05-13  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* src/evolution.f90: 
