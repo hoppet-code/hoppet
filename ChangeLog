@@ -1,10 +1,19 @@
+2008-07-11  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* example_f90/tabulation_example_2.f90: 
+          added comments at start to explain why we have a second example
+	  program. 
+	
+	* example_f90/sumrules.f90: 
+	  small changes to help readability, etc.
+
 2008-07-10  Juan Rojo  <rojo@lpthe.jussieu.fr> 
 
 	* src/convolution.f90
 	Updated functions to compute moments
 	arbitrary moments of grid quantities
 
-	* example_f90/sumrules.f90
+	* example_f90/sumrules.f90      *** ADDED ***
 	Added example code which shows how to compute the various
 	sum rules of a PDF set
 	

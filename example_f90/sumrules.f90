@@ -29,7 +29,7 @@ program sumrules
   real(dp), pointer :: pdf_flav(:)
   real(dp) :: Q0
   !! hold results at some x, Q
-  real(dp) :: Q, pdf_at_xQ(-6:6)
+  real(dp) :: Q
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   integer  :: ix
@@ -39,8 +39,10 @@ program sumrules
 
   ! set up parameters for grid
   order = -6
-  ymax  = 12.0_dp
+  ymax  = 20.0_dp  ! you may see significant violations with too small a ymax
   dy    = 0.1_dp
+
+  call SetDefaultEvolutionDu(dy/3.0_dp)  ! generally a good choice
 
   ! set up the grid itself -- we use 4 nested subgrids
   call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
@@ -87,12 +89,12 @@ program sumrules
   ! Momentum sum rule
   nf_rep = GetPdfRep(pdf0)
   ! write(6,*) "nf_rep = ",nf_rep
-  if(nf_rep.lt.0) then
-     ! PDF set in human representation -> Sum all pdfs
-     pdf_flav(:)=sum(pdf0(:,:),dim=2)
+  if(nf_rep == pdfr_Human) then
+    ! PDF set in human representation -> Sum all pdfs
+    pdf_flav(:)=sum(pdf0(:,-6:6),dim=2)
   elseif(nf_rep.ge.0) then
-     ! PDF in evln representation -> Singlet + Gluon
-     pdf_flav(:)=pdf0(:,0) + pdf0(:,1)
+    ! PDF in evln representation -> Singlet + Gluon
+    pdf_flav(:)=pdf0(:,0) + pdf0(:,1)
   endif
   moment_index=1
   sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
@@ -102,14 +104,14 @@ program sumrules
   ! Valence sum rules
   ! uv + dv sum rule
   nf_rep = GetPdfRep(pdf0)
-  if(nf_rep.lt.0) then
-     ! PDF set in human representation 
-     pdf_flav(:)= pdf0(:,2) - pdf0(:,-2) + pdf0(:,1) - pdf0(:,-1)
+  if(nf_rep == pdfr_Human) then
+    ! PDF set in human representation 
+    pdf_flav(:)= pdf0(:,2) - pdf0(:,-2) + pdf0(:,1) - pdf0(:,-1)
+    moment_index=0
+    sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
+    
+    write(6,*) "uv + dv sum rule = ",sum_rule
   endif
-  moment_index=0
-  sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
-  
-  write(6,*) "uv + dv sum rule = ",sum_rule
   
 
   !
@@ -135,9 +137,9 @@ program sumrules
   ! Momentum sum rule
   nf_rep = GetPdfRep(pdf0)
   ! write(6,*) "nf_rep = ",nf_rep
-  if(nf_rep.lt.0) then
+  if(nf_rep == pdfr_Human) then
      ! PDF set in human representation -> Sum all pdfs
-     pdf_flav(:)=sum(pdf0(:,:),dim=2)
+     pdf_flav(:)=sum(pdf0(:,-6:6),dim=2)
   elseif(nf_rep.ge.0) then
      ! PDF in evln representation -> Singlet + Gluon
      pdf_flav(:)=pdf0(:,0) + pdf0(:,1)
@@ -151,15 +153,15 @@ program sumrules
   ! Valence sum rules
   ! uv + dv sum rule
   nf_rep = GetPdfRep(pdf0)
-  if(nf_rep.lt.0) then
-     ! PDF set in human representation 
-     pdf_flav(:)= pdf0(:,2) - pdf0(:,-2) + pdf0(:,1) - pdf0(:,-1)
+  if(nf_rep == pdfr_Human) then
+    ! PDF set in human representation 
+    pdf_flav(:)= pdf0(:,2) - pdf0(:,-2) + pdf0(:,1) - pdf0(:,-1)
+    moment_index=0
+    sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
+    
+    write(6,*) "uv + dv sum rule = ",sum_rule
+    write(6,*) " "
   endif
-  moment_index=0
-  sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
-  
-  write(6,*) "uv + dv sum rule = ",sum_rule
-  write(6,*) " "
  
   ! Some cleaning
   call Delete(pdf0)
