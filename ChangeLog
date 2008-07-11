@@ -1,3 +1,13 @@
+2008-07-10  Juan Rojo  <rojo@lpthe.jussieu.fr> 
+
+	* src/convolution.f90
+	Updated functions to compute moments
+	arbitrary moments of grid quantities
+
+	* example_f90/sumrules.f90
+	Added example code which shows how to compute the various
+	sum rules of a PDF set
+	
 2008-07-09  Gavin Salam  <salam@lpthe.jussieu.fr> & JR
 
 	* src/convolution.f90: 
