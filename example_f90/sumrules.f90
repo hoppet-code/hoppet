@@ -66,61 +66,26 @@ program sumrules
 
   ! Compute sum rules of the initial PDF set
   write(6,'(a)') "  "
-  write(6,'(a,1x,f3.1,1x,a)') " Computation of  sum rules at Q02 =  ",&
+  write(6,'(a,1x,f3.1,1x,a)') "Sum rules at Q02 =  ",&
        & Q0**2," GeV"
   write(6,'(a)') "  "
 
   ! Allocate a grid quantity for the pdf combination
   call AllocGridQuant(grid,pdf_flav)
   
-  !
-  ! (Truncated) moments are defined in terms of y as
-  ! 
-  !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
-  ! 
-  ! or in terms of x, where y = ln(1/x)
-  !
-  !   M(moment_index) = \int_xmin^1 dx x^( moment_index - 1) * xpdf(x)
-  !
-
-  ! Define the PDF combinations whose moments we are to compute
-  ! Check PDF representtation of input PDF set
   
-  ! Momentum sum rule
-  nf_rep = GetPdfRep(pdf0)
-  ! write(6,*) "nf_rep = ",nf_rep
-  if(nf_rep == pdfr_Human) then
-    ! PDF set in human representation -> Sum all pdfs
-    pdf_flav(:)=sum(pdf0(:,-6:6),dim=2)
-  elseif(nf_rep.ge.0) then
-    ! PDF in evln representation -> Singlet + Gluon
-    pdf_flav(:)=pdf0(:,0) + pdf0(:,1)
-  endif
-  moment_index=1
-  sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
-  
-  write(6,*) "Momentum sum rule = ",sum_rule
-
-  ! Valence sum rules
-  ! uv + dv sum rule
-  nf_rep = GetPdfRep(pdf0)
-  if(nf_rep == pdfr_Human) then
-    ! PDF set in human representation 
-    pdf_flav(:)= pdf0(:,2) - pdf0(:,-2) + pdf0(:,1) - pdf0(:,-1)
-    moment_index=0
-    sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
-    
-    write(6,*) "uv + dv sum rule = ",sum_rule
-  endif
-  
+  ! Compute various sum rules
+   call truncated_sum_rules(grid,pdf0)
 
   !
   ! Sum rules at arbitrary values of Q
-  !
+  ! Note that if sum rules at satisfied at the input evolution
+  ! scale Q0, they will also be satisfied for any Q > Q0
+  ! 
 
   Q=100_dp
   write(6,'(a)') "  "
-  write(6,'(a,1x,f7.1,1x,a)') " Computation of  sum rules at Q2 =  ",&
+  write(6,'(a,1x,f7.1,1x,a)') "Sum rules at Q2 =  ",&
        & Q**2," GeV"
   write(6,'(a)') "  "
   
@@ -134,34 +99,9 @@ program sumrules
   ! Evolve the initial PDF up to scale Q to test sum rules
   call EvolvePDF(dh,pdf0,coupling,Q0,Q)
 
-  ! Momentum sum rule
-  nf_rep = GetPdfRep(pdf0)
-  ! write(6,*) "nf_rep = ",nf_rep
-  if(nf_rep == pdfr_Human) then
-     ! PDF set in human representation -> Sum all pdfs
-     pdf_flav(:)=sum(pdf0(:,-6:6),dim=2)
-  elseif(nf_rep.ge.0) then
-     ! PDF in evln representation -> Singlet + Gluon
-     pdf_flav(:)=pdf0(:,0) + pdf0(:,1)
-  endif
-  moment_index=1
-  sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
-  
-  write(6,*) "Momentum sum rule = ",sum_rule
-
-
-  ! Valence sum rules
-  ! uv + dv sum rule
-  nf_rep = GetPdfRep(pdf0)
-  if(nf_rep == pdfr_Human) then
-    ! PDF set in human representation 
-    pdf_flav(:)= pdf0(:,2) - pdf0(:,-2) + pdf0(:,1) - pdf0(:,-1)
-    moment_index=0
-    sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
-    
-    write(6,*) "uv + dv sum rule = ",sum_rule
-    write(6,*) " "
-  endif
+  ! Compute various sum rules at the scale Q
+   call truncated_sum_rules(grid,pdf0)
+ 
  
   ! Some cleaning
   call Delete(pdf0)
@@ -204,6 +144,100 @@ contains
     pdf(:, iflv_d) = dv + dbar
     pdf(:,-iflv_d) = dbar
   end function unpolarized_dummy_pdf
+
+!--------------------------------------------
+
+  !======================================================================
+  ! Routines which computes the momentum and valence (truncated)
+  ! sum rules from a given pdf set in an arbitary representation
+  ! See table 1 in doc for the summary of PDF representation
+  !======================================================================
+  subroutine truncated_sum_rules(gd,pdf_sr)
+    implicit none
+    integer :: nf_rep, nf_lcl, ipdf
+    type(grid_def), intent(in)      :: gd
+    real(dp), intent(in),pointer    :: pdf_sr(:,:)
+    real(dp), pointer    :: pdf_sr2(:,:)
+    real(dp), pointer               :: pdf_flav(:)
+    real(dp)                        :: moment_index, sum_rule
+    !--------------------------------------------
+
+    write(6,*) "       ---       "
+    write(6,*) "Computation of (truncated) sum rules"
+    write(6,*) "              "
+
+    !
+    ! (Truncated) moments are defined in terms of y as
+    ! 
+    !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
+    ! 
+    ! or in terms of x, where y = ln(1/x)
+    !
+    !   M(moment_index) = \int_xmin^1 dx x^( moment_index - 1) * xpdf(x)
+    !
+
+    ! Allocate space for pdf_flav
+    call AllocGridQuant(gd,pdf_flav)
+        
+    ! Compute the (truncated) momentum sum rule
+
+    nf_rep = GetPdfRep(pdf_sr)
+    ! Construct the appropiate combination for the
+    ! given PDF representation
+    if(nf_rep == pdfr_Human) then
+       ! PDF set in human representation -> Sum all pdfs
+      ! write(6,*) "I am here"
+       pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
+       !write(6,*) "pdf_flav(20) = ", pdf_flav(20)
+    elseif(nf_rep.ge.0) then
+       ! PDF in evln representation -> Singlet + Gluon
+       pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
+    endif
+
+    moment_index=1_dp ! See definition of truncated moments above
+    sum_rule = GetTruncMoment(gd,pdf_flav,moment_index)
+  
+    write(6,*) "Momentum sum rule = ",sum_rule, ", expected 1"
+
+    ! Compute the (truncated) valence sum rules
+
+    ! Total valence sum rule 
+    ! Construct the appropiate combination for the
+    ! given PDF representation
+    if(nf_rep == pdfr_Human) then
+       ! PDF set in human representation 
+       pdf_flav(:)= pdf_sr(:,1) - pdf_sr(:,-1)
+       do ipdf = 2,6
+          pdf_flav(:) = pdf_flav(:) + ( pdf_sr(:,ipdf) - pdf_sr(:,-ipdf) )
+       enddo
+    elseif(nf_rep.ge.0) then
+       ! PDF in evln representation
+       pdf_flav(:)=pdf_sr(:,-1)
+    endif
+    
+    moment_index=0_dp
+    sum_rule = GetTruncMoment(gd,pdf_flav,moment_index)
+    
+    write(6,*) "uv + dv sum rule = ",sum_rule, ", expected 3"
+
+    ! uv - dv sum rule
+    if(nf_rep == pdfr_Human) then
+       ! PDF set in human representation 
+       pdf_flav(:)= pdf_sr(:,2) - pdf_sr(:,-2) - & 
+            & ( pdf_sr(:,1) - pdf_sr(:,-1) ) 
+    elseif(nf_rep.ge.0) then
+       ! PDF in evln representation 
+       pdf_flav(:)=pdf_sr(:,-2) 
+    endif
+    
+    moment_index=0_dp
+    sum_rule = GetTruncMoment(gd,pdf_flav,moment_index)
+    
+    write(6,*) "uv - dv sum rule = ",sum_rule, ", expected 1"
+    write(6,*) " "
+
+
+  end subroutine truncated_sum_rules
 
 end program sumrules
 

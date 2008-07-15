@@ -1362,6 +1362,23 @@ contains
   !======================================================================
   ! Routines related to calculations of moments
   !======================================================================
+
+  ! --------------------------------------------------------------------
+  ! Computes the truncated moment between 0 and min(y,ymax)
+  ! of the grid quantity gq with the moment index defined as
+  !
+  ! Define the function which is going to be integrated
+  ! Multiply the pdf by exp( - y * moment_index)
+  ! Moment index are defined as
+  ! 
+  !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
+  ! 
+  ! or in terms of x, where y = ln(1/x)
+  !
+  !   M(moment_index) = \int_xmin^1 dx x^( moment_index - 1) * xpdf(x)
+  !
+  ! 
+  ! ------------------------------------------------------------
   function conv_GetTruncMoment_1d(gd, gq, moment_index, y) result(res)
     use integrator
     type(grid_def), intent(in) :: gd
@@ -1416,34 +1433,21 @@ contains
 
   end function conv_GetTruncMoment_1d
   
+  !------------------------------------------------
+  ! Auxiliary function for GetTruncatedMoment
+  !------------------------------------------------
   function conv_GetTruncMoment_helper(y) result(res)
    
     real(dp), intent(in) :: y 
     real(dp) :: res , pdf_check
     integer :: ny
 
-    ! Define the function which is going to be integrated
-    ! Multiply the pdf by exp( - y * moment_index)
-    ! Moment index are defined as
-    ! 
-    !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
-    ! 
-    ! or in terms of x, where y = ln(1/x)
-    !
-    !   M(moment_index) = \int_xmin^1 dx x^( moment_index - 1) * xpdf(x)
-    !
+
 
     ! Check dimensions
-    !write(6,*) "ndim = ",conv_moment_gd%ny, ubound(conv_moment_gq,dim=1)
     ny = assert_eq(conv_moment_gd%ny,&
          & ubound(conv_moment_gq,dim=1),"EvalGridQuant")
-
-    !write(6,*) "y = ",y
-    !write(6,*) "pdf_check = "
-    pdf_check = EvalGridQuant(conv_moment_gd,conv_moment_gq,y) 
-    !write(6,*) pdf_check
-    !stop
-
+    
     res = exp( -y * conv_moment_index ) &
          & * EvalGridQuant(conv_moment_gd,conv_moment_gq,y) 
    

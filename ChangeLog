@@ -1,3 +1,15 @@
+2008-07-15  Juan Rojo  <rojo@lpthe.jussieu.fr> 
+
+	* example_f90/sumrules.f90     
+	The computation of the sum rules is now performed
+	with a single function the two times
+	Sum rules are computed for a PDF set in an
+	arbitrary representation
+
+	* src/convolution.f90
+	Added comment on the function GetTruncMoment
+
+
 2008-07-11  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* example_f90/tabulation_example_2.f90: 
