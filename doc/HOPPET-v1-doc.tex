@@ -1355,6 +1355,36 @@ which returns the number of active flavours if the PDF is in the
 the PDF is in the
 \ttt{human} representation.
 
+%------------------------------------------------------------
+\subsection{Sum rules}
+\label{sec:sum-rules}
+
+The function {\tt GetTruncMoment} allows the
+computation of general truncated moments of grid quantities.
+
+The convention for the definition of truncated moments
+in \hoppet is
+\be
+M_N\lc xq(x,Q^2)\rc \equiv \int_0^{y_{\rm max}} dy e^{-yN} xq\lp y,Q^2 \rp \ ,
+\ee
+
+\begin{lstlisting}
+  call AllocGridQuant(grid,pdf_flav)
+  nf_rep = GetPdfRep(pdf_sr)
+  ! Construct the appropiate combination for the
+  ! given PDF representation
+  if(nf_rep == pdfr_Human) then
+  ! PDF set in human representation -> Sum over all pdfs
+      pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
+  elseif(nf_rep.ge.0) then
+  ! PDF in evln representation -> Singlet + Gluon
+      pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
+  endif
+  moment_index=1_dp 
+  momentum_sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
+\end{lstlisting}
+An example of the computation of sum rules can be found
+in {\tt example\_f90/sumrules.f90}.
 
 %----------------------------------------------------------------------
 \subsection{Splitting function matrices}

@@ -1,5 +1,11 @@
 2008-07-15  Juan Rojo  <rojo@lpthe.jussieu.fr> 
 
+	* doc/HOPPET-v1-doc.tex
+	Begin section on sum rules of the
+	documentation
+
+2008-07-15  Juan Rojo  <rojo@lpthe.jussieu.fr> 
+
 	* example_f90/sumrules.f90     
 	The computation of the sum rules is now performed
 	with a single function the two times
