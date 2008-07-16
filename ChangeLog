@@ -1,19 +1,25 @@
+2008-07-16  Gavin SALAM  <salam@lpthe.jussieu.fr> & Juan
+
+	* src/pdf_tabulate.f90 (EvalPdfTable_Q): 
+	  added this routine to get the pdf at the given Q value [still to
+	  be completed]
+
 2008-07-15  Juan Rojo  <rojo@lpthe.jussieu.fr> 
 
 	* doc/HOPPET-v1-doc.tex
-	Begin section on sum rules of the
-	documentation
+	  Begin section on sum rules of the
+	  documentation
 
 2008-07-15  Juan Rojo  <rojo@lpthe.jussieu.fr> 
 
 	* example_f90/sumrules.f90     
-	The computation of the sum rules is now performed
-	with a single function the two times
-	Sum rules are computed for a PDF set in an
-	arbitrary representation
+	  The computation of the sum rules is now performed
+	  with a single function the two times
+	  Sum rules are computed for a PDF set in an
+	  arbitrary representation
 
 	* src/convolution.f90
-	Added comment on the function GetTruncMoment
+	  Added comment on the function GetTruncMoment
 
 
 2008-07-11  Gavin Salam  <salam@lpthe.jussieu.fr>

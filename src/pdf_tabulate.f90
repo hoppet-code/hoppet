@@ -670,6 +670,36 @@ contains
     call EvalPdfTable_yQ(tab,-log(x),Q,val)
   end subroutine EvalPdfTable_xQ
 
+
+  !--------------------------------------------------------------------
+  !! Sets the pdf(0:iflv_min:) for the PDF at this value of Q.
+  !!
+  subroutine EvalPdfTable_Q(tab,Q,pdf)
+    type(pdf_table), intent(in) :: tab
+    real(dp),    intent(in)  :: Q
+    real(dp),    intent(out) :: pdf(0:,iflv_min:)
+    !-----------------------------------------------
+    real(dp) :: lnlnQ_wgts(0:tab%lnlnQ_order)
+    integer  :: ilnlnQ_lo, ilnlnQ_hi
+    integer  :: iQ
+
+    ! safety checks
+    if (tab%grid%ny /= ubound(pdf,dim=1) .or.&
+         & ubound(pdf,dim=1) /= ncompmax) call wae_error("EvalPdfTable_Q",&
+         & "pdf was not of size consistent with the table")
+
+    stop
+    !call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
+
+    ! by setting the pdf to zero we will then get whatever representation
+    ! is implicity in the table
+    pdf(:,:) = zero
+    do iQ = ilnlnQ_lo, ilnlnQ_hi
+       pdf(:,:) = pdf(:,:) + lnlnQ_wgts(iQ-ilnlnQ_lo) * tab%tab(:, : ,iQ)
+    end do
+    
+  end subroutine EvalPdfTable_Q
+
   
   !-----------------------------------------------------------
   !! Deletes all allocated info associated with the tabulation
