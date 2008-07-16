@@ -553,6 +553,24 @@ in terms of the \ttt{human} representation.}
 \end{center}
 \end{table}
 
+In general, PDF analysis enforce physical constraints
+represented by sum rules like the momentum sum rule
+\be
+\int_0^1 dx~x \lp \Sigma(x,Q^2)+g(x,Q^2)\rp =1 \ ,
+\ee
+or the valence sum rules
+\be
+\int_0^1 dx~ u_V(x,Q^2) =2 \ , \quad \int_0^1 dx~ d_V(x,Q^2) =1 \ .
+\ee
+We note that is the above conditions are satisfied at the input
+evolution scale $Q_0^2$, then these conditions are respected
+by perturbative evolution for any $Q^2 \ge Q_0^2$. Note that
+purportedly some PDF sets do not impose some sum rules, like
+the modified LO sets for Monte Carlo generators where the
+momentum sum rule is absent \cite{Sherstnev:2008dm}. We describe how to compute
+arbitrary sum rules (or more generally truncated moments)
+of PDFs in Sect.~\ref{sec:sum-rules}.
+
 In \hoppet unpolarised DGLAP evolution is available up to NNLO
 in the $\MSbar$ scheme, while for the DIS scheme
 only evolution up to NLO is available, but without the NLO heavy-quark
@@ -1358,32 +1376,36 @@ the PDF is in the
 %------------------------------------------------------------
 \subsection{Sum rules}
 \label{sec:sum-rules}
-
-The function {\tt GetTruncMoment} allows the
+As discussed in Sect.~\ref{sec:pqcd}, it is useful to check
+explicitely is the various sum rules are satisfied by a given
+PDF set. In \hoppet this can by achieved by the
+function {\tt GetTruncMoment}, which allows the
 computation of general truncated moments of grid quantities.
 
 The convention for the definition of truncated moments
-in \hoppet is
+as implemented in {\tt GetTruncMoment}
+in \hoppet is given by
 \be
 M_N\lc xq(x,Q^2)\rc \equiv \int_0^{y_{\rm max}} dy e^{-yN} xq\lp y,Q^2 \rp \ ,
 \ee
+Note that the fact that the grid extends up to {\tt ymax} only
+forces us to compute truncated moments, but for a large enough 
+value of  {\tt ymax} these truncated moments should coincide
+with the full moments.
 
+As as example, we show how to compute the momentum sum rule
+from a PDF set:
 \begin{lstlisting}
   call AllocGridQuant(grid,pdf_flav)
-  nf_rep = GetPdfRep(pdf_sr)
-  ! Construct the appropiate combination for the
-  ! given PDF representation
-  if(nf_rep == pdfr_Human) then
-  ! PDF set in human representation -> Sum over all pdfs
-      pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
-  elseif(nf_rep.ge.0) then
-  ! PDF in evln representation -> Singlet + Gluon
-      pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
-  endif
-  moment_index=1_dp 
+  ! Construct the appropriate flavour combination 
+  ! assume PDF in human representation
+  pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
+  moment_index=1_dp ! See definition of truncated moments 
   momentum_sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
 \end{lstlisting}
-An example of the computation of sum rules can be found
+An example of the computation of sum rules at an
+arbitrary value of Q2 can be found as an example
+program 
 in {\tt example\_f90/sumrules.f90}.
 
 %----------------------------------------------------------------------
@@ -4187,6 +4209,14 @@ Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
   %evolution,''
   Phys.\ Lett.\  B {\bf 652} (2007) 194
   [arXiv:0705.2639 [hep-th]].
+
+%\cite{Sherstnev:2008dm}
+\bibitem{Sherstnev:2008dm}
+  A.~Sherstnev and R.~S.~Thorne,
+  %``Different PDF approximations useful for LO Monte Carlo generators,''
+  arXiv:0807.2132 [hep-ph].
+  %%CITATION = ARXIV:0807.2132;%%
+
 
 
 \bibitem{NNLO-MTM}
