@@ -156,8 +156,7 @@ contains
     implicit none
     integer :: nf_rep, nf_lcl, ipdf
     type(grid_def), intent(in)      :: gd
-    real(dp), intent(in),pointer    :: pdf_sr(:,:)
-    real(dp), pointer    :: pdf_sr2(:,:)
+    real(dp), intent(in)            :: pdf_sr(:,:)
     real(dp), pointer               :: pdf_flav(:)
     real(dp)                        :: moment_index, sum_rule
     !--------------------------------------------
@@ -186,9 +185,9 @@ contains
     ! given PDF representation
     if(nf_rep == pdfr_Human) then
        ! PDF set in human representation -> Sum all pdfs
-      ! write(6,*) "I am here"
+       write(6,*) "I am here"
        pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
-       !write(6,*) "pdf_flav(20) = ", pdf_flav(20)
+       write(6,*) "pdf_flav(20) = ", pdf_flav(20)
     elseif(nf_rep.ge.0) then
        ! PDF in evln representation -> Singlet + Gluon
        pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
