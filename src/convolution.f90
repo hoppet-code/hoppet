@@ -1363,6 +1363,7 @@ contains
   ! Routines related to calculations of moments
   !======================================================================
 
+
   !---------------------------------------------------------------------
   !! Computes the truncated moment between 0 and min(y,ymax)
   !! of the grid quantity gq with the moment index defined as
@@ -1397,6 +1398,7 @@ contains
     allocate( conv_moment_gq(0:gd%ny) )
     conv_moment_gq    = gq
     
+
     ! Check dimensions are correct
     ! write(6,*) gd%ny, ubound(gq,dim=1)
     ny = assert_eq(gd%ny,ubound(gq,dim=1),"EvalGridQuant")
@@ -1430,6 +1432,7 @@ contains
     ! Dealocate auxiliary grid quantity
     deallocate( conv_moment_gq )
 
+
   end function conv_GetTruncMoment_1d
 
   
@@ -1437,12 +1440,14 @@ contains
   ! Auxiliary function for GetTruncatedMoment
   !------------------------------------------------
   function conv_GetTruncMoment_helper(y) result(res)
+   
     real(dp), intent(in) :: y 
     real(dp) :: res
 
     res = exp( -y * conv_moment_index ) &
          & * EvalGridQuant(conv_moment_gd,conv_moment_gq,y) 
    
+
   end function conv_GetTruncMoment_helper
   
 
