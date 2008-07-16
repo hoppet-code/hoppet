@@ -23,9 +23,9 @@ LIBS = -L../src -lhoppet_v1
 
 CC = cc
 CFLAGS = -O
-FC = ifort
+FC = lf95
 FFLAGS = -O -I../src 
-F90 = ifort
+F90 = lf95
 F90FLAGS = -O -I../src 
 LDFLAGS =  
 

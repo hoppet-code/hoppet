@@ -86,43 +86,33 @@ contains
     real(dp), intent(in)  :: x,xgrid(0:)
     real(dp), intent(out) :: weights(0:)
     !-----------------------------------------
-    integer,  parameter :: nmax = 9
+    !integer,  parameter :: nmax = 9
     integer             :: n, i, ngrid, j
-    !                                           order=n
-    !real(dp), save      :: normalisation_general(0:nmax,0:nmax) = zero
-    ! Do not save normalizations for the time being
-    real(dp)            :: normalisation_general(0:nmax,0:nmax) = zero
+    real(dp)            :: normalisation_general(0:ubound(weights,dim=1))
     real(dp)            :: dists(0:ubound(weights,dim=1)), prod
     real(dp)            :: dist
 
     !Check dimensions    
     n = ubound(weights,dim=1)
     ngrid= ubound(xgrid, dim=1)
-    if (n > nmax) call wae_error('general_interpolation_weights',&
-         &'ubound of weights is too large:',intval=n)
     if (n.ne.ngrid) call wae_error('general_interpolation_weights',&
          &'ubound of weights different ubound xgrid:',intval=n)
     
-
-    !-- intialise once for each n
-    !if (normalisation_general(0,n) == zero) then
-    ! -- missing saving normalisations
     !-- calculate normalization
     do i = 0, n
-       normalisation_general(i,n) = one
+       normalisation_general(i) = one
        do j = 0, i-1
           dist  = xgrid(i) - xgrid(j)
-          normalisation_general(i,n) = normalisation_general(i,n) * dist
+          normalisation_general(i) = normalisation_general(i) * dist
        end do
        do j = i+1, n
           dist  = xgrid(i) - xgrid(j)
-          normalisation_general(i,n) = normalisation_general(i,n) * dist
+          normalisation_general(i) = normalisation_general(i) * dist
        end do
-       ! print *, i,normalisation_general(i,n)
+       ! print *, i,normalisation_general(i)
     enddo
     !-- calculate inverse weight "normalisation_generals"
-    normalisation_general(:n,n) = one / normalisation_general(:n,n)
-    !end if
+    normalisation_general(:n) = one / normalisation_general(:n)
 
     ! Compute interpolation weights
     do i = 0, n
@@ -135,12 +125,23 @@ contains
     end do
     prod = product(dists)
     do i = 0, n
-       weights(i) = prod * normalisation_general(i,n) / dists(i)
+       weights(i) = prod * normalisation_general(i) / dists(i)
     end do
     
   end subroutine general_interpolation_weights
 
 !-----------------------------------------
+
+
+  !! ! Alternative form
+  !! function interpolation_ixlo(x, xgrid, n_interp) result(ixlo)
+  !!   real(dp), intent(in) :: x, xgrid(0:)
+  !!   integer              :: ixlo
+  !!   !...
+  !!   ! set ixlo
+  !!   stop
+  !! end function interpolation_ixlo
+  
 
   ! Select the suitable grid for the general interpolation
   ! starting from the initial large grid
@@ -180,7 +181,9 @@ contains
     ! Different according to the value of x
    
     if( jx.le.n_interp ) then
-        ! Left region
+       ! Left region
+       ! GPS illustration
+       !x_interp(:) = xgrid(i_interp+1: )
        do i_interp = 0, n_interp
           ix_interp(i_interp) = i_interp + 1
           x_interp(i_interp) = xgrid( ix_interp(i_interp) )

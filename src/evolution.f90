@@ -7,6 +7,7 @@
 module evolution
   use types; use consts_dp
   use dglap_objects; use qcd_coupling
+  use dglap_holders
   use assertions; use qcd
   use warnings_and_errors
   implicit none
@@ -68,6 +69,7 @@ module evolution
 
   type(split_mat),      pointer :: ev_PLO, ev_PNLO, ev_PNNLO
   type(running_coupling), pointer :: ev_ash
+  type(dglap_holder), save :: ev_dhcopy
   integer                  :: ev_nloop
   real(dp) :: ev_muR_Q, fourpibeta0_lnmuR_Q
   logical  :: ev_untie_nf = .false.
@@ -222,7 +224,6 @@ contains
     real(dp),               intent(in),    optional :: du
     !-----------------------------------------------------
     !real(dp)           :: pdf_ev(size(pdf,dim=1), size(pdf,dim=2))
-    type(dglap_holder) :: dhcopy
     integer            :: nf_init, nf_end, nflcl, nfuse
     integer            :: shnf_init, shnf_end, direction, i
     integer            :: nfstore_dhcopy, nfstore_qcd
@@ -233,10 +234,10 @@ contains
     
     !-- this will just copy pointers, so that we don't
     !   alter info held in original
-    dhcopy = dh
+    ev_dhcopy = dh
     !   We want to be able to restore things at the end... (not that
-    !   it is not so much for the dhcopy [which will be deleted] as for
-    !   the global qcd nf. [maybe we could drop the dhcopy call?]
+    !   it is not so much for the ev_dhcopy [which will be deleted] as for
+    !   the global qcd nf. [maybe we could drop the ev_dhcopy call?]
     nfstore_dhcopy = dh%nf
     nfstore_qcd    = nf_int
 
@@ -256,8 +257,8 @@ contains
        direction = -1
     end if
 
-    call ev_limit_nf(dhcopy, nf_init, shnf_init,'initial nf')
-    call ev_limit_nf(dhcopy, nf_end , shnf_end ,'final nf')
+    call ev_limit_nf(ev_dhcopy, nf_init, shnf_init,'initial nf')
+    call ev_limit_nf(ev_dhcopy, nf_end , shnf_end ,'final nf')
 
 
     ! in loop we may want to refer to subsequent elements in chain, 
@@ -282,22 +283,22 @@ contains
        if (nflcl == shnf_end)  lcl_Q_end  = Q_end
        !-- this will also set the global (qcd) nf_int which will
        !   be used elsewhere in this module
-       call SetNfDglapHolder(dhcopy, nflcl)
+       call SetNfDglapHolder(ev_dhcopy, nflcl)
 
        ! convention: cross mass thresholds before a step in the evolution
        if (nflcl /= shnf_init) then
           ! act directly
           if (present(pdf))&
-               & call ev_CrossMassThreshold(dhcopy,coupling,direction,pdf)
+               & call ev_CrossMassThreshold(ev_dhcopy,coupling,direction,pdf)
           ! or store the information that will be needed to act subsequently.
-          if (present(evop)) call ev_CrossMassThreshold(dhcopy,&
+          if (present(evop)) call ev_CrossMassThreshold(ev_dhcopy,&
                &                  coupling,direction,evop=this_evop)
        else if (present(evop)) then
           this_evop%cross_mass_threshold = .false.
        end if
        
        ! do evolution
-       if (present(pdf)) call ev_evolve(dhcopy, &
+       if (present(pdf)) call ev_evolve(ev_dhcopy, &
             &pdf, coupling, lcl_Q_init, lcl_Q_end, muR_Q, nloop, untie_nf, du)
 
        ! do the fake evolutions that allow us to do an accelerated 
@@ -307,7 +308,7 @@ contains
           !call GetDerivedSplitMatProbes(dh%grid,probes)
           call GetDerivedSplitMatProbes(dh%grid,nflcl,probes)
           do i = 1, size(probes,3)
-             call ev_evolve(dhcopy, probes(:,:,i), &
+             call ev_evolve(ev_dhcopy, probes(:,:,i), &
                   & coupling, lcl_Q_init,lcl_Q_end, muR_Q, nloop, untie_nf, du)
           end do
           call AllocSplitMat(dh%grid, this_evop%P, nflcl)
@@ -322,7 +323,7 @@ contains
     end do
 
     !-- clean up
-    call SetNfDglapHolder(dhcopy, nfstore_dhcopy)
+    call SetNfDglapHolder(ev_dhcopy, nfstore_dhcopy)
     if (nfstore_qcd /= nfstore_dhcopy) call qcd_SetNf(nfstore_qcd)
   end subroutine EvolveGeneric
 
@@ -547,7 +548,7 @@ contains
     ev_tmp_du_ballpark = default_or_opt(du_ballpark, du)
 
     !* !**** Additional for interpolated splitting-function sets
-    !* if (dhcopy%using_interp) then
+    !* if (ev_dhcopy%using_interp) then
     !*    nloop = ev_nloop_interp
     !*    if (ev_muR_Q /= one) call wae_error('ev_SetModuleConsts',&
     !*         & "muR_Q must be 1 for interpolated evln; it was ",&
@@ -678,7 +679,8 @@ contains
     !real(dp), intent(out) :: dpdf(0:,-ncomponents:)
     !--------------------------------------
     real(dp) :: as2pi, Q, t, jacobian
-    type(split_mat) :: Pfull
+    type(split_mat), target  :: Pfull
+    type(split_mat), pointer :: Plocal
 
     ! for analysing Intel bug
     !write(0,*) 'X',lbound(pdf),lbound(pdf,dim=1),size(pdf,dim=1)
@@ -702,7 +704,8 @@ contains
     
     select case (ev_nloop)
     case(1)
-       dpdf = (jacobian * as2pi) * (ev_PLO .conv. pdf)
+       Plocal => ev_PLO
+       !dpdf = (jacobian * as2pi) * (ev_PLO .conv. pdf)
     case(2)
        if (fourpibeta0_lnmuR_Q /= zero) then
           call InitSplitMat(Pfull, ev_PLO, one + as2pi*fourpibeta0_lnmuR_Q)
@@ -710,8 +713,9 @@ contains
           call InitSplitMat(Pfull, ev_PLO)
        end if
        call AddWithCoeff(Pfull, ev_PNLO, as2pi)
-       dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
-       call Delete(Pfull)
+       Plocal => Pfull
+       !dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
+       !call Delete(Pfull)
     case(3)
        if (fourpibeta0_lnmuR_Q /= zero) then
           call InitSplitMat(Pfull, ev_PLO, one + as2pi*fourpibeta0_lnmuR_Q&
@@ -726,17 +730,41 @@ contains
           call AddWithCoeff(Pfull, ev_PNLO, as2pi)
           call AddWithCoeff(Pfull, ev_PNNLO, as2pi**2)
        end if
-       dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
-       call Delete(Pfull)
+       Plocal => Pfull
+       !dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
+       !call Delete(Pfull)
     case(ev_nloop_interp)
        ! *** SetCurrentP
        !
-       ! dpdf = jacobian * (dhcopy%currentP .conv. pdf)
+       ! dpdf = jacobian * (ev_dhcopy%currentP .conv. pdf)
        stop ! not yet programmed !!!
     case default
        call wae_error('ev_conv','unrecognised value for ev_nloop',&
             &         intval=ev_nloop)
     end select
+
+    !! if (...interpolating...) then
+    !!    if (.not. associated(Plocal,Pfull)) then
+    !!       ! transfer contents to Pfull
+    !!       call InitSplitMat(Pfull, Plocal)
+    !!       Plocal => Pfull
+    !!    end if
+    !!    ! nf has already been set of ev_dhcopy
+    !!    call SetCurrentInterpP(ev_dhcopy, as2pi*twopi) 
+    !!    ! include a factor 1/as2pi in front of currentInterpP since we
+    !!    ! later put it back in
+    !!    call AddWithCoeff(Pfull, ev_dhcopy%currentInterpP, one/as2pi)
+    !! end if
+    
+
+    ! finally do the convolution
+    dpdf = (jacobian * as2pi) * (Plocal .conv. pdf)
+
+
+    ! if we've allocated something specific for the convolution, then
+    ! remember to delete it
+    if (associated(Plocal,Pfull)) call Delete(Pfull)
+
   end subroutine ev_conv
   
   

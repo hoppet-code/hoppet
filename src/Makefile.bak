@@ -47,9 +47,9 @@ LIBS =
 
 CC = cc
 CFLAGS = -O
-FC = ifort
+FC = lf95
 FFLAGS = -O 
-F90 = ifort
+F90 = lf95
 F90FLAGS = -O 
 LDFLAGS =  
 
@@ -129,13 +129,13 @@ qcd.o: types.o
 qcd_coupling.o: assertions.o new_as.o types.o warnings_and_errors.o
 random.o: types.o
 resum_grids_out.o: convolution.o resum_kfact.o splitting_functions.o types.o
-resum_kfact.o: convolution.o splitting_functions.o types.o
+resum_kfact.o: convolution.o types.o
 runge_kutta.o: types.o
 sort.o: assertions.o types.o warnings_and_errors.o
 special_functions.o: types.o
-splitting_functions.o: coefficient_functions.o convolution.o qcd.o \
-	special_functions.o splitting_functions_nnlo.o types.o \
-	warnings_and_errors.o
+splitting_functions.o: coefficient_functions.o convolution.o interpolation.o \
+	qcd.o resum_kfact.o special_functions.o splitting_functions_nnlo.o \
+	types.o warnings_and_errors.o
 splitting_functions_nnlo.o: convolution.o dglap_choices.o qcd.o types.o \
 	warnings_and_errors.o xpij2e.o xpij2n.o xpij2p.o xpns2e.o xpns2n.o \
 	xpns2p.o

@@ -1,3 +1,13 @@
+2008-07-16  Gavin SALAM  <salam@lpthe.jussieu.fr> + JR
+
+	* src/interpolation.f90: 
+	  a bit of tidying up of the variable-x interpolation + addition
+	  of possible new interface for choosing the x values
+
+	* src/evolution.f90: 
+	  added some more (still commented) infrastructure for using
+	  interpolated splitting functions
+
 2008-07-09  Gavin Salam  <salam@lpthe.jussieu.fr> & JR
 
 	* src/convolution.f90: 

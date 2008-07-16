@@ -27,7 +27,7 @@ module dglap_holders
      !*********** for interpolated splitting functions ****************
      !* type(split_mat), pointer :: interpP(:, :)  ![alphas,nf]
      !* real(dp),        pointer :: alphas_values(:,:) ![alphas,nf]
-     !* type(split_max), pointer :: currentP => null()
+     !* type(split_mat), pointer :: currentInterpP => null()
      !* logical                  :: using_interp
      !*********** for interpolated splitting functions ****************
 
