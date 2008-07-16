@@ -8,6 +8,49 @@
 	  added some more (still commented) infrastructure for using
 	  interpolated splitting functions
 
+2008-07-16  Gavin SALAM  <salam@lpthe.jussieu.fr> & Juan
+
+	* src/pdf_tabulate.f90 (EvalPdfTable_Q): 
+	  added this routine to get the pdf at the given Q value [still to
+	  be completed]
+
+2008-07-15  Juan Rojo  <rojo@lpthe.jussieu.fr> 
+
+	* doc/HOPPET-v1-doc.tex
+	  Begin section on sum rules of the
+	  documentation
+
+2008-07-15  Juan Rojo  <rojo@lpthe.jussieu.fr> 
+
+	* example_f90/sumrules.f90     
+	  The computation of the sum rules is now performed
+	  with a single function the two times
+	  Sum rules are computed for a PDF set in an
+	  arbitrary representation
+
+	* src/convolution.f90
+	  Added comment on the function GetTruncMoment
+
+
+2008-07-11  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* example_f90/tabulation_example_2.f90: 
+          added comments at start to explain why we have a second example
+	  program. 
+	
+	* example_f90/sumrules.f90: 
+	  small changes to help readability, etc.
+
+2008-07-10  Juan Rojo  <rojo@lpthe.jussieu.fr> 
+
+	* src/convolution.f90
+	Updated functions to compute moments
+	arbitrary moments of grid quantities
+
+	* example_f90/sumrules.f90      *** ADDED ***
+	Added example code which shows how to compute the various
+	sum rules of a PDF set
+	
 2008-07-09  Gavin Salam  <salam@lpthe.jussieu.fr> & JR
 
 	* src/convolution.f90: 

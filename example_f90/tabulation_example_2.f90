@@ -1,6 +1,11 @@
-!! An second example program using a tabulation. It outputs a subset of
-!! table 15 of hep-ph/0511119 and this output should be identical
-!! to the contents of the file tabulation_example.default_output
+!! A second example program using a tabulation. It differs from
+!! tabulation_example.f90 in that it shows how to consistently carry
+!! out initialisation and evolution from separate sub-programs, as
+!! might for example be needed in a PDF fit.
+!!
+!! It outputs a subset of table 15 of hep-ph/0511119 and this output
+!! should be identical to the contents of the file
+!! tabulation_example.default_output
 !!
 !! NB: for the full functionality used in generating the HeraLHC and
 !!     Les Houches comparison tables, see ../benchmarks/benchmarks.f90
