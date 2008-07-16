@@ -1363,22 +1363,21 @@ contains
   ! Routines related to calculations of moments
   !======================================================================
 
-  ! --------------------------------------------------------------------
-  ! Computes the truncated moment between 0 and min(y,ymax)
-  ! of the grid quantity gq with the moment index defined as
-  !
-  ! Define the function which is going to be integrated
-  ! Multiply the pdf by exp( - y * moment_index)
-  ! Moment index are defined as
-  ! 
-  !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
-  ! 
-  ! or in terms of x, where y = ln(1/x)
-  !
-  !   M(moment_index) = \int_xmin^1 dx x^( moment_index - 1) * xpdf(x)
-  !
-  ! 
-  ! ------------------------------------------------------------
+  !---------------------------------------------------------------------
+  !! Computes the truncated moment between 0 and min(y,ymax)
+  !! of the grid quantity gq with the moment index defined as
+  !!
+  !! Define the function which is going to be integrated
+  !! Multiply the pdf by exp( - y * moment_index)
+  !! Moment index are defined as
+  !! 
+  !!  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
+  !! 
+  !! or in terms of x, where y = ln(1/x)
+  !!
+  !!   M(moment_index) = \int_xmin^1 dx x^( moment_index - 1) * xpdf(x)
+  !! 
+  !-------------------------------------------------------------
   function conv_GetTruncMoment_1d(gd, gq, moment_index, y) result(res)
     use integrator
     type(grid_def), intent(in) :: gd
@@ -1428,29 +1427,21 @@ contains
     res = res +  ig_LinWeight(conv_GetTruncMoment_helper,&
          & min(two,ymax),ymax, one,one,eps)
 
-     ! Dealocate auxiliary grid quantity
-     deallocate( conv_moment_gq )
+    ! Dealocate auxiliary grid quantity
+    deallocate( conv_moment_gq )
 
   end function conv_GetTruncMoment_1d
+
   
   !------------------------------------------------
   ! Auxiliary function for GetTruncatedMoment
   !------------------------------------------------
   function conv_GetTruncMoment_helper(y) result(res)
-   
     real(dp), intent(in) :: y 
-    real(dp) :: res , pdf_check
-    integer :: ny
+    real(dp) :: res
 
-
-
-    ! Check dimensions
-    ny = assert_eq(conv_moment_gd%ny,&
-         & ubound(conv_moment_gq,dim=1),"EvalGridQuant")
-    
     res = exp( -y * conv_moment_index ) &
          & * EvalGridQuant(conv_moment_gd,conv_moment_gq,y) 
-   
    
   end function conv_GetTruncMoment_helper
   
