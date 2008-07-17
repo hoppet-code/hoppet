@@ -34,7 +34,9 @@ contains
     ! Read resummed K factors
 
     integer :: ix,ialpha
-     
+    character*23 ::  filepath
+
+    filepath ="../resummed-tables/nf4/"
   
     ! Corrections for resummed splitting functions
    open(unit=10,status="unknown",&

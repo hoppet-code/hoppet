@@ -10,35 +10,30 @@ ALLPROGSRC =
 
 ALLPROGOBJ =	
 
-SRCS =	alphas_jrc.f andim_lo_jrc.f andim_nlo_jrc.f dgauss_jrc.f \
-	evolfactn_jrc.f evolinit_jrc.f gammax_jrc.f hplog.f matutils_jrc.f \
-	pdfcomp_jrc.f pdfin_LH_jrc.f psi_jrc.f tmc_jrc.f umatrix_jrc.f \
-	wcDIS_jrc.f wcoeff_jrc.f xpij2e.f xpns2e.f assertions.f90 \
-	coefficient_functions.f90 convolution.f90 dglap_choices.f90 \
-	dglap_holders.f90 dglap_objects.f90 evolution.f90 hoppet_v1.f90 \
-	integrator.f90 interpolation.f90 jrc_modules.f90 new_as.f90 \
-	pdf_general.f90 pdf_representation.f90 pdf_tabulate.f90 qcd.f90 \
-	qcd_coupling.f90 random.f90 resum_grids_out.f90 resum_kfact.f90 \
-	runge_kutta.f90 sort.f90 special_functions.f90 \
-	splitting_functions.f90 splitting_functions_nnlo.f90 \
-	streamlined_interface.f90 types.f90 warnings_and_errors.f90 \
-	welcome_message.f90 xa2hgp.f90 xpij2n.f90 xpij2p.f90 xpns2n.f90 \
-	xpns2p.f90
+SRCS =	andim_lo_jrc.f andim_nlo_jrc.f evolinit_jrc.f hplog.f psi_jrc.f \
+	xpij2e.f xpns2e.f assertions.f90 coefficient_functions.f90 \
+	convolution.f90 dglap_choices.f90 dglap_holders.f90 dglap_objects.f90 \
+	evolution.f90 hoppet_v1.f90 integrator.f90 interpolation.f90 \
+	jrc_modules.f90 new_as.f90 pdf_general.f90 pdf_representation.f90 \
+	pdf_tabulate.f90 qcd.f90 qcd_coupling.f90 random.f90 \
+	resum_grids_out.f90 resum_kfact.f90 runge_kutta.f90 sort.f90 \
+	special_functions.f90 splitting_functions.f90 \
+	splitting_functions_nnlo.f90 streamlined_interface.f90 types.f90 \
+	warnings_and_errors.f90 welcome_message.f90 xa2hgp.f90 xpij2n.f90 \
+	xpij2p.f90 xpns2n.f90 xpns2p.f90
 
 POSTSRCS =	
 
-OBJS =	alphas_jrc.o andim_lo_jrc.o andim_nlo_jrc.o dgauss_jrc.o \
-	evolfactn_jrc.o evolinit_jrc.o gammax_jrc.o hplog.o matutils_jrc.o \
-	pdfcomp_jrc.o pdfin_LH_jrc.o psi_jrc.o tmc_jrc.o umatrix_jrc.o \
-	wcDIS_jrc.o wcoeff_jrc.o xpij2e.o xpns2e.o assertions.o \
-	coefficient_functions.o convolution.o dglap_choices.o dglap_holders.o \
-	dglap_objects.o evolution.o hoppet_v1.o integrator.o interpolation.o \
-	jrc_modules.o new_as.o pdf_general.o pdf_representation.o \
-	pdf_tabulate.o qcd.o qcd_coupling.o random.o resum_grids_out.o \
-	resum_kfact.o runge_kutta.o sort.o special_functions.o \
-	splitting_functions.o splitting_functions_nnlo.o \
-	streamlined_interface.o types.o warnings_and_errors.o \
-	welcome_message.o xa2hgp.o xpij2n.o xpij2p.o xpns2n.o xpns2p.o
+OBJS =	andim_lo_jrc.o andim_nlo_jrc.o evolinit_jrc.o hplog.o psi_jrc.o \
+	xpij2e.o xpns2e.o assertions.o coefficient_functions.o convolution.o \
+	dglap_choices.o dglap_holders.o dglap_objects.o evolution.o \
+	hoppet_v1.o integrator.o interpolation.o jrc_modules.o new_as.o \
+	pdf_general.o pdf_representation.o pdf_tabulate.o qcd.o \
+	qcd_coupling.o random.o resum_grids_out.o resum_kfact.o runge_kutta.o \
+	sort.o special_functions.o splitting_functions.o \
+	splitting_functions_nnlo.o streamlined_interface.o types.o \
+	warnings_and_errors.o welcome_message.o xa2hgp.o xpij2n.o xpij2p.o \
+	xpns2n.o xpns2p.o
 
 POSTOBJS =	
 POSTLIB = 
@@ -78,26 +73,11 @@ make:
 %.o: %.f90 
 	$(F90) $(F90FLAGS) -c $<
 
-alphas_jrc.o: ../../commons/alphas.h ../../commons/beta.h \
-	../../commons/consts.h
 andim_lo_jrc.o: ../../commons/colfact.h ../../commons/consts.h
 andim_nlo_jrc.o: ../../commons/colfact.h ../../commons/consts.h
-evolfactn_jrc.o: ../../commons/alphas.h ../../commons/beta.h \
-	../../commons/consts.h ../../commons/evflags.h \
-	../../commons/evscale.h ../../commons/expptkin.h
 evolinit_jrc.o: ../../commons/alphas.h ../../commons/beta.h \
 	../../commons/colfact.h ../../commons/consts.h \
 	../../commons/evflags.h ../../commons/evscale.h
-gammax_jrc.o: ../../commons/alphas.h ../../commons/consts.h \
-	../../commons/evflags.h ../../commons/evscale.h \
-	../../commons/observ.h
-pdfcomp_jrc.o: ../../commons/evflags.h
-tmc_jrc.o: ../../commons/expptkin.h ../../commons/observ.h \
-	../../commons/tmc.h
-umatrix_jrc.o: ../../commons/beta.h ../../commons/evflags.h
-wcDIS_jrc.o: ../../commons/colfact.h ../../commons/consts.h
-wcoeff_jrc.o: ../../commons/alphas.h ../../commons/evflags.h \
-	../../commons/observ.h
 xpij2e.o: qcd.o
 xpns2e.o: qcd.o
 assertions.o: types.o

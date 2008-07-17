@@ -5,7 +5,8 @@ program resummation_example
   use hoppet_v1
   use resum_kfact
   use resum_grids_out ! Module to output grids for LO, NLO, NLOres SFs
-  use interpolation ! (Why we need to call this module explicitely? )
+  use interpolation ! (need to call this module explicitely since
+                    !  it is not included in hoppet_v1)
   use convolution
 
   implicit none
@@ -65,14 +66,14 @@ program resummation_example
   !! Save resummed structure function grids
   do ix=1,nxgrid
      
-     write(10,"(6(f15.7,1x))") ,1.0_dp/xgrid(ix),&
-      & alphas(ialpha), (xPgg_resum(ialpha,ix,i),i=1,4)
-     write(11,"(6(f15.7,1x))") ,1.0_dp/xgrid(ix),&
-      & alphas(ialpha), (xPqq_resum(ialpha,ix,i),i=1,4)
-     write(12,"(6(f15.7,1x))") ,1.0_dp/xgrid(ix),&
-      & alphas(ialpha), (xPgq_resum(ialpha,ix,i),i=1,4)
-     write(13,"(6(f15.7,1x))") ,1.0_dp/xgrid(ix),&
-      & alphas(ialpha), (xPqg_resum(ialpha,ix,i),i=1,4)
+     write(10,"(6(f15.7,1x))") 1.0_dp/xgrid(ix),&
+          & alphas(ialpha), (xPgg_resum(ialpha,ix,i),i=1,4)
+     write(11,"(6(f15.7,1x))") 1.0_dp/xgrid(ix),&
+          & alphas(ialpha), (xPqq_resum(ialpha,ix,i),i=1,4)
+     write(12,"(6(f15.7,1x))") 1.0_dp/xgrid(ix),&
+          & alphas(ialpha), (xPgq_resum(ialpha,ix,i),i=1,4)
+     write(13,"(6(f15.7,1x))") 1.0_dp/xgrid(ix),&
+          & alphas(ialpha), (xPqg_resum(ialpha,ix,i),i=1,4)
 
   enddo
 
@@ -295,7 +296,7 @@ xpdf_conv_qg = (xPqg.conv.xpdf)
 !xpdf_conv_gq = (xPgq.conv.xpdf) 
 
 N=(2,0)  
-call ANDIM_NLO(N,nf_lcl,P0NS,P0SG)
+!call ANDIM_NLO(N,nf_lcl,P0NS,P0SG)
 
 open(unit=10,status="unknown",file="msr-nlo.res")
 do ix=1,nx-1

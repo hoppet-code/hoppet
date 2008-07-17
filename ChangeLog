@@ -1,3 +1,11 @@
+2008-07-16  Juan ROJO  <rojo@lpthe.jussieu.fr> 
+
+	* src/convolution.f90: 
+	  Added function conv_GetTruncMomentDouble_1d which computes
+	  the double truncated moment (between ymin and ymax)
+	  of a grid quantity
+
+	
 2008-07-16  Gavin SALAM  <salam@lpthe.jussieu.fr> + JR
 
 	* src/interpolation.f90: 

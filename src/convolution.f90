@@ -130,6 +130,10 @@ module convolution
     module procedure conv_GetTruncMoment_1d
   end interface
   public :: GetTruncMoment
+  interface GetTruncMomentDouble
+    module procedure conv_GetTruncMomentDouble_1d
+  end interface
+  public :: GetTruncMomentDouble
 
   !-- convolution routines -------------------------------------------
   interface AllocGridConv
@@ -1449,6 +1453,76 @@ contains
    
 
   end function conv_GetTruncMoment_helper
+
+!---------------------------------------------------------------------
+  !! Computes the inverse truncated moment between,
+  !! that is the integral between  ymin and ymax 
+  !! of the grid quantity gq with the moment index defined as
+  !!
+  !! Define the function which is going to be integrated
+  !! Multiply the pdf by exp( - y * moment_index)
+  !! Moment index are defined as
+  !! 
+  !!  M(moment_index) = \int_ymin^ymax dy exp( - y * moment_index) * xpdf(y)
+  !! 
+  !! or in terms of x, where y = ln(1/x)
+  !!
+  !!   M(moment_index) = \int_xmin^xmax dx x^( moment_index - 1) * xpdf(x)
+  !! 
+  !-------------------------------------------------------------
+  function conv_GetTruncMomentDouble_1d(gd, gq, moment_index, ymin, y) &
+       & result(res)
+    use integrator
+    type(grid_def), intent(in) :: gd
+    real(dp),       intent(in) :: gq(0:), moment_index
+    real(dp),       intent(in) :: ymin
+    real(dp), intent(in), optional :: y
+    real(dp)                   :: res, ymax,eps
+    integer :: ny
+    !-----------------------------------------------------
+    
+    res = zero
+    
+    ! global variables to pass to auxiliary conv_GetTruncMoment_helper
+    ! inefficient to make copies, but works around impossibility
+    ! of having pointers to intent(in) objects???
+    conv_moment_index = moment_index
+    conv_moment_gd    = gd
+    allocate( conv_moment_gq(0:gd%ny) )
+    conv_moment_gq    = gq
+
+    ! Check dimensions are correct
+    ! write(6,*) gd%ny, ubound(gq,dim=1)
+    ny = assert_eq(gd%ny,ubound(gq,dim=1),"EvalGridQuant")
+    if( gd%ny .ne. ubound(gq,dim=1) ) &
+         & call wae_error("Different dimensions for ",&
+         & "grid quantity and grid in conv_GetTruncMoment_1d")
+
+  
+    ! Get ymax, upper integration limit
+    ymax = default_or_opt(gd%ymax, y)
+    ! Warning: the upper integration limit cannot be larger than
+    ! ymax from the grid definition
+    if (ymax > gd%ymax) call wae_error("Input value for y",&
+         & "for computation of truncated moment",&
+         & "larger than ymax from grid")
+    
+    ! Set convolution for integration
+    eps = default_conv_eps
+    
+    ! Integrate between ymin and ymax
+    ! Do the integration in two steps to improve accuracy
+    ! Check ymax > two, the indermediate limit
+    res = ig_LinWeight(conv_GetTruncMoment_helper,&
+         & min(ymin,two),min(two,ymax),one,one,eps)
+    res = res +  ig_LinWeight(conv_GetTruncMoment_helper,&
+         & min(max(two,ymin),ymax),ymax, one,one,eps)
+
+    ! Dealocate auxiliary grid quantity
+    deallocate( conv_moment_gq )
+
+
+  end function conv_GetTruncMomentDouble_1d
   
 
   !======================================================================
