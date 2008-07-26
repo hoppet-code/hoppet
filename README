@@ -36,7 +36,8 @@ The free g95 (www.g95.org) compiler is one option, though its
 executables are fairly slow. It is easy to install if you don't
 already have a recent version on your system. At the time of writing
 (April 2007) the free gfortran compiler produced executables that
-crash and so is not currently recommended.
+crash or that give incorrect answers and so is not currently
+recommended.
 
 The intel (ifort) compiler (versions 8.1.033 upwards) exists in a
 semi-free version for non-commercial use under linux and produces fast
@@ -116,7 +117,7 @@ convolutions with splitting functions (convolution_example.f).
 Documentation
 -------------
 
-Draft documentation is available as doc/HOPPET-v1-doc.tex .
+Detailed documentation is available as doc/HOPPET-v1-doc.tex .
 
 
 ----------------------------------------------------------------------

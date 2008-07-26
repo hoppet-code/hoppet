@@ -441,8 +441,9 @@ mass threshold $m_h^2$.
 
 These matching conditions for the parton distributions
 receive non-trivial contributions at higher orders. In the $\MSbar$
-(factorisation) scheme, for example, these begin at NNLO:
-or light quarks $q_{l,i}$ of flavour $i$ 
+(factorisation) scheme, for example, these begin at NNLO:\footnote{In
+  a general scheme they would start at NLO.} %
+for light quarks $q_{l,i}$ of flavour $i$ 
 (quarks that are considered massless
 below the heavy quark mass threshold $m_h^2$) the matching between
 their values in the $n_f$ and
@@ -485,15 +486,46 @@ observables. In particular, the heavy quark PDFs start from a non-zero
 value at threshold at NNLO, which sometimes can even be
 negative.
 
-The corresponding NNLO relation for the matching of the coupling constant 
-at the heavy quark threshold $m^2_h$ is given by
-\be
+The corresponding NNLO relation for the matching of the $\MSbar$
+coupling constant at the heavy quark threshold $m^2_h$ is given by 
+\begin{equation}
 \label{eq:as-nf1}
   \as^{\, (n_f+1)}(m_h^2) \: = \:
   \as^{\, (\nf} (m_h^2) +   C_2 \lp \frac{\as^{\, (\nf} (m_h^2)}{2\pi} \rp^3
    \:\: ,
-\ee
+\end{equation}
 where the matching coefficient $C_2$ was computed in \cite{Chetyrkin:1997sg}.
+
+Both evolution and threshold matching preserve the momentum sum rule
+\begin{equation}
+  \int_0^1 dx~x \lp \Sigma(x,Q^2)+g(x,Q^2)\rp =1 \,,
+\end{equation}
+and valence sum rules
+\begin{equation}
+  \int_0^1 dx\, \left[q(x,Q^2)-{\bar q}(x,Q^2) \right] = \left\{ 
+    \begin{array}{ll}
+      1, & \text{for } q = d \text{ (in proton)}\\
+      2, & \text{for } q = u \text{ (in proton)}\\
+      0, & \text{other flavours}
+    \end{array}
+    \right.
+\end{equation}
+as long as they hold at the initial scale (occasionally not the case,
+\eg in modified LO sets for Monte Carlo
+generators~\cite{Sherstnev:2008dm}).
+%% 
+%% If satisfied at an initial scale  then they
+%% are preserved by perturbative evolution and when crossing mass
+%% thresholds.
+%% %
+%% We note that is the above conditions are satisfied at the input
+%% evolution scale $Q_0^2$, then these conditions are respected
+%% by perturbative evolution for any $Q^2 \ge Q_0^2$. Note that
+%% purportedly some PDF sets do not impose some sum rules, like
+%% the modified LO sets for Monte Carlo generators where the
+%% momentum sum rule is absent \cite{Sherstnev:2008dm}. We describe how to compute
+%% arbitrary sum rules (or more generally truncated moments)
+%% of PDFs in Sect.~\ref{sec:sum-rules}.
 
 
 The default basis for the PDFs, called the \ttt{human} 
@@ -508,7 +540,7 @@ representation in \hoppet, is such that
 s={3} \ , \nn   c&=&{4} \ , \nn b={5} \ , \nn  t={6} \ . \nn 
 \eea
  This representation is the
-same as that used through the \ttt{LHAPDF} library \cite{LHAPDF}. 
+same as that used in the \ttt{LHAPDF} library \cite{LHAPDF}. 
 However, this representation leads
 to a complicated form of the evolution equations.
 The splitting matrix can be simplified considerably (made diagonal
@@ -526,7 +558,7 @@ are preserved under linear operations, so in particular
 they are preserved under DGLAP evolution.
 The conversion from the \ttt{human} to the \ttt{evln}
 representations of PDFs requires that the number of
-active quark flavours $n_f$ is specified by the user, as described in
+active quark flavours $n_f$ be specified by the user, as described in
 Sect. \ref{sec:evln-rep}.
 
 \begin{table}
@@ -552,24 +584,6 @@ of PDFs with $n_f$ active quark flavours
 in terms of the \ttt{human} representation.}  
 \end{center}
 \end{table}
-
-In general, PDF analysis enforce physical constraints
-represented by sum rules like the momentum sum rule
-\be
-\int_0^1 dx~x \lp \Sigma(x,Q^2)+g(x,Q^2)\rp =1 \ ,
-\ee
-or the valence sum rules
-\be
-\int_0^1 dx~ u_V(x,Q^2) =2 \ , \quad \int_0^1 dx~ d_V(x,Q^2) =1 \ .
-\ee
-We note that is the above conditions are satisfied at the input
-evolution scale $Q_0^2$, then these conditions are respected
-by perturbative evolution for any $Q^2 \ge Q_0^2$. Note that
-purportedly some PDF sets do not impose some sum rules, like
-the modified LO sets for Monte Carlo generators where the
-momentum sum rule is absent \cite{Sherstnev:2008dm}. We describe how to compute
-arbitrary sum rules (or more generally truncated moments)
-of PDFs in Sect.~\ref{sec:sum-rules}.
 
 In \hoppet unpolarised DGLAP evolution is available up to NNLO
 in the $\MSbar$ scheme, while for the DIS scheme
@@ -795,7 +809,7 @@ Information concerning the grid is stored in a derived type
 \end{lstlisting}
 This initialises a grid between $x=1$ and down to $x =
 e^{-\texttt{ymax}}$, with uniform grid spacing in $y = \ln 1/x$ of
-\texttt{dy=0.1}, with a grid which  uses order 5 interpolation
+\texttt{dy=0.1}, with a grid that uses order 5 interpolation
 with only $x\le 1$ points.
 The user can modify this choice to better
 suit his/her particular needs, as explained
@@ -817,7 +831,7 @@ in the \texttt{module types} (and available indirectly through
 
 It is often useful to have multiple grids, with
 coarser coverage at small $x$ and finer coverage at high $x$, to
-improve the precision the convolution\footnote{
+improve the precision of the convolution\footnote{
 The reason that denser grids are required at large-$x$ is that
 if a typical parton distributions goes as
 \be
@@ -1198,9 +1212,9 @@ set for the determination of grid convolution operators.
 The use of adaptive Gaussian integration implies that the evaluation
 of moments is not optimally efficient for repeated use of the same
 moment index with different PDFs.\footnote{Should a user have an
-  (unusual!) application in which the repeated evaluation of truncated
-  moments is the main time-consuming step, then they are advised to
-  contact the authors for further advice.}
+  application in which the repeated evaluation of truncated moments is
+  the main time-consuming step, then they are advised to contact the
+  authors for further advice.}
 
 As as example, the calculation of the momentum contained in the gluon
 would proceed as follows:
@@ -1211,35 +1225,37 @@ would proceed as follows:
   N = 1.0_dp
   gluon_momentum = TruncatedMoment(grid, N, xgluon)
 \end{lstlisting}
+For a further example, see also section~\ref{sec:acc_table}.
+%
 Note that for $\ttt{ymax}= 12$ (a value used in many of the example
-programs), the truncation will underestimate the sum rules by a
+programs), the truncation can underestimate the sum rules by a
 fraction of a percent.
 
 
- =====================================================
-
- \comment{rest to be integrated with what follows elsewhere}
-
-Note that the fact that the grid extends up to {\tt ymax} only
-forces us to compute truncated moments, but for a large enough 
-value of  {\tt ymax} these truncated moments should coincide
-with the full moments.
-
-
-sum rule
-from a PDF set:
-\begin{lstlisting}
-  call AllocGridQuant(grid,pdf_flav)
-  ! Construct the appropriate flavour combination 
-  ! assume PDF in human representation
-  pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
-  moment_index=1.0_dp ! See definition of truncated moments 
-  momentum_sum_rule = TruncatedMoment(grid,pdf_flav,moment_index)
-\end{lstlisting}
-An example of the computation of sum rules at an
-arbitrary value of Q2 can be found as an example
-program 
-in {\tt example\_f90/sumrules.f90}.
+%%  =====================================================
+%% 
+%%  \comment{rest to be integrated with what follows elsewhere}
+%% 
+%% Note that the fact that the grid extends up to {\tt ymax} only
+%% forces us to compute truncated moments, but for a large enough 
+%% value of  {\tt ymax} these truncated moments should coincide
+%% with the full moments.
+%% 
+%% 
+%% sum rule
+%% from a PDF set:
+%% \begin{lstlisting}
+%%   call AllocGridQuant(grid,pdf_flav)
+%%   ! Construct the appropriate flavour combination 
+%%   ! assume PDF in human representation
+%%   pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
+%%   moment_index=1.0_dp ! See definition of truncated moments 
+%%   momentum_sum_rule = TruncatedMoment(grid,pdf_flav,moment_index)
+%% \end{lstlisting}
+%% An example of the computation of sum rules at an
+%% arbitrary value of Q2 can be found as an example
+%% program 
+%% in {\tt example\_f90/sumrules.f90}.
 
 
 
@@ -1837,7 +1853,7 @@ The constants \ttt{factscheme\_*} are defined in \ttt{module
 The corrections to the splitting functions to get the DIS scheme are
 implemented by carrying out appropriate convolutions of the $\MSbar$
 splitting and coefficient functions. Currently the DIS scheme is only
-implemented to NLO\footnote{It's NNLO implementation would actually be fairly
+implemented to NLO\footnote{Its NNLO implementation would actually be fairly
 straightforward given the parametrisation provided in
 \cite{White:2005wm}, and may be performed in
 future releases of \hoppet.}.
@@ -1851,7 +1867,7 @@ different numbers of flavours:
   nflo = 3; nfhi = 6    ! [calls to qcd_SetNf handled automatically]
   call InitDglapHolder(grid, dglap_h, factscheme, nloop, nflo, nfhi)
 \end{lstlisting}
-Mass thresholds are not currently correctly supported in the DIS
+Mass thresholds are not currently correctly supported even at NLO in the DIS
 scheme.
 
 For all the above calls, at NNLO the choice of exact of parametrised
@@ -2332,22 +2348,40 @@ One could also imagine using it to obtain tables of
 (flavour-separated) structure functions, if one were to convolute with
 coefficient functions rather than splitting functions.
 
+There are instances in which it is useful to extract the PDF at all
+$x$ values for a given $Q$. This is the case, for efficiency reasons,
+if one wishes to evaluate it at very many $x$ values and a single $Q$
+value. It's also the case if one wishes to evaluate
+sum-rules. One then uses uses the routine \ttt{EvalPdfTable\_Q}, as in
+the following example for calculating the momentum sum rule
+\begin{lstlisting}
+  real(dp), pointer :: pdf_at_Q(:,:)
+  real(dp)          :: moment_index, momentum_sum
+  ! [...]
+  call AllocPDF(table%grid, pdf_at_Q)        ! reserve space
+  call EvalPdfTable_Q(table, Q, pdf_at_Q)    ! evaluate the PDF at Q
+  moment_index = 1.0_dp
+  ! (truncated) momentum-sum of the sum of all flavours of pdf_at_Q
+  momentum_sum = TruncatedMoment(table%grid, moment_index, &
+                               & sum(pdf_at_Q(:,-6:6),dim=2)) ! dim=2 -> sum over flav
+\end{lstlisting}
+where the \ttt{TruncatedMoment} function was described in detail in
+section~\ref{sec:sum-rules}.
 
 As with all other objects, a \ttt{pdf\_table} object can be deleted
 using
 \begin{lstlisting}
   call Delete(table) 
 \end{lstlisting}
-Notice that a table is a local variable in each procedure and so 
-effectively a different variable each separate
-procedure. 
+Notice that a table is a variable that is local to the scope in which
+it is defined. So table variables defined separately in each of two
+different procedures will effectively be different variables in the
+two procedures.
 %
-If ones needs to use a 
-PDF table across different procedures, it has to be 
-defined within a module.
-In Appendix \ref{sec:example_program}, 
-there is a detailed example of different ways of
-accessing a table. 
+If ones needs to use a common PDF table across different procedures,
+it has to be defined within a module and then the module should
+be \ttt{use}d in both procedures.  In Appendix \ref{sec:example_program},
+there is a detailed example of different ways of accessing a table.
 
 
 
@@ -2565,7 +2599,7 @@ in~\cite{Benchmarks}:
   \end{align}
 \end{subequations}
 where $u_v \equiv u - \bar u$, $d_v \equiv d - \bar d$, and all other
-flavours are zero. The initial scale~
+flavours are zero. The initial scale%
 \footnote{With $\bar{\epsilon}$ an infinitesimal number. Note that
 this is unrelated to the evolution accuracy $\epsilon$, introduced later
 in this section.} is $Q_0 = \lp \sqrt{2}-\bar{\epsilon}

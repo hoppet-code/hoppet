@@ -1,5 +1,14 @@
 2008-07-26  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* doc/HOPPET-v1-doc.tex: 
+	  made a series of modifications to the documentation in line with
+	  referee requests (included moving some of the material on
+	  truncated moments).
+
+	* README: 
+	  updated this with warnings about gfortran and other
+	  typo-fixing. 
+
 	* example_f90/tabulation_example_2.f90: 
 	  added the routine tabulation_print_sum_rules(..) to show
 	  how to obtain sum rules from a tabulation

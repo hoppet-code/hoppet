@@ -1,0 +1,53 @@
+We thank both referees for their helpful comments and detailed reading
+of the manuscript.
+
+Specifically with respect to the points raised by referee 1:
+
+1) gfortran issues
+------------------
+
+We have extended the comments on the web page and the README to warn
+about the possibility of gfortran giving incorrect answers as well as
+crashing. 
+
+2) Mass threshold and schemes
+-----------------------------
+
+Yes, of course eq.(6) only holds in the MSbar scheme. We've made this
+clear in the text. We've also made it clear that we have not
+incorporate mass thresholds in the DIS scheme at NLO, both 
+on p.8 (now -> 9) and  p.26 (->28).
+
+We've also removed the "nearly always" (residual heavy flavour when
+crossing a threshold downwards) at the end of section 6.2.1.
+
+3) Typos
+--------
+We've fixed the typos indicated by the referee, together with some
+other ones that we have since found.
+
+[Juan: can't find p.22 line 19 -- do you have a version of the article
+with CPC's numbering?]
+
+
+4) Sum rules
+------------
+The absence of tools for determining PDF moments has been rectified
+with the addition of the TruncatedMoment(...) routine, now described
+in section 4.4. 
+
+An EvalPdfTable_Q(...) routine has also been added (described in
+section 7.2) which returns a PDF object (i.e. a two-dimension array
+with x and flavour dependence) for a given Q. Together with the
+TruncatedMoment(...)  routine this provides means of accessing the
+momentum and valence sums when using tabulations. An example of sum
+rule verification is given also in
+example_f90/tabulation_example_2.f90 .
+
+As concerns automatic verification of sum rules: given the finite
+range in x, one only has access to truncated moments and these do not
+satisfy exact sum rules -- to carry out checks on these would involve
+introducing parameters for tolerances, which would depend on the
+x-range and on Q. We feel that the complications ensuing from these
+parameters would outweigh the benefits of automatic checks on sum
+rules.
