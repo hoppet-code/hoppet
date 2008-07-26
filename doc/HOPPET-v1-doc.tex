@@ -1163,6 +1163,83 @@ slightly lower (whatever is lost due to the absence of intermediate
 locking).
 
 
+%------------------------------------------------------------
+\subsection{Truncated moments}
+\label{sec:sum-rules}
+
+There are various contexts in which it is useful to evaluate moments
+of PDFs, notably in checking sum rules. Since \hoppet doesn't store
+PDFs over the full range of $x$, one cannot calculate full moments,
+but only truncated moments.
+%
+%% As discussed in Sect.~\ref{sec:pqcd}, it is useful to check
+%% explicitely is the various sum rules are satisfied by a given
+%% PDF set. In \hoppet this can by achieved by the
+%% function {\tt TruncatedMoment}, which allows the
+%% computation of general truncated moments of grid quantities.
+%
+Truncated moments are calculated via the function
+\begin{lstlisting}
+  TruncatedMoment(grid, xparton, N [,ymax])
+\end{lstlisting}
+with the convention that the result $M_N$ is 
+\begin{equation}
+  \label{eq:truncMom}
+  %M_N\lc xq(x,Q^2)\rc \equiv \int_0^{y_{\rm max}} dy e^{-yN} xq\lp y,Q^2 \rp \ ,
+  M_N [\ttt{xparton}] \equiv \int_0^{y_{\rm max}} dy \,e^{-yN}\,
+  \ttt{xparton.aty.(}y\ttt{.with.grid)}\,.
+\end{equation}
+The moment index $N$ must be a double precision number, and if the argument
+\ttt{ymax} is not supplied, the integral extends to largest $y$ value
+present in the grid, \ttt{grid\%ymax}. The integral is evaluated using
+adaptive Gaussian integration with the same default precision that was
+set for the determination of grid convolution operators. 
+%
+The use of adaptive Gaussian integration implies that the evaluation
+of moments is not optimally efficient for repeated use of the same
+moment index with different PDFs.\footnote{Should a user have an
+  (unusual!) application in which the repeated evaluation of truncated
+  moments is the main time-consuming step, then they are advised to
+  contact the authors for further advice.}
+
+As as example, the calculation of the momentum contained in the gluon
+would proceed as follows:
+\begin{lstlisting}
+  real(dp), pointer :: xgluon(:)
+  real(dp)          :: N, gluon_momentum
+  ! [ ... other vars, allocation, intialisation ...]
+  N = 1.0_dp
+  gluon_momentum = TruncatedMoment(grid, N, xgluon)
+\end{lstlisting}
+Note that for $\ttt{ymax}= 12$ (a value used in many of the example
+programs), the truncation will underestimate the sum rules by a
+fraction of a percent.
+
+
+ =====================================================
+
+ \comment{rest to be integrated with what follows elsewhere}
+
+Note that the fact that the grid extends up to {\tt ymax} only
+forces us to compute truncated moments, but for a large enough 
+value of  {\tt ymax} these truncated moments should coincide
+with the full moments.
+
+
+sum rule
+from a PDF set:
+\begin{lstlisting}
+  call AllocGridQuant(grid,pdf_flav)
+  ! Construct the appropriate flavour combination 
+  ! assume PDF in human representation
+  pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
+  moment_index=1.0_dp ! See definition of truncated moments 
+  momentum_sum_rule = TruncatedMoment(grid,pdf_flav,moment_index)
+\end{lstlisting}
+An example of the computation of sum rules at an
+arbitrary value of Q2 can be found as an example
+program 
+in {\tt example\_f90/sumrules.f90}.
 
 
 
@@ -1282,7 +1359,7 @@ through \ttt{src/pdf\_general.f90}. Of these a sometimes handy one is
   call InitPDF_LHAPDF(grid, pdf, LHAsub, Q)
 \end{lstlisting}
 where \texttt{LHAsub} is the name of a subroutine 
-with the same interface as LHAPDF's \ttt{evolvePDF} \cite{LHAPDF}:
+with the same interface as LHAPDF's \ttt{evolvePDF}~\cite{LHAPDF}:
 \begin{lstlisting}
   subroutine LHAsub(x,Q,res)
     use types; implicit none
@@ -1373,40 +1450,6 @@ which returns the number of active flavours if the PDF is in the
 the PDF is in the
 \ttt{human} representation.
 
-%------------------------------------------------------------
-\subsection{Sum rules}
-\label{sec:sum-rules}
-As discussed in Sect.~\ref{sec:pqcd}, it is useful to check
-explicitely is the various sum rules are satisfied by a given
-PDF set. In \hoppet this can by achieved by the
-function {\tt GetTruncMoment}, which allows the
-computation of general truncated moments of grid quantities.
-
-The convention for the definition of truncated moments
-as implemented in {\tt GetTruncMoment}
-in \hoppet is given by
-\be
-M_N\lc xq(x,Q^2)\rc \equiv \int_0^{y_{\rm max}} dy e^{-yN} xq\lp y,Q^2 \rp \ ,
-\ee
-Note that the fact that the grid extends up to {\tt ymax} only
-forces us to compute truncated moments, but for a large enough 
-value of  {\tt ymax} these truncated moments should coincide
-with the full moments.
-
-As as example, we show how to compute the momentum sum rule
-from a PDF set:
-\begin{lstlisting}
-  call AllocGridQuant(grid,pdf_flav)
-  ! Construct the appropriate flavour combination 
-  ! assume PDF in human representation
-  pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
-  moment_index=1_dp ! See definition of truncated moments 
-  momentum_sum_rule = GetTruncMoment(grid,pdf_flav,moment_index)
-\end{lstlisting}
-An example of the computation of sum rules at an
-arbitrary value of Q2 can be found as an example
-program 
-in {\tt example\_f90/sumrules.f90}.
 
 %----------------------------------------------------------------------
 \subsection{Splitting function matrices}
