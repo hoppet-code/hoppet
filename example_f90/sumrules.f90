@@ -3,6 +3,8 @@
 !! An example program which shows how to compute
 !! sum rules (and general moments) for a given set of PDFS
 !!
+!! Another example is present in tabulation_example_2 
+!! (commented by default)
 !! -----------------------------------------------------
 
 program sumrules
@@ -193,8 +195,8 @@ contains
        pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
     endif
 
-    moment_index=1_dp ! See definition of truncated moments above
-    sum_rule = GetTruncMoment(gd,pdf_flav,moment_index)
+    moment_index = 1.0_dp ! See definition of truncated moments above
+    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
   
     write(6,*) "Momentum sum rule = ",sum_rule, ", expected 1"
 
@@ -214,8 +216,8 @@ contains
        pdf_flav(:)=pdf_sr(:,-1)
     endif
     
-    moment_index=0_dp
-    sum_rule = GetTruncMoment(gd,pdf_flav,moment_index)
+    moment_index = 0.0_dp
+    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
     
     write(6,*) "uv + dv sum rule = ",sum_rule, ", expected 3"
 
@@ -229,8 +231,8 @@ contains
        pdf_flav(:)=pdf_sr(:,-2) 
     endif
     
-    moment_index=0_dp
-    sum_rule = GetTruncMoment(gd,pdf_flav,moment_index)
+    moment_index = 0.0_dp
+    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
     
     write(6,*) "uv - dv sum rule = ",sum_rule, ", expected 1"
     write(6,*) " "

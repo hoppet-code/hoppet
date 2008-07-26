@@ -7,6 +7,9 @@
 !! should be identical to the contents of the file
 !! tabulation_example.default_output
 !!
+!! It also outputs (truncated) sum rules, in order to illustrate
+!! how to obtain them from a tabulation
+!!
 !! NB: for the full functionality used in generating the HeraLHC and
 !!     Les Houches comparison tables, see ../benchmarks/benchmarks.f90
 !!     and carefully read the comments at the beginning. Subtleties
@@ -17,6 +20,7 @@
 !!     you will also need to link with LHAPDF
 !!
 
+!----------------------------------------------------------------------
 !! This module holds the bits and pieces needed to store the grid,
 !! the dglap_holder, the coupling and a table
 !! 
@@ -86,7 +90,7 @@ end module initial_condition
 !----------------------------------------------------------------------
 !! the main program that does the work once the evolution and table 
 !! have been initialised
-Program main
+program main
   use table_module
   implicit none
   !! hold results at some x, Q
@@ -125,11 +129,15 @@ Program main
     end do
   end do
 
+  !! The following routine shows how to print out the sum rules for
+  !! the table at the given scale
+  call tabulation_print_sum_rules(Q)
+
   !! deallocate things where relevant (right at end of program,
   !! not strictly needed)
   call tabulation_example_cleanup
 
-End program main
+end program main
 
 
 !----------------------------------------------------------------------
@@ -238,6 +246,39 @@ subroutine tabulation_example_evolve_table
   call Delete(pdf0)
 end subroutine tabulation_example_evolve_table
 
+
+!----------------------------------------------------------------------
+!! print out the truncated sum rules
+subroutine tabulation_print_sum_rules(Q)
+  use table_module
+  implicit none
+  real(dp), intent(in) :: Q
+  !-------------------------
+  !! hold the pdf at scale Q
+  real(dp), pointer :: pdf(:,:)
+
+  ! allocate place to store the pdf at scale Q
+  call AllocPDF(grid, pdf)
+  ! evaluate the pdf at scale Q
+  call EvalPDFTable_Q(table, Q, pdf)
+  
+  ! now output the results
+  write(6,*)
+  write(6,'(a,f8.3,a,es11.4)') "Evaluating sum rules at scale Q = ",Q, &
+       &         " GeV, truncated at x = ", exp(-grid%ymax)
+  write(6,'(a)') &
+     &"[NB: O(0.5%) differences from expectations are due to truncation]"
+  write(6,'(a,f7.4)') '  momentum sum: ', &
+       &   TruncatedMoment(grid, sum(pdf(:,-6:6),dim=2), one )
+  write(6,'(a,f7.4)') '  down valence: ', &
+       &   TruncatedMoment(grid, pdf(:,1)-pdf(:,-1),     zero)
+  write(6,'(a,f7.4)') '  up   valence: ', &
+       &   TruncatedMoment(grid, pdf(:,2)-pdf(:,-2),     zero)
+
+  ! cleaning up
+  call Delete(pdf)
+  
+end subroutine tabulation_print_sum_rules
 
 !----------------------------------------------------------------------
 !! deallocate things 

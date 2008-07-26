@@ -105,7 +105,7 @@ module pdf_tabulate
   public :: AddNfInfoToPdfTable
   public :: EvolvePdfTable, PreEvolvePdfTable
   public :: EvolvePdfTableGen
-  public :: EvalPdfTable_yQ, EvalPdfTable_xQ
+  public :: EvalPdfTable_yQ, EvalPdfTable_xQ, EvalPdfTable_Q
   public :: Delete
 
 contains
@@ -611,11 +611,11 @@ contains
     real(dp),     intent(in) :: y, Q
     real(dp),    intent(out) :: val(iflv_min:)
     !----------------------------------------
-    real(dp) :: lnlnQ, lnlnQ_norm
+    !real(dp) :: lnlnQ, lnlnQ_norm
     real(dp) :: lnlnQ_wgts(0:tab%lnlnQ_order)
     real(dp), pointer :: y_wgts(:)
     real(dp), allocatable :: wgts(:,:)
-    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, if
+    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv
     integer, save :: warn_id = warn_id_INIT
 
     if (ubound(val,dim=1) < iflv_max) call wae_error('pdftab_ValTab',&
@@ -623,26 +623,33 @@ contains
 
     !-- y weights taken care of elsewhere....
     call WgtGridQuant(tab%grid, y, iylo, y_wgts)
-    !-- Q weights need some help in finding location etc.
-    lnlnQ = lnln(tab,Q)
 
-    if (tab%freeze_at_Qmin .and. lnlnQ < tab%lnlnQ_min) then
-       lnlnQ = tab%lnlnQ_min
-    else if (lnlnQ < (one-warn_tolerance)*tab%lnlnQ_min &
-         &.or. lnlnQ > (one+warn_tolerance)*tab%lnlnQ_max) then
-       call wae_warn(default_max_warn, warn_id, &
-            &'pdftab_ValTab: Q out of range; result set to zero; Q was:',&
-            &dbleval=Q)
-       val = zero
-       return
+    !-- Q weights need some help in finding location etc.
+    !! lnlnQ = lnln(tab,Q)
+    !! 
+    !! if (tab%freeze_at_Qmin .and. lnlnQ < tab%lnlnQ_min) then
+    !!    lnlnQ = tab%lnlnQ_min
+    !! else if (lnlnQ < (one-warn_tolerance)*tab%lnlnQ_min &
+    !!      &.or. lnlnQ > (one+warn_tolerance)*tab%lnlnQ_max) then
+    !!    call wae_warn(default_max_warn, warn_id, &
+    !!         &'EvalPdfTable_yQ: Q out of range; result set to zero; Q was:',&
+    !!         &dbleval=Q)
+    !!    val = zero
+    !!    return
+    !! end if
+    !! 
+    !! call request_iQrange(tab,lnlnQ,tab%lnlnQ_order,ilnlnQ_lo,ilnlnQ_hi,lnlnQ_norm)
+    !! nQ = ilnlnQ_hi - ilnlnQ_lo
+    !! call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
+
+    !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
+    !   signal for Q being out of range
+    call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
+    if (ilnlnQ_lo > ilnlnQ_lo) then
+      val = zero
+      return
     end if
-    
-    call request_iQrange(tab,lnlnQ,tab%lnlnQ_order,ilnlnQ_lo,ilnlnQ_hi,lnlnQ_norm)
     nQ = ilnlnQ_hi - ilnlnQ_lo
-    !OLD lnlnQ_norm = (lnlnQ-tab%lnlnQ_min)/tab%dlnlnQ
-    !OLD ilnlnQ_lo = floor(lnlnQ_norm) - tab%lnlnQ_order/2
-    !OLD ilnlnQ_lo = max(0, min(tab%nQ-tab%lnlnQ_order,ilnlnQ_lo))
-    call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
 
     allocate(wgts(lbound(y_wgts,dim=1):ubound(y_wgts,dim=1),0:nQ))
     do iQ = 0, nQ
@@ -651,9 +658,9 @@ contains
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts?
-    do if = iflv_min, iflv_max
-       val(if) = sum(wgts*tab%tab(iylo:iylo+size(y_wgts)-1,&
-            & if,ilnlnQ_lo:ilnlnQ_hi))
+    do iflv = iflv_min, iflv_max
+       val(iflv) = sum(wgts*tab%tab(iylo:iylo+size(y_wgts)-1,&
+            & iflv,ilnlnQ_lo:ilnlnQ_hi))
     end do
     !write(0,*) ilnlnQ_lo, ilnlnQ_hi, real(lnlnQ_wgts), val(1)
     
@@ -685,20 +692,26 @@ contains
 
     ! safety checks
     if (tab%grid%ny /= ubound(pdf,dim=1) .or.&
-         & ubound(pdf,dim=1) /= ncompmax) call wae_error("EvalPdfTable_Q",&
-         & "pdf was not of size consistent with the table")
+         & ubound(pdf,dim=2) /= ncompmax) call wae_error("EvalPdfTable_Q",&
+         & "pdf argument was not of size consistent with the table")
 
-    stop
-    !call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
+    !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
+    !   signal for Q being out of range
+    call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
+    if (ilnlnQ_lo > ilnlnQ_lo) then
+      pdf = zero
+      return
+    end if
 
     ! by setting the pdf to zero we will then get whatever representation
-    ! is implicity in the table
+    ! is implicity in the table once we do the additions
     pdf(:,:) = zero
     do iQ = ilnlnQ_lo, ilnlnQ_hi
        pdf(:,:) = pdf(:,:) + lnlnQ_wgts(iQ-ilnlnQ_lo) * tab%tab(:, : ,iQ)
     end do
     
   end subroutine EvalPdfTable_Q
+
 
   
   !-----------------------------------------------------------
@@ -730,6 +743,48 @@ contains
     end do
   end subroutine pdftab_DelTab_1d
   
+
+  !--------------------------------------------------------------
+  !! Service routine used in evaluating the PDF table so as to obtain,
+  !! given Q, the relevant range of ilnlnQ values and weights for
+  !! interpolating the table
+  !!
+  subroutine get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
+    type(pdf_table), intent(in) :: tab
+    real(dp), intent(in)    :: Q
+    real(dp), intent(out)   :: lnlnQ_wgts(0:)
+    integer,  intent(out)   :: ilnlnQ_lo, ilnlnQ_hi
+    !------------------------------------------------
+    real(dp) :: lnlnQ, lnlnQ_norm
+    integer  :: nQ
+    integer, save :: warn_id = warn_id_INIT
+
+    !-- Q weights need some help in finding location etc.
+    lnlnQ = lnln(tab,Q)
+
+    if (tab%freeze_at_Qmin .and. lnlnQ < tab%lnlnQ_min) then
+       lnlnQ = tab%lnlnQ_min
+    else if (lnlnQ < (one-warn_tolerance)*tab%lnlnQ_min &
+         &.or. lnlnQ > (one+warn_tolerance)*tab%lnlnQ_max) then
+      call wae_warn(default_max_warn, warn_id, &
+           &'get_lnlnQ_wgts: Q out of range; result will be set to zero; Q was:',&
+           &dbleval=Q)
+      ilnlnQ_lo  = 0
+      ilnlnQ_hi  = 0
+      lnlnQ_wgts = zero ! set this to avoid warning
+      return
+    end if
+    
+    call request_iQrange(tab,lnlnQ, tab%lnlnQ_order,&
+         &               ilnlnQ_lo, ilnlnQ_hi, lnlnQ_norm)
+
+    nQ = ilnlnQ_hi - ilnlnQ_lo
+    if (nQ < ubound(lnlnQ_wgts,1)) call wae_error('get_lnlnQ_wgts',&
+         & 'lnlnQ_wgts to small for requested Q interpolation')
+    call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
+
+  end subroutine get_lnlnQ_wgts
+
 
   !------------------------------------------------------------------
   !! Given a tab and lnlnQ value, determine the range of iQ entries,

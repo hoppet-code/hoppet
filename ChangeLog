@@ -1,3 +1,21 @@
+2008-07-26  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* example_f90/tabulation_example_2.f90: 
+	  added the routine tabulation_print_sum_rules(..) to show
+	  how to obtain sum rules from a tabulation
+	
+	* src/pdf_tabulate.f90: 
+	  switched evaluation of Q weights out into get_lnlnQ_wgts(...),
+	  and arranged for EvalPdfTable_yQ and EvalPdfTable_Q to make use
+	  of this.
+
+	* src/convolution.f90: 
+	* example_f90/sumrules.f90: 
+	  renamed GetTruncMoment -> TruncatedMoment
+	
+	* src/welcome_message.f90: 
+	  updated version number to 1.1.1-devel
+
 2008-07-16  Gavin SALAM  <salam@lpthe.jussieu.fr> & Juan
 
 	* src/pdf_tabulate.f90 (EvalPdfTable_Q): 

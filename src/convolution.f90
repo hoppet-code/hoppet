@@ -126,10 +126,10 @@ module convolution
   real(dp)       :: conv_moment_index
   type(grid_def) :: conv_moment_gd
   real(dp), allocatable :: conv_moment_gq(:)
-  interface GetTruncMoment
-    module procedure conv_GetTruncMoment_1d
+  interface TruncatedMoment
+    module procedure conv_TruncatedMoment_1d
   end interface
-  public :: GetTruncMoment
+  public :: TruncatedMoment
 
   !-- convolution routines -------------------------------------------
   interface AllocGridConv
@@ -1377,8 +1377,9 @@ contains
   !!
   !!   M(moment_index) = \int_xmin^1 dx x^( moment_index - 1) * xpdf(x)
   !! 
+  !! where xpdf(y) is gq .aty. (y .with. gd)
   !-------------------------------------------------------------
-  function conv_GetTruncMoment_1d(gd, gq, moment_index, y) result(res)
+  function conv_TruncatedMoment_1d(gd, gq, moment_index, y) result(res)
     use integrator
     type(grid_def), intent(in) :: gd
     real(dp),       intent(in) :: gq(0:), moment_index
@@ -1389,7 +1390,7 @@ contains
     
     res = zero
     
-    ! global variables to pass to auxiliary conv_GetTruncMoment_helper
+    ! global variables to pass to auxiliary conv_TruncatedMoment_helper
     ! inefficient to make copies, but works around impossibility
     ! of having pointers to intent(in) objects???
     conv_moment_index = moment_index
@@ -1402,7 +1403,7 @@ contains
     ny = assert_eq(gd%ny,ubound(gq,dim=1),"EvalGridQuant")
     if( gd%ny .ne. ubound(gq,dim=1) ) &
          & call wae_error("Different dimensions for ",&
-         & "grid quantity and grid in conv_GetTruncMoment_1d")
+         & "grid quantity and grid in conv_TruncatedMoment_1d")
 
   
     ! Get ymax, upper integration limit
@@ -1422,28 +1423,28 @@ contains
     ! Check ymax > two, the indermediate limit
     yl=zero
     yh=ymax
-    res = ig_LinWeight(conv_GetTruncMoment_helper,&
+    res = ig_LinWeight(conv_TruncatedMoment_helper,&
          & yl,min(two,ymax),one,one,eps)
-    res = res +  ig_LinWeight(conv_GetTruncMoment_helper,&
+    res = res +  ig_LinWeight(conv_TruncatedMoment_helper,&
          & min(two,ymax),ymax, one,one,eps)
 
     ! Dealocate auxiliary grid quantity
     deallocate( conv_moment_gq )
 
-  end function conv_GetTruncMoment_1d
+  end function conv_TruncatedMoment_1d
 
   
   !------------------------------------------------
-  ! Auxiliary function for GetTruncatedMoment
+  ! Auxiliary function for conv_TruncatedMoment_1d
   !------------------------------------------------
-  function conv_GetTruncMoment_helper(y) result(res)
+  function conv_TruncatedMoment_helper(y) result(res)
     real(dp), intent(in) :: y 
     real(dp) :: res
 
     res = exp( -y * conv_moment_index ) &
          & * EvalGridQuant(conv_moment_gd,conv_moment_gq,y) 
    
-  end function conv_GetTruncMoment_helper
+  end function conv_TruncatedMoment_helper
   
 
   !======================================================================
