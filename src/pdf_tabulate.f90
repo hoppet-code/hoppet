@@ -611,7 +611,6 @@ contains
     real(dp),     intent(in) :: y, Q
     real(dp),    intent(out) :: val(iflv_min:)
     !----------------------------------------
-    !real(dp) :: lnlnQ, lnlnQ_norm
     real(dp) :: lnlnQ_wgts(0:tab%lnlnQ_order)
     real(dp), pointer :: y_wgts(:)
     real(dp), allocatable :: wgts(:,:)
@@ -623,24 +622,6 @@ contains
 
     !-- y weights taken care of elsewhere....
     call WgtGridQuant(tab%grid, y, iylo, y_wgts)
-
-    !-- Q weights need some help in finding location etc.
-    !! lnlnQ = lnln(tab,Q)
-    !! 
-    !! if (tab%freeze_at_Qmin .and. lnlnQ < tab%lnlnQ_min) then
-    !!    lnlnQ = tab%lnlnQ_min
-    !! else if (lnlnQ < (one-warn_tolerance)*tab%lnlnQ_min &
-    !!      &.or. lnlnQ > (one+warn_tolerance)*tab%lnlnQ_max) then
-    !!    call wae_warn(default_max_warn, warn_id, &
-    !!         &'EvalPdfTable_yQ: Q out of range; result set to zero; Q was:',&
-    !!         &dbleval=Q)
-    !!    val = zero
-    !!    return
-    !! end if
-    !! 
-    !! call request_iQrange(tab,lnlnQ,tab%lnlnQ_order,ilnlnQ_lo,ilnlnQ_hi,lnlnQ_norm)
-    !! nQ = ilnlnQ_hi - ilnlnQ_lo
-    !! call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
 
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
     !   signal for Q being out of range
