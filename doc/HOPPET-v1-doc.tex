@@ -142,7 +142,7 @@
 \noindent {\Large \textbf{Program Summary}}\\
 
 \noindent {\em Title of program\/}: \hoppet \\[2mm]
-{\em Version\/}: 1.1 \\[2mm]
+{\em Version\/}: 1.1.1 \\[2mm]
 {\em Catalogue identifier\/}: \\[2mm]
 {\em Program obtainable from\/}:
 \url{http://projects.hepforge.org/hoppet/}
@@ -158,7 +158,7 @@
 {\em Other programs called\/}: none \\[2mm]
 {\em External files needed\/}: none \\[2mm]
 {\em Number of bytes in distributed program, including test data
-  etc.\/}: $\sim 270$~kB\\[2mm]
+  etc.\/}: $\sim 330$~kB\\[2mm]
 {\em Keywords\/}: unpolarised and longitudinally polarised parton
 space-like distribution functions (PDFs), DGLAP evolution equations,
 $x$-space solutions.
@@ -342,7 +342,7 @@ This manual is structured as follows: Sect.~\ref{sec:pqcd}
 briefly summarises the perturbative QCD ingredients contained in
 \hoppet, while Sect.~\ref{tricks} describes the numerical techniques
 used to solve the DGLAP equation. 
-Sects.~\ref{sec:singleflav}-\ref{sec:tabulated-pdfs} present in detail the capabilities
+Sects.~\ref{sec:singleflav}--\ref{sec:tabulated-pdfs} present in detail the capabilities
 of the \hoppet package with its general F95 interface, 
 with emphasis on those aspects that
 can be adapted by a user to tailor it to their own needs. 
@@ -1433,7 +1433,7 @@ flavour representation, as can be seen in Table \ref{eq:diag_split}.
  When carrying out a convolution, the only non-diagonal part is the
 block containing indices $0,1$. This representation is referred to as
 the \ttt{evln} representation. Whereas the \ttt{human} representation
-is $n_f$-independent the \ttt{evln} depends on $n_f$ through the
+is $n_f$-independent, the \ttt{evln} depends on $n_f$ through the
 $\Sigma$ and $q_{\mathrm{NS}}^{V}$ entries and the fact that flavours
 beyond $n_f$ are left in the human representation (since they are
 inactive for evolution with $n_f$ flavours).
@@ -1554,8 +1554,9 @@ negligible. In practice, especially when aiming for high speed at low
 $N_x$, the change of representation can imply a significant cost. In
 such cases, if multiple convolutions are to be carried out, it may be
 advantageous to manually change into the appropriate \ttt{evln}
-representation, carry out all the convolutions and then change back to
-the \ttt{human} manually representation at the end, see
+representation, carry out all the convolutions and then change back
+manually to
+the \ttt{human}  representation at the end, see
 Sect.~\ref{sec:pdf-objects}.
 %
 

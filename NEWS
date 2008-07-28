@@ -1,10 +1,18 @@
+NEWS for HOPPET
+
 ======================================================================
-                Release notes for HOPPET (v1)
+Release 1.1.1  July 2008
 ======================================================================
 
-----------------------------------------------------------------------
-Release 1.1 (in preparation)
------------
+. added TruncatedMoment routine (e.g. for verifying sum-rules)
+
+. added ability to extract a whole pdf(x,flav) at a given Q from a
+  tabulation, with the EvalPdfTable_Q routine
+
+
+======================================================================
+Release 1.1.0  April 2008
+======================================================================
 
 . Name changed to hoppet
 . Many internal name changes to provide more consistent user-interface

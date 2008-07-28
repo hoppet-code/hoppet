@@ -1,3 +1,13 @@
+2008-07-28  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* CHECKLIST: *** ADDED ***
+	  reminder of things to do before a new release
+
+	* doc/HOPPET-v1-doc.tex: 
+	  small typos and update of release info
+
+	* ReleaseNotes -> NEWS
+
 2008-07-26  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* doc/HOPPET-v1-doc.tex: 
