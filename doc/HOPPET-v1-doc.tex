@@ -1695,10 +1695,8 @@ for which they were initially calculated.
 With the above subroutines for initialising DGLAP splitting functions,
 the normalisation is as given in eq.~(\ref{eq:dpdf}).
 
-In practice, because convolutions take a time $\order{N^2}$, where
-$N$ is the number of points in the grid, whereas
-additions and multiplications take a time $\order{N}$, in a program it
-is more efficient to first sum the splitting matrices and then carry out the
+When carrying out DGLAP evolution it is most
+efficient to first sum the splitting matrices and then carry out the
 convolution,
 \begin{lstlisting}
   type(split_mat)   :: P_sum
@@ -1709,6 +1707,10 @@ convolution,
   dq = (as2pi * dt) * (P_sum .conv. q)      ! Step dt in evolution
   call Delete(P_sum)                        ! Memory freed
 \end{lstlisting}
+This is because convolutions take a time $\order{N^2}$, where $N$ is the
+number of points in the grid, whereas additions and multiplications
+take a time $\order{N}$.
+%
 Note the use of brackets in the line setting \ttt{dq}: all scalar
 factors are first multiplied together ($\order{1}$) so that we only
 have one multiplication of a PDF ($\order{N_x}$). Note also that we have
@@ -1854,11 +1856,11 @@ The constants \ttt{factscheme\_*} are defined in \ttt{module
 The corrections to the splitting functions to get the DIS scheme are
 implemented by carrying out appropriate convolutions of the $\MSbar$
 splitting and coefficient functions. Currently the DIS scheme is only
-implemented to NLO\footnote{Its NNLO implementation would actually be fairly
+implemented to NLO.\footnote{Its NNLO implementation would actually be fairly
 straightforward given the parametrisation provided in
 \cite{White:2005wm}, and may be performed in
-future releases of \hoppet.}.
- The polarised splitting functions are only currently known to NLO.
+future releases of \hoppet.} %
+The polarised splitting functions are only currently known to NLO.
 
 Initialisation can also be carried out with a single call for a range of
 different numbers of flavours:
@@ -1868,8 +1870,8 @@ different numbers of flavours:
   nflo = 3; nfhi = 6    ! [calls to qcd_SetNf handled automatically]
   call InitDglapHolder(grid, dglap_h, factscheme, nloop, nflo, nfhi)
 \end{lstlisting}
-Mass thresholds are not currently correctly supported even at NLO in the DIS
-scheme.
+Mass thresholds are not currently correctly supported in the DIS
+scheme, even at NLO.
 
 For all the above calls, at NNLO the choice of exact of parametrised
 splitting functions and mass thresholds is determined by the calls to
@@ -2225,7 +2227,7 @@ them:
   call AddNfInfoToPdfTable(table,coupling)
 \end{lstlisting}
 When interpolating the table (see below), the set of $Q$ values for
-the interpolation will be chosen to as to always have a common $n_f$
+the interpolation will be chosen so as to always have a common $n_f$
 value. Note that \ttt{AddNfInfoToPdfTable} may only be called once for
 an allocated table: if you need to change the information about $n_f$
 thresholds, \ttt{Delete} the table, reallocate it and then reset the
@@ -2281,9 +2283,9 @@ Sect.~\ref{sec:precomputed-evolution}, by calling the routine
   call PreEvolvePdfTable(table, Q0, dglap_h, coupling, &
                          & [, muR_Q] [, nloop] [, untie_nf] )
 \end{lstlisting}
-prepares \ttt{evln\_operator}s for all successive $Q$ intervals in the
-table. An accelerated evolution that uses these operators instead of
-explicit Runge-Kutta steps may then be obtained by calling
+which prepares \ttt{evln\_operator}s for all successive $Q$ intervals in the
+table. An accelerated evolution, which uses these operators instead of
+explicit Runge-Kutta steps, may then be obtained by calling
 \begin{lstlisting}
   call EvolvePdfTable(table, initial_pdf)
 \end{lstlisting}
@@ -2489,7 +2491,7 @@ while the PDF at a given value of $\ttt{x}$ and $\ttt{Q}$ is obtained with
 \begin{lstlisting}
   call hoppetEval(x,Q,f)
 \end{lstlisting}
-which sets \ttt{f(-6:6)} (recall that it is $xg(x)$, etc., that are
+which sets \ttt{f(-6:6)} (recall that it is $xg(x)$, etc., that is
 returned, since this is what is
 used through \hoppet).
 
@@ -2570,7 +2572,7 @@ implementation of the physics (especially the higher-order parts) may
 only manifest themselves as small changes in the results.
 
 In contrast, for use in most physical applications, an accuracy in the
-range $10^{-3}$ to $10^{-4}$ is generally y more than adequate, since it
+range $10^{-3}$ to $10^{-4}$ is generally more than adequate, since it
 is rare for other sources of numerical uncertainty (\eg Monte Carlo
 integration errors in NLO codes, or experimental errors) to be
 comparably small. The critical issue in such cases is more likely to
@@ -2625,7 +2627,7 @@ accuracy for each flavour at $5000$ points in the $x, Q$ plane, as
 shown in Fig.~\ref{fig:grid}. The points are uniformly spaced in
 $\zeta = \ln 1/x + 9(1-x)$ so as to obtain fine coverage at small and
 large $x$. The $Q$ values are chosen more closely spaced at low $Q$
-where the evolution is fastest and they are taken slightly correlated
+where the $Q$-dependence is strongest and they are taken slightly correlated
 with $\zeta$ so as to cover a nearly continuous range of
 $Q$.\footnote{This procedure differs from that in \cite{Benchmarks}
   where fewer (500) points were used and one compared not individual
@@ -2665,7 +2667,7 @@ some flavours change sign as one varies $x$ or $Q$. Close to the zero
 the relative accuracy diverges because of the small value of the
 denominator. Therefore in global accuracy estimates, we eliminate
 flavours in the region where they change sign (within $\Delta
-\zeta=0.4$ and at the neighbouring $Q$ value). Specifically, for our
+\zeta=0.4$ and at the neighbouring $Q$ values). Specifically, for our
 initial conditions, this corresponds to $c,\bar c$ for the two lowest
 $Q$ values below $x\sim 10^{-2}$ and $\bar u$ for $x\gtrsim
 0.9$.\footnote{The change in sign of the charm distribution is not
