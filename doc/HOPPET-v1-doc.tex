@@ -514,20 +514,6 @@ and valence sum rules
 as long as they hold at the initial scale (occasionally not the case,
 \eg in modified LO sets for Monte Carlo
 generators~\cite{Sherstnev:2008dm}).
-%% 
-%% If satisfied at an initial scale  then they
-%% are preserved by perturbative evolution and when crossing mass
-%% thresholds.
-%% %
-%% We note that is the above conditions are satisfied at the input
-%% evolution scale $Q_0^2$, then these conditions are respected
-%% by perturbative evolution for any $Q^2 \ge Q_0^2$. Note that
-%% purportedly some PDF sets do not impose some sum rules, like
-%% the modified LO sets for Monte Carlo generators where the
-%% momentum sum rule is absent \cite{Sherstnev:2008dm}. We describe how to compute
-%% arbitrary sum rules (or more generally truncated moments)
-%% of PDFs in Sect.~\ref{sec:sum-rules}.
-
 
 The default basis for the PDFs, called the \ttt{human} 
 representation in \hoppet, is such that 
@@ -1231,33 +1217,6 @@ For a further example, see also section~\ref{sec:acc_table}.
 Note that for $\ttt{ymax}= 12$ (a value used in many of the example
 programs), the truncation can underestimate the sum rules by a
 fraction of a percent.
-
-
-%%  =====================================================
-%% 
-%%  \comment{rest to be integrated with what follows elsewhere}
-%% 
-%% Note that the fact that the grid extends up to {\tt ymax} only
-%% forces us to compute truncated moments, but for a large enough 
-%% value of  {\tt ymax} these truncated moments should coincide
-%% with the full moments.
-%% 
-%% 
-%% sum rule
-%% from a PDF set:
-%% \begin{lstlisting}
-%%   call AllocGridQuant(grid,pdf_flav)
-%%   ! Construct the appropriate flavour combination 
-%%   ! assume PDF in human representation
-%%   pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
-%%   moment_index=1.0_dp ! See definition of truncated moments 
-%%   momentum_sum_rule = TruncatedMoment(grid,pdf_flav,moment_index)
-%% \end{lstlisting}
-%% An example of the computation of sum rules at an
-%% arbitrary value of Q2 can be found as an example
-%% program 
-%% in {\tt example\_f90/sumrules.f90}.
-
 
 
 
@@ -2914,42 +2873,6 @@ of a tabulated evolution. Default values shown in square
 %      v. Param}}
   \label{tab:acc-param}
 \end{table}
-
-%% Notes:
-%% \begin{itemize}
-%% \item Protection scheme regarding sign change: if a sign change occurs
-%%   within $0.4$ of the point's $y$ value (decreasing gradually to
-%%   $0.04$ at large $x$) or in neighbouring $Q$ values, then the point
-%%   is discarded (for that flavour).
-%% \end{itemize}
-%% 
-%% Comparisons to $N$-space codes (especially Vogt):
-%% 
-%% \begin{itemize}
-%% \item $N$-space is good for a moderate (few hundred) number of $x$-$Q$
-%%   points (for lots of points, better to convert it to tabulation)
-%% %
-%% \item For $\sim 500$ points, $N$-space is faster for the same
-%%   accuracy, and its running times probably scale much more tamely when
-%%   you try to go to extremely high accuracies.
-%% %
-%% \item Nevertheless, for reference purposes the $x$-space code can also
-%%   go to high accuracies ($10^{-7}$) if you're willing to accept slow
-%%   runs.
-%% %
-%% \item At accuracies that are acceptable for phenomenology ($10^{-3} -
-%%   10^{-4}$) the $x$-space code runs nearly as fast as Vogt's $N$-space
-%%   code in its lower accuracy option (which is still better accuracy
-%%   than the $x$-space code). But overheads are different --- evolution
-%%   is a one-off operation, accessing points is then done using
-%%   interpolation.
-%% %
-%% \item $N$-space isn't an option if you don't have a simple analytic
-%%   form for your initial parton distributions.
-%% %
-%% \item currently no other code has the option of the exact NNLO
-%%   splitting functions.
-%% \end{itemize}
 
 
 %======================================================================
