@@ -2422,7 +2422,7 @@ streamlined interface is by calling
 \end{lstlisting}
 which will set up a compound (four different spacings) grid with
 spacing \ttt{dy} at small $x$, extending to $y = 12$, and numerical
-order $\ttt=-5$.  The $Q$ range for the tabulation will be $1\GeV <
+order $\ttt=-6$.  The $Q$ range for the tabulation will be $1\GeV <
 Q<28 \TeV$ and a reasonable choice will be made for the \ttt{dlnlnQ}
 spacing (related to \ttt{dy}). It will initialise splitting functions
 up to \ttt{nloop} loops (though one can still carry out evolutions
@@ -2667,7 +2667,8 @@ some flavours change sign as one varies $x$ or $Q$. Close to the zero
 the relative accuracy diverges because of the small value of the
 denominator. Therefore in global accuracy estimates, we eliminate
 flavours in the region where they change sign (within $\Delta
-\zeta=0.4$ and at the neighbouring $Q$ values). Specifically, for our
+\zeta=0.4$ and at the two $Q$ values straddling a sign
+change). Specifically, for our 
 initial conditions, this corresponds to $c,\bar c$ for the two lowest
 $Q$ values below $x\sim 10^{-2}$ and $\bar u$ for $x\gtrsim
 0.9$.\footnote{The change in sign of the charm distribution is not
@@ -2835,13 +2836,12 @@ The various contributions to the run-time are shown in
 table~\ref{tab:timings} for $\dy=0.2$ and $\dlnlnQ=0.05$ (giving an
 accuracy $\sim 10^{-4}$), for various compilers.  In a typical
 analysis where run-times matter, such as a PDF fit, it is to be
-expected that the time will be dominated by $t_c$ (or $t_i$). However,
-in the typical case of global PDF fits, for which
-the number of $x,Q$ points is rather large ($\gtrsim 3000$), 
- it will be $n_{xQ} t_{xQ}$ that takes the most time\footnote{
+expected that the time will be dominated by $t_c$ (or $t_i$), or if
+the number of $x,Q$ points is rather large ($\gtrsim 3000$), by
+$n_{xQ} t_{xQ}$.\footnote{
 With these numbers, it is easy to check that a global fit with
 $n_{xQ}\sim 3000$ and $n_i\sim 10^5$ could be completed
-in less than half and hour.}. We note (with regret!) the
+in less than half and hour.} We note (with regret)\ the
 considerably speed advantage (almost an order
 of magnitude) that is to be had with commercial
 compilers.
@@ -3389,7 +3389,7 @@ Table  \ref{tab:general}.
 Sets up a compound grid with
 spacing in $\ln 1/x$ of \ttt{dy} at small $x$,\\ &
 \fn~  extending to $y = 12$ and numerical
-order $\ttt=-5$. \\ & \fn~  The $Q$ range for the tabulation will be $1\GeV <
+order $\ttt=-6$. \\ & \fn~  The $Q$ range for the tabulation will be $1\GeV <
 Q<28 \TeV$, \\
 & \fn~ \ttt{dlnlnQ=dy/4} and the factorisation scheme is ${\overline{\rm MS}}$\\
 \hline
