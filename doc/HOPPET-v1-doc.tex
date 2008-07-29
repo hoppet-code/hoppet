@@ -3045,7 +3045,7 @@ found (in a slightly more commented form) in
 are to be found in the \ttt{README} file in the main directory of the
 release. A program that has the same functionality but in F77, using
 the streamlined interface of Sect.~\ref{sec:vanilla}, is to be found as
-\ttt{example\_f77/tabulation\_example.f}.
+\ttt{example\_f77/tabulation\_example.f} (cf.\ Sect.~\ref{sec:stream-example}).
 
 
 \begin{lstlisting}
@@ -3187,6 +3187,7 @@ panel of table~15 of the second reference of \cite{Benchmarks} ($\mu_F
 = \mu_R$).
 
 \subsection{Streamlined interface}
+\label{sec:stream-example}
 
 The program below generates exactly the same output
 as the previous example program, but this time
@@ -3327,7 +3328,8 @@ can be found in a
 second example program, called \ttt{tabulation\_example\_2.f90},
 which is available at the \ttt{example\_f90} 
 directory. It generates exactly
-the same output as the previous example program, however it
+the same output as the previous example program (with additional
+output about truncated moments), however it
 provides an example of how to access a table from
 external procedures, as explained in Sect.~\ref{sec:acc_table}.
 
@@ -3723,7 +3725,7 @@ Sect.~\ref{sec:human-rep}
 
 \section{NNLO splitting functions}
 \label{sect:nnlo}
-A remark concerning NNLO splitting functions: the exact NNLO splitting
+The exact NNLO splitting
 functions derived by Moch, Vermaseren and Vogt
 \cite{NNLO-NS,NNLO-singlet} involve long (multi-page) expressions in
 terms of harmonic polylogarithms of up to weight 4. Very conveniently,
@@ -3769,8 +3771,8 @@ the way to full NNLO results, nowadays their interest is mainly
 historical.
 
 Note that only for the \ttt{nnlo\_splitting\_exact} can the colour
-constants be varied (with the caveat about $d^{abc}d_{abc}$ , as is
-described in Sect.~\ref{sec:qcd}). For the other options the
+constants be varied (with the caveat about $d^{abc}d_{abc}$, as
+discussed in Sect.~\ref{sec:qcd}). For the other options the
 NNLO splitting functions have been computed using the QCD values
 for the colour factors.
 
@@ -3830,7 +3832,7 @@ program test_program
   some_integer = 5   ! set the variable in test_module
   array1       = 0   ! set all elements of array1 to zero
   array2(-2:0) = 99  ! set elements 1..3 of array2 to equal to 3.
-  array2(1:2)  = 2*array2(-1:0)  ! elements -2..0 equal twice elements -1..0
+  array2(1:2)  = 2*array2(-1:0)  ! elements 1..2 equal twice elements -1..0
 
   print *, "Printing array 1"
   call print_array(array1)
@@ -3903,7 +3905,7 @@ In this case the subroutine has the freedom to allocate and deallocate
 the array. Note also that because a pointer to the full array
 information is being passed, the lower bound of \texttt{dummy\_pointer\_array}
 is now the same as in the calling routine. Though this sounds like a
-technicality, it is important because a corollary it that a subroutine
+technicality, it is important because a corollary is that a subroutine
 can allocate a dummy pointer array with bounds that are passed back to
 the calling subroutine (we need this for the flavour dimension of
 PDFs, whose lower bound is most naturally $-6$). 
@@ -3995,8 +3997,8 @@ where the second line is illegal because we have not defined any
 operator for adding an integer and a pair. Similarly care is needed
 when using the \hoppet's operator \texttt{.conv.}.
 
-\paragraph{Floating point precision:}
-A final point concerns floating point variable types. Throughout we
+\paragraph{Floating-point precision:}
+A final point concerns floating-point variable types. Throughout we
 have used definitions such as
 \begin{lstlisting}
   real(dp), pointer :: pdf(:,:)
@@ -4017,6 +4019,14 @@ special functions are written in Fortran~77 using \texttt{double
   precision} declarations and do their numerics based on the
 assumption that that truly is the type they're dealing with).
 
+A word of caution: \ttt{1\_dp} is \emph{not} a double-precision
+number, but rather an integer (\eg on many compilers \ttt{dp=8},
+indicating a number with 8 bytes of storage, so that \ttt{1.0\_dp} is
+an 8-byte floating-point number and \ttt{1\_dp} is an 8-byte integer).
+%
+Therefore trying to pass \ttt{1\_dp} as the value for a
+double-precision dummy argument in a subprogram call will lead to a
+compile-time error.
 
 \paragraph{Optional and keyword arguments}
 
