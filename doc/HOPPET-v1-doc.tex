@@ -398,8 +398,8 @@ equation for a non-singlet parton distribution reads
   P(z,\aq) q\lp \frac{x}{z},Q^2\rp \equiv 
 \frac{\aq}{2\pi}  P(x,\aq) \otimes q\lp x,Q^2\rp \ .
 \end{equation}
-Note that the related variable $t\equiv \ln Q^2$ is also used
-through \hoppet.
+The related variable $t\equiv \ln Q^2$ is also used
+in various places in \hoppet.
 The splitting functions in eq.~(\ref{eq:dglap-ns})
 are known up to NNLO in the 
 unpolarised case \cite{CFP,NNLO-NS,NNLO-singlet}:
@@ -600,7 +600,8 @@ and the subsequent DGLAP evolution in $Q^2$.
 The first aspect that we discuss is how to represent PDFs
 and associated convolutions in terms of an interpolating grid
 in $x-$space.
-Note that this technique can be applied to any quantity
+%Note that 
+This technique can be applied to any quantity
 that appears through convolutions, so it is not restricted
 to parton distributions. Then we will describe how
 to obtain the solution of the DGLAP evolution equations.
@@ -653,14 +654,14 @@ defined
  \,P(z,t)\, w_\beta(y_\alpha + \ln z)\  .
 \end{equation}
 
-Note that the piecewise  interpolating polynomials 
-that we use are not smooth at the
-grid points. The reason for this is that this type of interpolation
-strategy is much more suited for the numerical integration required
-in convolutions than other strategies which impose continuity
-on the interpolating polynomials, like for example splines, which
-are in general slower and less accurate for the same number
-of grid points.
+%% Note that the piecewise interpolating polynomials 
+%% that we use are not smooth at the
+%% grid points. The reason for this is that this type of interpolation
+%% strategy is much more suited for the numerical integration required
+%% in convolutions than other strategies which impose continuity
+%% on the interpolating polynomials, like for example splines, which
+%% are in general slower and less accurate for the same number
+%% of grid points.
 
 
 A virtue
@@ -702,6 +703,15 @@ entries), with $\mathcal{P}_{\alpha-\beta} = 0$ for $\alpha < \beta$.
     based.}
   \label{fig:interpolation-orders}
 \end{figure}
+
+
+The piecewise interpolating polynomials that we use are not smooth at
+the grid points. In practice this is a small effect. We could, in
+principle, have enforced smoothness, for example by using
+splines. However analytical studies indicate suggest that for a given
+polynomial interpolation order this would actually reduce the accuracy
+of the convolutions. It would also complicate somewhat the internal
+bookkeeping during convolutions.
 
 
 
