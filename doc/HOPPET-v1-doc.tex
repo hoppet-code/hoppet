@@ -120,7 +120,7 @@
 \begin{abstract}
   This document describes a Fortran~95 package for carrying out DGLAP
   evolution and other common manipulations of parton distribution
-  functions (PDFs). The PDFs are represented on a grid in $x$-space so
+  functions (PDFs). The PDFs are represented on a grid in $x$--space so
   as to avoid limitations on the functional form of input
   distributions.  Good speed and accuracy are obtained through the
   representation of splitting functions in terms of their convolution
@@ -161,7 +161,7 @@
   etc.\/}: $\sim 330$~kB\\[2mm]
 {\em Keywords\/}: unpolarised and longitudinally polarised parton
 space-like distribution functions (PDFs), DGLAP evolution equations,
-$x$-space solutions.
+$x$--space solutions.
 \\[2mm]
 {\em Nature of the physical problem\/}: Solution of the DGLAP
 evolution equations up to NNLO (NLO) for unpolarised (longitudinally
@@ -238,14 +238,14 @@ parton densities over the full range of $Q$ and for all flavours.
 The pivotal role played by the DGLAP equation has motivated a
 considerable body of literature discussing its numerical solution
 \cite{\AllDGLAP}. There exist two main classes of approaches: those that
-solve the equation directly in $x$-space and those that solve it for
+solve the equation directly in $x$--space and those that solve it for
 Mellin transforms of the
 parton densities, defined as
 \be
 q_{N}\lp N,Q^2\rp = \int_0^1 dx x^N q_i(x,Q^2) \ ,
 \ee 
  and subsequently invert the transform back to
-$x$-space.
+$x$--space.
  Recently, a novel approach has been proposed which combines
 advantages of the $N-$space and $x-$space methods \cite{nnpdf}.
 $N-$space based methods are of interest because the Mellin transform
@@ -259,8 +259,8 @@ transforms of both the splitting functions and the initial conditions.
 There can also be subtleties associated with the inverse Mellin
 transform.
 %
-The $x$-space method is in contrast more flexible, since the inputs
-are only required in $x$-space; however it is generally considered to
+The $x$--space method is in contrast more flexible, since the inputs
+are only required in $x$--space; however it is generally considered to
 less efficient numerically, because of the need to carry out the
 convolution in eq.~(\ref{eq:dglap}).
 
@@ -268,10 +268,10 @@ To understand the question of efficiencies one should analyse the
 number of operations needed to carry out the evolution. Assuming that
 one needs to establish the results of the evolution at $N_x$ values of
 $x$, and $N_Q$ values of $Q$, one essentially needs $\order{N_x^2
-  N_Q}$ operations with an $x$-space method, where the $N_x^2$ factor
+  N_Q}$ operations with an $x$--space method, where the $N_x^2$ factor
 comes from the convolutions. In the Mellin-space method, one needs
 $\order{N_x N_Q M}$ operations, where $M$ is the number of points used
-for Mellin inversion. One source of drawback of the $x$-space method
+for Mellin inversion. One source of drawback of the $x$--space method
 is that, nearly always, $N_x \sim \ln 1/x_{\min}$ and so the method
 scales as the square of $\ln 1/x_{\min}$, where the Mellin method is
 linear (and $M$ can be kept roughly independent of $x_{\min}$). 
@@ -279,7 +279,7 @@ linear (and $M$ can be kept roughly independent of $x_{\min}$).
 
 The other issue relates to how one goes to higher numerical
 integration and interpolation orders.
-In $x$-space methods one tends to choose $x$ values that are uniformly
+In $x$--space methods one tends to choose $x$ values that are uniformly
 distributed (be it in $\ln 1/x$ or some other more complex function)
 --- this limits one to higher-order extensions of the Trapezium and
 Simpson-rule type integrations, whose order in general is $n_p-1$
@@ -298,18 +298,18 @@ $\lp \delta x\rp^{2n_p}$, and furthermore the integration weights do not suffer
 from cancellations at large $n_p$, allowing one to increase
 $n_p$, and thus the accuracy, quite considerably.
 
-Despite it being more difficult to obtain high accuracy with $x$-space
+Despite it being more difficult to obtain high accuracy with $x$--space
 methods, their greater flexibility means that they are widespread,
 serving as the basis of the well-known  QCDNUM program \cite{Botje},
 and  used also by the CTEQ~\cite{CTEQ} and MRST/MSTW~\cite{MRST}
 global fitting
-collaborations. Higher-order methods in $x$-space have been developed
+collaborations. Higher-order methods in $x$--space have been developed
 in \cite{Schoeffel:1998tz,Pascaud:2001bi,coriano,GuzziThesis,DisResum}, and
 more recently have been incorporated also in QCDNUM.
 
 \hoppet, the program presented here, uses higher-order methods both for
 the $x$-integrations and $Q$ evolution. It combines this with multiple
-grids in $x$-space: a high-density grid at large $x$ where it is
+grids in $x$--space: a high-density grid at large $x$ where it is
 hardest to obtain good accuracy, and coarser grids at smaller $x$
 where the smoothness of the PDFs facilitates the integrations. One of
 the other crucial features of the program is that it pre-calculates as
@@ -882,10 +882,10 @@ it would suffice to modify the \texttt{convolution} module, while the
 rest of the library (and its interfaces) would remain unchanged.
 
 %......................................................................
-\subsection[$x$-space functions]{$\boldsymbol{x}$-space functions}
+\subsection[$x$--space functions]{$\boldsymbol{x}$-space functions}
 \label{sec:xspc}
 
-Normal $x$-space functions (such as PDFs) are
+Normal $x$--space functions (such as PDFs) are
 held in double precision arrays, which are to be allocated as follows
 \begin{lstlisting}
   real(dp), pointer :: xgluon(:)
@@ -2668,7 +2668,7 @@ is poorest as
 one approaches $x=1$, where the PDFs all go to zero very rapidly and
 so have divergent logarithmic derivatives in $x$, $d\ln q/d\ln x$,
 adversely affecting the accuracy of the convolutions. This region is
-always the most difficult in $x$-space methods, however the use of
+always the most difficult in $x$--space methods, however the use of
 multiple subgrids in $x$ allows to one to obtain acceptable results
 for $x<0.9$ which is likely to be the largest value of any
 phenomenological relevance. 
@@ -2841,7 +2841,7 @@ lowering the interpolation orders, at the expense of needing a finer
 grid (and so longer evolution times).
 
 The timings shown here are roughly similar, for accuracies $\sim
-10^{-4}$, to those obtained with the $N$-space code
+10^{-4}$, to those obtained with the $N$--space code
 Pegasus~\cite{Pegasus} when the number of $x,Q$ points to be
 evaluated is $\order{10^3}$. For much smaller numbers of points
 Pegasus becomes superior (because of the significantly smaller ratio
@@ -2888,8 +2888,8 @@ of a tabulated evolution. Default values shown in square
 %======================================================================
 \section{Conclusions}
 
-\hoppet is an $x$-space evolution code that is novel both in terms of
-the accuracy and speed that it provides compared to other $x$-space
+\hoppet is an $x$--space evolution code that is novel both in terms of
+the accuracy and speed that it provides compared to other $x$--space
 codes, and in terms of its interface, designed to provide a
 straightforward and physical way of manipulating PDFs beyond the
 built-in task of DGLAP evolution.
