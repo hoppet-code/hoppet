@@ -822,7 +822,7 @@ the grid representation.
 
 In line with the convention set out in the Fortran~90 edition of
 Numerical Recipes \cite{NRf90} we shall use \texttt{\_dp} to indicate
-that numbers are in double precision, and \ttt{real(dp)} to declare
+that floating-point numbers are in double precision, and \ttt{real(dp)} to declare
 double precision variables. The integer parameter \ttt{dp} is defined
 in the \texttt{module types} (and available indirectly through
 \ttt{module hoppet\_v1}).
@@ -892,13 +892,13 @@ held in double precision arrays, which are to be allocated as follows
   real(dp), pointer :: xgluon(:)
   call AllocGridQuant(grid,xgluon)
 \end{lstlisting}
-Note that for this to work, \texttt{xgluon(:)} should be a
+Note that for this to work, \texttt{xgluon(:)}\ should be a
 \texttt{pointer}, and not just 
 have the \texttt{allocatable} attribute. To
 deallocate a grid quantity, one may safely use the F95
 \texttt{deallocate} command.
 
-Since \texttt{xgluon(:)} is just an array, it carries no information
+Since \texttt{xgluon(:)}\ is just an array, it carries no information
 about the \texttt{grid}. Therefore to set and access its value, one
 must always provide the information about the \texttt{grid}. This is
 not entirely satisfactory, and is one of the drawbacks of the use of
@@ -937,7 +937,7 @@ proceeds as follows
   real(dp) :: y, xgluon_at_y
   ...
   y = 5.0_dp
-  xgluon_at_y = EvalGridQuant(grid,xgluon,y) !! again this returns xg(x)
+  xgluon_at_y = EvalGridQuant(grid,xgluon,y) !! again this returns xg(x), x=exp(-y)
 \end{lstlisting}
 Note that again we have to supply 
 the \texttt{grid} argument to \ttt{EvalGridQuant}
@@ -1031,14 +1031,14 @@ call
   call SetDefaultConvolutionEps(eps)
 \end{lstlisting}
 which is to be made before creating the \ttt{grid\_def}
-object.Alternatively, an optional \ttt{eps} argument can be
+object. Alternatively, an optional \ttt{eps} argument can be
   included in the call to \ttt{InitGridDef} as follows:
 \begin{lstlisting}
   type(grid_def) :: grid
   real(dp) :: eps
   [ ... set eps ... ]
   call InitGridDef(grid,dy=0.1_dp,ymax=10.0_dp,order=3,eps)
- \end{lstlisting}
+\end{lstlisting}
 Note that {\tt eps} is just
 one of the parameters affecting the final accuracy of convolutions. In
 practice (unless going to extremely high accuracies) the grid spacing
@@ -1101,7 +1101,7 @@ than PDF distributions, but still fairly simple:
 
   call Delete(Pab)                     ! Pab memory freed
 \end{lstlisting}
-Routines labelled ``\texttt{(opt.alloc.)}'' allocate the memory for
+Routines labelled ``\texttt{(opt.alloc.)}''\ allocate the memory for
 the \texttt{grid\_conv} object if the memory has not already been
 allocated. (If it has already been allocated it is assumed to
 correspond to the same grid as any other \texttt{grid\_conv} objects
@@ -1282,9 +1282,9 @@ has \texttt{PDF(:,7)=0}, while for PDFs in the \ttt{evln}
 representation, the information on the active number of flavours
 is encoded as
 \ttt{nf = (abs(q(2,7))+abs(q(3,7)))/(abs(q(0,7))+abs(q(1,7)))},
-so that it is conserved under linear combinations.
-
-However this feature might be modified in future
+so that it is conserved under linear operations.
+%
+However the details of the encoding may evolve in future
 versions of the program.
 }.
 
@@ -1294,7 +1294,7 @@ versions of the program.
 \label{sec:human-rep}
 When a PDF is allocated it is automatically labelled as being in the
 \ttt{human} representation, described in
-Sect. \ref{sec:pqcd}. Constants with names like
+Sect.~\ref{sec:pqcd}. Constants with names like
 \ttt{iflv\_bbar}, \ttt{iflv\_g}, \ttt{iflv\_b}, are defined in
 \ttt{module pdf\_representation}, to facilitate symbolic access to the
 different flavours.
@@ -1313,7 +1313,7 @@ contains
     real(dp), intent(in) :: xvals(:)
     real(dp)             :: pdf(size(xvals),-6:7)
 
-    ! clean method for labelling as PDF as being in the human representation
+    ! clean method for labelling a PDF as being in the human representation
     call LabelPdfAsHuman(pdf)
     ! Alternatively, by setting everything to zero 
     ! (notably pdf(:,7)), the PDF representation
@@ -1470,7 +1470,7 @@ initialised by hand, for example
   call InitGridConv(grid,P%NS_minus, P_function_NS_minus)
   call InitGridConv(grid,P%NS_V    , P_function_NS_V    )
 \end{lstlisting}
-We can then write
+One can then write
 \begin{lstlisting}
   real(dp), pointer :: q(:,:), delta_q(:,:)
   [... allocations, etc. ...]
@@ -1735,7 +1735,7 @@ The treatment of $n_f$ in the \ttt{mass\_threshold\_mat} is very
 specific because at NNLO, the only order in the $\MSbar$ factorisation
 scheme at which it's non-zero and currently known, it is independent of $n_f$.
 Its action does of course however depend on $n_f$. Since, as for
-\ttt{split\_mat} objects, we don't want to the action of of the
+\ttt{split\_mat} objects, we don't want the action of the
 \ttt{mass\_threshold\_mat} to depend on the availability of the
 current $n_f$ information from the \ttt{qcd} module, instead we
 require that before using a \ttt{mass\_threshold\_mat}, you should
@@ -1800,7 +1800,7 @@ been implemented and of how they can be initialised individually. This
 is useful above all if the user needs to tune the program to some
 specific unusual application.
 
-In practice, one foresees that most users will need just a standard
+In practice, we foresee that most users will need just a standard
 DGLAP evolution framework, and so will prefer not need to manage
 all these components individually. Accordingly \hoppet provides a
 type, $\ttt{dglap\_holder}$ which holds all the components 
@@ -2743,7 +2743,7 @@ value. The `guds' flavours in the $x<0.7$ range are generally better
 determined, for a given set of grid parameters, than the full set of
 flavours up to $x<0.9$. This is as one would expect since the
 large-$x$ region is usually the hardest and the `guds' flavours are
-generally somewhat smoother than the the others. Using only three $y$
+generally somewhat smoother than the others. Using only three $y$
 subgrids worsens the situation when including the largest $x$ values,
 and reducing the order in the $Q$ interpolation also adversely affects
 the accuracy (also for $x<0.7$, not shown).
@@ -3304,7 +3304,7 @@ external procedures, as explained in Sect.~\ref{sec:acc_table}.
 
 In this section we present the \hoppet reference guide, a 
 summary of the most important modules in the package with
-the corresponding description, both the the streamlined interface,
+the corresponding description, both the streamlined interface,
 Table \ref{tab:streamlined} and for the general interface,
 Table  \ref{tab:general}.
 
@@ -3916,7 +3916,7 @@ given which we can then write
   i = pair1 * pair2
   i = pair1 .dot. pair2  ! equivalent to previous statement
 \end{lstlisting}
-Since the the multiplication operator (\texttt{*}) already exists for
+Since the multiplication operator (\texttt{*}) already exists for
 all the default types, by defining it for a new type we have
 \emph{overloaded} it. Note that there are some subtleties with
 precedences of user-defined operators: operators (like \texttt{*})
