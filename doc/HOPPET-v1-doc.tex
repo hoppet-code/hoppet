@@ -1,4 +1,4 @@
- \documentclass[12pt]{article}
+\documentclass[12pt]{article}
 
 
 %%  TO DO - Program
@@ -348,7 +348,7 @@ with emphasis on those aspects that
 can be adapted by a user to tailor it to their own needs. 
 Sect.~\ref{sec:vanilla} describes a streamlined interface
 to \hoppet which embodies its essential capabilities in
-a simple interface available a variety of programming languages: 
+a simple interface available in a variety of programming languages: 
 F77 and C/C++.
 Finally, Sect.~\ref{sec:benchmarks} presents a detailed 
 quantitative study of
@@ -374,7 +374,7 @@ various example programs which contain detailed
 descriptions and explanations. 
 On the other hand, a reader interested in the
 more flexible and general 
-functionalities of \hoppet, should also consult
+functionalities of \hoppet should also consult
 Sects.~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}. 
 
 Note 
@@ -389,7 +389,7 @@ as used in the LHAPDF PDF library \cite{LHAPDF}.
 \section{Perturbative evolution in QCD}
 \label{sec:pqcd}
 First of all we set up the notation and
-conventions that are used through \hoppet. The DGLAP
+conventions that are used throughout \hoppet. The DGLAP
 equation for a non-singlet parton distribution reads
 \begin{equation}
   \label{eq:dglap-ns}
@@ -422,7 +422,7 @@ are also available \cite{Mitov:2006ic}.
 
 
 As with the splitting functions, all perturbative quantities in
-\hoppet are defined to be a coefficient of $\as/2\pi$. The one
+\hoppet are defined to be coefficients of powers of $\as/2\pi$. The one
 exception is the $\beta$-function coefficients of the running
 coupling equation:
 \begin{equation}
@@ -601,9 +601,9 @@ The first aspect that we discuss is how to represent PDFs
 and associated convolutions in terms of an interpolating grid
 in $x-$space.
 %Note that 
-This technique can be applied to any quantity
-that appears through convolutions, so it is not restricted
-to parton distributions. Then we will describe how
+These techniques can be applied to a range of problems
+that involve convolutions, so are not restricted
+to parton distributions. Then in later sections we will describe how
 to obtain the solution of the DGLAP evolution equations.
 
 %......................................................................
@@ -620,7 +620,7 @@ $xq \lp x,t \rp$ by
 interpolating the PDF at the grid points,\footnote{From the 
 numerical point of view, it is
 advantageous to interpolate $xq$ rather than $q$ itself because
-the is in general smoother.}
+the former is in general smoother.}
 \begin{equation}
   xq(y=\ln 1/x,t) = \sum_\alpha w_\alpha(y) q_\alpha(t)\,,
 \end{equation}
@@ -667,10 +667,11 @@ defined
 A virtue
  of having a uniform grid in $y = \ln 1/x$ is that the
 interpolation functions can be arranged to have a structure
-$w_\beta(y) = w_{\beta}(y - y_\beta)$, so that $P_{\alpha\beta}$ just depends
+$w_\alpha(y) = w(y - y_\alpha)$ (where $w(y)$ is non-zero for $0\le y <
+n \delta y$), so that $P_{\alpha\beta}$ just depends
 on $\alpha - \beta$, and can be rewritten $\mathcal{P}_{\alpha - \beta}$. A
-slight subtlety arises at large $x$, where if one writes $w_\beta(y) =
-w_{\beta}(y - y_\beta)$ one is effectively assuming an interpolation that uses
+slight subtlety arises at large $x$, where if one writes $w_\alpha(y) =
+w(y - y_\alpha)$ one is effectively assuming an interpolation that uses
 identically zero interpolation points for $x\ge 1$~\cite{coriano,
 Ratcliffe:2000kp},
 even though $xq(x)$ is not formally defined for $x > 1$. In practice
@@ -705,7 +706,8 @@ entries), with $\mathcal{P}_{\alpha-\beta} = 0$ for $\alpha < \beta$.
 \end{figure}
 
 
-The piecewise interpolating polynomials that we use are not smooth at
+Note that the piecewise interpolating polynomials that we use effectively
+imply a PDF that is not smooth at
 the grid points. In practice this is a small effect. We could, in
 principle, have enforced smoothness, for example by using
 splines. However analytical studies indicate suggest that for a given
@@ -728,7 +730,7 @@ approximated in terms of its grid representation by
 where for a general value of $\alpha$ the sum over $\beta$ extends over
 $\mathcal{O}\lp \alpha + |\ttt{order}| \rp$ 
 points of the grid.
-Introducing $M_{\alpha\beta}(t_0) = \delta_{\alpha\beta}$ as initial
+Introducing $M_{\alpha\beta}(t_0) = \delta_{\alpha\beta}$ as an initial
 condition at some initial scale $t_0$, one can
 alternatively solve
 \begin{equation}
@@ -744,16 +746,15 @@ given by
 \end{equation}
 We refer to $M_{\alpha\beta}(t)$ as the evolution operator. From 
 a practical point of view, we will solve eqs.~(\ref{eq:evol})
-and ~(\ref{eq:evolop})
+and (\ref{eq:evolop})
 with higher order iterative Runge-Kutta methods, as described in
-Sect. \ref{sec:direct-evolution}.
+Sect.~\ref{sec:direct-evolution}.
 
-A further simplification occurs 
-if one can rewrite the splitting functions $P$ as
-a translation invariant object. Using the properties
-discussed in the previous subsection, 
-we can rewrite $P_{\alpha\beta} = \cal P_{\alpha-\beta}$,
-and then similarly one can rewrite $M_{\alpha\beta} = \cal
+A further simplification occurs if one can rewrite the splitting
+functions $P$ as translationally invariant objects, \ie
+$P_{\alpha\beta} = \cal P_{\alpha-\beta}$.
+%
+Then similarly one can rewrite $M_{\alpha\beta} = \cal
 M_{\alpha-\beta}$, and it is as simple to determine
 $M_{\alpha\beta}(t)$ as it is to determine the evolution of a single
 vector $q_\alpha$, i.e.\ one just evolves a single column, $\beta =
