@@ -185,7 +185,7 @@ smooth on the scale of the discretisation in $x$.
 {\em Typical running time\/}: a few seconds for initialisation, then
 $\sim 10$~ms for creating a tabulation with a relative accuracy of
 $10^{-4}$ from a new initial condition (on a 3.4~GHz Pentium~IV
-processor). Further details in Sect.~\ref{sec:Timing}.
+processor). Further details in section~\ref{sec:Timing}.
 
 \newpage
 \tableofcontents
@@ -338,19 +338,19 @@ not hitherto been released in a documented form,
 it is the authors' hope that availability of
 this documentation may make the package somewhat more useful.
 
-This manual is structured as follows: Sect.~\ref{sec:pqcd}
+This manual is structured as follows: section~\ref{sec:pqcd}
 briefly summarises the perturbative QCD ingredients contained in
-\hoppet, while Sect.~\ref{tricks} describes the numerical techniques
+\hoppet, while section~\ref{tricks} describes the numerical techniques
 used to solve the DGLAP equation. 
-Sects.~\ref{sec:singleflav}--\ref{sec:tabulated-pdfs} present in detail the capabilities
+sections~\ref{sec:singleflav}--\ref{sec:tabulated-pdfs} present in detail the capabilities
 of the \hoppet package with its general F95 interface, 
 with emphasis on those aspects that
 can be adapted by a user to tailor it to their own needs. 
-Sect.~\ref{sec:vanilla} describes a streamlined interface
+section~\ref{sec:vanilla} describes a streamlined interface
 to \hoppet which embodies its essential capabilities in
 a simple interface available in a variety of programming languages: 
 F77 and C/C++.
-Finally, Sect.~\ref{sec:benchmarks} presents a detailed 
+Finally, section~\ref{sec:benchmarks} presents a detailed 
 quantitative study of
 the performance of \hoppet, and in the final section we conclude.
 A set of appendices contain various example programs,
@@ -364,9 +364,9 @@ A reader
 whose interest is to use \hoppet to perform
 fast and efficient evolution of PDFs 
 may wish to skip 
-Sects.~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}
+sections~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}
 and move directly to
- Sect.~\ref{sec:vanilla}, which describes the 
+ section~\ref{sec:vanilla}, which describes the 
 user-friendlier streamlined interface,
 accessible from F95, F77 and C/C++, and which contains the essential
 functionalities of \hoppet. He/she is also encouraged to go through the
@@ -375,7 +375,7 @@ descriptions and explanations.
 On the other hand, a reader interested in the
 more flexible and general 
 functionalities of \hoppet should also consult
-Sects.~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}. 
+sections~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}. 
 
 Note 
 that throughout this documentation, a PDF refers always to a momentum
@@ -546,7 +546,7 @@ they are preserved under DGLAP evolution.
 The conversion from the \ttt{human} to the \ttt{evln}
 representations of PDFs requires that the number of
 active quark flavours $n_f$ be specified by the user, as described in
-Sect. \ref{sec:evln-rep}.
+section \ref{sec:evln-rep}.
 
 \begin{table}
 \begin{center}
@@ -748,7 +748,7 @@ We refer to $M_{\alpha\beta}(t)$ as the evolution operator. From
 a practical point of view, we will solve eqs.~(\ref{eq:evol})
 and (\ref{eq:evolop})
 with higher order iterative Runge-Kutta methods, as described in
-Sect.~\ref{sec:direct-evolution}.
+section~\ref{sec:direct-evolution}.
 
 A further simplification occurs if one can rewrite the splitting
 functions $P$ as translationally invariant objects, \ie
@@ -791,7 +791,10 @@ be accessed indirectly through the \ttt{hoppet\_v1} module
 \end{lstlisting}
 Unless you are delving into the innards of  \hoppet, the latter is
 more convenient since it provides access to everything you are likely
-to need.
+to need. Note that not all of \hoppet routines and functions
+can be accessed through the  \ttt{hoppet\_v1} module, in order
+to reduce the possibility of conflicts with the
+user's namespace.
 
 %......................................................................
 \subsection{Grid definitions (\texttt{grid\_def})}
@@ -811,7 +814,7 @@ e^{-\texttt{ymax}}$, with uniform grid spacing in $y = \ln 1/x$ of
 with only $x\le 1$ points.
 The user can modify this choice to better
 suit his/her particular needs, as explained
-in Sect.~\ref{sec:highord}.
+in section~\ref{sec:highord}.
 %
 One notes 
 the use of keyword arguments --- the keywords are not
@@ -866,7 +869,9 @@ requirements on the grid spacings, notably that a coarse grid have a
 spacing that is a multiple of that of the next finest grid. If the
 requirements are not satisfied by the \ttt{subgrids} that have been
 provided, then new similar, but more suitable subgrids are
-automatically generated. 
+automatically generated. When nested sub-grids are put together,
+the values of the $x$ points of the combined grid will in general
+not be ordered.
 
 Note that the two kinds of invocation of \ttt{InitGridDef} actually
 correspond to different (overloaded) subroutines. The Fortran~95 compiler
@@ -920,7 +925,7 @@ a function
 \end{lstlisting}
 which
 returns the gluon
-momentum density $xg(x)$ (\cf Sect.~\ref{sec:highord}).
+momentum density $xg(x)$ (\cf section~\ref{sec:highord}).
 %
 Then we can call
 \begin{lstlisting}
@@ -1021,8 +1026,8 @@ plus-distributions and delta functions, the module
 function is to be returned --- the real, virtual, real + virtual, or
 $\delta$-function pieces. 
 
-The initialisation of a \texttt{grid\_conv} object uses an adaptive
-Gaussian integrator (a variant of CERNLIB's \texttt{dgauss}) to
+The initialisation of a \texttt{grid\_conv} object uses adaptive
+Gaussian integration (a variant of CERNLIB's \texttt{dgauss}) to
 calculate the convolution of the splitting function with trial weight
 functions. The default accuracy for these integrations is $10^{-7}$.
 It can be modified to value \texttt{eps} with the following subroutine
@@ -1184,7 +1189,7 @@ of PDFs, notably in checking sum rules. Since \hoppet doesn't store
 PDFs over the full range of $x$, one cannot calculate full moments,
 but only truncated moments.
 %
-%% As discussed in Sect.~\ref{sec:pqcd}, it is useful to check
+%% As discussed in section~\ref{sec:pqcd}, it is useful to check
 %% explicitely is the various sum rules are satisfied by a given
 %% PDF set. In \hoppet this can by achieved by the
 %% function {\tt TruncatedMoment}, which allows the
@@ -1227,7 +1232,9 @@ For a further example, see also section~\ref{sec:acc_table}.
 %
 Note that for $\ttt{ymax}= 12$ (a value used in many of the example
 programs), the truncation can underestimate the sum rules by a
-fraction of a percent.
+fraction of a percent. This underestimation is more important
+at higher values of $Q^2$, due to the perturbative growth of PDFs
+at small-$x$ at large-$Q^2$.
 
 
 
@@ -1294,7 +1301,7 @@ versions of the program.
 \label{sec:human-rep}
 When a PDF is allocated it is automatically labelled as being in the
 \ttt{human} representation, described in
-Sect.~\ref{sec:pqcd}. Constants with names like
+section~\ref{sec:pqcd}. Constants with names like
 \ttt{iflv\_bbar}, \ttt{iflv\_g}, \ttt{iflv\_b}, are defined in
 \ttt{module pdf\_representation}, to facilitate symbolic access to the
 different flavours.
@@ -1361,7 +1368,7 @@ happens with the LHAPDF routines \cite{LHAPDF}.
 
 Having initialised a PDF, to then extract it at a given $y$ value, one
 can either examine a particular flavour using the methods described in
-Sect.~\ref{sec:xspc}
+section~\ref{sec:xspc}
 \begin{lstlisting}
   real(dp) :: y, gluon_at_y
   gluon_at_y = pdf(:,iflv_g) .aty. (y.with.grid)
@@ -1528,7 +1535,7 @@ advantageous to manually change into the appropriate \ttt{evln}
 representation, carry out all the convolutions and then change back
 manually to
 the \ttt{human}  representation at the end, see
-Sect.~\ref{sec:pdf-objects}.
+section~\ref{sec:pdf-objects}.
 %
 
 As for \ttt{grid\_conv} objects, a variety of routines have been
@@ -1558,7 +1565,7 @@ As with \ttt{grid\_conv} objects, \hoppet provides means to construct
 a \ttt{split\_mat} object that corresponds to an arbitrary series of
 \ttt{split\_mat} operations, as long as they all involve the same
 value of $n_f$. One proceeds in a very similar way as
-in Sect.~\ref{sec:derived_grid_conv},
+in section~\ref{sec:derived_grid_conv},
 \begin{lstlisting}
   real(dp), pointer :: probes(:,:,:)
   type(split_mat)  :: PA, PB, Pcomm
@@ -1574,7 +1581,7 @@ in Sect.~\ref{sec:derived_grid_conv},
 \end{lstlisting}
 Note that we need to provide the number of active quark flavours
 to \ttt{GetDerivedSplitMatProbes}.
-As in Sect.~\ref{sec:derived_grid_conv}, we first need to set up
+As in section~\ref{sec:derived_grid_conv}, we first need to set up
 some `probe' PDFs (note the extra dimension compared to earlier, since
 we also have flavour information; the probe index always corresponds
 to the last dimension); then we act on those probes; finally we
@@ -1703,7 +1710,7 @@ to evaluate. Other possibilities, like
 the exact splitting functions or a previous set of approximated NNLO
 splitting functions which was used before the full
 calculation was available are described in Appendix \ref{sect:nnlo}.
-Note that the QCD colour factors introduced in Sect.~\ref{sec:qcd}
+Note that the QCD colour factors introduced in section~\ref{sec:qcd}
 cannot be modified if the interpolated NNLO splitting functions
 are used, since these expressions use the default QCD values.
 
@@ -1727,7 +1734,7 @@ This is the coefficient  of $(\as/2\pi)^2$ for the convolution matrix that
 accounts for crossing a heavy flavour threshold in $\MSbar$
 factorisation scheme, at $\mu_F = m_h$, where
 $m_h$ is the heavy-quark pole mass, as has
-been described in Sect.~\ref{sec:pqcd}. Since the
+been described in section~\ref{sec:pqcd}. Since the
 corresponding NLO term is zero, the number of flavours in $\as$ is
 immaterial at NNLO. 
 
@@ -1848,7 +1855,7 @@ For all the above calls, at NNLO the choice of exact of parametrised
 splitting functions and mass thresholds is determined by the calls to
 \ttt{dglap\_Set\_nnlo\_splitting} and
 \ttt{dglap\_Set\_nnlo\_nfthreshold}, as described in
-Sects.~\ref{sec:dglap-split} and \ref{sec:mtm} respectively. These
+sections~\ref{sec:dglap-split} and \ref{sec:mtm} respectively. These
 calls must be made prior to the call to \ttt{InitDglapHolder}.
 
 Having initialised a \ttt{dglap\_holder} one has access to various components:
@@ -1937,7 +1944,8 @@ value. Otherwise flavour thresholds are implemented at scales
 \end{lstlisting}
 where the quark masses are \emph{pole} masses. The choice to use pole
 masses (and their particular default values) is inspired by the
-benchmark runs~\cite{Benchmarks} in which \hoppet results were
+PDF evolution benchmark comparison~\cite{Benchmarks} 
+in which \hoppet results were
 compared to those of Vogt's moment-space code
 QCD-Pegasus~\cite{Pegasus}. The default value of the
 QCD coupling is taken to be close
@@ -2042,7 +2050,7 @@ The step size in u, du, can be set with the following call
 The error on the evolution from the finite step size should scale as
 $(\ttt{du})^4$. With the default value of $\ttt{du}=0.1$, errors are
 typically somewhat smaller than $10^{-3}$ (see
-Sect.~\ref{sec:benchmarks} for the detailed benchmarks).
+section~\ref{sec:benchmarks} for the detailed benchmarks).
 
 To actually carry out the evolution, one uses the following subroutine
 call:
@@ -2084,7 +2092,7 @@ will be used.\footnote{For example if \ttt{dglap\_h} was initialised with
   differs from a `proper' procedure).}
 
 Mass thresholds (NNLO) are implemented as described in
-Sect.~\ref{sec:pqcd}:
+section~\ref{sec:pqcd}:
 \begin{subequations}
 \label{eq:mass_threshold}
 \begin{align}
@@ -2155,8 +2163,8 @@ values. Often however one simply wishes to provide a PDF distribution
 at some initial scale and then subsequently be able to access it at
 arbitrary values of $x$ and $Q$. For this purpose it is useful 
 (and most efficient) to
-produce a table of the PDF as a function of $Q^2$, which then allows
-for access to the PDF at arbitrary $x, Q$ using an interpolation. All
+produce a table of the PDF as a function of $Q$, which then allows
+for access to the PDF at arbitrary $x$ and $Q$ using an interpolation. All
 types and routines discussed in this section are in the
 \ttt{pdf\_tabulate} module, or accessible also from \ttt{hoppet\_v1}.
 
@@ -2223,7 +2231,7 @@ initial scale. The former can be achieved with
 \end{lstlisting}
 where \ttt{LHAsub} is any subroutine with the LHAPDF interface,
 {\it i.e.}, as shown earlier
-in Sect.~\ref{sec:human-rep}.
+in section~\ref{sec:human-rep}.
 
 To fill a table via an evolution from an initial scale, one uses 
 \begin{lstlisting}
@@ -2242,14 +2250,14 @@ which takes an the \ttt{initial\_pdf} at scale \ttt{Q0}, and evolves
 it across the whole range of $Q$ values in the table, using the
 \ttt{EvolvePDF} routine. The arguments have the same meaning as
 corresponding ones in \ttt{EvolvePDF}, explained in
-Sect.~\ref{sec:direct-evolution}. The $\ttt{du}$ value that's used
+section~\ref{sec:direct-evolution}. The $\ttt{du}$ value that's used
 is the default one for \ttt{EvolvePDF} which, we recall, may be set
 using \ttt{SetDefaultEvolutionDu(du)}. If the $Q$ spacing in the
 tabulation is such that steps in \ttt{du} would be too large, then the
 steps are automatically resized to the tabulation spacing.
 
 One may also use the precomputed evolution facilities of
-Sect.~\ref{sec:precomputed-evolution}, by calling the routine
+section~\ref{sec:precomputed-evolution}, by calling the routine
 \begin{lstlisting}
   call PreEvolvePdfTable(table, Q0, dglap_h, coupling, &
                          & [, muR_Q] [, nloop] [, untie_nf] )
@@ -2326,7 +2334,7 @@ There are instances in which it is useful to extract the PDF at all
 $x$ values for a given $Q$. This is the case, for efficiency reasons,
 if one wishes to evaluate it at very many $x$ values and a single $Q$
 value. It's also the case if one wishes to evaluate
-sum-rules. One then uses uses the routine \ttt{EvalPdfTable\_Q}, as in
+sum rules. One then uses uses the routine \ttt{EvalPdfTable\_Q}, as in
 the following example for calculating the momentum sum rule
 \begin{lstlisting}
   real(dp), pointer :: pdf_at_Q(:,:)
@@ -2340,7 +2348,10 @@ the following example for calculating the momentum sum rule
                                & sum(pdf_at_Q(:,-6:6),dim=2)) ! dim=2 -> sum over flav
 \end{lstlisting}
 where the \ttt{TruncatedMoment} function was described in detail in
-section~\ref{sec:sum-rules}.
+section~\ref{sec:sum-rules}. Let us emphasize again that
+if the goal is to extract accurately sum rules or in general
+full (not truncated) moments, the value of {\tt ymax} of the
+grid should be large enough.
 
 As with all other objects, a \ttt{pdf\_table} object can be deleted
 using
@@ -2588,7 +2599,7 @@ carried out to NNLO accuracy in a variable flavour number scheme,
 including the mass thresholds in the coupling and PDF.
 
 All tests here are carried out based on tabulations of the PDF
-evolution, Sect.~\ref{sec:tabulated-pdfs}.
+evolution, section~\ref{sec:tabulated-pdfs}.
 %
 We first run \hoppet with a very fine grid spacing to provide a
 reference result. Then we run the evolution for a coarser grid ---
@@ -2779,7 +2790,7 @@ one evaluates the full set of flavours once per PDF initial condition;
 in the case with pre-prepared cached evolution, $t_p$ is the time for a
 preparing a cached evolution and $t_c$ is the time for performing the
 cached evolution. Finally $t_{xQ}$ is the time it takes to evaluate
-the PDFs at a given value of $(x,Q^2)$ once the tabulation has
+the PDFs at a given value of $(x,Q)$ once the tabulation has
 been performed.
 
 \begin{table}
@@ -2812,7 +2823,8 @@ the number of $x,Q$ points is rather large ($\gtrsim 3000$), by
 $n_{xQ} t_{xQ}$.\footnote{
 With these numbers, it is easy to check that a global fit with
 $n_{xQ}\sim 3000$ and $n_i\sim 10^5$ could be completed
-in less than half and hour.} We note (with regret)\ the
+in less than half and hour, assuming cached evolution
+and the use of commercial compilers.} We note (with regret)\ the
 considerably speed advantage (almost an order
 of magnitude) that is to be had with commercial
 compilers.
@@ -2917,7 +2929,10 @@ no general public code exists which performs a matching between
 resummed 
  and fixed (NLO, NNLO) order
 splitting functions, either in the time-like case or in
-the space-like case. 
+the space-like case. In particular, work to extend
+\hoppet in order to deal with general interpolated
+splitting functions and coefficient functions, required
+to implement small-$x$ resummation, is in progress.
 
 Another interesting extension of \hoppet would be to
 implement a more general mass treatment of heavy quarks.
@@ -2979,8 +2994,8 @@ found (in a slightly more commented form) in
 \ttt{example\_f90/tabulation\_example.f90}. Compilation instructions
 are to be found in the \ttt{README} file in the main directory of the
 release. A program that has the same functionality but in F77, using
-the streamlined interface of Sect.~\ref{sec:vanilla}, is to be found as
-\ttt{example\_f77/tabulation\_example.f} (cf.\ Sect.~\ref{sec:stream-example}).
+the streamlined interface of section~\ref{sec:vanilla}, is to be found as
+\ttt{example\_f77/tabulation\_example.f} (cf.\ section~\ref{sec:stream-example}).
 
 
 \begin{lstlisting}
@@ -3127,7 +3142,7 @@ panel of table~15 of the second reference of \cite{Benchmarks} ($\mu_F
 The program below generates exactly the same output
 as the previous example program, but this time
 using the streamlined interface introduced
-in Sect.~\ref{sec:vanilla}. It is to be
+in section~\ref{sec:vanilla}. It is to be
 found in
 \ttt{example\_f90/tabulation\_example\_streamlined.f90}. 
 A program with same interface and same output 
@@ -3220,7 +3235,7 @@ end program tabulation_example_streamlined
 
 \subsection{Accessing tables}
 
-As has been mentioned in Sect.~\ref{sec:acc_table}, 
+As has been mentioned in section~\ref{sec:acc_table}, 
 there are several ways to define, initialise
 and access a user defined table, for example 
 as in the example below:
@@ -3266,7 +3281,135 @@ directory. It generates exactly
 the same output as the previous example program (with additional
 output about truncated moments), however it
 provides an example of how to access a table from
-external procedures, as explained in Sect.~\ref{sec:acc_table}.
+external procedures, as explained in section~\ref{sec:acc_table}.
+
+\subsection{Sum rules}
+As has been discussed in section \ref{sec:sum-rules}, \hoppet
+allows the computation of (truncated) moments of general
+grid quantities, as required for example in the computation
+of various sum rules.
+An example of how truncated moments can
+be computed  can be found in the
+example program {\tt example\_f90/sumrules.f90}.
+Schematically, the outline of this example program 
+is the following:
+
+\begin{lstlisting}
+
+  ! set up parameters for grid
+  order = -6
+  ymax  = 20.0_dp  ! you may see significant violations with too small a ymax
+  dy    = 0.1_dp
+
+  call SetDefaultEvolutionDu(dy/3.0_dp)  ! generally a good choice
+
+  ! set up the grid itself -- we use 4 nested subgrids
+  call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
+  call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
+  call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
+  call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
+  call InitGridDef(grid,gdarray(1:4),locked=.true.)
+
+  ! initialise the splitting-function holder
+  nloop = 3
+  call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
+       &                      nloop=nloop,nflo=3,nfhi=6)
+  
+  call AllocPDF(grid, pdf0)
+  pdf0 = unpolarized_dummy_pdf(xValues(grid))
+  Q0 = sqrt(2.0_dp)  ! the initial scale
+
+  ! Compute various sum rules
+  call truncated_sum_rules(grid,pdf0)
+
+  ! Sum rules at arbitrary values of Q
+  Q=100_dp
+  ! allocate and initialise the running coupling with a given
+  ! set of quark masses (NB: charm mass just above Q0).
+  quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
+  call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
+       &                   quark_masses = quark_masses)
+
+  ! Evolve the initial PDF up to scale Q to test sum rules
+  call EvolvePDF(dh,pdf0,coupling,Q0,Q)
+
+  ! Compute various sum rules at the scale Q
+   call truncated_sum_rules(grid,pdf0)
+
+contains 
+
+  !======================================================================
+  ! Routine which computes the momentum and valence (truncated)
+  ! sum rules from a given pdf set in an arbitary representation
+  !======================================================================
+  subroutine truncated_sum_rules(gd,pdf_sr)
+    implicit none
+    integer :: nf_rep, nf_lcl, ipdf
+    type(grid_def), intent(in)      :: gd
+    real(dp), intent(in)            :: pdf_sr(:,:)
+    real(dp), pointer               :: pdf_flav(:)
+    real(dp)                        :: moment_index, sum_rule
+
+    ! (Truncated) moments are defined in terms of y as
+    !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
+
+    call AllocGridQuant(gd,pdf_flav)
+        
+    ! Compute the (truncated) momentum sum rule
+    nf_rep = GetPdfRep(pdf_sr)
+    ! Construct the appropiate combination for the
+    ! given PDF representation
+    if(nf_rep == pdfr_Human) then
+       ! PDF set in human representation -> Sum all pdfs
+       pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
+    elseif(nf_rep.ge.0) then
+       ! PDF in evln representation -> Singlet + Gluon
+       pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
+    endif
+
+    moment_index = 1.0_dp ! See definition of truncated moments above
+    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
+  
+    write(6,*) "Momentum sum rule = ",sum_rule, ", expected 1"
+
+    ! Compute the (truncated) valence sum rules
+
+    ! Total valence sum rule 
+    if(nf_rep == pdfr_Human) then
+       ! PDF set in human representation 
+       pdf_flav(:)= pdf_sr(:,1) - pdf_sr(:,-1)
+       do ipdf = 2,6
+          pdf_flav(:) = pdf_flav(:) + ( pdf_sr(:,ipdf) - pdf_sr(:,-ipdf) )
+       enddo
+    elseif(nf_rep.ge.0) then
+       ! PDF in evln representation
+       pdf_flav(:)=pdf_sr(:,-1)
+    endif
+    
+    moment_index = 0.0_dp
+    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
+    
+    write(6,*) "uv + dv sum rule = ",sum_rule, ", expected 3"
+
+    ! uv - dv sum rule
+    if(nf_rep == pdfr_Human) then
+       ! PDF set in human representation 
+       pdf_flav(:)= pdf_sr(:,2) - pdf_sr(:,-2) - & 
+            & ( pdf_sr(:,1) - pdf_sr(:,-1) ) 
+    elseif(nf_rep.ge.0) then
+       ! PDF in evln representation 
+       pdf_flav(:)=pdf_sr(:,-2) 
+    endif
+    
+    moment_index = 0.0_dp
+    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
+    
+    write(6,*) "uv - dv sum rule = ",sum_rule, ", expected 1"
+
+  end subroutine truncated_sum_rules
+
+end program sumrules
+\end{lstlisting}
 
 %===================================================================
 
@@ -3594,7 +3737,7 @@ a call to the \ttt{Delete(...)} subroutine. }
 \section{Initialisation of grid quantities}
 \label{sec:gridinit}
 As has been mentioned in
-Sect.~\ref{sec:xspc},  
+section~\ref{sec:xspc},  
 there exist several ways of setting a grid quantity. In this
 Appendix we describe the most important methods for initialising
 a grid quantity, which we take to be a parton distribution.
@@ -3656,7 +3799,7 @@ pdf_at_y = EvalGridQuant(grid,pdf_set(:,-6:6),y)
 
 \end{lstlisting}
 where an example of  the \ttt{LHAsub} subroutine can be found in
-Sect.~\ref{sec:human-rep}
+section~\ref{sec:human-rep}
 
 \section{NNLO splitting functions}
 \label{sect:nnlo}
@@ -3707,7 +3850,7 @@ historical.
 
 Note that only for the \ttt{nnlo\_splitting\_exact} can the colour
 constants be varied (with the caveat about $d^{abc}d_{abc}$, as
-discussed in Sect.~\ref{sec:qcd}). For the other options the
+discussed in section~\ref{sec:qcd}). For the other options the
 NNLO splitting functions have been computed using the QCD values
 for the colour factors.
 
