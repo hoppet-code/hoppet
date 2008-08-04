@@ -1,5 +1,9 @@
 2008-08-04  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* tarit.sh: 
+	  eliminated problem with multiple versions of .tex file ending up
+	  in tarball
+
 	* src/welcome_message.f90: 
 	  updated the version number to 1.1.1
 
