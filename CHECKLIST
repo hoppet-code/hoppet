@@ -11,4 +11,8 @@ Check List for new releases of HOPPET
 . update web page
 
 
+. copy manual to downloads section
+  scp -pC HOPPET-v1-doc.pdf hepforge:hoppet/public_html/downloads/
 
+[. run doc/mkhtml.sh (check you have correct local settings) and then
+  rsync -avz HOPPET-v1-docl2h hepforge:hoppet/public_html/]
