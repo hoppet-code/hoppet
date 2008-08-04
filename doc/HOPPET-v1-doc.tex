@@ -654,14 +654,6 @@ defined
  \,P(z,t)\, w_\beta(y_\alpha + \ln z)\  .
 \end{equation}
 
-%% Note that the piecewise interpolating polynomials 
-%% that we use are not smooth at the
-%% grid points. The reason for this is that this type of interpolation
-%% strategy is much more suited for the numerical integration required
-%% in convolutions than other strategies which impose continuity
-%% on the interpolating polynomials, like for example splines, which
-%% are in general slower and less accurate for the same number
-%% of grid points.
 
 
 A virtue
@@ -1189,11 +1181,6 @@ of PDFs, notably in checking sum rules. Since \hoppet doesn't store
 PDFs over the full range of $x$, one cannot calculate full moments,
 but only truncated moments.
 %
-%% As discussed in section~\ref{sec:pqcd}, it is useful to check
-%% explicitely is the various sum rules are satisfied by a given
-%% PDF set. In \hoppet this can by achieved by the
-%% function {\tt TruncatedMoment}, which allows the
-%% computation of general truncated moments of grid quantities.
 %
 Truncated moments are calculated via the function
 \begin{lstlisting}
@@ -3251,11 +3238,6 @@ have been used in benchmark PDF evolution
 comparisons~\cite{Benchmarks} and in determining the accuracies and
 speeds shown in section~\ref{sec:benchmarks}.
 
-%% As has been mentioned in section~\ref{sec:acc_table}, 
-%% there are several ways to define, initialise
-%% and access a user defined table, for example 
-%% as in the example below:
-
 One particular usage question that has arisen, relative to the example
 in appendix~\ref{sec:example_gen}, is what to do when a table (or
 other evolution components) need to be accessed from different
@@ -3317,133 +3299,6 @@ external procedures, as explained in section~\ref{sec:acc_table}.
 
 
 
-%% \subsection{Sum rules}
-%% As has been discussed in section \ref{sec:sum-rules}, \hoppet
-%% allows the computation of (truncated) moments of general
-%% grid quantities, as required for example in the computation
-%% of various sum rules.
-%% An example of how truncated moments can
-%% be computed  can be found in the
-%% example program {\tt example\_f90/sumrules.f90}.
-%% Schematically, the outline of this example program 
-%% is the following:
-%% 
-%% \begin{lstlisting}
-%% 
-%%   ! set up parameters for grid
-%%   order = -6
-%%   ymax  = 20.0_dp  ! you may see significant violations with too small a ymax
-%%   dy    = 0.1_dp
-%% 
-%%   call SetDefaultEvolutionDu(dy/3.0_dp)  ! generally a good choice
-%% 
-%%   ! set up the grid itself -- we use 4 nested subgrids
-%%   call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
-%%   call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
-%%   call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
-%%   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
-%%   call InitGridDef(grid,gdarray(1:4),locked=.true.)
-%% 
-%%   ! initialise the splitting-function holder
-%%   nloop = 3
-%%   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
-%%        &                      nloop=nloop,nflo=3,nfhi=6)
-%%   
-%%   call AllocPDF(grid, pdf0)
-%%   pdf0 = unpolarized_dummy_pdf(xValues(grid))
-%%   Q0 = sqrt(2.0_dp)  ! the initial scale
-%% 
-%%   ! Compute various sum rules
-%%   call truncated_sum_rules(grid,pdf0)
-%% 
-%%   ! Sum rules at arbitrary values of Q
-%%   Q=100_dp
-%%   ! allocate and initialise the running coupling with a given
-%%   ! set of quark masses (NB: charm mass just above Q0).
-%%   quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
-%%   call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
-%%        &                   quark_masses = quark_masses)
-%% 
-%%   ! Evolve the initial PDF up to scale Q to test sum rules
-%%   call EvolvePDF(dh,pdf0,coupling,Q0,Q)
-%% 
-%%   ! Compute various sum rules at the scale Q
-%%    call truncated_sum_rules(grid,pdf0)
-%% 
-%% contains 
-%% 
-%%   !======================================================================
-%%   ! Routine which computes the momentum and valence (truncated)
-%%   ! sum rules from a given pdf set in an arbitary representation
-%%   !======================================================================
-%%   subroutine truncated_sum_rules(gd,pdf_sr)
-%%     implicit none
-%%     integer :: nf_rep, nf_lcl, ipdf
-%%     type(grid_def), intent(in)      :: gd
-%%     real(dp), intent(in)            :: pdf_sr(:,:)
-%%     real(dp), pointer               :: pdf_flav(:)
-%%     real(dp)                        :: moment_index, sum_rule
-%% 
-%%     ! (Truncated) moments are defined in terms of y as
-%%     !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
-%% 
-%%     call AllocGridQuant(gd,pdf_flav)
-%%         
-%%     ! Compute the (truncated) momentum sum rule
-%%     nf_rep = GetPdfRep(pdf_sr)
-%%     ! Construct the appropiate combination for the
-%%     ! given PDF representation
-%%     if(nf_rep == pdfr_Human) then
-%%        ! PDF set in human representation -> Sum all pdfs
-%%        pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
-%%     elseif(nf_rep.ge.0) then
-%%        ! PDF in evln representation -> Singlet + Gluon
-%%        pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
-%%     endif
-%% 
-%%     moment_index = 1.0_dp ! See definition of truncated moments above
-%%     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
-%%   
-%%     write(6,*) "Momentum sum rule = ",sum_rule, ", expected 1"
-%% 
-%%     ! Compute the (truncated) valence sum rules
-%% 
-%%     ! Total valence sum rule 
-%%     if(nf_rep == pdfr_Human) then
-%%        ! PDF set in human representation 
-%%        pdf_flav(:)= pdf_sr(:,1) - pdf_sr(:,-1)
-%%        do ipdf = 2,6
-%%           pdf_flav(:) = pdf_flav(:) + ( pdf_sr(:,ipdf) - pdf_sr(:,-ipdf) )
-%%        enddo
-%%     elseif(nf_rep.ge.0) then
-%%        ! PDF in evln representation
-%%        pdf_flav(:)=pdf_sr(:,-1)
-%%     endif
-%%     
-%%     moment_index = 0.0_dp
-%%     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
-%%     
-%%     write(6,*) "uv + dv sum rule = ",sum_rule, ", expected 3"
-%% 
-%%     ! uv - dv sum rule
-%%     if(nf_rep == pdfr_Human) then
-%%        ! PDF set in human representation 
-%%        pdf_flav(:)= pdf_sr(:,2) - pdf_sr(:,-2) - & 
-%%             & ( pdf_sr(:,1) - pdf_sr(:,-1) ) 
-%%     elseif(nf_rep.ge.0) then
-%%        ! PDF in evln representation 
-%%        pdf_flav(:)=pdf_sr(:,-2) 
-%%     endif
-%%     
-%%     moment_index = 0.0_dp
-%%     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
-%%     
-%%     write(6,*) "uv - dv sum rule = ",sum_rule, ", expected 1"
-%% 
-%%   end subroutine truncated_sum_rules
-%% 
-%% end program sumrules
-%% \end{lstlisting}
 
 %===================================================================
 

@@ -28,6 +28,10 @@ other ones that we have since found. We've also taken the opportunity
 to add some missing reference and clarify one or two points that
 seemed unclear to us.
 
+A full list of changes can be obtained from
+
+http://projects.hepforge.org/hoppet/trac/anydiff?new_path=%2Ftrunk%2Fdoc%2FHOPPET-v1-doc.tex&old_path=%2Ftrunk%2Fdoc%2FHOPPET-v1-doc.tex&new_rev=&old_rev=102
+
 
 4) Sum rules
 ------------
