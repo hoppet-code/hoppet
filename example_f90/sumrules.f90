@@ -1,10 +1,13 @@
 !! ------------------------------------------------------------
 !!
 !! An example program which shows how to compute
-!! sum rules (and general moments) for a given set of PDFS
+!! sum rules (and general moments) for a given set of PDFS.
+!! 
+!! This example also illustrates how to use the evolution
+!! in cases where one wishes to bypass a pdf_table.
 !!
-!! Another example is present in tabulation_example_2 
-!! (commented by default)
+!! Another example showing sum rules with a pdf_table is present 
+!! in tabulation_example_2
 !! -----------------------------------------------------
 
 program sumrules
@@ -21,8 +24,6 @@ program sumrules
   type(grid_def) :: grid, gdarray(4)
   !! holds the splitting functions
   type(dglap_holder) :: dh
-  !! hold the PDF tabulation
-  type(pdf_table)       :: table
   !! hold the coupling
   real(dp)               :: quark_masses(4:6)
   type(running_coupling) :: coupling
@@ -34,10 +35,6 @@ program sumrules
   real(dp) :: Q
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
-  integer  :: ix
-
-  real(dp) :: sum_rule, moment_index
-  integer  :: nf_rep,nf_lcl
 
   ! set up parameters for grid
   order = -6
@@ -156,9 +153,12 @@ contains
   !======================================================================
   subroutine truncated_sum_rules(gd,pdf_sr)
     implicit none
-    integer :: nf_rep, nf_lcl, ipdf
+    integer :: nf_rep, ipdf
     type(grid_def), intent(in)      :: gd
-    real(dp), intent(in)            :: pdf_sr(:,:)
+    ! remember lower bounds of (non-pointer) array arguments default
+    ! to 1 unless explicitly specified; here we specify them
+    ! because we want to access individual flavours below
+    real(dp), intent(in)            :: pdf_sr(0:,-6:)
     real(dp), pointer               :: pdf_flav(:)
     real(dp)                        :: moment_index, sum_rule
     !--------------------------------------------
