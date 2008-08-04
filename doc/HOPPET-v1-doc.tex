@@ -546,7 +546,7 @@ they are preserved under DGLAP evolution.
 The conversion from the \ttt{human} to the \ttt{evln}
 representations of PDFs requires that the number of
 active quark flavours $n_f$ be specified by the user, as described in
-section \ref{sec:evln-rep}.
+section~\ref{sec:evln-rep}.
 
 \begin{table}
 \begin{center}
@@ -791,9 +791,9 @@ be accessed indirectly through the \ttt{hoppet\_v1} module
 \end{lstlisting}
 Unless you are delving into the innards of  \hoppet, the latter is
 more convenient since it provides access to everything you are likely
-to need. Note that not all of \hoppet routines and functions
-can be accessed through the  \ttt{hoppet\_v1} module, in order
-to reduce the possibility of conflicts with the
+to need. Some of the more internal \hoppet routines and functions
+have however been left out of the  \ttt{hoppet\_v1} module, in order
+to reduce the likelihood of conflicts with objects in the
 user's namespace.
 
 %......................................................................
@@ -1232,7 +1232,7 @@ For a further example, see also section~\ref{sec:acc_table}.
 %
 Note that for $\ttt{ymax}= 12$ (a value used in many of the example
 programs), the truncation can underestimate the sum rules by a
-fraction of a percent. This underestimation is more important
+fraction of a percent. This underestimation is largest
 at higher values of $Q^2$, due to the perturbative growth of PDFs
 at small-$x$ at large-$Q^2$.
 
@@ -2348,9 +2348,9 @@ the following example for calculating the momentum sum rule
                                & sum(pdf_at_Q(:,-6:6),dim=2)) ! dim=2 -> sum over flav
 \end{lstlisting}
 where the \ttt{TruncatedMoment} function was described in detail in
-section~\ref{sec:sum-rules}. Let us emphasize again that
-if the goal is to extract accurately sum rules or in general
-full (not truncated) moments, the value of {\tt ymax} of the
+section~\ref{sec:sum-rules}. Recall that
+if the goal is to extract accurate sum-rule estimates or in general
+full (non-truncated) moments, the value of {\tt ymax} of the
 grid should be large enough.
 
 As with all other objects, a \ttt{pdf\_table} object can be deleted
@@ -2987,6 +2987,7 @@ French Agence Nationale de la Recherche.
 \label{sec:example_program}
 
 \subsection{General interface}
+\label{sec:example_gen}
 
 The program below generates a subset of table~15 of the NNLO benchmark
 evolution in the second reference of~\cite{Benchmarks}. It is to be
@@ -3233,183 +3234,216 @@ end program tabulation_example_streamlined
 \end{lstlisting}
 
 
-\subsection{Accessing tables}
+\subsection{Other general-interface examples}
 
-As has been mentioned in section~\ref{sec:acc_table}, 
-there are several ways to define, initialise
-and access a user defined table, for example 
-as in the example below:
+To help better illustrate the usage of the general interface,
+additional examples are available in the \ttt{examples\_f90/} and
+\ttt{benchmarking/} directories. One,
+\ttt{examples\_f90/tabulation\_example\_2.f90}, summarised briefly
+below, illustrates how to distribute initialisation and evolution
+tasks across different parts of the program, and also illustrates how
+to verify sum rules. A second example for sum rules,
+\ttt{examples\_f90/sumrules.f90}, also illustrates the use of
+evolution without tabulation.
+%
+The programs in the \ttt{benchmarking/} directory are the ones that
+have been used in benchmark PDF evolution
+comparisons~\cite{Benchmarks} and in determining the accuracies and
+speeds shown in section~\ref{sec:benchmarks}.
+
+%% As has been mentioned in section~\ref{sec:acc_table}, 
+%% there are several ways to define, initialise
+%% and access a user defined table, for example 
+%% as in the example below:
+
+One particular usage question that has arisen, relative to the example
+in appendix~\ref{sec:example_gen}, is what to do when a table (or
+other evolution components) need to be accessed from different
+subprograms, as would be the case in a typical global-fit code.  The
+answer is that the derived-type variables that should persist outside
+a specific subroutine call must be placed in a \ttt{module} that is
+then accessed from each of the subprograms. The module might be
 \begin{lstlisting}
-module external_table_module ! common location for your table
+! common location for your table and other evolution components
+module external_table_module 
    use hoppet_v1
    implicit none
    type(pdf_table) :: table
    type(dglap_holder) :: dh
    type(running_coupling) :: coupling
-   type(grid_def) :: grid   ! Optional
+   type(grid_def) :: grid  ! here for convenience, not strictly necessary
 end module external_table_module
 \end{lstlisting}
-Note that one might need to include in the common module objects
-like \texttt{dh} or \ttt{coupling}, since these are
-required in other procedures:
+Here \texttt{table}, \texttt{dh} and \ttt{coupling} have all been
+placed in the module insofar as they are initialised/used in more than
+one location in the schematic subprograms below
+%Note that one might need to include in the common module objects
+%like \texttt{dh} or \ttt{coupling}, since these are
+%required in other procedures:
 \begin{lstlisting}
-
 subroutine A
    use external_table_module
-   call PreEvolvePdfTable(table, Q0, dh, coupling)
+   ! initialisation/allocation of grid, dh, table, coupling, ...
 end subroutine A
 
 subroutine B
    use external_table_module
-   ...
-   call EvolvePdfTable(table,pdf0)
+   call PreEvolvePdfTable(table, Q0, dh, coupling)
 end subroutine B
 
 subroutine C
    use external_table_module
    ...
-   call EvalPdfTable_xQ(table, x, Q, pdf)
+   call EvolvePdfTable(table,pdf0)
 end subroutine C
 
-\end{lstlisting}
+subroutine D
+   use external_table_module
+   ...
+   call EvalPdfTable_xQ(table, x, Q, pdf)
+end subroutine D
 
+\end{lstlisting}
+%
 A more detailed description of the above technique 
 can be found in a 
 second example program, called \ttt{tabulation\_example\_2.f90},
-which is available at the \ttt{example\_f90} 
+which is available in the \ttt{example\_f90} 
 directory. It generates exactly
-the same output as the previous example program (with additional
-output about truncated moments), however it
-provides an example of how to access a table from
+the same output as the previous example program, as well as additional
+output about truncated moments (sum rules), while
+providing an example of how to access a table from
 external procedures, as explained in section~\ref{sec:acc_table}.
 
-\subsection{Sum rules}
-As has been discussed in section \ref{sec:sum-rules}, \hoppet
-allows the computation of (truncated) moments of general
-grid quantities, as required for example in the computation
-of various sum rules.
-An example of how truncated moments can
-be computed  can be found in the
-example program {\tt example\_f90/sumrules.f90}.
-Schematically, the outline of this example program 
-is the following:
 
-\begin{lstlisting}
 
-  ! set up parameters for grid
-  order = -6
-  ymax  = 20.0_dp  ! you may see significant violations with too small a ymax
-  dy    = 0.1_dp
-
-  call SetDefaultEvolutionDu(dy/3.0_dp)  ! generally a good choice
-
-  ! set up the grid itself -- we use 4 nested subgrids
-  call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
-  call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
-  call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
-  call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
-  call InitGridDef(grid,gdarray(1:4),locked=.true.)
-
-  ! initialise the splitting-function holder
-  nloop = 3
-  call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
-       &                      nloop=nloop,nflo=3,nfhi=6)
-  
-  call AllocPDF(grid, pdf0)
-  pdf0 = unpolarized_dummy_pdf(xValues(grid))
-  Q0 = sqrt(2.0_dp)  ! the initial scale
-
-  ! Compute various sum rules
-  call truncated_sum_rules(grid,pdf0)
-
-  ! Sum rules at arbitrary values of Q
-  Q=100_dp
-  ! allocate and initialise the running coupling with a given
-  ! set of quark masses (NB: charm mass just above Q0).
-  quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
-  call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
-       &                   quark_masses = quark_masses)
-
-  ! Evolve the initial PDF up to scale Q to test sum rules
-  call EvolvePDF(dh,pdf0,coupling,Q0,Q)
-
-  ! Compute various sum rules at the scale Q
-   call truncated_sum_rules(grid,pdf0)
-
-contains 
-
-  !======================================================================
-  ! Routine which computes the momentum and valence (truncated)
-  ! sum rules from a given pdf set in an arbitary representation
-  !======================================================================
-  subroutine truncated_sum_rules(gd,pdf_sr)
-    implicit none
-    integer :: nf_rep, nf_lcl, ipdf
-    type(grid_def), intent(in)      :: gd
-    real(dp), intent(in)            :: pdf_sr(:,:)
-    real(dp), pointer               :: pdf_flav(:)
-    real(dp)                        :: moment_index, sum_rule
-
-    ! (Truncated) moments are defined in terms of y as
-    !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
-
-    call AllocGridQuant(gd,pdf_flav)
-        
-    ! Compute the (truncated) momentum sum rule
-    nf_rep = GetPdfRep(pdf_sr)
-    ! Construct the appropiate combination for the
-    ! given PDF representation
-    if(nf_rep == pdfr_Human) then
-       ! PDF set in human representation -> Sum all pdfs
-       pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
-    elseif(nf_rep.ge.0) then
-       ! PDF in evln representation -> Singlet + Gluon
-       pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
-    endif
-
-    moment_index = 1.0_dp ! See definition of truncated moments above
-    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
-  
-    write(6,*) "Momentum sum rule = ",sum_rule, ", expected 1"
-
-    ! Compute the (truncated) valence sum rules
-
-    ! Total valence sum rule 
-    if(nf_rep == pdfr_Human) then
-       ! PDF set in human representation 
-       pdf_flav(:)= pdf_sr(:,1) - pdf_sr(:,-1)
-       do ipdf = 2,6
-          pdf_flav(:) = pdf_flav(:) + ( pdf_sr(:,ipdf) - pdf_sr(:,-ipdf) )
-       enddo
-    elseif(nf_rep.ge.0) then
-       ! PDF in evln representation
-       pdf_flav(:)=pdf_sr(:,-1)
-    endif
-    
-    moment_index = 0.0_dp
-    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
-    
-    write(6,*) "uv + dv sum rule = ",sum_rule, ", expected 3"
-
-    ! uv - dv sum rule
-    if(nf_rep == pdfr_Human) then
-       ! PDF set in human representation 
-       pdf_flav(:)= pdf_sr(:,2) - pdf_sr(:,-2) - & 
-            & ( pdf_sr(:,1) - pdf_sr(:,-1) ) 
-    elseif(nf_rep.ge.0) then
-       ! PDF in evln representation 
-       pdf_flav(:)=pdf_sr(:,-2) 
-    endif
-    
-    moment_index = 0.0_dp
-    sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
-    
-    write(6,*) "uv - dv sum rule = ",sum_rule, ", expected 1"
-
-  end subroutine truncated_sum_rules
-
-end program sumrules
-\end{lstlisting}
+%% \subsection{Sum rules}
+%% As has been discussed in section \ref{sec:sum-rules}, \hoppet
+%% allows the computation of (truncated) moments of general
+%% grid quantities, as required for example in the computation
+%% of various sum rules.
+%% An example of how truncated moments can
+%% be computed  can be found in the
+%% example program {\tt example\_f90/sumrules.f90}.
+%% Schematically, the outline of this example program 
+%% is the following:
+%% 
+%% \begin{lstlisting}
+%% 
+%%   ! set up parameters for grid
+%%   order = -6
+%%   ymax  = 20.0_dp  ! you may see significant violations with too small a ymax
+%%   dy    = 0.1_dp
+%% 
+%%   call SetDefaultEvolutionDu(dy/3.0_dp)  ! generally a good choice
+%% 
+%%   ! set up the grid itself -- we use 4 nested subgrids
+%%   call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
+%%   call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
+%%   call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
+%%   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
+%%   call InitGridDef(grid,gdarray(1:4),locked=.true.)
+%% 
+%%   ! initialise the splitting-function holder
+%%   nloop = 3
+%%   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
+%%        &                      nloop=nloop,nflo=3,nfhi=6)
+%%   
+%%   call AllocPDF(grid, pdf0)
+%%   pdf0 = unpolarized_dummy_pdf(xValues(grid))
+%%   Q0 = sqrt(2.0_dp)  ! the initial scale
+%% 
+%%   ! Compute various sum rules
+%%   call truncated_sum_rules(grid,pdf0)
+%% 
+%%   ! Sum rules at arbitrary values of Q
+%%   Q=100_dp
+%%   ! allocate and initialise the running coupling with a given
+%%   ! set of quark masses (NB: charm mass just above Q0).
+%%   quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
+%%   call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
+%%        &                   quark_masses = quark_masses)
+%% 
+%%   ! Evolve the initial PDF up to scale Q to test sum rules
+%%   call EvolvePDF(dh,pdf0,coupling,Q0,Q)
+%% 
+%%   ! Compute various sum rules at the scale Q
+%%    call truncated_sum_rules(grid,pdf0)
+%% 
+%% contains 
+%% 
+%%   !======================================================================
+%%   ! Routine which computes the momentum and valence (truncated)
+%%   ! sum rules from a given pdf set in an arbitary representation
+%%   !======================================================================
+%%   subroutine truncated_sum_rules(gd,pdf_sr)
+%%     implicit none
+%%     integer :: nf_rep, nf_lcl, ipdf
+%%     type(grid_def), intent(in)      :: gd
+%%     real(dp), intent(in)            :: pdf_sr(:,:)
+%%     real(dp), pointer               :: pdf_flav(:)
+%%     real(dp)                        :: moment_index, sum_rule
+%% 
+%%     ! (Truncated) moments are defined in terms of y as
+%%     !  M(moment_index) = \int_0^ymax dy exp( - y * moment_index) * xpdf(y)
+%% 
+%%     call AllocGridQuant(gd,pdf_flav)
+%%         
+%%     ! Compute the (truncated) momentum sum rule
+%%     nf_rep = GetPdfRep(pdf_sr)
+%%     ! Construct the appropiate combination for the
+%%     ! given PDF representation
+%%     if(nf_rep == pdfr_Human) then
+%%        ! PDF set in human representation -> Sum all pdfs
+%%        pdf_flav(:)=sum(pdf_sr(:,-6:6),dim=2)
+%%     elseif(nf_rep.ge.0) then
+%%        ! PDF in evln representation -> Singlet + Gluon
+%%        pdf_flav(:)=pdf_sr(:,0) + pdf_sr(:,1)
+%%     endif
+%% 
+%%     moment_index = 1.0_dp ! See definition of truncated moments above
+%%     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
+%%   
+%%     write(6,*) "Momentum sum rule = ",sum_rule, ", expected 1"
+%% 
+%%     ! Compute the (truncated) valence sum rules
+%% 
+%%     ! Total valence sum rule 
+%%     if(nf_rep == pdfr_Human) then
+%%        ! PDF set in human representation 
+%%        pdf_flav(:)= pdf_sr(:,1) - pdf_sr(:,-1)
+%%        do ipdf = 2,6
+%%           pdf_flav(:) = pdf_flav(:) + ( pdf_sr(:,ipdf) - pdf_sr(:,-ipdf) )
+%%        enddo
+%%     elseif(nf_rep.ge.0) then
+%%        ! PDF in evln representation
+%%        pdf_flav(:)=pdf_sr(:,-1)
+%%     endif
+%%     
+%%     moment_index = 0.0_dp
+%%     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
+%%     
+%%     write(6,*) "uv + dv sum rule = ",sum_rule, ", expected 3"
+%% 
+%%     ! uv - dv sum rule
+%%     if(nf_rep == pdfr_Human) then
+%%        ! PDF set in human representation 
+%%        pdf_flav(:)= pdf_sr(:,2) - pdf_sr(:,-2) - & 
+%%             & ( pdf_sr(:,1) - pdf_sr(:,-1) ) 
+%%     elseif(nf_rep.ge.0) then
+%%        ! PDF in evln representation 
+%%        pdf_flav(:)=pdf_sr(:,-2) 
+%%     endif
+%%     
+%%     moment_index = 0.0_dp
+%%     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
+%%     
+%%     write(6,*) "uv - dv sum rule = ",sum_rule, ", expected 1"
+%% 
+%%   end subroutine truncated_sum_rules
+%% 
+%% end program sumrules
+%% \end{lstlisting}
 
 %===================================================================
 
