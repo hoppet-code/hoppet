@@ -2321,7 +2321,7 @@ There are instances in which it is useful to extract the PDF at all
 $x$ values for a given $Q$. This is the case, for efficiency reasons,
 if one wishes to evaluate it at very many $x$ values and a single $Q$
 value. It's also the case if one wishes to evaluate
-sum rules. One then uses uses the routine \ttt{EvalPdfTable\_Q}, as in
+sum rules. One then uses the routine \ttt{EvalPdfTable\_Q}, as in
 the following example for calculating the momentum sum rule
 \begin{lstlisting}
   real(dp), pointer :: pdf_at_Q(:,:)
@@ -2810,9 +2810,9 @@ the number of $x,Q$ points is rather large ($\gtrsim 3000$), by
 $n_{xQ} t_{xQ}$.\footnote{
 With these numbers, it is easy to check that a global fit with
 $n_{xQ}\sim 3000$ and $n_i\sim 10^5$ could be completed
-in less than half and hour, assuming cached evolution
+in less than half an hour, assuming cached evolution
 and the use of commercial compilers.} We note (with regret)\ the
-considerably speed advantage (almost an order
+considerable speed advantage (almost an order
 of magnitude) that is to be had with commercial
 compilers.
 
@@ -3259,9 +3259,6 @@ end module external_table_module
 Here \texttt{table}, \texttt{dh} and \ttt{coupling} have all been
 placed in the module insofar as they are initialised/used in more than
 one location in the schematic subprograms below
-%Note that one might need to include in the common module objects
-%like \texttt{dh} or \ttt{coupling}, since these are
-%required in other procedures:
 \begin{lstlisting}
 subroutine A
    use external_table_module
