@@ -1,5 +1,8 @@
 2008-08-04  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* example_f90/sumrules.f90 (truncated_sum_rules): 
+	  removed extraneous writes
+
 	* tarit.sh: 
 	  eliminated problem with multiple versions of .tex file ending up
 	  in tarball
