@@ -1,7 +1,7 @@
 NEWS for HOPPET
 
 ======================================================================
-Release 1.1.1  July 2008
+Release 1.1.1  August 2008
 ======================================================================
 
 . added TruncatedMoment routine (e.g. for verifying sum-rules)
@@ -9,6 +9,7 @@ Release 1.1.1  July 2008
 . added ability to extract a whole pdf(x,flav) at a given Q from a
   tabulation, with the EvalPdfTable_Q routine
 
+. clarifications and other small changes in the documentation
 
 ======================================================================
 Release 1.1.0  April 2008
