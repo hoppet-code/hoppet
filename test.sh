@@ -9,7 +9,7 @@
 
 # build lib
 cd src/
-make clean
+make realclean
 make -j2
 cd ..
 
