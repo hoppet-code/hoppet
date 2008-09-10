@@ -1169,7 +1169,7 @@ contains
        if (y > grid%ymax*(one+warn_tolerance) .or. y < -warn_tolerance) then
           write(0,*) 'WgtGridQuant: &
                &requested function value outside y range'
-          write(0,*) 'y = ', y, 'ymax=',grid%ymax
+          write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
           stop
        end if
        

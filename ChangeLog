@@ -1,3 +1,8 @@
+2008-09-10  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* src/convolution.f90: 
+	  small mod to out-of-range error message
+
 2008-08-04  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* example_f90/sumrules.f90 (truncated_sum_rules): 
