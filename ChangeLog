@@ -1,5 +1,8 @@
 2008-09-10  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
+	* benchmarking/prec_and_timing.f90: 
+	  updated comments and fixed small warning that appears with gfortran.
+
 	* test.sh: 
 	  replaced make clean with realclean in some places (safer)
 

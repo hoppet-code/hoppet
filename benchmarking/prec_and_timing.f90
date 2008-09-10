@@ -26,6 +26,9 @@
 !   -exactsp          use exact 3-loop split-fns
 !   -exactth          use exact 3-loop mass thresholds
 !
+! BEWARE: older copies of executables have ymax=5 and Qmax=100(?). Explicitly
+!         specify -ymax 11.5 and -Qmax 1e4 to get sensible timings.
+! 
 !======================================================================
 module pdf_initial_condition
   use hoppet_v1
@@ -244,7 +247,6 @@ contains
     write(6,'(a,4f10.6)')  '# dymax = ', maxval(grid%subgd(:)%dy)
     write(6,'(a,4i10)')    '# dnsty = ', nint(maxval(grid%subgd(:)%dy)/grid%subgd(:)%dy)
     write(6,'(a,4f10.6)')  '# ymax  = ', grid%subgd(:)%ymax
-         &
     write(6,'(a,4i10)'  )  '# order = ', grid%subgd(:)%order
     write(6,'(a,4es10.2)') '# eps   = ', grid%subgd(:)%eps
     
