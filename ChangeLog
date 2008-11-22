@@ -1,3 +1,16 @@
+2008-11-22  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/dglap_choices.f90 (dglap_choices): 
+	* src/dglap_holders.f90 (InitDglapHolder): 
+
+    	  Following discussions with Wei-Tian Deng, introduced
+	  factscheme_FragMSbar, and added support for it at 1-loop; tested
+	  the momentum sum-rule and it is consistent.
+
+	  Note that for flavour thresholds to be dealt with correctly, in
+	  the initial condition one must set e.g. D_b(x,Q0^2) =
+	  D_b(x,mb^2) for Q0 < mb.
+
 2008-09-10  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* benchmarking/prec_and_timing.f90: 
