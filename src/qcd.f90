@@ -20,7 +20,7 @@ module qcd
   !integer, parameter, public :: nf_u = nf_def, nf_d = 0
 
   ! beta2 is from Tarasov JINR P2-82-900 (Dubna 1982)
-  ! Larin NIKHEF-H/92-18 hep-ph/9302240
+  ! Larin & Vermaseren NIKHEF-H/92-17 hep-ph/9302208
   real(dp), public :: beta0 = (11*ca_def - four*tf_def)/(12*pi)
   real(dp), public :: twopi_beta0 = (11*ca_def - four*tf_def)/6.0_dp
   real(dp), public :: beta1 = (17*ca_def**2 - tf_def*(10*ca_def + 6*cf_def))&
