@@ -55,8 +55,8 @@ module qcd
   !   though it is not the original referece, just a "container"
   !-- expression not known for variable colour factors?
   !   NB: they express nf-1 in terms of nf...
-  !real(dp), public :: alphastep20_pole  = 11.0_dp/72.0_dp/pisq
-  !real(dp), public :: alphastep20_pole  = 7.0_dp/24.0_dp/pisq
+  !real(dp), public :: alphastep20_pole  = -11.0_dp/72.0_dp/pisq
+  !real(dp), public :: alphastep20_pole  =   7.0_dp/24.0_dp/pisq
   real(dp), public :: alphastep20_pole  = &
        &(15.0_dp/16.0_dp*cf_def-two/9.0_dp*ca_def) * tr_def/pisq
 

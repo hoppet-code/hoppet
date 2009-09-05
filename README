@@ -34,10 +34,12 @@ You will need a Fortran 95 compiler to compile this package.
 
 The free g95 (www.g95.org) compiler is one option, though its
 executables are fairly slow. It is easy to install if you don't
-already have a recent version on your system. At the time of writing
-(April 2007) the free gfortran compiler produced executables that
-crash or that give incorrect answers and so is not currently
-recommended.
+already have a recent version on your system.
+
+The gfortran compiler is becoming fairly widespread. Versions upwards
+of a recent 4.3 are OK. Older versions generate incorrect code for
+HOPPET and should be avoided. The code is acceptably fast, though not
+quite as fast as with commercial compilers.
 
 The intel (ifort) compiler (versions 8.1.033 upwards) exists in a
 semi-free version for non-commercial use under linux and produces fast
@@ -47,50 +49,35 @@ The release has also been tested with the lahey lf95 commercial
 compiler, which also generates fast code.
 
 
-----------------------------------------------------------------------
 Compilation
 -----------
+For details see the INSTALL file. To get moving quickly, just specify
+an installation prefix and a fortran compiler (FC), and then do
 
-Makefiles for f90/95 are generated automatically using the perl script
-scripts/makef95makefile, called from scripts "mkmk" in each
-directory. To generate the full set of makefiles for your compiler,
-type (from the main directory)
+  ./configure --prefix="..."  FC="..."
+  make 
+  make check
+  make install     [if you're interested]
 
-     ./mkmk compiler-name   
+This is not autotools based: if you're used to more advanced usage of
+autotools scripts, you'll be disappointed here...
 
-where compiler-name can be g95,lf95,ifort,gfortran (the latter may
-give executables that crash though). This will run subsiduary mkmk
-files and also set files .compiler in each directory which store the
-information about the compiler being used. If you add new programs to
-a directory, they will automatically be taken into account when you
-rerun mkmk.
+Example programs
+----------------
 
-To compile the hoppet library
-
-     cd src/
-     # compile the library
-     make
-
-To compile the f90 example program 
-
-     cd ../example_f90
-     # compile the program
-     make tabulation_example
-     # run the program
-     ./tabulation_example
-
-The output should be compared to the file
-"tabulation_example.default_output", which contains the correct
-results. 
+The main example program is examples_f90/tabulation_example.f90
 
 An equivalent program with the startup, pdf initialisation and
 evolution spread across different subroutines is given as
 tabulation_example_2.
 
-Compiling f77 example programs (using g77) is a little trickier
-because of the need to include the correct f95 libraries. Accordingly
-the Makefile is not generated automatically -- look inside the
-suppplied Makefile to see what needs doing.
+An equivalent program based on the streamlined interface is given as
+tabulation_example_streamlined.
+
+Compiling f77 example programs (examples_f77) using g77 is a little
+trickier because of the need to include the correct f95
+libraries. Accordingly the Makefile is not generated automatically --
+look inside the suppplied Makefile to see what needs doing.
 
      cd ../example_f77
      # <edit the Makefile directly>

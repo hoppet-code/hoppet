@@ -1,0 +1,56 @@
+#!/usr/bin/perl -w
+#
+# script to configure hoppet. To find out more type
+#
+# ./configure --help 
+#
+# GPS created 2009-09-05
+#----------------------------------------------------------------------
+use Cwd;
+
+$usage="
+Usage: 
+  ./configure [--prefix=...] [FC='...'] [FFLAGS='...'] [LDFLAGS='...']
+
+  --prefix='...'      sets the location for installation
+  FC='...'            sets the fortran (and f90) compiler
+  FFLAGS='...'        sets the fortran (and f90) compiler options
+  LDLAGS='...'        sets the link options
+";
+
+
+
+if ($#ARGV >=0 && ($ARGV[0] eq "-h" || $ARGV[0] eq "--help")) {
+  print "$usage";
+  exit;
+}
+
+foreach (@ARGV) {push @args, "\"".$_."\"";}
+
+@dirs=split(" ","src example_f90 benchmarking benchmarking/test_acc");
+
+$topdir = getcwd;
+
+
+chdir "src";
+
+# now generate the makefiles
+foreach $dir (@dirs) {
+  chdir $dir;
+  print "Creating makefile in ".getcwd."\n";
+  # find out what we're already up to
+  $mkmk=`grep -v '^#' mkmk | grep makef95makefile`;
+  chomp($mkmk);
+  $mkmk =~ s/\$[^ ]+//g;
+  $mkmk =~ s/-remake.*//;
+  $mkmk .= " ".join(" ",@args);
+  #print $mkmk."\n";
+  system($mkmk);
+  chdir $topdir;
+}
+
+# write a file config.log
+open (LOG,">config.log") || die "Could not open config.log";
+print LOG "# the last configure that was run was\n";
+print LOG "$0 ".join(" ",@args)."\n";
+close LOG;

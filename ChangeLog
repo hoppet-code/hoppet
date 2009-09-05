@@ -1,3 +1,34 @@
+2009-09-05  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* INSTALL: 
+	  moved build / installation instructions into here.
+	
+	* README: 
+	  updated this for new build procedure
+
+	* configure:     *** ADDED ***
+	  script to allow for new configure/make procedure (autotools
+	  lookalike, at least in some simple respects). Is now the default.
+
+	* Makefile:      *** ADDED ***
+	  top-level Makefile added to go with the configure structure.
+
+	* scripts/makef95makefile: 
+	  added make install functionality, specification of compiler and
+	  its options via FC and FFLAGS.
+
+        * scripts/check   *** ADDED ***
+	  for running a check on the output.
+
+	* test.sh: 
+	  switched this over to the new build and test procedure
+
+	* scripts/install-sh:      *** ADDED ***
+	  to help with installation
+
+	* src/f77_pdftab.h: *** removed ***
+	  this was obsolete, so it has been removed
+
 2009-07-27  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/qcd.f90 (qcd): 

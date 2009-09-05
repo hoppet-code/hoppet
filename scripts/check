@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# Script that runs a quick check that the results are sensible
+# 
+# Run it from the top-level directory as scripts/check
+#
+# Created by GPS on 2009-09-05
+#----------------------------------------------------------------------
+
+example_f90/tabulation_example | grep -vi '^[a-z]' | tee check.tmp.new
+
+grep -vi '^[a-z]' example_f90/tabulation_example.default_output > check.tmp.orig
+
+diff check.tmp.new check.tmp.orig > check.tmp.diff
+checkwc=`cat check.tmp.diff| wc -l `
+
+  echo
+if [[ $checkwc == 0 ]]; then
+  echo check PASSED
+  rm -f check.tmp.new check.tmp.orig check.tmp.diff
+else
+  echo check FAILED: look at 'check.tmp.*' to see differences
+  exit 1;
+fi
+
+

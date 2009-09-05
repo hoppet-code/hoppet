@@ -9,6 +9,15 @@
 #   first arg = PROGNAME (or a library name, for making a lib of all OBJ)
 #   Subsequent options: 
 #        -comp xxx       sets compiler
+#        FC="..."        alternative way to set compiler 
+#
+#        FFLAGS="..."    sets compiler flags
+#        LDFLAGS="..."   sets compiler flags
+#
+#        --prefix="..."  sets the install prefix
+#        --install-script="..."
+#                        indicates where to find the script install-sh;
+#                        if not specified, then install target will be left empty
 #
 #        -lcern          sets cernlib options
 #
@@ -30,6 +39,7 @@
 #
 #        -postlib        adds command after all else
 #
+
 #   allows presence of multiple (up to 7) "use module_x" on one line, 
 #   separated by semi-colons 
 #
@@ -81,7 +91,8 @@ elsif ($OSNAME eq 'linux')  {
   chomp($libg2cDIR);
   print "libg2cDIR is $libg2cDIR\n";
   # set the default compiler to be g95
-  $compiler = "g95";
+  #$compiler = "g95";
+  $compiler = "gfortran";
   #if ($hostname =~ "pcth[0-9]+" || $hostname =~ "lxplus.*") {
   #  $compiler="portland";}
   #elsif ($hostname =~ ".*lpthe.*" || $hostname =~ "thalie" ){
@@ -91,7 +102,8 @@ elsif ($OSNAME eq 'linux')  {
   #  #$compiler = "absoft";
   #  $compiler="laheycern";
   #}
-  $make="gmake"; }
+  $make="gmake"; 
+}
 
 # not always in the obvious place
 # need to work around the fact that thalie does not give lpthe in hostname...
@@ -128,6 +140,10 @@ $xtralibs="";
 $xtraincl="";
 $postlibs="";
 $remake="";
+$prefix="/usr/local";
+$userFFLAGS="";
+$userLDLAGS="";
+$installScript="";
 #--
 $i=1;
 
@@ -137,18 +153,25 @@ $i=1;
 while ($i <= $#ARGV) {
   $OPT = $ARGV[$i++];
   chomp($OPT);
-  if    ($OPT eq '-comp')   { $compiler = $ARGV[$i++];}
-  elsif ($OPT eq '-lcern')  { $cernlib = "-lmathlib -lkernlib"; }
-  elsif ($OPT eq '-lpcern') { $cernlib = "-lmathlib -lkernlib -lpacklib"; }
-  elsif ($OPT eq "-g77libs"){ $g77libs=1; }
-  elsif ($OPT eq "-lio")    { $iolib=1; }
-  elsif ($OPT eq "-lla95")  { $lapack=1; }
-  elsif ($OPT eq "-post")   { $postfile=$ARGV[$i++]; }
-  elsif ($OPT eq "-remake") { $remake=$ARGV[$i++];}
-  elsif ($OPT eq "-srcdir") { push @extra_dirs,$ARGV[$i++]."/";}
-  elsif ($OPT eq "-postlib"){ $postlibs .= $ARGV[$i++]." ";}
-  elsif ($OPT =~ "^-I")     { $xtraincl .= $OPT." ";}
-  else                      { $xtralibs .= $OPT." "; }
+  if    ($OPT eq '-comp')      { $compiler = $ARGV[$i++];}
+  elsif ($OPT eq '-lcern')     { $cernlib = "-lmathlib -lkernlib"; }
+  elsif ($OPT eq '-lpcern')    { $cernlib = "-lmathlib -lkernlib -lpacklib"; }
+  elsif ($OPT eq "-g77libs")   { $g77libs=1; }
+  elsif ($OPT eq "-lio")       { $iolib=1; }
+  elsif ($OPT eq "-lla95")     { $lapack=1; }
+  elsif ($OPT eq "-post")      { $postfile=$ARGV[$i++]; }
+  elsif ($OPT eq "-remake")    { $remake=$ARGV[$i++];}
+  elsif ($OPT eq "-srcdir")    { push @extra_dirs,$ARGV[$i++]."/";}
+  elsif ($OPT eq "-postlib")   { $postlibs .= $ARGV[$i++]." ";}
+  elsif ($OPT =~ /^-I/)        { $xtraincl .= $OPT." ";}
+  elsif ($OPT =~ /^-+prefix$/) { $prefix= $ARGV[$i++];}
+  elsif ($OPT =~ /^-+install-script$/) { $installScript=$ARGV[$i++];}
+  elsif ($OPT =~ /^-+prefix=(.*)/) { $prefix= $1;}
+  elsif ($OPT =~ /^-+install-script=(.*)/) { $installScript=$1;}
+  elsif ($OPT =~ /^FC=(.*)/)   { $compiler = $1;}
+  elsif ($OPT =~ /^FFLAGS=(.*)/){ $userFFLAGS = $1;}
+  elsif ($OPT =~ /^LDLAGS=(.*)/){ $userLDLAGS = $1;}
+  else                         { $xtralibs .= $OPT." "; }
 }
 #print "Compiler is ".$compiler."\n";
 
@@ -235,9 +258,9 @@ elsif ($compiler eq 'g95') {
 }
 elsif ($compiler eq 'gfortran') {
   $FC         = "gfortran";
-  $FFLAGS     = "-O3 -march=i686";
+  $FFLAGS     = "-O3";
   $F90        = "gfortran";
-  $F90FLAGS   = "-O3 -march=i686";
+  $F90FLAGS   = "-O3";
   $LDFLAGS    = "";
   $IOINC      = "-I".$ENV{HOME}."/utils/libf90-gfortran";
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-gfortran -liof90";
@@ -312,7 +335,22 @@ elsif ($compiler eq 'portland') {
 }
 else {
 #======================================================================
-  die "unknown compiler: ".$compiler.". Cannot procede\n";}
+  print STDERR "Unknown compiler: ".$compiler.". Attempting to set reasonable defaults\n";
+  $FC       = $compiler;
+  $F90      = $compiler;
+  $FFLAGS   = "-O";
+  $F90FLAGS = "-O";
+}
+
+# allow for user-set options
+if ($userFFLAGS) {
+  $FFLAGS   = $userFFLAGS;
+  $F90FLAGS = $userFFLAGS;
+}
+if ($userLDFLAGS) {
+  $LDFLAGS  = $userLDFLAGS;
+}
+
 
 #---------------------------------------------
 print "Using '".$compiler."' compiler\n";
@@ -373,7 +411,7 @@ print MAKEFILE "# ".$0;
 $i = 0;
 $commandArgs = "";
 while ($i <= $#ARGV) {
-  $commandArgs .= " ".$ARGV[$i++]
+  $commandArgs .= " \"".$ARGV[$i++]."\""
 }
 print MAKEFILE $commandArgs;
 print MAKEFILE "\n";
@@ -391,6 +429,8 @@ print MAKEFILE "PROG =\t$ARGV[0]\n\n";
 if (@extra_dirs) {print MAKEFILE "VPATH = ".join(":",@extra_dirs)."\n";}
 push @extra_dirs, "";
 foreach (@extra_dirs) {push @ffiles,<$_*.f $_*.f90 $_*.F>}
+foreach (@extra_dirs) {push @cinclude,<$_*.h $_*.hh>}
+
 
 # now get object name for each source name
 foreach (@ffiles) {
@@ -432,6 +472,9 @@ print MAKEFILE "\n\n";
 print MAKEFILE "SRCS =\t";
 #push @srcs,'$(PROG).f90' unless $MAKELIB;
 foreach (<*.c>) {push @srcs,$_};
+
+
+
 
 &PrintWords(8, 0, @srcs);
 print MAKEFILE "\n\n";
@@ -477,7 +520,7 @@ print MAKEFILE "LDFLAGS = ".$LDFLAGS." \n\n";
 
 
 
-
+#
 # make
 #
 $ALLXTRAS='';
@@ -522,6 +565,11 @@ print MAKEFILE "\trm -f  \$(ALLPROGOBJ) \$(OBJS) \$(POSTOBJS) \n\n";
 print MAKEFILE "clean:\n";
 print MAKEFILE "\trm -f  \$(ALLPROGOBJ) \$(OBJS) \$(POSTOBJS) *.mod *.d\n\n";
 #
+# make distclean
+#
+print MAKEFILE "distclean: realclean\n";
+print MAKEFILE "\trm -f Makefile\n";
+#
 # make realclean
 #
 print MAKEFILE "realclean:\n";
@@ -532,6 +580,24 @@ print MAKEFILE "\trm -f $LIBNAME \$(ALLPROG) \$(ALLPROGOBJ) \$(OBJS) \$(POSTOBJS
 #
 print MAKEFILE "make:\n";
 print MAKEFILE "\t$remake\n\n";
+
+#
+# make install (ignores the .mod files for now...)
+# only done if installScript was specified on command line
+# 
+if ($installScript) {
+  print MAKEFILE "install: $LIBNAME $PROG ".join(" ",@cinclude)."\n";
+  if ($LIBNAME) {
+    print MAKEFILE "\t$installScript $LIBNAME $prefix/lib/$LIBNAME\n";
+  }
+  if ($PROG) {
+    print MAKEFILE "\t$installScript $PROG $prefix/$PROGNAME\n";
+  }
+  foreach (@cinclude) {print MAKEFILE "\t$installScript $_ $prefix/include/$_\n"};
+  print MAKEFILE "\n";
+} else {
+  print MAKEFILE "install:\n\n";
+}
 
 #
 # Make .f90 a valid suffix

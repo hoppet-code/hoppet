@@ -1,6 +1,15 @@
 NEWS for HOPPET
 
 ======================================================================
+Release 1.1.2  September 2009
+======================================================================
+
+. new build system (configure lookalike).
+
+. added 1-loop time-like (fragmentation function) evolution following
+  discussions with Wei-Tian Deng. Only partially tested.
+
+======================================================================
 Release 1.1.1  August 2008
 ======================================================================
 

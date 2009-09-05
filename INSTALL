@@ -1,1 +1,77 @@
-see the README file...
+----------------------------------------------------------------------
+Compilation
+-----------
+
+Makefiles for f90/95 are generated automatically using the perl script
+scripts/makef95makefile. Things can be orchestrated in two ways:
+
+New (and recommended)
+--------------------
+First run 
+
+  ./configure  [options...]
+
+which takes options
+
+       --prefix=DIR	installs things in DIR/lib, DIR/include
+
+       FC=fortran-compiler-name 
+			uses the specified fortran compiler (default: gfortran)
+
+       FFLAGS=fortran-compiler-options
+			uses the specified fortran compiler (default: gfortran)
+
+The configure script is written in perl and is _not_ a standard
+autotools script (but the few options given above coincide with those
+from autotools).
+
+Then run
+
+  make
+
+  # checks that the output from running example_f90/tabulation_example
+  # is sensible
+  make check
+
+  # and do this if you want to install the library
+  # (currently only the library and .h files, not the module files
+  # for f90 compilation).
+  make install          
+
+Note: contrary to the situation with autotools configure scripts, it
+is not possible to this configure script from a directory other than
+the top-level directory of the distribution.
+
+
+Old
+---
+Everything is generated from from scripts "mkmk" called in each
+directory. To generate the full set of makefiles for your compiler,
+type (from the main directory)
+
+     ./mkmk compiler-name   
+
+where compiler-name can be g95,lf95,ifort,gfortran (the latter may
+give executables that crash though). This will run subsiduary mkmk
+files and also set files .compiler in each directory which store the
+information about the compiler being used. If you add new programs to
+a directory, they will automatically be taken into account when you
+rerun mkmk.
+
+To compile the hoppet library
+
+     cd src/
+     # compile the library
+     make
+
+To compile the f90 example program 
+
+     cd ../example_f90
+     # compile the program
+     make tabulation_example
+     # run the program
+     ./tabulation_example
+
+The output should be compared to the file
+"tabulation_example.default_output", which contains the correct
+results. 

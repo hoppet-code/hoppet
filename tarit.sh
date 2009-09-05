@@ -28,7 +28,7 @@ else
                       $dirhere/doc/HOPPET-v1-doc.tex \
                       $dirhere/doc/*.(eps|sty) \
                       $dirhere/(src|example_f77|example_f90|benchmarking)/**/Makefile \
-                      $dirhere/**/(README|INSTALL|Doxyfile|NEWS|COPYING|mkmk) \
+                      $dirhere/**/(README|INSTALL|Doxyfile|NEWS|COPYING|mkmk|configure|Makefile) \
                       $dirhere/scripts/*[a-z] \
                       $dirhere/example_f90/*.default_output \
                       $dirhere/test.sh
