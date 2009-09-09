@@ -1,9 +1,14 @@
+2009-09-09  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* scripts/makef95makefile:
+	  fixed typo to do with LDFLAGS.
+
 2009-09-05  Gavin Salam  <salam@lpthe.jussieu.fr>
 
-	* INSTALL: 
+	* INSTALL:
 	  moved build / installation instructions into here.
-	
-	* README: 
+
+	* README:
 	  updated this for new build procedure
 
 	* configure:     *** ADDED ***

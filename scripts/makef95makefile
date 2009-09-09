@@ -170,7 +170,7 @@ while ($i <= $#ARGV) {
   elsif ($OPT =~ /^-+install-script=(.*)/) { $installScript=$1;}
   elsif ($OPT =~ /^FC=(.*)/)   { $compiler = $1;}
   elsif ($OPT =~ /^FFLAGS=(.*)/){ $userFFLAGS = $1;}
-  elsif ($OPT =~ /^LDLAGS=(.*)/){ $userLDLAGS = $1;}
+  elsif ($OPT =~ /^LDFLAGS=(.*)/){ $userLDFLAGS = $1;}
   else                         { $xtralibs .= $OPT." "; }
 }
 #print "Compiler is ".$compiler."\n";
