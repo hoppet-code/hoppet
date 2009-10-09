@@ -1,0 +1,45 @@
+#!/bin/bash
+# copied in part from fastjet-config
+# Licensed under the GPL v2.
+
+installationdir=@prefix@
+
+# print a usage message and exit
+# exit code passed as argument:
+#   0 if it is a normal call
+#   1 if it is due to a misusage.
+usage()
+{
+  cat 1>&2 <<EOF
+This is the tool for determining compiler flags for use with hoppet @VERSION@.
+Usage:
+  --prefix     returns the prefix indicating where the code is installed
+  --cxxflags   returns the compilation flags to be used with a C++ programs
+  --libs       returns the flags to pass to the linker
+
+NOTE: --libs does not currently provide access to the system f90 libraries 
+      that may be needed if you link a program with a c++ compiler
+EOF
+exit $1
+}
+
+# first deal with the case where no argument is passed
+[ $# -gt 0 ] || usage 1
+
+# browse arguments
+for arg do
+    case "$arg" in
+	--help|-h)
+	    usage 0
+	    ;;
+	--prefix)
+	  echo $installationdir
+	  ;;
+	--cxxflags)
+	  echo -I$installationdir/include
+	  ;;
+	--libs)
+	  echo -L$installationdir/lib -lhoppet_v1
+	  ;;
+    esac
+done

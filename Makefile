@@ -16,7 +16,8 @@ benchmarking/test_acc: src force_look
 	cd benchmarking/test_acc; $(MAKE) $(MFLAGS)
 
 # only one directory needs installation
-install: force_look
+install: force_look 
+	scripts/install-sh hoppet-config `cat src/.makef95.prefix`/bin/hoppet-config
 	cd src; $(MAKE) $(MFLAGS) install
 
 check: example_f90

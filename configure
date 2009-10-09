@@ -25,7 +25,9 @@ if ($#ARGV >=0 && ($ARGV[0] eq "-h" || $ARGV[0] eq "--help")) {
   exit;
 }
 
-foreach (@ARGV) {push @args, "\"".$_."\"";}
+foreach $arg (@ARGV) {
+  push @args, "\"".$arg."\"";
+}
 
 @dirs=split(" ","src example_f90 benchmarking benchmarking/test_acc");
 
@@ -49,8 +51,18 @@ foreach $dir (@dirs) {
   chdir $topdir;
 }
 
+# get things ready for the hoppet-config script
+$version=`grep 'Welcome to' src/welcome_message.f90 | sed -e 's/.*v\. //' -e 's/ .*//'`;
+chomp $version;
+$prefix=`cat src/.makef95.prefix`;
+chomp $prefix;
+($escprefix = $prefix) =~ s/\//\\\//g;
+system("sed -e 's/\@prefix\@/$escprefix/' -e 's/\@VERSION\@/$version/'  hoppet-config.in > hoppet-config");
+system("chmod +x hoppet-config");
+
 # write a file config.log
 open (LOG,">config.log") || die "Could not open config.log";
 print LOG "# the last configure that was run was\n";
 print LOG "$0 ".join(" ",@args)."\n";
+print LOG "prefix=$prefix\n";
 close LOG;

@@ -1,3 +1,19 @@
+2009-10-09  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/welcome_message.f90 (HoppetWelcomeMessage): 
+	  updated version to 1.1.3-devel
+
+	* hoppet-config.in:  *** ADDED ***
+	  template script which is processed to become hoppet-config
+	  which gives indications of library names, etc.
+	
+	* scripts/makef95makefile: 
+	  now outputs a .makef95.prefix file indicating what the prefix was
+
+	* Makefile (install): 
+	* configure: 
+	  adapted them so that hoppet-config is properly dealt with
+	
 2009-09-09  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* scripts/makef95makefile:

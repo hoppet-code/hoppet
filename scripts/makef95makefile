@@ -176,7 +176,11 @@ while ($i <= $#ARGV) {
 #print "Compiler is ".$compiler."\n";
 
 
-
+#========================================================================
+# record the prefix somewhere -- it can come in useful
+open(PREFIX, ">.makef95.prefix") || die "Could not open .makef95.prefix";
+print PREFIX "$prefix\n";
+close PREFIX;
 
 #======================================================================
 # here we define the properties of various compilers
