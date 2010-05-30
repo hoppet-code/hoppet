@@ -1,3 +1,9 @@
+2010-05-30  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/dglap_objects.f90: 
+	  made cobj_InitSplitLinks public to allow a user to code other
+	  splitting matrices.
+
 2009-10-09  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/welcome_message.f90 (HoppetWelcomeMessage): 

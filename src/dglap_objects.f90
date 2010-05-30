@@ -88,6 +88,7 @@ module dglap_objects
   public :: cobj_InitGridDef
   public :: InitGridDef
 
+  public :: cobj_InitSplitLinks
   public :: InitSplitMatLO, InitSplitMatNLO
   public :: InitSplitMatNNLO
   public :: InitSplitMatPolLO, InitSplitMatPolNLO
