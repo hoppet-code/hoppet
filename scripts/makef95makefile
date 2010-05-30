@@ -142,7 +142,7 @@ $postlibs="";
 $remake="";
 $prefix="/usr/local";
 $userFFLAGS="";
-$userLDLAGS="";
+$userLDFLAGS="";
 $installScript="";
 #--
 $i=1;
