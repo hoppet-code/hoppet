@@ -599,6 +599,12 @@ if ($installScript) {
   }
   foreach (@cinclude) {print MAKEFILE "\t$installScript $_ $prefix/include/$_\n"};
   print MAKEFILE "\n";
+
+  # also put in an install-mod target; NB: it assumes the target directory
+  # already exists; NB: assumes all module files in this directory will
+  # be installed (and that the have the .mod suffix).
+  print MAKEFILE "install-mod: $LIBNAME $PROG \n";
+  print MAKEFILE "\t$installScript -t $prefix/include/ *.mod \n\n";
 } else {
   print MAKEFILE "install:\n\n";
 }

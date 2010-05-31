@@ -57,7 +57,8 @@ an installation prefix and a fortran compiler (FC), and then do
   ./configure --prefix="..."  FC="..."
   make 
   make check
-  make install     [if you're interested]
+  make install      [if you're interested]
+  make install-mod  [if you want the f90 module files installed too]
 
 This is not autotools based: if you're used to more advanced usage of
 autotools scripts, you'll be disappointed here...

@@ -1,5 +1,12 @@
 2010-05-31  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* INSTALL: 
+	* README: 
+	* Makefile: 
+	* scripts/makef95makefile: 
+	  added an install-mod target to install f90 module files and
+	  documented it.
+
 	* example_f77/Makefile: 
 	  modified things so that everything works out of the box if
 	  you're using gfortran/gcc.

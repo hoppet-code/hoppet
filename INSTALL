@@ -34,13 +34,17 @@ Then run
   make check
 
   # and do this if you want to install the library
-  # (currently only the library and .h files, not the module files
+  # (only the library and .h files, not the module files
   # for f90 compilation).
   make install          
 
+  # and this is what you need to install the f90 module files
+  # (only relevant if you'll use the f90 interface)
+  make install-mod          
+
 Note: contrary to the situation with autotools configure scripts, it
-is not possible to this configure script from a directory other than
-the top-level directory of the distribution.
+is not possible to use this configure script from a directory other
+than the top-level directory of the distribution.
 
 
 Old

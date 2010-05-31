@@ -20,6 +20,9 @@ install: force_look
 	scripts/install-sh hoppet-config `cat src/.makef95.prefix`/bin/hoppet-config
 	cd src; $(MAKE) $(MFLAGS) install
 
+install-mod: force_look 
+	cd src; $(MAKE) $(MFLAGS) install-mod
+
 check: example_f90
 	scripts/check
 
