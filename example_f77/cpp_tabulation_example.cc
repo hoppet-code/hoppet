@@ -1,6 +1,7 @@
 #include "../src/hoppet_v1.h"
 #include<iostream>
 #include<cmath>
+#include<cstdio>
 
 using namespace std;
 

@@ -1,3 +1,8 @@
+2010-05-31  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* example_f77/cpp_tabulation_example.cc: 
+	  fixed missing include (cstdio)
+
 2010-05-30  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/dglap_objects.f90: 
