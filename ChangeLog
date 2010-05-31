@@ -1,5 +1,9 @@
 2010-05-31  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* example_f77/Makefile: 
+	  modified things so that everything works out of the box if
+	  you're using gfortran/gcc.
+
 	* example_f77/cpp_tabulation_example.cc: 
 	  fixed missing include (cstdio)
 

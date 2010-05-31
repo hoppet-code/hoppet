@@ -1,7 +1,8 @@
 
 
 
-FC = g77
+#FC = g77
+FC = gfortran
 FFLAGS = -O
 
 # BELOW FOLLOW settings that need to be selected according to the f90
@@ -12,7 +13,7 @@ FFLAGS = -O
 # libraries (-L??? -lg2c).
 
 # for the f90 (lf95) compiler libraries
-F90LIB= -L`which lf95 | sed s:bin/lf95:lib:` -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
+# F90LIB= -L`which lf95 | sed s:bin/lf95:lib:` -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
 
 # for the ifort compiler libraries
 #F90LIB= -L`which ifort | sed s:bin/ifort:lib:` -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lc -lirc_s
@@ -28,6 +29,11 @@ F90LIB= -L`which lf95 | sed s:bin/lf95:lib:` -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
 # for the gfortran compiler
 #F90LIB=  -L`locate libgfortran.a | tail -1 | sed s:/libgfortran.a::` -lgfortran
 #F90LIB=  -L$(HOME)/software/gfortran/lib -lgfortran
+#F90LIB=   -lgfortran
+
+# -lgfortran not needed for the gfortran compilations, but it is needed
+# for C++ compilations.
+F90LIB4GCC=   -lgfortran
 
 
 LIBS = -L../src -lhoppet_v1 $(F90LIB)
@@ -37,7 +43,7 @@ tabulation_example: tabulation_example.o
 	$(FC) -o tabulation_example $<  $(LIBS) 
 
 cpp_tabulation_example: cpp_tabulation_example.o
-	$(CXX) -o cpp_tabulation_example $<  $(LIBS) -lm
+	$(CXX) -o cpp_tabulation_example $<  $(LIBS) -lm $(F90LIB4GCC)
 
 compare_lhapdf_hoppet: compare_lhapdf_hoppet.o
 	$(FC) -o compare_lhapdf_hoppet $< $(LHAPDFLIBS)  $(LIBS)
