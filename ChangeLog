@@ -1,3 +1,8 @@
+2010-06-17  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* tarit.sh: 
+	  fixed missing hoppet-config.in file.
+
 2010-05-31  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* INSTALL: 
