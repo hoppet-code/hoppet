@@ -1,3 +1,9 @@
+2010-11-07  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* scripts/makef95makefile: 
+
+	  added default -fPIC option to default ifort and gfortran options
+
 2010-06-17  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* src/welcome_message.f90: 
