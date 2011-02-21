@@ -142,7 +142,8 @@
 \noindent {\Large \textbf{Program Summary}}\\
 
 \noindent {\em Title of program\/}: \hoppet \\[2mm]
-{\em Version\/}: 1.1.1 \\[2mm]
+{\em Version\/}: 1.1.1  (including documentation of some updates up
+to 2011-02-21)\\[2mm]
 {\em Catalogue identifier\/}: \\[2mm]
 {\em Program obtainable from\/}:
 \url{http://projects.hepforge.org/hoppet/}
@@ -449,30 +450,30 @@ for light quarks $q_{l,i}$ of flavour $i$
 below the heavy quark mass threshold $m_h^2$) the matching between
 their values in the $n_f$ and
 $n_f+1$ effective theories reads:
-\be
+\begin{equation}
 \label{eq:lp-nf1}
   q_{l,i}^{\,(n_f+1)}(x,m_h^2) \: = \:  q_{l,i}^{\,(\nf}(x,m_h^2) +
 \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
    A^{\rm ns,(2)}_{qq,h}(x) \otimes
   q_{l,i}^{\, (\nf}(x,m_h^2) \ ,
-\ee
+\end{equation}
 where  $i = 1,\ldots n_f$, while for the gluon
 distribution and the heavy quark PDF $q_h$ one has a coupled matching 
 condition:
-\bea
+\begin{align}
 \label{eq:hp-nf1}
-  g^{(n_f+1)}(x,m_h^2) \:\:\: &\! = \!\! &
+  g^{(n_f+1)}(x,m_h^2) \:\:\: &=
     g^{\, (\nf}(x,m_h^2) 
-\\ &+& \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2 \Big[
+\\ &+ \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2 \Big[
     A_{\rm gq,h}^{S,(2)}(x) \otimes \Sigma^{(\nf}(x,m_h^2) +
     A_{\rm gg,h}^{S,(2)}(x) \otimes g^{(\nf}(x,m_h^2) \Big ]\ ,
   \nn \\[0.5mm] 
-  (q_h+\bar{q}_{h})^{(n_f+1)}(x,m_h^2) \! &\! =\!\! &
+  (q_h+\bar{q}_{h})^{(n_f+1)}(x,m_h^2)  &=
    \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2 \Big [
     \tilde{A}_{\rm hq}^{S,(2)}(x)\otimes \Sigma^{(\nf}(x,m_h^2) 
     + \tilde{A}_{\rm hg}^{S,(2)}(x)\otimes g^{(\nf}(x,m_h^2) \Big  ] \ ,
   \quad \nonumber
-\eea
+\end{align}
 with $q_h=\bar{q}_h$, and the singlet PDF $\Sigma(x,Q^2)$ is defined
 in Table \ref{eq:diag_split}.
 The NNLO matching coefficients were
@@ -496,6 +497,12 @@ coupling constant at the heavy quark threshold $m^2_h$ is given by
    \:\: ,
 \end{equation}
 where the matching coefficient $C_2$ was computed in \cite{Chetyrkin:1997sg}.
+%
+The value of $C_2$ and the form of the matching coefficients in
+eqs.~(\ref{eq:lp-nf1},\ref{eq:hp-nf1}) depend on the scheme used for
+the quark masses; by default in \hoppet quark masses are taken to be
+pole masses, though the option exists for the user to supply and have
+thresholds crossed at $\MSbar$ masses.
 
 Both evolution and threshold matching preserve the momentum sum rule
 \begin{equation}
@@ -1907,7 +1914,7 @@ a \ttt{running\_coupling} object (defined in \ttt{module
 
   [... set parameters ...]
   call InitRunningCoupling(coupling [, alfas] [, Q] [, nloop] [, fixnf]&
-                          & [, quark_masses] [, muMatch_mQuark])
+                          & [, quark_masses] [, masses_are_MSbar] [, muMatch_mQuark])
 \end{lstlisting}
 As can be seen, many of the arguments are optional. Their default
 values are as follows:
@@ -1929,14 +1936,23 @@ value. Otherwise flavour thresholds are implemented at scales
 \begin{lstlisting}
   muMatch_mQuark * quark_masses(4:6)
 \end{lstlisting}
-where the quark masses are \emph{pole} masses. The choice to use pole
-masses (and their particular default values) is inspired by the
-PDF evolution benchmark comparison~\cite{Benchmarks} 
-in which \hoppet results were
-compared to those of Vogt's moment-space code
-QCD-Pegasus~\cite{Pegasus}. The default value of the
-QCD coupling is taken to be close
-to the present world average \cite{Bethke:2006ac}.
+By default the quark masses are taken to be \emph{pole} masses.
+%
+This choice (and the particular default values) was inspired by the
+PDF evolution benchmark comparison~\cite{Benchmarks} in which \hoppet
+results were compared to those of Vogt's moment-space code
+QCD-Pegasus~\cite{Pegasus}. 
+%
+If the user instead prefers to supply $\MSbar$ masses,
+$m_h^{\MSbar}(m_h^{\MSbar})$, and have flavour thresholds implemented
+at the $\MSbar$ masses, then she/he should specify
+\ttt{masses\_are\_MSbar = .true.}\,.
+
+The default value of the QCD coupling is
+taken to be close to the world average at the time of initial release
+of \hoppet \cite{Bethke:2006ac}.
+%
+
 
 To access the coupling at some scale \ttt{Q} one uses the following
 function call:

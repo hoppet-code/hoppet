@@ -48,15 +48,12 @@ module qcd
   real(dp), public :: alphastep22 = (four*tr_def/(12*pi))**2
   real(dp), public :: alphastep21 = tr_def*(10*ca_def + 6*cf_def)/(24*pisq)
   real(dp), public :: alphastep20_msbar=&
-       &(13.0_dp/48.0_dp*cf_def-two/9.0_dp*ca_def)&
-       &                            *tr_def/pisq
+       &(13.0_dp/48.0_dp*cf_def-two/9.0_dp*ca_def) *tr_def/pisq
   !-- for the pole mass, take this from hep-ph/9706430 
   !   (Chetyrkin, Kniehl and Steinhauser), PRL 79 (1997) 2184
   !   though it is not the original referece, just a "container"
   !-- expression not known for variable colour factors?
   !   NB: they express nf-1 in terms of nf...
-  !real(dp), public :: alphastep20_pole  = -11.0_dp/72.0_dp/pisq
-  !real(dp), public :: alphastep20_pole  =   7.0_dp/24.0_dp/pisq
   real(dp), public :: alphastep20_pole  = &
        &(15.0_dp/16.0_dp*cf_def-two/9.0_dp*ca_def) * tr_def/pisq
 

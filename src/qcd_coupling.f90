@@ -94,16 +94,17 @@ contains
 
   !-- alternative versions to allow access to a global alpha
   subroutine as_Init_noash(alfas, Q, qcdl5, nloop, fixnf,  &
-       & quark_masses, muMatch_mQuark, use_nah)
+       & quark_masses, masses_are_MSbar, muMatch_mQuark, use_nah)
     real(dp), intent(in), optional :: alfas, Q, qcdl5
     integer,  intent(in), optional :: nloop, fixnf
     real(dp), intent(in), optional :: quark_masses(4:6)
+    logical,  intent(in), optional :: masses_are_MSbar
     real(dp), intent(in), optional :: muMatch_mQuark
     logical,  intent(in), optional :: use_nah
     type(running_coupling), pointer :: coupling
     coupling => ash_global
     call as_Init_ash(coupling, alfas, Q, nloop, fixnf,  &
-       & quark_masses, muMatch_mQuark, use_nah, qcdl5)
+       & quark_masses, masses_are_MSbar, muMatch_mQuark, use_nah, qcdl5)
   end subroutine as_Init_noash
   
   function as_Value_noash(Q,fixnf) result(Value)
@@ -136,14 +137,19 @@ contains
   ! may well be quite a bit slower. Also if we want to reinitialise
   ! then it is necessary to call Delete
   !
-  ! As od 16/01/2001 use_nah=.true. will become the default
+  ! As of 16/01/2001 use_nah=.true. will become the default
+  !
+  ! Feature added 21/02/2011: masses_are_MSbar, default is false; if
+  ! true then masses are assumed to be MSbar masses, evaluated at the
+  ! mass itself, m_MSbar(m_MSbar).
   subroutine as_Init_ash(coupling, alfas, Q, nloop, fixnf, &
-       & quark_masses, muMatch_mQuark, use_nah, qcdl5)
+       & quark_masses, masses_are_MSbar, muMatch_mQuark, use_nah, qcdl5)
     use assertions
     type(running_coupling) :: coupling
     real(dp), intent(in), optional :: alfas, Q, qcdl5
     integer,  intent(in), optional :: nloop, fixnf
     real(dp), intent(in), optional :: quark_masses(4:6)
+    logical,  intent(in), optional :: masses_are_MSbar
     real(dp), intent(in), optional :: muMatch_mQuark
     logical,  intent(in), optional :: use_nah
     real(dp) :: dummy, lower, upper, middle
@@ -153,7 +159,7 @@ contains
     coupling%use_nah = default_or_opt(.true., use_nah)
     if (coupling%use_nah) then
        call na_Init(coupling%nah, alfas, Q, nloop, fixnf, &
-            &           quark_masses, muMatch_mQuark)
+            &           quark_masses, masses_are_MSbar, muMatch_mQuark)
        return
     else
        call wae_error('as_Init_ash','old alphas (analytic approx to solution) is obsolete and will not run...')

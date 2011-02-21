@@ -1,3 +1,16 @@
+2011-02-21  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/qcd_coupling.f90: 
+	* src/new_as.f90: 
+	  added support for MSbar masses to be used for crossing flavour
+	  thresholds, with the new masses_are_MSbar argument.
+	
+	* doc/HOPPET-v1-doc.tex: 
+	  added mention of MSbar masses in sections 2 and 6.1.
+	
+	* src/qcd.f90: 
+	  minor reformatting
+
 2010-11-07  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* scripts/makef95makefile: 

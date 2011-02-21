@@ -21,6 +21,7 @@ module new_as
      real(dp)                  :: alfas, Q
      real(dp)                  :: quark_masses(1:6)
      real(dp)                  :: muMatch_mQuark
+     logical                   :: masses_are_MSbar
   end type na_handle
   
   !-- this seems to give reasonable results (c. 10^-9 precision
@@ -67,18 +68,20 @@ contains
   
 
   !---------------------------------------------------
-  subroutine na_Init(nah, alfas, Q, nloop, fixnf, quark_masses, muMatch_mQuark)
+  
+  subroutine na_Init(nah, alfas, Q, nloop, fixnf, quark_masses, masses_are_MSbar, muMatch_mQuark)
     use qcd; 
     type(na_handle),  intent(out), target :: nah
     real(dp), intent(in), optional :: alfas, Q
     integer,  intent(in), optional :: nloop, fixnf
     real(dp), intent(in), optional :: quark_masses(4:6)
     real(dp), intent(in), optional :: muMatch_mQuark
+    logical,  intent(in), optional :: masses_are_MSbar
     !---------------------------------------------
     !real(dp) :: alfas_lcl, Q_lcl
     !integer  :: nloop_lcl, fixnf_lcl
     !-------------------------------
-    real(dp) :: alfas_here, lnmatch
+    real(dp) :: alfas_here, lnmatch, alphastep20_lclscheme
     real(dp) :: tstart, t, ra
     integer  :: nf_store
     integer  :: nbin, i, j, nseg, istart
@@ -94,6 +97,7 @@ contains
     nah%fixnf = default_or_opt(nofixnf, fixnf)
 
     nah%muMatch_mQuark = default_or_opt(one, muMatch_mQuark)
+    nah%masses_are_MSbar = default_or_opt(.false., masses_are_MSbar)
 
     nah%quark_masses(1:3) = quark_masses_def(1:3)
     if (present(quark_masses)) then
@@ -179,6 +183,13 @@ contains
     end do
     seg%iflip = istart
 
+    ! handle pole v. MSbar mass treatment
+    if (nah%masses_are_MSbar) then
+      alphastep20_lclscheme = alphastep20_msbar
+    else
+      alphastep20_lclscheme = alphastep20_pole
+    end if
+
     !-- fill up the segments above
     do j = nseg+1, nah%nhi
        seg => nah%seg(j)
@@ -193,10 +204,8 @@ contains
           case(3)
              alfas_here = alfas_here*(1 + alphastep11 * lnmatch * alfas_here&
                   & + (alphastep22 * lnmatch**2 + alphastep21 * lnmatch&
-                  &    + alphastep20_pole)*alfas_here**2)
-             !alfas_here = alfas_here*(1 + alphastep20_pole*alfas_here**2)
+                  &    + alphastep20_lclscheme)*alfas_here**2)
           end select
-          !write(0,*) j, alfas_here
        end if
        seg%ra(0) = one/alfas_here
        ! recall that this is the reciprocal of alpha!
@@ -220,8 +229,7 @@ contains
           case(3)
              alfas_here = alfas_here*(1 - alphastep11 * lnmatch * alfas_here&
                   & + (alphastep22 * lnmatch**2 - alphastep21 * lnmatch&
-                  &    - alphastep20_pole)*alfas_here**2)
-             !alfas_here = alfas_here*(1 - alphastep20_pole*alfas_here**2)
+                  &    - alphastep20_lclscheme)*alfas_here**2)
           end select
           !write(0,*) j, alfas_here
        end if
