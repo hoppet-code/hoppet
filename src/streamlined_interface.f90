@@ -23,6 +23,7 @@ module streamlined_interface
   logical,                save :: coupling_initialised = .false.
   type(running_coupling), save :: coupling
   integer,  save :: ffn_nf = -1
+  logical,  save :: quark_masses_are_MSbar = .false.
   real(dp), save :: masses(4:6) = quark_masses_def(4:6)
 end module streamlined_interface
 
@@ -150,7 +151,8 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
           &                   fixnf=ffn_nf)
   else 
      call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
-          &                   quark_masses=masses)
+          &                   quark_masses=masses, &
+          &                   masses_are_MSbar = quark_masses_are_MSbar)
   end if
   call AddNfInfoToPdfTable(tables,coupling)
   coupling_initialised = .true.
@@ -260,17 +262,50 @@ subroutine hoppetSetFFN(fixed_nf)
   ffn_nf = fixed_nf
 end subroutine hoppetSetFFN
 
+
 !======================================================================
 !! Set up things to be a variable-flavour number scheme with the given
-!! quark masses
+!! quark masses in the pole mass scheme.
+!!
+!! This interface retained for legacy purposes. Preferred interface is
+!! via hoppetSetPoleMassVFN(mc,mb,mt)
 subroutine hoppetSetVFN(mc,mb,mt)
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  real(dp) :: mc, mb, mt
+  call hoppetSetPoleMassVFN(mc,mb,mt)
+end subroutine hoppetSetVFN
+
+
+!======================================================================
+!! Set up things to be a variable-flavour number scheme with the given
+!! quark masses in the pole mass scheme. Thresholds are crossed at the
+!! pole masses, both for the coupling and the PDF evolution.
+subroutine hoppetSetPoleMassVFN(mc,mb,mt)
   use streamlined_interface ! this module which provides access to the array of tables
   implicit none
   real(dp) :: mc, mb, mt
 
   ffn_nf = -1
   masses = (/mc,mb,mt/)
-end subroutine hoppetSetVFN
+  quark_masses_are_MSbar = .false.
+end subroutine hoppetSetPoleMassVFN
+
+
+!======================================================================
+!! Set up things to be a variable-flavour number scheme with the given
+!! quark masses in the MSbar mass scheme, i.e. m(m). Thresholds are
+!! crossed at the MSbar masses, both for the coupling and the PDF
+!! evolution.
+subroutine hoppetSetMSbarMassVFN(mc,mb,mt)
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  real(dp) :: mc, mb, mt
+
+  ffn_nf = -1
+  masses = (/mc,mb,mt/)
+  quark_masses_are_MSbar = .true.
+end subroutine hoppetSetMSbarMassVFN
 
 
 !======================================================================

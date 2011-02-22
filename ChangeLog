@@ -1,5 +1,14 @@
 2011-02-22  Gavin Salam  <salam@lpthe.jussieu.fr>
 
+	* doc/HOPPET-v1-doc.tex: 
+	  documented streamlined interface to Pole v. MSbar mass choice.
+
+	* src/streamlined_interface.f90: 
+	* src/hoppet_v1.h: 
+	  added support for Pole v. MSbar masses in the streamlined
+	  interface, via the calls hoppetSetPoleMassVFN and
+	  hoppetSetMSbarMassVFN.
+
 	* src/welcome_message.f90: 
 	  updated version number to 1.1.4-devel
 

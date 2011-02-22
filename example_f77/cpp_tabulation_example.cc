@@ -20,6 +20,7 @@ int main () {
 
   // initialise with NNLO, VFN
   hoppetStart(dy, nloop);
+  // hoppetSetPoleMassVFN(1.414213563, 4.5, 175.0);
   
   // evolve the initial condition
   double asQ0 = 0.35, Q0=sqrt(2.0);

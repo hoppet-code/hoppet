@@ -2444,10 +2444,13 @@ fixed-flavour number scheme or a variable flavour number scheme (the
 default). Either can be set with its parameters as follows:
 \begin{lstlisting}
   call hoppetSetFFN(fixed_nf)
-  call hoppetSetVFN(mc, mb, mt) ! Heavy quark pole masses
+  call hoppetSetPoleMassVFN(mc, mb, mt)  ! Heavy quark pole masses
+  call hoppetSetMSbarMassVFN(mc, mb, mt) ! Heavy quark MSbar masses, m(m)
 \end{lstlisting}
-where for the VFN one specifies the pole-masses for the quarks. An
-evolution is carried out with the following routine
+where for the VFNs one specifies either the pole-masses or the
+$\MSbar$ masses for the quarks (thresholds are then implemented at the
+pole or $\MSbar$ masses accordingly). An evolution is carried out with
+the following routine
 \begin{lstlisting}
   call hoppetEvolve(asQ, Q0alphas, nloop, muR_Q, LHAsub, Q0pdf)
 \end{lstlisting}

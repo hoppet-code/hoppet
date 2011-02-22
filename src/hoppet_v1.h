@@ -4,17 +4,19 @@
 #define __HOPPET_V1__
 
 // define nicer forms of standard f77 naming
-#define hoppetStart         hoppetstart_
-#define hoppetStartExtended hoppetstartextended_
-#define hoppetAssign        hoppetassign_
-#define hoppetEvolve        hoppetevolve_        
-#define hoppetPreEvolve     hoppetpreevolve_     
-#define hoppetCachedEvolve  hoppetcachedevolve_
-#define hoppetAlphaS        hoppetalphas_ 
-#define hoppetSetFFN        hoppetsetffn_       
-#define hoppetSetVFN        hoppetsetvfn_       
-#define hoppetEval          hoppeteval_          
-#define hoppetEvalSplit     hoppetevalsplit_
+#define hoppetStart            hoppetstart_
+#define hoppetStartExtended    hoppetstartextended_
+#define hoppetAssign           hoppetassign_
+#define hoppetEvolve           hoppetevolve_        
+#define hoppetPreEvolve        hoppetpreevolve_     
+#define hoppetCachedEvolve     hoppetcachedevolve_
+#define hoppetAlphaS           hoppetalphas_ 
+#define hoppetSetFFN           hoppetsetffn_       
+#define hoppetSetVFN           hoppetsetvfn_       
+#define hoppetSetPoleMassVFN   hoppetsetpolemassvfn_       
+#define hoppetSetMSbarMassVFN  hoppetsetmsbarmassvfn_       
+#define hoppetEval             hoppeteval_          
+#define hoppetEvalSplit        hoppetevalsplit_
 
 extern "C" {
 
@@ -49,9 +51,18 @@ extern "C" {
 
 
   /// Set things up to be a variable-flavour number scheme with the given
-  /// quark (pole) masses
+  /// quark (pole) masses. Now deprecated; use hoppetSetPoleMassVFN instead
   void  hoppetSetVFN(const double &mc, const double & mb, const double & mt);
 
+  /// Set things up to be a variable-flavour number scheme with the
+  /// given quark (pole) masses. Thresholds are crossed at the pole
+  /// masses, both for the coupling and the PDF evolution.
+  void  hoppetSetPoleMassVFN(const double &mc, const double & mb, const double & mt);
+
+  /// Set things up to be a variable-flavour number scheme with the given
+  /// quark (MSbar) masses. Thresholds are crossed at the MSbar
+  /// masses, both for the coupling and the PDF evolution.
+  void  hoppetSetMSbarMassVFN(const double &mc, const double & mb, const double & mt);
 
   /// Given a pdf_subroutine with the interface shown below, initialise
   /// our internal pdf table.
