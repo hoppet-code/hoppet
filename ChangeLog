@@ -1,3 +1,30 @@
+2011-02-22  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/welcome_message.f90: 
+	  updated version number to 1.1.4-devel
+
+	* src/evolution.f90: 
+	* src/dglap_holders.f90: 
+	  added support for PDF thresholds that take places at MSbar
+	  masses in the evolution. The type of masses present in the
+	  couplings determines what action occurs also in the PDF
+	  evolution. This also involved some extra "communication"
+	  functions (a little dirty?)
+
+	* src/dglap_objects.f90: 
+	  extended mass_threshold_mat so that it has all the info needed
+	  for PDF mass thresholds not just for pole-quark masses but also
+	  MSbar masses.
+
+	* src/qcd_coupling.f90: 
+	* src/new_as.f90: 
+	  added enquiry function about quark-mass scheme, 
+	  QuarkMassesAreMSbar	
+
+	* tests/msbar_tests.f90: *** ADDED ***
+	  used for checking that differences between different pole and
+	  MSbar choices are genuinely of the order they should be.
+
 2011-02-21  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/qcd_coupling.f90: 

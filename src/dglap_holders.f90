@@ -335,10 +335,14 @@ contains
   ! set up all pointers so that it looks like an old holder in the
   ! good-old fixed-nf days; it also sets the global nf.
   ! (NB: perhaps that is not too good?)
-  subroutine SetNfDglapHolder(dh, nflcl)
+  !
+  ! If quark_masses_are_MSbar is present, the the quark mass 
+  ! scheme is also set for the mass-threshold-matrix
+  subroutine SetNfDglapHolder(dh, nflcl, quark_masses_are_MSbar)
     use qcd
     type(dglap_holder), intent(inout) :: dh
     integer, intent(in) :: nflcl
+    logical, optional, intent(in) :: quark_masses_are_MSbar
 
     if (nflcl < lbound(dh%allP,dim=2) .or. nflcl > ubound(dh%allP,dim=2)) then
        call wae_Error('SetNfDglapHolder: tried to set unsupported nf; request val was',intval=nflcl)
@@ -349,6 +353,9 @@ contains
     !   given the current structure...
     call qcd_SetNf(nflcl)
     if (dh%mtm2_exists) call SetNfMTM(dh%MTM2, nflcl)
+    if (present(quark_masses_are_MSbar)) then
+      call SetMassSchemeMTM(dh%MTM2, quark_masses_are_MSbar)
+    end if
 
     !-- set up links so that the remainder of the routine
     !   can stay unchanged

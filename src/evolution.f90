@@ -282,7 +282,7 @@ contains
        if (nflcl == shnf_end)  lcl_Q_end  = Q_end
        !-- this will also set the global (qcd) nf_int which will
        !   be used elsewhere in this module
-       call SetNfDglapHolder(dhcopy, nflcl)
+       call SetNfDglapHolder(dhcopy, nflcl, QuarkMassesAreMSbar(coupling))
 
        ! convention: cross mass thresholds before a step in the evolution
        if (nflcl /= shnf_init) then
@@ -334,11 +334,11 @@ contains
   !!
   !! Currently only supports mass thresholds at muF = m_H.
   !!
-  !! Currently direction = -1 is not supported at NNLO -- this needs
-  !! to be sorted out, with special care about temporarily resetting
-  !! the number of active flavours so that it corresponds to the
-  !! number above threshold, rather than the number after crossing the
-  !! threshold.
+  !! In the case of positive direction, it assumes that the correct
+  !! quark mass scheme setting has been applied to dh. 
+  !!
+  !! In the case of negative direction, at the end the quark mass setting
+  !! of dh is that dictated by the coupling
   !!
   subroutine ev_CrossMassThreshold(dh,coupling,direction,pdf,evop)
     use dglap_holders; use pdf_representation; use dglap_choices
@@ -370,7 +370,7 @@ contains
        ! nf value is that after crossing threshold; but for MTM
        ! (and other things) we need nf value above threshold, i.e. before
        ! crossing the threshold; so put in the correct value temporarily
-       call SetNfDglapHolder(dh, nfstore + 1)
+       call SetNfDglapHolder(dh, nfstore + 1, QuarkMassesAreMSbar(coupling))
     case default
        call wae_error('ev_CrossMassThreshold',&
             &  'direction had unsupported value of',intval=direction)
@@ -395,11 +395,11 @@ contains
          &                   (direction*as2pi**2) * (dh%MTM2 .conv. pdf)
     if (present(evop)) then
        evop%cross_mass_threshold = .true.
-       evop%MTM = dh%MTM2  ! stores current nf value
+       evop%MTM = dh%MTM2  ! stores current nf value and quark-mass treatment
        evop%MTM_coeff = (direction*as2pi**2)
     end if
     
-    if (nf_int /= nfstore) call SetNfDglapHolder(dh, nfstore)
+    if (nf_int /= nfstore) call SetNfDglapHolder(dh, nfstore, QuarkMassesAreMSbar(coupling))
 
   end subroutine ev_CrossMassThreshold
   

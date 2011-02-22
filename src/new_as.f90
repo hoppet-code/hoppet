@@ -36,6 +36,7 @@ module new_as
   public :: na_handle
   public :: na_Init, na_Value, na_Del, na_NumberOfLoops
   public :: na_nfRange, na_nfAtQ, na_QrangeAtNf, na_QuarkMass
+  public :: na_QuarkMassesAreMSbar
   public :: na_Set_dt_base
 
   type(na_segment), pointer :: seg
@@ -355,6 +356,14 @@ contains
          &'illegal value for iflv', intval=iflv)
     mass = nah%quark_masses(iflv)
   end function na_QuarkMass
+
+  !-------------------------------------------------------------
+  ! return true if the quark masses are in the MSbar scheme
+  logical function na_QuarkMassesAreMSbar(nah) result(res)
+    type(na_handle), intent(in) :: nah
+    logical                     :: res
+    res = nah%masses_are_MSbar
+  end function na_QuarkMassesAreMSbar
   
 
   !-------------------------------------------------------------

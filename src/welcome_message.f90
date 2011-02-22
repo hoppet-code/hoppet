@@ -3,10 +3,10 @@
 !
 subroutine HoppetWelcomeMessage
   write(0,'(a)') '-----------------------------------------------------------'
-  write(0,'(a)') '               Welcome to HOPPET v. 1.1.3.1                '
+  write(0,'(a)') '               Welcome to HOPPET v. 1.1.4-devel            '
   write(0,'(a)') '   Higher Order Perturbative Parton Evolution Toolkit      '
   write(0,'(a)') ''
-  write(0,'(a)') '        Written by Gavin P. Salam (2001-2008)'
+  write(0,'(a)') '        Written by Gavin P. Salam (2001-2011)'
   write(0,'(a)') '          with contributions from Juan Rojo'
   write(0,'(a)') ''
   write(0,'(a)') ' It is made available under the GNU public license,'

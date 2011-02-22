@@ -46,7 +46,7 @@ module qcd_coupling
      module procedure  as_Del_ash!, as_Del_noash
   end interface
   public :: Delete
-  public :: NfRange, NfAtQ, QRangeAtNf, QuarkMass
+  public :: NfRange, NfAtQ, QRangeAtNf, QuarkMass, QuarkMassesAreMSbar
   interface NumberOfLoops
      module procedure NumLoops_in_coupling
   end interface
@@ -314,7 +314,18 @@ contains
   end function QuarkMass
 
 
-
+  !======================================================================
+  logical function QuarkMassesAreMSbar(coupling) result(res)
+    type(running_coupling), intent(in) :: coupling
+    logical :: res
+    if (coupling%use_nah) then
+       res = na_QuarkMassesAreMSbar(coupling%nah)
+    else
+       call wae_Error('QuarkMassesAreMSbar: this routine&
+            & is only supported with new alpha_s')
+    end if
+  end function QuarkMassesAreMSbar
+  
   !-------------------------------------------------------------
   ! returns the Q range for a given value of nf. If supported.
   subroutine QRangeAtNf(coupling, nflcl, Qlo, Qhi, muM_mQ)

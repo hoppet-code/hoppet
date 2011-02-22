@@ -49,13 +49,16 @@ module dglap_objects
   !---------------------------------------------------------------
   ! for going from nf to nf+1. Currently contains pieces
   ! required for O(as^2), but not the full general structure.
-  ! Initially, support for this might be a bit limited?
   type mass_threshold_mat
      type(grid_conv) :: PShq, PShg
      type(grid_conv) :: NSqq_H, Sgg_H, Sgq_H
+     ! pieces related to the case of thresholds at MSbar masses
+     type(grid_conv) :: PShg_MSbar
+     real(dp)        :: Sgg_H_extra_MSbar_delta
      ! LOOPS == 1+POWER OF AS2PI, NF_INT = nf including heavy quark.
      ! This is potentially adaptable.
      integer         :: loops, nf_int
+     logical         :: masses_are_MSbar
   end type mass_threshold_mat
   public :: mass_threshold_mat
 
@@ -98,7 +101,8 @@ module dglap_objects
   !public :: cobj_PConv, cobj_PConv_1d
 
   public :: InitMTMNNLO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
-
+  public :: SetMassSchemeMTM
+  
   !-------- things for splitting functions --------------------
   interface cobj_InitCoeff
      module procedure cobj_InitCoeffLO, cobj_InitCoeffHO, cobj_InitCoeff_cf
@@ -744,6 +748,7 @@ contains
   ! Here we keep all things to do with mass thresholds
 
   subroutine InitMTMNNLO(grid,MTM)
+    use qcd
     type(grid_def),           intent(in)  :: grid
     type(mass_threshold_mat), intent(out) :: MTM
     !logical, parameter :: vogt_A2PShg = .false.
@@ -766,6 +771,15 @@ contains
     call InitGridConv(grid, MTM%NSqq_H, sf_A2NSqq_H)
     call InitGridConv(grid, MTM%Sgg_H, sf_A2Sgg_H)
     call InitGridConv(grid, MTM%Sgq_H, sf_A2Sgq_H)
+
+    ! things specific to MSbar (CCN32-57)
+    MTM%Sgg_H_extra_MSbar_delta = 8.0_dp/three * CF * TR
+    ! here we need an extra -4CF * P_{q+qbar,g} = -8CF*P_{qg}
+    call InitGridConv(grid, MTM%PShg_MSbar, sf_Pqg)
+    call Multiply(MTM%PShg_MSbar, -8.0_dp*CF)
+    call AddWithCoeff(MTM%PShg_MSbar, MTM%PSHg)
+
+
     ! just store info that it is NNLO. For now it is obvious, but
     ! one day when we have NNNLO it may be useful, to indicate
     ! which structures exist and which do not. 
@@ -773,6 +787,8 @@ contains
     MTM%loops = 3
     !-- no default value
     MTM%nf_int = 0
+    !-- by default 
+    MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
 
   !---------------------------------------------------------------------
@@ -786,6 +802,14 @@ contains
     end if
     MTM%nf_int = nf_lcl
   end subroutine SetNfMTM
+  
+  !---------------------------------------------------------------------
+  ! set the quark mass scheme for the MTM matching
+  subroutine SetMassSchemeMTM(MTM, masses_are_MSbar)
+    type(mass_threshold_mat), intent(inout) :: MTM
+    logical,                  intent(in)    :: masses_are_MSbar
+    MTM%masses_are_MSbar = masses_are_MSbar
+  end subroutine SetMassSchemeMTM
   
 
   !----------------------------------------------------------------------
@@ -822,10 +846,22 @@ contains
     
     singlet = sum(q(:,-nf_light:-1),dim=2) + sum(q(:,1:nf_light),dim=2)
 
-    Pxq(:,nf_heavy) = half*(&
-         &(MTM%PShq .conv. singlet) + (MTM%PShg .conv. q(:,iflv_g)) )
+    if (MTM%masses_are_MSbar) then
+      Pxq(:,nf_heavy) = half*(&
+           &(MTM%PShq .conv. singlet) + (MTM%PShg_MSbar .conv. q(:,iflv_g)) )
+    else 
+      Pxq(:,nf_heavy) = half*(&
+           &(MTM%PShq .conv. singlet) + (MTM%PShg .conv. q(:,iflv_g)) )
+    end if
+    
     Pxq(:,-nf_heavy) = Pxq(:,nf_heavy)
     Pxq(:,iflv_g)     = (MTM%Sgq_H.conv. singlet) + (MTM%Sgg_H.conv. q(:,iflv_g))
+
+    ! the extra delta-function piece in the MSbar scheme
+    if (MTM%masses_are_MSbar) then
+      Pxq(:,iflv_g) = Pxq(:,iflv_g) + MTM%Sgg_H_extra_MSbar_delta*q(:,iflv_g)
+    end if
+    
     
     do i = -ncomponents, ncomponents
        if (abs(i) > nf_heavy) then
