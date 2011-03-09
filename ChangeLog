@@ -1,3 +1,9 @@
+2011-03-09  Gavin Salam  <gsalam@macth69.cern.ch>
+
+	* example_f77/variants/tabulation_example_exact_nnlo.f: ***ADDED***
+          variant that illustrates how to set the exact nnlo splitting
+	  functions rather than parametrised ones.
+
 2011-03-09  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* example_f77/tabulation_example.f:
