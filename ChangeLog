@@ -1,3 +1,9 @@
+2011-03-09  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* example_f77/tabulation_example.f:
+	  corrected wrong initial PDF function in the cached part of the
+	  tabulation example.
+
 2011-02-22  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* doc/HOPPET-v1-doc.tex: 
