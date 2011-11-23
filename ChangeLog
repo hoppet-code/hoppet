@@ -1,3 +1,10 @@
+2011-11-23  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* src/new_as.f90: 
+	* src/qcd_coupling.f90: 
+	  fixed a couple of issues with double-declared return-value
+	  variables. (Pointed out by Alberto Guffanti)
+
 2011-03-09  Gavin Salam  <gsalam@macth69.cern.ch>
 
 	* example_f77/variants/tabulation_example_exact_nnlo.f: ***ADDED***

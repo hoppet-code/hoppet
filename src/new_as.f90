@@ -361,7 +361,6 @@ contains
   ! return true if the quark masses are in the MSbar scheme
   logical function na_QuarkMassesAreMSbar(nah) result(res)
     type(na_handle), intent(in) :: nah
-    logical                     :: res
     res = nah%masses_are_MSbar
   end function na_QuarkMassesAreMSbar
   

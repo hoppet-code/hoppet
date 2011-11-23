@@ -317,7 +317,6 @@ contains
   !======================================================================
   logical function QuarkMassesAreMSbar(coupling) result(res)
     type(running_coupling), intent(in) :: coupling
-    logical :: res
     if (coupling%use_nah) then
        res = na_QuarkMassesAreMSbar(coupling%nah)
     else
