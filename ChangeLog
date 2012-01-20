@@ -1,3 +1,13 @@
+2012-01-20  Gavin Salam  <gsalam@macth69.cern.ch>
+
+	* scripts/makef95makefile:
+	  arranged for gfortran to be the default compiler for all
+	  architectures (previously was only for linux)
+
+	* scripts/check:
+	  fixed bug related to make check on mac (in if condition),
+	  following bug report by Aneesh Manohar and Juan Rojo.
+
 2011-11-23  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* src/new_as.f90: 

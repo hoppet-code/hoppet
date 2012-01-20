@@ -82,7 +82,8 @@ use English;
 if    ($OSNAME eq 'dec_osf')  { 
   $compiler="compaq";
   $make="make";  }
-elsif ($OSNAME eq 'linux')  { 
+#elsif ($OSNAME eq 'linux')  { 
+else { 
   $hostname = `hostname`;
   chomp($hostname);
   print "We are on: ".$hostname."\n";

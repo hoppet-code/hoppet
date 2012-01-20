@@ -14,8 +14,9 @@ grep -vi '^[a-z]' example_f90/tabulation_example.default_output > check.tmp.orig
 diff check.tmp.new check.tmp.orig > check.tmp.diff
 checkwc=`cat check.tmp.diff| wc -l `
 
-  echo
-if [[ $checkwc == 0 ]]; then
+echo
+if [ $checkwc == "0" ] 
+then
   echo check PASSED
   rm -f check.tmp.new check.tmp.orig check.tmp.diff
 else
