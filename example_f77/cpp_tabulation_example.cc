@@ -18,8 +18,6 @@ int main () {
   double dy    = 0.1;
   int    nloop = 3;
 
-  hoppetSetVFN(1.5, 4.5, 17300.0);
-
   // initialise with NNLO, VFN
   hoppetStart(dy, nloop);
   // hoppetSetPoleMassVFN(1.414213563, 4.5, 175.0);
@@ -30,8 +28,6 @@ int main () {
   // alternatively preprepare an evolution and then use its cached version.x
   //hoppetPreEvolve(asQ0, Q0, nloop, 1.0, Q0);
   //hoppetCachedEvolve(heralhc_init);
-
-  cout <<  "as(MZ,1000) " << hoppetAlphaS(91.20) << " " << hoppetAlphaS(1000.0) << endl;
 
   // output the results
   double pdf[13];
