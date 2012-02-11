@@ -13,6 +13,9 @@ module lumi_elements
 
 contains
 
+  !----------------------------------------------------------------------
+  ! a straightforward dgauss integration of the two PDFs to get the lumi
+  ! function at a specific x value
   function lumi_dgauss(grid, gq1, gq2, y) result(res)
     type(grid_def), intent(in) :: grid
     real(dp),        intent(in), target  :: gq1(0:), gq2(0:)
@@ -63,7 +66,8 @@ contains
     end select
   end function conv_AddGridConv_integrand
   
-
+  !----------------------------------------------------------------------
+  ! a simple routine for testing the polypoly integrator
   subroutine polypoly_test()
     real(dp) :: nodesA(5), nodesB(5), result
     integer :: i, j
@@ -80,7 +84,8 @@ contains
 
   end subroutine polypoly_test
   
-  
+
+  !----------------------------------------------------------------------
   !! function that integrates the product of two interpolation
   !! polynomials, specified by nodesA and nodesB and the "1" nodes
   !! inodeA_one and inodeB_one
@@ -235,7 +240,7 @@ contains
     real(dp)             :: lumi(0:ubound(gq1,1))
     !-----------------------
     type(grid_def), pointer :: fine, coarse
-    integer  :: isub
+    integer  :: isub, iy, step
 
     ! get our first guess for the luminosity function
     lumi = lumi_plain(grid, gq1, gq2)
@@ -243,8 +248,9 @@ contains
     ! if the grid doesn't have the right structure, we just give up
     if (grid%nsub == 0 .or. .not. grid%locked) return
 
-    ! patch things up order by order
+    ! patch things up isub by isub (lowest isub has finest spacing)
     do isub = 1, grid%nsub-1
+      ! write(6,'(a,i5)') '# isub = ', isub
       fine => grid%subgd(isub)
       coarse => grid%subgd(isub+1)
       call lumi_multi_do_sub(fine,&
@@ -255,6 +261,18 @@ contains
            &                 gq2(grid%subiy(isub+1):grid%subiy(isub+1)+coarse%ny),&
            &                 lumi(grid%subiy(isub+1):grid%subiy(isub+1)+coarse%ny))
     end do
+
+    !-- decant information from finer grids into coarser grids (just copied from 
+    !   conv_ConvGridQuant_scalar)
+    ! (remember: finest grid has lowest isub)
+    do isub = 2, grid%nsub
+      ! the ratio should be an exact integer, but use
+      ! nint() to avoid the dangers of rounding errors
+      step = nint(grid%subgd(isub)%dy / grid%subgd(isub-1)%dy)
+      do iy = 0, grid%subgd(isub-1)%ny / step
+        lumi(grid%subiy(isub)+iy) = lumi(grid%subiy(isub-1)+iy*step)
+      end do
+    end do
     
   end function lumi_multi
   
@@ -264,7 +282,7 @@ contains
     type(grid_def), intent(in) :: grid_fine, grid_coarse
     real(dp), intent(in) :: gq1_fine(0:), gq2_fine(0:)
     real(dp), intent(in) :: gq1_coarse(0:), gq2_coarse(0:)
-    real(dp), intent(inout) :: lumi_coarse(:)
+    real(dp), intent(inout) :: lumi_coarse(0:)
     !--------------------------------------
     integer  :: ny_fine, ny_coarse, max_ny_coarse
     real(dp) :: gq1_tmp(0:2*ubound(gq1_fine,1))
@@ -273,7 +291,7 @@ contains
     integer, parameter :: nmax = 9 ! max order, as uniform_interpolation_weights
     !real(dp) :: weights(0:nmax,nint(grid_coarse%dy / grid_fine%dy)-1)
     real(dp) :: weights(0:nmax)!,nint(grid_coarse%dy / grid_fine%dy)-1)
-    integer  :: i, step, iy_coarse
+    integer  :: i, step, iy_coarse, iy_fine
 
     step = nint(grid_coarse%dy / grid_fine%dy)
 
@@ -290,7 +308,7 @@ contains
     max_ny_coarse = min(2*ny_coarse, grid_coarse%ny)
     
     ! decide where we will interpolate
-    order = grid_coarse%order
+    order = abs(grid_coarse%order)
     if (grid_coarse%ny < order) call wae_error("lumi_multi_do_sub",&
          &"grid_coarse%ny < order, grid_fine%dy = ", dbleval=grid_fine%dy)
 
@@ -300,7 +318,7 @@ contains
     gq2_tmp(ny_fine+step:max_ny_coarse*step:step) = &
          &                      gq2_coarse(ny_coarse+1:max_ny_coarse)
 
-
+    ! populate the fine grids by interpolation
     do iy_coarse = ny_coarse, max_ny_coarse-1
       range_down = max(0, iy_coarse-(order)/2)
       range_up   = min(grid_coarse%ny, range_down + order)
@@ -317,6 +335,20 @@ contains
       end do
       
     end do
+
+    ! now do the actual convolutions
+    do iy_coarse = ny_coarse+1, max_ny_coarse
+      lumi_coarse(iy_coarse) = sum(gq1_tmp(0:iy_coarse*step)&
+           &                        * gq2_tmp(iy_coarse*step:0:-1)) * grid_fine%dy
+    end do
+    
+    ! ! for testing
+    ! do iy_fine = 0, max_ny_coarse*step
+    !   write(6,*) iy_fine * grid_fine%dy, gq1_tmp(iy_fine), gq2_tmp(iy_fine)
+    ! end do
+    ! write(6,*)
+    ! write(6,*)
+    
 
   end subroutine lumi_multi_do_sub
   
@@ -370,12 +402,16 @@ program lumi_tests
   real(dp), pointer  :: pdf(:,:), lumi(:), lumi_p(:)
   real(dp) :: dy, ymax, sum, element, lumi1, lumi2, lumi_p_aty
   integer  :: i, n, order, j
+  integer  :: flv1, flv2
 
   call polypoly_test()
 
   dy = dble_val_opt('-dy',0.1_dp)
   ymax = 10.0_dp
   order = int_val_opt("-order",-5)
+  flv1 = int_val_opt("-flv1",iflv_g)
+  flv2 = int_val_opt("-flv2",iflv_u)
+
   if (log_val_opt("-single-grid")) then
     write(0,*) "grid with single spacing"
     call InitGridDef(grid,ymax=10.0_dp, dy=dy, order=order)
@@ -407,13 +443,14 @@ program lumi_tests
   !   write(6,*) i*grid%dy, lumi(i)
   ! end do
   do j = 1, 1
-    lumi = lumi_simple(grid, pdf(:,iflv_g), pdf(:,iflv_g))
+    lumi = lumi_multi(grid, pdf(:,flv1), pdf(:,flv2))
   end do
-  lumi_p = lumi_plain(grid, pdf(:,iflv_g), pdf(:,iflv_g))
+  lumi_p = lumi_plain(grid, pdf(:,flv1), pdf(:,flv2))
+  !lumi_p = lumi_multi(grid, pdf(:,iflv_g), pdf(:,iflv_g))
 
   do i = 0, 50
     do j = 1, 1
-      lumi2 = lumi_dgauss(grid, pdf(:,iflv_g), pdf(:,iflv_g), i*0.2_dp) 
+      lumi2 = lumi_dgauss(grid, pdf(:,flv1), pdf(:,flv2), i*0.2_dp) 
     end do
     lumi1 = EvalGridQuant(grid, lumi, i*0.2_dp)
     lumi_p_aty = EvalGridQuant(grid, lumi_p, i*0.2_dp)
