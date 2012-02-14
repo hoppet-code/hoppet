@@ -1,3 +1,17 @@
+2012-02-14  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* src/convolution.f90: 
+	  added a function PartonLuminosity(grid, gq1, gq2) to efficiently
+	  evaluate the partonic luminosity that comes from the "collision"
+	  of two grid quantities. Its accuracy currently relies on PDFs
+	  vanishing smoothly near y=0. While this routine functions
+	  adequately, the exact interface and internal implementation
+	  could change in the future.
+
+	* src/welcome_message.f90: 
+	  updated copyright date
+
+
 2012-01-20  Gavin Salam  <gsalam@macth69.cern.ch>
 
 	* scripts/makef95makefile:

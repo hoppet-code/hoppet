@@ -131,6 +131,12 @@ module convolution
   end interface
   public :: TruncatedMoment
 
+  !-- for calculating partonic luminosities
+  interface PartonLuminosity
+    module procedure conv_Luminosity_multi
+  end interface
+  public :: PartonLuminosity
+
   !-- convolution routines -------------------------------------------
   interface AllocGridConv
      module procedure conv_AllocGridConv_0d, conv_AllocGridConv_1d, &
@@ -2090,17 +2096,18 @@ contains
        end do
         
        if (gc%grid%locked .and. .not.override_grid_locking) then
-          !-- decant information from finer grids into coarser grids
-          ! (remember: finest grid has lowest isub)
-          do isub = 2, gc%grid%nsub
-             ! the ratio should be an exact integer, but use
-             ! nint() to avoid the dangers of rounding errors
-             dy_ratio = nint(gc%grid%subgd(isub)%dy / gc%grid%subgd(isub-1)%dy)
-             do iy = 0, gc%grid%subgd(isub-1)%ny / dy_ratio
-                gqout(gc%grid%subiy(isub)+iy) = &
-                     &gqout(gc%grid%subiy(isub-1)+iy*dy_ratio)
-             end do
-          end do
+          ! !-- decant information from finer grids into coarser grids
+          ! ! (remember: finest grid has lowest isub)
+          ! do isub = 2, gc%grid%nsub
+          !    ! the ratio should be an exact integer, but use
+          !    ! nint() to avoid the dangers of rounding errors
+          !    dy_ratio = nint(gc%grid%subgd(isub)%dy / gc%grid%subgd(isub-1)%dy)
+          !    do iy = 0, gc%grid%subgd(isub-1)%ny / dy_ratio
+          !       gqout(gc%grid%subiy(isub)+iy) = &
+          !            &gqout(gc%grid%subiy(isub-1)+iy*dy_ratio)
+          !    end do
+          ! end do
+          call conv_DecantMultiGridQuant(gc%grid, gqout)
           nconv_with_override_off = nconv_with_override_off + 1
        end if
        return
@@ -2407,6 +2414,192 @@ contains
     end do
   end function conv_ConvGridQuant_mat
 
+
+  !======================================================================
+  !> Evaluates the partonic luminosity associated with two grid quantities
+  !> gq1 and gq2 using a "plain" method involving a straightforward sum
+  !> of the products of the two (oppositely-ordered) vectors.
+  !>
+  !> This method can only be used for PDFs that go smoothly to zero for y->0.
+  !> Reasonable accuracy of the result is then a consequence of the fact that
+  !> integrals that go to zero smoothly at both extremities of the integration
+  !> region converge as dy^n with n very high, even without any fancy 
+  !> higher-order tricks. Actually, fancy higher-order tricks do worse often.
+  !>
+  !> This routine is not intended for general use. Instead go for
+  !> conv_Luminosity_plain.
+  recursive function conv_Luminosity_plain(grid, gq1, gq2) result(lumi)
+    type(grid_def), intent(in) :: grid
+    real(dp), intent(in) :: gq1(0:), gq2(0:)
+    real(dp)             :: lumi(0:grid%ny)
+    integer :: i, isub, lo, hi, ny
+
+    ny = assert_eq(grid%ny, ubound(gq1,1),ubound(gq2,1),"conv_Luminosity_plain")
+    if (grid%nsub == 0) then
+      lumi(0) = zero
+      do i = 1, ny
+        lumi(i) = sum(gq1(0:i)*gq2(i:0:-1))*grid%dy
+      end do
+    else 
+      do isub = 1, grid%nsub
+        lo = grid%subiy(isub)
+        hi = lo + grid%subgd(isub)%ny
+        lumi(lo:hi) = conv_Luminosity_plain(grid%subgd(isub), gq1(lo:hi), gq2(lo:hi))
+      end do
+      if (grid%locked) call conv_DecantMultiGridQuant(grid,lumi)
+    end if
+  end function conv_Luminosity_plain
+  
+
+  !======================================================================
+  !> Evaluate the partonic luminosity of gq1 and gq2  using tricks to improve
+  !> accuracy of the multi-grid case.
+  !> 
+  !> In particular for a fine grid going from 0:yfine, the coarse
+  !> lumi evaluation uses the fine grid information up to 2*yfine, with
+  !> interpolation (according to grid%order) of the coarser grid in the regions
+  !> where fine information is lacking.
+  !> 
+  !> Like conv_Luminosity_plain(...), this relies on the PDFs vanishing
+  !> suitably smoothly at y = 0.
+  function conv_Luminosity_multi(grid, gq1, gq2) result(lumi)
+    type(grid_def), intent(in) :: grid
+    real(dp), intent(in) :: gq1(0:), gq2(0:)
+    real(dp)             :: lumi(0:ubound(gq1,1))
+    !-----------------------
+    type(grid_def), pointer :: fine, coarse
+    integer  :: isub, iy, step
+
+    ! if the grid doesn't have the right structure, we just give up
+    if (grid%nsub == 0 .or. .not. grid%locked) then
+      ! get our usual guess for the luminosity function and then return
+      lumi = conv_Luminosity_plain(grid, gq1, gq2)
+      return
+    end if
+
+    ! first do lowest isub (has finest spacing)
+    lumi(0:grid%subgd(1)%ny) = conv_Luminosity_plain(&
+         &                                grid%subgd(1), &
+         &                                gq1(0:grid%subgd(1)%ny), &
+         &                                gq2(0:grid%subgd(1)%ny))
+
+    ! then do non-trivial bits isub by isub
+    do isub = 1, grid%nsub-1
+      fine => grid%subgd(isub)
+      coarse => grid%subgd(isub+1)
+      call conv_Luminosity_multi_do_sub(&
+           &                 fine,&
+           &                 gq1(grid%subiy(isub):grid%subiy(isub)+fine%ny),&
+           &                 gq2(grid%subiy(isub):grid%subiy(isub)+fine%ny),&
+           &                 coarse,&
+           &                 gq1(grid%subiy(isub+1):grid%subiy(isub+1)+coarse%ny),&
+           &                 gq2(grid%subiy(isub+1):grid%subiy(isub+1)+coarse%ny),&
+           &                 lumi(grid%subiy(isub+1):grid%subiy(isub+1)+coarse%ny))
+    end do
+
+    !-- decant information from finer grids into coarser grids
+    call conv_DecantMultiGridQuant(grid,lumi)
+
+  end function conv_Luminosity_multi
+  
+  !----------------------------------------------------------------------
+  !> helper function for lumi_multi, which is responsible for handling
+  !> the combined use of fine and coarse grids.
+  subroutine conv_Luminosity_multi_do_sub(&
+       &           grid_fine, gq1_fine, gq2_fine,&
+       &           grid_coarse, gq1_coarse, gq2_coarse, lumi_coarse)
+    use interpolation
+    type(grid_def), intent(in) :: grid_fine, grid_coarse
+    real(dp), intent(in) :: gq1_fine(0:), gq2_fine(0:)
+    real(dp), intent(in) :: gq1_coarse(0:), gq2_coarse(0:)
+    real(dp), intent(inout) :: lumi_coarse(0:)
+    !--------------------------------------
+    integer  :: ny_fine, ny_coarse, max_ny_coarse
+    real(dp) :: gq1_tmp(0:2*ubound(gq1_fine,1))
+    real(dp) :: gq2_tmp(0:2*ubound(gq2_fine,1))
+    integer  :: order, range_up, range_down, range_down_last
+    integer, parameter :: nmax = 9 ! max order, as uniform_interpolation_weights
+    real(dp) :: weights(0:nmax,nint(grid_coarse%dy / grid_fine%dy)-1)
+    integer  :: i, step, iy_coarse, iy_fine
+    integer  :: offset, last_offset
+
+    step = nint(grid_coarse%dy / grid_fine%dy)
+
+    ! make sure the ny we use is a multiple of step
+    ny_coarse = (grid_fine%ny/step)
+    ny_fine   = ny_coarse * step
+
+    ! first copy the high-resolution piece across to a temporary array
+    gq1_tmp(0:ny_fine) = gq1_fine(0:ny_fine)
+    gq2_tmp(0:ny_fine) = gq2_fine(0:ny_fine)
+    
+    ! next get take the low resolution part and interpolate it
+    ! first establish the appropriate range
+    max_ny_coarse = min(2*ny_coarse, grid_coarse%ny)
+    
+    ! decide where we will interpolate
+    order = abs(grid_coarse%order)
+    if (grid_coarse%ny < order) call wae_error("lumi_multi_do_sub",&
+         &"grid_coarse%ny < order, grid_fine%dy = ", dbleval=grid_fine%dy)
+
+    ! first do the trivial points
+    gq1_tmp(ny_fine+step:max_ny_coarse*step:step) = &
+         &                      gq1_coarse(ny_coarse+1:max_ny_coarse)
+    gq2_tmp(ny_fine+step:max_ny_coarse*step:step) = &
+         &                      gq2_coarse(ny_coarse+1:max_ny_coarse)
+
+    ! populate the fine grids by interpolation
+    last_offset = 2000000000 ! semaphore for first round
+    do iy_coarse = ny_coarse, max_ny_coarse-1
+      range_down = max(0, iy_coarse-(order)/2)
+      range_up   = min(grid_coarse%ny, range_down + order)
+      range_down = range_up - order  ! our order check earlier on ensures saftey here
+      offset = iy_coarse-range_down
+      
+      ! now get the weights
+      do i = 1, step-1
+        if (offset /= last_offset) then
+          ! NB: with a tiny bit more work, could avoid repetitive determination
+          !     of interpolation weights; but for now ignore this 
+          call uniform_interpolation_weights(i*(one/step)+offset, weights(0:order,i))
+        end if
+        gq1_tmp(iy_coarse*step+i) = sum(weights(0:order,i)*gq1_coarse(range_down:range_up))
+        gq2_tmp(iy_coarse*step+i) = sum(weights(0:order,i)*gq2_coarse(range_down:range_up))
+      end do
+      last_offset = offset
+    end do
+
+    ! now do the actual convolutions
+    do iy_coarse = ny_coarse+1, max_ny_coarse
+      lumi_coarse(iy_coarse) = sum(gq1_tmp(0:iy_coarse*step)&
+           &                        * gq2_tmp(iy_coarse*step:0:-1)) * grid_fine%dy
+    end do
+
+    ! and then the rest
+    do iy_coarse = max_ny_coarse+1, grid_coarse%ny
+      lumi_coarse(iy_coarse) = sum(gq1_coarse(0:iy_coarse)&
+           &                        * gq2_coarse(iy_coarse:0:-1)) * grid_coarse%dy
+    end do
+    
+  end subroutine conv_Luminosity_multi_do_sub
+  
+  !======================================================================
+  ! Perform the steps to decant information from fine grids into the 
+  ! coarse grids of a grid quantity.
+  subroutine conv_DecantMultiGridQuant(grid, gq)
+    type(grid_def), intent(in) :: grid
+    real(dp), intent(inout) :: gq(0:)
+    integer :: isub, step, iy
+    ! Temember: finest grid has lowest isub
+    do isub = 2, grid%nsub
+      ! the ratio should be an exact integer, but use
+      ! nint() to avoid the dangers of rounding errors
+      step = nint(grid%subgd(isub)%dy / grid%subgd(isub-1)%dy)
+      do iy = 0, grid%subgd(isub-1)%ny / step
+        gq(grid%subiy(isub)+iy) = gq(grid%subiy(isub-1)+iy*step)
+      end do
+    end do
+  end subroutine conv_DecantMultiGridQuant
   
 
   !======================================================================

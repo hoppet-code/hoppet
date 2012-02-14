@@ -812,7 +812,8 @@ program lumi_tests
   ! end do
   lumi_p = lumi_plain(grid, pdf(:,flv1), pdf(:,flv2))
   do j = 1, repeat
-    lumi = lumi_multi(grid, pdf(:,flv1), pdf(:,flv2))
+    lumi = PartonLuminosity(grid, pdf(:,flv1), pdf(:,flv2))
+    !lumi = lumi_multi(grid, pdf(:,flv1), pdf(:,flv2))
     !lumi = lumi_plain(grid, pdf(:,flv1), pdf(:,flv2))
   end do
 
