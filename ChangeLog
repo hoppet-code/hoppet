@@ -1,3 +1,10 @@
+2012-04-17  Gavin Salam  <gsalam@macth69.cern.ch>
+
+	* src/qcd_coupling.f90 (qcd_coupling): 
+	  added RunningCoupling(...) interface as an alternative to the
+	  Value(...) function, whose name was rather meaningless when
+	  using the globally initialised coupling.
+
 2012-02-14  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/convolution.f90: 

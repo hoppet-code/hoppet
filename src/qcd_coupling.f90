@@ -40,6 +40,9 @@ module qcd_coupling
   interface Value
      module procedure  as_Value_ash, as_Value_noash
   end interface
+  interface RunningCoupling
+     module procedure  as_Value_ash, as_Value_noash
+  end interface
   public :: Value
   interface Delete
      !-- for digital f90 the second one causes problems
