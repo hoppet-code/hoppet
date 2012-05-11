@@ -834,7 +834,11 @@ contains
     real(dp),     intent(in) :: Q
     real(dp)                 :: lnln
 
-    lnln = log(log(Q/tab%lambda_eff))
+    if (Q < tab%lambda_eff) then
+       lnln = -1e300_dp
+    else
+       lnln = log(log(Q/tab%lambda_eff))
+    end if
   end function lnln
 
   !! conversion from lnlnQ to Q

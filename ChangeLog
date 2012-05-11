@@ -1,5 +1,10 @@
 2012-05-11  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
+	* src/pdf_tabulate.f90 (get_lnlnQ_wgts): 
+	  fixed bug that when Q was too small lnln came out as NaN, as did
+	  the PDF (while it should have been frozen or zero). The lnln
+	  function now returns a large negative number instead.
+
 	* src/dglap_objects.f90: 
 	  changed error message in case of mismatch of flavours between
 	  PDF and splitting function so that both nf values get printed.
