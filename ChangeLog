@@ -1,3 +1,9 @@
+2012-05-11  Gavin SALAM  <salam@lpthe.jussieu.fr>
+
+	* src/dglap_objects.f90: 
+	  changed error message in case of mismatch of flavours between
+	  PDF and splitting function so that both nf values get printed.
+
 2012-04-17  Gavin Salam  <gsalam@macth69.cern.ch>
 
 	* src/qcd_coupling.f90 (qcd_coupling): 

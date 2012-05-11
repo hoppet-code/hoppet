@@ -593,7 +593,7 @@ contains
        if (GetPdfRep(q_in) /= p%nf_int) then
           call wae_error('cobj_Pconv:',&
                &'n-flavours of q_in representation /= n-flavours for splitting function = ', &
-               &intval=p%nf_int)
+               &intval=GetPdfRep(q_in), dbleval=one*p%nf_int)
        end if
        q => q_in
     else
