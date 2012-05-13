@@ -27,6 +27,7 @@ else
                       $dirhere/(src|example_f77|example_f90|benchmarking|benchmarking)/**/*.(f90|f|h|hh|alg|c|cc|C|eps|cpp|gp) \
                       $dirhere/doc/HOPPET-v1-doc.tex \
                       $dirhere/doc/*.(eps|sty) \
+                      $dirhere/ChangeLog \
                       $dirhere/hoppet-config.in \
                       $dirhere/(src|example_f77|example_f90|benchmarking)/**/Makefile \
                       $dirhere/**/(README|INSTALL|Doxyfile|NEWS|COPYING|mkmk|configure|Makefile) \
