@@ -1,3 +1,11 @@
+2012-05-13  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* README:
+	  a few small edits to update things re compilation
+
+	* tarit.sh: 
+	  ChangeLog had been left out of the tarball; so now include it.
+
 2012-05-11  Gavin SALAM  <salam@lpthe.jussieu.fr>
 
 	* src/pdf_tabulate.f90 (get_lnlnQ_wgts): 
@@ -9,6 +17,7 @@
 	  changed error message in case of mismatch of flavours between
 	  PDF and splitting function so that both nf values get printed.
 
+>>>>>>> .r203
 2012-04-17  Gavin Salam  <gsalam@macth69.cern.ch>
 
 	* src/qcd_coupling.f90 (qcd_coupling): 

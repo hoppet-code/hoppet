@@ -32,16 +32,16 @@ F95 compilers
 
 You will need a Fortran 95 compiler to compile this package. 
 
-The free g95 (www.g95.org) compiler is one option, though its
-executables are fairly slow. It is easy to install if you don't
-already have a recent version on your system.
+The gfortran compiler is widespread. Versions upwards of a recent 4.3
+are OK. Older versions generate incorrect code for HOPPET and should
+be avoided. The code is acceptably fast, though not quite as fast as
+with commercial compilers.
 
-The gfortran compiler is becoming fairly widespread. Versions upwards
-of a recent 4.3 are OK. Older versions generate incorrect code for
-HOPPET and should be avoided. The code is acceptably fast, though not
-quite as fast as with commercial compilers.
+The free g95 (www.g95.org) compiler is another option, though when
+tested around 2008 its executables were fairly slow. It is easy to
+install if you don't already have a recent version on your system.
 
-The intel (ifort) compiler (versions 8.1.033 upwards) exists in a
+The intel (ifort) compiler (versions 8.1.033 upwards) may still exist in a
 semi-free version for non-commercial use under linux and produces fast
 executables.
 
@@ -77,8 +77,8 @@ tabulation_example_streamlined.
 
 Compiling f77 example programs (examples_f77) using g77 is a little
 trickier because of the need to include the correct f95
-libraries. Accordingly the Makefile is not generated automatically --
-look inside the suppplied Makefile to see what needs doing.
+libraries. Look inside the suppplied Makefile and if need be edit it
+manually.
 
      cd ../example_f77
      # <edit the Makefile directly>
