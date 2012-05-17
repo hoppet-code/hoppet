@@ -1,3 +1,9 @@
+2012-05-17  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* README: 
+	  added a note about ranlib "no symbol" warnings. Thanks to Merjin
+	  can de Klundert for suggesting this.
+
 2012-05-13  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* README:

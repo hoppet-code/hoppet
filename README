@@ -114,3 +114,22 @@ Benchmarking
 
 The benchmarking/ directory contains the programs used for the full
 benchmarking, accuracy and precision testing. 
+
+
+----------------------------------------------------------------------
+Compiler warnings
+-----------------
+
+When the hoppet library is being built, on some systems the following
+warnings may be reported 
+
+  /usr/bin/ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
+  /usr/bin/ranlib: file: libhoppet_v1.a(types.o) has no symbols
+  
+  ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
+  ranlib: file: libhoppet_v1.a(types.o) has no symbols
+
+These warnings do not indicate an actual problem. They are simply a
+consequence of the fact that some of the source (.f90) files contain
+only information about interfaces and constants, so that the resulting
+object (.o) files are essentially empty.
