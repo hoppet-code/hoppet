@@ -591,21 +591,21 @@ print MAKEFILE "\t$remake\n\n";
 # only done if installScript was specified on command line
 # 
 if ($installScript) {
-  print MAKEFILE "install: $LIBNAME $PROG ".join(" ",@cinclude)."\n";
+  print MAKEFILE "install: $LIBNAME $PROG install-mod ".join(" ",@cinclude)."\n";
   if ($LIBNAME) {
     print MAKEFILE "\t$installScript $LIBNAME $prefix/lib/$LIBNAME\n";
   }
   if ($PROG) {
     print MAKEFILE "\t$installScript $PROG $prefix/$PROGNAME\n";
   }
-  foreach (@cinclude) {print MAKEFILE "\t$installScript $_ $prefix/include/$_\n"};
+  foreach (@cinclude) {print MAKEFILE "\t$installScript -m 644 $_ $prefix/include/$_\n"};
   print MAKEFILE "\n";
 
   # also put in an install-mod target; NB: it assumes the target directory
   # already exists; NB: assumes all module files in this directory will
   # be installed (and that the have the .mod suffix).
   print MAKEFILE "install-mod: $LIBNAME $PROG \n";
-  print MAKEFILE "\t$installScript -t $prefix/include/ *.mod \n\n";
+  print MAKEFILE "\t$installScript -m 644 -t $prefix/include/ *.mod \n\n";
 } else {
   print MAKEFILE "install:\n\n";
 }

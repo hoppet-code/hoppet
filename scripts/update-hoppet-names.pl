@@ -8,10 +8,10 @@
 # If there are any names to be modified, the original file will be copied
 # to file.f90.bak and file.f90 will be modified to contain new names.
 #
-# Note: if you are using this for the first time on you own programs
+# Note: if you are using this for the first time on your own programs
 # check that nothing too strange has happened before throwing away the
 # backup... Note two very short names are renamed: sh (->dh) and gd
-# (-> grid) they could conceivably conflict with something a user
+# (-> grid) they could conceivably conflict with something in a user
 # program.
 #
 # Author: Gavin Salam, 2006

@@ -1,8 +1,23 @@
+2012-07-27  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* hoppet-config.in: 
+	  added error handling in case of unrecognized arguments;
+	  added an --fflags argument for flags to be used with fortran
+	  compilers.
+
+	* scripts/makef95makefile: 
+	  changed behaviour of install, so that it now also installs the
+	  .mod files (needed for programs like the jet veto resummation),
+	  without having to explicitly perform a "make install-mod".
+
+	  Also ensured that .h and .mod files are installed with -rw-r--r--
+	  permissions (rather than executable, as before).
+
 2012-05-17  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* README: 
 	  added a note about ranlib "no symbol" warnings. Thanks to Merjin
-	  can de Klundert for suggesting this.
+	  van de Klundert for suggesting this.
 
 2012-05-13  Gavin Salam  <salam@lpthe.jussieu.fr>
 
@@ -23,7 +38,6 @@
 	  changed error message in case of mismatch of flavours between
 	  PDF and splitting function so that both nf values get printed.
 
->>>>>>> .r203
 2012-04-17  Gavin Salam  <gsalam@macth69.cern.ch>
 
 	* src/qcd_coupling.f90 (qcd_coupling): 
