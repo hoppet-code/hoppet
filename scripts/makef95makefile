@@ -18,6 +18,8 @@
 #        --install-script="..."
 #                        indicates where to find the script install-sh;
 #                        if not specified, then install target will be left empty
+#        --install-modules  if present, modules are installed by default (with make install-mod)
+#        --mod-prefix="..."  sets the install prefix for modules (PREFIX/include by default)
 #
 #        -lcern          sets cernlib options
 #
@@ -87,12 +89,13 @@ else {
   $hostname = `hostname`;
   chomp($hostname);
   print "We are on: ".$hostname."\n";
-  #if ($hostname eq "pcth70") { $compiler="portland";}
-  ($libg2cDIR = `locate libg2c.a | head -1`) =~ s/\/libg2c.a//;
-  chomp($libg2cDIR);
-  print "libg2cDIR is $libg2cDIR\n";
-  # set the default compiler to be g95
-  #$compiler = "g95";
+  
+  # old code relating to cernlib needs
+  #($libg2cDIR = `locate libg2c.a | head -1`) =~ s/\/libg2c.a//;
+  #chomp($libg2cDIR);
+  #print "libg2cDIR is $libg2cDIR\n";
+
+  # set the default compiler to be gfortran
   $compiler = "gfortran";
   #if ($hostname =~ "pcth[0-9]+" || $hostname =~ "lxplus.*") {
   #  $compiler="portland";}
@@ -145,6 +148,8 @@ $prefix="/usr/local";
 $userFFLAGS="";
 $userLDFLAGS="";
 $installScript="";
+$installModules="";
+$modPrefix="";
 #--
 $i=1;
 
@@ -168,6 +173,8 @@ while ($i <= $#ARGV) {
   elsif ($OPT =~ /^-+prefix$/) { $prefix= $ARGV[$i++];}
   elsif ($OPT =~ /^-+install-script$/) { $installScript=$ARGV[$i++];}
   elsif ($OPT =~ /^-+prefix=(.*)/) { $prefix= $1;}
+  elsif ($OPT =~ /^-+mod-prefix=(.*)/) { $modPrefix= $1;}
+  elsif ($OPT =~ /^-+install-modules/) { $installModules=1;}
   elsif ($OPT =~ /^-+install-script=(.*)/) { $installScript=$1;}
   elsif ($OPT =~ /^FC=(.*)/)   { $compiler = $1;}
   elsif ($OPT =~ /^FFLAGS=(.*)/){ $userFFLAGS = $1;}
@@ -177,11 +184,15 @@ while ($i <= $#ARGV) {
 #print "Compiler is ".$compiler."\n";
 
 
+if (! $modPrefix) {$modPrefix=$prefix+"/include";}
+
 #========================================================================
 # record the prefix somewhere -- it can come in useful
 open(PREFIX, ">.makef95.prefix") || die "Could not open .makef95.prefix";
 print PREFIX "$prefix\n";
 close PREFIX;
+
+$CRNLIBPOST="-lm"; # a semi-sensible default value; but cernlib no longer fully supported by this script
 
 #======================================================================
 # here we define the properties of various compilers
@@ -195,8 +206,7 @@ if ($compiler eq 'absoft') {
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90 -liof90";
   $IOPOST     = 0;
   $CRNLIBPRE  = "-L$CERNLIBLOC";
-  $CRNLIBPOST = 
-    "-L$libg2cDIR -lg2c -lm";
+  #$CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
   $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
   $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
 }
@@ -212,12 +222,12 @@ elsif ($compiler eq 'lf95' || $compiler eq 'lahey' || $compiler eq 'laheycern') 
   if ($LPTHE || $LAPTOP) { 
     #$LDFLAGS    = "--staticlink";
     $LDFLAGS    = "";
-    $CRNLIBPOST = "-lfj9i6 -L$libg2cDIR -lg2c -lm";
+    #$CRNLIBPOST = "-lfj9i6 -L$libg2cDIR -lg2c -lm";
   }
   else {
     $LDFLAGS    = "";
     #$CRNLIBPOST = "-L/usr/lib/ -lf2c -lm";
-    $CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
+    #$CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
   }
   $IOINC      = "-I".$ENV{HOME}."/utils/libf90-lh";
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-lh -liof90";
@@ -238,7 +248,7 @@ elsif ($compiler eq 'compaq') {
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90 -liof90";
   $IOPOST     = 0;
   $CRNLIBPRE  = "-L$CERNLIBLOC";
-  $CRNLIBPOST = "";
+  #$CRNLIBPOST = "";
   $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
   $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
 }
@@ -257,7 +267,7 @@ elsif ($compiler eq 'g95') {
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-g95 -liof90";
   $IOPOST     = 0;
   $CRNLIBPRE  = "-L$CERNLIBLOC";
-  $CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
+  #$CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
   $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
   $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
 }
@@ -271,7 +281,7 @@ elsif ($compiler eq 'gfortran') {
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-gfortran -liof90";
   $IOPOST     = 0;
   $CRNLIBPRE  = "-L$CERNLIBLOC";
-  $CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
+  #$CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
   $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
   $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
 }
@@ -285,7 +295,7 @@ elsif ($compiler eq 'nag') {
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-nag -liof90";
   $IOPOST     = 0;
   $CRNLIBPRE  = "-L$CERNLIBLOC";
-  $CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
+  #$CRNLIBPOST = "-L$libg2cDIR -lg2c -lm";
   $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
   $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
 }
@@ -303,7 +313,7 @@ elsif ($compiler eq 'intel' || $compiler eq 'ifort') {
     $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-ifc -liof90 -lPEPCF90";
     $IOPOST     = 0;
     $CRNLIBPRE  = "-L$CERNLIBLOC";
-    $CRNLIBPOST = "-L$libg2cDIR -lg2c";
+    #$CRNLIBPOST = "-L$libg2cDIR -lg2c";
     $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
     $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
     $POSTLIB    = "";
@@ -317,7 +327,7 @@ elsif ($compiler eq 'intel' || $compiler eq 'ifort') {
     $IOLIB      = "-L".$ENV{HOME}."/utils/libf90-ifc -liof90";
     $IOPOST     = 0;
     $CRNLIBPRE  = "-L$CERNLIBLOC";
-    $CRNLIBPOST = "-L$libg2cDIR -lg2c";
+    #$CRNLIBPOST = "-L$libg2cDIR -lg2c";
     $LAPACKINC  = "-I".$ENV{HOME}."/utils/LAPACK95/lapack95_modules";
     # NB: lapack and blas are installed by default on the system...
     $LAPACKLIB  = "-L".$ENV{HOME}."/utils/LAPACK95/ -llapack95 -llapack -lblas";
@@ -334,7 +344,7 @@ elsif ($compiler eq 'portland') {
   $IOLIB      = "-L".$ENV{HOME}."/utils/libf90 -liof90";
   $IOPOST     = 0;
   $CRNLIBPRE  = "-L$CERNLIBLOC";
-  $CRNLIBPOST = "-g77libs";
+  #$CRNLIBPOST = "-g77libs";
   $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
   $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
 }
@@ -591,7 +601,11 @@ print MAKEFILE "\t$remake\n\n";
 # only done if installScript was specified on command line
 # 
 if ($installScript) {
-  print MAKEFILE "install: $LIBNAME $PROG install-mod ".join(" ",@cinclude)."\n";
+  print "Installation prefix is $prefix\n";
+  print "Module installation directory is $modPrefix\n";
+  print MAKEFILE "install: $LIBNAME $PROG ".join(" ",@cinclude);
+  if ($installModules) {print MAKEFILE " install-mod";}
+  print MAKEFILE "\n";
   if ($LIBNAME) {
     print MAKEFILE "\t$installScript $LIBNAME $prefix/lib/$LIBNAME\n";
   }
@@ -605,7 +619,8 @@ if ($installScript) {
   # already exists; NB: assumes all module files in this directory will
   # be installed (and that the have the .mod suffix).
   print MAKEFILE "install-mod: $LIBNAME $PROG \n";
-  print MAKEFILE "\t$installScript -m 644 -t $prefix/include/ *.mod \n\n";
+  print MAKEFILE "\t$installScript -d $modPrefix\n";
+  print MAKEFILE "\t$installScript -m 644 -t $modPrefix *.mod \n\n";
 } else {
   print MAKEFILE "install:\n\n";
 }

@@ -1,3 +1,21 @@
+2012-07-30  Gavin Salam  <salam@lpthe.jussieu.fr>
+
+	* scripts/makef95makefile: 
+	  --install-modules, if present, indicates that modules should be
+	  installed by default; --mod-prefix=... indicates a non-standard location
+	
+	* configure: 
+	  added support for --mod-prefix, and arranged for default
+	  mod-prefix to be PREFIX/include/hoppet + made use of the new
+	  --install-modules option of scripts/makef95makefile
+
+	* INSTALL: 
+	  adapted the documentation to reflect the new module installation scheme
+
+	* hoppet-config.in: 
+	  --fflags now handles the configurable modules location
+	
+
 2012-07-27  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* hoppet-config.in: 

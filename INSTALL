@@ -13,13 +13,14 @@ First run
 
 which takes options
 
-       --prefix=DIR	installs things in DIR/lib, DIR/include
+       --prefix=PREFIX	 installs things in PREFIX/lib, PREFIX/include
+       --mod-prefix=DIR  install modules in DIR rather than PREFIX/include/hoppet
 
        FC=fortran-compiler-name 
-			uses the specified fortran compiler (default: gfortran)
+			 uses the specified fortran compiler (default: gfortran)
 
        FFLAGS=fortran-compiler-options
-			uses the specified fortran compiler (default: gfortran)
+			 uses the specified fortran compiler (default: gfortran)
 
 The configure script is written in perl and is _not_ a standard
 autotools script (but the few options given above coincide with those
@@ -33,14 +34,16 @@ Then run
   # is sensible
   make check
 
-  # and do this if you want to install the library
-  # (only the library and .h files, not the module files
-  # for f90 compilation).
+  # the following installs the library, the hoppet-config script, the
+  # .h file for usage with C++ and the .mod files for usage with
+  # fortran (f90) compilers
   make install          
 
-  # and this is what you need to install the f90 module files
-  # (only relevant if you'll use the f90 interface)
-  make install-mod          
+  # for backwards compatibility, you can still use the "make
+  # install-mod" target to install f90 files; but as of version 1.1.5
+  # the module files go into the PREFIX/include/hoppet directory 
+  # rather than PREFIX/include
+  
 
 Note: contrary to the situation with autotools configure scripts, it
 is not possible to use this configure script from a directory other

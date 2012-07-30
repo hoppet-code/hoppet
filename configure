@@ -13,6 +13,7 @@ Usage:
   ./configure [--prefix=...] [FC='...'] [FFLAGS='...'] [LDFLAGS='...']
 
   --prefix='...'      sets the location for installation
+  --mod-prefix='...'  sets the location for installation of modules (by default prefix/include/hoppet)
   FC='...'            sets the fortran (and f90) compiler
   FFLAGS='...'        sets the fortran (and f90) compiler options
   LDLAGS='...'        sets the link options
@@ -25,20 +26,33 @@ if ($#ARGV >=0 && ($ARGV[0] eq "-h" || $ARGV[0] eq "--help")) {
   exit;
 }
 
-foreach $arg (@ARGV) {
-  push @args, "\"".$arg."\"";
-}
+$prefix="/usr/local";
+$modPrefix="";
 
-@dirs=split(" ","src example_f90 benchmarking benchmarking/test_acc");
+foreach $arg (@ARGV) {
+  if    ($arg =~ /^--prefix=(.*)/) { $prefix= $1;}
+  elsif ($arg =~ /^--mod-prefix=(.*)/) { $modPrefix= $1;}
+  else {push @args, "\"".$arg."\"";}
+}
+push @args, "--prefix=$prefix";
+if (!$modPrefix) {$modPrefix = "$prefix/include/hoppet";}
+push @args, "--mod-prefix=$modPrefix";
+
+
+# NB: src comes last, because from src onwards we will include an option to install modules
+@dirs=split(" ","example_f90 benchmarking benchmarking/test_acc src");
 
 $topdir = getcwd;
 
 
-chdir "src";
+#chdir "src";
 
 # now generate the makefiles
 foreach $dir (@dirs) {
+  # when we reach src, ensure that modules get installed
+  if ($dir eq "src") {push @args, "--install-modules";}
   chdir $dir;
+  
   print "Creating makefile in ".getcwd."\n";
   # find out what we're already up to
   $mkmk=`grep -v '^#' mkmk | grep makef95makefile`;
@@ -47,6 +61,7 @@ foreach $dir (@dirs) {
   $mkmk =~ s/-remake.*//;
   $mkmk .= " ".join(" ",@args);
   #print $mkmk."\n";
+  print $dir, $mkmk,"\n";
   system($mkmk);
   chdir $topdir;
 }
@@ -56,8 +71,9 @@ $version=`grep 'Welcome to' src/welcome_message.f90 | sed -e 's/.*v\. //' -e 's/
 chomp $version;
 $prefix=`cat src/.makef95.prefix`;
 chomp $prefix;
-($escprefix = $prefix) =~ s/\//\\\//g;
-system("sed -e 's/\@prefix\@/$escprefix/' -e 's/\@VERSION\@/$version/'  hoppet-config.in > hoppet-config");
+($escprefix    = $prefix)    =~ s/\//\\\//g;
+($escmodprefix = $modPrefix) =~ s/\//\\\//g;
+system("sed -e 's/\@prefix\@/$escprefix/' -e 's/\@modprefix\@/$escmodprefix/' -e 's/\@VERSION\@/$version/'  hoppet-config.in > hoppet-config");
 system("chmod +x hoppet-config");
 
 # write a file config.log

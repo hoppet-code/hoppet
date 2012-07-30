@@ -3,6 +3,7 @@
 # Licensed under the GPL v2.
 
 installationdir=@prefix@
+moddir=@modprefix@
 
 # print a usage message and exit
 # exit code passed as argument:
@@ -48,7 +49,7 @@ for arg do
 	  echo -I$installationdir/include
 	  ;;
 	--fflags)
-	  echo -I$installationdir/include
+	  echo -I$moddir
 	  ;;
 	--libs)
 	  echo -L$installationdir/lib -lhoppet_v1
