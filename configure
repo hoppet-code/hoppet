@@ -26,6 +26,7 @@ if ($#ARGV >=0 && ($ARGV[0] eq "-h" || $ARGV[0] eq "--help")) {
   exit;
 }
 
+$configline=$0." ".join(" ",@ARGV);
 $prefix="/usr/local";
 $modPrefix="";
 
@@ -79,6 +80,6 @@ system("chmod +x hoppet-config");
 # write a file config.log
 open (LOG,">config.log") || die "Could not open config.log";
 print LOG "# the last configure that was run was\n";
-print LOG "$0 ".join(" ",@args)."\n";
+print LOG "$configline\n";
 print LOG "prefix=$prefix\n";
 close LOG;

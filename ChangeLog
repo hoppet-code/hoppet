@@ -13,7 +13,8 @@
 	  adapted the documentation to reflect the new module installation scheme
 
 	* hoppet-config.in: 
-	  --fflags now handles the configurable modules location
+	  --fflags now handles the configurable modules location;
+	  --ldflags can now be used as a synonym for --libs
 	
 
 2012-07-27  Gavin Salam  <salam@lpthe.jussieu.fr>
