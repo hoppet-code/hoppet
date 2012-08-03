@@ -12,7 +12,7 @@ subroutine HoppetWelcomeMessage
   write(0,'(a)') ' It is made available under the GNU public license,'
   write(0,'(a)') ' with the additional request that if you use it or any'
   write(0,'(a)') ' derivative of it in scientific work then you should cite:'
-  write(0,'(a)') ' G.P. Salam and J. Rojo, arXiv:0804.3755.'
+  write(0,'(a)') ' G.P. Salam & J. Rojo, CPC 180(2009)120 (arXiv:0804.3755).'
   write(0,'(a)') ' '
   write(0,'(a)') ' You are also encouraged to cite the original references,'
   write(0,'(a)') ' for LO, NLO and NNLO splitting functions, the QCD'

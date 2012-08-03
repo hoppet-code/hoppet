@@ -4,6 +4,9 @@
 	  switched version over to 1.1.6-devel (but everything is for now
 	  still identical to 1.1.5)
 
+	* src/welcome_message.f90: 
+	  added publication reference to welcome message.
+
 2012-08-03  Gavin Salam  <gsalam@macth69.cern.ch>
 
 	* NEWS
@@ -16,7 +19,8 @@
 
 2012-07-30  Gavin Salam  <salam@lpthe.jussieu.fr>
 
-	* scripts/makef95makefile:
+
+	* scripts/makef95makefile: 
 	  --install-modules, if present, indicates that modules should be
 	  installed by default; --mod-prefix=... indicates a non-standard location
 
