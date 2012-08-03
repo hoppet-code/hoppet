@@ -2,7 +2,7 @@ Check List for new releases of HOPPET
 -------------------------------------
 
 . version number in src/welcome_message.f90
-. version number in doc/HOPPET-v1-doc.tex
+. version number in doc/HOPPET-v1-doc.tex (two places)
 . info on changes in the NEWS file
 . build and test
 . tarit

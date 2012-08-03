@@ -2427,7 +2427,7 @@ contains
   !> higher-order tricks. Actually, fancy higher-order tricks do worse often.
   !>
   !> This routine is not intended for general use. Instead go for
-  !> conv_Luminosity_plain.
+  !> conv_Luminosity_multi.
   recursive function conv_Luminosity_plain(grid, gq1, gq2) result(lumi)
     type(grid_def), intent(in) :: grid
     real(dp), intent(in) :: gq1(0:), gq2(0:)

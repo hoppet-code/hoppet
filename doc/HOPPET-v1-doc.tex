@@ -103,7 +103,7 @@
 %-----------------------------------------
 \title{A Higher Order Perturbative Parton Evolution Toolkit \\
 (\hoppet)\\
-version 1.1.4
+version 1.1.5
 %  a.k.a.\ HOPPETv1
 }
 \author{G.~P. Salam and J.~Rojo\\[3pt]
@@ -119,7 +119,7 @@ version 1.1.4
 \maketitle 
 
 \begin{abstract}
-  This document describes a Fortran~95 package for carrying out DGLAP
+  This document describes \hoppet, a Fortran~95 package for carrying out DGLAP
   evolution and other common manipulations of parton distribution
   functions (PDFs). The PDFs are represented on a grid in $x$--space so
   as to avoid limitations on the functional form of input
@@ -143,8 +143,9 @@ version 1.1.4
 \noindent {\Large \textbf{Program Summary}}\\
 
 \noindent {\em Title of program\/}: \hoppet \\[2mm]
-{\em Version\/}: 1.1.1  (including documentation of some updates up
-to 2011-02-21)\\[2mm]
+{\em Version\/}: 1.1.5%
+%  (including documentation of some updates upto 2011-02-21)
+\\[2mm]
 {\em Catalogue identifier\/}: \\[2mm]
 {\em Program obtainable from\/}:
 \url{http://projects.hepforge.org/hoppet/}
@@ -1231,7 +1232,70 @@ fraction of a percent. This underestimation is largest
 at higher values of $Q^2$, due to the perturbative growth of PDFs
 at small-$x$ at large-$Q^2$.
 
+%------------------------------------------------------------
+\subsection{Parton Luminosities}
+\label{sec:parton-luminosities}
 
+The parton luminosity function ${\cal L}(\tau)$ obtained from two
+parton distributions $x q_i(x)$ and $x q_j(x)$, defined as
+\begin{equation}
+  \label{eq:parton-lumi}
+  {\cal L}_{ij}(\tau) = \int_{\tau}^1 \frac{dx}{x} \,  x q_i(x) \, \frac{\tau}{x}
+  q_j\left(\frac{\tau}{x} \right) 
+  = 
+  \tau \int_{\tau}^1 \frac{dx}{x}   q_i(x) \,
+  q_j\left(\frac{\tau}{x} \right)
+\end{equation}
+is a quantity that enters evaluations of many total cross sections at
+hadron-hadron colliders: e.g.\ the LO cross section for producing a
+boson with mass $M$ through fusion of partons of types $i$ and $j$ is
+proportional to ${\cal L}_{ij}(M^2/s)$, where $s$ is the squared centre of
+mass energy of the hadron-hadron collision.
+
+The parton luminosity function is represented as a grid quantity
+\begin{lstlisting}
+  real(dp), pointer :: lumi(:), xqi(:), xqj(:)
+  ! [... lumi, xqi and xqj should all be allocated as standard grid quantities]
+  lumi = PartonLuminosity(grid, xqi, xqj)
+\end{lstlisting}
+and all standard operations on grid quantities can be used with it,
+for example convolutions with splitting functions, evaluations at
+particular values of $y$ or $x$, and so forth.
+
+Parton luminosities are a new feature of the 1.1.5 release of \hoppet
+and should be considered ``beta'' functionality, valid only for PDFs
+that vanish smoothly for $x\to 1$, the same assumption that enters
+the use of negative \ttt{order} values (cf.\
+Fig.~\ref{fig:interpolation-orders}). 
+%
+In particular, for grids with a single spacing, they are evaluated
+through the sum
+\begin{equation}
+  \label{eq:lumi-tricks}
+  {\cal L}_{ij,\alpha} = \texttt{dy} \times \sum_{\beta=0}^{\alpha}
+  \,q_{i,\beta}\, q_{j,\alpha-\beta} \,.
+\end{equation}
+At first sight, this might appear to be a low-order integration
+formula.
+%
+However one can show that if one superposes multiple higher-order
+integration formulae, each shifted by one grid unit, then one obtains
+Eq.~(\ref{eq:lumi-tricks}) as long as the integrand vanishes
+sufficiently smoothly at its upper and lower limits, as is the case
+with physical PDFs.
+%
+When using multiple locked grid spacings, say a coarse and a fine
+grid, $\ttt{dy}_1 > \ttt{dy}_{2}$, $\ttt{ymax}_1 > \ttt{ymax}_{2}$,
+then for $y$ up to $2\ttt{ymax}_2$ the luminosity sum is evaluated
+using the fine grid spacing, taking information directly from the fine
+grid for the PDFs up to $\ttt{ymax}_2$, plus interpolation from
+the coarse grid onto the fine grid for points up to $2\ttt{ymax}_2$
+(the interpolation order is that of the coarse grid).
+%
+This procedure has been found to give accuracies comparable to those obtained
+for convolutions. 
+%
+Note that it may be modified in future versions of HOPPET.
 
 %======================================================================
 %======================================================================
@@ -1963,7 +2027,10 @@ of \hoppet \cite{Bethke:2006ac}.
 
 
 To access the coupling at some scale \ttt{Q} one uses the following
-function call:
+function call:\footnote{\texttt{RunningCoupling(...)} can be used as a
+    synonym for \texttt{Value(...)}, which helps code readability when the
+    \texttt{coupling} argument is left out (i.e.\ when using the
+    global \texttt{coupling} object).}
 \begin{lstlisting}
   alfas = Value(coupling, Q [, fixnf])
 \end{lstlisting}

@@ -1,21 +1,30 @@
+2012-08-03  Gavin Salam  <gsalam@macth69.cern.ch>
+
+	* NEWS
+	* src/welcome_message.f90: 
+	  updated for release of version 1.1.5
+
+	* doc/HOPPET-v1-doc.tex:
+	  documented PartonLuminosity(...) function.
+
 2012-07-30  Gavin Salam  <salam@lpthe.jussieu.fr>
 
-	* scripts/makef95makefile: 
+	* scripts/makef95makefile:
 	  --install-modules, if present, indicates that modules should be
 	  installed by default; --mod-prefix=... indicates a non-standard location
-	
-	* configure: 
+
+	* configure:
 	  added support for --mod-prefix, and arranged for default
 	  mod-prefix to be PREFIX/include/hoppet + made use of the new
 	  --install-modules option of scripts/makef95makefile
 
-	* INSTALL: 
+	* INSTALL:
 	  adapted the documentation to reflect the new module installation scheme
 
-	* hoppet-config.in: 
+	* hoppet-config.in:
 	  --fflags now handles the configurable modules location;
 	  --ldflags can now be used as a synonym for --libs
-	
+
 
 2012-07-27  Gavin Salam  <salam@lpthe.jussieu.fr>
 
@@ -26,7 +35,7 @@
 
 	* scripts/makef95makefile: 
 	  changed behaviour of install, so that it now also installs the
-	  .mod files (needed for programs like the jet veto resummation),
+	  .mod files (needed for programs like JetVHeto),
 	  without having to explicitly perform a "make install-mod".
 
 	  Also ensured that .h and .mod files are installed with -rw-r--r--

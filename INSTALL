@@ -40,7 +40,7 @@ Then run
   make install          
 
   # for backwards compatibility, you can still use the "make
-  # install-mod" target to install f90 files; but as of version 1.1.5
+  # install-mod" target to install f90 files; as of version 1.1.5
   # the module files go into the PREFIX/include/hoppet directory 
   # rather than PREFIX/include
   
