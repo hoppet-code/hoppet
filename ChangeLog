@@ -1,8 +1,15 @@
 2012-08-03  Gavin Salam  <gsalam@macth69.cern.ch>
 
+	* src/welcome_message.f90: 
+	  switched version over to 1.1.6-devel (but everything is for now
+	  still identical to 1.1.5)
+
+2012-08-03  Gavin Salam  <gsalam@macth69.cern.ch>
+
 	* NEWS
 	* src/welcome_message.f90: 
 	  updated for release of version 1.1.5
+	  (HoppetWelcomeMessage): 
 
 	* doc/HOPPET-v1-doc.tex:
 	  documented PartonLuminosity(...) function.
