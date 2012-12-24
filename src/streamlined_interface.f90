@@ -15,6 +15,11 @@ module streamlined_interface
 
   !! 0 is main pdf table, while i=1:3 contain convolutions with the
   !! i-loop splitting function
+  !!
+  !! NB (2012-12-24): 
+  !!     in future evolution of the code, we should aim to guarantee
+  !!     that tables(0) remains the default PDF, even if the other
+  !!     entries change
   type(pdf_table), save :: tables(0:3)
   logical,      save :: setup_done(0:3) = .false.
   integer,      save :: setup_nf(3)     = 0
