@@ -37,7 +37,7 @@ F90LIB4GCC=   -lgfortran
 
 
 LIBS = -L../src -lhoppet_v1 $(F90LIB)
-LHAPDFLIBS = -L$(LHAPDFDIR) -lLHAPDF 
+LHAPDFLIBS = `lhapdf-config --ldflags`
 
 tabulation_example: tabulation_example.o
 	$(FC) -o tabulation_example $<  $(LIBS) 

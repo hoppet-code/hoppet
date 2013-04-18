@@ -14,13 +14,15 @@ C----------------------------------------------------------------------
       double precision dy, ymax, Qmin, Qmax, dlnlnQ
       integer          nloop, order
       !---------------
-      external         evolvePDF
+      double precision alphasPDF
+      external         evolvePDF, alphasPDF
       double precision x, Q, lhapdf(-6:6), ourpdf(-6:6)
-      double precision asmz, Q0, xmu
+      double precision mz, asmz, Q0, xmu
       integer          iloop,  nf, iflv, i, scheme
 
       ! initialise an LHAPDF set
-      call InitPDFsetByName("cteq61.LHgrid")
+      !call InitPDFsetByName("cteq61.LHgrid")
+      call InitPDFsetByName("CT10nlo.LHgrid")
       call InitPDF(0)
 
       ! start the dglap evolution/convolution package 
@@ -29,7 +31,7 @@ C----------------------------------------------------------------------
                         ! 0.1 should provide at least 10^{-3} accuracy 
       Qmin  = 1.0d0     ! smallest Q value in tabulation
       Qmax  = 1d4       ! largest Q value in tabulation
-      dlnlnQ = 0.025d0  ! tabulation spacing in dlnlnQ (dy/4 recommended)
+      dlnlnQ = dy/4.0d0 ! tabulation spacing in dlnlnQ (dy/4 recommended)
       nloop = 2         ! the number of loops to initialise (max=3!)
       order = -6        ! numerical interpolation order (-6 is a good choice)
       scheme = 1        ! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
@@ -45,16 +47,19 @@ C----------------------------------------------------------------------
       !
       ! Call this routine each time you want to change 
       ! input PDFs
-      asmz = 0.118d0
+      mz = 91.1876d0
+      asmz = alphasPDF(mz)
+      write(6,*) "alpha_s(MZ) = ", asmz
       Q0   = 20.0d0
       xmu  = 1.0d0
       !call hoppetSetVFN(1.5d0,4.7d0,175d0)
-      call hoppetEvolve(asmz,91.2d0,nloop,xmu,evolvePDF,Q0)
+      call hoppetEvolve(asmz,mz,nloop,xmu,evolvePDF,Q0)
       ! alternatively if you need to repeat the same evolution on very
       ! many pdf sets, used a cached evolution (set up once, use many times
       ! and gain a factor 3-4 in speed.
       !call hoppetPreEvolve(asmz,91.2d0,nloop,xmu,Q0)
       !call hoppetCachedEvolve(evolvePDF) 
+      !x = 0.7d0
       x = 1d-3
       Q = 100.0d0
 

@@ -1,3 +1,12 @@
+2013-04-18  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example_f77/Makefile (LHAPDFLIBS): 
+	  now set using lhapdf-config (assuming it's in your path).
+
+	* example_f77/compare_lhapdf_hoppet.f:
+	  now explicitly takes alphas(MZ) from LHAPDF (and set dlnlnQ
+	  automatically based on dy).
+
 2012-12-24  Gavin Salam  <salam@lpthe.jussieu.fr>
 
 	* src/streamlined_interface.f90: 
