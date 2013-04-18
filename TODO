@@ -1,4 +1,6 @@
-- more explicit error message when coupling is used initialised
+- more explicit error message when coupling is used (un?)initialised
   [and clean up of whole alphas code?]
 
+- get intrinsic charm working with cached evolution (threshold
+  operators should become additive rather than multiplicative)
 
