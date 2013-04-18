@@ -415,9 +415,10 @@ contains
     
     this_evop => evop
     res = pdfdist
+
     do
        if (this_evop%cross_mass_threshold) then
-          ! NB: this never eccurs on first pass
+          ! NB: this never occurs on first pass
           res = res + this_evop%MTM_coeff * (this_evop%MTM .conv. res)
        end if
        
