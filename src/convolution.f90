@@ -2590,7 +2590,7 @@ contains
     type(grid_def), intent(in) :: grid
     real(dp), intent(inout) :: gq(0:)
     integer :: isub, step, iy
-    ! Temember: finest grid has lowest isub
+    ! Remember: finest grid has lowest isub
     do isub = 2, grid%nsub
       ! the ratio should be an exact integer, but use
       ! nint() to avoid the dangers of rounding errors
