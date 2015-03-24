@@ -749,7 +749,7 @@ sub MakeDepends {
       while (<FILE>) {
          /$pattern/i && push(@incs, $1);
          }
-      if (defined @incs) {
+      if (@incs) {
          $file =~ s/\.[^.]+$/.o/;
          print MAKEFILE "$file: ";
          &PrintWords(length($file) + 2, 0, @incs);
@@ -809,7 +809,7 @@ sub MakeDependsf90 {
 	/^$a$a$a$a$a$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
 	/^$a$a$a$a$a$a$a\s*use\s+([^\s,!;]+)/i && push(@modules, &toLower($1));
 	  }
-      if (defined @incs || defined @modules) {
+      if (@incs || @modules) {
 	 # very nasty hack to get .f .F and .f90 
 	 # it will also get .f90000000, .F99999990 etc...
 	 # but this shouldn't matter because there should be no

@@ -1,3 +1,9 @@
+2015-03-24  Gavin Salam  <gavin.salam@cern.ch>
+
+	* scripts/makef95makefile:
+	removed perl warning message about unnecessary "defined" in a
+	couple of places; 
+
 2013-04-18  Gavin Salam  <gavin.salam@cern.ch>
 
 	* example_f77/Makefile (LHAPDFLIBS): 
