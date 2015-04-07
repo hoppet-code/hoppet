@@ -1,3 +1,9 @@
+2015-04-07  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/pdf_tabulate.f90 (EvalPdfTable_yQ):
+	removed redundant if statement for case where we are out of Q
+	bounds (correct handling was already taking place elsewhere).
+
 2015-03-24  Gavin Salam  <gavin.salam@cern.ch>
 
 	* scripts/makef95makefile:

@@ -626,10 +626,17 @@ contains
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
     !   signal for Q being out of range
     call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
-    if (ilnlnQ_lo > ilnlnQ_lo) then
-      val = zero
-      return
-    end if
+    ! GPS 2015-04-07: the following if statement was wrong, because
+    ! (ilnlnQ_lo > ilnlnQ_lo) will never be satisfied.
+    ! 
+    ! But things are OK all the same since get_lnlnQ_wgts sets
+    ! ilnlnQ_lo=ilnlnQ_hi=0 and lnlnQ_wgts=0 so that we simply get
+    ! zero in the final evaluation.
+    !
+    !if (ilnlnQ_lo > ilnlnQ_lo) then
+    !  val = zero
+    !  return
+    !end if
     nQ = ilnlnQ_hi - ilnlnQ_lo
 
     allocate(wgts(lbound(y_wgts,dim=1):ubound(y_wgts,dim=1),0:nQ))
