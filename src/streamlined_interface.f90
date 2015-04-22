@@ -13,16 +13,24 @@ module streamlined_interface
   !! holds the splitting functions
   type(dglap_holder), save :: dh
 
-  !! 0 is main pdf table, while i=1:3 contain convolutions with the
-  !! i-loop splitting function
+  !! table_index_from_iloop tells us which table to loop up for a give
+  !! iloop value; most of the iloop values are illegal (index -1), but
+  !! for those that are allowed (e.g. 1, 2, 3, 12, 111) this gives
+  !! quick access to the relevant table (without having to store 111
+  !! tables, most of which would be redundant)
+  !!
+  !! The array gets initialised in hoppetStartExtended
+  integer, save :: table_index_from_iloop(1:111) = -1
+  integer, parameter :: max_table_index = 7
+
   !!
   !! NB (2012-12-24): 
   !!     in future evolution of the code, we should aim to guarantee
   !!     that tables(0) remains the default PDF, even if the other
   !!     entries change
-  type(pdf_table), save :: tables(0:3)
-  logical,      save :: setup_done(0:3) = .false.
-  integer,      save :: setup_nf(3)     = 0
+  type(pdf_table), save :: tables(0:max_table_index)
+  logical,         save :: setup_done(0:max_table_index) = .false.
+  integer,         save :: setup_nf(max_table_index)     = 0
 
   !! coupling
   logical,                save :: coupling_initialised = .false.
@@ -30,6 +38,72 @@ module streamlined_interface
   integer,  save :: ffn_nf = -1
   logical,  save :: quark_masses_are_MSbar = .false.
   real(dp), save :: masses(4:6) = quark_masses_def(4:6)
+
+contains
+
+  !----------------------------------------------------------------------
+  ! returns the value of the table index for the given iloop and
+  ! ensures that the table is actually set up (working down recursively
+  ! when iloop is composite)
+  recursive integer function tableIndexValue(iloop, nf) result(tabindex)
+    use warnings_and_errors
+    integer, intent(in) :: iloop, nf
+    !------------------------------
+    integer :: table_index_source, iloop_P, iQ
+
+    ! first establish if iloop is "legal"
+    if (iloop < 1 .or. iloop > ubound(table_index_from_iloop,dim=1)) then
+       call wae_error('tableIndexValue','illegal value for iloop (out of bounds):',&
+            &intval=iloop)
+    else if (table_index_from_iloop(iloop) < 0) then
+       call wae_error('tableIndexValue','illegal value for iloop (lookup < 0):',&
+            &intval=iloop)
+    end if
+    tabindex = table_index_from_iloop(iloop)
+
+    !write(0,*) 'iloop, tabindex ', iloop, tabindex
+    if (.not. setup_done(tabindex) .or. setup_nf(tabindex) /= nf) then
+
+       if (iloop < 10) then
+          table_index_source = 0
+          iloop_P = iloop
+       else if (iloop < 100) then
+          table_index_source = tableIndexValue(mod(iloop,10), nf)
+          iloop_P = iloop / 10
+       else if (iloop < 1000) then
+          table_index_source = tableIndexValue(mod(iloop,100), nf)
+          iloop_P = iloop / 100
+       else 
+          call wae_error('tableIndexValue','unsupported value for iloop (source & iloop_P determination):',&
+            &intval=iloop)
+       end if
+       !write(0,*) 'setting up with source and iloop_P = ', table_index_source, iloop_P
+       
+       if (nf < 0) then
+          ! use whatever nf is relevant 
+          if (.not. tables(0)%nf_info_associated) call wae_error(&
+               & 'hoppetEvalSplit','automatic choice of nf (nf<0) but the tabulation has no information on nf')
+          do iQ = 0, tables(0)%nQ
+             tables(tabindex)%tab(:,:,iQ) = dh%allP(iloop_P, tables(0)%nf_int(iQ)) &
+                  &             .conv. tables(table_index_source)%tab(:,:,iQ)
+          end do
+       else
+          ! use a fixed nf
+          if (nf < lbound(dh%allP,dim=2) .or. nf > ubound(dh%allP,dim=2)) &
+               &call wae_error('hoppetEvalSplit','illegal value for nf:',&
+               &intval=nf)
+          
+          tables(tabindex)%tab = dh%allP(iloop_P, nf) .conv. tables(table_index_source)%tab
+       end if
+       
+       setup_done(tabindex) = .true.
+       setup_nf(tabindex)   = nf
+  end if
+
+  end function tableIndexValue
+
+  
+  
 end module streamlined_interface
 
 
@@ -68,7 +142,7 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   integer,  intent(in) :: order  !! order of numerical interpolation (+ve v. -ve: see below)
   integer,  intent(in) :: factscheme !! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
   !-------------------------------------
-
+  integer :: iloop
   ! initialise our grids
 
   ! the internal interpolation order (with a minus sign allows
@@ -83,6 +157,17 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
   call InitGridDef(grid,gdarray(1:4),locked=.true.)
 
+  ! Fill the array that will be used for table index lookup (e.g. 21 is PNLO*PLO).
+  ! For now do it by hand; one day we might automate this;
+  ! entries that aren't filled are automatically -1
+  do iloop = 1, nloop
+     table_index_from_iloop(iloop) = iloop
+  end do
+  table_index_from_iloop(11)  = 4
+  table_index_from_iloop(111) = 5
+  if (nloop >= 2) table_index_from_iloop(12)  = 6
+  if (nloop >= 2) table_index_from_iloop(21)  = 7
+  
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
   call AllocPdfTable(grid, tables(:), Qmin, Qmax, & 
@@ -350,41 +435,22 @@ end subroutine hoppetEval
 !! each value of iloop). Multiple calls with different values for
 !! iloop can be carried out without problems.
 !!
+!! Note that iloop can also be of the form ij or ijk, which means
+!! P(i)*P(j)*pdf or P(i)*P(j)*P(k)*pdf. The sum of i+j+k is currently
+!! bounded to be <= 3.
+!!
+!! The number of loops must be consistent with iloop
 subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
   use streamlined_interface; use warnings_and_errors
   implicit none
   real(dp), intent(in)  :: x, Q
   integer,  intent(in)  :: iloop, nf
   real(dp), intent(out) :: f(-6:6)
-  integer :: iQ
+  integer :: iQ, tabindex
 
-  if (.not. setup_done(iloop) .or. setup_nf(iloop) /= nf) then
-     if (iloop > size(dh%allP,dim=1) .or. iloop < 1) &
-          &call wae_error('hoppetEvalSplit','illegal value for iloop:',&
-          &intval=iloop)
+  tabindex = tableIndexValue(iloop, nf)
+  call EvalPdfTable_xQ(tables(tabindex),x,Q,f)
 
-     if (nf < 0) then
-        ! use whatever nf is relevant 
-        if (.not. tables(0)%nf_info_associated) call wae_error(&
-             & 'hoppetEvalSplit','automatic choice of nf (nf<0) but the tabulation has no information on nf')
-        do iQ = 0, tables(0)%nQ
-           tables(iloop)%tab(:,:,iQ) = dh%allP(iloop, tables(0)%nf_int(iQ)) &
-                &             .conv. tables(0)%tab(:,:,iQ)
-        end do
-     else
-        ! use a fixed nf
-        if (nf < lbound(dh%allP,dim=2) .or. nf > ubound(dh%allP,dim=2)) &
-             &call wae_error('hoppetEvalSplit','illegal value for nf:',&
-             &intval=nf)
-        
-        tables(iloop)%tab = dh%allP(iloop, nf) .conv. tables(0)%tab
-     end if
-
-     setup_done(iloop) = .true.
-     setup_nf(iloop)   = nf
-  end if
-  
-  call EvalPdfTable_xQ(tables(iloop),x,Q,f)
 end subroutine hoppetEvalSplit
 
 

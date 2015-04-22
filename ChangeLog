@@ -1,3 +1,26 @@
+2015-04-22  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tests/README-hoppet-tests.org: *** ADDED ***
+	added this file in order to keep track of future tests
+
+	* tests/streamlined_multisplit.f90: *** ADDED ***
+	added this routine for testing the nested splitting-function
+	convolutions.
+
+	* src/dummy_pdfs.f90: *** ADDED ***
+	added this module with dummy unpolarized PDFs (given how often
+	they are needed); interface of internal functions may still evolve
+
+	* src/streamlined_interface.f90:
+	removed commented bits of code and improved comments in some
+	places now that tests have been run hoppetEvalSplit.
+
+2015-04-21  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/streamlined_interface.f90:
+	work in progress on getting support for composite iloop values
+	(e.g. 11, 12, 21, 111) in hoppetEvalSplit.
+
 2015-04-07  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/pdf_tabulate.f90 (EvalPdfTable_yQ):

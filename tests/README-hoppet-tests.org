@@ -1,0 +1,15 @@
+#+TITLE: file for tracking our tests
+#+STARTUP: logdone
+
+* streamlined_multisplit [6/6]
+  
+  Tests carried out on <2015-04-22 Wed> by running
+  file:streamlined_multisplit.f90 :
+
+    - [X] basic pdf is still correct (3 loops)
+    - [X] dynamic nf at two scales, for all combinations of split-fns
+    - [X] fixed nf in convolution, for all combinations of split-fns
+    - [X] failure for iloop inconsistent with nloop
+    - [X] failure for iloop out of bounds
+    - [X] a few printouts to make sure that caching is working
+  
