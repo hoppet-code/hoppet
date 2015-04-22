@@ -1,5 +1,17 @@
 2015-04-22  Gavin Salam  <gavin.salam@cern.ch>
 
+	* NEWS:
+	started work on comments for 1.2.0 release
+
+	* doc/HOPPET-v1-doc.tex:
+	added note on multi-splitting function support in
+	hoppetEvalSplit. 
+
+	* src/welcome_message.f90 (HoppetWelcomeMessage):
+	upped version number to 1.2.0-devel (will now try to follow
+	semantic version 2.0.0 numbering for releases, http://semver.org/,
+	so that patch number changes are mainly for bug fixes).
+
 	* tests/README-hoppet-tests.org: *** ADDED ***
 	added this file in order to keep track of future tests
 

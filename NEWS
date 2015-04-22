@@ -1,6 +1,13 @@
 NEWS for HOPPET
 
 ======================================================================
+Release 1.2.0-devel [pending]
+======================================================================
+. hoppetEvalSplit now supports composite iloop value, e.g. iloop=12
+  to get PLO*PNLO*pdf
+. small fixes to build system and examples
+
+======================================================================
 Release 1.1.5  August 2012
 ======================================================================
 . a PartonLuminosity(...) function has been added (see manual)

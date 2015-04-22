@@ -103,7 +103,7 @@
 %-----------------------------------------
 \title{A Higher Order Perturbative Parton Evolution Toolkit \\
 (\hoppet)\\
-version 1.1.5
+version 1.2.0-devel
 %  a.k.a.\ HOPPETv1
 }
 \author{G.~P. Salam and J.~Rojo\\[3pt]
@@ -2608,6 +2608,20 @@ $Q$ scale (as long as the information is available, \ie one of
 first call with a given \ttt{nf} for a specified \ttt{iloop} will be
 slow ($\sim$ the time for a cached evolution), but subsequent calls
 with the same values will be fast.
+
+If \ttt{iloop} has a value composed of two digits, \ttt{ij},
+then one obtains the convolution of the \ttt{i}-loop splitting function
+with the result of the convolution of the \ttt{j}-loop splitting
+function with the PDF. 
+%
+Analogously for a three-digit value, \ttt{ijk}.
+%
+Currently there is a limit that $i+j \le 3$ and $i+j+k \le 3$, which
+is adequate, e.g., for carrying out factorisation scale variation up
+the N$^3$LO.
+%
+The support for multi-digit \ttt{iloop} values is new as of \hoppet
+version 1.2.0.
 
 The routines described here 
 %(and associated data storage) 
