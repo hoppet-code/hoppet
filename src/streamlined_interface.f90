@@ -177,7 +177,7 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   ! as well as the convolutions with the pdf.
   call AllocPdfTable(grid, tables(:), Qmin, Qmax, & 
        & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
-  alloc_done = .true.
+  alloc_already_done = .true.
 
   ! initialise splitting-function holder
   call InitDglapHolder(grid,dh,factscheme=factscheme,&
