@@ -31,7 +31,8 @@ module streamlined_interface
   type(pdf_table), save :: tables(0:max_table_index)
   logical,         save :: setup_done(0:max_table_index) = .false.
   integer,         save :: setup_nf(max_table_index)     = 0
-
+  logical,         save :: alloc_already_done = .false.
+  
   !! coupling
   logical,                save :: coupling_initialised = .false.
   type(running_coupling), save :: coupling
@@ -167,11 +168,16 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   table_index_from_iloop(111) = 5
   if (nloop >= 2) table_index_from_iloop(12)  = 6
   if (nloop >= 2) table_index_from_iloop(21)  = 7
-  
+
+  ! if the allocation has already been done previously, delete
+  ! the existing tables to avoid a memory leak
+  if (alloc_already_done) call Delete(tables)
+
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
   call AllocPdfTable(grid, tables(:), Qmin, Qmax, & 
        & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
+  alloc_done = .true.
 
   ! initialise splitting-function holder
   call InitDglapHolder(grid,dh,factscheme=factscheme,&

@@ -1,3 +1,9 @@
+2015-06-26  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/streamlined_interface.f90:
+	added some code to delete old tabulations if hoppetStart is called
+	more than once.
+
 2015-04-22  Gavin Salam  <gavin.salam@cern.ch>
 
 	* NEWS:
