@@ -170,20 +170,28 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   if (nloop >= 2) table_index_from_iloop(21)  = 7
 
   ! if the allocation has already been done previously, delete
-  ! the existing tables to avoid a memory leak
-  if (alloc_already_done) call Delete(tables)
+  ! the existing tables and dglap holder to avoid a memory leak
+  if (alloc_already_done) then
+     call Delete(tables)
+     call Delete(dh)
+  end if
+  
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
   call AllocPdfTable(grid, tables(:), Qmin, Qmax, & 
        & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
-  alloc_already_done = .true.
 
   ! initialise splitting-function holder
   call InitDglapHolder(grid,dh,factscheme=factscheme,&
        &                      nloop=nloop,nflo=3,nfhi=6)
   ! choose a sensible default number of flavours.
   call SetNfDglapHolder(dh,nflcl=5)
+
+  ! indicate that allocations have already been done,
+  ! to allow for cleanup if hoppetStartExtended is
+  ! called a second time
+  alloc_already_done = .true.
 
   ! indicate the pdfs and convolutions have not been initialised...
   setup_done = .false.
