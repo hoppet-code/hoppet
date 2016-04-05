@@ -29,6 +29,13 @@ module qcd
        & + (54*cf_def**2-615*cf_def*ca_def-1415*ca_def**2)*two*tf_def&
        & + (66*cf_def + 79*ca_def)*(two*tf_def)**2)/(3456*pi**3)
 
+  ! beta3 taken from RunDec paper (hep-ph/0004189v1). Note that there is
+  ! no control over the colour factors in this expression
+  real(dp), public :: beta3 =  (149753._dp/6._dp + 3564._dp*zeta3 + &
+       &        (-1078361._dp/162._dp-6508._dp/27._dp*zeta3) * nf_def + &
+       &        (50065._dp/162._dp+6472._dp/81._dp*zeta3) * nf_def**2 + &
+       &        1093._dp/729._dp * nf_def**3)/256._dp/pi**4
+
   !--- nomenclature is: 
   !  alpha_s(nf+1,mu) = alpha_s(nf,mu) + 
   !               sum_{mn} alphastep_mn * (alphas)^(m+1) ln^n(mu^2/m(mu^2)^2)
@@ -56,7 +63,39 @@ module qcd
   !   NB: they express nf-1 in terms of nf...
   real(dp), public :: alphastep20_pole  = &
        &(15.0_dp/16.0_dp*cf_def-two/9.0_dp*ca_def) * tr_def/pisq
-
+  !--All taken from RunDec paper (SI and OS). Full colour dependence
+  ! not known. At 3-loop order we also need separate coefficients
+  ! for the inverted expressions. cf. Eq 23-25 in the RunDec paper.
+  real(dp), public :: alphastep33=&
+       &1._dp/216._dp/picb
+  real(dp), public :: alphastep32=&
+       &131._dp/576._dp/picb
+  real(dp), public :: alphastep32_inv=&
+       &511._dp/576._dp/picb ! For the inverted expression
+  ! SI scheme (MSbar)
+  real(dp), public :: alphastep31_msbar=&
+       &6793._dp/1728._dp/picb
+  real(dp), public :: alphastep31_msbar_inv=&
+       &2191._dp/1728._dp/picb ! For the inverted expression
+  real(dp), public :: alphastep31_msbar_nl=&
+       &281._dp/1728._dp/picb !Multiplies the number of light flavours (nl)
+  real(dp), public :: alphastep30_msbar=&
+       &(-82043._dp/27648._dp*zeta3 + 564731._dp/124416._dp)/picb
+  real(dp), public :: alphastep30_msbar_nl=&
+       &-2633._dp/31104._dp/picb !Multiplies the number of light flavours (nl)
+  ! OS scheme (pole)  
+  real(dp), public :: alphastep31_pole=&
+       &8521._dp/1728._dp/picb
+  real(dp), public :: alphastep31_pole_inv=&
+       &8941._dp/1728._dp/picb ! For the inverted expression
+  real(dp), public :: alphastep31_pole_nl=&
+       &409._dp/1728._dp/picb !Multiplies the number of light flavours (nl)
+  real(dp), public :: alphastep30_pole=&
+       &(-80507._dp/27648._dp*zeta3 - 58933._dp/124416._dp&
+       &-two/three*zeta2 * (one + one/three*log(two)))/picb
+  real(dp), public :: alphastep30_pole_nl=&
+       &(2479._dp/31104._dp + zeta2/9._dp)/picb !Multiplies the number of light flavours (nl)
+  
   real(dp), public :: cmw_K = ca_def*(67.0_dp/18.0_dp - pisq/6.0_dp) &
        &                      - tf_def * 10.0_dp/9.0_dp
   
@@ -112,6 +151,10 @@ contains
     beta1       = (17*ca**2 - tf*(10*ca + 6*cf)) / (24*pisq)
     beta2       = (2857*ca**3 + (54*cf**2-615*CF*CA-1415*ca**2)*two*tf&
          &           + (66*cf + 79*ca)*(two*tf)**2)/(3456*pi**3)
+    beta3 =  (149753._dp/6._dp + 3564._dp*zeta3 + &
+       &        (-1078361._dp/162._dp-6508._dp/27._dp*zeta3) * nf + &
+       &        (50065._dp/162._dp+6472._dp/81._dp*zeta3) * nf**2 + &
+       &        1093._dp/729._dp * nf**3)/256._dp/pi**4
     !-- matching thresholds -----------------
     alphastep11 = four*tr/(12*pi)
     alphastep22 = (four*tr/(12*pi))**2

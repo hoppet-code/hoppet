@@ -6,7 +6,7 @@ module new_as
 
   type na_segment
      real(dp) :: tlo, thi, dt
-     real(dp) :: beta0, beta1, beta2
+     real(dp) :: beta0, beta1, beta2, beta3
      real(dp), pointer :: ra(:)
      !-- above iflip we evolve upwards, below iflip we evolve downwards
      integer  :: iflip, dummy
@@ -83,6 +83,9 @@ contains
     !integer  :: nloop_lcl, fixnf_lcl
     !-------------------------------
     real(dp) :: alfas_here, lnmatch, alphastep20_lclscheme
+    real(dp) :: alphastep30_lclscheme, alphastep31_lclscheme 
+    real(dp) :: alphastep31_inv_lclscheme 
+    real(dp) :: alphastep30_nl_lclscheme, alphastep31_nl_lclscheme 
     real(dp) :: tstart, t, ra
     integer  :: nf_store
     integer  :: nbin, i, j, nseg, istart
@@ -115,6 +118,18 @@ contains
        if (tlo > tOfQ(nah%muMatch_mQuark*nah%quark_masses(i))) nah%nlo = i
        if (thi > tOfQ(nah%muMatch_mQuark*nah%quark_masses(i))) nah%nhi = i
     end do
+
+    ! check we have CA=3 and CF=4/3 for the nloop >=4 case
+    if (nloop >= 4) then
+       if (ca /= ca_def) then
+          call wae_error('na_Init','CA/=CA_def not supported for nloop >=4. CA is',dbleval=ca)
+       else if (abs(cf - cf_def) > 1e-10_dp) then
+          call wae_error('na_Init','CF/=CF_def not supported for nloop >=4. CF is',dbleval=cf)
+       else if (abs(tr - tr_def) > 1e-10_dp) then
+          call wae_error('na_Init','TR/=TR_def not supported for nloop >=4. TR is',dbleval=tr)
+       end if
+    end if
+    
     
     !-- now set up the parameters of the segments
     allocate(nah%seg(nah%nlo:nah%nhi))
@@ -142,16 +157,23 @@ contains
        case(1)
           seg%beta1 = zero
           seg%beta2 = zero
+          seg%beta3 = zero
        case(2)
           seg%beta1 = beta1
           seg%beta2 = zero
+          seg%beta3 = zero
        case(3)
           seg%beta1 = beta1
           seg%beta2 = beta2
+          seg%beta3 = zero
+       case(4)
+          seg%beta1 = beta1
+          seg%beta2 = beta2
+          seg%beta3 = beta3
        case default
           call wae_Error('na_init: unsupported number of loops requested')
        end select
-       
+
        !-- first guess, which then needs to be "adapted" to the range
        seg%dt    = dt_base * half**(6-i)
        nbin = ceiling((seg%thi - seg%tlo)/seg%dt)
@@ -187,8 +209,18 @@ contains
     ! handle pole v. MSbar mass treatment
     if (nah%masses_are_MSbar) then
       alphastep20_lclscheme = alphastep20_msbar
+      alphastep30_lclscheme = alphastep30_msbar
+      alphastep31_lclscheme = alphastep31_msbar
+      alphastep31_inv_lclscheme = alphastep31_msbar_inv
+      alphastep30_nl_lclscheme = alphastep30_msbar_nl
+      alphastep31_nl_lclscheme = alphastep31_msbar_nl
     else
       alphastep20_lclscheme = alphastep20_pole
+      alphastep30_lclscheme = alphastep30_pole
+      alphastep31_lclscheme = alphastep31_pole
+      alphastep31_inv_lclscheme = alphastep31_pole_inv
+      alphastep30_nl_lclscheme = alphastep30_pole_nl
+      alphastep31_nl_lclscheme = alphastep31_pole_nl
     end if
 
     !-- fill up the segments above
@@ -206,6 +238,13 @@ contains
              alfas_here = alfas_here*(1 + alphastep11 * lnmatch * alfas_here&
                   & + (alphastep22 * lnmatch**2 + alphastep21 * lnmatch&
                   &    + alphastep20_lclscheme)*alfas_here**2)
+          case(4)
+             alfas_here = alfas_here*(1 + alphastep11 * lnmatch * alfas_here&
+                  & + (alphastep22 * lnmatch**2 + alphastep21 * lnmatch&
+                  & + alphastep20_lclscheme)*alfas_here**2&
+                  & + (alphastep33 * lnmatch**3 + alphastep32_inv * lnmatch**2&
+                  & + (alphastep31_inv_lclscheme - (j-1) * alphastep31_nl_lclscheme) * lnmatch & 
+                  & + (-alphastep30_lclscheme - (j-1) * alphastep30_nl_lclscheme))*alfas_here**3)
           end select
        end if
        seg%ra(0) = one/alfas_here
@@ -221,8 +260,8 @@ contains
        seg => nah%seg(j)
        alfas_here = one/nah%seg(j+1)%ra(0)
        if (mass_steps_on .and. nah%fixnf == nofixnf) then
-          !write(0,*) '------ changing as from ',j+1,' to ',j
-          !write(0,*) j+1, alfas_here
+!          write(0,*) '------ changing as from ',j+1,' to ',j
+!          write(0,*) j+1, alfas_here
           lnmatch = two*log(nah%muMatch_mQuark)
           select case (nah%nloop)
           case(2)
@@ -231,8 +270,16 @@ contains
              alfas_here = alfas_here*(1 - alphastep11 * lnmatch * alfas_here&
                   & + (alphastep22 * lnmatch**2 - alphastep21 * lnmatch&
                   &    - alphastep20_lclscheme)*alfas_here**2)
+          case(4)
+             alfas_here = alfas_here*(1 - alphastep11 * lnmatch * alfas_here&
+                  & + (alphastep22 * lnmatch**2 - alphastep21 * lnmatch&
+                  & - alphastep20_lclscheme)*alfas_here**2&
+                  & + (-alphastep33 * lnmatch**3 - alphastep32 * lnmatch**2&
+                  & + (-alphastep31_lclscheme + j * alphastep31_nl_lclscheme) * lnmatch & 
+                  & + (alphastep30_lclscheme + j * alphastep30_nl_lclscheme))*alfas_here**3)
           end select
-          !write(0,*) j, alfas_here
+!          write(0,*) j, alfas_here
+!          write(0,*) 'Coefficients', alphastep20_lclscheme * pisq
        end if
        seg%ra(ubound(seg%ra,dim=1)) = one/alfas_here
        do i = ubound(seg%ra,dim=1)-1, 0, -1
@@ -497,7 +544,7 @@ contains
     real(dp), intent(in)  :: t, ra
     real(dp), intent(out) :: dra
 
-    dra = seg%beta0 + seg%beta1/ra + seg%beta2/ra**2
+    dra = seg%beta0 + seg%beta1/ra + seg%beta2/ra**2 + seg%beta3/ra**3
   end subroutine na_deriv
 
   !-- avoid risk of errors when forgetting factor of two

@@ -2002,7 +2002,11 @@ values are as follows:
 \end{lstlisting}
 The running coupling object is initialised so that at scale \ttt{Q}
 the coupling is equal to \ttt{alfas}. The running is carried out with
-the \ttt{nloop} $\beta$-function. If the \ttt{fixnf} argument is
+the \ttt{nloop} $\beta$-function. 
+%
+The highest value current supported is 4 loops.
+%
+If the \ttt{fixnf} argument is
 present, then the number of flavours is kept fixed at that
 value. Otherwise flavour thresholds are implemented at scales
 \begin{lstlisting}
@@ -2037,8 +2041,9 @@ function call:\footnote{\texttt{RunningCoupling(...)} can be used as a
 This is the value of the coupling as obtained from the Runge-Kutta
 solution of the \ttt{nloop} version of eq.~(\ref{eq:as-ev}) (the
 numerical solution is actually carried out for $1/\as$), together with the
-appropriate mass thresholds. For
-typical values of $\as(M_Z)$ the coupling is guaranteed to be reliably
+appropriate mass thresholds. 
+%
+For typical values of $\as(M_Z)$ the coupling is guaranteed to be reliably
 determined in the range $0.5 \GeV < Q < 10^{19}\GeV$. The values of
 the $\beta$ function coefficients used in the evolution correspond to
 those obtained with the values of the QCD colour factors that were in

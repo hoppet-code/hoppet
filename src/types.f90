@@ -30,6 +30,8 @@ module consts_dp
        & 1.202056903159594285399738161511449990765_dp
   real(dp), parameter, public :: pisq =&
        & 9.869604401089358618834490999876151135314_dp
+  real(dp), parameter, public :: picb =&
+       & 31.00627668029982017547631506710139520222_dp
   real(dp), parameter, public :: eulergamma =&
        & 0.577215664901532860606512090082402431042_dp
   real(dp), parameter, public :: ln2 =&

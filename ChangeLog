@@ -1,3 +1,24 @@
+2016-04-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* doc/HOPPET-v1-doc.tex:
+	added mention of running up to 4 loops
+
+	* src/new_as.f90 (na_Init):
+	added protection against 4-loop running with non-standard colour factors.
+
+	* src/welcome_message.f90 (HoppetWelcomeMessage):
+	added Frederic and Alexander as contributors.
+
+	* src/qcd.f90
+	* src/new_as.f90
+	* src/types.f90
+
+	Put in changes from Alexander Karlberg to support 4-loop running
+	of the coupling, including flavour thresholds. Alexander has
+	tested this against my python code (itself tested against
+	rundec). Note -- there's support only for QCD colour factors, not
+	general colour factors.
+
 2015-06-26  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/streamlined_interface.f90:
