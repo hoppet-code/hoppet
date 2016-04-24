@@ -1,3 +1,12 @@
+2016-04-24  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tests/test_qed.f90: *** ADDED ***
+	file for first tests of QED coupling
+
+	* src/qed_coupling.f90: *** ADDED ***
+	got a first basic version of a 1-loop QED coupling -- interface
+	may evolve
+
 2016-04-04  Gavin Salam  <gavin.salam@cern.ch>
 
 	* doc/HOPPET-v1-doc.tex:
