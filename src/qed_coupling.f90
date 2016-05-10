@@ -11,14 +11,18 @@ module qed_coupling_module
   private
 
   real(dp), parameter :: m_light_quarks = 0.300_dp ! DECIDE ON THIS
-  real(dp), parameter :: m_electron   = 0.511e-3_dp
-  real(dp), parameter :: m_muon  = 0.110_dp ! GPS FIX THIS UP
-  real(dp), parameter :: m_tau = 1.7_dp ! GPS FIX THIS UP
+
+  ! lepton masses from from 2014 PDG
+  real(dp), parameter :: m_electron = 0.510998928e-3_dp ! +-(11) on last digits
+  real(dp), parameter :: m_muon     = 105.6583715e-3_dp ! +-(35) on last digits
+  real(dp), parameter :: m_tau      = 1776.82e-3_dp ! +-(16) on last digits
 
   real(dp), parameter :: e_dn2 = (one/three)**2
   real(dp), parameter :: e_up2 = (two/three)**2
 
-  real(dp), parameter :: alpha_qed_scale_0 = one/137.0_dp ! GPS FIX THIS UP
+  ! from the PDG rpp2014-rev-phys-constants
+  real(dp), parameter :: alpha_qed_scale_0 = one/137.035999074_dp ! +-(44) is uncertainty
+  public :: alpha_qed_scale_0
   
   integer, parameter :: n_thresholds = 7
 
@@ -82,7 +86,6 @@ contains
        coupling%b0_values(i) = qed_squared_charge(coupling%nflav(1,i),&
             &                                     coupling%nflav(2,i),&
             &                                     coupling%nflav(3,i))
-       write(6,*) i, coupling%b0_values(i)
     end do
     ! then include the normalisation
     coupling%b0_values = -two/(6*pi) * coupling%b0_values
