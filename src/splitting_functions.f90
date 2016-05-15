@@ -39,6 +39,9 @@ module splitting_functions
   public :: sf_DP1qqV, sf_DP1qqbarV, sf_DP1qqS
   public :: sf_DP1qg, sf_DP1gq, sf_DP1gg
 
+  public :: sf_S2 ! for outside things that might need it
+  
+
 !!$  ! these are of help elsewhere in identifying (run-time) the sets of 
 !!$  ! splitting functions that have been used?
 !!$  public :: name_xpij2, name_xpns2

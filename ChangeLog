@@ -1,3 +1,14 @@
+2016-05-15  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tests/test_qed.f90:
+	added tests of moments of the QED splitting functions.
+
+	* src/splitting_functions.f90:
+	made sf_S2(x) public, for us in the qed_splitting_functions
+
+	* src/qed_splitting_functions.f90: *** ADDED ***
+	added the QED splitting functions from 1512.00612
+
 2016-05-10  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/qed_coupling.f90:
