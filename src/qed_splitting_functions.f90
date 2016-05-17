@@ -11,6 +11,14 @@
 !
 ! - P^{\pm}_q = P_{qq}^V \pm P_{q\bar q}^V
 !
+! In our notation, "gamma" is written "y".
+!
+! Note that the Piy_11 functions have not been coded, because they
+! appear to be given simply by
+!
+!    Piy_11 = (CF CA / TR) Pig_11 
+!
+! GPS 2016-05-20
 module qed_splitting_functions
   use types; use consts_dp; use convolution_communicator
   use qcd; use warnings_and_errors
@@ -21,6 +29,7 @@ module qed_splitting_functions
   public :: sf_Pqq_01, sf_Pqy_01, sf_Pyq_01, sf_Pyy_01
   public :: sf_Pqg_11, sf_Pyg_11, sf_Pgg_11
   public :: sf_PqqV_11, sf_PqqbarV_11, sf_Pgq_11
+
 contains
 
   !----------------------------------------------------------------------
