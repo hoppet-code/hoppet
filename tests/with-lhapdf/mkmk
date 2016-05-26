@@ -1,0 +1,3 @@
+../../scripts/makef95makefile lumi_tests -I../../src -L../../src -lhoppet_v1 -lio \
+                           `lhapdf-config --cflags` `lhapdf-config --libs` -lc++
+
