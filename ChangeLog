@@ -1,3 +1,14 @@
+2016-05-26  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/streamlined_interface.f90 (hoppetStartExtended):
+	this now uses InitGridDefDefault for creating its grid
+
+	* src/convolution.f90:
+	added InitGridDefDefault(grid, dy, ymax, order) to make it
+	a bit easier to create good grids
+
+	added 2d version of TruncatedMoment
+
 2016-05-15  Gavin Salam  <gavin.salam@cern.ch>
 
 	* tests/test_qed.f90:

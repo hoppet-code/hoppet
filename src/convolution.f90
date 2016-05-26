@@ -67,10 +67,11 @@ module convolution
   !-- public routines --
   interface InitGridDef
      module procedure conv_InitGridDef_single, conv_InitGridDef_multi
-  end interface
+  end interface InitGridDef
   public :: conv_InitGridDef_single, conv_InitGridDef_multi
   public :: InitGridDef, ValidateGD, GetGridInfoString
   public :: SetDefaultConvolutionEps, DefaultConvolutionEps
+  public :: InitGridDefDefault
   interface operator(==)
      module procedure conv_CmpGridDef
   end interface
@@ -127,7 +128,7 @@ module convolution
   type(grid_def) :: conv_moment_gd
   real(dp), allocatable :: conv_moment_gq(:)
   interface TruncatedMoment
-    module procedure conv_TruncatedMoment_1d
+    module procedure conv_TruncatedMoment_1d, conv_TruncatedMoment_2d
   end interface
   public :: TruncatedMoment
 
@@ -408,8 +409,29 @@ contains
     end do
     
   end subroutine conv_InitGridDef_multi
-  
 
+  !======================================================================
+  ! create a grid covering ymax and dy, using our default nested grid
+  ! setup (as created originally for the streamlined interface)
+  subroutine InitGridDefDefault(grid, dy, ymax, order)
+    type(grid_def), intent(out) :: grid
+    real(dp),       intent(in)  :: ymax, dy
+    integer, optional, intent(in) :: order
+    !---------------------------------
+    type(grid_def) :: gdarray(4)
+    integer        :: lcl_order
+
+    lcl_order = default_or_opt(-6, order)
+
+    call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=lcl_order)
+    call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp,  order=lcl_order)
+    call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp,  order=lcl_order)
+    call InitGridDef(gdarray(1),dy,       ymax  ,  order=lcl_order)
+    call InitGridDef(grid,gdarray(1:4),locked=.true.)
+
+  end subroutine InitGridDefDefault
+  
+  
   !======================================================================
   !! Set a string with a compact summary about the grid
   !!
@@ -1439,6 +1461,20 @@ contains
 
   end function conv_TruncatedMoment_1d
 
+  !----------------------------------------------------------------------
+  ! a 2d version of TruncatedMoment
+  function conv_TruncatedMoment_2d(gd, gq, moment_index, y) result(res)
+    type(grid_def), intent(in) :: gd
+    real(dp),       intent(in) :: gq(0:,:), moment_index
+    real(dp), intent(in), optional :: y
+    real(dp) :: res(size(gq,dim=2))
+    !---------------------------------
+    integer :: i
+    do i = 1, size(gq,dim=2)
+       res(i) = conv_TruncatedMoment_1d(gd, gq(:,i), moment_index, y)
+    end do
+  end function conv_TruncatedMoment_2d
+  
   
   !------------------------------------------------
   ! Auxiliary function for conv_TruncatedMoment_1d
