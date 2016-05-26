@@ -31,8 +31,9 @@ module qed_coupling_module
   type qed_coupling 
      !private
      real(dp) :: mc, mb, mt
-     integer  :: nflav(3, n_thresholds) ! first index: 1 = nleptons, 2=ndown, 3=nup
-     real(dp) :: thresholds(n_thresholds)  !
+     integer  :: n_thresholds
+     integer  :: nflav(3, 0:n_thresholds) ! first index: 1 = nleptons, 2=ndown, 3=nup
+     real(dp) :: thresholds(0:n_thresholds+1)  !
      real(dp) :: b0_values(n_thresholds)
      real(dp) :: alpha_values(n_thresholds)
   end type qed_coupling
@@ -62,7 +63,10 @@ contains
     
     if (mc > m_tau) call wae_error("InitQEDCoupling", "mc > m_tau")
 
+    coupling%n_thresholds = n_thresholds
+    
     ! set up the thresholds
+    coupling%thresholds(0) = zero
     coupling%thresholds(1) = m_electron
     coupling%thresholds(2) = m_muon
     coupling%thresholds(3) = m_light_quarks
@@ -70,9 +74,11 @@ contains
     coupling%thresholds(5) = m_tau
     coupling%thresholds(6) = mb
     coupling%thresholds(7) = mt
+    coupling%thresholds(8) = 1e200_dp
 
     ! set up the numbers of flavours just above each threshold
     !                       nlept  ndown  nup
+    coupling%nflav(:,0) = (/   0,    0,    0 /)
     coupling%nflav(:,1) = (/   1,    0,    0 /)
     coupling%nflav(:,2) = (/   2,    0,    0 /)
     coupling%nflav(:,3) = (/   2,    2,    1 /)

@@ -1,6 +1,31 @@
 2016-05-26  Gavin Salam  <gavin.salam@cern.ch>
 
-	* src/qed_objects_and_evolution.f90: *** ADDED ***
+	* src/welcome_message.f90 (HoppetWelcomeMessage):
+	updated date!
+
+	* src/qed_coupling.f90:
+	added info on n_thresholds inside the qed_coupling type and
+	extended the bounds of some of the arrays to make it easier to
+	access threshold information without worrying about out-of-bounds
+	accesses. 
+
+	* src/qed_evolution.f90:  *** ADDED ***
+	added this routine for QED evolution, including thresholds;
+	comprehensive testing still remains to be performed.
+
+	For now alphas and alpha_QED still have separate evolutions
+	(whereas with O(alpha alpha_s) splitting kernels they should have
+	coupled evolution).
+
+	* src/evolution.f90:
+	factored out some part of the machinery into a new module,
+	evolution_helper, so that it can be used by the QED
+	evolution. Nothing should change in the public interface.
+
+	* scripts/makef95makefile:
+	added a "-g" option to gfortran by default, to aid with debugging
+
+	* src/qed_objects.f90: *** ADDED ***
 	started work on a module for holding QED splitting matrices,
 	performing the flavour convolutions, etc. Currently the LO
 	QED splitting matrix appears to be working. The NLO is also mostly

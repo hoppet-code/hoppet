@@ -1,4 +1,4 @@
-module qed_objects_and_evolution
+module qed_objects
   use types; use consts_dp
   use convolution; use qcd
   use pdf_representation
@@ -30,7 +30,8 @@ module qed_objects_and_evolution
   end type qed_split_mat
   public :: qed_split_mat
   public :: InitQEDSplitMat
-
+  public :: QEDSplitMatSetNf
+  
   interface operator(*)
      module procedure :: conv_qed_lo, conv_qed_nlo
   end interface operator(*)
@@ -40,7 +41,35 @@ module qed_objects_and_evolution
   integer, parameter, public :: ncompmaxLeptons = 11
   integer, parameter, public :: ncompmaxPhoton  = 8
 
+  public :: AllocPDFWithPhoton, AllocPDFWithLeptons
+
+  integer, parameter, public :: iflv_photon   =  8
+  ! NB: convention here is that electron, muon and tau contain the sum
+  !     of the particle and anti-particle distributions
+  integer, parameter, public :: iflv_electron =  9
+  integer, parameter, public :: iflv_muon     = 10
+  integer, parameter, public :: iflv_tau      = 11
+  
 contains
+
+  !------------------------------------------
+  subroutine AllocPDFWithPhoton(grid, pdf)
+    type(grid_def), intent(in) :: grid
+    real(dp),       pointer    :: pdf(:,:)
+    
+    call AllocGridQuant(grid,  pdf, ncompmin, ncompmaxPhoton)
+  end subroutine AllocPDFWithPhoton
+
+  !------------------------------------------
+  subroutine AllocPDFWithLeptons(grid, pdf)
+    type(grid_def), intent(in) :: grid
+    real(dp),       pointer    :: pdf(:,:)
+    
+    call AllocGridQuant(grid,  pdf, ncompmin, ncompmaxPhoton)
+  end subroutine AllocPDFWithLeptons
+  
+    
+  
   !------------------------------------------
   subroutine InitQEDSplitMat(grid, qed_split)
     use qed_splitting_functions
@@ -239,4 +268,4 @@ contains
     
   end function conv_qed_nlo
   
-end module qed_objects_and_evolution
+end module qed_objects

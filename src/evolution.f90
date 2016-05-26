@@ -1,56 +1,12 @@
 !======================================================================
-!!
-!! Module for providing access to variable-flavour number DGLAP
-!! evolution, both directly of a pdf and via evolution operators (with
-!! facilities both for setting them and using them).
-!!
-module evolution
+! Module that holds a whole bunch of helper routines and variables
+! some of which will come in useful also for the QED evolution code
+module evolution_helper
   use types; use consts_dp
   use dglap_objects; use qcd_coupling
   use assertions; use qcd
   use warnings_and_errors
   implicit none
-  private
-
-  public :: EvolvePDF, EvolveGeneric
-  public :: SetDefaultEvolutionDt, SetDefaultEvolutionDu
-  public :: DefaultEvolutionDu
-
-  public :: ev_MSBar2DIS, ev_evolve  ! should these be public
-
-  !!
-  !! A type that allows one to store the result of the evolution as an
-  !! operator that can be "applied" to any parton distribution, eliminating 
-  !! the need to repeat the whole Runge-Kutta evolution for each new PDF
-  !!
-  type evln_operator
-     type(split_mat)              :: P
-     type(mass_threshold_mat)  :: MTM ! assume we have just one of these...
-     real(dp)                :: MTM_coeff, Q_init, Q_end
-     logical                 :: cross_mass_threshold
-     type(evln_operator), pointer :: next
-  end type evln_operator
-  public :: evln_operator
-  public :: InitEvlnOperator
-
-  interface Delete
-     module procedure Delete_evln_operator
-  end interface
-  public :: Delete
-
-  
-  !!
-  !! related operation and operator
-  !!
-  public :: ev_conv_evop
-  interface operator(*)
-     module procedure ev_conv_evop
-  end interface
-  public :: operator(*)
-  interface operator(.conv.)
-     module procedure ev_conv_evop
-  end interface
-  public  :: operator(.conv.)
 
   !!
   !! fact that alpha_s/2pi is small means that we can quite comfortably
@@ -82,6 +38,351 @@ module evolution
   integer             :: ev_du_type
   real(dp)            :: ev_u_asref, ev_u_tref, ev_u_bval, ev_du_dt
   integer,  parameter :: ev_nloop_interp = -1
+
+  real(dp) :: ev_conv_last_jacobian
+  real(dp) :: ev_conv_last_Q
+  real(dp) :: ev_conv_last_as2pi
+
+    !!
+  !! A type that allows one to store the result of the evolution as an
+  !! operator that can be "applied" to any parton distribution, eliminating 
+  !! the need to repeat the whole Runge-Kutta evolution for each new PDF
+  !!
+  type evln_operator
+     type(split_mat)              :: P
+     type(mass_threshold_mat)  :: MTM ! assume we have just one of these...
+     real(dp)                :: MTM_coeff, Q_init, Q_end
+     logical                 :: cross_mass_threshold
+     type(evln_operator), pointer :: next
+  end type evln_operator
+
+contains
+  
+
+  !======================================================================
+  !! this bit here does the actual evolution of a PDF. Could make it
+  !! more sophisticated later, if necessary (e.g. variable step size).
+  subroutine ev_evolveLocal(pdf, Q_init, Q_end, ev_conv_sub)
+    use runge_kutta
+    real(dp),        intent(inout)         :: pdf(:,:)
+    real(dp),        intent(in)            :: Q_init, Q_end
+    interface
+       subroutine ev_conv_sub(x,y,dy)
+         use types
+         real(dp), intent(in)  :: x, y(:,:)
+         real(dp), intent(out) :: dy(:,:)
+       end subroutine ev_conv_sub
+    end interface
+       
+    !------------------------------------------------------------
+    real(dp) :: t1, t2, dt, t, u1, u2, du, u, as1, as2
+    integer  :: n, i
+    integer :: ntot=0
+
+    fourpibeta0_lnmuR_Q = four*pi*beta0*log(ev_muR_Q)
+    !write(0,*) fourpibeta0_lnmuR_Q
+    t1 = two*log(Q_init)
+    t2 = two*log(Q_end)
+
+    if (t2 == t1) return
+
+    !-- now work out jacobians...
+    as1 = ev_asval(Q_init)
+    as2 = ev_asval(Q_end)
+
+    ! allow for both signs of coupling (and sign changes)
+    ! See CCN25-95 for formulae (NB: 0->1 and 1->2)
+    if (ev_force_old_dt) then
+       ev_du_type = ev_du_is_dt
+       u1 = t1; u2 = t2
+       n  = ceiling(abs(t2-t1)/(ev_tmp_du_ballpark/du_dt))
+    else if (abs(as1 - as2)/max(as1,as2) < ev_minalphadiff &
+         &.or. as1*as2 <= zero) then
+    !else if (.true.) then
+       ev_du_type = ev_du_is_dtas_fixed
+       ev_du_dt = max(abs(as1),abs(as2))
+       u1 = t1 * ev_du_dt; u2 = t2 * ev_du_dt
+       n  = ceiling(abs(u2-u1)/ev_tmp_du_ballpark)
+    else
+       ev_du_type = ev_du_is_dtas_run
+       ev_u_asref = as1
+       ev_u_tref  = t1
+       ev_u_bval  = (as1/as2-1)/(as1*(t2-t1))
+       u1 = zero
+       u2 = log(1+ev_u_bval*ev_u_asref*(t2-t1)) / ev_u_bval
+       n  = ceiling(abs(u2-u1)/ev_tmp_du_ballpark)
+       !write(0,*) ev_u_asref, ev_u_bval
+    end if
+    
+    du = (u2 - u1)/n
+
+    ntot = ntot + n
+    !write(0,*) 'Qinit,end, nsteps', Q_init, Q_end, n, ntot
+    u = u1
+    do i = 1, n
+       call rkstp(du, u, pdf, ev_conv_sub)
+    end do
+  end subroutine ev_evolveLocal
+
+
+  !======================================================================
+  !! Assuming the relevant module-wide variables have been set, this
+  !! returns the derivative dpdf (wrt "u" -- defined precisely
+  !! elsewhere) of pdf, as specified by the DGLAP equations.
+  !! 
+  subroutine ev_conv(u, pdf, dpdf)
+    use pdf_representation
+    ! The following fails with absoft compiler: see ABSOFT_BUG.txt
+    real(dp), intent(in)  :: u, pdf(:,:)
+    real(dp), intent(out) :: dpdf(:,:)
+    ! The following fails with the intel compiler! See INTEL_BUG.txt
+    !real(dp), intent(in)  :: t, pdf(0:,-ncomponents:)
+    !real(dp), intent(out) :: dpdf(0:,-ncomponents:)
+    !--------------------------------------
+    real(dp) :: as2pi, Q, t, jacobian
+    type(split_mat) :: Pfull
+
+    ! for analysing Intel bug
+    !write(0,*) 'X',lbound(pdf),lbound(pdf,dim=1),size(pdf,dim=1)
+
+    select case(ev_du_type)
+    case(ev_du_is_dt)
+       t = u
+       jacobian = one
+    case(ev_du_is_dtas_fixed)
+       t = u / ev_du_dt
+       jacobian = one / ev_du_dt
+    case(ev_du_is_dtas_run)
+       t = ev_u_tref + (exp(ev_u_bval*u)-one)/(ev_u_bval*ev_u_asref)
+       jacobian = (1+ev_u_bval*ev_u_asref*(t-ev_u_tref))/ev_u_asref
+    case default
+       call wae_error('evconv: unknown ev_du_type',intval=ev_du_type)
+    end select
+    
+    Q     = exp(half*t)
+    as2pi = ev_asval(Q)/twopi
+    
+    ! store things, so that e.g. the QED evolution routine can make use of it
+    ev_conv_last_jacobian = jacobian
+    ev_conv_last_Q        = Q
+    ev_conv_last_as2pi    = as2pi
+
+    select case (ev_nloop)
+    case(1)
+       dpdf = (jacobian * as2pi) * (ev_PLO .conv. pdf)
+    case(2)
+       if (fourpibeta0_lnmuR_Q /= zero) then
+          call InitSplitMat(Pfull, ev_PLO, one + as2pi*fourpibeta0_lnmuR_Q)
+       else
+          call InitSplitMat(Pfull, ev_PLO)
+       end if
+       call AddWithCoeff(Pfull, ev_PNLO, as2pi)
+       dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
+       call Delete(Pfull)
+    case(3)
+       if (fourpibeta0_lnmuR_Q /= zero) then
+          call InitSplitMat(Pfull, ev_PLO, one + as2pi*fourpibeta0_lnmuR_Q&
+               & + (as2pi*fourpibeta0_lnmuR_Q)**2&
+               & + as2pi**2*(twopi**2*beta1)*two*log(ev_muR_Q))
+          call AddWithCoeff(Pfull, ev_PNLO, &
+               &as2pi*(one + two*as2pi*fourpibeta0_lnmuR_Q))
+          call AddWithCoeff(Pfull, ev_PNNLO, as2pi**2)
+          !call wae_error('ev_conv: NNL evolution not supported with muR_Q/=1')
+       else
+          call InitSplitMat(Pfull, ev_PLO)
+          call AddWithCoeff(Pfull, ev_PNLO, as2pi)
+          call AddWithCoeff(Pfull, ev_PNNLO, as2pi**2)
+       end if
+       dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
+       call Delete(Pfull)
+    case(ev_nloop_interp)
+       ! *** SetCurrentP
+       !
+       ! dpdf = jacobian * (dhcopy%currentP .conv. pdf)
+       stop ! not yet programmed !!!
+    case default
+       call wae_error('ev_conv','unrecognised value for ev_nloop',&
+            &         intval=ev_nloop)
+    end select
+  end subroutine ev_conv
+  
+  
+  !======================================================================
+  !! Given module-wide variables (including a pointer to the running
+  !! coupling object), this returns alphas for the appropriate number 
+  !! of flavours and at a scale Q*muR_Q.
+  !!
+  !! (put there because nf handling and xmuR handling involve various
+  !! options, and it is convenient to have a common call that handles
+  !! all options correctly).
+  function ev_asval(Q) result(res)
+    real(dp), intent(in) :: Q
+    real(dp)             :: res
+    if (.not. ev_untie_nf) then
+       !-- fixnf option here will be quite restrictive. It means that
+       !   if we have ev_muR_Q/=1 and variable numbers of flavours,
+       !   then either ev_ash supports "extrapolation" with the same nf
+       !   beyond the strictly legal region, or else it has been defined 
+       !   so as to have flavour thresholds at ev_muR_Q*masses
+       res   = Value(ev_ash, Q*ev_muR_Q, fixnf=nf_int)
+    else
+       ! sometimes (e.g. comparisons with others) it is useful to
+       ! allow nf in alpha_s to have a value different from the nf
+       ! being used in the splitting functions...
+       res   = Value(ev_ash, Q*ev_muR_Q)
+    end if
+
+  end function ev_asval
+  
+
+  !---------------------------------------------------------
+  !! A shortcut for setting up copies of information
+  !! which may be useful module-wide
+  !!
+  !! Is it really needed?
+  subroutine ev_SetModuleConsts(coupling, muR_Q, nloop, untie_nf, du)
+    type(running_coupling),    intent(in)  :: coupling
+    real(dp),        intent(in), optional  :: muR_Q
+    integer,         intent(in), optional  :: nloop
+    logical,         intent(in), optional  :: untie_nf
+    real(dp),        intent(in), optional  :: du
+
+    ev_nloop = default_or_opt(NumberOfLoops(coupling),nloop)
+    ev_muR_Q = default_or_opt(one,muR_Q)
+    ev_untie_nf = default_or_opt(.false., untie_nf)
+    ev_tmp_du_ballpark = default_or_opt(du_ballpark, du)
+
+    !* !**** Additional for interpolated splitting-function sets
+    !* if (dhcopy%using_interp) then
+    !*    nloop = ev_nloop_interp
+    !*    if (ev_muR_Q /= one) call wae_error('ev_SetModuleConsts',&
+    !*         & "muR_Q must be 1 for interpolated evln; it was ",&
+    !*         & dble_val=ev_muR_Q)
+  end subroutine ev_SetModuleConsts
+
+  !======================================================================
+  !! Cross the mass threshold in the specified direction (+-1). It is
+  !! assumed that the current (module qcd) nf_int value corrresponds
+  !! to the number of flavours _after_ crossing the threshold.
+  !!
+  !! Currently only supports mass thresholds at muF = m_H.
+  !!
+  !! In the case of positive direction, it assumes that the correct
+  !! quark mass scheme setting has been applied to dh. 
+  !!
+  !! In the case of negative direction, at the end the quark mass setting
+  !! of dh is that dictated by the coupling
+  !!
+  subroutine ev_CrossMassThreshold(dh,coupling,direction,pdf,evop)
+    use dglap_holders; use pdf_representation; use dglap_choices
+    type(dglap_holder),       intent(inout) :: dh
+    type(running_coupling),   intent(in)    :: coupling
+    integer,                  intent(in)    :: direction
+    real(dp),                 intent(inout), optional :: pdf(:,:)
+    type(evln_operator),      intent(inout), optional :: evop
+    !----------------------------------------------
+    integer, save      :: warn_DIS = 2, warn_Direction = 2
+    real(dp) :: as2pi, muR
+    integer  :: nfstore
+    
+    !-- CHANGE THIS IF HAVE MATCHING AT MUF/=MH
+    if (ev_nloop < 3) return
+    if (.not. mass_steps_on) return
+    if (dh%factscheme /= factscheme_MSBar) then
+       call wae_Warn(warn_DIS,&
+            &'ev_CrossMassThreshold',&
+            &'Factscheme is not MSBar;&
+            & mass thresholds requested but not implemented')
+       return
+    end if
+    
+    nfstore = nf_int ! keep record in case we change it
+    select case(direction)
+    case(1)
+    case(-1)
+       ! nf value is that after crossing threshold; but for MTM
+       ! (and other things) we need nf value above threshold, i.e. before
+       ! crossing the threshold; so put in the correct value temporarily
+       call SetNfDglapHolder(dh, nfstore + 1, QuarkMassesAreMSbar(coupling))
+    case default
+       call wae_error('ev_CrossMassThreshold',&
+            &  'direction had unsupported value of',intval=direction)
+    end select
+    
+    !if (direction /= 1) then
+    !   call wae_Warn(max_warn,warn_Direction,&
+    !        &'ev_CrossMassThreshold',&
+    !        &'Direction/=1; mass thresholds requested but not implemented')
+    !   return
+    !end if
+    
+    !-- now actually do something!
+    !muR   = quark_masses(nf_int) * ev_MuR_Q
+    muR   = QuarkMass(coupling,nf_int) * ev_MuR_Q
+    !write(0,*) 'evolution crossing threshold ', nf_int, muR
+
+    !-- fix nf so as to be sure of getting alpha value corresponding
+    !   to the desired nf value, despite proximity to threshold.
+    as2pi = Value(coupling, muR, fixnf=nf_int) / twopi
+    if (present(pdf)) pdf = pdf + &
+         &                   (direction*as2pi**2) * (dh%MTM2 .conv. pdf)
+    if (present(evop)) then
+       evop%cross_mass_threshold = .true.
+       evop%MTM = dh%MTM2  ! stores current nf value and quark-mass treatment
+       evop%MTM_coeff = (direction*as2pi**2)
+    end if
+    
+    if (nf_int /= nfstore) call SetNfDglapHolder(dh, nfstore, QuarkMassesAreMSbar(coupling))
+
+  end subroutine ev_CrossMassThreshold
+  
+end module evolution_helper
+
+
+!======================================================================
+!!
+!! Module for providing access to variable-flavour number DGLAP
+!! evolution, both directly of a pdf and via evolution operators (with
+!! facilities both for setting them and using them).
+!!
+module evolution
+  use types; use consts_dp
+  use dglap_objects; use qcd_coupling
+  use assertions; use qcd
+  use warnings_and_errors
+  use evolution_helper
+  implicit none
+  private
+
+  public :: EvolvePDF, EvolveGeneric
+  public :: SetDefaultEvolutionDt, SetDefaultEvolutionDu
+  public :: DefaultEvolutionDu
+
+  public :: ev_MSBar2DIS, ev_evolve  ! should these be public
+
+  ! the evln_operator type is defined in evolution_helper
+  public :: evln_operator
+  public :: InitEvlnOperator
+
+  interface Delete
+     module procedure Delete_evln_operator
+  end interface
+  public :: Delete
+
+  
+  !!
+  !! related operation and operator
+  !!
+  public :: ev_conv_evop
+  interface operator(*)
+     module procedure ev_conv_evop
+  end interface
+  public :: operator(*)
+  interface operator(.conv.)
+     module procedure ev_conv_evop
+  end interface
+  public  :: operator(.conv.)
+
 
 contains
 
@@ -327,82 +628,6 @@ contains
   end subroutine EvolveGeneric
 
 
-  !======================================================================
-  !! Cross the mass threshold in the specified direction (+-1). It is
-  !! assumed that the current (module qcd) nf_int value corrresponds
-  !! to the number of flavours _after_ crossing the threshold.
-  !!
-  !! Currently only supports mass thresholds at muF = m_H.
-  !!
-  !! In the case of positive direction, it assumes that the correct
-  !! quark mass scheme setting has been applied to dh. 
-  !!
-  !! In the case of negative direction, at the end the quark mass setting
-  !! of dh is that dictated by the coupling
-  !!
-  subroutine ev_CrossMassThreshold(dh,coupling,direction,pdf,evop)
-    use dglap_holders; use pdf_representation; use dglap_choices
-    type(dglap_holder),       intent(inout) :: dh
-    type(running_coupling),   intent(in)    :: coupling
-    integer,                  intent(in)    :: direction
-    real(dp),                 intent(inout), optional :: pdf(:,:)
-    type(evln_operator),      intent(inout), optional :: evop
-    !----------------------------------------------
-    integer, save      :: warn_DIS = 2, warn_Direction = 2
-    real(dp) :: as2pi, muR
-    integer  :: nfstore
-    
-    !-- CHANGE THIS IF HAVE MATCHING AT MUF/=MH
-    if (ev_nloop < 3) return
-    if (.not. mass_steps_on) return
-    if (dh%factscheme /= factscheme_MSBar) then
-       call wae_Warn(warn_DIS,&
-            &'ev_CrossMassThreshold',&
-            &'Factscheme is not MSBar;&
-            & mass thresholds requested but not implemented')
-       return
-    end if
-    
-    nfstore = nf_int ! keep record in case we change it
-    select case(direction)
-    case(1)
-    case(-1)
-       ! nf value is that after crossing threshold; but for MTM
-       ! (and other things) we need nf value above threshold, i.e. before
-       ! crossing the threshold; so put in the correct value temporarily
-       call SetNfDglapHolder(dh, nfstore + 1, QuarkMassesAreMSbar(coupling))
-    case default
-       call wae_error('ev_CrossMassThreshold',&
-            &  'direction had unsupported value of',intval=direction)
-    end select
-    
-    !if (direction /= 1) then
-    !   call wae_Warn(max_warn,warn_Direction,&
-    !        &'ev_CrossMassThreshold',&
-    !        &'Direction/=1; mass thresholds requested but not implemented')
-    !   return
-    !end if
-    
-    !-- now actually do something!
-    !muR   = quark_masses(nf_int) * ev_MuR_Q
-    muR   = QuarkMass(coupling,nf_int) * ev_MuR_Q
-    !write(0,*) 'evolution crossing threshold ', nf_int, muR
-
-    !-- fix nf so as to be sure of getting alpha value corresponding
-    !   to the desired nf value, despite proximity to threshold.
-    as2pi = Value(coupling, muR, fixnf=nf_int) / twopi
-    if (present(pdf)) pdf = pdf + &
-         &                   (direction*as2pi**2) * (dh%MTM2 .conv. pdf)
-    if (present(evop)) then
-       evop%cross_mass_threshold = .true.
-       evop%MTM = dh%MTM2  ! stores current nf value and quark-mass treatment
-       evop%MTM_coeff = (direction*as2pi**2)
-    end if
-    
-    if (nf_int /= nfstore) call SetNfDglapHolder(dh, nfstore, QuarkMassesAreMSbar(coupling))
-
-  end subroutine ev_CrossMassThreshold
-  
 
   !======================================================================
   !! Return the action of the evln_operator on the pdfdist 
@@ -517,8 +742,7 @@ contains
     if (ev_nloop >= 2) ev_PNLO => dh%P_NLO
     if (ev_nloop >= 3) ev_PNNLO => dh%P_NNLO
 
-
-    call ev_evolveLocal(pdf_ev, Q_init, Q_end)
+    call ev_evolveLocal(pdf_ev, Q_init, Q_end, ev_conv)
 
     !-- put things back into a "human" format
     if (pdfrep == pdfr_Human) then
@@ -529,31 +753,6 @@ contains
     end if
   end subroutine ev_evolve
 
-
-  !---------------------------------------------------------
-  !! A shortcut for setting up copies of information
-  !! which may be useful module-wide
-  !!
-  !! Is it really needed?
-  subroutine ev_SetModuleConsts(coupling, muR_Q, nloop, untie_nf, du)
-    type(running_coupling),    intent(in)  :: coupling
-    real(dp),        intent(in), optional  :: muR_Q
-    integer,         intent(in), optional  :: nloop
-    logical,         intent(in), optional  :: untie_nf
-    real(dp),        intent(in), optional  :: du
-
-    ev_nloop = default_or_opt(NumberOfLoops(coupling),nloop)
-    ev_muR_Q = default_or_opt(one,muR_Q)
-    ev_untie_nf = default_or_opt(.false., untie_nf)
-    ev_tmp_du_ballpark = default_or_opt(du_ballpark, du)
-
-    !* !**** Additional for interpolated splitting-function sets
-    !* if (dhcopy%using_interp) then
-    !*    nloop = ev_nloop_interp
-    !*    if (ev_muR_Q /= one) call wae_error('ev_SetModuleConsts',&
-    !*         & "muR_Q must be 1 for interpolated evln; it was ",&
-    !*         & dble_val=ev_muR_Q)
-  end subroutine ev_SetModuleConsts
   
 
 
@@ -604,169 +803,6 @@ contains
   end subroutine ev_MSBar2DIS
   
 
-  
-
-  !======================================================================
-  !! this bit here does the actual evolution of a PDF. Could make it
-  !! more sophisticated later, if necessary (e.g. variable step size).
-  subroutine ev_evolveLocal(pdf, Q_init, Q_end)
-    use runge_kutta
-    real(dp),        intent(inout)         :: pdf(:,:)
-    real(dp),        intent(in)            :: Q_init, Q_end
-    !------------------------------------------------------------
-    real(dp) :: t1, t2, dt, t, u1, u2, du, u, as1, as2
-    integer  :: n, i
-    integer :: ntot=0
-
-    fourpibeta0_lnmuR_Q = four*pi*beta0*log(ev_muR_Q)
-    !write(0,*) fourpibeta0_lnmuR_Q
-    t1 = two*log(Q_init)
-    t2 = two*log(Q_end)
-
-    if (t2 == t1) return
-
-    !-- now work out jacobians...
-    as1 = ev_asval(Q_init)
-    as2 = ev_asval(Q_end)
-
-    ! allow for both signs of coupling (and sign changes)
-    ! See CCN25-95 for formulae (NB: 0->1 and 1->2)
-    if (ev_force_old_dt) then
-       ev_du_type = ev_du_is_dt
-       u1 = t1; u2 = t2
-       n  = ceiling(abs(t2-t1)/(ev_tmp_du_ballpark/du_dt))
-    else if (abs(as1 - as2)/max(as1,as2) < ev_minalphadiff &
-         &.or. as1*as2 <= zero) then
-    !else if (.true.) then
-       ev_du_type = ev_du_is_dtas_fixed
-       ev_du_dt = max(abs(as1),abs(as2))
-       u1 = t1 * ev_du_dt; u2 = t2 * ev_du_dt
-       n  = ceiling(abs(u2-u1)/ev_tmp_du_ballpark)
-    else
-       ev_du_type = ev_du_is_dtas_run
-       ev_u_asref = as1
-       ev_u_tref  = t1
-       ev_u_bval  = (as1/as2-1)/(as1*(t2-t1))
-       u1 = zero
-       u2 = log(1+ev_u_bval*ev_u_asref*(t2-t1)) / ev_u_bval
-       n  = ceiling(abs(u2-u1)/ev_tmp_du_ballpark)
-       !write(0,*) ev_u_asref, ev_u_bval
-    end if
-    
-    du = (u2 - u1)/n
-
-    ntot = ntot + n
-    !write(0,*) 'Qinit,end, nsteps', Q_init, Q_end, n, ntot
-    u = u1
-    do i = 1, n
-       call rkstp(du, u, pdf, ev_conv)
-    end do
-  end subroutine ev_evolveLocal
-
-
-  !======================================================================
-  !! Assuming the relevant module-wide variables have been set, this
-  !! returns the derivative dpdf (wrt "u" -- defined precisely
-  !! elsewhere) of pdf, as specified by the DGLAP equations.
-  !! 
-  subroutine ev_conv(u, pdf, dpdf)
-    use pdf_representation
-    ! The following fails with absoft compiler: see ABSOFT_BUG.txt
-    real(dp), intent(in)  :: u, pdf(:,:)
-    real(dp), intent(out) :: dpdf(:,:)
-    ! The following fails with the intel compiler! See INTEL_BUG.txt
-    !real(dp), intent(in)  :: t, pdf(0:,-ncomponents:)
-    !real(dp), intent(out) :: dpdf(0:,-ncomponents:)
-    !--------------------------------------
-    real(dp) :: as2pi, Q, t, jacobian
-    type(split_mat) :: Pfull
-
-    ! for analysing Intel bug
-    !write(0,*) 'X',lbound(pdf),lbound(pdf,dim=1),size(pdf,dim=1)
-
-    select case(ev_du_type)
-    case(ev_du_is_dt)
-       t = u
-       jacobian = one
-    case(ev_du_is_dtas_fixed)
-       t = u / ev_du_dt
-       jacobian = one / ev_du_dt
-    case(ev_du_is_dtas_run)
-       t = ev_u_tref + (exp(ev_u_bval*u)-one)/(ev_u_bval*ev_u_asref)
-       jacobian = (1+ev_u_bval*ev_u_asref*(t-ev_u_tref))/ev_u_asref
-    case default
-       call wae_error('evconv: unknown ev_du_type',intval=ev_du_type)
-    end select
-    
-    Q     = exp(half*t)
-    as2pi = ev_asval(Q)/twopi
-    
-    select case (ev_nloop)
-    case(1)
-       dpdf = (jacobian * as2pi) * (ev_PLO .conv. pdf)
-    case(2)
-       if (fourpibeta0_lnmuR_Q /= zero) then
-          call InitSplitMat(Pfull, ev_PLO, one + as2pi*fourpibeta0_lnmuR_Q)
-       else
-          call InitSplitMat(Pfull, ev_PLO)
-       end if
-       call AddWithCoeff(Pfull, ev_PNLO, as2pi)
-       dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
-       call Delete(Pfull)
-    case(3)
-       if (fourpibeta0_lnmuR_Q /= zero) then
-          call InitSplitMat(Pfull, ev_PLO, one + as2pi*fourpibeta0_lnmuR_Q&
-               & + (as2pi*fourpibeta0_lnmuR_Q)**2&
-               & + as2pi**2*(twopi**2*beta1)*two*log(ev_muR_Q))
-          call AddWithCoeff(Pfull, ev_PNLO, &
-               &as2pi*(one + two*as2pi*fourpibeta0_lnmuR_Q))
-          call AddWithCoeff(Pfull, ev_PNNLO, as2pi**2)
-          !call wae_error('ev_conv: NNL evolution not supported with muR_Q/=1')
-       else
-          call InitSplitMat(Pfull, ev_PLO)
-          call AddWithCoeff(Pfull, ev_PNLO, as2pi)
-          call AddWithCoeff(Pfull, ev_PNNLO, as2pi**2)
-       end if
-       dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
-       call Delete(Pfull)
-    case(ev_nloop_interp)
-       ! *** SetCurrentP
-       !
-       ! dpdf = jacobian * (dhcopy%currentP .conv. pdf)
-       stop ! not yet programmed !!!
-    case default
-       call wae_error('ev_conv','unrecognised value for ev_nloop',&
-            &         intval=ev_nloop)
-    end select
-  end subroutine ev_conv
-  
-  
-  !======================================================================
-  !! Given module-wide variables (including a pointer to the running
-  !! coupling object), this returns alphas for the appropriate number 
-  !! of flavours and at a scale Q*muR_Q.
-  !!
-  !! (put there because nf handling and xmuR handling involve various
-  !! options, and it is convenient to have a common call that handles
-  !! all options correctly).
-  function ev_asval(Q) result(res)
-    real(dp), intent(in) :: Q
-    real(dp)             :: res
-    if (.not. ev_untie_nf) then
-       !-- fixnf option here will be quite restrictive. It means that
-       !   if we have ev_muR_Q/=1 and variable numbers of flavours,
-       !   then either ev_ash supports "extrapolation" with the same nf
-       !   beyond the strictly legal region, or else it has been defined 
-       !   so as to have flavour thresholds at ev_muR_Q*masses
-       res   = Value(ev_ash, Q*ev_muR_Q, fixnf=nf_int)
-    else
-       ! sometimes (e.g. comparisons with others) it is useful to
-       ! allow nf in alpha_s to have a value different from the nf
-       ! being used in the splitting functions...
-       res   = Value(ev_ash, Q*ev_muR_Q)
-    end if
-
-  end function ev_asval
   
 
   !======================================================================
