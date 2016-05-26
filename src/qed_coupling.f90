@@ -13,12 +13,12 @@ module qed_coupling_module
   real(dp), parameter :: m_light_quarks = 0.300_dp ! DECIDE ON THIS
 
   ! lepton masses from from 2014 PDG
-  real(dp), parameter :: m_electron = 0.510998928e-3_dp ! +-(11) on last digits
-  real(dp), parameter :: m_muon     = 105.6583715e-3_dp ! +-(35) on last digits
-  real(dp), parameter :: m_tau      = 1776.82e-3_dp ! +-(16) on last digits
+  real(dp), parameter, public :: m_electron = 0.510998928e-3_dp ! +-(11) on last digits
+  real(dp), parameter, public :: m_muon     = 105.6583715e-3_dp ! +-(35) on last digits
+  real(dp), parameter, public :: m_tau      = 1776.82e-3_dp ! +-(16) on last digits
 
-  real(dp), parameter :: e_dn2 = (one/three)**2
-  real(dp), parameter :: e_up2 = (two/three)**2
+  real(dp), parameter, public :: e_dn2 = (one/three)**2
+  real(dp), parameter, public :: e_up2 = (two/three)**2
 
   ! from the PDG rpp2014-rev-phys-constants
   real(dp), parameter :: alpha_qed_scale_0 = one/137.035999074_dp ! +-(44) is uncertainty
@@ -29,7 +29,7 @@ module qed_coupling_module
   public :: IQEDThresholdAtQ
   
   type qed_coupling 
-     private
+     !private
      real(dp) :: mc, mb, mt
      integer  :: nflav(3, n_thresholds) ! first index: 1 = nleptons, 2=ndown, 3=nup
      real(dp) :: thresholds(n_thresholds)  !
