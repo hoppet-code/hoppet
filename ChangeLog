@@ -3,7 +3,8 @@
 	* src/qed_objects_and_evolution.f90: *** ADDED ***
 	started work on a module for holding QED splitting matrices,
 	performing the flavour convolutions, etc. Currently the LO
-	QED splitting matrix appears to be working.
+	QED splitting matrix appears to be working. The NLO is also mostly
+	tested. 
 
 	* src/streamlined_interface.f90 (hoppetStartExtended):
 	this now uses InitGridDefDefault for creating its grid

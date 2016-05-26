@@ -6,9 +6,9 @@ program test_qed_obj
   implicit none
   type(grid_def)     :: grid
   type(qed_split_mat) :: qed_split
-  real(dp) :: ymax = 20.0_dp, dy = 0.10_dp
+  real(dp) :: ymax = 25.0_dp, dy = 0.10_dp
   real(dp), pointer :: pdf(:,:), dpdf(:,:), moments(:)
-  integer :: ncompmaxQED = 8 ! 8 without leptons, 11 with leptons
+  integer :: ncompmaxQED = 11 ! 8 without leptons, 11 with leptons
   type(qed_coupling) :: qed_alpha
   
   call InitGridDefDefault(grid, dy, ymax)
@@ -30,9 +30,18 @@ program test_qed_obj
   write(6,*) '1st moment of dflavours = ', moments
   write(6,*) 'sum of dflavours = ', sum(moments)
   write(6,*)
-  moments = TruncatedMoment(grid, dpdf, zero)
-  write(6,*) 'zeroth moment of dflavours = ', moments
-  write(6,*) 'd-dbar, u-ubar = ', moments(1)-moments(-1), moments(2)-moments(-2)
+  moments(1:6) = TruncatedMoment(grid, dpdf(:,1:6)-dpdf(:,-1:-6:-1), zero)
+  write(6,*) 'zeroth moment of dflav-dantiflav = ', moments(1:6)
+  write(6,*)
+
+  dpdf = qed_split%nlo * pdf
+  moments = TruncatedMoment(grid, dpdf, one)
+  write(6,*) '*********** NLO QED splitting checks **************'
+  write(6,*) '1st moment of dflavours = ', moments
+  write(6,*) 'sum of dflavours = ', sum(moments)
+  write(6,*)
+  moments(1:6) = TruncatedMoment(grid, dpdf(:,1:6)-dpdf(:,-1:-6:-1), zero)
+  write(6,*) 'zeroth moment of dflav-dantiflav = ', moments(1:6)
   write(6,*)
 
 
@@ -43,8 +52,13 @@ program test_qed_obj
   dpdf = qed_split%lo * pdf
   moments(8) = TruncatedMoment(grid, dpdf(:,8), two)
   moments(7) = TruncatedMoment(grid,  pdf(:,8), two)
-  write(6,*) 'fractional dpdf/pdf for photon is', moments(8)/moments(7)
-  write(6,*) 'qed beta function is ', qed_alpha%b0_values(6) * twopi
+  write(6,*) 'LO fractional dpdf/pdf for photon is', moments(8)/moments(7)
+  write(6,*) 'LO qed beta function is ', qed_alpha%b0_values(6) * twopi
+  dpdf = qed_split%nlo * pdf
+  moments(8) = TruncatedMoment(grid, dpdf(:,8), two)
+  moments(7) = TruncatedMoment(grid,  pdf(:,8), two)
+  write(6,*) 'NLO fractional dpdf/pdf for photon is', moments(8)/moments(7)
+  !write(6,*) 'NLO qed beta function is ', qed_alpha%b0_values(6) * twopi
   write(6,*)
 contains
 

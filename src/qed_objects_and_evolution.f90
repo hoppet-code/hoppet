@@ -15,6 +15,7 @@ module qed_objects_and_evolution
 
   ! a NLO splitting matrix (multiplies (alpha alpha_s)/(2pi)^2)
   type qed_split_mat_nlo
+     type(grid_conv) :: Pqy_11, Pyy_11, Pgy_11
      type(grid_conv) :: Pqg_11, Pyg_11, Pgg_11
      type(grid_conv) :: PqqV_11, PqqbarV_11, Pgq_11, Pyq_11
      integer         :: nu, nd, nl, nf
@@ -31,7 +32,7 @@ module qed_objects_and_evolution
   public :: InitQEDSplitMat
 
   interface operator(*)
-     module procedure :: conv_qed_lo
+     module procedure :: conv_qed_lo, conv_qed_nlo
   end interface operator(*)
   public :: operator(*)
 
@@ -46,6 +47,7 @@ contains
     type(grid_def),      intent(in)    :: grid
     type(qed_split_mat), intent(inout) :: qed_split
     integer :: nl, nd, nu
+    real(dp) :: fy_over_fg
 
     call InitGridConv(grid, qed_split%lo%Pqq_01, sf_Pqq_01)
     call InitGridConv(grid, qed_split%lo%Pyq_01, sf_Pyq_01)
@@ -55,6 +57,12 @@ contains
     call InitGridConv(grid, qed_split%nlo%Pqg_11, sf_Pqg_11)
     call InitGridConv(grid, qed_split%nlo%Pyg_11, sf_Pyg_11)
     call InitGridConv(grid, qed_split%nlo%Pgg_11, sf_Pgg_11)
+
+    ! get the fy splitting functions from the fg ones 
+    fy_over_fg = CF * CA / TR 
+    call InitGridConv(qed_split%nlo%Pqy_11, qed_split%nlo%Pqg_11, fy_over_fg)
+    call InitGridConv(qed_split%nlo%Pgy_11, qed_split%nlo%Pyg_11, fy_over_fg)
+    call InitGridConv(qed_split%nlo%Pyy_11, qed_split%nlo%Pgg_11, fy_over_fg)
 
     call InitGridConv(grid, qed_split%nlo%PqqV_11, sf_PqqV_11)
     call InitGridConv(grid, qed_split%nlo%PqqbarV_11, sf_PqqbarV_11)
@@ -105,7 +113,9 @@ contains
     ! for now we force this...
     if (GetPdfRep(gq(:,:ncompmax)) /= pdfr_Human) call wae_error('conv_qed_lo',&
          &'gq is not in "Human" format')
-
+    if (ubound(gq,dim=2) < ncompmaxPhoton) call wae_error('conv_qed_lo',&
+         &'gq appears not to have photon component')
+    
     ! set up the squared electric charges of each of the components
     chg2_fromflv = zero
     chg2_fromflv(-1:(-2*qed_lo%nd+1):-2) = e_dn2
@@ -158,5 +168,75 @@ contains
     
   end function conv_qed_lo
          
+  
+  !----------------------------------------------------------------------
+  function conv_qed_nlo(qed_nlo, gq) result(gout)
+    type(qed_split_mat_nlo), intent(in) :: qed_nlo
+    real(dp),                intent(in) :: gq(0:, ncompmin:)
+    real(dp)                            :: gout(0:ubound(gq,dim=1), ncompmin:ubound(gq,dim=2))
+    !---------------------------------------
+    real(dp) :: flvsum(0:ubound(gq,dim=1)), flvout(0:ubound(gq,dim=1))
+    integer  :: i
+    ! the charge, colour, etc. factor when branching from a flavour;
+    ! we allow for the leptons here, even if not using them, to
+    ! allow for photon branching to them...
+    real(dp) :: chg2_fromflv(ncompmin:ncompmaxPhoton)
+    ! the sum over charges (just flavours)
+    real(dp) :: chg2sum
+
+    ! for now we force this...
+    if (GetPdfRep(gq(:,:ncompmax)) /= pdfr_Human) call wae_error('conv_qed_nlo',&
+         &'gq is not in "Human" format')
+    if (ubound(gq,dim=2) < ncompmaxPhoton) call wae_error('conv_qed_nlo',&
+         &'gq appears not to have photon component')
+
+    ! set up the squared electric charges of each of the components
+    ! only use quarks here, because leptons don't contribute at O(alpha alpha_s)
+    chg2_fromflv = zero
+    chg2_fromflv(-1:(-2*qed_nlo%nd+1):-2) = e_dn2
+    chg2_fromflv( 1:( 2*qed_nlo%nd-1):+2) = e_dn2
+    chg2_fromflv(-2:(-2*qed_nlo%nu ):-2) = e_up2
+    chg2_fromflv( 2:( 2*qed_nlo%nu ):+2) = e_up2
+    chg2sum = half * sum(chg2_fromflv) 
+
+
+    !write(6,*) nf_int
+    !write(6,*) chg2_fromflv
+    !write(6,*) chg2_toflv
+    
+    ! now get the full "photon"-emission power; if the PDF doesn't
+    ! include leptons, then the branching from them is not included
+    ! (even if nl /= 0 in the splitting matrix)
+    flvsum = zero
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxPhoton)
+       if (chg2_fromflv(i) /= zero) flvsum = flvsum + chg2_fromflv(i) * gq(:,i)
+    end do
+    
+    ! now set the result
+    gout = zero
+    ! first the evolution of the gluon and photon from quarks
+    gout(:,0) = qed_nlo%Pgq_11 * flvsum
+    gout(:,8) = qed_nlo%Pyq_11 * flvsum
+    ! Then the derivative of the photons associated with their "decay" to fermions.
+    ! Include a factor of 1/2 because we sum explicitly over quarks and anti-quarks
+    ! whereas the original normalisation from eqs.(21&22) of 1512.00612 involves
+    ! only a sum over flavours, not anti-flavours
+    gout(:,8) = gout(:,8) + chg2sum * (qed_nlo%Pyy_11 * gq(:,8) + qed_nlo%Pyg_11 * gq(:,0))
+    gout(:,0) = gout(:,0) + chg2sum * (qed_nlo%Pgg_11 * gq(:,0) + qed_nlo%Pgy_11 * gq(:,8))
+
+    ! now the evolution of the quarks:
+    ! first calculate the generic splitting from a photon to a fermion
+    ! without any charge or colour factors
+    flvout    = (qed_nlo%Pqy_11 * gq(:,8) + qed_nlo%Pqg_11 * gq(:,0))
+    ! then add it in with appropriate charges
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxPhoton)
+       if (chg2_fromflv(i) /= zero) then
+          gout(:,i) = chg2_fromflv(i) * flvout
+          gout(:,i) = gout(:,i) + chg2_fromflv(i) * (&
+               &qed_nlo%PqqV_11 * gq(:,i) + qed_nlo%PqqbarV_11 * gq(:,-i))
+       end if
+    end do
+    
+  end function conv_qed_nlo
   
 end module qed_objects_and_evolution
