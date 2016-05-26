@@ -1,6 +1,6 @@
 program test_qed_obj
   use hoppet_v1; use convolution
-  use qed_objects_and_evolution
+  use qed_objects
   use qed_coupling_module
   use sub_defs_io
   implicit none
