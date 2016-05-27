@@ -55,9 +55,11 @@ contains
 
   !----------------------------------------------------------------------
   !! Initialises a QED coupling
-  subroutine InitQEDCoupling(coupling, mc, mb, mt)
+  subroutine InitQEDCoupling(coupling, mc, mb, mt, value_at_scale_0)
+    use assertions
     type(qed_coupling), intent(out) :: coupling
     real(dp),           intent(in)  :: mc, mb, mt
+    real(dp), optional, intent(in)  :: value_at_scale_0 ! defaults to alpha_qed_scale_0
     !--------------------------------------------
     integer :: i
     
@@ -97,7 +99,7 @@ contains
     coupling%b0_values = -two/(6*pi) * coupling%b0_values
 
     ! finally set up the alpha values at the threshold
-    coupling%alpha_values(1) = alpha_qed_scale_0
+    coupling%alpha_values(1) = default_or_opt(alpha_qed_scale_0, value_at_scale_0)
     do i = 2, n_thresholds
        coupling%alpha_values(i) = coupling%alpha_values(i-1)/&
             &  (1 + coupling%b0_values(i-1) * coupling%alpha_values(i-1) &

@@ -10,15 +10,15 @@ program test_qed_evol
   type(qed_coupling)     :: coupling_qed
   real(dp)               :: ymax, dy
   real(dp), pointer :: pdf_in(:,:), pdf_out(:,:)
-  real(dp)         :: Q0, Qfinal
+  real(dp)         :: Q0, Qfinal, moments(ncompmin:ncompmaxLeptons)
   integer :: nloop_qcd, nqcdloop_qed
   
-  ymax  = 12.0_dp
+  ymax  = 25.0_dp
   dy    = 0.1_dp
   nloop_qcd = 3
-  nqcdloop_qed = 0
-  !Q0 = sqrt(2.0_dp)  ! the initial scale
-  Q0 = 1.7_dp  ! the initial scale
+  nqcdloop_qed = 1
+  Q0 = sqrt(2.0_dp)  ! the initial scale
+  !Q0 = 1.7_dp  ! the initial scale
   Qfinal = 40.0_dp
   
   call InitGridDefDefault(grid, dy, ymax)
@@ -31,21 +31,39 @@ program test_qed_evol
   call InitRunningCoupling(coupling,alfas=0.35_dp,Q=sqrt(two),nloop=nloop_qcd,&
        &                   quark_masses = quark_masses)
   call InitQEDCoupling(coupling_qed, quark_masses(4), quark_masses(5), quark_masses(6))
-
+  write(0,*) "# QED coupling at 1 GeV = ", Value(coupling_qed,one)
+  
   call AllocPDFWithLeptons(grid, pdf_in)
   call AllocPDFWithLeptons(grid, pdf_out)
   pdf_in = zero
   ! fill in the QCD part
   pdf_in(:,:ncompmax) = unpolarized_dummy_pdf(xValues(grid))
   ! then add in a photon of some kind
-  pdf_in(:,iflv_photon) = Value(coupling_qed, Q0) * (one - xValues(grid))**4
+  pdf_in(:,iflv_photon) = alpha_qed_scale_0 * (one - xValues(grid))**4
+  pdf_out = pdf_in
 
-  call QEDQCDEvolvePDF(dh, qed_split, pdf_in, coupling, coupling_qed,&
+  
+  call QEDQCDEvolvePDF(dh, qed_split, pdf_out, coupling, coupling_qed,&
        &               Q0, Qfinal, nloop_qcd, nqcdloop_qed)
-  !! NEED TO
-  !! - TEST AGAINST PLAIN QCD EVOLUTION (with QED alpha turned low)
-  !! - test momentum sum rule, with both nqcdloop_qed values
-  !! - compare to photon evolution from another source?
+  !call EvolvePDF(dh, pdf_out(:,ncompmin:ncompmax), coupling, Q0, Qfinal, nloop=nloop_qcd)
+
+
+  call write_moments(pdf_in, ' in')
+  call write_moments(pdf_out,'out')
+  call write_pdf(pdf_in,'in')
+  call write_pdf(pdf_out,'out')
+  
+  !! TESTS
+  !! * Test against plain qcd evolution, with QED alpha turned to zero
+  !!   -> works OK, but watch out for the fact that the tau introduces
+  !!      an extra threshold, so that numerically there are differences
+  !!      at the evolution precision; reducing du by a factor of 10
+  !!      significantly reduces these differences
+  !!
+  !! * test momentum sum rule, with both nqcdloop_qed values
+  !!   -> this seems to work fine
+  !!
+  !! * compare to photon evolution from another source?
 contains
 
   !======================================================================
@@ -83,5 +101,48 @@ contains
     pdf(:,-iflv_d) = dbar
   end function unpolarized_dummy_pdf
 
+  !----------------------------------------------------------------------
+  subroutine write_moments(pdf,label)
+    real(dp),         intent(in) :: pdf(0:,ncompmin:)
+    character(len=*), intent(in) :: label
+    !-----------------
+    real(dp) :: moments(ncompmin:ubound(pdf,dim=2))
+    
+    write(6,"(a)", advance="no"), "# total momentum "//trim(label)//" (& components)"
+    moments = TruncatedMoment(grid, pdf, one)
+    write(6,"(40f10.7)") sum(moments), moments
 
+    write(6,"(a)", advance="no"), "# total number "//trim(label)//" (& components)"
+    moments(1:6) = TruncatedMoment(grid, pdf(:,1:6)-pdf(:,-1:-6:-1), zero)
+    write(6,"(40f11.7)") sum(moments(1:6)), moments(1:6)
+
+
+  end subroutine write_moments
+  
+  
+  !----------------------------------------------------------------------
+  subroutine write_pdf(pdf,label)
+    real(dp), intent(in) :: pdf(0:,ncompmin:)
+    character(len=*), intent(in) :: label
+    !----------------------
+    real(dp) :: y, yVals(0:grid%ny), last_y
+    integer  :: i
+
+    write(6,"(a)"), "# pdf "//trim(label)
+    !do i = 0, 100
+    !   y = 0.1_dp * i
+    !   write(6,*) y, pdf.aty.(y.with.grid)
+    !end do
+    yVals = yValues(grid)
+    do i = 0, grid%ny
+       y = yVals(i)
+       if (y < 1.000000001_dp * last_y) cycle
+       write(6,*) y, pdf(i,:)
+       last_y = y
+    end do
+    write(6,*)
+    write(6,*)
+    
+  end subroutine write_pdf
+  
 end program test_qed_evol

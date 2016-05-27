@@ -63,10 +63,11 @@ contains
     iqed_init = iQEDThresholdAtQ(coupling_qed, Q_init)
     iqed_end  = iQEDThresholdAtQ(coupling_qed, Q_end )
 
-    nf_old = coupling_qed%nflav(2,iqed) + coupling_qed%nflav(3,iqed)
+    nf_old = coupling_qed%nflav(2,iqed_init) + coupling_qed%nflav(3,iqed_init)
     do iqed = iqed_init, iqed_end, direction
-       !write(6,*) 'iqed = ',iqed
-       if (iqed == 0) continue
+       ! there is no evolution to be done when iqed=0 (below electron mass)
+       if (iqed == 0) cycle
+       ! make sure we don't get into trouble here...
        if (iqed  > coupling_qed%n_thresholds) call wae_error("QEDQCDEvolvePDF", "iqed too high")
        if (direction == 1) then
           lcl_Q_init = max(Q_init, coupling_qed%thresholds(iqed  ))
@@ -103,6 +104,7 @@ contains
   
 
   subroutine ev_conv_qed(u, pdf, dpdf)
+    use convolution
     real(dp), intent(in)  :: u, pdf(0:,ncompmin:)
     real(dp), intent(out) :: dpdf(0:,ncompmin:)
     !--------------
@@ -112,16 +114,18 @@ contains
     ! get the QCD part of the evolution
     call ev_conv(u, pdf(:,:ncompmax), dpdf(:,:ncompmax))
 
+    
     ! then get the QED and mixed QED-QCD parts, making use of the
     ! jacobian, as2pi and last_Q values made available in ev_conv
     alpha = Value(ev_coupling_qed, ev_conv_last_Q)
+
     dpdf = dpdf + (alpha/twopi * ev_conv_last_jacobian) * (qed_sm_copy%lo * pdf)
 
     if (ev_nqcdloop_qed >= 1) then
        dpdf = dpdf + (ev_conv_last_as2pi * alpha/twopi * ev_conv_last_jacobian) &
             &        * (qed_sm_copy%nlo * pdf)
     end if
-    
+
   end subroutine ev_conv_qed
   
 end module qed_evolution

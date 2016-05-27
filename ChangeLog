@@ -1,3 +1,15 @@
+2016-05-27  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/qed_objects.f90 (AllocPDFWithLeptons):
+	fixed wrong upper bound for flavour dimension
+
+	* src/qed_coupling.f90 (qed_coupling_module):
+	added an option to pass value_at_scale_0 when initialising
+	the coupling (e.g. to test sensitivity to higher orders, etc.)
+
+	* src/qed_evolution.f90 (QEDQCDEvolvePDF):
+	fixed a bug with the initial nf values
+
 2016-05-26  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/welcome_message.f90 (HoppetWelcomeMessage):

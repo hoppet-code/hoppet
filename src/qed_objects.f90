@@ -65,7 +65,7 @@ contains
     type(grid_def), intent(in) :: grid
     real(dp),       pointer    :: pdf(:,:)
     
-    call AllocGridQuant(grid,  pdf, ncompmin, ncompmaxPhoton)
+    call AllocGridQuant(grid,  pdf, ncompmin, ncompmaxLeptons)
   end subroutine AllocPDFWithLeptons
   
     
