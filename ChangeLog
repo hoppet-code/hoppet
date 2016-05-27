@@ -7,6 +7,8 @@
 	added an option to pass value_at_scale_0 when initialising
 	the coupling (e.g. to test sensitivity to higher orders, etc.)
 
+	Also changed the "light quarks" mass to 0.5GeV.
+
 	* src/qed_evolution.f90 (QEDQCDEvolvePDF):
 	fixed a bug with the initial nf values
 

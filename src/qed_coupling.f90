@@ -10,7 +10,7 @@ module qed_coupling_module
   implicit none
   private
 
-  real(dp), parameter :: m_light_quarks = 0.300_dp ! DECIDE ON THIS
+  real(dp), parameter :: m_light_quarks = 0.500_dp ! DECIDE ON THIS
 
   ! lepton masses from from 2014 PDG
   real(dp), parameter, public :: m_electron = 0.510998928e-3_dp ! +-(11) on last digits
