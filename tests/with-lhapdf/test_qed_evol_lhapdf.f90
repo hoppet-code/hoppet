@@ -27,7 +27,7 @@
 program test_qed_evol
   use hoppet_v1
   use qed_evolution; use qed_objects; use qed_coupling_module
-  use sub_defs_io
+  use sub_defs_io;
   implicit none
   character(len=200) :: pdfname
   type(grid_def)      :: grid
@@ -36,7 +36,7 @@ program test_qed_evol
   real(dp)               :: quark_masses(4:6)
   type(running_coupling) :: coupling
   type(qed_coupling)     :: coupling_qed
-  real(dp)               :: ymax, dy, x, alphas_mz
+  real(dp)               :: ymax, dy, x, alphas_mz, lha_qmin
   real(dp), parameter    :: mz = 91.1876_dp
   real(dp), pointer :: pdf_in(:,:), pdf_out(:,:), pdf_lhapdf_out(:,:)
   real(dp)         :: Qlo, Qhi, moments(ncompmin:ncompmaxLeptons)
@@ -46,6 +46,10 @@ program test_qed_evol
 
   write(6,*) "# "//trim(command_line())
   use_lhapdf = log_val_opt("-pdf")
+
+  Qlo = dble_val_opt("-Qlo",sqrt(2.0_dp))  ! the initial scale
+  Qhi = dble_val_opt("-Qhi",40.0_dp)
+
   if (use_lhapdf) then
      pdfname = string_val_opt("-pdf")
      imem    = int_val_opt("-imem",0)
@@ -55,12 +59,15 @@ program test_qed_evol
      quark_masses(4:6) = (/lhapdf_qmass(4), lhapdf_qmass(5), lhapdf_qmass(6)/)
      alphas_mz = alphaspdf(mz)
      call getorderas(nloop_qcd); nloop_qcd = nloop_qcd + 1 ! LHAPDF convention is that LO=0
+     ! the following lines are problematic for some reason
+     ! if (Qlo < lhapdf_qmin()) &
+    !      &write(0,*) "WARNING: Qlo = ", Qlo, " < lhapdf Qmin = ", lhapdf_qmin() 
   else
      write(6,*) "# using toy pdf"
      quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
      alphas_mz = 0.118_dp
   end if
-  
+  write(6,*) '# quark masses (c,b,t) = ', quark_masses
   
   ymax  = dble_val_opt("-ymax",20.0_dp)
   dy    = dble_val_opt("-dy",0.1_dp)
@@ -71,8 +78,6 @@ program test_qed_evol
   nqcdloop_qed = int_val_opt('-nqcdloop-qed',0)
   write(6,*) "# nqcdloop_qed = ", nqcdloop_qed
   
-  Qlo = dble_val_opt("-Qlo",sqrt(2.0_dp))  ! the initial scale
-  Qhi = dble_val_opt("-Qhi",40.0_dp)
   no_qed = log_val_opt("-no-qed",.false.)
 
   x = dble_val_opt("-x",1e-3_dp)
@@ -140,6 +145,14 @@ program test_qed_evol
   
 contains
 
+  function lhapdf_qmin() result(qmin)
+    real(dp) :: qmin, q2min
+    call getq2min(q2min)
+    write(0,*) q2min
+    qmin = sqrt(q2min)
+  end function lhapdf_qmin
+  
+  
   function lhapdf_qmass(iflv) result(res)
     integer, intent(in) :: iflv
     real(dp)            :: res
