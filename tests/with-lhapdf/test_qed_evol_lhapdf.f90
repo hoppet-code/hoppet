@@ -41,10 +41,16 @@ program test_qed_evol
   real(dp), pointer :: pdf_in(:,:), pdf_out(:,:), pdf_lhapdf_out(:,:)
   real(dp)         :: Qlo, Qhi, moments(ncompmin:ncompmaxLeptons)
   real(dp) :: alphaspdf ! from LHAPDF
-  integer :: nloop_qcd = 3, nqcdloop_qed, imem, iflv
+  integer :: nloop_qcd = 3, nqcdloop_qed, imem, iflv, iunit
   logical :: no_qed, use_lhapdf
 
-  write(6,*) "# "//trim(command_line())
+  if (log_val_opt("-out")) then
+     iunit = idev_open_opt("-out")
+  else
+     iunit = 6
+  end if
+  
+  write(iunit,*) "# "//trim(command_line())
   use_lhapdf = log_val_opt("-pdf")
 
   Qlo = dble_val_opt("-Qlo",sqrt(2.0_dp))  ! the initial scale
@@ -55,7 +61,7 @@ program test_qed_evol
      imem    = int_val_opt("-imem",0)
      call InitPDFsetByName(trim(pdfname))
      call InitPDFm(1,imem)
-     write(6,*) "# using LHAPDF ", trim(pdfname), ' imem = ', imem
+     write(iunit,*) "# using LHAPDF ", trim(pdfname), ' imem = ', imem
      quark_masses(4:6) = (/lhapdf_qmass(4), lhapdf_qmass(5), lhapdf_qmass(6)/)
      alphas_mz = alphaspdf(mz)
      call getorderas(nloop_qcd); nloop_qcd = nloop_qcd + 1 ! LHAPDF convention is that LO=0
@@ -63,20 +69,20 @@ program test_qed_evol
      ! if (Qlo < lhapdf_qmin()) &
     !      &write(0,*) "WARNING: Qlo = ", Qlo, " < lhapdf Qmin = ", lhapdf_qmin() 
   else
-     write(6,*) "# using toy pdf"
+     write(iunit,*) "# using toy pdf"
      quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
      alphas_mz = 0.118_dp
   end if
-  write(6,*) '# quark masses (c,b,t) = ', quark_masses
+  write(iunit,*) '# quark masses (c,b,t) = ', quark_masses
   
   ymax  = dble_val_opt("-ymax",20.0_dp)
   dy    = dble_val_opt("-dy",0.1_dp)
-  write(6,*) "# ymax, dy ", ymax, dy
+  write(iunit,*) "# ymax, dy ", ymax, dy
   nloop_qcd = int_val_opt("-nloop-qcd",nloop_qcd)
-  write(6,*) "# nloop_qcd = ", nloop_qcd
+  write(iunit,*) "# nloop_qcd = ", nloop_qcd
 
   nqcdloop_qed = int_val_opt('-nqcdloop-qed',0)
-  write(6,*) "# nqcdloop_qed = ", nqcdloop_qed
+  write(iunit,*) "# nqcdloop_qed = ", nqcdloop_qed
   
   no_qed = log_val_opt("-no-qed",.false.)
 
@@ -101,9 +107,9 @@ program test_qed_evol
 
   if (.not.CheckAllArgsUsed(0)) stop
   
-  write(6,*) "# 1/QED coupling at MZ = ", one/Value(coupling_qed,MZ)
-  write(6,*) "# QCD coupling at MZ = ", Value(coupling,MZ)
-  write(6,*) "# Qlo, Qhi ", Qlo, Qhi
+  write(iunit,*) "# 1/QED coupling at MZ = ", one/Value(coupling_qed,MZ)
+  write(iunit,*) "# QCD coupling at MZ = ", Value(coupling,MZ)
+  write(iunit,*) "# Qlo, Qhi ", Qlo, Qhi
   
   call AllocPDFWithLeptons(grid, pdf_in)
   call AllocPDFWithLeptons(grid, pdf_out)
@@ -172,7 +178,7 @@ contains
     this_pdf = zero
     do i = 0, grid%ny
        call EvolvePDFPhoton(xv(i), Q, this_pdf(i,-6:6), this_pdf(i,8))
-       !write(6,*) xv(i), this_pdf(i,8)
+       !write(iunit,*) xv(i), this_pdf(i,8)
     end do
     
   end subroutine fill_from_lhapdf
@@ -184,13 +190,13 @@ contains
     !-----------------
     real(dp) :: moments(ncompmin:ubound(pdf,dim=2))
     
-    write(6,"(a)", advance="no"), "# total momentum "//trim(label)//" (& components)"
+    write(iunit,"(a)", advance="no"), "# total momentum "//trim(label)//" (& components)"
     moments = TruncatedMoment(grid, pdf, one)
-    write(6,"(40f10.7)") sum(moments), moments
+    write(iunit,"(40f10.7)") sum(moments), moments
 
-    write(6,"(a)", advance="no"), "# total number "//trim(label)//" (& components)"
+    write(iunit,"(a)", advance="no"), "# total number "//trim(label)//" (& components)"
     moments(1:6) = TruncatedMoment(grid, pdf(:,1:6)-pdf(:,-1:-6:-1), zero)
-    write(6,"(40f11.7)") sum(moments(1:6)), moments(1:6)
+    write(iunit,"(40f11.7)") sum(moments(1:6)), moments(1:6)
 
 
   end subroutine write_moments
@@ -204,21 +210,21 @@ contains
     real(dp) :: y, yVals(0:grid%ny), last_y
     integer  :: i
 
-    write(6,"(a)"), "# pdf "//trim(label)
+    write(iunit,"(a)"), "# pdf "//trim(label)
     !do i = 0, 100
     !   y = 0.1_dp * i
-    !   write(6,*) y, pdf.aty.(y.with.grid)
+    !   write(iunit,*) y, pdf.aty.(y.with.grid)
     !end do
     last_y = -one
     yVals = yValues(grid)
     do i = 0, grid%ny
        y = yVals(i)
        if (y < 1.000000001_dp * last_y) cycle
-       write(6,*) y, pdf(i,:)
+       write(iunit,*) y, pdf(i,:)
        last_y = y
     end do
-    write(6,*)
-    write(6,*)
+    write(iunit,*)
+    write(iunit,*)
     
   end subroutine write_pdf
   
