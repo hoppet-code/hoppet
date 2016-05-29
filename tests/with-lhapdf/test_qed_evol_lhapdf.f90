@@ -27,7 +27,7 @@
 program test_qed_evol
   use hoppet_v1
   use qed_evolution; use qed_objects; use qed_coupling_module
-  use sub_defs_io;
+  use sub_defs_io
   implicit none
   character(len=200) :: pdfname
   type(grid_def)      :: grid
@@ -41,6 +41,7 @@ program test_qed_evol
   real(dp), pointer :: pdf_in(:,:), pdf_out(:,:), pdf_lhapdf_out(:,:)
   real(dp)         :: Qlo, Qhi, moments(ncompmin:ncompmaxLeptons)
   real(dp) :: alphaspdf ! from LHAPDF
+  integer :: compact_output_n = -1
   integer :: nloop_qcd = 3, nqcdloop_qed, imem, iflv, iunit
   logical :: no_qed, use_lhapdf
 
@@ -49,13 +50,33 @@ program test_qed_evol
   else
      iunit = 6
   end if
+  compact_output_n = int_val_opt("-compact-output", compact_output_n)
   
-  write(iunit,*) "# "//trim(command_line())
-  use_lhapdf = log_val_opt("-pdf")
+  write(iunit,'(a)') "# "//trim(command_line())
 
-  Qlo = dble_val_opt("-Qlo",sqrt(2.0_dp))  ! the initial scale
+  ymax  = dble_val_opt("-ymax",20.0_dp)
+  dy    = dble_val_opt("-dy",0.1_dp)
+  call InitGridDefDefault(grid, dy, ymax)
+  write(iunit,'(a,2f10.6)') "# ymax, dy ", ymax, dy
+
+  ! allow option to just write out the x values of the grid
+  ! and exit
+  if (log_val_opt("-xvalues")) then
+     write(iunit,"(a)") "# next lines contain number of x values, and actual x values"
+     write(iunit,*) grid%ny+1
+     write(iunit,*) xValues(grid)
+     stop
+  end if
+
+  Qlo = sqrt(two) ! the initial scale
+  Qhi = 40.0_dp
+  Qlo = sqrt(dble_val_opt("-Q2lo", Qlo**2))
+  Qhi = sqrt(dble_val_opt("-Q2hi", Qhi**2))
+  Qlo = dble_val_opt("-Qlo",sqrt(2.0_dp))  
   Qhi = dble_val_opt("-Qhi",40.0_dp)
 
+  
+  use_lhapdf = log_val_opt("-pdf")
   if (use_lhapdf) then
      pdfname = string_val_opt("-pdf")
      imem    = int_val_opt("-imem",0)
@@ -75,9 +96,7 @@ program test_qed_evol
   end if
   write(iunit,*) '# quark masses (c,b,t) = ', quark_masses
   
-  ymax  = dble_val_opt("-ymax",20.0_dp)
-  dy    = dble_val_opt("-dy",0.1_dp)
-  write(iunit,*) "# ymax, dy ", ymax, dy
+
   nloop_qcd = int_val_opt("-nloop-qcd",nloop_qcd)
   write(iunit,*) "# nloop_qcd = ", nloop_qcd
 
@@ -89,7 +108,6 @@ program test_qed_evol
   x = dble_val_opt("-x",1e-3_dp)
 
   
-  call InitGridDefDefault(grid, dy, ymax)
   call SetDefaultEvolutionDu(dy/3.0_dp)  ! generally a good choice
   call InitQEDSplitMat(grid, qed_split)
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
@@ -105,7 +123,6 @@ program test_qed_evol
      call InitQEDCoupling(coupling_qed, quark_masses(4), quark_masses(5), quark_masses(6))
   end if
 
-  if (.not.CheckAllArgsUsed(0)) stop
   
   write(iunit,*) "# 1/QED coupling at MZ = ", one/Value(coupling_qed,MZ)
   write(iunit,*) "# QCD coupling at MZ = ", Value(coupling,MZ)
@@ -125,6 +142,11 @@ program test_qed_evol
      ! then add in a photon of some kind
      pdf_in(:,iflv_photon) = alpha_qed_scale_0 * (one - xValues(grid))**4
   end if
+
+  ! allow user to override the photon from a suitably formatted file
+  if (log_val_opt("-read-photon")) pdf_in(:,iflv_photon) = read_photon(grid)
+
+  if (.not.CheckAllArgsUsed(0)) stop
   
   pdf_out = pdf_in
   if (no_qed) then
@@ -180,9 +202,41 @@ contains
        call EvolvePDFPhoton(xv(i), Q, this_pdf(i,-6:6), this_pdf(i,8))
        !write(iunit,*) xv(i), this_pdf(i,8)
     end do
-    
   end subroutine fill_from_lhapdf
 
+  !----------------------------------------------------------------------
+  ! this assumes a 6-column format where column 1 is x and column 6 is
+  ! xf_{gamma/p}(x)
+  function read_photon(grid) result(photon)
+    type(grid_def), intent(in) :: grid
+    !---------------------------------
+    integer             :: iy, iread
+    character(len=1000) :: line
+    real(dp)            :: photon(0:grid%ny), xVals(0:grid%ny), numbers(6)
+    real(dp), parameter :: tolerance = 1e-7_dp
+    
+    iread = idev_open_opt("-read-photon",status='OLD')
+    xVals = xValues(grid)
+    write(0,*) 'reading photon from file',trim(string_val_opt("-read-photon"))
+    do iy = 0, grid%ny
+       ! skip comment lines
+       do while (.true.)
+          read(iread,'(a)') line
+          if (line(1:1) /= '#') exit
+       end do
+       ! then get & check the numbers
+       read(line,*) numbers
+       if (abs(log(numbers(1)/xVals(iy))) > tolerance) then
+          write(0,*) 'grid  x value = ', xVals(iy)
+          write(0,*) 'input x value = ', numbers(1)
+          call wae_error('read_photon', 'x value is inconsistent with grid')
+       end if
+       photon(iy) = numbers(6)
+    end do
+    
+  end function read_photon
+  
+  
   !----------------------------------------------------------------------
   subroutine write_moments(pdf,label)
     real(dp),         intent(in) :: pdf(0:,ncompmin:)
@@ -208,21 +262,42 @@ contains
     character(len=*), intent(in) :: label
     !----------------------
     real(dp) :: y, yVals(0:grid%ny), last_y
-    integer  :: i
+    real(dp) :: zeta, zeta_max, a_stretch=7.0_dp, pdf_val
+    integer  :: i,j
 
     write(iunit,"(a)"), "# pdf "//trim(label)
     !do i = 0, 100
     !   y = 0.1_dp * i
     !   write(iunit,*) y, pdf.aty.(y.with.grid)
     !end do
-    last_y = -one
-    yVals = yValues(grid)
-    do i = 0, grid%ny
-       y = yVals(i)
-       if (y < 1.000000001_dp * last_y) cycle
-       write(iunit,*) y, pdf(i,:)
-       last_y = y
-    end do
+    if (compact_output_n > 0) then
+       ! value of compact_output_n sets number of points being written
+       zeta_max = zeta_of_y(grid%ymax, a_stretch)
+       do i = 0, compact_output_n
+          zeta = (i*zeta_max)/compact_output_n
+          y = y_of_zeta(zeta, a_stretch)
+          write(iunit,'(f10.6)',advance="no") y
+          do j = lbound(pdf,dim=2), ubound(pdf,dim=2)
+             pdf_val = pdf(:,j).aty.(y.with.grid)
+             if (abs(pdf_val) < 1e-100_dp) then
+                write(iunit,'(a)',advance='no') ' 0 '
+             else
+                write(iunit,'(es14.6)',advance='no') pdf_val
+             end if
+          end do
+          write(iunit,*)
+       end do
+    else
+       last_y = -one
+       yVals = yValues(grid)
+       do i = 0, grid%ny
+          y = yVals(i)
+          if (y < 1.000000001_dp * last_y) cycle
+          write(iunit,*) y, pdf(i,:)
+          last_y = y
+       end do
+    end if
+    
     write(iunit,*)
     write(iunit,*)
     
@@ -262,4 +337,40 @@ contains
     pdf(:, iflv_d) = dv + dbar
     pdf(:,-iflv_d) = dbar
   end function unpolarized_dummy_pdf
+
+  !-----------------------------------------------------------------
+  !! return zeta = ln 1/x + a*(1-x)  (x = exp(-y))
+  function zeta_of_y(y, a) result(zeta)
+    real(dp), intent(in) :: y, a
+    real(dp)             :: zeta
+    zeta = y + a*(one - exp(-y))
+  end function zeta_of_y
+
+  
+  !-----------------------------------------------------------------
+  !! return inversion of zeta = ln 1/x + a*(1-x)  (x = exp(-y))
+  function y_of_zeta(zeta, a) result(y)
+    real(dp), intent(in) :: zeta, a
+    real(dp)             :: y, x, diff_from_zero, deriv
+    integer             :: iter
+    real(dp), parameter :: eps = 1e-12_dp
+    integer,  parameter :: maxiter = 100
+
+    ! starting condition (and soln if a = 0)
+    y = zeta 
+    if (a /= zero) then
+       do iter = 0, maxiter
+          x = exp(-y);
+          diff_from_zero = zeta - y - a*(one-x);
+          ! we have found good solution
+          if (abs(diff_from_zero) < eps) exit
+          deriv = -one  - a*x;
+          y = y - diff_from_zero / deriv;
+       end do
+    end if
+    
+    if (iter > maxiter) write(0,*) "y_of_zeta reached maxiter"
+
+  end function y_of_zeta
+
 end program test_qed_evol
