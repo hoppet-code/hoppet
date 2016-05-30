@@ -72,8 +72,10 @@ program test_qed_evol
   Qhi = 40.0_dp
   Qlo = sqrt(dble_val_opt("-Q2lo", Qlo**2))
   Qhi = sqrt(dble_val_opt("-Q2hi", Qhi**2))
-  Qlo = dble_val_opt("-Qlo",sqrt(2.0_dp))  
-  Qhi = dble_val_opt("-Qhi",40.0_dp)
+  Qlo = dble_val_opt("-Qlo",Qlo)
+  Qhi = dble_val_opt("-Qhi",Qhi)
+  write(iunit,'(a,es14.6)') "# Qlo = ", Qlo
+  write(iunit,'(a,es14.6)') "# Qhi = ", Qhi
 
   
   use_lhapdf = log_val_opt("-pdf")
