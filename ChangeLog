@@ -1,3 +1,10 @@
+2016-06-07  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/coefficient_functions_N3LO.f90:
+	* src/xc*.f:
+	added all the coefficient functions, implemented up to N3LO, with
+	both the parametrised and the exact NNLO implementation.
+
 2016-04-04  Gavin Salam  <gavin.salam@cern.ch>
 
 	* doc/HOPPET-v1-doc.tex:
