@@ -5,6 +5,9 @@
 	added all the coefficient functions, implemented up to N3LO, with
 	both the parametrised and the exact NNLO implementation.
 
+	* src/structure_functions.f90:
+	added the implementation of the structure functions, as used in proVBFH
+
 2016-04-04  Gavin Salam  <gavin.salam@cern.ch>
 
 	* doc/HOPPET-v1-doc.tex:
