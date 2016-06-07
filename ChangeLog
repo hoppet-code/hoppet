@@ -6,7 +6,7 @@
 	both the parametrised and the exact NNLO implementation.
 
 	* src/structure_functions.f90:
-	added the implementation of the structure functions, as used in proVBFH
+	added the implementation of the structure functions, as used in proVBFH.
 
 2016-04-04  Gavin Salam  <gavin.salam@cern.ch>
 
