@@ -11,6 +11,8 @@
 !
 ! - Original van Neerven and Zijlstra papers
 module coefficient_functions_N3LO
+  use types; use consts_dp; use convolution_communicator
+  use qcd
   use convolution_communicator
   use dglap_objects
   use coefficient_functions 
@@ -1588,4 +1590,4 @@ contains
 
 
   
-end module hoppet_coefficient_functions_N3LO
+end module coefficient_functions_N3LO
