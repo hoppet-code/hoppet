@@ -36,7 +36,7 @@ program test_qed_evol
   real(dp)               :: quark_masses(4:6)
   type(running_coupling) :: coupling
   type(qed_coupling)     :: coupling_qed
-  real(dp)               :: ymax, dy, x, alphas_mz, lha_qmin
+  real(dp)               :: ymax, dy, x, alphas_mz, lha_qmin, scale_qg
   real(dp), parameter    :: mz = 91.1876_dp
   real(dp), pointer :: pdf_in(:,:), pdf_out(:,:), pdf_lhapdf_out(:,:)
   real(dp)         :: Qlo, Qhi, moments(ncompmin:ncompmaxLeptons)
@@ -77,6 +77,8 @@ program test_qed_evol
   write(iunit,'(a,es14.6)') "# Qlo = ", Qlo
   write(iunit,'(a,es14.6)') "# Qhi = ", Qhi
 
+
+  scale_qg = dble_val_opt("-scale-qg",one)
   
   use_lhapdf = log_val_opt("-pdf")
   if (use_lhapdf) then
@@ -144,7 +146,10 @@ program test_qed_evol
      ! then add in a photon of some kind
      pdf_in(:,iflv_photon) = alpha_qed_scale_0 * (one - xValues(grid))**4
   end if
-
+  if (scale_qg /= one) then
+     pdf_in(:,:6) = pdf_in(:,:6) * scale_qg
+  end if
+  
   ! allow user to override the photon from a suitably formatted file
   if (log_val_opt("-read-photon")) pdf_in(:,iflv_photon) = read_photon(grid)
 
@@ -157,7 +162,7 @@ program test_qed_evol
      call QEDQCDEvolvePDF(dh, qed_split, pdf_out, coupling, coupling_qed,&
           &               Qlo, Qhi, nloop_qcd, nqcdloop_qed)
   end if
-  
+     
 
   call write_moments(pdf_in, ' in')
   call write_moments(pdf_out,'out')

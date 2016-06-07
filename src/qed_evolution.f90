@@ -14,7 +14,7 @@ module qed_evolution
 
   public :: QEDQCDEvolvePDF
   
-  type(qed_split_mat) :: qed_sm_copy
+  type(qed_split_mat), save :: qed_sm_copy
   integer             :: ev_nqcdloop_qed
   type(qed_coupling), pointer :: ev_coupling_qed
   

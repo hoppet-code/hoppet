@@ -34,7 +34,7 @@ module qed_objects
   public :: QEDSplitMatSetNf
   
   interface operator(*)
-     module procedure :: conv_qed_lo, conv_qed_nlo
+     module procedure conv_qed_lo, conv_qed_nlo
   end interface operator(*)
   public :: operator(*)
 
