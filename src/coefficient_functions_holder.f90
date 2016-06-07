@@ -10,7 +10,7 @@
 !   what it is we're doing.
 !
 ! - Original van Neerven and Zijlstra papers
-module coefficient_functions_N3LO
+module coefficient_functions_holder
   use types; use consts_dp; use convolution_communicator
   use qcd
   use convolution_communicator
@@ -1590,4 +1590,4 @@ contains
 
 
   
-end module coefficient_functions_N3LO
+end module coefficient_functions_holder
