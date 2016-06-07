@@ -271,10 +271,10 @@ elsif ($compiler eq 'g95') {
   $LAPACKINC  = "-p_NON_EXISTENT_FOR_NOW";
   $LAPACKLIB  = "-L/usr/local/lib/LAPACK3/ -llapack95 -llapack -lblas";
 }
-elsif ($compiler eq 'gfortran') {
-  $FC         = "gfortran";
+elsif ($compiler =~ /^gfortran/) {
+  $FC         = $compiler;
   $FFLAGS     = "-g -O3 -fPIC";
-  $F90        = "gfortran";
+  $F90        = $compiler;
   $F90FLAGS   = "-g -O3 -fPIC";
   $LDFLAGS    = "";
   $IOINC      = "-I".$ENV{HOME}."/utils/libf90-gfortran";

@@ -1,3 +1,8 @@
+2016-06-07  Gavin Salam  <gsalam@lxplus0031.cern.ch>
+
+	* scripts/makef95makefile: 
+	this now handles gfortran compiler names such as gfortran-61, etc.
+
 2016-05-27  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/qed_objects.f90 (AllocPDFWithLeptons):
