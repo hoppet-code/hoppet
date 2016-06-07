@@ -1,3 +1,8 @@
+2016-06-07  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/qed_objects.f90 (qed_objects):
+	tried to get rid of Fortran-2003 constructs
+
 2016-06-07  Gavin Salam  <gsalam@lxplus0031.cern.ch>
 
 	* scripts/makef95makefile: 

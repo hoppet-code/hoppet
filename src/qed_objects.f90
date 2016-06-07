@@ -25,8 +25,9 @@ module qed_objects
   type qed_split_mat
      type(qed_split_mat_lo)  :: lo
      type(qed_split_mat_nlo) :: nlo
-   contains
-     procedure :: SetNf => QEDSplitMatSetNf
+   ! only with F2003
+   !contains
+   !  procedure :: SetNf => QEDSplitMatSetNf
   end type qed_split_mat
   public :: qed_split_mat
   public :: InitQEDSplitMat
@@ -103,12 +104,12 @@ contains
     nl = 3
     nd = (nf_int+1) / 2
     nu = (nf_int  ) / 2
-    call qed_split%SetNf(nl, nd, nu)
+    call SetNf(qed_split, nl, nd, nu)
   end subroutine InitQEDSplitMat
 
   !----------------------------------------------------------------------
   subroutine QEDSplitMatSetNf(qed_sm, nl, nd, nu)
-    class(qed_split_mat) :: qed_sm
+    type(qed_split_mat) :: qed_sm
     integer, intent(in) :: nl, nu, nd
 
     qed_sm%lo%nl = nl
