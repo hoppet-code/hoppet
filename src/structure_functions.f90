@@ -103,15 +103,18 @@ contains
 
   !----------------------------------------------------------------------
   ! This routine assumes that LHAPDF has already been initialised with a PDF
-  subroutine InitStrFct(rts, order_max, nf, xR, xF, sc_choice, muR, muF, toyQ0, dglapQ0, xR_PDF)
+  subroutine InitStrFct(rts, order_max, nf, xR, xF, sc_choice, muR, muF,  &
+    &                   toyQ0, dglapQ0, xR_PDF, param_coefs)
     real(dp), intent(in) :: rts, xR, xF
     integer, intent(in)  :: order_max, nf
     integer, optional    :: sc_choice
     real(dp), optional   :: muR, muF, toyQ0, dglapQ0, xR_PDF
+    logical, optional    :: param_coefs
     !----------------------------------------------------------------------
     real(dp) :: ymax, dy, minQval, maxQval, dlnlnQ
     real(dp) :: sin_thw
     integer  :: nloop, order
+    logical  :: exact_coefs
     if(present(sc_choice))then
        scale_choice=sc_choice
     else
@@ -124,6 +127,12 @@ contains
     if(present(xR_PDF)) xmuR_PDF=xR_PDF
     xmuR = xR
     xmuF = xF
+
+    if(present(param_coefs))then
+       exact_coefs = .not.param_coefs
+    else
+       exact_coefs = .false.
+    endif
     
     ! where should Qmin and sin_thw go ?
     ! computed from W,Z mass
@@ -173,10 +182,16 @@ contains
     call InitC3NLO(grid, C3NLO) 
 
     ! and the NNLO ones
-    call InitC2NNLO(grid, C2NNLO)
-    call InitCLNNLO(grid, CLNNLO)
-    call InitC3NNLO(grid, C3NNLO) 
-
+    if (exact_coefs) then
+       call InitC2NNLO_e(grid, C2NNLO)
+       call InitCLNNLO_e(grid, CLNNLO)
+       call InitC3NNLO_e(grid, C3NNLO)
+    else
+       call InitC2NNLO(grid, C2NNLO)
+       call InitCLNNLO(grid, CLNNLO)
+       call InitC3NNLO(grid, C3NNLO) 
+    endif
+    
     ! and the N3LO ones
     call InitC2N3LO(grid_n3lo, C2N3LO)
     call InitCLN3LO(grid_n3lo, CLN3LO)
