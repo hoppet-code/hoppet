@@ -665,14 +665,23 @@ contains
        Q = tables(0)%Q_vals(iQ)
        call EvalPdfTable_Q(tables(0),muF(Q),f)
        call set_scale_logs(Q)
+
+       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       ! For central scale with scale_choice=1, we don't need to do all
+       ! the convolutions of the splitting functions
+          f2 = C2NLO * f
+          fL = CLNLO * f
+          f3 = C3NLO * f
+       else
        ! do the convolution with the coefficient functions and also the
        ! corresponding splitting-function contributions when scales
        ! are not equal to Q
-       PLO_f = dh%P_LO * f
-       f2 = CxNLO_with_logs(C2LO, C2NLO, f, PLO_f)
-       fL = CxNLO_with_logs(CLLO, CLNLO, f, PLO_f)
-       f3 = CxNLO_with_logs(C3LO, C3NLO, f, PLO_f)
-       
+          PLO_f = dh%P_LO * f
+          f2 = CxNLO_with_logs(C2LO, C2NLO, f, PLO_f)
+          fL = CxNLO_with_logs(CLLO, CLNLO, f, PLO_f)
+          f3 = CxNLO_with_logs(C3LO, C3NLO, f, PLO_f)
+       endif
+          
        tables(2)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
     end do
@@ -748,15 +757,23 @@ contains
        Q = tables(0)%Q_vals(iQ)
        call EvalPdfTable_Q(tables(0),muF(Q),f)
        call set_scale_logs(Q)
+       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       ! For central scale with scale_choice=1, we don't need to do all
+       ! the convolutions of the splitting functions
+          f2 = C2NNLO * f
+          fL = CLNNLO * f
+          f3 = C3NNLO * f
+       else
        ! do the convolution with the coefficient functions and also the
        ! corresponding splitting-function contributions when scales
        ! are not equal to Q
-       PLO_f   = dh%P_LO  * f
-       PNLO_f  = dh%P_NLO * f
-       PLO2_f  = dh%P_LO  * PLO_f
-       f2 = CxNNLO_with_logs(C2LO, C2NLO, C2NNLO, f, PLO_f, PNLO_f, PLO2_f)
-       fL = CxNNLO_with_logs(CLLO, CLNLO, CLNNLO, f, PLO_f, PNLO_f, PLO2_f)
-       f3 = CxNNLO_with_logs(C3LO, C3NLO, C3NNLO, f, PLO_f, PNLO_f, PLO2_f)
+          PLO_f   = dh%P_LO  * f
+          PNLO_f  = dh%P_NLO * f
+          PLO2_f  = dh%P_LO  * PLO_f
+          f2 = CxNNLO_with_logs(C2LO, C2NLO, C2NNLO, f, PLO_f, PNLO_f, PLO2_f)
+          fL = CxNNLO_with_logs(CLLO, CLNLO, CLNNLO, f, PLO_f, PNLO_f, PLO2_f)
+          f3 = CxNNLO_with_logs(C3LO, C3NLO, C3NNLO, f, PLO_f, PNLO_f, PLO2_f)
+       endif
 
        tables(4)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
      
@@ -874,23 +891,33 @@ contains
        Q = tables(0)%Q_vals(iQ)
        call EvalPdfTable_Q(tables(0),muF(Q),f)
        call set_scale_logs(Q)
+       
+       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       ! For central scale with scale_choice=1 (i.e. mur=muf=Q), we don't
+       ! need to do all the convolutions of the splitting functions
+          f2 = C2N3LO * f
+          fL = CLN3LO * f
+          f3 = C3N3LO * f
+       else
        ! do the convolution with the coefficient functions and also the
        ! corresponding splitting-function contributions when scales
        ! are not equal to Q
-       PLO_f    = dh%P_LO   * f
-       PNLO_f   = dh%P_NLO  * f
-       PLO2_f   = dh%P_LO   * PLO_f
-       PNNLO_f  = dh%P_NNLO * f
-       PLONLO_f = dh%P_LO   * PNLO_f
-       PNLOLO_f = dh%P_NLO  * PLO_f
-       PLO3_f   = dh%P_LO   * PLO2_f
-    
-       f2 = CxN3LO_with_logs(C2LO, C2NLO, C2NNLO, C2N3LO, f, PLO_f, PNLO_f, PLO2_f, &
-            &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
-       fL = CxN3LO_with_logs(CLLO, CLNLO, CLNNLO, CLN3LO, f, PLO_f, PNLO_f, PLO2_f, &
-            &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
-       f3 = CxN3LO_with_logs(C3LO, C3NLO, C3NNLO, C3N3LO, f, PLO_f, PNLO_f, PLO2_f, &
-            &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
+          PLO_f    = dh%P_LO   * f
+          PNLO_f   = dh%P_NLO  * f
+          PLO2_f   = dh%P_LO   * PLO_f
+          PNNLO_f  = dh%P_NNLO * f
+          PLONLO_f = dh%P_LO   * PNLO_f
+          PNLOLO_f = dh%P_NLO  * PLO_f
+          PLO3_f   = dh%P_LO   * PLO2_f
+          
+          f2 = CxN3LO_with_logs(C2LO, C2NLO, C2NNLO, C2N3LO, f, PLO_f, PNLO_f, PLO2_f, &
+               &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
+          fL = CxN3LO_with_logs(CLLO, CLNLO, CLNNLO, CLN3LO, f, PLO_f, PNLO_f, PLO2_f, &
+               &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
+          f3 = CxN3LO_with_logs(C3LO, C3NLO, C3NNLO, C3N3LO, f, PLO_f, PNLO_f, PLO2_f, &
+               &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
+       endif
+       
        ! now the fl_11 piece
        f2_fl11 = C2N3LO_fl11 * f
        fL_fl11 = CLN3LO_fl11 * f
