@@ -26,7 +26,7 @@
 * ..The regular piece. The rational end-point coefficients are exact, 
 *    the rest has been fitted for x between 10^-6 and 1 - 10^-6. 
 *
-       FUNCTION C2NP3A (Y, NF, CC)
+       FUNCTION C2NP3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A - Z)
        INTEGER NF
        INTEGER CC ! charged current
@@ -35,9 +35,8 @@
 *
        FL11 = FL(NF)
 *
-       Y1  = 1.D0 -Y
-       DL  = LOG (Y)
-       DL1 = LOG (Y1)
+       Y1 = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
        D27  = 1./27.D0
        D243 = 1./243.D0
 *
@@ -79,12 +78,12 @@
 *
 * ..The exact singular piece (irrational coefficients truncated)
 *
-       FUNCTION C2NS3B (Y, NF)
+       FUNCTION C2NS3B (Y, DL, NF)
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
 *
-       DL1 = LOG (1.-Y)
-       DM  = 1./(1.-Y)
+       DL1 = DL1VAL(Y, DL)
+       DM  = DMVAL(Y, DL)
        D81 = 1./81.D0
 *
        C2NS3B = 
@@ -115,8 +114,8 @@
        DATA FL / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
 *
        FL11 = FL(NF)
-*
-       DL1 = LOG (1.-Y)
+
+       DL1 = LOG (1.D0-Y)
        D81 = 1./81.D0
        D3  = 1./3.D0
 *
@@ -141,6 +140,57 @@
 *     
        RETURN
        END FUNCTION
-*
+
+* ..For Y values close to 1, use the series expansion close 
+*   to Y1=0 instead of full value, for numerical convergence
+*     
+       FUNCTION Y1VAL (Y, DL)
+       IMPLICIT REAL*8 (A - Z)
+
+       IF (ABS(DL).LT.1D-4) THEN
+       Y1VAL = - DL - DL**2/2.0D0 - DL**3/6.0D0 - DL**4/24.0D0
+     ,         - DL**5/120.0D0
+       ELSE
+       Y1VAL = 1.0D0 - Y
+       ENDIF
+
+       RETURN
+       END FUNCTION
+
+
+* ..For Y values close to 1, use the series expansion close 
+*   to Y1=0 instead of full value, for numerical convergence
+*     
+       FUNCTION DL1VAL (Y, DL)
+       IMPLICIT REAL*8 (A - Z)
+
+       IF (ABS(DL).LT.1D-4) THEN
+       DL1VAL = LOG(-DL) +  DL/2.0D0 + DL**2/24.0D0 - DL**4/2880.0D0
+       ELSE
+       DL1VAL = LOG(1.0D0 - Y)
+       ENDIF
+
+       RETURN
+       END FUNCTION
+
+* ..For Y values close to 1, use the series expansion close 
+*   to Y1=0 instead of full value, for numerical convergence
+*     
+       FUNCTION DMVAL (Y, DL)
+       IMPLICIT REAL*8 (A - Z)
+
+
+       IF (ABS(DL).LT.1D-12) THEN
+       DMVAL = 0.0D0
+       ELSEIF (ABS(DL).LT.1D-3) THEN
+       DMVAL  = 0.5D0 - 1.0D0/DL - DL/12.0D0 + DL**3/720.0D0
+     ,         - DL**5/30240.0D0
+       ELSE
+       DMVAL = 1.0D0/(1.0D0-Y)
+       ENDIF
+
+       RETURN
+       END FUNCTION
+
 * =================================================================av==
       END MODULE XC2NS3P

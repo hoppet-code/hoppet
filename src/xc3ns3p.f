@@ -1,4 +1,5 @@
       MODULE XC3NS3P
+      USE XC2NS3P
       CONTAINS
 *     
 * ..File: xc3ns3p.f    F3^NU+NU(BAR)
@@ -26,7 +27,7 @@
 * ..The regular piece. The rational end-point coefficients are exact, 
 *    the rest has been fitted for x between 10^-6 and 1 - 10^-6. 
 *
-       FUNCTION C3NM3A (Y, NF, V) 
+       FUNCTION C3NM3A (Y, DL, NF, V) 
        IMPLICIT REAL*8 (A - Z)
        INTEGER NF
        INTEGER V
@@ -36,9 +37,8 @@
 *      if V==0 then return the NS minus coefficient instead of the NS valence
        IF (V.eq.0) FL02 = 0.D0
 *
-       Y1  = 1.D0 -Y
-       DL  = LOG (Y)
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
        D27  = 1./27.D0
        D243 = 1./243.D0
 *
@@ -74,12 +74,12 @@
 *
 * ..The exact singular piece (irrational coefficients truncated)
 *
-       FUNCTION C3NS3B (Y, NF)
+       FUNCTION C3NS3B (Y, DL, NF)
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
 *
-       DL1 = LOG (1.-Y)
-       DM  = 1./(1.-Y)
+       DL1 = DL1VAL(Y, DL)
+       DM  = DMVAL(Y, DL)
        D81 = 1./81.D0
 *
        C3NS3B = 
@@ -106,7 +106,7 @@
        IMPLICIT REAL*8 (A - Z)
        INTEGER NF
 *
-       DL1 = LOG (1.-Y)
+       DL1 = LOG (1.D0-Y)
        D81 = 1./81.D0
        D3  = 1./3.D0
 *

@@ -60,7 +60,6 @@ module structure_functions
   type(running_coupling), save :: coupling
   !! holds information about the grid
   type(grid_def),     save :: grid, gdarray(4)
-  type(grid_def),     save :: grid_n3lo, gdarray_n3lo(4)
 
   !! holds the splitting functions
   type(dglap_holder), save :: dh
@@ -193,12 +192,12 @@ contains
     endif
     
     ! and the N3LO ones
-    call InitC2N3LO(grid_n3lo, C2N3LO)
-    call InitCLN3LO(grid_n3lo, CLN3LO)
-    call InitC3N3LO(grid_n3lo, C3N3LO)
+    call InitC2N3LO(grid, C2N3LO)
+    call InitCLN3LO(grid, CLN3LO)
+    call InitC3N3LO(grid, C3N3LO)
     ! including the fl11 terms for Z/photon exchanges
-    call InitC2N3LO_fl11(grid_n3lo, C2N3LO_fl11)
-    call InitCLN3LO_fl11(grid_n3lo, CLN3LO_fl11)
+    call InitC2N3LO_fl11(grid, C2N3LO_fl11)
+    call InitCLN3LO_fl11(grid, CLN3LO_fl11)
 
     ! read the PDF in
     call read_PDF()
@@ -232,17 +231,6 @@ contains
     call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp,  order=order)
     call InitGridDef(gdarray(1),dy,       ymax  ,  order=order)
     call InitGridDef(grid,gdarray(1:4),locked=.true.)
-
-    ! At N3LO we need to change the grid slightly:
-    !  - convolution epsilon is reduced from 10^-7 to 10^-6
-    !  - interpolation order is reduced from -6 to -5 for the high x region
-    ! Note: The grid points in y have to be the same as for the other grid!
-    call SetDefaultConvolutionEps(0.000001_dp) ! anything less breaks integration of N3LO pieces
-    call InitGridDef(gdarray_n3lo(4),dy/27.0_dp,0.2_dp, order=-abs(order)+1)!reduce order to -5
-    call InitGridDef(gdarray_n3lo(3),dy/9.0_dp,0.5_dp,  order=-abs(order)+1) !reduce order to -5
-    call InitGridDef(gdarray_n3lo(2),dy/3.0_dp,2.0_dp,  order=order)
-    call InitGridDef(gdarray_n3lo(1),dy,       ymax  ,  order=order)
-    call InitGridDef(grid_n3lo,gdarray_n3lo(1:4),locked=.true.)
 
     ! create the tables that will contain our copy of the user's pdf
     ! as well as the convolutions with the pdf.

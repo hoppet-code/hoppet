@@ -1,4 +1,5 @@
       MODULE XCLNS3P
+      USE XC2NS3P
       CONTAINS
 *     
 * ..File: xclns3p.f    FL_NS
@@ -26,7 +27,7 @@
 *    exact, the rest has been fitted for x between 10^-6 and 1 - 10^-6.
 *    The N_f^2 part is exact and requires the dilogarithm Li2(x).
 *
-       FUNCTION CLNP3A (Y, NF, CC)
+       FUNCTION CLNP3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A - Z)
        COMPLEX*16 WGPLG	
        INTEGER NF
@@ -35,8 +36,7 @@
        DATA FL / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
        PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0 )
 *
-       DL  = LOG (Y)
-       DL1 = LOG (1.-Y)
+       DL1 = DL1VAL(Y, DL)
        D81 = 1./81.D0
 *
        FL11 = FL(NF)

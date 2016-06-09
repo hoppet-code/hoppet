@@ -1,4 +1,5 @@
       MODULE XC2SG3P
+      USE XC2NS3P
       CONTAINS
 *     
 * ..File: xc2sg3p.f    F_2^PS  and  F_2^G
@@ -19,7 +20,7 @@
 *
 * ..The pure-singlet coefficient function, regular piece
 *
-       FUNCTION C2S3A (Y, NF, CC)
+       FUNCTION C2S3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A-Z)
        DIMENSION FL(6), FLS(6)
        INTEGER NF
@@ -27,9 +28,9 @@
        DATA FL  / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
        DATA FLS /  1.d0, 0.1d0, 0.d0, 0.1d0, 0.018181818d0, 0.1d0 /
 *
-       DL  = LOG (Y)
-       Y1  = 1.-Y
-       DL1 = LOG (Y1)
+
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
        D9  = 1./9.D0
        D81 = D9*D9
        
@@ -86,7 +87,7 @@
 *
 * ..The gluon coefficient function
 *
-       FUNCTION C2G3A (Y, NF, CC)
+       FUNCTION C2G3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A-Z)
        DIMENSION FLG(6)
        INTEGER NF
@@ -94,8 +95,7 @@
        DATA FLG / 1.d0, 0.1d0, 0.d0, 0.1d0, 0.018181818d0, 0.1d0 /
 *
        YI  = 1./Y
-       DL  = LOG (Y)
-       DL1 = LOG (1.-Y)
+       DL1 = DL1VAL(Y, DL)
        D9  = 1./9.D0
        D81 = D9*D9
        FLG11 = FLG(NF)

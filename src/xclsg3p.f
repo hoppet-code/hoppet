@@ -1,4 +1,5 @@
       MODULE XCLSG3P
+      USE XC2NS3P
       CONTAINS
 *
 * ..File: xclsg3p.f    F_L^PS  and  F_L^G
@@ -19,16 +20,15 @@
 *
 * ..The pure-singlet coefficient function
 *
-       FUNCTION CLS3A (Y, NF, CC)
+       FUNCTION CLS3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A-Z)
        DIMENSION FLS(6)
        INTEGER CC ! charged current
        INTEGER NF
        DATA FLS / 1.d0, 0.1d0, 0.d0, 0.1d0, 0.01818181818d0, 0.1d0 /
 *
-       DL  = LOG (Y)
-       Y1  = 1.-Y
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
        D27 = 1./27.D0
        D81 = 1./81.D0
        FLS11 = FLS(NF)
@@ -60,16 +60,15 @@
 *
 * ..The gluon coefficient function
 *
-       FUNCTION CLG3A (Y, NF, CC)
+       FUNCTION CLG3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A-Z)
        DIMENSION FLG(6)
        INTEGER CC ! charged current
        INTEGER NF
        DATA FLG / 1.d0, 0.1d0, 0.d0, 0.1d0, 0.01818181818d0, 0.1d0 /
 *
-       DL  = LOG (Y)
-       Y1  = 1.-Y
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
        D27 = 1./27.D0
        FLG11 = FLG(NF)
 *

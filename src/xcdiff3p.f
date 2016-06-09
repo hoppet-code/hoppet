@@ -1,4 +1,5 @@
       MODULE XCDIFF3P
+      USE XC2NS3P
       CONTAINS
 *     
 * ..File: xcdiff3p.f    Fi_NS,  i = 2,3,L  (even-N - odd-N)
@@ -26,14 +27,13 @@
 *
 * ..F2
 *
-       FUNCTION C2Q3DF (Y, NF, IMOD)
+       FUNCTION C2Q3DF (Y, DL, NF, IMOD)
 *
        IMPLICIT REAL*8 (A-Z)
        INTEGER IMOD, NF
 *
-       Y1  = 1.- Y 
-       DL  = LOG (Y)
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
 *
        C2Q30A = (54.478 * DL1**2 + 304.60 * DL1 + 691.68 * Y) * Y1 
      1          + 179.14 * DL - 0.1826 * DL**3
@@ -60,14 +60,13 @@
 *
 * ..F3
 *
-       FUNCTION C3Q3DF (Y, NF, IMOD)
+       FUNCTION C3Q3DF (Y, DL, NF, IMOD)
 *
        IMPLICIT REAL*8 (A-Z)
        INTEGER IMOD, NF
 *
-       Y1  = 1.- Y
-       DL  = LOG (Y)
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
 *
        C3Q30A = - (46.72 * DL1**2 + 267.26 * DL1 + 719.49 * Y) * Y1
      1          - 171.98 * DL + 9.470 * DL**3
@@ -94,14 +93,13 @@
 *
 * ..FL
 *
-       FUNCTION CLQ3DF (Y, NF, IMOD)
+       FUNCTION CLQ3DF (Y, DL, NF, IMOD)
 *
        IMPLICIT REAL*8 (A-Z)
        INTEGER IMOD, NF
 *
-       Y1  = 1.- Y
-       DL  = LOG (Y)
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
 *
        CLQ30A = - (495.49 * Y**2 + 906.86) * Y1**2
      1          - 983.23 * Y*Y1*DL + 53.706 * DL**2 + 5.3059 * DL**3
