@@ -21,7 +21,7 @@ module streamlined_interface
   !!
   !! The array gets initialised in hoppetStartExtended
   integer, save :: table_index_from_iloop(1:111) = -1
-  integer, parameter :: max_table_index = 7
+  integer, parameter :: max_table_index = 15
 
   !!
   !! NB (2012-12-24): 

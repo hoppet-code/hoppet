@@ -37,14 +37,10 @@
 !       (q_j+qbar_j) * C_{i,ns}^+ + q_s * C_{i,ps}
 !
 module structure_functions
-  use qcd_coupling
-  use dglap_holders; use dglap_choices
   use pdf_representation
-  use pdf_tabulate
+  use streamlined_interface
   use dummy_pdfs
-  use types; use consts_dp; use splitting_functions
-  use convolution
-  use qcd; use warnings_and_errors
+  use splitting_functions
   use coefficient_functions_holder
   implicit none
 
@@ -57,16 +53,17 @@ module structure_functions
   public :: write_f3
   
   real(dp), external :: alphasPDF
-  type(running_coupling), save :: coupling
+  ! type(running_coupling), save :: coupling
   !! holds information about the grid
-  type(grid_def),     save :: grid, gdarray(4)
+  ! type(grid_def),     save :: grid, gdarray(4)
 
   !! holds the splitting functions
-  type(dglap_holder), save :: dh
+  ! type(dglap_holder), save :: dh
 
   !! 0 is main pdf table, while i=1:8 contain convolutions with the
   !! splitting function
-  type(pdf_table), save :: tables(0:15)
+  ! type(pdf_table), save :: tables(0:15)
+  
   ! indices for the different structure functions
   integer, parameter :: F1Wp= 1, F2Wp= 2, F3Wp= 3
   integer, parameter :: F1Wm=-1, F2Wm=-2, F3Wm=-3
@@ -206,79 +203,79 @@ contains
     
   end subroutine InitStrFct
 
-  !----------------------------------------------------------------------
-  subroutine hoppetStartExtendedLocal(ymax,dy,valQmin,valQmax,dlnlnQ,nloop,order,factscheme)
-    implicit none
-    real(dp), intent(in) :: ymax   !! highest value of ln1/x user wants to access
-    real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
-    real(dp), intent(in) :: valQmin, valQmax !! range in Q
-    real(dp), intent(in) :: dlnlnQ !! internal table spacing in lnlnQ
-    integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=3)
-    integer,  intent(in) :: order  !! order of numerical interpolation (+ve v. -ve: see below)
-    integer,  intent(in) :: factscheme !! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
-    !-------------------------------------
+  ! !----------------------------------------------------------------------
+  ! subroutine hoppetStartExtendedLocal(ymax,dy,valQmin,valQmax,dlnlnQ,nloop,order,factscheme)
+  !   implicit none
+  !   real(dp), intent(in) :: ymax   !! highest value of ln1/x user wants to access
+  !   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
+  !   real(dp), intent(in) :: valQmin, valQmax !! range in Q
+  !   real(dp), intent(in) :: dlnlnQ !! internal table spacing in lnlnQ
+  !   integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=3)
+  !   integer,  intent(in) :: order  !! order of numerical interpolation (+ve v. -ve: see below)
+  !   integer,  intent(in) :: factscheme !! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
+  !   !-------------------------------------
 
-    ! initialise our grids
+  !   ! initialise our grids
 
-    ! the internal interpolation order (with a minus sign allows
-    ! interpolation to take fake zero points beyond x=1 -- convolution
-    ! times are unchanged, initialisation time is much reduced and
-    ! accuracy is slightly reduced)
-    !order = -5
-    ! Now create a nested grid
-    call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
-    call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp,  order=order)
-    call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp,  order=order)
-    call InitGridDef(gdarray(1),dy,       ymax  ,  order=order)
-    call InitGridDef(grid,gdarray(1:4),locked=.true.)
+  !   ! the internal interpolation order (with a minus sign allows
+  !   ! interpolation to take fake zero points beyond x=1 -- convolution
+  !   ! times are unchanged, initialisation time is much reduced and
+  !   ! accuracy is slightly reduced)
+  !   !order = -5
+  !   ! Now create a nested grid
+  !   call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
+  !   call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp,  order=order)
+  !   call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp,  order=order)
+  !   call InitGridDef(gdarray(1),dy,       ymax  ,  order=order)
+  !   call InitGridDef(grid,gdarray(1:4),locked=.true.)
 
-    ! create the tables that will contain our copy of the user's pdf
-    ! as well as the convolutions with the pdf.
-    call AllocPdfTable(grid, tables(:), valQmin, valQmax, &
-         & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
+  !   ! create the tables that will contain our copy of the user's pdf
+  !   ! as well as the convolutions with the pdf.
+  !   call AllocPdfTable(grid, tables(:), valQmin, valQmax, &
+  !        & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
     
-    ! tables(0) : pdf
-    tables(0)%tab = zero
-    ! tables(1) : LO structure function : C_LO x f
-    tables(1)%tab = zero
+  !   ! tables(0) : pdf
+  !   tables(0)%tab = zero
+  !   ! tables(1) : LO structure function : C_LO x f
+  !   tables(1)%tab = zero
     
-    ! tables(2) : NLO structure function : C_NLO x f
-    tables(2)%tab = zero
-    ! tables(3) : NLO contribution : C_LO x P_LO x f
-    tables(3)%tab = zero
+  !   ! tables(2) : NLO structure function : C_NLO x f
+  !   tables(2)%tab = zero
+  !   ! tables(3) : NLO contribution : C_LO x P_LO x f
+  !   tables(3)%tab = zero
     
-    ! tables(4) : NNLO structure function : C_NNLO x f
-    tables(4)%tab = zero
-    ! tables(5) : NNLO contribution : C_LO x P_LO^2 x f
-    tables(5)%tab = zero
-    ! tables(6) : NNLO contribution : C_LO x P_NLO x f
-    tables(6)%tab = zero
-    ! tables(7) : NNLO contribution : C_NLO x P_LO x f
-    tables(7)%tab = zero
+  !   ! tables(4) : NNLO structure function : C_NNLO x f
+  !   tables(4)%tab = zero
+  !   ! tables(5) : NNLO contribution : C_LO x P_LO^2 x f
+  !   tables(5)%tab = zero
+  !   ! tables(6) : NNLO contribution : C_LO x P_NLO x f
+  !   tables(6)%tab = zero
+  !   ! tables(7) : NNLO contribution : C_NLO x P_LO x f
+  !   tables(7)%tab = zero
     
-    ! tables(8)  : N3LO contribution : C_N3LO x f
-    tables(8)%tab = zero
-    ! tables(9)  : N3LO contribution : C_LO x P_LO^3 x f
-    tables(9)%tab = zero
-    ! tables(10) : N3LO contribution : C_LO x P_LO x P_NLO x f
-    tables(10)%tab = zero
-    ! tables(11) : N3LO contribution : C_LO x P_NLO x P_LO x f
-    tables(11)%tab = zero
-    ! tables(12) : N3LO contribution : C_NLO x P_LO^2 x f
-    tables(12)%tab = zero
-    ! tables(13) : N3LO contribution : C_NLO x P_NLO x f
-    tables(13)%tab = zero
-    ! tables(14) : N3LO contribution : C_NNLO x P_LO x f
-    tables(14)%tab = zero
-    ! tables(15) : N3LO contribution : C_LO x P_NNLO x f
-    tables(15)%tab = zero
+  !   ! tables(8)  : N3LO contribution : C_N3LO x f
+  !   tables(8)%tab = zero
+  !   ! tables(9)  : N3LO contribution : C_LO x P_LO^3 x f
+  !   tables(9)%tab = zero
+  !   ! tables(10) : N3LO contribution : C_LO x P_LO x P_NLO x f
+  !   tables(10)%tab = zero
+  !   ! tables(11) : N3LO contribution : C_LO x P_NLO x P_LO x f
+  !   tables(11)%tab = zero
+  !   ! tables(12) : N3LO contribution : C_NLO x P_LO^2 x f
+  !   tables(12)%tab = zero
+  !   ! tables(13) : N3LO contribution : C_NLO x P_NLO x f
+  !   tables(13)%tab = zero
+  !   ! tables(14) : N3LO contribution : C_NNLO x P_LO x f
+  !   tables(14)%tab = zero
+  !   ! tables(15) : N3LO contribution : C_LO x P_NNLO x f
+  !   tables(15)%tab = zero
     
-    ! initialise splitting-function holder
-    call InitDglapHolder(grid,dh,factscheme=factscheme,&
-         &                      nloop=nloop,nflo=3,nfhi=6)
-    ! choose a sensible default number of flavours.
-    call SetNfDglapHolder(dh,nflcl=nflav)
-  end subroutine hoppetStartExtendedLocal
+  !   ! initialise splitting-function holder
+  !   call InitDglapHolder(grid,dh,factscheme=factscheme,&
+  !        &                      nloop=nloop,nflo=3,nfhi=6)
+  !   ! choose a sensible default number of flavours.
+  !   call SetNfDglapHolder(dh,nflcl=nflav)
+  ! end subroutine hoppetStartExtendedLocal
 
 
   !----------------------------------------------------------------------
@@ -373,24 +370,24 @@ contains
     write(6,*) 'hoppet: ', res_hoppet
   end subroutine read_PDF
 
-  !----------------------------------------------------------------------
-  !! Given a pdf_subroutine with the interface shown below, initialise
-  !! our internal pdf table.
-  subroutine hoppetAssign(pdf_subroutine)
-    implicit none
-    interface ! indicate what "interface" pdf_subroutine is expected to have
-       subroutine pdf_subroutine(x,Q,res)
-         use types; implicit none
-         real(dp), intent(in)  :: x,Q
-         real(dp), intent(out) :: res(*)
-       end subroutine pdf_subroutine
-    end interface
-    !-----------------------------------
+  ! !----------------------------------------------------------------------
+  ! !! Given a pdf_subroutine with the interface shown below, initialise
+  ! !! our internal pdf table.
+  ! subroutine hoppetAssign(pdf_subroutine)
+  !   implicit none
+  !   interface ! indicate what "interface" pdf_subroutine is expected to have
+  !      subroutine pdf_subroutine(x,Q,res)
+  !        use types; implicit none
+  !        real(dp), intent(in)  :: x,Q
+  !        real(dp), intent(out) :: res(*)
+  !      end subroutine pdf_subroutine
+  !   end interface
+  !   !-----------------------------------
 
-    ! set up table(0) by copying the values returned by pdf_subroutine onto 
-    ! the x-Q grid in table(0)
-    call FillPdfTable_LHAPDF(tables(0), pdf_subroutine)
-  end subroutine hoppetAssign
+  !   ! set up table(0) by copying the values returned by pdf_subroutine onto 
+  !   ! the x-Q grid in table(0)
+  !   call FillPdfTable_LHAPDF(tables(0), pdf_subroutine)
+  ! end subroutine hoppetAssign
 
   !----------------------------------------------------------------------
   ! Set up the structure function tables up to a given order

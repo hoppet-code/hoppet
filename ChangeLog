@@ -1,5 +1,9 @@
 2016-06-09  Frédéric Dreyer  <frederic.dreyer@gmail.com>
 
+	* src/streamlined_interface.f90:
+	changed size of tables for integration of structure functions in
+	existing framework
+
 	* src/structure_functions.f90:
 	* src/coefficient_functions_holder.f90:
 	* src/xc*.f:
