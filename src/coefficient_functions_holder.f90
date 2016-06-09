@@ -1066,11 +1066,11 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C3NM3A(x, -y, nf_int, 1) + C3NS3B(x, -y, nf_int)
+       res = C3NM3A(x, -y, nf_int, 1) + C3NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C3NM3A(x, -y, nf_int, 1)
+       res = C3NM3A(x, -y, nf_int, 1)
     case(cc_VIRT)
-       if (x.lt.one) res = - C3NS3B(x, -y, nf_int)
+       res = - C3NS3B(x, -y, nf_int)
     case(cc_DELTA)
        !res = C3NS3C(zero, nf_int)
        res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
@@ -1095,11 +1095,11 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C3NM3A(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
+       res = C3NM3A(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C3NM3A(x, -y, nf_int, 0)
+       res = C3NM3A(x, -y, nf_int, 0)
     case(cc_VIRT)
-       if (x.lt.one) res = - C3NS3B(x, -y, nf_int)
+       res = - C3NS3B(x, -y, nf_int)
     case(cc_DELTA)
        !res = C3NS3C(zero, nf_int)
        res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
@@ -1125,11 +1125,11 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C3NM3A(x, -y, nf_int, 0) + C3Q3DF(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
+       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DF(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C3NM3A(x, -y, nf_int, 0) + C3Q3DF(x, -y, nf_int, 0)
+       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DF(x, -y, nf_int, 0)
     case(cc_VIRT)
-       if (x.lt.one) res = - C3NS3B(x, -y, nf_int)
+       res = - C3NS3B(x, -y, nf_int)
     case(cc_DELTA)
        !res = C3NS3C(zero, nf_int)
        res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
@@ -1157,11 +1157,11 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C2NP3A(x, -y, nf_int, 1) + C2NS3B(x, -y, nf_int)
+       res = C2NP3A(x, -y, nf_int, 1) + C2NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C2NP3A(x, -y, nf_int, 1)
+       res = C2NP3A(x, -y, nf_int, 1)
     case(cc_VIRT)
-       if (x.lt.one) res = - C2NS3B(x, -y, nf_int)
+       res = - C2NS3B(x, -y, nf_int)
     case(cc_DELTA)
        res = C2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
     end select
@@ -1183,11 +1183,11 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C2NP3A(x, -y, nf_int, 0)
+       res = C2NP3A(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C2NP3A(x, -y, nf_int, 0)
+       res = C2NP3A(x, -y, nf_int, 0)
     case(cc_VIRT)
-       if (x.lt.one) res = res
+       res = res
     case(cc_DELTA)
        res = C2NP3C(zero, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
     end select
@@ -1214,11 +1214,11 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C2NP3A(x, -y, nf_int, 1) - C2Q3DF(x, -y, nf_int, 0) + C2NS3B(x, -y, nf_int)
+       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DF(x, -y, nf_int, 0) + C2NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C2NP3A(x, -y, nf_int, 1) - C2Q3DF(x, -y, nf_int, 0)
+       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DF(x, -y, nf_int, 0)
     case(cc_VIRT)
-       if (x.lt.one) res = - C2NS3B(x, -y, nf_int)
+       res = - C2NS3B(x, -y, nf_int)
     case(cc_DELTA)
        res = C2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
     end select
@@ -1243,11 +1243,11 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C2NP3A(x, -y, nf_int, 0)
+       res = C2NP3A(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C2NP3A(x, -y, nf_int, 0)
+       res = C2NP3A(x, -y, nf_int, 0)
     case(cc_VIRT)
-       if (x.lt.one) res = res
+       res = res
     case(cc_DELTA)
        res = C2NP3C(zero, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
     end select
@@ -1271,9 +1271,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C2S3A(x, -y, nf_int, 1)
+       res = C2S3A(x, -y, nf_int, 1)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C2S3A(x, -y, nf_int, 1)
+       res = C2S3A(x, -y, nf_int, 1)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1298,9 +1298,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C2S3A(x, -y, nf_int, 0)
+       res = C2S3A(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C2S3A(x, -y, nf_int, 0)
+       res = C2S3A(x, -y, nf_int, 0)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1326,9 +1326,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C2G3A(x, -y, nf_int, 1)
+       res = C2G3A(x, -y, nf_int, 1)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C2G3A(x, -y, nf_int, 1)
+       res = C2G3A(x, -y, nf_int, 1)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1353,9 +1353,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = C2G3A(x, -y, nf_int, 0)
+       res = C2G3A(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = C2G3A(x, -y, nf_int, 0)
+       res = C2G3A(x, -y, nf_int, 0)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1383,9 +1383,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = CLNP3A(x, -y, nf_int, 1)
+       res = CLNP3A(x, -y, nf_int, 1)
     case(cc_REALVIRT)
-       if (x.lt.one) res = CLNP3A(x, -y, nf_int, 1)
+       res = CLNP3A(x, -y, nf_int, 1)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1410,9 +1410,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = CLNP3A(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = CLNP3A(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 0)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1440,9 +1440,9 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = CLNP3A(x, -y, nf_int, 1) - CLQ3DF(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 1) - CLQ3DF(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = CLNP3A(x, -y, nf_int, 1) - CLQ3DF(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 1) - CLQ3DF(x, -y, nf_int, 0)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1467,9 +1467,9 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = CLNP3A(x, -y, nf_int, 0) - CLQ3DF(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DF(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = CLNP3A(x, -y, nf_int, 0) - CLQ3DF(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DF(x, -y, nf_int, 0)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1495,9 +1495,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = CLS3A(x, -y, nf_int, 1)
+       res = CLS3A(x, -y, nf_int, 1)
     case(cc_REALVIRT)
-       if (x.lt.one) res = CLS3A(x, -y, nf_int, 1)
+       res = CLS3A(x, -y, nf_int, 1)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1522,9 +1522,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = CLS3A(x, -y, nf_int, 0)
+       res = CLS3A(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = CLS3A(x, -y, nf_int, 0)
+       res = CLS3A(x, -y, nf_int, 0)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1550,9 +1550,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = CLG3A(x, -y, nf_int, 1)
+       res = CLG3A(x, -y, nf_int, 1)
     case(cc_REALVIRT)
-       if (x.lt.one) res = CLG3A(x, -y, nf_int, 1)
+       res = CLG3A(x, -y, nf_int, 1)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1577,9 +1577,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       if (x.lt.one) res = CLG3A(x, -y, nf_int, 0)
+       res = CLG3A(x, -y, nf_int, 0)
     case(cc_REALVIRT)
-       if (x.lt.one) res = CLG3A(x, -y, nf_int, 0)
+       res = CLG3A(x, -y, nf_int, 0)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)

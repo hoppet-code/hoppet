@@ -180,7 +180,7 @@
        IMPLICIT REAL*8 (A - Z)
 
 
-       IF (ABS(DL).LT.1D-12) THEN
+       IF (ABS(DL).LT.1D-14) THEN
        DMVAL = 0.0D0
        ELSEIF (ABS(DL).LT.1D-3) THEN
        DMVAL  = 0.5D0 - 1.0D0/DL - DL/12.0D0 + DL**3/720.0D0
