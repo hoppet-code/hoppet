@@ -2,8 +2,8 @@
 
 	* src/integrator.f90 (ig_PolyWeight_expand):
 	* src/convolution.f90 (conv_GCAf_Helper):
-	added an additional integrator ig_PolyWeight_expand which expands
-	term around zero avoids numerical issues close to zero.
+	added an additional integrator ig_PolyWeight_expand which expands term
+	around zero. This avoids numerical issues close to zero for real pieces.
 
 	* src/streamlined_interface.f90:
 	changed size of tables for integration of structure functions in
