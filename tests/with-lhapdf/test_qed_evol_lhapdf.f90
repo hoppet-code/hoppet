@@ -39,6 +39,7 @@ program test_qed_evol
   real(dp)               :: ymax, dy, x, alphas_mz, lha_qmin, scale_qg
   real(dp), parameter    :: mz = 91.1876_dp
   real(dp), pointer :: pdf_in(:,:), pdf_out(:,:), pdf_lhapdf_out(:,:)
+  real(dp), pointer :: photon_lumi(:,:)
   real(dp)         :: Qlo, Qhi, moments(ncompmin:ncompmaxLeptons)
   real(dp) :: alphaspdf ! from LHAPDF
   integer :: compact_output_n = -1
@@ -135,7 +136,8 @@ program test_qed_evol
   call AllocPDFWithLeptons(grid, pdf_in)
   call AllocPDFWithLeptons(grid, pdf_out)
   call AllocPDFWithLeptons(grid, pdf_lhapdf_out)
-
+  call AllocGridQuant(grid, photon_lumi, 1, 1)
+  
   if (use_lhapdf) then
      call fill_from_lhapdf(pdf_in, Qlo)
      call fill_from_lhapdf(pdf_lhapdf_out, Qhi)
@@ -171,6 +173,15 @@ program test_qed_evol
   call write_pdf(pdf_out,'out')
   if (use_lhapdf) call write_pdf(pdf_lhapdf_out,'lhapdf out')
 
+  photon_lumi(:,1) = PartonLuminosity(grid, pdf_in(:,8),pdf_in(:,8))
+  call write_pdf(photon_lumi,'photon-lumi-in')
+  photon_lumi(:,1) = PartonLuminosity(grid, pdf_out(:,8),pdf_out(:,8))
+  call write_pdf(photon_lumi,'photon-lumi-out')
+  if (use_lhapdf)  then
+     photon_lumi(:,1) = PartonLuminosity(grid, pdf_lhapdf_out(:,8),pdf_lhapdf_out(:,8))
+     call write_pdf(photon_lumi,'photon-lumi-lhapdf-out')
+  end if
+  
   write(0,*) 'x = ', x, 'Q = ', Qhi
   write(0,'(a5,4a17)') 'iflv','lhapdf','hoppet'
   do iflv = -6, 8
