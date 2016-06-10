@@ -79,7 +79,6 @@ module structure_functions
   ! these log terms are only used for scale_choice = 0,1, to speed up the code
   real(dp), save      :: log_muF2_over_Q2, log_muR2_over_Q2
   real(dp), save      :: Qmin, toy_Q0, dglap_Q0
-  integer, save       :: nflav
   real(dp), public, save :: toy_alphas_Q0 = 0.1185_dp
   type(running_coupling), public, save :: toy_coupling
 
@@ -87,6 +86,7 @@ module structure_functions
   real(dp), save :: cst_muR, cst_muF, xmuR, xmuF, xmuR_PDF
   integer, save  :: scale_choice
 
+  logical, save  :: exact_coefs
   real(dp), save        :: C2LO,   CLLO,   C3LO
   type(split_mat), save :: C2NLO,  CLNLO,  C3NLO
   type(split_mat), save :: C2NNLO, CLNNLO, C3NNLO
@@ -98,45 +98,25 @@ module structure_functions
 contains
 
   !----------------------------------------------------------------------
-  ! This routine assumes that LHAPDF has already been initialised with a PDF
-  subroutine InitStrFct(rts, order_max, nf, xR, xF, sc_choice, muR, muF,  &
-    &                   toyQ0, dglapQ0, xR_PDF, param_coefs)
-    real(dp), intent(in) :: rts, xR, xF
-    integer, intent(in)  :: order_max, nf
+  ! Setup of constants and parameters needed for structure functions
+  subroutine StartStrFct(nflav, sc_choice, cmuR, cmuF, toyQ0, dglapQ0, xR_PDF, param_coefs)
+    integer, intent(in)  :: nflav
     integer, optional    :: sc_choice
-    real(dp), optional   :: muR, muF, toyQ0, dglapQ0, xR_PDF
+    real(dp), optional   :: cmuR, cmuF, toyQ0, dglapQ0, xR_PDF
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
-    real(dp) :: ymax, dy, minQval, maxQval, dlnlnQ
-    real(dp) :: sin_thw
-    integer  :: nloop, order
-    logical  :: exact_coefs
-    if(present(sc_choice))then
-       scale_choice=sc_choice
-    else
-       scale_choice=1
-    endif
-    if(present(muR)) cst_muR=muR
-    if(present(muF)) cst_muF=muF
-    if(present(toyQ0)) toy_Q0=toyQ0
-    if(present(dglapQ0)) dglap_Q0=dglapQ0
-    if(present(xR_PDF)) xmuR_PDF=xR_PDF
-    xmuR = xR
-    xmuF = xF
+    real(dp) :: sin_thw, dy
+    integer  :: nloop
 
-    if(present(param_coefs))then
-       exact_coefs = .not.param_coefs
-    else
-       exact_coefs = .false.
-    endif
-    
+    ! TEMPORARY CONSTANTS (to be taken from hoppet)
     ! where should Qmin and sin_thw go ?
     ! computed from W,Z mass
     sin_thw = 0.22289722252391826839_dp
-    Qmin = 1.0_dp ! TEMPORARY 
     ! call getQ2min(0,Qmin)
     ! Qmin = sqrt(Qmin)
-    
+    Qmin = 1.0_dp
+    ! END TEMPORARY
+
     ! evaluate parameters needed for the structure functions
     ! cf. Eqs. (3.10+11) of 1109.3717
     vi2_ai2_Z_up     = one/four + (half - (four/three) * sin_thw)**2
@@ -150,22 +130,58 @@ contains
     ! 1/nf \sum_j=1^nf 2*vj*aj
     two_vi_ai_avg_W = two * viW * aiW
 
-    ! Streamlined initialization
-    ! including  parameters for x-grid
-    order = -6 
-    ymax  = 16.0_dp
-    dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
-    dlnlnQ = dy/4.0_dp
+    dy = 0.05_dp
     nloop = 3
-    minQval = min(xmuF*Qmin, Qmin)
-    maxQval = max(xmuF*rts, rts)
-    
-    call hoppetStartExtendedLocal(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
-         &         order,factscheme_MSbar)
+    call hoppetStart(dy, nloop)
 
     call qcd_SetNf(nflav)
     nf_lcl = nf_int
     write(6,*) "nf_lcl = ", nf_lcl
+
+    ! default settings
+    scale_choice = 1
+    exact_coefs  = .false.
+    cst_muR      = zero
+    cst_muF      = zero
+    toy_Q0       = -one
+    dglap_Q0     = -one
+    xmuR_PDF     = one
+    
+    ! change to user input if specified
+    if(present(sc_choice)) scale_choice=sc_choice
+    if(present(cmuR)) cst_muR=cmuR
+    if(present(cmuF)) cst_muF=cmuF
+    if(present(toyQ0)) toy_Q0=toyQ0
+    if(present(dglapQ0)) dglap_Q0=dglapQ0
+    if(present(xR_PDF)) xmuR_PDF=xR_PDF
+    if(present(param_coefs)) exact_coefs = .not.param_coefs
+    
+  end subroutine StartStrFct
+  
+  !----------------------------------------------------------------------
+  ! Initialize the structure functions up to specified order
+  subroutine InitStrFct(rts, order_max, xR, xF)
+    real(dp), intent(in) :: rts, xR, xF
+    integer, intent(in)  :: order_max
+    !----------------------------------------------------------------------
+    ! real(dp) :: ymax, dy, minQval, maxQval, dlnlnQ
+    ! integer  :: nloop, order
+    
+    xmuR = xR
+    xmuF = xF
+    
+    ! ! Streamlined initialization
+    ! ! including  parameters for x-grid
+    ! order = -6 
+    ! ymax  = 16.0_dp
+    ! dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
+    ! dlnlnQ = dy/4.0_dp
+    ! nloop = 3
+    ! minQval = min(xmuF*Qmin, Qmin)
+    ! maxQval = max(xmuF*rts, rts)
+    
+    ! call hoppetStartExtendedLocal(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
+    !      &         order,factscheme_MSbar)
 
     ! first initialise the LO coefficient "functions" (just a number, since delta-fn)
     C2LO = one
