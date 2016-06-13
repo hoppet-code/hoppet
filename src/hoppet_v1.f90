@@ -9,5 +9,6 @@ module hoppet_v1
   use qcd_coupling
   use qcd
   use pdf_tabulate
+  use structure_functions
   implicit none
 end module hoppet_v1

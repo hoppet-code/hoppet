@@ -13,7 +13,7 @@
 module coefficient_functions_holder
   use types; use consts_dp; use convolution_communicator
   use qcd
-  use convolution_communicator
+  use convolution
   use dglap_objects
   use coefficient_functions 
   implicit none

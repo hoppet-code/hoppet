@@ -179,7 +179,6 @@
        FUNCTION DMVAL (Y, DL)
        IMPLICIT REAL*8 (A - Z)
 
-
        IF (ABS(DL).LT.1D-3) THEN
        DMVAL  = 0.5D0 - 1.0D0/DL - DL/12.0D0 + DL**3/720.0D0
      ,         - DL**5/30240.0D0

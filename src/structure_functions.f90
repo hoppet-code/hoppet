@@ -45,12 +45,9 @@ module structure_functions
   implicit none
 
   private
-  public :: InitStrFct
-  public :: read_PDF
-  public :: set_structure_functions_up_to
-  public :: write_f1
-  public :: write_f2
-  public :: write_f3
+  public :: InitStrFct, StartStrFct, write_f1, write_f2, write_f3
+  public :: F1Wp, F2Wp, F3Wp, F1Wm, F2Wm, F3Wm, F1Z, F2Z, F3Z, F1EM, F2EM
+  public :: F_LO, F_NLO, F_NNLO, F_N3LO, muR, muF
   
   real(dp), external :: alphasPDF
   ! type(running_coupling), save :: coupling
@@ -78,12 +75,12 @@ module structure_functions
   real(dp), parameter :: e2_up = 4.0_dp/9.0_dp, e2_down = 1.0_dp/9.0_dp
   ! these log terms are only used for scale_choice = 0,1, to speed up the code
   real(dp), save      :: log_muF2_over_Q2, log_muR2_over_Q2
-  real(dp), save      :: Qmin, toy_Q0, dglap_Q0
+  real(dp), save      :: Qmin, toy_Q0, Q0pdf
   real(dp), public, save :: toy_alphas_Q0 = 0.1185_dp
   type(running_coupling), public, save :: toy_coupling
 
   ! scale choices
-  real(dp), save :: cst_muR, cst_muF, xmuR, xmuF, xmuR_PDF
+  real(dp), save :: cst_mu, xmuR, xmuF, xmuR_PDF
   integer, save  :: scale_choice
 
   logical, save  :: exact_coefs
@@ -99,23 +96,22 @@ contains
 
   !----------------------------------------------------------------------
   ! Setup of constants and parameters needed for structure functions
-  subroutine StartStrFct(nflav, sc_choice, cmuR, cmuF, toyQ0, dglapQ0, xR_PDF, param_coefs)
-    integer, intent(in)  :: nflav
+  subroutine StartStrFct(rts, nflav, order_max, xR, xF, sc_choice, cmu, param_coefs, &
+       & Qmin_PDF,  toyQ0, dglapQ0, xR_PDF)
+    real(dp), intent(in) :: rts
+    integer, intent(in)  :: nflav, order_max
     integer, optional    :: sc_choice
-    real(dp), optional   :: cmuR, cmuF, toyQ0, dglapQ0, xR_PDF
+    real(dp), optional   :: xR, xF, cmu, Qmin_PDF, toyQ0, dglapQ0, xR_PDF
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
-    real(dp) :: sin_thw, dy
-    integer  :: nloop
-
-    ! TEMPORARY CONSTANTS (to be taken from hoppet)
+    real(dp) :: sin_thw, ymax, dy, minQval, maxQval, dlnlnQ
+    integer  :: nloop, order
+    
+    ! TEMPORARY CONSTANTS (to be taken from hoppet!?)
     ! where should Qmin and sin_thw go ?
     ! computed from W,Z mass
     sin_thw = 0.22289722252391826839_dp
-    ! call getQ2min(0,Qmin)
-    ! Qmin = sqrt(Qmin)
-    Qmin = 1.0_dp
-    ! END TEMPORARY
+    ! END TEMPORARY 
 
     ! evaluate parameters needed for the structure functions
     ! cf. Eqs. (3.10+11) of 1109.3717
@@ -130,92 +126,109 @@ contains
     ! 1/nf \sum_j=1^nf 2*vj*aj
     two_vi_ai_avg_W = two * viW * aiW
 
-    dy = 0.05_dp
+    ! default settings
+    xmuR = one
+    xmuF = one
+    scale_choice = 1
+    exact_coefs  = .false.
+    cst_mu       = zero
+    toy_Q0       = -one
+    Q0pdf        = -one
+    xmuR_PDF     = one
+    Qmin         = one
+    
+    ! change to user input if specified
+    if(present(xR)) xmuR=xR
+    if(present(xF)) xmuF=xF
+    if(present(sc_choice)) scale_choice=sc_choice
+    if(present(cmu)) cst_mu=cmu
+    if(present(toyQ0)) toy_Q0=toyQ0
+    if(present(dglapQ0)) Q0pdf=dglapQ0
+    if(present(xR_PDF)) xmuR_PDF=xR_PDF
+    if(present(param_coefs)) exact_coefs = .not.param_coefs
+    if(present(Qmin_PDF)) Qmin=Qmin_PDF
+    
+    
+    ! Streamlined initialization
+    ! including  parameters for x-grid
+    order = -6 
+    ymax  = 16.0_dp
+    dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
+    dlnlnQ = dy/4.0_dp
     nloop = 3
-    call hoppetStart(dy, nloop)
-
+    minQval = min(xmuF*Qmin, Qmin)
+    maxQval = max(xmuF*rts, rts)
+    
+    call hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
+         &         order,factscheme_MSbar)
+    
     call qcd_SetNf(nflav)
     nf_lcl = nf_int
     write(6,*) "nf_lcl = ", nf_lcl
 
-    ! default settings
-    scale_choice = 1
-    exact_coefs  = .false.
-    cst_muR      = zero
-    cst_muF      = zero
-    toy_Q0       = -one
-    dglap_Q0     = -one
-    xmuR_PDF     = one
-    
-    ! change to user input if specified
-    if(present(sc_choice)) scale_choice=sc_choice
-    if(present(cmuR)) cst_muR=cmuR
-    if(present(cmuF)) cst_muF=cmuF
-    if(present(toyQ0)) toy_Q0=toyQ0
-    if(present(dglapQ0)) dglap_Q0=dglapQ0
-    if(present(xR_PDF)) xmuR_PDF=xR_PDF
-    if(present(param_coefs)) exact_coefs = .not.param_coefs
-    
-  end subroutine StartStrFct
-  
-  !----------------------------------------------------------------------
-  ! Initialize the structure functions up to specified order
-  subroutine InitStrFct(rts, order_max, xR, xF)
-    real(dp), intent(in) :: rts, xR, xF
-    integer, intent(in)  :: order_max
-    !----------------------------------------------------------------------
-    ! real(dp) :: ymax, dy, minQval, maxQval, dlnlnQ
-    ! integer  :: nloop, order
-    
-    xmuR = xR
-    xmuF = xF
-    
-    ! ! Streamlined initialization
-    ! ! including  parameters for x-grid
-    ! order = -6 
-    ! ymax  = 16.0_dp
-    ! dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
-    ! dlnlnQ = dy/4.0_dp
-    ! nloop = 3
-    ! minQval = min(xmuF*Qmin, Qmin)
-    ! maxQval = max(xmuF*rts, rts)
-    
-    ! call hoppetStartExtendedLocal(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
-    !      &         order,factscheme_MSbar)
+    call InitCoefFct(order_max)
 
+  end subroutine StartStrFct
+
+  !----------------------------------------------------------------------
+  ! Initialize the coefficient functions up to specified order
+  subroutine InitCoefFct (order_max)
+    integer, intent(in) :: order_max
+    
     ! first initialise the LO coefficient "functions" (just a number, since delta-fn)
     C2LO = one
     CLLO = zero
     C3LO = one
     
     ! now initialise some NLO coefficient functions
-    call InitC2NLO(grid, C2NLO)
-    call InitCLNLO(grid, CLNLO)
-    call InitC3NLO(grid, C3NLO) 
+    if (order_max > 1) then
+       call InitC2NLO(grid, C2NLO)
+       call InitCLNLO(grid, CLNLO)
+       call InitC3NLO(grid, C3NLO)
+    endif
 
     ! and the NNLO ones
-    if (exact_coefs) then
-       call InitC2NNLO_e(grid, C2NNLO)
-       call InitCLNNLO_e(grid, CLNNLO)
-       call InitC3NNLO_e(grid, C3NNLO)
-    else
-       call InitC2NNLO(grid, C2NNLO)
-       call InitCLNNLO(grid, CLNNLO)
-       call InitC3NNLO(grid, C3NNLO) 
+    if (order_max > 2) then
+       ! either with the exact functions
+       if (exact_coefs) then
+          call InitC2NNLO_e(grid, C2NNLO)
+          call InitCLNNLO_e(grid, CLNNLO)
+          call InitC3NNLO_e(grid, C3NNLO)
+       ! or the parametrised version
+       else
+          call InitC2NNLO(grid, C2NNLO)
+          call InitCLNNLO(grid, CLNNLO)
+          call InitC3NNLO(grid, C3NNLO) 
+       endif
     endif
-    
-    ! and the N3LO ones
-    call InitC2N3LO(grid, C2N3LO)
-    call InitCLN3LO(grid, CLN3LO)
-    call InitC3N3LO(grid, C3N3LO)
-    ! including the fl11 terms for Z/photon exchanges
-    call InitC2N3LO_fl11(grid, C2N3LO_fl11)
-    call InitCLN3LO_fl11(grid, CLN3LO_fl11)
 
-    ! read the PDF in
+    ! and the N3LO ones
+    if (order_max > 3) then
+       call InitC2N3LO(grid, C2N3LO)
+       call InitCLN3LO(grid, CLN3LO)
+       call InitC3N3LO(grid, C3N3LO)
+       ! including the fl11 terms for Z/photon exchanges
+       call InitC2N3LO_fl11(grid, C2N3LO_fl11)
+       call InitCLN3LO_fl11(grid, CLN3LO_fl11)
+    endif    
+
+  end subroutine InitCoefFct
+
+  
+  !----------------------------------------------------------------------
+  ! Initialize the structure functions up to specified order
+  subroutine InitStrFct(order_max)
+    integer, intent(in)  :: order_max
+    !----------------------------------------------------------------------
+    real(dp), parameter :: mz = 91.2_dp
+
+    ! read in PDF
+    !call hoppetEvolve(alphasPDF(MZ),  MZ, 4, xmuR_PDF, pdf_subroutine, Q0pdf)
     call read_PDF()
+    
     ! set up all the strucutre functions
     call set_structure_functions_up_to(order_max)
+    setup_done(1:) = .true.
     
   end subroutine InitStrFct
 
@@ -298,13 +311,6 @@ contains
   ! fill the streamlined interface PDF table (possibly using hoppet's
   ! evolution)
   subroutine read_PDF()
-    !real(dp) :: muR_Q
-    !real(dp) :: Q0pdf, asMZ
-    !! define the interfaces for LHA pdf (by default not used)
-    !! (NB: unfortunately this conflicts with an internal hoppet name,
-    !! so make sure that you "redefine" the internal hoppet name,
-    !! as illustrated in the commented "use" line above:
-    !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
     interface
        subroutine EvolvePDF(x,Q,res)
          use types; implicit none
@@ -317,10 +323,10 @@ contains
     real(dp) :: res_lhapdf(-6:6), x, Q
     real(dp) :: res_hoppet(-6:6)
     real(dp) :: toy_pdf_at_Q0(0:grid%ny,ncompmin:ncompmax)
-    real(dp) :: pdf_at_Q0(0:grid%ny,ncompmin:ncompmax)
-    integer  :: ix
-    real(dp) :: xvals(0:grid%ny)
     real(dp), parameter :: mz = 91.2_dp
+    real(dp) :: pdf_at_Q0(0:grid%ny,ncompmin:ncompmax)
+    ! integer  :: ix
+    ! real(dp) :: xvals(0:grid%ny)
     
     ! ! Set parameters of running coupling
     ! asMZ = alphasPDF(MZ)
@@ -349,30 +355,31 @@ contains
        call InitRunningCoupling(toy_coupling, alfas=toy_alphas_Q0, &
             &                   nloop = 3, Q = toy_Q0, fixnf=nf_int)
        call EvolvePdfTable(tables(0), toy_Q0, toy_pdf_at_Q0, dh, toy_coupling, nloop=3)
-    elseif (dglap_Q0 > zero) then
+    elseif (Q0pdf > zero) then
 
        write(6,*) "WARNING: Using internal HOPPET DGLAP evolution"
-       xvals = xValues(grid)
 
-       do ix = 0, grid%ny
-          call EvolvePDF(xvals(ix),dglap_Q0,pdf_at_Q0(ix,:))
-       enddo
+       ! call hoppetEvolve(alphasPDF(MZ), MZ, 3, xmuR_PDF, EvolvePDF, Q0pdf)
+       call InitPDF_LHAPDF(grid, pdf_at_Q0, EvolvePDF, Q0pdf)
+       ! xvals = xValues(grid)
+       ! do ix = 0, grid%ny
+       !    call EvolvePDF(xvals(ix),Q0pdf,pdf_at_Q0(ix,:))
+       ! enddo
        call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , 4,&
             & -1000000045, (/  1.275_dp, 4.18_dp, 173.21_dp/),&
             & .true.)
-       call EvolvePdfTable(tables(0), dglap_Q0, pdf_at_Q0, dh, coupling, &
+       call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
             &  muR_Q=xmuR_PDF, nloop=3)
+
     else
-    ! InitRunningCoupling has to be called for the HOPPET coupling to be initialised 
-    ! Default is to ask for 4 loop running and threshold corrections at quark masses.  
+       ! InitRunningCoupling has to be called for the HOPPET coupling to be initialised 
+       ! Default is to ask for 4 loop running and threshold corrections at quark masses.  
        call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , 4,&
             & -1000000045, (/  1.275_dp, 4.18_dp, 173.21_dp/),&
-            & .true., xmuR_PDF)
-       ! InitRunningCoupling(coupling, alfas , Q , nloop,&
-       !     & fixnf, quarkmasses,& ! fixnf can be set to a positive number for
-                                    ! fixed nf. -1000000045 gives variable nf
-                                    ! and threshold corrections at quarkmasses.
-       !     & masses_areMSbar)
+            & .true.)
+       ! fixnf can be set to a positive number for
+       ! fixed nf. -1000000045 gives variable nf
+       ! and threshold corrections at quarkmasses.
        call hoppetAssign(EvolvePDF)
     end if
     
@@ -434,7 +441,7 @@ contains
        if (order.ge.4) call set_N3LO_structure_functions_anyscale()
     endif
 
-    ! To rescale PDF by the N3LO F2 structure function (evaluated at 10 GeV)
+    ! To rescale PDF by the N3LO F2 structure function (evaluated at 8 GeV)
     ! as a check of the size of missing N3LO PDFs, uncomment following line:
     ! call rescale_pdf_nnlo(8.0_dp,order)
     ! call rescale_pdf_n3lo(8.0_dp,order)
@@ -1424,8 +1431,8 @@ contains
     real(dp), intent(in) :: Q
     muR = zero
     if (scale_choice.eq.0) then
-       ! scale_choice = 0 : muF = xmuF * cst_muR
-       muR = xmuR * cst_muR
+       ! scale_choice = 0 : muF = xmuF * cst_mu
+       muR = xmuR * cst_mu
     elseif (scale_choice.eq.1) then
        ! scale_choice = 1 : mu_R = xmuR * Q
        muR = xmuR * Q
@@ -1440,8 +1447,8 @@ contains
     real(dp), intent(in) :: Q
     muF = zero
     if (scale_choice.eq.0) then
-       ! scale_choice = 0 : muF = xmuF * cst_muF
-       muF = xmuF * cst_muF
+       ! scale_choice = 0 : muF = xmuF * cst_mu
+       muF = xmuF * cst_mu
     elseif (scale_choice.eq.1) then
        ! scale_choice = 1 : muF = xmuF * Q
        muF = xmuF * Q
