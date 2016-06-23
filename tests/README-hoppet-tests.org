@@ -13,3 +13,33 @@
     - [X] failure for iloop out of bounds
     - [X] a few printouts to make sure that caching is working
   
+   :  Running full set with Q =    100.00000000000000      , x =   0.29999999999999999      nf =           -1
+   :    internal v. table    7.88978E-02    7.88978E-02  OK  
+   :            PLO * pdf   -4.43837E-01   -4.43837E-01  OK  
+   :           PNLO * pdf    6.08769E-01    6.08769E-01  OK  
+   :          PNNLO * pdf    7.64858E+00    7.64858E+00  OK  
+   :      PLO * PLO * pdf    2.78335E+00    2.78335E+00  OK  
+   :     PLO * PNLO * pdf   -8.09495E+00   -8.09495E+00  OK  
+   :     PNLO * PLO * pdf    4.51645E-01    4.51645E-01  OK  
+   :          PLO^3 * pdf   -1.80150E+01   -1.80150E+01  OK  
+   : 
+   :  Running full set with Q =    3.2999999999999998      , x =   0.29999999999999999      nf =           -1
+   :    internal v. table    2.11070E-01    2.11070E-01  OK  
+   :            PLO * pdf   -1.14308E+00   -1.14308E+00  OK  
+   :           PNLO * pdf   -1.89359E-01   -1.89359E-01  OK  
+   :          PNNLO * pdf    9.92964E+00    9.92964E+00  OK  
+   :      PLO * PLO * pdf    5.96431E+00    5.96431E+00  OK  
+   :     PLO * PNLO * pdf   -7.29162E+00   -7.29162E+00  OK  
+   :     PNLO * PLO * pdf    6.28659E+00    6.28659E+00  OK  
+   :          PLO^3 * pdf   -2.24481E+01   -2.24481E+01  OK  
+   : 
+   :  Running full set with Q =    3.2999999999999998      , x =   0.29999999999999999      nf =            5
+   :    internal v. table    2.11070E-01    2.11070E-01  OK  
+   :            PLO * pdf   -1.21344E+00   -1.21344E+00  OK  
+   :           PNLO * pdf    4.20046E-01    4.20046E-01  OK  
+   :          PNNLO * pdf    1.56955E+01    1.56955E+01  OK  
+   :      PLO * PLO * pdf    6.94266E+00    6.94266E+00  OK  
+   :     PLO * PNLO * pdf   -1.01154E+01   -1.01154E+01  OK  
+   :     PNLO * PLO * pdf    4.80305E+00    4.80305E+00  OK  
+   :          PLO^3 * pdf   -3.17287E+01   -3.17287E+01  OK  
+   : bison[tests] 10:14% 
