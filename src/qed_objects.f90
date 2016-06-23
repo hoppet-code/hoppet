@@ -104,7 +104,7 @@ contains
     nl = 3
     nd = (nf_int+1) / 2
     nu = (nf_int  ) / 2
-    call SetNf(qed_split, nl, nd, nu)
+    call QEDSplitMatSetNf(qed_split, nl, nd, nu)
   end subroutine InitQEDSplitMat
 
   !----------------------------------------------------------------------

@@ -1,3 +1,17 @@
+2016-06-23  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/pdf_general.f90:
+	started introducing support for PDFs with non-standard number of
+	flavours. WORK HERE IS INCOMPLETE
+
+	* src/pdf_tabulate.f90
+	added support for non-standard number of flavours and for a
+	tabulation that uses QED evolution. Currently untested.
+
+	* example_f77/compare_lhapdf_hoppet.f:
+	changed the default pdf
+
+
 2016-06-07  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/qed_objects.f90 (qed_objects):

@@ -74,10 +74,11 @@ contains
 
 
   !----------------------------------------------------------------------
-  ! All of these routine just redirect to the official routine, 
-  ! with the added features that they redirect only the components 
-  ! iflv_min:iflv_max, and that they label the result as being in the
-  ! "Human" representation
+  ! All of these routine just redirect to the official routine, with
+  ! the added features that if it's a standard QCD PDF, then they
+  ! redirect only the components iflv_min:iflv_max.
+  !
+  ! They also label the result as being in the "Human" representation
   recursive subroutine pdfgen_InitPDF_(grid, gq, func)
     real(dp),         intent(inout) :: gq(0:,ncompmin:)
     type(grid_def),   intent(in)    :: grid
@@ -90,8 +91,15 @@ contains
        end function func
     end interface
     !-----------------------------------------
-    call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func)
-    call LabelPdfAsRep(gq,pdfr_Human)
+    if (ubound(gq,dim=2) == ncompmax) then
+       ! if it's a standard QCD-only PDF, then pass just -6:6 to the subroutine
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func)
+    else
+       ! otherwise pass the whole thing; the subroutine must be aware that
+       ! index 7 is a special ("representation") index
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func)
+    end if
+    call LabelPdfAsRep(gq(:,ncompmin:ncompmax),pdfr_Human)
   end subroutine pdfgen_InitPDF_
 
   !----------------------------------------------------------------------
@@ -112,8 +120,15 @@ contains
        end function func
     end interface
     !-----------------------------------------
-    call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra)
-    call LabelPdfAsRep(gq,pdfr_Human)
+    if (ubound(gq,dim=2) == ncompmax) then
+       ! if it's a standard QCD-only PDF, then pass just -6:6 to the subroutine
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra)
+    else
+       ! otherwise pass the whole thing; the subroutine must be aware that
+       ! index 7 is a special ("representation") index
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra)
+    end if
+    call LabelPdfAsRep(gq(:,ncompmin:ncompmax),pdfr_Human)
   end subroutine pdfgen_InitPDF_a
 
   !----------------------------------------------------------------------
@@ -135,8 +150,15 @@ contains
        end function func
     end interface
     !-----------------------------------------
-    call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra, ixtra)
-    call LabelPdfAsRep(gq,pdfr_Human)
+    if (ubound(gq,dim=2) == ncompmax) then
+       ! if it's a standard QCD-only PDF, then pass just -6:6 to the subroutine
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra, ixtra)
+    else
+       ! otherwise pass the whole thing; the subroutine must be aware that
+       ! index 7 is a special ("representation") index
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra, ixtra)
+    end if
+    call LabelPdfAsRep(gq(:,ncompmin:ncompmax),pdfr_Human)
   end subroutine pdfgen_InitPDF_ai
 
 
