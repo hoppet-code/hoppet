@@ -103,7 +103,7 @@ module pdf_tabulate
 
   public :: AllocPdfTable, FillPdfTable_f90sub
   public :: AddNfInfoToPdfTable
-  public :: EvolvePdfTable, PreEvolvePdfTable
+  public :: EvolvePdfTable, PreEvolvePdfTable, EvolvePdfTableQED
   public :: EvolvePdfTableGen
   public :: EvalPdfTable_yQ, EvalPdfTable_xQ, EvalPdfTable_Q
   public :: Delete
@@ -618,9 +618,9 @@ contains
   !! Routine for creating a QED evolution table. It assumes the tabulation
   !! has been set up with the correct size, etc.
   !!
-  subroutine EvolvePdfTableQED(tab, StartScale, dh, qed_sm, &
+  subroutine EvolvePdfTableQED(tab, StartScale, StartDist, dh, qed_sm, &
        & coupling_qcd, coupling_qed, &
-       & StartDist, nloop_qcd, nqcdloop_qed)
+       & nloop_qcd, nqcdloop_qed)
     use qed_evolution; use qed_coupling_module; use qed_objects
     type(pdf_table),           intent(inout) :: tab
     real(dp),               intent(in)    :: StartScale
@@ -765,7 +765,7 @@ contains
 
     ! safety checks
     if (tab%grid%ny /= ubound(pdf,dim=1) .or.&
-         & ubound(pdf,dim=2) /= ncompmax) call wae_error("EvalPdfTable_Q",&
+         & ubound(pdf,dim=2) /= ubound(tab%tab,dim=2)) call wae_error("EvalPdfTable_Q",&
          & "pdf argument was not of size consistent with the table")
 
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
