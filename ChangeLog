@@ -1,3 +1,39 @@
+2016-06-26  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/couplings.f90:         *** ADDED ***
+	* src/qcd_qed_coupling.f90:  *** ADDED ***
+	* src/qed_coupling.f90:
+	* tests/test_qed.f90
+	copied couplings.f90 over from hopper (aborted OO v2 of
+	hoppet). It has the small adaptation that any segment should
+	always have at least n_interp+1 nodes.
+
+	Then used it to build the QCDQEDCoupling type in
+	qcd_qed_coupling. Interface may yet evolve.
+
+	Small mods also to qed_coupling.f90 to make useful pieces public.
+
+	Conclusion from tests/test_qed.f90 is that effect of mixed QCD/QED
+	effects in the running coupling are ~0.2% on the QED coupling,
+	which, given that we don't have a proper treatment of hadronic
+	thresholds, is irrelevant.
+
+           mu      1/alpha    1/al(new)         diff       alphas  alphas(new)         diff
+     0.000255  137.0359991  137.2400777   -0.2040786  0.000000000  0.476340982 -0.476340982
+     0.010000  136.4049024  136.6089810   -0.2040786  0.000000000  0.476340982 -0.476340982
+     0.100000  135.9162787  136.1203573   -0.2040786  0.000000000  0.476340982 -0.476340982
+     1.000000  134.6565304  134.8606091   -0.2040786  0.476606222  0.476340982  0.000265241
+     1.680000  134.2144754  134.3909726   -0.1764972  0.328186836  0.328080169  0.000106667
+    10.000000  131.7767815  131.8555300   -0.0787485  0.178150999  0.178134081  0.000016918
+    91.200000  128.6496065  128.6496065   -0.0000000  0.118000000  0.118000000 -0.000000000
+   100.000000  128.5192900  128.5166165    0.0026735  0.116380683  0.116380983 -0.000000300
+  1000.000000  124.7657300  124.6901403    0.0755898  0.088496149  0.088501936 -0.000005787
+
+	where diff is the difference between running without and with the
+	mixed terms. (If running with pure QCD and QED evolutions the
+	differences are zero).
+
+	
 2016-06-23  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/pdf_general.f90:

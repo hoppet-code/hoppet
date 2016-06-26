@@ -4,6 +4,8 @@ program test_qed
   use qed_coupling_module
   use qed_splitting_functions
   use splitting_functions
+  use qcd_qed_coupling
+  use qcd_coupling
   implicit none
   type(grid_def)     :: grid
   type(qed_coupling) :: qed_alpha
@@ -13,22 +15,40 @@ program test_qed
   real(dp), pointer  :: res(:), source(:)
   real(dp) :: moment
 
+  real(dp) :: scales(9) = (/m_electron/two, 0.01_dp, 0.1_dp, 1.0_dp, 1.68_dp, 10.0_dp, 91.2_dp, 100.0_dp, 1000.0_dp/)
+  real(dp) :: quark_masses(4:6) = (/ 1.67_dp, 4.78_dp, 173.21_dp/)
+  real(dp) :: cpls(2), alphas, mu
+  integer  :: i, n
+  type(QCDQEDCoupling) :: qcd_qed
+  type(running_coupling) :: qcd_cpl
+  
   write(6,'(a)') "========== testing QED coupling ========================="
-  call InitQEDCoupling(qed_alpha, 1.5_dp, 4.5_dp, 173.0_dp)
+  call InitQEDCoupling(qed_alpha, quark_masses(4), quark_masses(5), quark_masses(6))
   write(6,*) IQEDThresholdAtQ(qed_alpha, 0.2_dp)
 
+  qcd_qed = new_QCDQEDCoupling(0.118_dp, 1/128.6496065_dp, 91.2_dp, &
+       & '01 02 03 10 11',&
+       & quark_masses, &
+       & (/ qcd_mass_scheme_pole, qcd_mass_scheme_pole, qcd_mass_scheme_pole /) )
+  write(6,*) coupling_array(qcd_qed%Coupling, 91.2_dp)
+  call InitRunningCoupling(0.118_dp, 91.2_dp, nloop=3, quark_masses = quark_masses)
   
-  write(6,*) 'alpha QED at 0       = ', one/Value(qed_alpha, 0.0_dp)
-  write(6,*) 'alpha QED at MZ      = ', one/Value(qed_alpha, 91.2_dp)
-  write(6,*) 'alpha QED at 0.1 GeV = ', one/Value(qed_alpha, 0.1_dp)
-  write(6,*) 'alpha QED at 1 GeV   = ', one/Value(qed_alpha, 1.0_dp)
-  write(6,*) 'alpha QED at 10 GeV  = ', one/Value(qed_alpha, 10.0_dp)
-  write(6,*) 'alpha QED at 100 GeV = ', one/Value(qed_alpha, 100.0_dp)
-  write(6,*) 'alpha QED at 1 TeV   = ', one/Value(qed_alpha, 1000.0_dp)
+  write(6,'(10a13)') 'mu','1/alpha','1/al(new)','diff','alphas','alphas(new)','diff'
+  do i = 1, size(scales)
+     mu = scales(i)
+  !n=200; do i = 0, n
+  !   mu = exp(i*log(300.0_dp)/n)
+     cpls = coupling_array(qcd_qed%Coupling, mu)
+     alphas = zero
+     if (mu > 0.5_dp) alphas = Value(mu)
+     write(6,'(f13.6,3f13.7,3f13.9)') mu, &
+          & one/Value(qed_alpha, mu), 1/cpls(2), one/Value(qed_alpha, mu)-1/cpls(2), &
+          & alphas, cpls(1), alphas-cpls(1)
+  end do
+  stop !************************************
   
   write(6,'(a)') "========== testing sum rules ========================="
   call setup_grid_def()
-
 
   call InitGridConv(grid, Pqq_01, sf_Pqq_01)
   call InitGridConv(grid, Pyq_01, sf_Pyq_01)

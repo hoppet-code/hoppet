@@ -27,6 +27,7 @@ module qed_coupling_module
   integer, parameter :: n_thresholds = 7
 
   public :: IQEDThresholdAtQ
+  public :: qed_squared_charge
   
   type qed_coupling 
      !private
