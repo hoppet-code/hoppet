@@ -46,7 +46,7 @@ module structure_functions
 
   private
   public :: InitStrFct, StartStrFct, write_f1, write_f2, write_f3
-  public :: F1Wp, F2Wp, F3Wp, F1Wm, F2Wm, F3Wm, F1Z, F2Z, F3Z, F1EM, F2EM
+  public :: F1Wp, F2Wp, F3Wp, F1Wm, F2Wm, F3Wm, F1Z, F2Z, F3Z, F1EM, F2EM, F1gZ, F2gZ, F3gZ
   public :: F_LO, F_NLO, F_NNLO, F_N3LO, muR, muF
   
   real(dp), external :: alphasPDF
@@ -66,12 +66,19 @@ module structure_functions
   integer, parameter :: F1Wm=-1, F2Wm=-2, F3Wm=-3
   integer, parameter :: F1Z = 4, F2Z = 5, F3Z = 6
   integer, parameter :: F1EM = -4, F2EM = -5
+  integer, parameter :: F1gZ = 0, F2gZ = -6, F3gZ = -7
   
   ! constants and fixed parameters
+  real(dp), parameter :: quark_masses(4:6) = &
+       & (/ 1.275_dp, 4.18_dp, 173.21_dp/)
+  logical,  save      :: use_mass_thresholds
   real(dp), parameter :: viW = 1/sqrt(two), aiW = viW
   real(dp), save      :: vi2_ai2_avg_W, two_vi_ai_avg_W
   real(dp), save      :: vi2_ai2_Z_down, vi2_ai2_Z_up
   real(dp), save      :: two_vi_ai_Z_down, two_vi_ai_Z_up
+  real(dp), save      :: two_vi_Z_down, two_vi_Z_up
+  real(dp), save      :: two_ai_Z_down, two_ai_Z_up
+  real(dp), parameter :: e_up = 2.0_dp/3.0_dp, e_down = 1.0_dp/3.0_dp
   real(dp), parameter :: e2_up = 4.0_dp/9.0_dp, e2_down = 1.0_dp/9.0_dp
   ! these log terms are only used for scale_choice = 0,1, to speed up the code
   real(dp), save      :: log_muF2_over_Q2, log_muR2_over_Q2
@@ -97,12 +104,13 @@ contains
   !----------------------------------------------------------------------
   ! Setup of constants and parameters needed for structure functions
   subroutine StartStrFct(rts, nflav, order_max, xR, xF, sc_choice, cmu, param_coefs, &
-       & Qmin_PDF,  toyQ0, dglapQ0, xR_PDF)
+       & Qmin_PDF,  toyQ0, dglapQ0, xR_PDF, use_mass_thresh)
     real(dp), intent(in) :: rts
     integer, intent(in)  :: nflav, order_max
     integer, optional    :: sc_choice
     real(dp), optional   :: xR, xF, cmu, Qmin_PDF, toyQ0, dglapQ0, xR_PDF
     logical, optional    :: param_coefs
+    logical, optional    :: use_mass_thresh
     !----------------------------------------------------------------------
     real(dp) :: sin_thw, ymax, dy, minQval, maxQval, dlnlnQ
     integer  :: nloop, order
@@ -126,11 +134,18 @@ contains
     ! 1/nf \sum_j=1^nf 2*vj*aj
     two_vi_ai_avg_W = two * viW * aiW
 
+    ! these parameters are needed explicitly for the gamma-Z structure function
+    two_vi_Z_down = one - (8.0_dp/three) * sin_thw
+    two_vi_Z_up   = -one + (four/three) * sin_thw
+    two_ai_Z_down = half
+    two_ai_Z_up   = -half
+    
     ! default settings
     xmuR = one
     xmuF = one
     scale_choice = 1
     exact_coefs  = .false.
+    use_mass_thresholds = .false.
     cst_mu       = zero
     toy_Q0       = -one
     Q0pdf        = -one
@@ -147,7 +162,7 @@ contains
     if(present(xR_PDF)) xmuR_PDF=xR_PDF
     if(present(param_coefs)) exact_coefs = .not.param_coefs
     if(present(Qmin_PDF)) Qmin=Qmin_PDF
-    
+    if(present(use_mass_thresh)) use_mass_thresholds =  use_mass_thresh
     
     ! Streamlined initialization
     ! including  parameters for x-grid
@@ -366,8 +381,7 @@ contains
        !    call EvolvePDF(xvals(ix),Q0pdf,pdf_at_Q0(ix,:))
        ! enddo
        call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , 4,&
-            & -1000000045, (/  1.275_dp, 4.18_dp, 173.21_dp/),&
-            & .true.)
+            & -1000000045, quark_masses, .true.)
        call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
             &  muR_Q=xmuR_PDF, nloop=3)
 
@@ -375,8 +389,7 @@ contains
        ! InitRunningCoupling has to be called for the HOPPET coupling to be initialised 
        ! Default is to ask for 4 loop running and threshold corrections at quark masses.  
        call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , 4,&
-            & -1000000045, (/  1.275_dp, 4.18_dp, 173.21_dp/),&
-            & .true.)
+            & -1000000045, quark_masses, .true.)
        ! fixnf can be set to a positive number for
        ! fixed nf. -1000000045 gives variable nf
        ! and threshold corrections at quarkmasses.
@@ -453,7 +466,7 @@ contains
     real(dp), intent(in) :: Qval
     integer, intent(in)  :: order
     real(dp) :: mF, mR, factor
-    real(dp) :: str_fct(-6:6), f2nnlo, f2n3lo, y(0:grid%ny)
+    real(dp) :: str_fct(-7:6), f2nnlo, f2n3lo, y(0:grid%ny)
     integer :: iy, ii
     mF = muF(Qval)
     mR = muR(Qval)
@@ -492,7 +505,7 @@ contains
     real(dp), intent(in) :: Qval
     integer, intent(in)  :: order
     real(dp) :: mF, mR, factor
-    real(dp) :: str_fct(-6:6), f2nlo, f2nnlo, y(0:grid%ny) 
+    real(dp) :: str_fct(-7:6), f2nlo, f2nnlo, y(0:grid%ny) 
     integer :: iy, ii
     mF = muF(Qval) 
     mR = muR(Qval)
@@ -528,7 +541,7 @@ contains
   subroutine write_f1 (idev, Qtest, ymax, ny)
     real(dp), intent(in) :: Qtest, ymax
     integer, intent(in)  :: idev, ny
-    real(dp) :: ytest, xval, mR, mF, F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO, res(-6:6)
+    real(dp) :: ytest, xval, mR, mF, F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO, res(-7:6)
     integer  :: iy
     !F1 Wp Wm Z
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
@@ -561,7 +574,7 @@ contains
   subroutine write_f2 (idev, Qtest, ymax, ny)
     real(dp), intent(in) :: Qtest, ymax
     integer, intent(in)  :: idev, ny
-    real(dp) :: ytest, xval, mR, mF, F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO, res(-6:6)
+    real(dp) :: ytest, xval, mR, mF, F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO, res(-7:6)
     integer  :: iy
     !F2 Wp Wm Z
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
@@ -594,7 +607,7 @@ contains
   subroutine write_f3 (idev, Qtest, ymax, ny)
     real(dp), intent(in) :: Qtest, ymax
     integer, intent(in)  :: idev, ny
-    real(dp) :: ytest, xval, mR, mF, F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO, res(-6:6)
+    real(dp) :: ytest, xval, mR, mF, F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO, res(-7:6)
     integer  :: iy
     !F3 Wp Wm Z
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
@@ -645,14 +658,21 @@ contains
   ! Set up the LO structure functions for any scale choice
   subroutine set_LO_structure_functions_anyscale()
     integer :: iQ
+    real(dp) :: f (0:grid%ny,ncompmin:ncompmax)
 
     ! all coefficient functions at LO are delta functions (F2, FL and F3),
     ! so simply pass table(0) for each of the pieces
     do iQ = 0, tables(0)%nQ
+       f = tables(0)%tab(:,:,iQ)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, tables(0)%Q_vals(iQ))
+       endif
+       
        tables(1)%tab(:,:,iQ) = structure_function_general(&
-            & tables(0)%tab(:,:,iQ) * C2LO, &
-            & tables(0)%tab(:,:,iQ) * CLLO, &
-            & tables(0)%tab(:,:,iQ) * C3LO)       
+            & f * C2LO, &
+            & f * CLLO, &
+            & f * C3LO)       
     end do
     
   end subroutine set_LO_structure_functions_anyscale
@@ -673,6 +693,10 @@ contains
        Q = tables(0)%Q_vals(iQ)
        call EvalPdfTable_Q(tables(0),muF(Q),f)
        call set_scale_logs(Q)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, tables(0)%Q_vals(iQ))
+       endif
 
        if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1, we don't need to do all
@@ -729,6 +753,10 @@ contains
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
 
+       if (use_mass_thresholds) then
+          call use_vfns(f, tables(0)%Q_vals(iQ))
+       endif
+       
        ! Save the NLO pieces in tables(2) and tables(3)
       
        ! Get the NLO coefficient function, (C_NLO x f) 
@@ -765,6 +793,11 @@ contains
        Q = tables(0)%Q_vals(iQ)
        call EvalPdfTable_Q(tables(0),muF(Q),f)
        call set_scale_logs(Q)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, tables(0)%Q_vals(iQ))
+       endif
+       
        if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1, we don't need to do all
        ! the convolutions of the splitting functions
@@ -840,6 +873,10 @@ contains
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
        
+       if (use_mass_thresholds) then
+          call use_vfns(f, tables(0)%Q_vals(iQ))
+       endif
+       
        ! save the NNLO pieces in tables(4:7)
        
        PLO2_f  = dh%P_LO  * (dh%P_LO * f)
@@ -899,6 +936,10 @@ contains
        Q = tables(0)%Q_vals(iQ)
        call EvalPdfTable_Q(tables(0),muF(Q),f)
        call set_scale_logs(Q)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, tables(0)%Q_vals(iQ))
+       endif
        
        if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1 (i.e. mur=muf=Q), we don't
@@ -1012,6 +1053,10 @@ contains
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
        
+       if (use_mass_thresholds) then
+          call use_vfns(f, tables(0)%Q_vals(iQ))
+       endif
+       
        ! save the N3LO pieces in tables(8:15)
        
        PLO2_f   = dh%P_LO  * (dh%P_LO * f)
@@ -1084,7 +1129,7 @@ contains
     real(dp), intent(in) :: C2_f(0:,ncompmin:), CL_f(0:,ncompmin:), C3_f(0:,ncompmin:)
     real(dp) :: C2_f_fl11(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: CL_f_fl11(0:grid%ny,ncompmin:ncompmax)
-    real(dp) :: res(0:ubound(C2_f,dim=1), ncompmin:ncompmax)
+    real(dp) :: res(0:ubound(C2_f,dim=1), -7:6)
     C2_f_fl11 = zero
     CL_f_fl11 = zero
     res = structure_function_general_full(C2_f, CL_f, C3_f, C2_f_fl11, CL_f_fl11)
@@ -1098,7 +1143,7 @@ contains
     real(dp), intent(in) :: C2_f_fl11(0:,ncompmin:), CL_f_fl11(0:,ncompmin:)
     real(dp) :: C2_f_NC(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: CL_f_NC(0:grid%ny,ncompmin:ncompmax)
-    real(dp)             :: res(0:ubound(C2_f,dim=1), ncompmin:ncompmax)
+    real(dp)             :: res(0:ubound(C2_f,dim=1), -7:6)
     !----------------------
     ! not just up and down, but the sum 
     real(dp) :: u(0:grid%ny), d(0:grid%ny), ubar(0:grid%ny), dbar(0:grid%ny) 
@@ -1133,6 +1178,21 @@ contains
          &        (ulike(CL_f_NC) + ubarlike(CL_f_NC))*e2_up
     ! then convert to F1
     res(:,F1EM) = (res(:,F2EM) - res(:,F1EM)) / two_xvals
+    
+    !--- deal with gamma-Z case -----------------------------------------
+    ! equations taken from section 19 of PDG (19.18)
+    res(:,F2gZ) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*e_down*two_vi_Z_down + &
+         &        (ulike(C2_f_NC) + ubarlike(C2_f_NC))*e_up * two_vi_Z_up
+    
+    ! temporarily put FL into F1;
+    res(:,F1gZ) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*e_down*two_vi_Z_down + &
+         &        (ulike(CL_f_NC) + ubarlike(CL_f_NC))*e_up * two_vi_Z_up
+    ! then convert to F1
+    res(:,F1gZ) = (res(:,F2gZ) - res(:,F1gZ)) / two_xvals
+    
+    res(:,F3gZ) = (dlike(C3_f) - dbarlike(C3_f))*e_down*two_ai_Z_down + &
+         &        (ulike(C3_f) - ubarlike(C3_f))*e_up * two_ai_Z_up
+    res(:,F3gZ) = res(:,F3Z)/xValues(grid)
 
     ! for the W cases, it only makes sense to sum over an even number
     ! of light flavours; so save the actual number of flavours, switch
@@ -1223,8 +1283,7 @@ contains
   !
   function F_LO (y, Q, muR, muF) result(res)
     real(dp), intent(in)  :: y, Q, muR, muF
-    real(dp) :: res(-6:6)
-    real(dp) :: C1f(-6:6), C0P0f(-6:6)
+    real(dp) :: res(-7:6)
     real(dp) :: Q_or_muF
     
     ! if scale_choice = 0,1, then evaluate tables at Q
@@ -1247,8 +1306,8 @@ contains
   !
   function F_NLO (y, Q, muR, muF) result(res)
     real(dp), intent(in)  :: y, Q, muR, muF
-    real(dp) :: res(-6:6), as2pi, LFQ2
-    real(dp) :: C1f(-6:6), C0P0f(-6:6)
+    real(dp) :: res(-7:6), as2pi, LFQ2
+    real(dp) :: C1f(-7:6), C0P0f(-7:6)
     real(dp) :: Q_or_muF
 
     as2pi = alphasLocal(muR) / (twopi)
@@ -1285,9 +1344,9 @@ contains
   ! LFQ2 == ln muF^2/Q^2
   function F_NNLO (y, Q, muR, muF) result(res)
     real(dp), intent(in)  :: y, Q, muR, muF
-    real(dp) :: res(-6:6), as2pi, LRQ2, LFQ2
-    real(dp) :: C1f(-6:6), C0P0f(-6:6), C2f(-6:6), C0P0sqf(-6:6)
-    real(dp) :: C0P1f(-6:6), C1P0f(-6:6)
+    real(dp) :: res(-7:6), as2pi, LRQ2, LFQ2
+    real(dp) :: C1f(-7:6), C0P0f(-7:6), C2f(-7:6), C0P0sqf(-7:6)
+    real(dp) :: C0P1f(-7:6), C1P0f(-7:6)
     real(dp) :: Q_or_muF
     
     as2pi = alphasLocal(muR) / (twopi)
@@ -1336,10 +1395,10 @@ contains
   ! LFQ2 == ln muF^2/Q^2
   function F_N3LO (y, Q, muR, muF) result(res)
     real(dp), intent(in)  :: y, Q, muR, muF
-    real(dp) :: res(-6:6), as2pi, LRQ2, LFQ2
-    real(dp) :: C1f(-6:6), C0P0f(-6:6), C3f(-6:6), C0P0sqf(-6:6), C2f(-6:6)
-    real(dp) :: C0P1f(-6:6), C1P0f(-6:6), C0P0cbf(-6:6), C0P01f(-6:6), C0P10f(-6:6)
-    real(dp) :: C1P0sqf(-6:6), C1P1f(-6:6), C2P0f(-6:6), C0P2f(-6:6)
+    real(dp) :: res(-7:6), as2pi, LRQ2, LFQ2
+    real(dp) :: C1f(-7:6), C0P0f(-7:6), C3f(-7:6), C0P0sqf(-7:6), C2f(-7:6)
+    real(dp) :: C0P1f(-7:6), C1P0f(-7:6), C0P0cbf(-7:6), C0P01f(-7:6), C0P10f(-7:6)
+    real(dp) :: C1P0sqf(-7:6), C1P1f(-7:6), C2P0f(-7:6), C0P2f(-7:6)
     real(dp) :: Q_or_muF
     
     as2pi = alphasLocal(muR) / (twopi)
@@ -1457,4 +1516,19 @@ contains
     endif
   end function muF
   
+  subroutine use_vfns (f, Q)
+    real(dp), intent(in) :: Q
+    real(dp), intent(inout) :: f(0:grid%ny,ncompmin:ncompmax)
+    integer :: inf
+
+    ! set pdf to zero if below charm, bottom, top threshold
+    do inf = 4, 6
+       if (Q.lt.quark_masses(inf)) then
+          f(:,-inf) = zero
+          f(:, inf) = zero
+       endif
+    enddo
+    
+  end subroutine use_vfns
+
 end module structure_functions

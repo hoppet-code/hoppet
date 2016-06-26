@@ -1,8 +1,15 @@
+2016-06-26  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/structure_functions.f90:
+	- added optional variable flavour-number scheme for the structure functions.
+	- added the gamma-Z structure function.
+	these features still need to be cross-checked against other codes.
+
 2016-06-09  Frédéric Dreyer  <frederic.dreyer@gmail.com>
 
 	* src/integrator.f90 (ig_PolyWeight_expand):
 	* src/convolution.f90 (conv_GCAf_Helper):
-	added an additional integrator ig_PolyWeight_expand which expands term
+	added an additional integrator ig_PolyWeight_expand which expands terms
 	around zero. This avoids numerical issues close to zero for real pieces.
 
 	* src/streamlined_interface.f90:
@@ -13,8 +20,7 @@
 	* src/coefficient_functions_holder.f90:
 	* src/xc*.f:
 	fixed numerical convergence issues at large x by taking a series
-	expansion close to x=1, and adding a cutoff on 1/x term in C3NS3B
-	and C2NS3B.
+	expansion close to x=1.
 
 2016-06-07  Frédéric Dreyer  <frederic.dreyer@gmail.com>
 
