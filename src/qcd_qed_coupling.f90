@@ -18,7 +18,8 @@ module qcd_qed_coupling
   public :: QCDQEDThreshold
 
   integer, parameter    :: n_thresholds = 8
-  type, extends(Coupling) :: QCDQEDCoupling
+  type QCDQEDCoupling
+     type(Coupling)        :: Coupling
      type(QCDQEDThreshold) :: thresholds(0:n_thresholds)
      integer               :: quark_schemes(4:6)
   end type QCDQEDCoupling
