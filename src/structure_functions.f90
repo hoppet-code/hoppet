@@ -163,7 +163,12 @@ contains
     if(present(param_coefs)) exact_coefs = .not.param_coefs
     if(present(Qmin_PDF)) Qmin=Qmin_PDF
     if(present(use_mass_thresh)) use_mass_thresholds =  use_mass_thresh
-    
+
+    ! if mass thresholds are used in the structure functions, only scale_choice 0 and 1 are allowed
+    if ((use_mass_thresholds).and.(scale_choice.gt.1)) then
+       call wae_error('StartStrFct', 'illegal value for scale_choice with mass thresholds turned on', intval = scale_choice)
+    end if
+
     ! Streamlined initialization
     ! including  parameters for x-grid
     order = -6 
@@ -649,6 +654,9 @@ contains
        Q = tables(0)%Q_vals(iQ)
        ! explicitly evaluate the PDF at scale muF(Q)
        call EvalPdfTable_Q(tables(0),muF(Q),f)
+       if (use_mass_thresholds) then
+          call use_vfns(f, Q)
+       endif
        tables(1)%tab(:,:,iQ) = structure_function_general(C2LO*f, CLLO*f, C3LO*f)
     end do
     
@@ -695,7 +703,7 @@ contains
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
+          call use_vfns(f, Q)
        endif
 
        if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
@@ -753,10 +761,6 @@ contains
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
 
-       if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
-       endif
-       
        ! Save the NLO pieces in tables(2) and tables(3)
       
        ! Get the NLO coefficient function, (C_NLO x f) 
@@ -795,7 +799,7 @@ contains
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
+          call use_vfns(f, Q)
        endif
        
        if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
@@ -873,10 +877,6 @@ contains
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
        
-       if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
-       endif
-       
        ! save the NNLO pieces in tables(4:7)
        
        PLO2_f  = dh%P_LO  * (dh%P_LO * f)
@@ -938,7 +938,7 @@ contains
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
+          call use_vfns(f, Q)
        endif
        
        if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
@@ -1052,10 +1052,6 @@ contains
 
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
-       
-       if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
-       endif
        
        ! save the N3LO pieces in tables(8:15)
        
