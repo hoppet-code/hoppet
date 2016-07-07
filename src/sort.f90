@@ -27,7 +27,7 @@ module sort
   public :: swap
   
   interface sort_array
-     module procedure :: sort_array_dp
+     module procedure sort_array_dp
   end interface sort_array
   public :: sort_array
   
