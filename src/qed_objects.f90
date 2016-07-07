@@ -38,6 +38,11 @@ module qed_objects
   end interface operator(*)
   public :: operator(*)
 
+  interface Copy
+     module procedure Copy_qed_split_mat_lo, Copy_qed_split_mat_nlo, Copy_qed_split_mat
+  end interface Copy
+  public :: Copy
+  
   ! 8 is photon, 9,10,11 are leptons (each is lepton + anti-lepton)
   integer, parameter, public :: ncompmaxLeptons = 11
   integer, parameter, public :: ncompmaxPhoton  = 8
@@ -50,6 +55,7 @@ module qed_objects
   integer, parameter, public :: iflv_electron =  9
   integer, parameter, public :: iflv_muon     = 10
   integer, parameter, public :: iflv_tau      = 11
+
   
 contains
 
@@ -268,5 +274,48 @@ contains
     end do
     
   end function conv_qed_nlo
+
+  !----------------------------------------------------------------------
+  subroutine Copy_qed_split_mat_lo(in,out)
+    type(qed_split_mat_lo), intent(inout) :: in
+    type(qed_split_mat_lo), intent(out)   :: out
+    out%nu = in%nu
+    out%nd = in%nd
+    out%nl = in%nl
+    out%nf = in%nf
+    call InitGridConv(out%Pqq_01, in%Pqq_01)
+    call InitGridConv(out%Pqy_01, in%Pqy_01)
+    call InitGridConv(out%Pyq_01, in%Pyq_01)
+    call InitGridConv(out%Pyy_01, in%Pyy_01)    
+  end subroutine Copy_qed_split_mat_lo
+  
+  !----------------------------------------------------------------------
+  subroutine Copy_qed_split_mat_nlo(in,out)
+    type(qed_split_mat_nlo), intent(inout) :: in
+    type(qed_split_mat_nlo), intent(out)   :: out
+    out%nu = in%nu
+    out%nd = in%nd
+    out%nl = in%nl
+    out%nf = in%nf
+
+    call InitGridConv(out%Pqy_11    , in%Pqy_11    )
+    call InitGridConv(out%Pyy_11    , in%Pyy_11    )
+    call InitGridConv(out%Pgy_11    , in%Pgy_11    )
+    call InitGridConv(out%Pqg_11    , in%Pqg_11    )
+    call InitGridConv(out%Pyg_11    , in%Pyg_11    )
+    call InitGridConv(out%Pgg_11    , in%Pgg_11    )
+    call InitGridConv(out%PqqV_11   , in%PqqV_11   )
+    call InitGridConv(out%PqqbarV_11, in%PqqbarV_11)
+    call InitGridConv(out%Pgq_11    , in%Pgq_11    )
+    call InitGridConv(out%Pyq_11    , in%Pyq_11    )
+  end subroutine Copy_qed_split_mat_nlo
+
+  !----------------------------------------------------------------------
+  subroutine Copy_qed_split_mat(in,out)
+    type(qed_split_mat), intent(inout) :: in
+    type(qed_split_mat), intent(out)   :: out
+    call Copy(in%lo , out%lo )
+    call Copy(in%nlo, out%nlo)
+  end subroutine Copy_qed_split_mat
   
 end module qed_objects

@@ -299,7 +299,6 @@ contains
     
     ! REMEMBER TO COMPLETE FROM ORIG...
     tab%nf_info_associated = .true.
-    !write(0,*) 'pdf_table info: Number of Q bins changed to ',tab%nQ
   end subroutine AddNfInfoToPdfTable
 
 
@@ -430,7 +429,7 @@ contains
     integer :: iQ
     real(dp) :: Q
     do iQ = 0, tab%nQ
-       Q = invlnln(tab,tab%lnlnQ_min + iQ*tab%dlnlnQ)
+       Q = tab%Q_vals(iQ)
        call InitPDF_LHAPDF(tab%grid, tab%tab(:,:,iQ), LHAsub, Q)
     end do
   end subroutine FillPdfTable_LHAPDF
