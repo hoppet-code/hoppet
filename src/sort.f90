@@ -257,8 +257,8 @@ contains
 
 
   subroutine swap_dp(a,b)
-    real, intent(inout) :: a,b
-    real                :: dummy
+    real(dp), intent(inout) :: a,b
+    real(dp)                :: dummy
     dummy=a
     a=b
     b=dummy
