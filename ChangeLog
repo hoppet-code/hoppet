@@ -6,7 +6,7 @@
 
 	* src/sort.f90 (sort):
 	added sort_array() routine which acts as if an in-place sort is
-	carried out (relying on idx); make it public (and also swap)
+	carried out (relying on idx); made it public (and also swap)
 
 	* src/pdf_tabulate.f90 (FillPdfTable_LHAPDF):
 	fixed serious issue for tabulations where nf info is associated,
