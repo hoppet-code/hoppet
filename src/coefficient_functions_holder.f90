@@ -11,16 +11,150 @@
 !
 ! - Original van Neerven and Zijlstra papers
 module coefficient_functions_holder
-  use types; use consts_dp; use convolution_communicator
+  use types; use warnings_and_errors
+  use consts_dp; use convolution_communicator
   use qcd
   use convolution
   use dglap_objects
   use coefficient_functions 
   implicit none
-  public :: InitC2NLO, InitCLNLO, InitC3NLO, InitC2NNLO, InitCLNNLO, InitC3NNLO
-  public :: InitC2NNLO_e, InitCLNNLO_e, InitC3NNLO_e, InitC2N3LO, InitCLN3LO, InitC3N3LO
+  private
+  
+  public :: coef_holder, InitCoefHolder, SetNfCoefHolder
+  
+  type coef_holder
+     integer        :: nloop
+     integer        :: nf, nflo, nfhi
+     real(dp)       :: C2LO,   CLLO,   C3LO
+     type(split_mat), pointer :: C2NLO,  CLNLO,  C3NLO
+     type(split_mat), pointer :: C2NNLO, CLNNLO, C3NNLO
+     type(split_mat), pointer :: C2N3LO, CLN3LO, C3N3LO
+     type(split_mat), pointer :: C2N3LO_fl11, CLN3LO_fl11
+     type(split_mat), pointer :: C_NLO(:,:), C_NNLO(:,:), C_N3LO(:,:)
+  end type coef_holder
   
 contains
+
+  !----------------------------------------------------------------------
+  ! Set up all the coefficient functions
+  subroutine InitCoefHolder(grid, ch, nloop, use_exact_cf, nflo, nfhi)
+    type(grid_def),    intent(in) :: grid
+    type(coef_holder), intent(inout), target :: ch
+    integer, optional, intent(in) :: nloop
+    logical, optional, intent(in) :: use_exact_cf
+    integer, optional, intent(in) :: nflo, nfhi
+    !------------------------------
+    integer :: nfstore, nf_lcl
+    logical :: use_exact
+
+    ! default settings
+    ch%nloop  = 4
+    use_exact = .false.
+    ch%nf     = nf_int
+    ch%nflo   = nf_int
+    ch%nfhi   = nf_int
+
+    ! if specified, use inputs
+    if (present(nloop)) ch%nloop = nloop
+    if (present(use_exact_cf)) use_exact = use_exact_cf
+    if (present(nflo)) ch%nflo = nflo
+    if (present(nfhi)) ch%nfhi = nfhi
+    
+    if (ch%nloop > 4 .or. ch%nloop < 1) then
+       call wae_error('InitCoefHolder: nloop must be between 1 and 4')
+    end if
+    
+    ! now allocate the arrays
+    if (nloop.ge.2) then
+       allocate(ch%C_NLO(3,ch%nflo:ch%nfhi))
+    endif
+    if (nloop.ge.3) then
+       allocate(ch%C_NNLO(3,ch%nflo:ch%nfhi))
+    endif
+    if (nloop.ge.4) then
+       allocate(ch%C_N3LO(5,ch%nflo:ch%nfhi))
+    endif
+
+    ! first initialise the LO coefficient "functions" (just a number, since delta-fn)
+    ! they don't depend on nf, so set them up now
+    ch%C2LO = one
+    ch%CLLO = zero
+    ch%C3LO = one
+
+    ! store nf value so that we can reset it afterwards
+    nfstore = nf_int
+    
+    ! loop over nf values and set up coefficient functions
+    do nf_lcl = ch%nflo, ch%nfhi
+       call SetNfCoefHolder(ch, nf_lcl)
+       if (ch%nloop.ge.2) then
+          call InitC2NLO(grid, ch%C2NLO)
+          call InitCLNLO(grid, ch%CLNLO)
+          call InitC3NLO(grid, ch%C3NLO)
+       end if
+       if (nloop.ge.3) then
+          ! either with the exact functions
+          if (use_exact_cf) then
+             call InitC2NNLO_e(grid, ch%C2NNLO)
+             call InitCLNNLO_e(grid, ch%CLNNLO)
+             call InitC3NNLO_e(grid, ch%C3NNLO)
+          else
+             ! or the parametrised version
+             call InitC2NNLO(grid, ch%C2NNLO)
+             call InitCLNNLO(grid, ch%CLNNLO)
+             call InitC3NNLO(grid, ch%C3NNLO) 
+          endif
+       endif
+       if (nloop.ge.4) then
+          call InitC2N3LO(grid, ch%C2N3LO)
+          call InitCLN3LO(grid, ch%CLN3LO)
+          call InitC3N3LO(grid, ch%C3N3LO)
+          ! including the fl11 terms for Z/photon exchanges
+          call InitC2N3LO_fl11(grid, ch%C2N3LO_fl11)
+          call InitCLN3LO_fl11(grid, ch%CLN3LO_fl11)
+       endif
+    end do
+
+    ! reset nf value to initial value
+    ! and set all the pointers accordingly
+    call SetNfCoefHolder(ch, nfstore)
+    
+  end subroutine InitCoefHolder
+
+  !----------------------------------------------------------------------
+  ! Set the internal nf to specified value
+  subroutine SetNfCoefHolder(ch, nflcl)
+    type(coef_holder), intent(inout), target :: ch
+    integer, intent(in) :: nflcl
+
+    if ((nflcl.lt.ch%nflo) .or. (nflcl.gt.ch%nfhi)) then
+       call wae_Error('SetNfCoefHolder: tried to set unsupported nf; request val was',intval=nflcl)
+    end if
+    
+    ch%nf   = nflcl
+    call qcd_SetNf(nflcl)
+
+    ! now set the pointers
+    if (ch%nloop.ge.2) then
+       ch%C2NLO => ch%C_NLO(1,nflcl)
+       ch%CLNLO => ch%C_NLO(2,nflcl)
+       ch%C3NLO => ch%C_NLO(3,nflcl)
+    endif
+    if (ch%nloop.ge.3) then
+       ch%C2NNLO => ch%C_NNLO(1,nflcl)
+       ch%CLNNLO => ch%C_NNLO(2,nflcl)
+       ch%C3NNLO => ch%C_NNLO(3,nflcl)
+    endif
+    if (ch%nloop.ge.4) then
+       ch%C2N3LO => ch%C_N3LO(1,nflcl)
+       ch%CLN3LO => ch%C_N3LO(2,nflcl)
+       ch%C3N3LO => ch%C_N3LO(3,nflcl)
+       ch%C2N3LO_fl11 => ch%C_N3LO(4,nflcl)
+       ch%CLN3LO_fl11 => ch%C_N3LO(5,nflcl)
+    endif
+    
+  end subroutine SetNfCoefHolder
+
   
   !======================================================================
   ! NLO coefficient functions

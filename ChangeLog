@@ -1,3 +1,11 @@
+2016-07-08  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/structure_functions.f90:
+	* example_f90/structure_functions_example.f90 :
+	added an example program showing sample usage of structure functions module;
+	moved the handling of the pdf outside of structure_functions.f90, and into
+	the actual program.
+
 2016-06-26  Frédéric Dreyer  <frederic.dreyer@gmail.com>
 
 	* src/structure_functions.f90:
