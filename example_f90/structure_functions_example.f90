@@ -2,7 +2,7 @@
 !!
 !!
 
-program tabulation_example
+program structure_functions_example
   use hoppet_v1
   use dummy_pdfs
   use streamlined_interface
@@ -99,6 +99,6 @@ contains
     write(6,*) 'hoppet: ', res_hoppet
   end subroutine read_PDF
 
-end program tabulation_example
+end program structure_functions_example
 
 
