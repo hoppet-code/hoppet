@@ -32,7 +32,9 @@ program structure_functions_example
   call read_PDF()
   call InitStrFct(order_max)
 
-  call write_f2(6, 100.0_dp, 12.0_dp, 100)
+  call write_f1(6, 100.0_dp, 12.0_dp, 20)
+  call write_f2(6, 100.0_dp, 12.0_dp, 20)
+  call write_f3(6, 100.0_dp, 12.0_dp, 20)
 
 contains 
   !----------------------------------------------------------------------

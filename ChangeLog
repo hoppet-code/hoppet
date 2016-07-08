@@ -1,6 +1,10 @@
 2016-07-08  Frédéric Dreyer  <frederic.dreyer@gmail.com>
 
 	* src/structure_functions.f90:
+	added a third implementation of the structure functions, where we add up
+	all orders before the convolution of the coefficient functions with the
+	PDF; this is possible only for scale_choice=0,1.
+
 	* example_f90/structure_functions_example.f90 :
 	added an example program showing sample usage of structure functions module;
 	moved the handling of the pdf outside of structure_functions.f90, and into

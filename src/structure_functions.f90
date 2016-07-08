@@ -94,8 +94,9 @@ module structure_functions
   real(dp), save :: cst_mu, xmuR, xmuF
   integer, save  :: scale_choice
 
+  logical, save  :: use_sep_orders
   logical, save  :: exact_coefs
-  integer :: nf_lcl
+  integer :: nf_lcl, order_setup
 
 
 contains
@@ -238,31 +239,49 @@ contains
   !----------------------------------------------------------------------
   ! Initialize the structure functions up to specified order
   ! this requires the PDF to have been set up beforehand, and filled in tables(0)
-  subroutine InitStrFct(order)
+  subroutine InitStrFct(order, separate_orders)
     integer, intent(in) :: order
+    logical, optional :: separate_orders
 
     ! To turn off b quarks completely (only for testing and comparison)
     ! uncomment following two lines:
     ! tables(0)%tab(:,-5,:) = zero
     ! tables(0)%tab(:,+5,:) = zero
-    
-    if (scale_choice.le.1) then
-       ! if scale_choice = 0,1 use fast implementation
-       ! tables is saved as an array in Q, and only tables(0),
-       ! tables(1), tables(2), tables(4), tables(8) are non zero
-       if (order.ge.1) call set_LO_structure_functions()
-       if (order.ge.2) call set_NLO_structure_functions()
-       if (order.ge.3) call set_NNLO_structure_functions()
-       if (order.ge.4) call set_N3LO_structure_functions()
+
+    ! default is to sum each order before convolutions (it's faster)
+    if (present(separate_orders)) then
+       use_sep_orders = separate_orders
     else
-       ! if scale_choice >= 2 use slower implementation with full
-       ! scale choices, such as sqrt(Q1*Q2)
-       ! tables is saved as an array in muF now, and all components
-       ! of tables are non zero.
-       if (order.ge.1) call set_LO_structure_functions_anyscale()
-       if (order.ge.2) call set_NLO_structure_functions_anyscale()
-       if (order.ge.3) call set_NNLO_structure_functions_anyscale()
-       if (order.ge.4) call set_N3LO_structure_functions_anyscale()
+       use_sep_orders = .false.
+    endif
+
+    if (use_sep_orders) then
+       ! First we treat the case where we want to separate out each order in
+       ! the final structure functions.
+       ! This is slower, but is needed e.g. for VBFH
+       if (scale_choice.le.1) then
+          ! if scale_choice = 0,1 use fast implementation
+          ! tables is saved as an array in Q, and only tables(0),
+          ! tables(1), tables(2), tables(4), tables(8) are non zero
+          if (order.ge.1) call set_LO_structure_functions()
+          if (order.ge.2) call set_NLO_structure_functions()
+          if (order.ge.3) call set_NNLO_structure_functions()
+          if (order.ge.4) call set_N3LO_structure_functions()
+       else
+          ! if scale_choice >= 2 use slower implementation with full
+          ! scale choices, such as sqrt(Q1*Q2)
+          ! tables is saved as an array in muF now, and all components
+          ! of tables are non zero.
+          if (order.ge.1) call set_LO_structure_functions_anyscale()
+          if (order.ge.2) call set_NLO_structure_functions_anyscale()
+          if (order.ge.3) call set_NNLO_structure_functions_anyscale()
+          if (order.ge.4) call set_N3LO_structure_functions_anyscale()
+       endif
+    else
+       ! Now set up the default case where we sum up everything right away.
+       if (scale_choice.gt.1) & ! only allow for scale_choice = 0,1
+            & call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice)
+       call set_structure_functions_upto(order)
     endif
 
     ! To rescale PDF by the N3LO F2 structure function (evaluated at 8 GeV)
@@ -271,6 +290,7 @@ contains
     ! call rescale_pdf_n3lo(8.0_dp,order)
 
     setup_done(1:) = .true.
+    order_setup = order
     
   end subroutine InitStrFct
 
@@ -359,26 +379,35 @@ contains
     integer  :: iy
     !F1 Wp Wm Z
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
-    write(idev,'(a,a)') '# x  F1Wp(LO) F1Wm(LO) F1Wp(NLO) F1Wm(NLO) F1Wp(NNLO) F1Wm(NNLO)', &
-         & ' F1Wp(N3LO) F1Wm(N3LO) F1Z(LO) F1Z(NLO) F1Z(NNLO) F1Z(N3LO)'
+    if (use_sep_orders) then
+       write(idev,'(a,a)') '# x  F1Wp(LO) F1Wm(LO) F1Wp(NLO) F1Wm(NLO) F1Wp(NNLO) F1Wm(NNLO)', &
+            & ' F1Wp(N3LO) F1Wm(N3LO) F1Z(LO) F1Z(NLO) F1Z(NNLO) F1Z(N3LO)'
+    else
+       write(idev,'(a)') '# x F1Wp F1Wm F1Z'
+    endif
     mF = muF(Qtest)
     mR = muR(Qtest)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
-       res = F_LO(ytest, Qtest, mR, mF)
-       write(idev,'(3es22.12)',advance='no') xval, res(F1Wp),res(F1Wm)
-       F1Z_LO = res(F1Z)
-       res = F_NLO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
-       F1Z_NLO = res(F1Z)
-       res = F_NNLO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
-       F1Z_NNLO = res(F1Z)
-       res = F_N3LO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
-       F1Z_N3LO = res(F1Z)
-       write(idev,'(4es22.12)',advance='no') F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO
+       if (use_sep_orders) then
+          res = F_LO(ytest, Qtest, mR, mF)
+          write(idev,'(3es22.12)',advance='no') xval, res(F1Wp),res(F1Wm)
+          F1Z_LO = res(F1Z)
+          res = F_NLO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
+          F1Z_NLO = res(F1Z)
+          res = F_NNLO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
+          F1Z_NNLO = res(F1Z)
+          res = F_N3LO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
+          F1Z_N3LO = res(F1Z)
+          write(idev,'(4es22.12)',advance='no') F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO
+       else
+          res = StrFct(ytest, Qtest, mR, mF)
+          write(idev,'(4es22.12)',advance='no') xval, res(F1Wp),res(F1Wm), res(F1Z)
+       endif
        write(idev,*)
     end do
   end subroutine write_f1
@@ -392,26 +421,35 @@ contains
     integer  :: iy
     !F2 Wp Wm Z
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
-    write(idev,'(a,a)') '# x  F2Wp(LO) F2Wm(LO) F2Wp(NLO) F2Wm(NLO) F2Wp(NNLO) F2Wm(NNLO)', &
-         & ' F2Wp(N3LO) F2Wm(N3LO) F2Z(LO) F2Z(NLO) F2Z(NNLO) F2Z(N3LO)'
+    if (use_sep_orders) then
+       write(idev,'(a,a)') '# x  F2Wp(LO) F2Wm(LO) F2Wp(NLO) F2Wm(NLO) F2Wp(NNLO) F2Wm(NNLO)', &
+            & ' F2Wp(N3LO) F2Wm(N3LO) F2Z(LO) F2Z(NLO) F2Z(NNLO) F2Z(N3LO)'
+    else
+       write(idev,'(a)') '# x F2Wp F2Wm F2Z'
+    endif
     mF = muF(Qtest)
     mR = muR(Qtest)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
-       res = F_LO(ytest, Qtest, mR, mF)
-       write(idev,'(3es22.12)',advance='no') xval, res(F2Wp),res(F2Wm)
-       F2Z_LO = res(F2Z)
-       res = F_NLO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
-       F2Z_NLO = res(F2Z)
-       res = F_NNLO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
-       F2Z_NNLO = res(F2Z)
-       res = F_N3LO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
-       F2Z_N3LO = res(F2Z)
-       write(idev,'(4es22.12)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
+       if (use_sep_orders) then
+          res = F_LO(ytest, Qtest, mR, mF)
+          write(idev,'(3es22.12)',advance='no') xval, res(F2Wp),res(F2Wm)
+          F2Z_LO = res(F2Z)
+          res = F_NLO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
+          F2Z_NLO = res(F2Z)
+          res = F_NNLO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
+          F2Z_NNLO = res(F2Z)
+          res = F_N3LO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
+          F2Z_N3LO = res(F2Z)
+          write(idev,'(4es22.12)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
+       else
+          res = StrFct(ytest, Qtest, mR, mF)
+          write(idev,'(4es22.12)',advance='no') xval, res(F2Wp),res(F2Wm), res(F2Z)
+       endif
        write(idev,*)
     end do
   end subroutine write_f2
@@ -425,31 +463,161 @@ contains
     integer  :: iy
     !F3 Wp Wm Z
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
-    write(idev,'(a,a)') '# x  F3Wp(LO) F3Wm(LO) F3Wp(NLO) F3Wm(NLO) F3Wp(NNLO) F3Wm(NNLO)', &
-         & ' F3Wp(N3LO) F3Wm(N3LO) F3Z(LO) F3Z(NLO) F3Z(NNLO) F3Z(N3LO)'
+    if (use_sep_orders) then
+       write(idev,'(a,a)') '# x  F3Wp(LO) F3Wm(LO) F3Wp(NLO) F3Wm(NLO) F3Wp(NNLO) F3Wm(NNLO)', &
+            & ' F3Wp(N3LO) F3Wm(N3LO) F3Z(LO) F3Z(NLO) F3Z(NNLO) F3Z(N3LO)'
+    else
+       write(idev,'(a)') '# x F3Wp F3Wm F3Z'
+    endif
     mF = muF(Qtest)
     mR = muR(Qtest)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
-       res = F_LO(ytest, Qtest, mR, mF)
-       write(idev,'(3es22.12)',advance='no') xval, res(F3Wp),res(F3Wm)
-       F3Z_LO = res(F3Z)
-       res = F_NLO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
-       F3Z_NLO = res(F3Z)
-       res = F_NNLO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
-       F3Z_NNLO = res(F3Z)
-       res = F_N3LO(ytest, Qtest, mR, mF)
-       write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
-       F3Z_N3LO = res(F3Z)
-       write(idev,'(4es22.12)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
+       if (use_sep_orders) then
+          res = F_LO(ytest, Qtest, mR, mF)
+          write(idev,'(3es22.12)',advance='no') xval, res(F3Wp),res(F3Wm)
+          F3Z_LO = res(F3Z)
+          res = F_NLO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
+          F3Z_NLO = res(F3Z)
+          res = F_NNLO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
+          F3Z_NNLO = res(F3Z)
+          res = F_N3LO(ytest, Qtest, mR, mF)
+          write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
+          F3Z_N3LO = res(F3Z)
+          write(idev,'(4es22.12)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
+       else
+          res = StrFct(ytest, Qtest, mR, mF)
+          write(idev,'(4es22.12)',advance='no') xval, res(F3Wp),res(F3Wm), res(F3Z)
+       endif
        write(idev,*)
     end do
   end subroutine write_f3
 
+  !----------------------------------------------------------------------
+  ! set up structure functions for scale_choice = 0, 1, adding up each order
+  subroutine set_structure_functions_upto (order)
+    integer, intent(in) :: order
+    integer :: iQ
+    real(dp) :: Q, as2pi
+    real(dp) :: f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f3(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO_f (0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNNLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLONLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNLOLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
+    
+    do iQ = 0, tables(0)%nQ
+       
+       Q = tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(tables(0),muF(Q),f)
+       call set_scale_logs(Q)
+       
+       as2pi = alphasLocal(muR(Q)) / (twopi)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, Q)
+       endif
 
+       ! start with LO
+       if (order.ge.1) then
+          tables(1)%tab(:,:,iQ) = structure_function_general(ch%C2LO*f, ch%CLLO*f, ch%C3LO*f)
+       endif
+       
+       ! now add NLO terms
+       if (order.ge.2) then
+          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+             ! For central scale with scale_choice=1, we don't need to do all
+             ! the convolutions of the splitting functions
+             f2 = ch%C2NLO * f
+             fL = ch%CLNLO * f
+             f3 = ch%C3NLO * f
+          else
+             ! do the convolution with the coefficient functions and also the
+             ! corresponding splitting-function contributions when scales
+             ! are not equal to Q
+             PLO_f = dh%P_LO * f
+             f2 = CxNLO_with_logs(ch%C2LO, ch%C2NLO, f, PLO_f)
+             fL = CxNLO_with_logs(ch%CLLO, ch%CLNLO, f, PLO_f)
+             f3 = CxNLO_with_logs(ch%C3LO, ch%C3NLO, f, PLO_f)
+          endif
+
+          tables(1)%tab(:,:,iQ) = tables(1)%tab(:,:,iQ) + &
+               & as2pi * structure_function_general(f2, fL, f3)
+       endif
+
+       ! now add NNLO terms
+       if (order.ge.3) then
+          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+             ! For central scale with scale_choice=1, we don't need to do all
+             ! the convolutions of the splitting functions
+             f2 = ch%C2NNLO * f
+             fL = ch%CLNNLO * f
+             f3 = ch%C3NNLO * f
+          else
+             ! do the convolution with the coefficient functions and also the
+             ! corresponding splitting-function contributions when scales
+             ! are not equal to Q
+             PLO_f   = dh%P_LO  * f
+             PNLO_f  = dh%P_NLO * f
+             PLO2_f  = dh%P_LO  * PLO_f
+             f2 = CxNNLO_with_logs(ch%C2LO, ch%C2NLO, ch%C2NNLO, f, PLO_f, PNLO_f, PLO2_f)
+             fL = CxNNLO_with_logs(ch%CLLO, ch%CLNLO, ch%CLNNLO, f, PLO_f, PNLO_f, PLO2_f)
+             f3 = CxNNLO_with_logs(ch%C3LO, ch%C3NLO, ch%C3NNLO, f, PLO_f, PNLO_f, PLO2_f)
+          endif
+
+          tables(1)%tab(:,:,iQ) = tables(1)%tab(:,:,iQ) + &
+               (as2pi**2) * structure_function_general(f2, fL, f3)
+       endif
+
+       ! and finally, add the N3LO terms
+       if (order.ge.4) then
+          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+             ! For central scale with scale_choice=1 (i.e. mur=muf=Q), we don't
+             ! need to do all the convolutions of the splitting functions
+             f2 = ch%C2N3LO * f
+             fL = ch%CLN3LO * f
+             f3 = ch%C3N3LO * f
+          else
+             ! do the convolution with the coefficient functions and also the
+             ! corresponding splitting-function contributions when scales
+             ! are not equal to Q
+             PLO_f    = dh%P_LO   * f
+             PNLO_f   = dh%P_NLO  * f
+             PLO2_f   = dh%P_LO   * PLO_f
+             PNNLO_f  = dh%P_NNLO * f
+             PLONLO_f = dh%P_LO   * PNLO_f
+             PNLOLO_f = dh%P_NLO  * PLO_f
+             PLO3_f   = dh%P_LO   * PLO2_f
+
+             f2 = CxN3LO_with_logs(ch%C2LO, ch%C2NLO, ch%C2NNLO, ch%C2N3LO, f, PLO_f, PNLO_f, PLO2_f, &
+                  &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
+             fL = CxN3LO_with_logs(ch%CLLO, ch%CLNLO, ch%CLNNLO, ch%CLN3LO, f, PLO_f, PNLO_f, PLO2_f, &
+                  &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
+             f3 = CxN3LO_with_logs(ch%C3LO, ch%C3NLO, ch%C3NNLO, ch%C3N3LO, f, PLO_f, PNLO_f, PLO2_f, &
+                  &                PNNLO_f, PLONLO_f, PNLOLO_f, PLO3_f)
+          endif
+
+          ! now the fl_11 piece
+          f2_fl11 = ch%C2N3LO_fl11 * f
+          fL_fl11 = ch%CLN3LO_fl11 * f
+
+          tables(1)%tab(:,:,iQ) = tables(1)%tab(:,:,iQ) + &
+               & (as2pi**3) * structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
+       endif
+    end do
+  end subroutine set_structure_functions_upto
+
+  
   !----------------------------------------------------------------------
   ! set up LO structure functions for scale_choice = 0, 1
   subroutine set_LO_structure_functions()
@@ -1081,6 +1249,28 @@ contains
     ! end if
   end function alphasLocal
   
+
+  !----------------------------------------------------------------------
+  ! F
+  ! calculate the structure function at x, muF
+  ! this is the sum over all orders
+  function StrFct (y, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: y, Q, muR, muF
+    real(dp) :: res(-6:7)
+    
+    if (use_sep_orders) then
+       ! if we kept each order separate, then add up all the fixed order terms one by one
+       if (order_setup.ge.1) res = F_LO(y, Q, muR, muF)
+       if (order_setup.ge.2) res = res + F_NLO(y, Q, muR, muF)
+       if (order_setup.ge.3) res = res + F_NNLO(y, Q, muR, muF)
+       if (order_setup.ge.4) res = res + F_N3LO(y, Q, muR, muF)
+    else
+       ! if we haven't kept each order separate, then everything is in tables(1)
+       call EvalPdfTable_yQ(tables(1), y, Q, res)
+    endif
+    
+  end function StrFct
+
 
   !----------------------------------------------------------------------
   ! F_LO
