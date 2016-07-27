@@ -50,18 +50,6 @@ module structure_functions
   public :: F_LO, F_NLO, F_NNLO, F_N3LO
   public :: muR, muF, quark_masses_sf
   
-  ! real(dp), external :: alphasPDF
-  ! type(running_coupling), save :: coupling
-  !! holds information about the grid
-  ! type(grid_def),     save :: grid, gdarray(4)
-
-  !! holds the splitting functions
-  ! type(dglap_holder), save :: dh
-
-  !! 0 is main pdf table, while i=1:8 contain convolutions with the
-  !! splitting function
-  ! type(pdf_table), save :: tables(0:15)
-
   ! holds the coefficient functions
   type(coef_holder), save :: ch
   
@@ -104,28 +92,31 @@ contains
   !----------------------------------------------------------------------
   ! Setup of constants and parameters needed for structure functions
   subroutine StartStrFct(rts, order_max, nflav, xR, xF, sc_choice, cmu, param_coefs, &
-       & Qmin_PDF)
+       & Qmin_PDF, wmass, zmass)
     real(dp), intent(in) :: rts
     integer, intent(in)  :: order_max
     integer, optional    :: nflav, sc_choice
-    real(dp), optional   :: xR, xF, cmu, Qmin_PDF
+    real(dp), optional   :: xR, xF, cmu, Qmin_PDF, wmass, zmass
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
-    real(dp) :: sin_thw, ymax, dy, minQval, maxQval, dlnlnQ
+    real(dp) :: sin_thw_sq, ymax, dy, minQval, maxQval, dlnlnQ, mw, mz
     integer  :: nloop, order
-    
-    ! TEMPORARY CONSTANTS (to be taken from hoppet!?)
-    ! where should Qmin and sin_thw go ?
-    ! computed from W,Z mass
-    sin_thw = 0.22289722252391826839_dp
-    ! END TEMPORARY 
 
+    ! take sensible default value for mw and mz
+    mw = 80.398_dp
+    mz = 91.187_dp
+    ! otherwise use user input
+    if(present(wmass)) mw = wmass
+    if(present(zmass)) mz = zmass
+    ! compute sin(\theta_w) from W/Z mass
+    sin_thw_sq = 1.0_dp - (mw/mz)**2
+    
     ! evaluate parameters needed for the structure functions
     ! cf. Eqs. (3.10+11) of 1109.3717
-    vi2_ai2_Z_up     = one/four + (half - (four/three) * sin_thw)**2
-    vi2_ai2_Z_down   = one/four + (half - (two/three)  * sin_thw)**2
-    two_vi_ai_Z_up   = half - (four/three) * sin_thw
-    two_vi_ai_Z_down = half - (two/three)  * sin_thw
+    vi2_ai2_Z_up     = one/four + (half - (four/three) * sin_thw_sq)**2
+    vi2_ai2_Z_down   = one/four + (half - (two/three)  * sin_thw_sq)**2
+    two_vi_ai_Z_up   = half - (four/three) * sin_thw_sq
+    two_vi_ai_Z_down = half - (two/three)  * sin_thw_sq
 
     ! cf. Eq.3.20 + 3.17 & 3.18
     ! 1/nf \sum_j=1^nf (vj^2 + aj^2)
@@ -134,8 +125,8 @@ contains
     two_vi_ai_avg_W = two * viW * aiW
 
     ! these parameters are needed explicitly for the gamma-Z structure function
-    two_vi_Z_down = one - (8.0_dp/three) * sin_thw
-    two_vi_Z_up   = -one + (four/three) * sin_thw
+    two_vi_Z_down = one - (8.0_dp/three) * sin_thw_sq
+    two_vi_Z_up   = -one + (four/three) * sin_thw_sq
     two_ai_Z_down = half
     two_ai_Z_up   = -half
     
@@ -191,51 +182,7 @@ contains
 
   end subroutine StartStrFct
 
-  ! !----------------------------------------------------------------------
-  ! ! Initialize the coefficient functions up to specified order
-  ! subroutine InitCoefFct (order_max)
-  !   integer, intent(in) :: order_max
-    
-  !   ! first initialise the LO coefficient "functions" (just a number, since delta-fn)
-  !   C2LO = one
-  !   CLLO = zero
-  !   C3LO = one
-    
-  !   ! now initialise some NLO coefficient functions
-  !   if (order_max > 1) then
-  !      call InitC2NLO(grid, C2NLO)
-  !      call InitCLNLO(grid, CLNLO)
-  !      call InitC3NLO(grid, C3NLO)
-  !   endif
-
-  !   ! and the NNLO ones
-  !   if (order_max > 2) then
-  !      ! either with the exact functions
-  !      if (exact_coefs) then
-  !         call InitC2NNLO_e(grid, C2NNLO)
-  !         call InitCLNNLO_e(grid, CLNNLO)
-  !         call InitC3NNLO_e(grid, C3NNLO)
-  !      ! or the parametrised version
-  !      else
-  !         call InitC2NNLO(grid, C2NNLO)
-  !         call InitCLNNLO(grid, CLNNLO)
-  !         call InitC3NNLO(grid, C3NNLO) 
-  !      endif
-  !   endif
-
-  !   ! and the N3LO ones
-  !   if (order_max > 3) then
-  !      call InitC2N3LO(grid, C2N3LO)
-  !      call InitCLN3LO(grid, CLN3LO)
-  !      call InitC3N3LO(grid, C3N3LO)
-  !      ! including the fl11 terms for Z/photon exchanges
-  !      call InitC2N3LO_fl11(grid, C2N3LO_fl11)
-  !      call InitCLN3LO_fl11(grid, CLN3LO_fl11)
-  !   endif    
-
-  ! end subroutine InitCoefFct
-
-
+  
   !----------------------------------------------------------------------
   ! Initialize the structure functions up to specified order
   ! this requires the PDF to have been set up beforehand, and filled in tables(0)
@@ -410,6 +357,8 @@ contains
        endif
        write(idev,*)
     end do
+    write(idev,*)
+    write(idev,*)
   end subroutine write_f1
   
   !----------------------------------------------------------------------
@@ -452,6 +401,8 @@ contains
        endif
        write(idev,*)
     end do
+    write(idev,*)
+    write(idev,*)
   end subroutine write_f2
 
   !----------------------------------------------------------------------
@@ -494,6 +445,8 @@ contains
        endif
        write(idev,*)
     end do
+    write(idev,*)
+    write(idev,*)
   end subroutine write_f3
 
   !----------------------------------------------------------------------
@@ -1237,16 +1190,11 @@ contains
   real(dp) function alphasLocal(muR)
     real(dp), intent(in) :: muR
     real(dp) :: muR_lcl
-    ! if (toy_Q0 > zero) then
-    !    ! we use alphas associated with the toy PDF
-    !    alphasLocal = Value(toy_coupling, muR)
-    ! else
-       muR_lcl = max(muR,Qmin)
-       ! we use alphas from the LHAPDF PDF
-       ! alphasLocal = alphasPDF(muR_lcl)
-       ! we use alphas from HOPPET
-       alphasLocal = Value(coupling, muR_lcl)
-    ! end if
+    muR_lcl = max(muR,Qmin)
+    ! we use alphas from the LHAPDF PDF
+    ! alphasLocal = alphasPDF(muR_lcl)
+    ! we use alphas from HOPPET
+    alphasLocal = Value(coupling, muR_lcl)
   end function alphasLocal
   
 

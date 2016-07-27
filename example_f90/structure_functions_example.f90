@@ -7,8 +7,9 @@ program structure_functions_example
   use dummy_pdfs
   use streamlined_interface
   use structure_functions
-  real(dp) :: sqrts, xmur, xmuf, Qmin
+  real(dp) :: sqrts, xmur, xmuf, Qmin, ymax
   integer  :: ipdf, order_max, sc_choice
+  
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
   ! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
@@ -20,6 +21,7 @@ program structure_functions_example
   xmur = one
   xmuf = one
   sc_choice = 1
+  ymax = log(1e5) !ymax=20
   
   ! initialize PDF set
   call PDFSET('DEFAULT', dble(ipdf))
@@ -30,11 +32,11 @@ program structure_functions_example
   call StartStrFct(sqrts, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
        param_coefs = .true., Qmin_PDF = Qmin)
   call read_PDF()
-  call InitStrFct(order_max)
+  call InitStrFct(order_max, .true.)
 
-  call write_f1(6, 100.0_dp, 12.0_dp, 20)
-  call write_f2(6, 100.0_dp, 12.0_dp, 20)
-  call write_f3(6, 100.0_dp, 12.0_dp, 20)
+  call write_f1(6, 100.0_dp, ymax, 100)
+  call write_f2(6, 100.0_dp, ymax, 100)
+  call write_f3(6, 100.0_dp, ymax, 100)
 
 contains 
   !----------------------------------------------------------------------
