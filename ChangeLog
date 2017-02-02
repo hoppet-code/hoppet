@@ -1,3 +1,16 @@
+2017-02-02  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/evolution.f90 (ev_CrossMassThreshold):
+	bug fix to address issue reported by Florian Lyonnet of error of
+
+	   FATAL ERROR in cobj_ConvMTM:
+           Mass threshold matrix is undefined
+
+	when using 2-loop cached evolution. It was caused by
+	evop%cross_mass_threshold not being properly initialised to
+	.false. in that situation. Also removed some redundant code
+	lines.
+
 2016-04-04  Gavin Salam  <gavin.salam@cern.ch>
 
 	* doc/HOPPET-v1-doc.tex:
