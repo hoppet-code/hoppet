@@ -25,7 +25,7 @@ int main () {
   // evolve the initial condition
   double asQ0 = 0.35, Q0=sqrt(2.0);
   hoppetEvolve(asQ0, Q0, nloop, 1.0, heralhc_init, Q0);
-  // alternatively preprepare an evolution and then use its cached version.x
+  // alternatively preprepare an evolution and then use its cached version.
   //hoppetPreEvolve(asQ0, Q0, nloop, 1.0, Q0);
   //hoppetCachedEvolve(heralhc_init);
 
