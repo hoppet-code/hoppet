@@ -28,9 +28,11 @@ compiler=""
 # note the "-I../src" flag used to provide access to module files
 # (*.mod) in the ../src directory
 
-../scripts/makef95makefile  tabulation_example  -L../src -lhoppet_v1 -I../src   $lhapdf $compiler -remake "./mkmk"
 
+../scripts/makef95makefile  tabulation_example -L`lhapdf-config --prefix`/lib -lLHAPDF -L../src -lhoppet_v1 -I../src   $lhapdf $compiler -remake "./mkmk"
 
-# old
+# old 1
+#../scripts/makef95makefile  tabulation_example  -L../src -lhoppet_v1 -I../src   $lhapdf $compiler -remake "./mkmk"
+# old 2
 #makePNEW.perl  small_fast_tab -lcern -L../src -ldglap -L$LHAPDFDIR -lLHAPDF -I../src
 
