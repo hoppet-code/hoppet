@@ -1,7 +1,7 @@
 2017-10-30  Gavin Salam  <gavin.salam@cern.ch>
 
 	* NEWS:
-	got back to the NEWS file in preparation for 1.2.0 release
+	finalised NEWS file for 1.2.0 release
 
 	* src/new_as.f90 (na_Init): 
 	fixed bug that arises when nloop is not specified (use of optional
