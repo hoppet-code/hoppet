@@ -5,7 +5,10 @@ Release 1.2.0-devel [pending]
 ======================================================================
 . hoppetEvalSplit now supports composite iloop value, e.g. iloop=12
   to get PLO*PNLO*pdf
-. small fixes to build system and examples
+. 4-loop running coupling is now available
+. added Frederic Dreyer and Alexander Karlberg as contributors
+. small fixes to build system and examples, memory management
+
 
 ======================================================================
 Release 1.1.5  August 2012

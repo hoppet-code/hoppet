@@ -1,3 +1,11 @@
+2017-10-30  Gavin Salam  <gavin.salam@cern.ch>
+
+	* NEWS:
+	got back to the NEWS file in preparation for 1.2.0 release
+
+	* tests/README-hoppet-tests.org:
+	added some old test output (from April 22)
+
 2017-02-02  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/evolution.f90 (ev_CrossMassThreshold):
@@ -65,7 +73,7 @@
 
 	* src/streamlined_interface.f90:
 	removed commented bits of code and improved comments in some
-	places now that tests have been run hoppetEvalSplit.
+	places now that tests have been run for hoppetEvalSplit.
 
 2015-04-21  Gavin Salam  <gavin.salam@cern.ch>
 
