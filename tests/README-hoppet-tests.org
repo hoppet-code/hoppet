@@ -1,6 +1,43 @@
 #+TITLE: file for tracking our tests
 #+STARTUP: logdone
 
+* alphas (4-loop) tests <2017-10-30 Mon>
+
+  ran cross-checks between the hoppet alphas and gavin's python code
+  (itself cross-checked at 4 loops against crundec). All is OK, cf
+  below. 
+
+: $ make coupling                                                                                             [14:44:54]
+: gfortran -O3 -fPIC -I../src -I/Users/gsalam/utils/libf90-gfortran  -c coupling.f90
+: gfortran  -o coupling coupling.o  -L/Users/gsalam/utils/libf90-gfortran -liof90 -L../src -lhoppet_v1    
+: macthxgavin:tests$ ./coupling                                                                                                [14:44:55]
+:    1.1000000000000001       0.44157703683451388     
+:    2.0000000000000000       0.30182652043651498     
+:    6.0000000000000000       0.20262695856002116     
+:    91.187600000000003       0.11799999999999999     
+:    1000.0000000000000        8.8501153525165216E-002
+: 
+:    1.1000000000000001       0.43651409159811355     
+:    2.0000000000000000       0.30149567153780843     
+:    6.0000000000000000       0.20262695855995225     
+:    91.187600000000003       0.11799999999999999     
+:    1000.0000000000000        8.8521865726016710E-002
+:
+: $ ./coupling.py                                                                                             [14:44:56]
+: c threshold: mass(pole) = 1.67, at scale mu = 1.67; b threshold: mass(pole) = 4.78, at scale mu = 4.78; t threshold: mass(pole) = 173.21, at scale mu = 173.21; 
+: 1.1 0.44157703638
+: 2.0 0.301826520425
+: 6.0 0.202626958559
+: 91.1876 0.118
+: 1000.0 0.0885011535252
+: 
+: c threshold: mass(MSbarM) = 1.275, at scale mu = 1.275; b threshold: mass(MSbarM) = 4.18, at scale mu = 4.18; t threshold: mass(MSbarM) = 161.0, at scale mu = 161.0; 
+: 1.1 0.43651409126
+: 2.0 0.301495671526
+: 6.0 0.202626958559
+: 91.1876 0.118
+: 1000.0 0.0885218657261
+  
 * streamlined_multisplit [6/6]
   
   Tests carried out on <2015-04-22 Wed> by running
