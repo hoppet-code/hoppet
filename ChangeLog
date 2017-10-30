@@ -3,6 +3,9 @@
 	* NEWS:
 	finalised NEWS file for 1.2.0 release
 
+	* src/welcome_message.f90 (HoppetWelcomeMessage):
+	changed version to 1.2.0
+
 	* src/new_as.f90 (na_Init): 
 	fixed bug that arises when nloop is not specified (use of optional
 	nloop argument instead of nah%nloop)
