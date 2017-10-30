@@ -3,6 +3,14 @@
 	* NEWS:
 	got back to the NEWS file in preparation for 1.2.0 release
 
+	* doc/HOPPET-v1-doc.tex: 
+	* tarit.sh:
+	added pdf files to tarball and added a whole bunch of pdf files +
+	changed documentation so that it works with both pdflatex and
+	latex.
+	Also changed front page to reflect contributions from Frederic and
+	Alexander. 
+
 	* tests/README-hoppet-tests.org:
 	added some old test output (from April 22)
 
