@@ -1,0 +1,9 @@
+.compiler
+Makefile
+*.mod
+*.a
+.makef95.prefix
+.sconsign.dblite
+
+Makefile.bak
+
