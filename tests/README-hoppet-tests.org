@@ -1,6 +1,43 @@
 #+TITLE: file for tracking our tests
 #+STARTUP: logdone
 
+* alphas (4-loop) tests <2017-10-30 Mon>
+
+  ran cross-checks between the hoppet alphas and gavin's python code
+  (itself cross-checked at 4 loops against crundec). All is OK, cf
+  below. 
+
+: $ make coupling                                                                                             [14:44:54]
+: gfortran -O3 -fPIC -I../src -I/Users/gsalam/utils/libf90-gfortran  -c coupling.f90
+: gfortran  -o coupling coupling.o  -L/Users/gsalam/utils/libf90-gfortran -liof90 -L../src -lhoppet_v1    
+: macthxgavin:tests$ ./coupling                                                                                                [14:44:55]
+:    1.1000000000000001       0.44157703683451388     
+:    2.0000000000000000       0.30182652043651498     
+:    6.0000000000000000       0.20262695856002116     
+:    91.187600000000003       0.11799999999999999     
+:    1000.0000000000000        8.8501153525165216E-002
+: 
+:    1.1000000000000001       0.43651409159811355     
+:    2.0000000000000000       0.30149567153780843     
+:    6.0000000000000000       0.20262695855995225     
+:    91.187600000000003       0.11799999999999999     
+:    1000.0000000000000        8.8521865726016710E-002
+:
+: $ ./coupling.py                                                                                             [14:44:56]
+: c threshold: mass(pole) = 1.67, at scale mu = 1.67; b threshold: mass(pole) = 4.78, at scale mu = 4.78; t threshold: mass(pole) = 173.21, at scale mu = 173.21; 
+: 1.1 0.44157703638
+: 2.0 0.301826520425
+: 6.0 0.202626958559
+: 91.1876 0.118
+: 1000.0 0.0885011535252
+: 
+: c threshold: mass(MSbarM) = 1.275, at scale mu = 1.275; b threshold: mass(MSbarM) = 4.18, at scale mu = 4.18; t threshold: mass(MSbarM) = 161.0, at scale mu = 161.0; 
+: 1.1 0.43651409126
+: 2.0 0.301495671526
+: 6.0 0.202626958559
+: 91.1876 0.118
+: 1000.0 0.0885218657261
+  
 * streamlined_multisplit [6/6]
   
   Tests carried out on <2015-04-22 Wed> by running
@@ -13,3 +50,33 @@
     - [X] failure for iloop out of bounds
     - [X] a few printouts to make sure that caching is working
   
+   :  Running full set with Q =    100.00000000000000      , x =   0.29999999999999999      nf =           -1
+   :    internal v. table    7.88978E-02    7.88978E-02  OK  
+   :            PLO * pdf   -4.43837E-01   -4.43837E-01  OK  
+   :           PNLO * pdf    6.08769E-01    6.08769E-01  OK  
+   :          PNNLO * pdf    7.64858E+00    7.64858E+00  OK  
+   :      PLO * PLO * pdf    2.78335E+00    2.78335E+00  OK  
+   :     PLO * PNLO * pdf   -8.09495E+00   -8.09495E+00  OK  
+   :     PNLO * PLO * pdf    4.51645E-01    4.51645E-01  OK  
+   :          PLO^3 * pdf   -1.80150E+01   -1.80150E+01  OK  
+   : 
+   :  Running full set with Q =    3.2999999999999998      , x =   0.29999999999999999      nf =           -1
+   :    internal v. table    2.11070E-01    2.11070E-01  OK  
+   :            PLO * pdf   -1.14308E+00   -1.14308E+00  OK  
+   :           PNLO * pdf   -1.89359E-01   -1.89359E-01  OK  
+   :          PNNLO * pdf    9.92964E+00    9.92964E+00  OK  
+   :      PLO * PLO * pdf    5.96431E+00    5.96431E+00  OK  
+   :     PLO * PNLO * pdf   -7.29162E+00   -7.29162E+00  OK  
+   :     PNLO * PLO * pdf    6.28659E+00    6.28659E+00  OK  
+   :          PLO^3 * pdf   -2.24481E+01   -2.24481E+01  OK  
+   : 
+   :  Running full set with Q =    3.2999999999999998      , x =   0.29999999999999999      nf =            5
+   :    internal v. table    2.11070E-01    2.11070E-01  OK  
+   :            PLO * pdf   -1.21344E+00   -1.21344E+00  OK  
+   :           PNLO * pdf    4.20046E-01    4.20046E-01  OK  
+   :          PNNLO * pdf    1.56955E+01    1.56955E+01  OK  
+   :      PLO * PLO * pdf    6.94266E+00    6.94266E+00  OK  
+   :     PLO * PNLO * pdf   -1.01154E+01   -1.01154E+01  OK  
+   :     PNLO * PLO * pdf    4.80305E+00    4.80305E+00  OK  
+   :          PLO^3 * pdf   -3.17287E+01   -3.17287E+01  OK  
+   : bison[tests] 10:14% 

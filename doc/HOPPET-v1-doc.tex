@@ -106,10 +106,11 @@
 version 1.2.0-devel
 %  a.k.a.\ HOPPETv1
 }
-\author{G.~P. Salam and J.~Rojo\\[3pt]
-  LPTHE,   \\UPMC -- Univ.\ Paris 6,\\
-  Universit\'e Paris Diderot -- Paris 7,\\
-  CNRS UMR 7589,\\ 75252 Paris cedex 05, France} 
+\author{G.~P. Salam and J.~Rojo\\
+  with contributions from Fr\'d\'eric Dreyer and Alexander Karlberg as
+  of v1.2
+}
+
 \date{}
 
 
@@ -696,7 +697,7 @@ entries), with $\mathcal{P}_{\alpha-\beta} = 0$ for $\alpha < \beta$.
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.72\textwidth]{interpolation-order.eps}%
+  \includegraphics[width=0.72\textwidth]{interpolation-order}%
   \caption{The different strategies (+ve and $-$ve order) for
     interpolation of the grid near $x=1$. The dotted (blue, red) boxes
     indicate two regions in which we illustrate the interpolation of
@@ -2727,7 +2728,7 @@ $Q$.\footnote{This procedure differs from that in \cite{Benchmarks}
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.7\textwidth]{grid.eps}%
+  \includegraphics[width=0.7\textwidth]{grid}%
   \caption{The set of points in $x, Q$ used to determine the accuracy
     of the evolution. The areas shaded in grey are regions where one
     of the flavours is in the neighbourhood of a sign-change
@@ -2818,8 +2819,8 @@ Fig.~\ref{fig:acc-fixed-dy-dlnlnQ}.
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.48\textwidth]{acc-dy0.2-dlnlnQ0.05.eps}\hfill
-  \includegraphics[width=0.48\textwidth]{acc-dy0.05-dlnlnQ0.0125.eps}
+  \includegraphics[width=0.48\textwidth]{acc-dy0_2-dlnlnQ0_05}\hfill
+  \includegraphics[width=0.48\textwidth]{acc-dy0_05-dlnlnQ0_0125}
   \caption{The relative accuracy $\epsilon$ of the least well
     determined flavour channel at each $x, Q$ point, shown as a
     function of $x$ for many $Q$ values. The results for the part of
@@ -2839,9 +2840,9 @@ $x<0.9$ with all flavours.
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.48\textwidth]{dy.eps}%
+  \includegraphics[width=0.48\textwidth]{dy}%
   \hfill
-  \includegraphics[width=0.495\textwidth]{dlnlnQ.eps}%
+  \includegraphics[width=0.495\textwidth]{dlnlnQ}%
   \caption{Left: the (globally) worst relative accuracy $\epsilon$ as
     a function of the base $y$-grid resolution parameter, \ttt{dy} ---
     shown for two $y$-grid configurations and two $x$-ranges and
@@ -2939,7 +2940,7 @@ compilers.\footnote{As this article was going to press, a development
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.7\textwidth]{acc-v-time.eps}%
+  \includegraphics[width=0.7\textwidth]{acc-v-time}%
   \caption{relative accuracy obtained as a function of the time taken
     to perform the evolution (lf95, 3.4GHz Pentium IV (D) with 2~MB
     cache).}

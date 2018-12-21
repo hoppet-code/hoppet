@@ -27,7 +27,7 @@ module evolution
      type(split_mat)              :: P
      type(mass_threshold_mat)  :: MTM ! assume we have just one of these...
      real(dp)                :: MTM_coeff, Q_init, Q_end
-     logical                 :: cross_mass_threshold
+     logical                 :: cross_mass_threshold ! better name: apply_mass_threshold
      type(evln_operator), pointer :: next
   end type evln_operator
   public :: evln_operator
@@ -353,13 +353,18 @@ contains
     integer  :: nfstore
     
     !-- CHANGE THIS IF HAVE MATCHING AT MUF/=MH
-    if (ev_nloop < 3) return
-    if (.not. mass_steps_on) return
+    if (ev_nloop < 3 .or. (.not. mass_steps_on)) then
+       ! the name cross_mass_threshold isn't great -- maybe better to rename
+       ! it apply_mass_threshold
+       if (present(evop)) evop%cross_mass_threshold = .false.
+       return
+    end if
     if (dh%factscheme /= factscheme_MSBar) then
        call wae_Warn(warn_DIS,&
             &'ev_CrossMassThreshold',&
             &'Factscheme is not MSBar;&
             & mass thresholds requested but not implemented')
+       if (present(evop)) evop%cross_mass_threshold = .false.
        return
     end if
     
@@ -375,13 +380,6 @@ contains
        call wae_error('ev_CrossMassThreshold',&
             &  'direction had unsupported value of',intval=direction)
     end select
-    
-    !if (direction /= 1) then
-    !   call wae_Warn(max_warn,warn_Direction,&
-    !        &'ev_CrossMassThreshold',&
-    !        &'Direction/=1; mass thresholds requested but not implemented')
-    !   return
-    !end if
     
     !-- now actually do something!
     !muR   = quark_masses(nf_int) * ev_MuR_Q
@@ -417,6 +415,7 @@ contains
     res = pdfdist
 
     do
+       ! "cross" here really means "apply"
        if (this_evop%cross_mass_threshold) then
           ! NB: this never occurs on first pass
           res = res + this_evop%MTM_coeff * (this_evop%MTM .conv. res)

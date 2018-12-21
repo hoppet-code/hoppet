@@ -768,7 +768,7 @@ contains
 
     nQ = ilnlnQ_hi - ilnlnQ_lo
     if (nQ < ubound(lnlnQ_wgts,1)) call wae_error('get_lnlnQ_wgts',&
-         & 'lnlnQ_wgts to small for requested Q interpolation')
+         & 'lnlnQ_wgts too small for requested Q interpolation')
     call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
 
   end subroutine get_lnlnQ_wgts

@@ -1,3 +1,45 @@
+
+2017-10-31  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/welcome_message.f90 (HoppetWelcomeMessage):
+	switched to 1.2.1-devel
+
+2017-10-30  Gavin Salam  <gavin.salam@cern.ch>
+
+	* NEWS:
+	finalised NEWS file for 1.2.0 release
+
+	* src/welcome_message.f90 (HoppetWelcomeMessage):
+	changed version to 1.2.0
+
+	* src/new_as.f90 (na_Init): 
+	fixed bug that arises when nloop is not specified (use of optional
+	nloop argument instead of nah%nloop)
+
+	* doc/HOPPET-v1-doc.tex: 
+	* tarit.sh:
+	added pdf files to tarball and added a whole bunch of pdf files +
+	changed documentation so that it works with both pdflatex and
+	latex.
+	Also changed front page to reflect contributions from Frederic and
+	Alexander. 
+
+	* tests/README-hoppet-tests.org:
+	added some old test output (from April 22)
+
+2017-02-02  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/evolution.f90 (ev_CrossMassThreshold):
+	bug fix to address issue reported by Florian Lyonnet of error of
+
+	   FATAL ERROR in cobj_ConvMTM:
+           Mass threshold matrix is undefined
+
+	when using 2-loop cached evolution. It was caused by
+	evop%cross_mass_threshold not being properly initialised to
+	.false. in that situation. Also removed some redundant code
+	lines.
+
 2016-07-08  Frédéric Dreyer  <frederic.dreyer@gmail.com>
 
 	* src/structure_functions.f90:
@@ -98,7 +140,7 @@
 
 	* src/streamlined_interface.f90:
 	removed commented bits of code and improved comments in some
-	places now that tests have been run hoppetEvalSplit.
+	places now that tests have been run for hoppetEvalSplit.
 
 2015-04-21  Gavin Salam  <gavin.salam@cern.ch>
 

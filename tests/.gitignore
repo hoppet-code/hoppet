@@ -1,0 +1,13 @@
+/*.mod
+/determine_accuracies
+/Makefile.bak
+/streamlined_multisplit
+/split_mat_ops
+/msbar_tests
+/lumi_tests
+/intrinsic_charm
+/bidirectional_mass_thresholds
+/.makef95.prefix
+/Makefile
+/# Added by svn-ignore on 2017-10-30
+/coupling

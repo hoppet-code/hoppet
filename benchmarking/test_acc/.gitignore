@@ -1,0 +1,7 @@
+/Makefile
+/.compiler
+/compare2files
+/compare2files_v2
+/*.mod
+/.makef95.prefix
+/Makefile.bak
