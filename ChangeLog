@@ -1,5 +1,21 @@
 2018-12-27  Gavin Salam  <gavin.salam@cern.ch>
 
+	* src/qed_evolution.f90:
+	this now handles evolution below the QCD scale, using a zero QCD
+	coupling to signal to the evolution.f90 routine that it should not
+	do any QCD evolution there.
+
+	* src/evolution.f90:
+	some small changes to aid communibation with the QED evolution
+	code, including skipping certain bits of code when alphas = 0, and
+	changing ev_force_old_dt to be a variable (rather than a
+	parameter), so that one can play with it.
+
+	* src/qed_coupling.f90 (qed_coupling_module):
+	switched the scale for the turn-on of 3 light flavours
+	to be 1 GeV, to avoid issues with QCD couplings that aren't
+	defined below that scale. 
+
 	* src/qcd_coupling.f90: 
 	* src/new_as.f90:
 	added support for nloop = 0, i.e. fixed coupling. It sets up all

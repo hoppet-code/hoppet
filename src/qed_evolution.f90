@@ -38,6 +38,12 @@ contains
     integer  :: nf_old, nf_new
     real(dp) :: lcl_Q_init, lcl_Q_end
     type(dglap_holder)  :: dhcopy
+    type(running_coupling), target :: coupling_qcd_zero
+
+    ! create a zero QCD coupling for use when scale is too low
+    ! (it's really a dummy coupling, just to satisfy some constraints
+    ! from the evolution.f90 module)
+    call InitRunningCoupling(coupling_qcd_zero, alfas=0.0_dp, Q=1.0_dp, nloop = 0)
     
     ! these copies are cheap, because they just copy pointers
     dhcopy = dh
@@ -77,16 +83,29 @@ contains
           lcl_Q_end  = max(Q_end,  coupling_qed%thresholds(iqed  ))
        end if
 
+       
        ! set up the number of flavours
        ! (/ nleptons, ndown, nup /)
        nflav = coupling_qed%nflav(:,iqed)
        nf_new = nflav(2) + nflav(3)
-       !write(0,*) lcl_Q_init, lcl_Q_end, nf_new 
-       call SetNfDglapHolder(dhcopy, nf_new, QuarkMassesAreMSbar(coupling_qcd))
+       !write(0,*) lcl_Q_init, lcl_Q_end, nf_new
+       call qcd_SetNf(nf_new)
+       ! we can only handle QCD evolution when nf >= 3
+       if (nf_new >= 3) then
+          call SetNfDglapHolder(dhcopy, nf_new, QuarkMassesAreMSbar(coupling_qcd))
+          ev_ash => coupling_qcd
+          ev_force_old_dt = .false.
+       else
+          ev_ash => coupling_qcd_zero
+          ! this ensures that we don't "intelligently" set the number of
+          ! evolution steps to zero on the basis of a zero coupling...
+          ev_force_old_dt = .true.
+       end if
        call QEDSplitMatSetNf(qed_sm_copy, nflav(1), nflav(2), nflav(3))
 
-       ! if we have changed nf, include threshold term
-       if (nf_new /= nf_old) then
+       ! if we have changed nf, include threshold term; but only for transitions
+       ! where one of the values is above three
+       if (nf_new /= nf_old .and. nf_new >=3 .and. nf_old >= 3) then
           call ev_CrossMassThreshold(dhcopy,coupling_qcd,direction,pdf(:,:ncompmax))
        end if
 
@@ -96,6 +115,7 @@ contains
        if (ev_nloop >= 3) ev_PNNLO => dhcopy%P_NNLO
        ev_nqcdloop_qed = nqcdloop_qed
        
+
        call ev_evolveLocal(pdf, lcl_Q_init, lcl_Q_end, ev_conv_qed)
        
        nf_old = nf_new
@@ -111,9 +131,13 @@ contains
     real(dp) :: alpha
     dpdf = zero
 
-    ! get the QCD part of the evolution
+    ! get the QCD part of the evolution; NB: if alphas
+    ! is zero, then this just returns a zero derivative,
+    ! without trying to call any of the splitting functions
+    ! (which may not be sensibly set up), but
+    ! while still setting up things we need such as the
+    ! jacobian.
     call ev_conv(u, pdf(:,:ncompmax), dpdf(:,:ncompmax))
-
     
     ! then get the QED and mixed QED-QCD parts, making use of the
     ! jacobian, as2pi and last_Q values made available in ev_conv

@@ -28,9 +28,9 @@ module evolution_helper
   real(dp) :: ev_muR_Q, fourpibeta0_lnmuR_Q
   logical  :: ev_untie_nf = .false.
 
-  ! this was introduced for testing --- should now never be
-  ! necessary to set it to .true.
-  logical,  parameter :: ev_force_old_dt = .false.
+  ! this was introduced for testing --- should now never be necessary
+  ! to set it to .true., except in the QED override
+  logical             :: ev_force_old_dt = .false.
   real(dp), parameter :: ev_minalphadiff     = 0.02_dp
   integer,  parameter :: ev_du_is_dt         = 1
   integer,  parameter :: ev_du_is_dtas_fixed = 2
@@ -89,10 +89,13 @@ contains
     !-- now work out jacobians...
     as1 = ev_asval(Q_init)
     as2 = ev_asval(Q_end)
-
+    
     ! allow for both signs of coupling (and sign changes)
     ! See CCN25-95 for formulae (NB: 0->1 and 1->2)
     if (ev_force_old_dt) then
+       ! if the couplings are zero, then we expect that
+       ! another type of evolution may be taking place
+       ! and allow a normal evolution.
        ev_du_type = ev_du_is_dt
        u1 = t1; u2 = t2
        n  = ceiling(abs(t2-t1)/(ev_tmp_du_ballpark/du_dt))
@@ -161,12 +164,22 @@ contains
     
     Q     = exp(half*t)
     as2pi = ev_asval(Q)/twopi
-    
+
     ! store things, so that e.g. the QED evolution routine can make use of it
     ev_conv_last_jacobian = jacobian
     ev_conv_last_Q        = Q
     ev_conv_last_as2pi    = as2pi
 
+    ! if the coupling is zero, then we can simply bail out with a
+    ! zero derivative; NB: this is useful in cases where we want
+    ! some intermediate info for more complex evolution (e.g. QED),
+    ! but we know we won't actually be doing any evolution within
+    ! the QCD part.
+    if (as2pi == zero) then
+       dpdf = zero
+       return
+    end if
+    
     select case (ev_nloop)
     case(1)
        dpdf = (jacobian * as2pi) * (ev_PLO .conv. pdf)
