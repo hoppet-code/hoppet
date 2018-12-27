@@ -76,7 +76,7 @@ module couplings
   real(dp), parameter :: initial_dt = 0.4_dp, default_eps = 1e-8_dp
   real(dp), parameter :: subsegment_size = 2.5_dp
   ! something that we can safely divide by but that should
-  ! not cause problems when addign things on
+  ! not cause problems when adding things on
   real(dp), parameter :: fake_zero_dt = 1e-200_dp
   ! fraction of dt by which we will consider it to be safe to extrapolate
   real(dp), parameter :: safe_extrapolation = 0.02
