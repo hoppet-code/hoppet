@@ -97,7 +97,7 @@ contains
     nah%alfas = default_or_opt(0.118_dp, alfas)
     nah%Q     = default_or_opt(91.2_dp, Q)
     nah%nloop = default_or_opt(2, nloop)
-    
+
     nah%fixnf = default_or_opt(nofixnf, fixnf)
 
     nah%muMatch_mQuark = default_or_opt(one, muMatch_mQuark)
@@ -120,7 +120,7 @@ contains
     end do
 
     ! check we have CA=3 and CF=4/3 for the nloop >=4 case
-    if (nloop >= 4) then
+    if (nah%nloop >= 4) then
        if (ca /= ca_def) then
           call wae_error('na_Init','CA/=CA_def not supported for nloop >=4. CA is',dbleval=ca)
        else if (abs(cf - cf_def) > 1e-10_dp) then

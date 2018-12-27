@@ -1,0 +1,7 @@
+/Makefile
+/prec_and_timing
+/benchmark
+/*.mod
+/.compiler
+/.makef95.prefix
+/Makefile.bak
