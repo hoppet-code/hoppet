@@ -13,7 +13,8 @@ program test_qed_obj
   
   call InitGridDefDefault(grid, dy, ymax)
   call InitQEDSplitMat(grid, qed_split)
-  call qed_split%SetNf(3,3,2)
+  !call qed_split%SetNf(3,3,2)
+  call QEDSplitMatSetNf(qed_split, 3,3,2)
   
   call AllocGridQuant(grid,  pdf, -6, ncompmaxQED)
   call AllocGridQuant(grid, dpdf, -6, ncompmaxQED)
