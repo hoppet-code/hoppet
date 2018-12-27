@@ -103,10 +103,10 @@ module sub_defs_io
   end interface
 
   interface
-     integer function int_value(string)
+     integer function value(string)
         implicit none
         character(*),  intent(in)  ::   string
-     end function int_value
+     end function value
   end interface
 
   interface
@@ -263,8 +263,8 @@ module track_args
   use sub_defs_io_consts
   implicit none
   private
-  logical, allocatable, save ::argsused(:)
-  logical :: started = .false.
+  logical, allocatable, save :: argsused(:)
+  logical, save :: started = .false.
   integer, save :: narg
   character(len=*), parameter :: sep = &
        &'=============================================================='
@@ -273,15 +273,13 @@ module track_args
 
 contains
 
+  !----------------------------------------------------------------------
+  ! registers the fact that argument number iarg has been used
   subroutine ta_RegisterUsed(iarg)
     integer, intent(in)  :: iarg
-    if (.not. started) then
-       narg = lcl_iargc()
-       allocate(argsused(narg))
-       argsused = .false.
-       started = .true.
-    end if
     
+    call ta_TrackingOn() 
+
     if (iarg > narg .or. iarg < 1) then
        write(0,*) 'In ta_RegisterUsed tried to set illegal arg', iarg
        stop
@@ -289,6 +287,17 @@ contains
     argsused(iarg) = .true.
   end subroutine ta_RegisterUsed
 
+  !----------------------------------------------------------------------
+  ! makes sure that tracking of argument usage is turned on
+  subroutine ta_TrackingOn()
+    if (.not. started) then
+       narg = lcl_iargc()
+       allocate(argsused(narg))
+       argsused = .false.
+       started = .true.
+    end if
+  end subroutine ta_TrackingOn
+  
   
   !--------------------------------------------------------
   !! ErrDev = device to which one should send the list of 
@@ -299,6 +308,8 @@ contains
     integer :: i
     character(len=max_arg_len) :: argi
     logical :: writeit
+
+    call ta_TrackingOn() 
 
     check = .true.
     writeit = present(ErrDev)
@@ -312,7 +323,7 @@ contains
                   &'WARNING / ERROR: the following options were not recognized'
           end if
           check = .false.
-          write(ErrDev,*) trim(argi)
+          if(writeit) write(ErrDev,*) trim(argi)
        end if
     end do
     if ((.not. check) .and. writeit ) write(ErrDev,*) sep
@@ -327,6 +338,8 @@ contains
     integer, optional :: ErrDev
     integer :: i
     character(len=max_arg_len) :: argi
+
+    call ta_TrackingOn() 
 
     if (narg > 0 ) then 
        check = all(argsused)
@@ -690,7 +703,7 @@ integer function int_val_arg(argk, default_val)
   if (trim(string) == '-' .and. present(default_val)) then
      int_val_arg = default_val
   else
-     int_val_arg = int_value(string)
+     int_val_arg = value(string)
   end if
 
 end function int_val_arg
@@ -702,7 +715,7 @@ end function int_val_arg
 !! GPS 30/11/94+13/11/96
 !======================================================================
 
-integer function int_value(string) result(value)
+integer function value(string)
       implicit none
       character(*),  intent(in)  ::   string
       !----------------------------------------------------------------
@@ -735,7 +748,7 @@ loop: do i = 1, len(string)
          endif
       end do loop
       value = value * sgn
-end function int_value
+end function value
 
 !----------------------------------------------------------------------
 !! Return the dble value corresponding to the argk^th command line
