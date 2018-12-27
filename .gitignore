@@ -1,3 +1,4 @@
+*.o
 /.compiler
 /config.log
 /hoppet-config

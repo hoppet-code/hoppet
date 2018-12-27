@@ -1,3 +1,17 @@
+2018-12-27  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/qcd_coupling.f90: 
+	* src/new_as.f90:
+	added support for nloop = 0, i.e. fixed coupling. It sets up all
+	the usual infrastructure (flavour thresholds, etc.), but then when
+	you ask for the coupling, it just returns the fixed value that it
+	was initialised with.
+
+	* tests/coupling-fixed.f90: *** ADDED ***
+	for running a quick test that the new fixed-coupling functionality
+	works.
+
+
 2017-10-31  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/welcome_message.f90 (HoppetWelcomeMessage):
