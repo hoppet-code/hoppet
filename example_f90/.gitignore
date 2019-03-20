@@ -1,9 +1,11 @@
-/tabulation_example
+*~
 /*.mod
-/tabulation_example_2
-/Makefile
 /.compiler
 /.makef95.prefix
+/Makefile
 /Makefile.bak
 /sumrules
+/tabulation_example
+/tabulation_example_2
 /tabulation_example_streamlined
+tabulation_example_diehl_crosschecks
