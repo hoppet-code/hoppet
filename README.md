@@ -133,8 +133,9 @@ object (.o) files are essentially empty.
 Branches
 --------
 
-The master branch provides the official HOPPET release. Two additional
-branches are in use for specific physics applications:
+The [master](https://github.com/gavinsalam/hoppet/tree/master) branch
+provides the official HOPPET release. Two additional branches are in use
+for specific physics applications:
 
 - the [qed](https://github.com/gavinsalam/hoppet/tree/qed) branch
   provides evolution including QED and mixed QED+QCD splitting
