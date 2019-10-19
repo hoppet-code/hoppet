@@ -1,6 +1,5 @@
-----------------------------------------------------------
 HOPPET: Higher Order Perturbative Parton Evolution Toolkit
-----------------------------------------------------------
+==========================================================
 
 HOPPET is a Fortran 95 package for carrying out DGLAP evolution and
 other common manipulations of parton distribution functions (PDFs).
@@ -20,7 +19,7 @@ for a user to extend the facilities already provided.
 
 The latest version can always be obtained from
 
-    svn checkout http://svn.hepforge.org/hoppet/trunk hoppet
+    git clone https://github.com/gavinsalam/hoppet
 
 Details of changes are to be found in the file ChangeLog, while
 summaries of changes between releases are in ReleaseNotes.
@@ -32,33 +31,25 @@ F95 compilers
 
 You will need a Fortran 95 compiler to compile this package. 
 
-The gfortran compiler is widespread. Versions upwards of a recent 4.3
-are OK. Older versions generate incorrect code for HOPPET and should
-be avoided. The code is acceptably fast, though not quite as fast as
-with commercial compilers.
+The gfortran compiler is widespread. Versions upwards of 4.3 are
+OK. Older versions (which might be present on legacy systems) generate
+incorrect code for HOPPET and should be avoided. The code is
+acceptably fast, though in tests some years ago was not quite as fast
+as with commercial compilers.
 
-The free g95 (www.g95.org) compiler is another option, though when
-tested around 2008 its executables were fairly slow. It is easy to
-install if you don't already have a recent version on your system.
-
-The intel (ifort) compiler (versions 8.1.033 upwards) may still exist in a
-semi-free version for non-commercial use under linux and produces fast
-executables.
-
-The release has also been tested with the lahey lf95 commercial
-compiler, which also generates fast code.
-
+The code has also been tested with the intel (ifort, versions 8.1.033
+upwards) and lahey (lf95) compilers.
 
 Compilation
 -----------
 For details see the INSTALL file. To get moving quickly, just specify
 an installation prefix and a fortran compiler (FC), and then do
 
-  ./configure --prefix="..."  FC="..."
-  make 
-  make check
-  make install      [if you're interested]
-  make install-mod  [if you want the f90 module files installed too]
+    ./configure --prefix="..."  FC="..."
+    make 
+    make check
+    make install      [if you're interested]
+    make install-mod  [if you want the f90 module files installed too]
 
 This is not autotools based: if you're used to more advanced usage of
 autotools scripts, you'll be disappointed here...
@@ -66,46 +57,50 @@ autotools scripts, you'll be disappointed here...
 Example programs
 ----------------
 
-The main example program is examples_f90/tabulation_example.f90
+The main example program is
+[example_f90/tabulation_example.f90](example_f90/tabulation_example.f90)
 
 An equivalent program with the startup, pdf initialisation and
 evolution spread across different subroutines is given as
 tabulation_example_2.
 
 An equivalent program based on the streamlined interface is given as
-tabulation_example_streamlined.
+[tabulation_example_streamlined](example_f90/tabulation_example_streamlined.f90).
 
-Compiling f77 example programs (examples_f77) using g77 is a little
-trickier because of the need to include the correct f95
-libraries. Look inside the suppplied Makefile and if need be edit it
-manually.
+Some users may prefer a pure f77 interface. Corresponding examples are
+to be found in the [example_f77/](example_f77) directory. Look inside
+the suppplied Makefile and if need be edit it manually.
 
      cd ../example_f77
      # <edit the Makefile directly>
      # compile
      make tabulation_example
-     # run the program should give output identical to that from
+     # run the program. Should give output identical to that from
      # example_f90/tabulation_example
      ./tabulation_example
 
-In the same directory there is a C++ example
+In the same directory there is a C++ [example](example_f77/cpp_tabulation_example.cc)
 
      make cpp_tabulation_example
      ./cpp_tabulation_example
 
 which again does the same things (though in this case it uses the
-simpler of the two vanilla initialization calls).
+simpler of the two streamlined initialization calls).
 
-Other programs provided in the example_f77/ directory illustrate the
-use of the vanilla interface in conjunction with LHAPDF
-(compare_lhapdf_hoppet.f), and show how use the feature of getting
-convolutions with splitting functions (convolution_example.f).
+Other programs provided in the [example_f77/](example_f77) directory
+illustrate the use of the streamlined interface in conjunction with
+LHAPDF ([compare_lhapdf_hoppet.f](example_f77/compare_lhapdf_hoppet.f)),
+and show how to use the feature of getting convolutions with splitting
+functions (convolution_example.f).
 
 ----------------------------------------------------------------------
 Documentation
 -------------
 
-Detailed documentation is available as doc/HOPPET-v1-doc.tex .
+Detailed documentation is available as
+[doc/HOPPET-v1-doc.tex](doc/HOPPET-v1-doc.tex). If you use HOPPET in a
+scientific publication, please refer to
+http://arxiv.org/abs/0804.3755. 
 
 
 ----------------------------------------------------------------------
@@ -123,13 +118,31 @@ Compiler warnings
 When the hoppet library is being built, on some systems the following
 warnings may be reported 
 
-  /usr/bin/ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
-  /usr/bin/ranlib: file: libhoppet_v1.a(types.o) has no symbols
-  
-  ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
-  ranlib: file: libhoppet_v1.a(types.o) has no symbols
+    /usr/bin/ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
+    /usr/bin/ranlib: file: libhoppet_v1.a(types.o) has no symbols
+    
+    ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
+    ranlib: file: libhoppet_v1.a(types.o) has no symbols
 
 These warnings do not indicate an actual problem. They are simply a
 consequence of the fact that some of the source (.f90) files contain
 only information about interfaces and constants, so that the resulting
 object (.o) files are essentially empty.
+
+----------------------------------------------------------------------
+Branches
+--------
+
+The [master](https://github.com/gavinsalam/hoppet/tree/master) branch
+provides the official HOPPET release. Two additional branches are in use
+for specific physics applications:
+
+- the [qed](https://github.com/gavinsalam/hoppet/tree/qed) branch
+  provides evolution including QED and mixed QED+QCD splitting
+  functions, as used in the [LUXqed](http://luxqed.web.cern.ch/luxqed/)
+  project. 
+- the
+  [struct-func-devel](https://github.com/gavinsalam/hoppet/tree/struct-func-devel)
+  branch provides tools for calculating structure functions, as used in the
+  [proVBFH](https://provbfh.hepforge.org/) project.
+
