@@ -128,3 +128,20 @@ These warnings do not indicate an actual problem. They are simply a
 consequence of the fact that some of the source (.f90) files contain
 only information about interfaces and constants, so that the resulting
 object (.o) files are essentially empty.
+
+----------------------------------------------------------------------
+Branches
+--------
+
+The master branch provides the official HOPPET release. Two additional
+branches are in use for specific physics applications:
+
+- the [qed](https://github.com/gavinsalam/hoppet/tree/qed) branch
+  provides evolution including QED and mixed QED+QCD splitting
+  functions, as used in the [LUXqed](http://luxqed.web.cern.ch/luxqed/)
+  project. 
+- the
+  [struct-func-devel](https://github.com/gavinsalam/hoppet/tree/struct-func-devel)
+  branch provides tools for calculating structure functions, as used in the
+  [proVBFH](https://provbfh.hepforge.org/) project.
+
