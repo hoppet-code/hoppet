@@ -67,8 +67,8 @@ An equivalent program based on the streamlined interface is given as
 tabulation_example_streamlined.
 
 Some users may prefer a pure f77 interface. Corresponding examples are
-to be found in examples_f77/. Look inside the suppplied Makefile and
-if need be edit it manually.
+to be found in the [examples_f77/](examples_f77) directory. Look inside
+the suppplied Makefile and if need be edit it manually.
 
      cd ../example_f77
      # <edit the Makefile directly>
