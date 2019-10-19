@@ -57,17 +57,18 @@ autotools scripts, you'll be disappointed here...
 Example programs
 ----------------
 
-The main example program is examples_f90/tabulation_example.f90
+The main example program is
+[example_f90/tabulation_example.f90](example_f90/tabulation_example.f90)
 
 An equivalent program with the startup, pdf initialisation and
 evolution spread across different subroutines is given as
 tabulation_example_2.
 
 An equivalent program based on the streamlined interface is given as
-tabulation_example_streamlined.
+[tabulation_example_streamlined](example_f90/tabulation_example_streamlined.f90).
 
 Some users may prefer a pure f77 interface. Corresponding examples are
-to be found in the [examples_f77/](examples_f77) directory. Look inside
+to be found in the [example_f77/](example_f77) directory. Look inside
 the suppplied Makefile and if need be edit it manually.
 
      cd ../example_f77
@@ -78,7 +79,7 @@ the suppplied Makefile and if need be edit it manually.
      # example_f90/tabulation_example
      ./tabulation_example
 
-In the same directory there is a C++ example
+In the same directory there is a C++ [example](example_f77/cpp_tabulation_example.cc)
 
      make cpp_tabulation_example
      ./cpp_tabulation_example
@@ -86,16 +87,20 @@ In the same directory there is a C++ example
 which again does the same things (though in this case it uses the
 simpler of the two streamlined initialization calls).
 
-Other programs provided in the example_f77/ directory illustrate the
-use of the streamlined interface in conjunction with LHAPDF
-(compare_lhapdf_hoppet.f), and show how to use the feature of getting
-convolutions with splitting functions (convolution_example.f).
+Other programs provided in the [example_f77/](example_f77) directory
+illustrate the use of the streamlined interface in conjunction with
+LHAPDF ([compare_lhapdf_hoppet.f](example_f77/compare_lhapdf_hoppet.f)),
+and show how to use the feature of getting convolutions with splitting
+functions (convolution_example.f).
 
 ----------------------------------------------------------------------
 Documentation
 -------------
 
-Detailed documentation is available as doc/HOPPET-v1-doc.tex .
+Detailed documentation is available as
+[doc/HOPPET-v1-doc.tex](doc/HOPPET-v1-doc.tex). If you use HOPPET in a
+scientific publication, please refer to
+http://arxiv.org/abs/0804.3755. 
 
 
 ----------------------------------------------------------------------
