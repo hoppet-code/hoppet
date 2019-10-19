@@ -154,6 +154,11 @@ contains
        !   in derivative calculation
        seg%beta0 = beta0
        select case(nah%nloop)
+       case(0)
+         seg%beta0 = zero
+         seg%beta1 = zero
+         seg%beta2 = zero
+         seg%beta3 = zero
        case(1)
           seg%beta1 = zero
           seg%beta2 = zero
@@ -182,6 +187,12 @@ contains
        allocate(seg%ra(0:nbin))
     end do
     !write(0,*) 'new_as: used total bins ', nbin_total
+
+
+    ! nloop = 0 will be fixed coupling, in which case there is nothing
+    ! else to do (we put this after the last of the "allocate"
+    ! statements, to help ensure that deallocation works smoothly)
+    if (nah%nloop == 0) return
 
     !-- find out in which segment we start
     tstart = tOfQ(nah%Q)
@@ -311,6 +322,11 @@ contains
     integer  :: nseg, i, n
     integer, save :: warn_id = warn_id_INIT
     integer, parameter :: max_warn = 1
+
+    if (nah%nloop == 0) then
+      res = nah%alfas
+      return
+    end if
 
     t = tOfQ(Q)
 

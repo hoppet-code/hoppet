@@ -146,6 +146,9 @@ contains
   ! Feature added 21/02/2011: masses_are_MSbar, default is false; if
   ! true then masses are assumed to be MSbar masses, evaluated at the
   ! mass itself, m_MSbar(m_MSbar).
+  !
+  ! As of 2018-12-27: it should now accept nloop = 0, to provide a
+  ! fixed-coupling class
   subroutine as_Init_ash(coupling, alfas, Q, nloop, fixnf, &
        & quark_masses, masses_are_MSbar, muMatch_mQuark, use_nah, qcdl5)
     use assertions

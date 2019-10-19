@@ -1,13 +1,18 @@
+*~
+/# Added by svn-ignore on 2017-10-30
 /*.mod
-/determine_accuracies
-/Makefile.bak
-/streamlined_multisplit
-/split_mat_ops
-/msbar_tests
-/lumi_tests
-/intrinsic_charm
-/bidirectional_mass_thresholds
 /.makef95.prefix
 /Makefile
-/# Added by svn-ignore on 2017-10-30
+/Makefile.bak
+/bidirectional_mass_thresholds
 /coupling
+/determine_accuracies
+/intrinsic_charm
+/lumi_tests
+/msbar_tests
+/split_mat_ops
+/streamlined_multisplit
+coupling-fixed
+test_qed
+test_qed_lepton_evol
+test_qed_obj
