@@ -1,3 +1,9 @@
+2020-04-14  Gavin Salam  <gavin.salam@cern.ch>
+
+	* benchmarking/benchmark.f90:
+	changed sub_defs_io "use" to avoid conflicts with 
+	Value(...) from hoppet (as reported by Federico Buccioni)
+
 2018-12-27  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/qed_evolution.f90:
