@@ -81,7 +81,7 @@ contains
   !!
   !! Human format is that produced by the pdf_general module.
   !! i.e. (tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t)
-  pure subroutine pdfr_HumanToEvln_sc(prep, qh, qe)
+  subroutine pdfr_HumanToEvln_sc(prep, qh, qe)
     type(pdf_rep), intent(in)  :: prep
     real(dp),      intent(in)  :: qh(ncompmin:)
     real(dp),      intent(out) :: qe(ncompmin:)

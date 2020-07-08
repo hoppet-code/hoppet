@@ -1,3 +1,10 @@
+2020-07-08  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/pdf_representation.f90:
+	removed "pure" from pdfr_HumanToEvln_sc, because it wasn't being
+	relied on and caused issues with the -fno-automatic option
+	that is used in POWHEG.
+
 2018-12-27  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/qcd_coupling.f90: 
