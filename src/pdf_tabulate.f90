@@ -123,6 +123,8 @@ contains
   !! More sensible extrapolation beyond Q range offers scope for future 
   !! improvement here!
   !!
+  !! If the pdf_table had previously been allocated, then delete its
+  !! contents before the new allocations
   subroutine pdftab_AllocTab_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
     type(grid_def),    intent(in)  :: grid
     type(pdf_table),      intent(out) :: tab
