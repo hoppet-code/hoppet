@@ -40,6 +40,7 @@ module pdf_tabulate
   type pdf_table
      ! basic elements of a pdf_table, common regardless of whether we
      ! additionally have the nf segments...
+     logical :: allocated = .false.
      type(grid_def) :: grid
      real(dp) :: default_dlnlnQ
      real(dp) :: lnlnQ_min, lnlnQ_max, lambda_eff
@@ -131,6 +132,10 @@ contains
     logical,  intent(in), optional :: freeze_at_Qmin
     !----------------------------------------------
     integer :: iQ
+
+    ! clear memory if the table was already allocated
+    if (tab%allocated) call Delete(tab)
+
     tab%grid = grid
     tab%lambda_eff = min(half*Qmin, default_lambda_eff)
     tab%lnlnQ_min = lnln(tab,Qmin)
@@ -156,7 +161,9 @@ contains
        tab%lnlnQ_vals(iQ) = tab%lnlnQ_min + iQ * tab%dlnlnQ
        tab%Q_vals(iQ) = invlnln(tab,tab%lnlnQ_vals(iQ))
     end do
-    
+
+    ! label this tab as allocated
+    tab%allocated = .true.
   end subroutine pdftab_AllocTab_
 
 
