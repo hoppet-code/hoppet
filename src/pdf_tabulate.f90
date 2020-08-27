@@ -731,6 +731,9 @@ contains
        !write(0,*) "CURRENTLY UNABLE TO DELETE EVOP CONTENTS"
        deallocate(tab%evops)
     end if
+    ! reset the information about allocation so that we don't
+    ! try to delete something that has already been deleted
+    tab%allocated = .false.
   end subroutine pdftab_DelTab_0d
   subroutine pdftab_DelTab_1d(tab)
     type(pdf_table), intent(inout) :: tab(:)
