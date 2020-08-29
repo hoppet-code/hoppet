@@ -126,8 +126,8 @@ contains
   !! If the pdf_table had previously been allocated, then delete its
   !! contents before the new allocations
   subroutine pdftab_AllocTab_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
-    type(grid_def),    intent(in)  :: grid
-    type(pdf_table),      intent(out) :: tab
+    type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
     integer,  intent(in), optional :: lnlnQ_order
@@ -173,8 +173,8 @@ contains
   !---------------------------------------------------------
   !! 1d overloaded version of AllocPdfTable
   subroutine pdftab_AllocTab_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
-    type(grid_def), intent(in)     :: grid
-    type(pdf_table),   intent(out)    :: tab(:)
+    type(grid_def),    intent(in)     :: grid
+    type(pdf_table),   intent(inout)  :: tab(:)
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
     integer,  intent(in), optional :: lnlnQ_order
@@ -327,8 +327,8 @@ contains
   !! tab are not however copied.
   !! 
   subroutine pdftab_AllocTab_fromorig(tab, origtab)
-    type(pdf_table), intent(out) :: tab
-    type(pdf_table), intent(in)  :: origtab
+    type(pdf_table), intent(inout) :: tab
+    type(pdf_table), intent(in)    :: origtab
 
     tab = origtab
     !-- this is the only thing that is not taken care of...
@@ -351,8 +351,8 @@ contains
   !---------------------------------------------------------
   !! 1d-overloaded version of pdftab_AllocTab_fromorig
   subroutine pdftab_AllocTab_fromorig_1d(tab, origtab)
-    type(pdf_table), intent(out) :: tab(:)
-    type(pdf_table), intent(in)  :: origtab
+    type(pdf_table), intent(inout) :: tab(:)
+    type(pdf_table), intent(in)    :: origtab
     integer :: i
     do i = 1, size(tab)
        call pdftab_AllocTab_fromorig(tab(i), origtab)

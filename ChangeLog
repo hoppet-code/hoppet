@@ -1,3 +1,9 @@
+2020-08-29 Gavin Salam<gavin.salam@physics.ox.ac.uk>
+
+	* src/pdf_tabulate.f90:
+	replaced intent(out) with intent(inout) so that
+	automatic deletion works
+
 2020-08-27 Gavin Salam<gavin.salam@physics.ox.ac.uk>
 
 	* src/pdf_tabulate.f90
