@@ -1,3 +1,9 @@
+2021-05-12  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/CMakeLists.txt:
+	added this from Gregory Soyez to facilitate
+	use with other projects
+
 2020-08-29 Gavin Salam<gavin.salam@physics.ox.ac.uk>
 
 	* src/pdf_tabulate.f90:
