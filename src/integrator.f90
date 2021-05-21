@@ -60,17 +60,19 @@ contains
 2   C1=HF*(BB+AA) 
     C2=HF*(BB-AA) 
     S8=0 
-    DO 3 I = 1,4 
+    DO I = 1,4 
        U=C2*X(I) 
        pmult = ((c1+u) - A)/(B-A) * (BMult -AMult) + AMult
        mmult = ((c1-u) - A)/(B-A) * (BMult -AMult) + AMult
-3      S8=S8+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+       S8=S8+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+    END DO
     S16=0 
-    DO 4 I = 5,12 
+    DO I = 5,12 
        U=C2*X(I) 
        pmult = ((c1+u) - A)/(B-A) * (BMult -AMult) + AMult
        mmult = ((c1-u) - A)/(B-A) * (BMult -AMult) + AMult
-4      S16=S16+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+       S16=S16+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+    END DO
     S16=C2*S16 
     IF(ABS(S16-C2*S8) .LE. EPS*(1+ABS(S16))) THEN 
        H=H+S16 
@@ -132,7 +134,7 @@ contains
 2   C1=HF*(BB+AA) 
     C2=HF*(BB-AA) 
     S8=0 
-    DO 3 I = 1,4 
+    DO I = 1,4 
        U=C2*X(I)
        !-- get original variables...
        xp = (c1+u)**2; xm = (c1-u)**2
@@ -141,9 +143,10 @@ contains
        !-- account for change of weight due two change of var
        pmult = pmult * two*(c1+u)
        mmult = mmult * two*(c1-u)
-3      S8=S8+W(I)*(F(xp)*pmult+F(xm)*mmult) 
+       S8=S8+W(I)*(F(xp)*pmult+F(xm)*mmult) 
+    END DO
     S16=0 
-    DO 4 I = 5,12 
+    DO I = 5,12 
        U=C2*X(I) 
        !-- get original variables...
        xp = (c1+u)**2; xm = (c1-u)**2
@@ -152,7 +155,8 @@ contains
        !-- account for change of weight due two change of var
        pmult = pmult * two*(c1+u)
        mmult = mmult * two*(c1-u)
-4      S16=S16+W(I)*(F(xp)*pmult+F(xm)*mmult) 
+       S16=S16+W(I)*(F(xp)*pmult+F(xm)*mmult) 
+    END DO
     S16=C2*S16 
     IF(ABS(S16-C2*S8) .LE. EPS*(1+ABS(S16))) THEN 
        H=H+S16 
@@ -230,17 +234,19 @@ contains
 2   C1=HF*(BB+AA) 
     C2=HF*(BB-AA) 
     S8=0 
-    DO 3 I = 1,4 
+    DO I = 1,4 
        U=C2*X(I) 
        pmult = product(c1+u - zero_nodes) * norm_nodes + lcl_wgtadd
        mmult = product(c1-u - zero_nodes) * norm_nodes + lcl_wgtadd
-3      S8=S8+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+       S8=S8+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+    END DO
     S16=0 
-    DO 4 I = 5,12 
+    DO I = 5,12 
        U=C2*X(I) 
        pmult = product(c1+u - zero_nodes) * norm_nodes + lcl_wgtadd
        mmult = product(c1-u - zero_nodes) * norm_nodes + lcl_wgtadd
-4      S16=S16+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+       S16=S16+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+    END DO
     S16=C2*S16 
     IF(ABS(S16-C2*S8) .LE. EPS*(1+ABS(S16))) THEN 
        H=H+S16 

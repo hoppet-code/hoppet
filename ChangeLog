@@ -1,3 +1,10 @@
+2021-05-21  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/special_functions.f90:
+	* src/integrator.f90:
+	replaced a set of number-terminated do loops with end do
+	constructs; ran make check to verify results have not changed.
+
 2021-05-12  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/CMakeLists.txt:
