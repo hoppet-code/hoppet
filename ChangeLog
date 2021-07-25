@@ -1,3 +1,10 @@
+2021-07-25  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/convolution.f90:
+	added DisableGridLocking() and RestoreGridLocking()
+	for user programs to be able to more safely handle
+	grid locking suspension.
+
 2021-05-21  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/special_functions.f90:
