@@ -1892,7 +1892,10 @@ contains
        ! regularly done in BFKL). NB Not documented in any CCN -- hopefully
        ! straightforward enough that it can be done in one's head?
        order = -gc%grid%order
-       do i = 1, ny
+       ! limit goes to ny+1 to ensure that everything that can contribute
+       ! to entry at ny is covered (otherwise entry at ny is dicontinuous 
+       ! relative to earlier entries)
+       do i = 1, ny+1
           !-- this is the range of interest
           yl = (i-1) * dy
           yh =  i    * dy

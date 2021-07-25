@@ -5,6 +5,14 @@
 	for user programs to be able to more safely handle
 	grid locking suspension.
 
+	Implemented minor fix to grid_conv initialisation with negative
+	orders, whereby the ny entry of the grid_conv matrix missed one
+	contribution. This doesn't affect normal evolution with physical
+	PDFs, because that element of the grid_conv entry multiplies the
+	pdf at iy=0, which is zero in physical PDFs. But it can affect the
+	use of the grid_conv entries when they are to be interpreted as
+	physical quantities in their own right.
+
 2021-05-21  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/special_functions.f90:
