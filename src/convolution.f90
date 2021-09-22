@@ -1173,7 +1173,9 @@ contains
        call WgtGridQuant(grid%subgd(isub), y, iylo, wgts)
        iylo = iylo + grid%subiy(isub)
     else
-       if (y > grid%ymax*(one+warn_tolerance) .or. y < -warn_tolerance) then
+       ! nan fails all comparison tests; arrange the tests so that
+       ! if we have a nan, then we will get something out of range.
+       if (.not.(y <= grid%ymax*(one+warn_tolerance) .and. y >= -warn_tolerance)) then
           write(0,*) 'WgtGridQuant: &
                &requested function value outside y range'
           write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax

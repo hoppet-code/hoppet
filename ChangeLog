@@ -1,3 +1,9 @@
+2021-09-22 Wed  <gavin.salam@physics.ox.ac.uk>
+
+	* src/convolution.f90:
+	arrange in-range tests for y-in-range to make sure that if y is nan
+	then the test fails.
+
 2021-07-25  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/convolution.f90:
