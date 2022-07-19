@@ -29,6 +29,8 @@ module splitting_functions
   public :: sf_P1fromg, sf_P1fromq
   public :: sf_P1qqV_DIS, sf_P1qg_DIS
 
+  public :: sf_TmSP1qqNS, sf_TP1gg, sf_TP1gq
+
   public :: sf_A2PShq, sf_A2PShg, sf_A2PShg_vogt
   public :: sf_A2NSqq_H, sf_A2Sgg_H, sf_A2Sgq_H
 
@@ -439,7 +441,156 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
     
   end function sf_P1qqBryanTyped
 
+  !======================================================================
+  ! P_NS(x)_timelike = P_NS(x)_timelike + (as/2pi)^2 Delta, where the
+  ! following function returns Delta.
+  !
+  ! Typed in from Eq.(6.39) of Curci-Furmanski-Petronzio
+  function sf_TmSP1qqNS(y) result(res)
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x, omx, lnx, ln1mx
+
+    x = exp(-y)
+    res = zero
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+      omx = one - x
+      lnx = log(x); ln1mx = log(omx)
+      res = CF**2*( 4.0_dp*(one + x**2)/omx * lnx * ln1mx &
+                  + (6.0_dp/omx - 5.0_dp - x)*lnx &
+                  + (one+x - two*(1+x**2)/omx)*lnx**2 &
+                  )
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+       res = res - zero
+    case(cc_DELTA)
+       res = zero
+    end select
+
+    if (cc_piece /= cc_DELTA) res = res * x
+  end function sf_TmSP1qqNS
+
+  !----------------------------------------------------------------------
+  ! typed in from Eq. 6.19 of ESW, together with their statement about
+  ! endpoint contributions being equal to those for the space-like case
+  ! "Real" part tested against apfel::P1Tgg (Regular+Singular)
+  function sf_TP1gg(y) result(res)
+   real(dp), intent(in) :: y
+   real(dp)             :: res
+   real(dp)             :: x
+   real(dp) :: lnx, ln1mx, pgg, S2x, pggmx
+   x = exp(-y)
+   res = zero
+
+   select case(cc_piece)
+   case(cc_REAL,cc_REALVIRT)
+      lnx = log(x); ln1mx = log(one - x)
+      pgg   = (one/(one-x) + one/x -two + x*(one-x))
+      pggmx = (one/(one+x) - one/x -two - x*(one+x))
+      S2x   = sf_S2(x)
+      res =   CF*Tf*(-4 + 12*x + -164/9.0_dp*x**2 &
+           &         + (10 + 14*x +  16/3._dp*x**2 + 16/(3*x))*lnx&
+           &         + 92/(9*x) + 2*(1+x)*lnx**2)&
+           &+ CA*Tf*(2*(1-x) + 26/9._dp*(x**2-1/x) &
+           &         - 4/3._dp*(1+x)*lnx&
+           &         - (20/9._dp + 8/3._dp * lnx) * pgg&
+           &         )&
+           &+ CA**2*(  27*(1-x)/2 + 67/9.0_dp*(x**2-1/x)&
+           &         + (11/3._dp - 25/3._dp*x - 44/(3*x))*lnx&
+           &         - 4*(1+x)*lnx**2 + 2*pggmx*S2x &
+           &         + (4*lnx*ln1mx - 3*lnx**2 + 22/3._dp*lnx - pisq/3._dp + 67/9._dp)*pgg)
+   end select
+   select case(cc_piece)
+   case(cc_VIRT,cc_REALVIRT)
+      pgg = -one/(1-x)
+      res = res + CA**2*pgg*(7.444444444444445_dp - Pi**2/3._dp) - (20*CA&
+          & *pgg*Tf)/9._dp
+   case(cc_DELTA)
+      res = (-4*CA*Tf)/3._dp - CF*Tf + CA**2*(2.6666666666666665_dp&
+          & + 3*zeta3)
+   end select
+
+   if (cc_piece /= cc_DELTA) res = res * x
+   
+  end function sf_TP1gg
+
+  !----------------------------------------------------------------------
+  ! typed in from Eq.(6.18) of ESW; no singular contributions;
+  ! 2*nf*sf_TP1gq(y) tested as coinciding with apfel::P1Tqg(nf)/4;
+  function sf_TP1gq(y) result(res)
+    use special_functions    
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x
+    real(dp) :: lnx, ln1mx, pgq, pgqmx, S1x, S2x
+    x = exp(-y)
+    res = zero
+
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+       lnx = log(x); ln1mx = log(one - x)
+       pgq   = (one + (one-x)**2)/x
+       pgqmx = -(one + (one+x)**2)/x
+       S1x   = -ddilog(1-x)
+       S2x   = sf_S2(x)
+       res =    CF**2 * (-half + 9*half*x + (-8+half*x)*lnx&
+            &            + 2*x*ln1mx + (1-half*x)*lnx**2 &
+            &            + (ln1mx**2 + 4*lnx*ln1mx - 8*S1x - 4*pisq/3)*pgq&
+            &           )&
+            & + CF*CA * (62/9._dp - 35*x/18 - 44*x**2/9&
+            &            + (2 + 12*x + 8*x**2/3) * lnx&
+            &            - 2*x*ln1mx - (4+x)*lnx**2 + pgqmx*S2x&
+            &            + (-2*lnx*ln1mx - 3*lnx - 3*half*lnx**2 - ln1mx**2&
+            &               +8*S1x + 7*pisq/6 + 17/18._dp) * pgq)
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+       res = res + zero
+    case(cc_DELTA)
+       res = zero
+    end select
+
+    if (cc_piece /= cc_DELTA) res = res * x
+  end function sf_TP1gq
+
   
+!   !----------------------------------------------------------------------
+!   function sf_TP1qg(y) result(res)
+!     real(dp), intent(in) :: y
+!     real(dp)             :: res
+!     real(dp)             :: x
+!     real(dp) :: lnx, ln1mx, pqg, pqgmx, S2x
+!     x = exp(-y)
+!     res = zero
+! 
+!     select case(cc_piece)
+!     case(cc_REAL,cc_REALVIRT)
+!        lnx = log(x); ln1mx = log(one - x)
+!        pqg   = x**2 + (one-x)**2
+!        pqgmx = x**2 + (one+x)**2
+!        S2x   = sf_S2(x)
+!       !!  CF*(half*TR)*(4 + 4*ln1mx + (10 - 4*(ln1mx - lnx) + 2*(-ln1mx&
+!       !!       & + lnx)& 
+!       !!      & **2 - (2*Pi**2)/3._dp)* pqg - lnx*(1 - 4*x) - lnx**2*(1 - 2&
+!       !!      & *x) - 9*x) + CA*(half*TR)*(20.22222222222222_dp - 4*ln1mx + (&
+!       !!      & -24.22222222222222_dp + 4*ln1mx - 2*ln1mx**2 + (44*lnx)/3._dp&
+!       !!      & - lnx**2 + Pi**2/3._dp)*pqg + 2*pqgmx*S2x + 40/(9._dp*x) +&
+!       !!      & (14*x)/9._dp - lnx**2*(2 + 8*x) + lnx*(-12.666666666666666_dp&
+!       !!      & + (136*x)/3._dp))
+!     end select
+!     select case(cc_piece)
+!     case(cc_VIRT,cc_REALVIRT)
+!        res = res + zero
+!     case(cc_DELTA)
+!        res = zero
+!     end select
+! 
+!     if (cc_piece /= cc_DELTA) res = res * x
+!   end function sf_P1qg
+
+
   
   !======================================================================
   ! helper...
