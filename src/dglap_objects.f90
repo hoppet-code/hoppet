@@ -94,6 +94,7 @@ module dglap_objects
   public :: cobj_InitSplitLinks
   public :: InitSplitMatLO, InitSplitMatNLO
   public :: InitSplitMatNNLO
+  public :: InitSplitMatTimeNLO
   public :: InitSplitMatPolLO, InitSplitMatPolNLO
 
   public :: InitSplitMat!, Delete_sm
@@ -382,7 +383,7 @@ contains
     call InitGridConv(grid, P%qg, sf_TP1gq) ! note swap of qg/gq for time-like case
     !-- recall that the way it is defined it needs a factor 2nf
     call Multiply(P%qg, two*nf)
-    call Multiply(P%gq, one/two*nf)
+    call Multiply(P%gq, one/(two*nf))
 
     !-- tidy up 
     call Delete(P1qqV)
