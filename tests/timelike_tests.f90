@@ -21,7 +21,8 @@ program timelike_tests
      !splitfn = 2*nf*sf_TP1gq(y)
      !splitfn = sf_P1qqV(y) + sf_P1qqbarV(y) + sf_TmSP1qqNS(y) + 2*nf*sf_P1qqS(y)
      !splitfn = sf_P1qqV(y) + sf_P1qqbarV(y) + 2*nf*sf_P1qqS(y) + sf_TmSP1qqNS(y)
-     splitfn = sf_TP1qq(y)
+     !splitfn = sf_TP1qq(y)
+     splitfn = sf_TP1qg(y)/(2*nf)
      write(6,*) x, splitfn/x
   end do
   

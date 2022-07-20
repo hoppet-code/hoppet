@@ -29,7 +29,7 @@ module splitting_functions
   public :: sf_P1fromg, sf_P1fromq
   public :: sf_P1qqV_DIS, sf_P1qg_DIS
 
-  public :: sf_TmSP1qqNS, sf_TP1gg, sf_TP1qq, sf_TP1gq
+  public :: sf_TmSP1qqNS, sf_TP1gg, sf_TP1qq, sf_TP1gq, sf_TP1qg
 
   public :: sf_A2PShq, sf_A2PShg, sf_A2PShg_vogt
   public :: sf_A2NSqq_H, sf_A2Sgg_H, sf_A2Sgq_H
@@ -474,7 +474,8 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
 
   !======================================================================
   ! The timeline singlet qq splitting function, typed in from ESW 6.16
-  ! (with divergences & delta functions taken from the spacelike qqV)
+  ! (with divergences & delta functions taken from the spacelike qqV).
+  ! REAL tested against apfel::P1Tnsp+apfel::P1Tps
   function sf_TP1qq(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
@@ -598,39 +599,56 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
   end function sf_TP1gq
 
   
-!   !----------------------------------------------------------------------
-!   function sf_TP1qg(y) result(res)
-!     real(dp), intent(in) :: y
-!     real(dp)             :: res
-!     real(dp)             :: x
-!     real(dp) :: lnx, ln1mx, pqg, pqgmx, S2x
-!     x = exp(-y)
-!     res = zero
-! 
-!     select case(cc_piece)
-!     case(cc_REAL,cc_REALVIRT)
-!        lnx = log(x); ln1mx = log(one - x)
-!        pqg   = x**2 + (one-x)**2
-!        pqgmx = x**2 + (one+x)**2
-!        S2x   = sf_S2(x)
-!       !!  CF*(half*TR)*(4 + 4*ln1mx + (10 - 4*(ln1mx - lnx) + 2*(-ln1mx&
-!       !!       & + lnx)& 
-!       !!      & **2 - (2*Pi**2)/3._dp)* pqg - lnx*(1 - 4*x) - lnx**2*(1 - 2&
-!       !!      & *x) - 9*x) + CA*(half*TR)*(20.22222222222222_dp - 4*ln1mx + (&
-!       !!      & -24.22222222222222_dp + 4*ln1mx - 2*ln1mx**2 + (44*lnx)/3._dp&
-!       !!      & - lnx**2 + Pi**2/3._dp)*pqg + 2*pqgmx*S2x + 40/(9._dp*x) +&
-!       !!      & (14*x)/9._dp - lnx**2*(2 + 8*x) + lnx*(-12.666666666666666_dp&
-!       !!      & + (136*x)/3._dp))
-!     end select
-!     select case(cc_piece)
-!     case(cc_VIRT,cc_REALVIRT)
-!        res = res + zero
-!     case(cc_DELTA)
-!        res = zero
-!     end select
-! 
-!     if (cc_piece /= cc_DELTA) res = res * x
-!   end function sf_P1qg
+  !----------------------------------------------------------------------
+  ! typed in from 6.17 of ESW
+  ! agrees with 2*nf*apfel::P1Tgq (divided by 4, for different alphas convention)
+  ! (note also different 2nf convention and qg/gq labeling)
+  function sf_TP1qg(y) result(res)
+    use special_functions
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x
+    real(dp) :: lnx, ln1mx, pqg, pqgmx, S1x, S2x
+    x = exp(-y)
+    res = zero
+
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+       lnx = log(x); ln1mx = log(one - x)
+       pqg   = x**2 + (one-x)**2
+       pqgmx = x**2 + (one+x)**2
+       S1x   = -ddilog(1-x)
+       S2x   = sf_S2(x)
+       res =   Tf**2 * (-8/3._dp - (16/9._dp + 8/3._dp*(lnx+ln1mx))*pqg)&
+            &  + &
+            &  CF*Tf * (-2 + 3*x + (-7+8*x)*lnx - 4*ln1mx&
+            &           + (1-2*x)*lnx**2 &
+            &           + (-2*(lnx+ln1mx)**2 - 2*(ln1mx-lnx) + 16*S1x + 2*pisq - 10)*pqg)&
+            &  + &
+            &  CA*Tf * (-152/9._dp + 166/9._dp * x - 40/(9*x) &
+            &           + (-4/3._dp -76/3._dp*x)*lnx &
+            &           + 4*ln1mx + (2 + 8*x)*lnx**2&
+            &           + (8*lnx*ln1mx - lnx**2 - 4/3._dp*lnx + 10/3._dp * ln1mx&
+            &              + 2*ln1mx**2 - 16*S1x - 7*pisq/3._dp + 178/9._dp)*pqg&
+            &           + 2*pqgmx*S2x)
+      !!  CF*(half*TR)*(4 + 4*ln1mx + (10 - 4*(ln1mx - lnx) + 2*(-ln1mx&
+      !!       & + lnx)& 
+      !!      & **2 - (2*Pi**2)/3._dp)* pqg - lnx*(1 - 4*x) - lnx**2*(1 - 2&
+      !!      & *x) - 9*x) + CA*(half*TR)*(20.22222222222222_dp - 4*ln1mx + (&
+      !!      & -24.22222222222222_dp + 4*ln1mx - 2*ln1mx**2 + (44*lnx)/3._dp&
+      !!      & - lnx**2 + Pi**2/3._dp)*pqg + 2*pqgmx*S2x + 40/(9._dp*x) +&
+      !!      & (14*x)/9._dp - lnx**2*(2 + 8*x) + lnx*(-12.666666666666666_dp&
+      !!      & + (136*x)/3._dp))
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+       res = res + zero
+    case(cc_DELTA)
+       res = zero
+    end select
+
+    if (cc_piece /= cc_DELTA) res = res * x
+  end function sf_TP1qg
 
 
   

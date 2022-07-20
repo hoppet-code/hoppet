@@ -19,6 +19,12 @@ void test_qg() {
     cout << x << " " << 0.25*(val(split_obj,x)) << endl;
   }
 }
+void test_gq() {
+  auto split_obj = apfel::P1Tgq(nf);
+  for (double x: xvals)  {
+    cout << x << " " << 0.25*(val(split_obj,x)) << endl;
+  }
+}
 void test_qq() {
   auto nsp = apfel::P1Tnsp(nf);
   auto ps =  apfel::P1Tps(nf);
@@ -33,5 +39,6 @@ int main(int argc, char ** argv) {
   for (i = 1; i < n; i++) {
     xvals[i-1] = (i-0.9)*1.0/n;
   }
-  test_qq();
+  //test_qq();
+  test_gq();
 }

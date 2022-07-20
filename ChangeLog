@@ -1,3 +1,11 @@
+2022-07-20  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/dglap_holders.f90 (InitDglapHolder): 
+	* src/dglap_objects.f90 (InitSplitMatTimeNLO): 
+	* src/splitting_functions.f90:
+	added ingredients needed for FFN time-like evolution at NLO. Tests
+	ongoing. 
+
 2021-09-22 Wed  <gavin.salam@physics.ox.ac.uk>
 
 	* src/convolution.f90:

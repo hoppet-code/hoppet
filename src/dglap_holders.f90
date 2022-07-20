@@ -91,6 +91,7 @@ contains
     logical :: newDIS = .true.
     !logical :: newDIS = .false.
     integer :: nfstore, nflcl
+    integer, save :: nfragwarn = 5
 
     dh%factscheme = default_or_opt(factscheme_default, factscheme)
     dh%nloop     = default_or_opt(2, nloop)
@@ -278,8 +279,8 @@ contains
                &'nloop >= 3 not supported for polarized case')
 
        case (factscheme_FragMSbar)
-          if (dh%nloop >= 2) call wae_error('InitDglapHolder',&
-               &'nloop >= 2 not supported for fragmentation case')
+          if (dh%nloop >= 3) call wae_error('InitDglapHolder',&
+               &'nloop >= 3 not supported for fragmentation case')
 
           ! recall that equations for timelike evolution (fragmentation
           ! functions) are different from those for the spacelike case,
@@ -303,6 +304,12 @@ contains
           dh%P_LO%qg = dh%P_LO%gq
           dh%P_LO%gq = dconv
 
+          if (dh%nloop >= 2) then
+             call InitSplitMatTimeNLO (grid, dh%P_NLO)
+             call wae_warn(nfragwarn, &
+                  & 'DANGER: nloop=2 fragmentation flavour thresholds not implemented')
+          end if
+          
        case default
           write(0,*) 'factorisation scheme ',dh%factscheme,&
                &' is not currently supported' 

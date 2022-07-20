@@ -328,7 +328,69 @@ contains
     call InitGridConv(grid, P%qq, sf_P2PS)
     call AddWithCoeff(P%qq, P%NS_plus)
   end subroutine InitSplitMatNNLO
-  
+
+    !======================================================================
+  !! Initialise a NLO unpolarised splitting matrix, with the nf value that
+  !! is current from the qcd module. (MSbar scheme)
+  subroutine InitSplitMatTimeNLO(grid, P)
+    use qcd
+    type(grid_def),    intent(in)    :: grid
+    type(split_mat),   intent(inout) :: P
+    !-----------------------------------------
+    type(grid_conv) :: P1qqV, P1qqbarV
+
+    !-- info to describe the splitting function
+    !P%loops = 2
+    P%nf_int = nf_int
+    
+    call cobj_InitSplitLinks(P)
+
+    !-- these are the building blocks
+    call InitGridConv(grid, P1qqV, sf_P1qqV)
+    ! add in the timelike correction
+    call AddWithCoeff(P1qqV, sf_TmSP1qqNS)
+    call InitGridConv(grid, P1qqbarV, sf_P1qqbarV)
+
+    !-- PqqV + PqqbarV
+    call InitGridConv(P%NS_plus, P1qqV)
+    call AddWithCoeff(P%NS_plus, P1qqbarV, one)
+    !-- PqqV - PqqbarV
+    call InitGridConv(P%NS_minus, P1qqV)
+    call AddWithCoeff(P%NS_minus, P1qqbarV, -one)
+
+    !-- PNSminus + nf * (PqqS - PqqbarS) 
+    !   [NB at NLO, PqqS = PqqbarS] 
+    call InitGridConv(P%NS_V, P%NS_minus)
+    
+    !--  singlet matrix
+    ! Note that for the singlet matrix here, we are using the ESW notation
+    ! which swaps qg/gq names in the matrix, i.e.
+    !
+    ! - the matrix qg entry will multiply a gluon fragementation function
+    !   so it corresponds to q->g splitting which is similar to the initial-state
+    !   Pgq; the q entry is the sum over all quark fragmentation functions; since
+    !   each quark can branch to a gluon we need a 2nf factor
+    !
+    ! - the matrix gq entry will multiply a quark fragmentation function, so
+    !   it corresponds to a g->q splitting, which is similar to the initial-state
+    !   Pqg; the ESW definition includes a factor 2nf which should not be there
+    !   because the singlet already includes the sum over all flavours.
+    !
+    call InitGridConv(grid, P%qq, sf_TP1qq)
+    call InitGridConv(grid, P%gg, sf_TP1gg)
+    call InitGridConv(grid, P%gq, sf_TP1qg) ! note swap of qg/gq for time-like case
+    call InitGridConv(grid, P%qg, sf_TP1gq) ! note swap of qg/gq for time-like case
+    !-- recall that the way it is defined it needs a factor 2nf
+    call Multiply(P%qg, two*nf)
+    call Multiply(P%gq, one/two*nf)
+
+    !-- tidy up 
+    call Delete(P1qqV)
+    call Delete(P1qqbarV)
+
+  end subroutine InitSplitMatTimeNLO
+
+
 
   !======================================================================
   !! Initialise a LO Polarised splitting matrix, with the nf value that
