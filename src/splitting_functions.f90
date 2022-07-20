@@ -29,7 +29,7 @@ module splitting_functions
   public :: sf_P1fromg, sf_P1fromq
   public :: sf_P1qqV_DIS, sf_P1qg_DIS
 
-  public :: sf_TmSP1qqNS, sf_TP1gg, sf_TP1gq
+  public :: sf_TmSP1qqNS, sf_TP1gg, sf_TP1qq, sf_TP1gq
 
   public :: sf_A2PShq, sf_A2PShg, sf_A2PShg_vogt
   public :: sf_A2NSqq_H, sf_A2Sgg_H, sf_A2Sgq_H
@@ -472,6 +472,48 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
     if (cc_piece /= cc_DELTA) res = res * x
   end function sf_TmSP1qqNS
 
+  !======================================================================
+  ! The timeline singlet qq splitting function, typed in from ESW 6.16
+  ! (with divergences & delta functions taken from the spacelike qqV)
+  function sf_TP1qq(y) result(res)
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x
+    real(dp) :: lnx, ln1mx, pqq,pqqmx, S2x
+    x = exp(-y)
+    res = zero
+
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+       lnx = log(x); ln1mx = log(one - x)
+       pqq   = two/(one-x) - one - x
+       pqqmx = two/(one+x) - one + x
+       S2x   = sf_S2(x)      
+       res=     CF**2 * (-one + x + half*(x-3)*lnx + half*(1+x)*lnx**2&
+            &            + (3/2._dp*lnx - 2*lnx**2 + 2*lnx*ln1mx)*pqq&
+            &            + 2 * pqqmx * S2x)&
+            & + CF*CA * (14/3._dp*(1-x) + &
+            &           (11/6._dp*lnx + half*lnx**2 + 67/18._dp-pisq/6._dp)*pqq&
+            &            - pqqmx * S2x)&
+            & + CF*Tf * ((-52 + 28*x)/3._dp - (10 + 18*x + 16/3._dp*x**2)*lnx&
+            &            + 112/9._dp*x**2 - 40/(9*x) + two*(1+x)*lnx**2 &
+            &            - (10/9._dp + 2/3._dp*lnx)*pqq)
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+       pqq = -two/(1-x)
+       res = res + CA*CF*(3.7222222222222223_dp - Pi**2/6._dp)*pqq - (10*CF&
+           & *pqq*Tf)/9._dp
+    case(cc_DELTA)
+       res = -(CF*(0.16666666666666666_dp + (2*Pi**2)/9._dp)*Tf) + CA&
+           & *CF*(0.7083333333333334_dp + (11*Pi**2)/18._dp - 3*zeta3) +&
+           & CF**2*(0.375_dp - Pi**2/2._dp + 6*zeta3)
+    end select
+
+    if (cc_piece /= cc_DELTA) res = res * x
+    
+  end function sf_TP1qq
+  
   !----------------------------------------------------------------------
   ! typed in from Eq. 6.19 of ESW, together with their statement about
   ! endpoint contributions being equal to those for the space-like case

@@ -1,16 +1,37 @@
 #include "apfel/splittingfunctionsunp_tl.h"
 #include "apfel/splittingfunctionsunp_sl.h"
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
-int main(int argc, char ** argv) {
-  int i, n=100;
-  int nf = 5;
+double val(const apfel::Expression & split, double x) {
+  return split.Regular(x)+split.Singular(x);
+}
+
+int i, n=100;
+int nf=5;
+vector<double> xvals;
+
+void test_qg() {
   auto split_obj = apfel::P1Tqg(nf);
-  cout.precision(15);
-  for (i = 1; i < n; i++) {
-    double x = (i-0.9)*1.0/n;
-    cout << x << " " << 0.25*(split_obj.Regular(x)+split_obj.Singular(x)) << endl;
+  for (double x: xvals)  {
+    cout << x << " " << 0.25*(val(split_obj,x)) << endl;
   }
+}
+void test_qq() {
+  auto nsp = apfel::P1Tnsp(nf);
+  auto ps =  apfel::P1Tps(nf);
+  for (double x: xvals)  {
+    cout << x << " " << 0.25*(val(nsp,x) + val(ps,x)) << endl;
+  }
+}
+
+int main(int argc, char ** argv) {
+  cout.precision(15);
+  xvals.resize(n-1);
+  for (i = 1; i < n; i++) {
+    xvals[i-1] = (i-0.9)*1.0/n;
+  }
+  test_qq();
 }

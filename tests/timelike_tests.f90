@@ -18,7 +18,10 @@ program timelike_tests
   do i = 1, n-1
      x = (i-0.9_dp)*one/n
      y = -log(x)
-     splitfn = 2*nf*sf_TP1gq(y)
+     !splitfn = 2*nf*sf_TP1gq(y)
+     !splitfn = sf_P1qqV(y) + sf_P1qqbarV(y) + sf_TmSP1qqNS(y) + 2*nf*sf_P1qqS(y)
+     !splitfn = sf_P1qqV(y) + sf_P1qqbarV(y) + 2*nf*sf_P1qqS(y) + sf_TmSP1qqNS(y)
+     splitfn = sf_TP1qq(y)
      write(6,*) x, splitfn/x
   end do
   
