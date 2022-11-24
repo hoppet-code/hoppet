@@ -21,8 +21,7 @@ C----------------------------------------------------------------------
       integer          iloop,  nf, iflv, i, scheme
 
       ! initialise an LHAPDF set
-      !call InitPDFsetByName("cteq61.LHgrid")
-      call InitPDFsetByName("CT10nlo.LHgrid")
+      call InitPDFsetByName("CT18NLO")
       call InitPDF(0)
 
       ! start the dglap evolution/convolution package 
