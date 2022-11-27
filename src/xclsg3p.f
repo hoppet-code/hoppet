@@ -22,9 +22,10 @@
 *
        FUNCTION CLS3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A-Z)
-       DIMENSION FLS(6)
+       DIMENSION FL(6), FLS(6)
        INTEGER CC ! charged current
        INTEGER NF
+       DATA FL  / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
        DATA FLS / 1.d0, 0.1d0, 0.d0, 0.1d0, 0.01818181818d0, 0.1d0 /
 *
        Y1  = Y1VAL(Y, DL)
@@ -32,6 +33,7 @@
        D27 = 1./27.D0
        D81 = 1./81.D0
        FLS11 = FLS(NF)
+       FL11  = FL(NF)
        CLS3A = 0.D0
 *
        IF (CC.EQ.1) THEN
@@ -49,8 +51,8 @@
        CLS3F = ( (107.0 + 321.05 * Y - 54.62 * Y**2) *(1.-Y)
      ,         - 26.717 - 320.*D81 * DL**3 - 640.*D81 * DL**2
      ,         + 9.773 * DL + Y*DL * (363.8 + 68.32 * DL) ) * Y
-       CLS3A = NF * FLS11 * CLS3F
-       ENDIF   
+       CLS3A = NF * ( FLS11 - FL11 ) * CLS3F
+       ENDIF
 *     
        RETURN
        END FUNCTION
