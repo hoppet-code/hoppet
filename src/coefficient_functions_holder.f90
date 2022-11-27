@@ -1550,7 +1550,7 @@ contains
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = CLNP3C(zero, nf_int)
+       res = zero !CLNP3C(zero, nf_int)
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -1607,7 +1607,7 @@ contains
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = CLNP3C(zero, nf_int)
+       res = zero !CLNP3C(zero, nf_int)
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
