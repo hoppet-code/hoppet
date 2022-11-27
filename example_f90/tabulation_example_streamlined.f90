@@ -105,6 +105,7 @@ program tabulation_example_streamlined
   dlnlnQ = dy/4.0_dp
   ! and number of loops to initialise!
   nloop = 3
+  call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
   call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,&
        &         order,factscheme_MSbar)
   write(6,'(a)') "Streamlined initialization completed!"

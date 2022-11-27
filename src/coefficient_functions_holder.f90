@@ -461,8 +461,8 @@ contains
 
     ! singlet qq is NS+ + pure_singlet
     call InitGridConv(C%qq, C%NS_plus)    ! start with NS+
-    call AddWithCoeff(C%qq, cfN3LO_F2PS)  ! add in pure singlet piece
-    call InitGridConv(grid, C%qg, cfN3LO_F2G)   ! the part driven by the gluon
+    call AddWithCoeff(C%qq, cfN3LO_F2PS_fl11)  ! add in pure singlet piece
+    call InitGridConv(grid, C%qg, cfN3LO_F2G_fl11)   ! the part driven by the gluon
     call InitGridConv(grid, C%gq)  ! zero
     call InitGridConv(grid, C%gg)  ! zero
 
@@ -1493,7 +1493,7 @@ contains
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = C2G3C(zero, nf_int)
+       res = zero !C2G3C(zero, nf_int)
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
