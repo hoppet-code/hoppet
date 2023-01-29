@@ -1,3 +1,8 @@
+2023-01-29  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/welcome_message.f90:
+	updated date in welcome message
+
 2022-07-20  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/dglap_holders.f90 (InitDglapHolder): 
