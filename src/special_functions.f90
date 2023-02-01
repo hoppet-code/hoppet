@@ -207,22 +207,25 @@ contains
       ENDIF 
     8 F=1 
       IF(U .LT. 3) THEN 
-       DO 1 I = 1,INT(4-U) 
+       DO I = 1,INT(4-U) 
        F=F/U 
-    1  U=U+1 
+       U=U+1
+       END DO
       ELSE 
-       DO 2 I = 1,INT(U-3) 
+       DO I = 1,INT(U-3) 
        U=U-1 
-    2  F=F*U 
+       F=F*U
+       END DO
       END IF 
       H=U+U-7 
       ALFA=H+H 
       B1=0 
       B2=0 
-      DO 3 I = 15,0,-1 
+      DO I = 15,0,-1 
       B0=C(I)+ALFA*B1-B2 
       B2=B1 
-    3 B1=B0 
+      B1=B0
+      END DO
                                                                         
     9 DGAMMA=F*(B0-H*B2) 
                                                                         
@@ -469,17 +472,19 @@ contains
         ENDIF 
         AP=P1(7) 
         AQ=Q1(7) 
-        DO 11 I = 6,0,-1 
+        DO I = 6,0,-1 
         AP=P1(I)+V*AP 
-   11   AQ=Q1(I)+V*AQ 
+        AQ=Q1(I)+V*AQ
+        END DO
         H=(V-X0)*AP/AQ-S 
        ELSE 
         R=1/V**2 
         AP=P2(4) 
         AQ=Q2(4) 
-        DO 12 I = 3,0,-1 
+        DO I = 3,0,-1 
         AP=P2(I)+R*AP 
-   12   AQ=Q2(I)+R*AQ 
+        AQ=Q2(I)+R*AQ
+        END DO
         H=LOG(V)-HF/V+AP/AQ 
        ENDIF 
        IF(X .LT. 0) H=H+1/A+PI/TAN(PI*A) 
@@ -488,41 +493,46 @@ contains
        IF(A .LE. 10) THEN 
         IF(A .LT. 3) THEN 
          S=-1/V**K1 
-         DO 1 J = 1,2-INT(A) 
+         DO J = 1,2-INT(A) 
          V=V+1 
-    1    S=S-1/V**K1 
+         S=S-1/V**K1
+         END DO
          V=V+1 
         ELSEIF(A .LE. 4) THEN 
          S=0 
         ELSE 
          V=V-1 
          S=1/V**K1 
-         DO 5 J = 1,INT(A)-4 
+         DO J = 1,INT(A)-4 
          V=V-1 
-    5    S=S+1/V**K1 
+         S=S+1/V**K1
+         END DO
         ENDIF 
         H=2*V-7 
         ALFA=H+H 
         B1=0 
         B2=0 
-        DO 2 J = NB(K),0,-1 
+        DO J = NB(K),0,-1 
         B0=B(J,K)+ALFA*B1-B2 
         B2=B1 
-    2   B1=B0 
+        B1=B0
+        END DO
         H=B0-H*B2+SGF(K)*S 
        ELSE 
         S=0 
         IF(A .LT. 15) THEN 
          S=1/V**K1 
-         DO 3 J = 1,14-INT(A) 
-         V=V+1 
-    3    S=S+1/V**K1 
+         DO J = 1,14-INT(A) 
+          V=V+1 
+          S=S+1/V**K1
+         END DO
          V=V+1 
         ENDIF 
         R=1/V**2 
         P=R*C(7,K) 
-        DO 4 J = 6,1,-1 
-    4   P=R*(C(J,K)+P) 
+        DO J = 6,1,-1 
+         P=R*(C(J,K)+P) 
+        END DO
         H=((SGF(K-1)-SGN(K)*P)*V-SGH(K))/V**K1-SGF(K)*S 
        ENDIF 
        IF(X .LT. 0) THEN 
@@ -966,28 +976,33 @@ contains
        ALFA=H+H 
        V(0)=1 
        V(1)=LOG(-X+I*Z0) 
-       DO 33 L = 2,N+M 
-   33 V(L)=V(1)*V(L-1)/L 
+       DO L = 2,N+M 
+         V(L)=V(1)*V(L-1)/L
+       END DO
        SK=0 
-       DO 34 K = 0,M-1 
-       M1=M-K 
-       R=X1**M1/(FCT(M1)*FCT(N-1)) 
+       DO K = 0,M-1 
+        M1=M-K 
+        R=X1**M1/(FCT(M1)*FCT(N-1)) 
+        SJ=0 
+        DO J = 0,K 
+          N1=N+K-J 
+          L=INDEX(10*N1+M1-10) 
+          B1=0 
+          B2=0 
+          DO IT = NC(L),0,-1 
+            B0=A(IT,L)+ALFA*B1-B2 
+            B2=B1 
+            B1=B0
+          END DO
+          Q=(FCT(N1-1)/FCT(K-J))*(B0-H*B2)*R/M1**N1 
+          SJ=SJ+V(J)*Q
+        END DO
+        SK=SK+SGN(K)*SJ
+       END DO
        SJ=0 
-       DO 35 J = 0,K 
-       N1=N+K-J 
-       L=INDEX(10*N1+M1-10) 
-       B1=0 
-       B2=0 
-       DO 31 IT = NC(L),0,-1 
-       B0=A(IT,L)+ALFA*B1-B2 
-       B2=B1 
-   31 B1=B0 
-       Q=(FCT(N1-1)/FCT(K-J))*(B0-H*B2)*R/M1**N1 
-   35 SJ=SJ+V(J)*Q 
-   34 SK=SK+SGN(K)*SJ 
-       SJ=0 
-       DO 36 J = 0,N-1 
-   36 SJ=SJ+V(J)*C(N-J,M) 
+       DO J = 0,N-1 
+          SJ=SJ+V(J)*C(N-J,M)
+       END DO
        Z=SGN(N)*SK+SGN(M)*(SJ+V(N+M)) 
       ELSEIF(X .GT. HF) THEN 
        X1=1-X 
@@ -997,27 +1012,32 @@ contains
        U(0)=1 
        V(1)=LOG(X1+I*Z0) 
        U(1)=LOG(X) 
-       DO 23 L = 2,M 
-   23 V(L)=V(1)*V(L-1)/L 
-       DO 26 L = 2,N 
-   26 U(L)=U(1)*U(L-1)/L 
+       DO L = 2,M 
+          V(L)=V(1)*V(L-1)/L
+       END DO
+       DO L = 2,N 
+          U(L)=U(1)*U(L-1)/L
+       END DO
        SK=0 
-       DO 24 K = 0,N-1 
-       M1=N-K 
-       R=X1**M1/FCT(M1) 
-       SJ=0 
-       DO 25 J = 0,M-1 
-       N1=M-J 
-       L=INDEX(10*N1+M1-10) 
-       B1=0 
-       B2=0 
-       DO 12 IT = NC(L),0,-1 
-       B0=A(IT,L)+ALFA*B1-B2 
-       B2=B1 
-   12 B1=B0 
-       Q=SGN(J)*(B0-H*B2)*R/M1**N1 
-   25 SJ=SJ+V(J)*Q 
-   24 SK=SK+U(K)*(S1(M1,M)-SJ) 
+       DO K = 0,N-1 
+         M1=N-K 
+         R=X1**M1/FCT(M1) 
+         SJ=0 
+         DO J = 0,M-1 
+           N1=M-J 
+           L=INDEX(10*N1+M1-10) 
+           B1=0 
+           B2=0 
+           DO IT = NC(L),0,-1 
+             B0=A(IT,L)+ALFA*B1-B2 
+             B2=B1 
+             B1=B0
+           END DO
+           Q=SGN(J)*(B0-H*B2)*R/M1**N1 
+           SJ=SJ+V(J)*Q
+         END DO
+         SK=SK+U(K)*(S1(M1,M)-SJ)
+       END DO
        Z=SK+SGN(M)*U(N)*V(M) 
       ELSE 
        L=INDEX(10*N+M-10) 
@@ -1025,10 +1045,11 @@ contains
        ALFA=H+H 
        B1=0 
        B2=0 
-       DO 11 IT = NC(L),0,-1 
-       B0=A(IT,L)+ALFA*B1-B2 
-       B2=B1 
-   11 B1=B0 
+       DO IT = NC(L),0,-1 
+         B0=A(IT,L)+ALFA*B1-B2 
+         B2=B1 
+         B1=B0
+       END DO
        Z=(B0-H*B2)*X**M/(FCT(M)*M**N) 
       ENDIF 
                                                                         

@@ -1,6 +1,53 @@
 #+TITLE: file for tracking our tests
 #+STARTUP: logdone
 
+* time-like NLO splitting function tests <2022-07-20 Wed>
+
+  - for the coding of the splitting functions themselves, compared
+    the output from apfelxx-refs/apfelxx-testsplit with that from
+    `timelike_tests` (documented exact test in each splitting
+    function header)
+    
+  - ran an actual evolution in a region without flavour thresholds,
+    with the standard LH initial condition (which makes little sense
+    here, but serves the purpose), i.e. from 5 GeV to 100 GeV
+    
+    : ./timelike_NLOevol_tests
+    : apfelxx-refs/apfel_dglap_test_streamlined
+
+    Output from Hoppet is
+    :     # nloop = 2
+    :            Evaluating PDFs at Q =  100.000 GeV
+    :     x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon
+    : 1.0E-05  9.6320E-04  5.7804E-04 -1.3078E+02 -6.6569E+01 -5.5214E+01
+    : 1.0E-04  5.9846E-03  3.5722E-03 -9.0209E+00 -5.4459E+00  5.4039E-01
+    : 1.0E-03  3.4946E-02  2.0663E-02  1.4893E+01  6.7125E+00  9.3437E+00
+    : 1.0E-02  1.8041E-01  1.0424E-01  7.9528E+00  3.4491E+00  4.7795E+00
+    : 1.0E-01  5.9845E-01  3.0656E-01  1.0842E+00  3.5978E-01  8.7285E-01
+    : 3.0E-01  4.8815E-01  1.9065E-01  9.1394E-02  2.1521E-02  1.0697E-01
+    : 5.0E-01  2.0522E-01  5.6594E-02  6.6239E-03  1.2295E-03  1.1269E-02
+    : 7.0E-01  4.2729E-02  7.0122E-03  1.7216E-04  2.5767E-05  5.2329E-04
+    : 9.0E-01  1.1294E-03  6.1400E-05  1.0124E-07  1.0477E-08  1.5777E-06
+
+    Output from apfel++ is
+
+    : # nloop = 2
+    : # muF = 100
+    : 
+    : AlphaQCD(Q) = 1.160315e-01
+    : 
+    :    x       u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon
+    : 1.0e-05  9.6320e-04  5.7804e-04  -1.3078e+02  -6.6569e+01  -5.5214e+01
+    : 1.0e-04  5.9846e-03  3.5722e-03  -9.0209e+00  -5.4459e+00  5.4039e-01
+    : 1.0e-03  3.4946e-02  2.0663e-02  1.4893e+01  6.7125e+00  9.3437e+00
+    : 1.0e-02  1.8041e-01  1.0424e-01  7.9528e+00  3.4491e+00  4.7795e+00
+    : 1.0e-01  5.9845e-01  3.0656e-01  1.0842e+00  3.5978e-01  8.7285e-01
+    : 3.0e-01  4.8815e-01  1.9065e-01  9.1394e-02  2.1521e-02  1.0697e-01
+    : 5.0e-01  2.0522e-01  5.6594e-02  6.6239e-03  1.2295e-03  1.1269e-02
+    : 7.0e-01  4.2729e-02  7.0122e-03  1.7216e-04  2.5767e-05  5.2329e-04
+    : 9.0e-01  1.1294e-03  6.1400e-05  1.0124e-07  1.0477e-08  1.5777e-06
+
+    
 * alphas (4-loop) tests <2017-10-30 Mon>
 
   ran cross-checks between the hoppet alphas and gavin's python code

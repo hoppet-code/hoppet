@@ -1,0 +1,3 @@
+#!/usr/bin/env zsh
+apfelld="$(apfelxx-config --ldflags)"
+mkcxx.pl -1 -i $(apfelxx-config --cppflags) -l $apfelld
