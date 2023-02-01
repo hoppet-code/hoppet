@@ -646,7 +646,11 @@ contains
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts?
-    do iflv = iflv_min, iflv_max
+
+    !do iflv = iflv_min, iflv_max
+    !   AK: I think this loop needs to run between ncompmin and ncompmax
+    !   to access the 7th PDF which is used with structure functions.
+    do iflv = ncompmin, ncompmax
        val(iflv) = sum(wgts*tab%tab(iylo:iylo+size(y_wgts)-1,&
             & iflv,ilnlnQ_lo:ilnlnQ_hi))
     end do

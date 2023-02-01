@@ -70,7 +70,7 @@ module structure_functions
   real(dp), save      :: two_vi_ai_Z_down, two_vi_ai_Z_up
   real(dp), save      :: two_vi_Z_down, two_vi_Z_up
   real(dp), save      :: two_ai_Z_down, two_ai_Z_up
-  real(dp), parameter :: e_up = 2.0_dp/3.0_dp, e_down = 1.0_dp/3.0_dp
+  real(dp), parameter :: e_up = 2.0_dp/3.0_dp, e_down = - 1.0_dp/3.0_dp
   real(dp), parameter :: e2_up = 4.0_dp/9.0_dp, e2_down = 1.0_dp/9.0_dp
   ! these log terms are only used for scale_choice = 0,1, to speed up the code
   real(dp), save      :: log_muF2_over_Q2, log_muR2_over_Q2
@@ -125,10 +125,10 @@ contains
     two_vi_ai_avg_W = two * viW * aiW
 
     ! these parameters are needed explicitly for the gamma-Z structure function
-    two_vi_Z_down = one - (8.0_dp/three) * sin_thw_sq
-    two_vi_Z_up   = -one + (four/three) * sin_thw_sq
-    two_ai_Z_down = half
-    two_ai_Z_up   = -half
+    two_vi_Z_up = one - (8.0_dp/three) * sin_thw_sq
+    two_vi_Z_down   = -one + (four/three) * sin_thw_sq
+    two_ai_Z_up = one
+    two_ai_Z_down   = -one
     
     ! default settings
     xmuR = one
@@ -1118,7 +1118,7 @@ contains
     
     res(:,F3gZ) = (dlike(C3_f) - dbarlike(C3_f))*e_down*two_ai_Z_down + &
          &        (ulike(C3_f) - ubarlike(C3_f))*e_up * two_ai_Z_up
-    res(:,F3gZ) = res(:,F3Z)/xValues(grid)
+    res(:,F3gZ) = res(:,F3gZ)/xValues(grid)
 
     ! for the W cases, it only makes sense to sum over an even number
     ! of light flavours; so save the actual number of flavours, switch
