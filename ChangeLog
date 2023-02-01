@@ -1,3 +1,9 @@
+2023-02-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk> (with Alexander Karlberg)
+
+	* src/pdf_tabulate.f90:
+	started to add support for table interpolation to use a
+	non-standard iflv_max
+
 2018-12-27  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/qcd_coupling.f90: 
