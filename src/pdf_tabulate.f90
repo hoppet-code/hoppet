@@ -66,6 +66,12 @@ module pdf_tabulate
      type(evln_operator), pointer :: evops(:)
      integer                      :: StartScale_iQlo
      real(dp)                     :: StartScale
+
+     ! for some purposes (e.g. structure function work), it is useful
+     ! for the table to have a user-tuned maximum iflv value (this
+     ! affects the range used for interpolation rather than for
+     ! allocation of the table itself)
+     integer :: tab_iflv_max = iflv_max
   end type pdf_table
   public :: pdf_table
 
@@ -626,7 +632,7 @@ contains
     integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv
     integer, save :: warn_id = warn_id_INIT
 
-    if (ubound(val,dim=1) < iflv_max) call wae_error('pdftab_ValTab',&
+    if (ubound(val,dim=1) < tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
          &'upper bound of val is too low', intval=ubound(val,dim=1))
 
     !-- y weights taken care of elsewhere....
@@ -655,7 +661,7 @@ contains
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts?
-    do iflv = iflv_min, iflv_max
+    do iflv = iflv_min, tab%tab_iflv_max
        val(iflv) = sum(wgts*tab%tab(iylo:iylo+size(y_wgts)-1,&
             & iflv,ilnlnQ_lo:ilnlnQ_hi))
     end do
