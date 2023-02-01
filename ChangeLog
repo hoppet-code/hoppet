@@ -1,3 +1,10 @@
+2023-02-01  Alexander Karlberg  <alexander.karlberg@cern.ch> 
+
+	* src/structure_functions.f90:
+	Fixed wrong couplings used in the FgZ structure functions. Now
+	initialising non-standard iflv_max and fixed bug where F3gZ was
+	set equal to F3Z
+
 2023-02-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk> (with Alexander Karlberg)
 
 	* src/pdf_tabulate.f90:

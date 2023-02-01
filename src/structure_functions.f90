@@ -180,6 +180,9 @@ contains
        call wae_error('StartStrFct', 'illegal value for scale_choice with mass thresholds turned on', intval = scale_choice)
     end if
 
+    ! AK: Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
+    tables(1:)%tab_iflv_max = 7
+
   end subroutine StartStrFct
 
   
