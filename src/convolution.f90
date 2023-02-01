@@ -231,6 +231,7 @@ module convolution
   integer :: nconv_with_override_off = 0 ! 
   public :: GetDerivedProbes, SetDerivedConv
   public :: SetDerivedConv_nodealloc
+  public :: DisableGridLocking, RestoreGridLocking
 
   ! actual subroutine is to be found in welcome_message.f90
   interface
@@ -1172,7 +1173,9 @@ contains
        call WgtGridQuant(grid%subgd(isub), y, iylo, wgts)
        iylo = iylo + grid%subiy(isub)
     else
-       if (y > grid%ymax*(one+warn_tolerance) .or. y < -warn_tolerance) then
+       ! nan fails all comparison tests; arrange the tests so that
+       ! if we have a nan, then we will get something out of range.
+       if (.not.(y <= grid%ymax*(one+warn_tolerance) .and. y >= -warn_tolerance)) then
           write(0,*) 'WgtGridQuant: &
                &requested function value outside y range'
           write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
@@ -1891,7 +1894,10 @@ contains
        ! regularly done in BFKL). NB Not documented in any CCN -- hopefully
        ! straightforward enough that it can be done in one's head?
        order = -gc%grid%order
-       do i = 1, ny
+       ! limit goes to ny+1 to ensure that everything that can contribute
+       ! to entry at ny is covered (otherwise entry at ny is dicontinuous 
+       ! relative to earlier entries)
+       do i = 1, ny+1
           !-- this is the range of interest
           yl = (i-1) * dy
           yh =  i    * dy
@@ -2755,7 +2761,7 @@ contains
     override_grid_locking = .false.
     if (nconv_with_override_off /= 0) call wae_error(&
          &'SetDerivedConv_nodealloc',&
-         &'Detected convolutions while lock overried off')
+         &'Detected convolutions while lock override off')
 
     if (gc%grid%nsub /= 0) then
        do isub = 1, gc%grid%nsub
@@ -2792,4 +2798,20 @@ contains
     end if
   end subroutine SetDerivedConv_nodealloc
   
+  !------------------------------------------------------------
+  !! Globally disables grid locking -- use with extreme
+  !! care, and when done call RestoreGridLocking
+  subroutine DisableGridLocking()
+    override_grid_locking = .true.
+    nconv_with_override_off = 0
+  end subroutine DisableGridLocking
+
+  !------------------------------------------------------------
+  !! Globally restores normal grid locking
+  subroutine RestoreGridLocking()
+   if (nconv_with_override_off /= 0) call wae_error(&
+     &'RestoreGridLocking',&
+      &'Detected unexpected convolutions with lock override off')
+   override_grid_locking = .false.
+  end subroutine RestoreGridLocking
 end module convolution

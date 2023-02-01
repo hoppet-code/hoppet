@@ -12,6 +12,8 @@
 /msbar_tests
 /split_mat_ops
 /streamlined_multisplit
+/timelike_NLOevol_tests
+/timelike_tests
 coupling-fixed
 test_qed
 test_qed_lepton_evol

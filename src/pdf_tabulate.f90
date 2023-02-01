@@ -40,6 +40,7 @@ module pdf_tabulate
   type pdf_table
      ! basic elements of a pdf_table, common regardless of whether we
      ! additionally have the nf segments...
+     logical :: allocated = .false.
      type(grid_def) :: grid
      real(dp) :: default_dlnlnQ
      real(dp) :: lnlnQ_min, lnlnQ_max, lambda_eff
@@ -65,6 +66,12 @@ module pdf_tabulate
      type(evln_operator), pointer :: evops(:)
      integer                      :: StartScale_iQlo
      real(dp)                     :: StartScale
+
+     ! for some purposes (e.g. structure function work), it is useful
+     ! for the table to have a user-tuned maximum iflv value (this
+     ! affects the range used for interpolation rather than for
+     ! allocation of the table itself)
+     integer :: tab_iflv_max = iflv_max
   end type pdf_table
   public :: pdf_table
 
@@ -122,15 +129,21 @@ contains
   !! More sensible extrapolation beyond Q range offers scope for future 
   !! improvement here!
   !!
+  !! If the pdf_table had previously been allocated, then delete its
+  !! contents before the new allocations
   subroutine pdftab_AllocTab_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
-    type(grid_def),    intent(in)  :: grid
-    type(pdf_table),      intent(out) :: tab
+    type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
     integer,  intent(in), optional :: lnlnQ_order
     logical,  intent(in), optional :: freeze_at_Qmin
     !----------------------------------------------
     integer :: iQ
+
+    ! clear memory if the table was already allocated
+    if (tab%allocated) call Delete(tab)
+
     tab%grid = grid
     tab%lambda_eff = min(half*Qmin, default_lambda_eff)
     tab%lnlnQ_min = lnln(tab,Qmin)
@@ -156,7 +169,9 @@ contains
        tab%lnlnQ_vals(iQ) = tab%lnlnQ_min + iQ * tab%dlnlnQ
        tab%Q_vals(iQ) = invlnln(tab,tab%lnlnQ_vals(iQ))
     end do
-    
+
+    ! label this tab as allocated
+    tab%allocated = .true.
   end subroutine pdftab_AllocTab_
 
 
@@ -164,8 +179,8 @@ contains
   !---------------------------------------------------------
   !! 1d overloaded version of AllocPdfTable
   subroutine pdftab_AllocTab_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
-    type(grid_def), intent(in)     :: grid
-    type(pdf_table),   intent(out)    :: tab(:)
+    type(grid_def),    intent(in)     :: grid
+    type(pdf_table),   intent(inout)  :: tab(:)
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
     integer,  intent(in), optional :: lnlnQ_order
@@ -318,8 +333,8 @@ contains
   !! tab are not however copied.
   !! 
   subroutine pdftab_AllocTab_fromorig(tab, origtab)
-    type(pdf_table), intent(out) :: tab
-    type(pdf_table), intent(in)  :: origtab
+    type(pdf_table), intent(inout) :: tab
+    type(pdf_table), intent(in)    :: origtab
 
     tab = origtab
     !-- this is the only thing that is not taken care of...
@@ -342,8 +357,8 @@ contains
   !---------------------------------------------------------
   !! 1d-overloaded version of pdftab_AllocTab_fromorig
   subroutine pdftab_AllocTab_fromorig_1d(tab, origtab)
-    type(pdf_table), intent(out) :: tab(:)
-    type(pdf_table), intent(in)  :: origtab
+    type(pdf_table), intent(inout) :: tab(:)
+    type(pdf_table), intent(in)    :: origtab
     integer :: i
     do i = 1, size(tab)
        call pdftab_AllocTab_fromorig(tab(i), origtab)
@@ -617,7 +632,7 @@ contains
     integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv
     integer, save :: warn_id = warn_id_INIT
 
-    if (ubound(val,dim=1) < iflv_max) call wae_error('pdftab_ValTab',&
+    if (ubound(val,dim=1) < tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
          &'upper bound of val is too low', intval=ubound(val,dim=1))
 
     !-- y weights taken care of elsewhere....
@@ -646,11 +661,7 @@ contains
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts?
-
-    !do iflv = iflv_min, iflv_max
-    !   AK: I think this loop needs to run between ncompmin and ncompmax
-    !   to access the 7th PDF which is used with structure functions.
-    do iflv = ncompmin, ncompmax
+    do iflv = iflv_min, tab%tab_iflv_max
        val(iflv) = sum(wgts*tab%tab(iylo:iylo+size(y_wgts)-1,&
             & iflv,ilnlnQ_lo:ilnlnQ_hi))
     end do
@@ -726,6 +737,9 @@ contains
        !write(0,*) "CURRENTLY UNABLE TO DELETE EVOP CONTENTS"
        deallocate(tab%evops)
     end if
+    ! reset the information about allocation so that we don't
+    ! try to delete something that has already been deleted
+    tab%allocated = .false.
   end subroutine pdftab_DelTab_0d
   subroutine pdftab_DelTab_1d(tab)
     type(pdf_table), intent(inout) :: tab(:)
