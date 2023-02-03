@@ -1,4 +1,6 @@
-*
+      MODULE XCLNS3E
+      CONTAINS
+*     
 * ..File: xclns3e.f    FL_NS
 *
 *
@@ -735,8 +737,10 @@ c    ,         + (1.-x)**2 * (-0.5*DL1-0.25*z2-0.5*z3+5./8.d0)
 * ...Output; if commented out, only the fl11 part is returned
 *
        XLNP3A = CLQQ3 + SP1 * 8.D0 * CF*(CA-2.*CF)**2
+
 *
        RETURN
-       END
+       END FUNCTION
 *
 * =================================================================av==
+       END MODULE XCLNS3E

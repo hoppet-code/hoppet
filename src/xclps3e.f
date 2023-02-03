@@ -1,4 +1,6 @@
-*
+      MODULE XCLPS3E
+      CONTAINS
+*     
 * ..File: xclps3e.f    FL_PS
 *
 *
@@ -319,3 +321,4 @@
        END
 *
 * =================================================================av==
+      END MODULE XCLPS3E
