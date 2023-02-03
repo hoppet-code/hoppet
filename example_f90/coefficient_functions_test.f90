@@ -17,7 +17,7 @@ contains
     use XCDIFF3P
     use XCLPS3E
     use XCLSG3P
-    use XCLSG3PV
+!    use XCLSG3PV
     implicit none
     integer, parameter :: nf_lc = 5, nbins=500
     real(dp), parameter :: logxmin = -12_dp, logxmax=zero
@@ -64,18 +64,18 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'xclsg3pv.dat'
-    open(unit = 99, file = trim(filename))
-    logx = zero
-    do ix = 1, nbins
-       logx = logxmin + (ix - 0.5_dp) * delx
-       x = exp(logx)
-       y = -logx
-       write(99,*) logx, CLS3AV(x, -y, nf_lc, 1), &
-                         CLS3AV(x, -y, nf_lc, 0), &
-                         CLG3AV(x, -y, nf_lc, 1), CLG3AV(x, -y, nf_lc, 0)
-    enddo
-    close(unit = 99)
+!    filename = 'xclsg3pv.dat'
+!    open(unit = 99, file = trim(filename))
+!    logx = zero
+!    do ix = 1, nbins
+!       logx = logxmin + (ix - 0.5_dp) * delx
+!       x = exp(logx)
+!       y = -logx
+!       write(99,*) logx, CLS3AV(x, -y, nf_lc, 1), &
+!                         CLS3AV(x, -y, nf_lc, 0), &
+!                         CLG3AV(x, -y, nf_lc, 1), CLG3AV(x, -y, nf_lc, 0)
+!    enddo
+!    close(unit = 99)
 
     filename = 'xclps3e.dat'
     open(unit = 99, file = trim(filename))
