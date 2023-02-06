@@ -44,7 +44,8 @@
      ,             Z3 = 1.2020 56903 15959 42854 D0,
      ,             Z4 = 1.0823 23233 71113 81916 D0,
      ,             Z5 = 1.0369 27755 14336 99263 D0 )
-       DIMENSION FLS(6)
+       DIMENSION FL(6), FLS(6)
+       DATA FL  / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
        DATA FLS / 1.d0, 0.1d0, 0.d0, 0.1d0, 0.01818181818d0, 0.1d0 /
 *
 * ...Colour factors and abbreviations
@@ -53,7 +54,7 @@
        CA  = 3.D0
        NF2 = NF*NF
        DABC2N = 5./18.D0 * NF
-       FL11 = FLS(NF)
+       FL11 = FLS(NF) - FL(NF)
 *
        DX = 1.D0/X
 *
