@@ -1,126 +1,138 @@
-      MODULE XCDIFF3P
+      MODULE XCDIFF3PNEW
       USE XC2NS3P
       CONTAINS
-*     
-* ..File: xcdiff3p.f    Fi_NS,  i = 2,3,L  (even-N - odd-N)
+
+*
+* ..File: xcdiff3p.f    F_{i,NS},  i = 2,3,L  (even-N - odd-N)
 *
 *
-* ..Approximations for the differences between the even-N and odd-N 
+* ..Parametrizations of the differences between the even-N and odd-N 
 *    based three-loop coefficient functions for the structure functions
 *    F_L, F_2 and F_3 in charged-current deep-inelastic scattering.
-*    The expansion parameter is normalized as  a_s = alpha_s/(4 pi).
+*    MS(bar) scheme, the expansion parameter is  a_s = alpha_s/(4 pi).
 *
-* ..The two sets providing the error estimate are called via  IMOD = 1
-*    and  IMOD = 2.  Any other value of IMOD invokes their average.
-*    The results are based on the first five even/odd-integer moments
-*    as derived in S. Moch and M. Rogal, arXiv:0704:1740 [hep-ph] and
-*    complete results mentined below.
+* ..Except where the values are very small, the relative accuracy of 
+*     these parametrizations, as well as of the convolution results, 
+*     is one part in thousand or better.
 *
-* ..Reference: M. Rogal, S. Moch and A. Vogt, arXiv:0708.3731 [hep-ph]
+* ..These functions should be used together with the results for the 
+*    even-N based F_L, F_2 and the odd-N F_3 respectively presented in 
+*              S. Moch, J. Vermaseren and A. Vogt,
+*              hep-ph/0411112, hep-ph/0504242 and arXiv:0812.4168
+*    For F_2 and F_L the (NC) flavour class fl11 has to be deactivated 
+*    there, and for F_3 the fl02 contributions have to be left out.
 *
-* ..The functions given here should be used together with the complete 
-*    results for the even-N based F_L, F_2 and the odd-N based F_3 
-*    respectively presented by S. Moch, J. Vermaseren and A. Vogt in 
-*    hep-ph/0411112, hep-ph/0504242 and hep-ph/0608307.
+* ..Reference: J. Davies, S. Moch, J. Vermaseren and A. Vogt, 
+*              arXiv:1606.xxxxx 
 *
 * ===================================================================== 
 *
-* ..F2
 *
-       FUNCTION C2Q3DF (Y, DL, NF, IMOD)
+* ..F_2: third-order c_2^{nu+nubar} - c_2^{nu-nubar}
+*
+       FUNCTION c2q3dfP (Y, NF)
 *
        IMPLICIT REAL*8 (A-Z)
-       INTEGER IMOD, NF
+       INTEGER NF
 *
-       Y1  = Y1VAL(Y, DL)
-       DL1 = DL1VAL(Y, DL)
+       Y1  = 1.- Y 
+       DL  = LOG (Y)
+       DL1 = LOG (Y1)
 *
-       C2Q30A = (54.478 * DL1**2 + 304.60 * DL1 + 691.68 * Y) * Y1 
-     1          + 179.14 * DL - 0.1826 * DL**3
-       C2Q30B = - (13.378 * DL1**2 + 97.60 * DL1 + 118.12 * Y) * Y1 
-     1          - 91.196 * DL**2 - 0.4644 * DL**5
+       C2Q30 =   273.59 - 44.95* Y - 73.56* Y**2 + 40.68* Y**3
+     ,         + 0.1356* DL**5 + 8.483* DL**4 + 55.90* DL**3
+     ,         + 120.67* DL**2 + 388.0* DL - 329.8* DL*DL1          
+     ,         - Y*DL* (316.2 + 71.63* DL) + 46.30*DL1 + 5.447* DL1**2
 *
-       C2Q31A = (20.822 * Y**2 - 282.10 * (1.+Y/2.)) * Y1
-     1          - 285.58 * Y*DL - 112.30 * DL + 3.587 * DL**3
-       C2Q31B = (4.522 * DL1 + 447.88 * (1.+Y/2.)) * Y1
-     1          + 514.02 * Y*DL + 147.05 * DL + 7.386 * DL**2
+       C2Q31 = - 19.093 + 12.97* Y + 36.44* Y**2 - 29.256* Y**3
+     ,         - 0.76* DL**4 - 5.317* DL**3 - 19.82* DL**2 - 38.958* DL
+     ,         - 13.395* DL*DL1 + Y*DL* (14.44 + 17.74*DL) + 1.395* DL1
 *
-       IF (IMOD .EQ. 1) THEN
-         C2Q3DF = C2Q30A + NF * C2Q31A
-       ELSE IF (IMOD .EQ. 2) THEN
-         C2Q3DF = C2Q30B + NF * C2Q31B
-       ELSE
-         C2Q3DF = 0.5 * (C2Q30A + C2Q30B + NF * (C2Q31A + C2Q31B))
-       END IF
+       c2q3dfP = (C2Q30 + NF * C2Q31)* Y1
 *
        RETURN
-       END FUNCTION
+       END
+*
+* ..The `local' piece for F2, artificial but useful for maximal accuracy 
+*    of moments and convolutions
+*
+       FUNCTION c2q3dfPC (Y, NF)
+*
+       IMPLICIT REAL*8 (A-Z)
+       INTEGER NF
+*
+       c2q3dfPC = - 0.0008 + 0.0001* NF  
+*
+       RETURN
+       END
 *
 * ---------------------------------------------------------------------
 *
-* ..F3
+* ..F_L: third-order c_L^{nu+nubar} - c_L^{nu-nubar}
 *
-       FUNCTION C3Q3DF (Y, DL, NF, IMOD)
+       FUNCTION cLq3dfP (Y, NF)
 *
        IMPLICIT REAL*8 (A-Z)
-       INTEGER IMOD, NF
+       INTEGER NF
 *
-       Y1  = Y1VAL(Y, DL)
-       DL1 = DL1VAL(Y, DL)
+       Y1  = 1.- Y
+       DL  = LOG (Y)
+       DL1 = LOG (Y1)
 *
-       C3Q30A = - (46.72 * DL1**2 + 267.26 * DL1 + 719.49 * Y) * Y1
-     1          - 171.98 * DL + 9.470 * DL**3
-       C3Q30B = (3.216 * DL1**2 + 44.50 * DL1 - 34.588) * Y1
-     1          + 98.719 * DL**2 + 2.6208 * DL**5
+       CLQ30 = - 620.53 - 394.5* Y + 1609.* Y**2 - 596.2* Y**3
+     ,         + 0.217* DL**3 + 62.18* DL**2 + 208.47* DL
+     ,         - 482.5* DL*DL1 - Y*DL* (1751. - 197.5* DL)
+     ,         + 105.5* DL1 + 0.442* DL1**2
 *
-       C3Q31A = (0.8489 * DL1 + 67.928 * (1.+0.5*Y)) * Y1
-     1          + 97.922 * Y*DL - 17.070 * DL**2 - 3.132 * DL**3
-       C3Q31B = - (0.186 * DL1 + 61.102 * (1.+Y)) * Y1
-     1          - 122.51 * Y*DL + 10.914 * DL**2 + 2.748 * DL**3
+       CLQ31 = - 6.500 - 12.435* Y + 23.66* Y**2 + 0.914* Y**3
+     ,         + 0.015* DL**3 - 6.627* DL**2 - 31.91* DL
+     ,         - Y*DL* (5.711 + 28.635* DL)
 *
-       IF (IMOD .EQ. 1) THEN
-         C3Q3DF = C3Q30A + NF * C3Q31A
-       ELSE IF (IMOD .EQ. 2) THEN
-         C3Q3DF = C3Q30B + NF * C3Q31B
-       ELSE
-         C3Q3DF = 0.5 * (C3Q30A + C3Q30B + NF * (C3Q31A + C3Q31B))
-       END IF
+       cLq3dfP = (CLQ30 + NF * CLQ31) * Y1**2
 *
        RETURN
-       END FUNCTION
+       END
 *
 * ---------------------------------------------------------------------
 *
-* ..FL
+* ..F_3: third-order c_3^{nu-nubar} - c_3^{nu+nubar}    Note the sign!
 *
-       FUNCTION CLQ3DF (Y, DL, NF, IMOD)
+       FUNCTION c3q3dfP (Y, NF)
 *
        IMPLICIT REAL*8 (A-Z)
        INTEGER IMOD, NF
 *
-       Y1  = Y1VAL(Y, DL)
-       DL1 = DL1VAL(Y, DL)
+       Y1  = 1.- Y
+       DL  = LOG (Y)
+       DL1 = LOG (Y1)
 *
-       CLQ30A = - (495.49 * Y**2 + 906.86) * Y1**2
-     1          - 983.23 * Y*Y1*DL + 53.706 * DL**2 + 5.3059 * DL**3
-       CLQ30B = (78.306 * DL1 + 6.3838 * Y) *Y1**2
-     1          + 20.809 * Y*Y1*DL - 114.47 * DL**2 - 22.222 * DL**3
+       C3Q30 = - 553.5 + 1412.5* Y - 990.3* Y**2 + 361.1* Y**3
+     ,         + 0.1458* DL**5 + 9.688* DL**4 + 90.62* DL**3
+     ,         + 83.684* DL**2 - 602.32* DL 
+     ,         - 382.5* DL*DL1 - Y*DL* (2.805 + 325.92* DL) 
+     ,         + 133.5* DL1 + 10.135* DL1**2 
 *
-       CLQ31A = (29.95 * Y**3 - 59.087 * Y**2 + 379.91) * Y1**2
-     1          - 273.042 * Y*DL**2 + 71.482 * Y1*DL
-       CLQ31B = (12.532 * DL1 + 141.99 * Y**2 - 250.62 * Y)* Y1**2
-     1          - (153.586 * Y - 0.6569) * Y1*DL
+       C3Q31 = - 16.777 + 77.78* Y - 24.81* Y**2 - 28.89* Y**3
+     ,         - 0.7714* DL**4 - 7.701* DL**3 - 21.522* DL**2
+     ,         - 7.897* DL - 16.17* DL*DL1 + Y*DL* (43.21 + 67.04*DL)
+     ,         + 1.519* DL1
 *
-       IF (IMOD .EQ. 1) THEN
-         CLQ3DF = CLQ30A + NF * CLQ31A
-       ELSE IF (IMOD .EQ. 2) THEN
-         CLQ3DF = CLQ30B + NF * CLQ31B
-       ELSE
-         CLQ3DF = 0.5 * (CLQ30A + CLQ30B + NF * (CLQ31A + CLQ31B))
-       END IF
+       c3q3dfP = (C3Q30 + NF * C3Q31)* Y1
 *
        RETURN
-       END FUNCTION
+       END
+*
+* ..The `local' piece for F3 - present for the same reason as for F2
+*
+       FUNCTION c3q3dfPC (Y, NF)
+*
+       IMPLICIT REAL*8 (A-Z)
+       INTEGER NF
+*
+       c3q3dfPC = - 0.0029 + 0.00006* NF
+*
+       RETURN
+       END
 *
 * =================================================================av==
-      END MODULE XCDIFF3P
+       END MODULE XCDIFF3PNEW

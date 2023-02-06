@@ -14,79 +14,309 @@ contains
   subroutine print()
     use xclns3e
     use xclns3p
-    use XCDIFF3P
     use XCLPS3E
     use XCLSG3P
+    use XCLGL3E
+
+    use xc2ns3e
+    use xc2ns3p
+    use XC2PS3E
+    use XC2SG3P
+    use XC2GL3E
+
+    USE XC3NS3E
+    USE XC3NS3P
+
+    USE XC3NS2E
+    USE XC3NS2P
+
+    use XCDIFF3P
+
 !    use XCLSG3PV
     implicit none
-    integer, parameter :: nf_lc = 5, nbins=500
+    integer, parameter :: nf_lc = 5, nbins=100
     real(dp), parameter :: logxmin = -12_dp, logxmax=zero
     integer :: ix
-    real(dp) :: logx, delx, x, y
-    character (len=20) :: filename
+    real(dp) :: logx, delx, x, y, param, exact
+    character (len=40) :: filename
 
     delx = (logxmax - logxmin) / dble(nbins)
+
+    ! First we do the FL coefficient functions
     
-    filename = 'xclns3p.dat'
+    filename = 'CL_NS_3loop_param_vs_exact.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
        logx = logxmin + (ix - 0.5_dp) * delx
        x = exp(logx)
        y = -logx
-       write(99,*) logx, CLNP3A(x, -y, nf_lc, 1), &
-                         CLNP3A(x, -y, nf_lc, 0), &
-                         CLNP3C(x, nf_lc) !, CLQ3DF(x, -y, nf_int, 0)
+
+       param = CLNP3A(x, -y, nf_lc, 1) + CLNP3A(x, -y, nf_lc, 0) 
+       exact = XLNP3A(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
     enddo
     close(unit = 99)
 
-    filename = 'xclns3e.dat'
+    filename = 'CL_PS_3loop_param_vs_exact.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
        logx = logxmin + (ix - 0.5_dp) * delx
        x = exp(logx)
        y = -logx
-       write(99,*) logx, XLNP3A(x,nf_lc) 
+
+       param = CLS3A(x, -y, nf_lc, 1) + CLS3A(x, -y, nf_lc, 0) 
+
+       exact = XLS3A(x,nf_lc)
+
+       write(99,*) logx, param, exact, one - exact/param
     enddo
     close(unit = 99)
 
-    filename = 'xclsg3p.dat'
+    filename = 'CL_gluon_3loop_param_vs_exact.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
        logx = logxmin + (ix - 0.5_dp) * delx
        x = exp(logx)
        y = -logx
-       write(99,*) logx, CLS3A(x, -y, nf_lc, 1), &
-                         CLS3A(x, -y, nf_lc, 0), &
-                         CLG3A(x, -y, nf_lc, 1), CLG3A(x, -y, nf_lc, 0)
+
+       param = CLG3A(x, -y, nf_lc, 1) 
+
+       exact = XLG3A(x,nf_lc)
+
+       write(99,*) logx, param, exact, one - exact/param
     enddo
     close(unit = 99)
 
-!    filename = 'xclsg3pv.dat'
+    ! Then we do the F2 coefficient functions
+
+    filename = 'C2_NS_3loop_param_vs_exact_A.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C2NP3A(x, -y, nf_lc, 1) + C2NP3A(x, -y, nf_lc, 0)
+
+       exact = X2NP3A(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C2_NS_3loop_param_vs_exact_B.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C2NS3B(x, -y, nf_lc)
+
+       exact = X2NS3B(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C2_NS_3loop_param_vs_exact_C.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C2NP3C(x, nf_lc, 1) + zero*C2NP3C(x, nf_lc, 0)
+
+       exact = X2NP3C(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C2_PS_3loop_param_vs_exact.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C2S3A(x, -y, nf_lc, 1) + C2S3A(x, -y, nf_lc, 0)
+
+       exact = X2S3A(x,nf_lc)
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C2_gluon_3loop_param_vs_exact.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C2G3A(x, -y, nf_lc, 1) 
+
+       exact = X2G3A(x,nf_lc)
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C3_NS_3loop_param_vs_exact_A.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C3NM3A(x, -y, nf_lc, 1) 
+
+       exact = X3NM3A(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C3_NS_3loop_param_vs_exact_B.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C3NS3B(x, -y, nf_lc)
+
+       exact = X3NS3B(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C3_NS_3loop_param_vs_exact_C.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C3NM3C(x, nf_lc) - C3Q3DF(x, -y, nf_lc,0)
+
+       exact = X3NS3C(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    call SET_C3SOFT(nf_lc)
+    filename = 'C3_NS_2loop_param_vs_exact_A.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C3NM2A(x,nf_lc)  
+
+       exact = X3NM2A(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C3_NS_2loop_param_vs_exact_B.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C3NS2B(x, nf_lc) 
+
+       exact = X3NS2B(x,nf_lc) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C3_NS_2loop_param_vs_exact_C.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C3NM2C(x, nf_lc) + C3NP2C(x, nf_lc) 
+
+       exact = X3NS2C(x,nf_lc) + X3NS2C(x,nf_lc)
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+!    filename = 'C3_NS_3loop_param_vs_exact_A.dat'
 !    open(unit = 99, file = trim(filename))
 !    logx = zero
 !    do ix = 1, nbins
 !       logx = logxmin + (ix - 0.5_dp) * delx
 !       x = exp(logx)
 !       y = -logx
-!       write(99,*) logx, CLS3AV(x, -y, nf_lc, 1), &
-!                         CLS3AV(x, -y, nf_lc, 0), &
-!                         CLG3AV(x, -y, nf_lc, 1), CLG3AV(x, -y, nf_lc, 0)
+!
+!       param = C3NM3A(x, -y, nf_lc, 1) 
+!
+!       exact = X3NM3A(x,nf_lc) 
+!
+!       write(99,*) logx, param, exact, one - exact/param
 !    enddo
 !    close(unit = 99)
-
-    filename = 'xclps3e.dat'
-    open(unit = 99, file = trim(filename))
-    logx = zero
-    do ix = 1, nbins
-       logx = logxmin + (ix - 0.5_dp) * delx
-       x = exp(logx)
-       y = -logx
-       write(99,*) logx, XLS3A(x,nf_lc) 
-    enddo
-    close(unit = 99)
+!
+!    filename = 'C3_NS_3loop_param_vs_exact_B.dat'
+!    open(unit = 99, file = trim(filename))
+!    logx = zero
+!    do ix = 1, nbins
+!       logx = logxmin + (ix - 0.5_dp) * delx
+!       x = exp(logx)
+!       y = -logx
+!
+!       param = C3NS3B(x, -y, nf_lc)
+!
+!       exact = X3NS3B(x,nf_lc) 
+!
+!       write(99,*) logx, param, exact, one - exact/param
+!    enddo
+!    close(unit = 99)
+!
+!    filename = 'C3_NS_3loop_param_vs_exact_C.dat'
+!    open(unit = 99, file = trim(filename))
+!    logx = zero
+!    do ix = 1, nbins
+!       logx = logxmin + (ix - 0.5_dp) * delx
+!       x = exp(logx)
+!       y = -logx
+!
+!       param = C3NM3C(x, nf_lc)
+!
+!       exact = X3NS3C(x,nf_lc) 
+!
+!       write(99,*) logx, param, exact, one - exact/param
+!    enddo
+!    close(unit = 99)
 
 
   end subroutine print
