@@ -189,7 +189,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C3_NS_3loop_param_vs_exact_A.dat'
+    filename = 'C3_NS_3loop_param_vs_exact_A_minus.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -199,7 +199,23 @@ contains
 
        param = C3NM3A(x, -y, nf_lc, 0) 
 
-       exact = X3NM3A(x,nf_lc) 
+       exact = X3NM3A(x,nf_lc,0) 
+
+       write(99,*) logx, param, exact, one - exact/param
+    enddo
+    close(unit = 99)
+
+    filename = 'C3_NS_3loop_param_vs_exact_A_valence.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = exp(logx)
+       y = -logx
+
+       param = C3NM3A(x, -y, nf_lc, 1) 
+
+       exact = X3NM3A(x,nf_lc,1) 
 
        write(99,*) logx, param, exact, one - exact/param
     enddo

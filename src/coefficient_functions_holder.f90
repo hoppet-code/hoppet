@@ -1391,7 +1391,7 @@ contains
   ! corresponding to C3NSP-C3NSN in W. van Neerven's program.
   function cfN3LO_F3NS_plus(y) result(res)
     use xc3ns3p
-    use xcdiff3p
+    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -1401,9 +1401,9 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DF(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
+       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + C3NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DF(x, -y, nf_int, 0)
+       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
     case(cc_VIRT)
        res = - C3NS3B(x, -y, nf_int)
     case(cc_DELTA)
@@ -1480,7 +1480,7 @@ contains
   ! multiplies.
   function cfN3LO_F2NS_minus(y) result(res)
     use xc2ns3p
-    use xcdiff3p
+    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -1490,9 +1490,9 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DF(x, -y, nf_int, 0) + C2NS3B(x, -y, nf_int)
+       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int) + C2NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DF(x, -y, nf_int, 0)
+       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int)
     case(cc_VIRT)
        res = - C2NS3B(x, -y, nf_int)
     case(cc_DELTA)
@@ -1509,7 +1509,7 @@ contains
   ! 
   function cfN3LO_F2NS_minus_fl11(y) result(res)
     use xc2ns3p
-    ! use xcdiff3p
+    ! use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -1707,7 +1707,7 @@ contains
   ! multiplies.
   function cfN3LO_FLNS_minus(y) result(res)
     use xclns3p
-    use xcdiff3p
+    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -1716,9 +1716,9 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       res = CLNP3A(x, -y, nf_int, 1) - CLQ3DF(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 1) - CLQ3DFP(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = CLNP3A(x, -y, nf_int, 1) - CLQ3DF(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 1) - CLQ3DFP(x, -y, nf_int)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1734,7 +1734,7 @@ contains
   ! this is the fl11 part
   function cfN3LO_FLNS_minus_fl11(y) result(res)
     use xclns3p
-    use xcdiff3p
+    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -1743,9 +1743,9 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DF(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DFP(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DF(x, -y, nf_int, 0)
+       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DFP(x, -y, nf_int)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -1935,7 +1935,7 @@ contains
   ! corresponding to C3NSP-C3NSN in W. van Neerven's program.
   function cfN3LO_F3NS_plus_e(y) result(res)
     use xc3ns3p
-    use xcdiff3p
+    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -1945,9 +1945,9 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DF(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
+       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + C3NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DF(x, -y, nf_int, 0)
+       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
     case(cc_VIRT)
        res = - C3NS3B(x, -y, nf_int)
     case(cc_DELTA)
@@ -1994,22 +1994,24 @@ contains
   ! This is the "plus" non-singlet coefficient function, but only the fl11 part
   ! 
   function cfN3LO_F2NS_plus_fl11_e(y) result(res)
-    use xc2ns3p
+    use xc2ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
     
     x = exp(-y)
     res = zero
+
+    call SET_C3SOFT_N3LO(nf_int)
     select case(cc_piece)
     case(cc_REAL)
-       res = C2NP3A(x, -y, nf_int, 0)
+       res = X2NP3A(x, nf_int, 0)
     case(cc_REALVIRT)
-       res = C2NP3A(x, -y, nf_int, 0)
+       res = X2NP3A(x, nf_int, 0)
     case(cc_VIRT)
        res = res
     case(cc_DELTA)
-       res = C2NP3C(zero, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
+       res = X2NP3C(x, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -2024,19 +2026,33 @@ contains
   ! multiplies.
   function cfN3LO_F2NS_minus_e(y) result(res)
     use xc2ns3p
-    use xcdiff3p
+    use xc2ns3e
+    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
     
     x = exp(-y)
     res = zero
-    
+    ! AK: These exact coefficient functions are causing problems with the Gaussian integrator.
+
+    !call SET_C3SOFT_N3LO(nf_int)
+    !select case(cc_piece)
+    !case(cc_REAL)
+    !   res = X2NP3A(x, nf_int, 1) - C2Q3DFP(x, -y, nf_int) + X2NS3B(x, nf_int)
+    !case(cc_REALVIRT)
+    !   res = X2NP3A(x, nf_int, 1) - C2Q3DFP(x, -y, nf_int)
+    !case(cc_VIRT)
+    !   res = - X2NS3B(x, nf_int)
+    !case(cc_DELTA)
+    !   res = X2NP3C(x, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+    !end select
+
     select case(cc_piece)
     case(cc_REAL)
-       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DF(x, -y, nf_int, 0) + C2NS3B(x, -y, nf_int)
+       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int) + C2NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DF(x, -y, nf_int, 0)
+       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int)
     case(cc_VIRT)
        res = - C2NS3B(x, -y, nf_int)
     case(cc_DELTA)
@@ -2052,24 +2068,24 @@ contains
   ! This is the "minus" non-singlet coefficient function but only the fl11 part
   ! 
   function cfN3LO_F2NS_minus_fl11_e(y) result(res)
-    use xc2ns3p
-    ! use xcdiff3p
+    use xc2ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
     
     x = exp(-y)
     res = zero
-    
+
+    call SET_C3SOFT_N3LO(nf_int)
     select case(cc_piece)
     case(cc_REAL)
-       res = C2NP3A(x, -y, nf_int, 0)
+       res = X2NP3A(x, nf_int, 0)
     case(cc_REALVIRT)
-       res = C2NP3A(x, -y, nf_int, 0)
+       res = X2NP3A(x, nf_int, 0)
     case(cc_VIRT)
        res = res
     case(cc_DELTA)
-       res = C2NP3C(zero, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+       res = X2NP3C(x, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -2193,23 +2209,22 @@ contains
   ! contributions, which is precisely what a NS+ coefficient function
   ! multiplies.
   function cfN3LO_FLNS_plus_e(y) result(res)
-    use xclns3p
+    use xclns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
     
     x = exp(-y)
     res = zero
-
     select case(cc_piece)
     case(cc_REAL)
-       res = CLNP3A(x, -y, nf_int, 1)
+       res = XLNP3A(x, nf_int, 1)
     case(cc_REALVIRT)
-       res = CLNP3A(x, -y, nf_int, 1)
+       res = XLNP3A(x, nf_int, 1)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = CLNP3C(zero, nf_int)
+       res = zero
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -2220,7 +2235,7 @@ contains
   ! This is the "plus" non-singlet coefficient function.
   ! this is the fl11 part.
   function cfN3LO_FLNS_plus_fl11_e(y) result(res)
-    use xclns3p
+    use xclns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -2230,9 +2245,9 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       res = CLNP3A(x, -y, nf_int, 0)
+       res = XLNP3A(x, nf_int, 0)
     case(cc_REALVIRT)
-       res = CLNP3A(x, -y, nf_int, 0)
+       res = XLNP3A(x, nf_int, 0)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
@@ -2250,8 +2265,8 @@ contains
   ! contributions, which is precisely what a NS- coefficient function
   ! multiplies.
   function cfN3LO_FLNS_minus_e(y) result(res)
-    use xclns3p
-    use xcdiff3p
+    use xclns3e
+    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -2260,13 +2275,13 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       res = CLNP3A(x, -y, nf_int, 1) - CLQ3DF(x, -y, nf_int, 0)
+       res = XLNP3A(x, nf_int, 1) - CLQ3DFP(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = CLNP3A(x, -y, nf_int, 1) - CLQ3DF(x, -y, nf_int, 0)
+       res = XLNP3A(x, nf_int, 1) - CLQ3DFP(x, -y, nf_int)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = CLNP3C(zero, nf_int)
+       res = zero!
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -2278,7 +2293,8 @@ contains
   ! this is the fl11 part
   function cfN3LO_FLNS_minus_fl11_e(y) result(res)
     use xclns3p
-    use xcdiff3p
+    use xclns3e
+    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -2287,9 +2303,9 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DF(x, -y, nf_int, 0)
+       res = XLNP3A(x, nf_int, 0) - CLQ3DFP(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DF(x, -y, nf_int, 0)
+       res = XLNP3A(x, nf_int, 0) - CLQ3DFP(x, -y, nf_int)
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
