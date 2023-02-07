@@ -686,7 +686,9 @@ contains
 
     ! all non-singlet pieces are equal to singlet ones
     call InitGridConv(grid, C%NS_plus, cfN3LO_F3NS_plus_e)
+    !call SetDefaultConvolutionEps(1d-4)
     call InitGridConv(grid, C%NS_minus, cfN3LO_F3NS_minus_e)
+    !call SetDefaultConvolutionEps(1d-7)
     ! NS_minus and NS_V are not identical at N3LO
     call InitGridConv(grid, C%NS_V, cfN3LO_F3NS_val_e) 
 
@@ -1905,7 +1907,7 @@ contains
   ! This is the coefficient function for the sum F3(nu)+F3(nubar),
   ! corresponding to C3NSP-C3NSN in W. van Neerven's program.
   function cfN3LO_F3NS_minus_e(y) result(res)
-    use xc3ns3p
+    use xc3ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -1915,14 +1917,14 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       res = C3NM3A(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
+       res = X3NM3A(x, nf_int, 0) + X3NS3B(x, nf_int)
     case(cc_REALVIRT)
-       res = C3NM3A(x, -y, nf_int, 0)
+       res = X3NM3A(x, nf_int, 0)
     case(cc_VIRT)
-       res = - C3NS3B(x, -y, nf_int)
+       res = - X3NS3B(x, nf_int)
     case(cc_DELTA)
        !res = C3NS3C(zero, nf_int)
-       res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
+       res = X3NS3C(x, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
                                   !     and where is the diff piece between C3NM3C and C3NP3C ?
     end select
     
