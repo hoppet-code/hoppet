@@ -25,11 +25,11 @@
 *
 * ..There is only a regular piece. 
 *
-       FUNCTION XLNP3A (X, NF)
+       FUNCTION XLNP3A (X, NF, CC)
 *
        IMPLICIT REAL*8 (A - Z)
        COMPLEX*16 HC1, HC2, HC3, HC4, HC5
-       INTEGER NF, NF2, N1, N2, NW
+       INTEGER NF, NF2, N1, N2, NW, CC
        PARAMETER ( N1 = -1, N2 = 1, NW = 5 )
        DIMENSION HC1(N1:N2),HC2(N1:N2,N1:N2),HC3(N1:N2,N1:N2,N1:N2),
      ,           HC4(N1:N2,N1:N2,N1:N2,N1:N2),
@@ -68,6 +68,7 @@
 *
 * ...The coefficient function in terms of the HPLs, fl11 part
 *
+       if(CC.eq.0) then
       cLqq3 =
      &  + dabc2n * fl11 * (  - 768.D0/5.D0 - 1152.D0/5.D0*x + 768.D0/
      &    5.D0*x**2 + 2560.D0*z5*x + 512.D0/5.D0*dx - 4864.D0/15.D0*z3
@@ -148,10 +149,12 @@
      &    *Hr5(0,1,1,0,0)*x )
 *
        XLNP3A = CLQQ3
+       endif
 *
 * ...The coefficient function in terms of the HPLs, standard parts
 *
-      cLqq3 = cLqq3 + cf*ca**2 * (  - 271972.D0/675.D0 + 3672316.D0/
+       if(CC.eq.1) then
+      cLqq3 = cf*ca**2 * (  - 271972.D0/675.D0 + 3672316.D0/
      &    2025.D0*x - 26432.D0/75.D0*x**2 - 224.D0*z5*x - 51104.D0/225.D
      &    0*dx + 176.D0/5.D0*z3 + 8372.D0/15.D0*z3*x - 1616.D0/15.D0*z3
      &    *x**2 - 1868.D0/3.D0*z3*x**3 + 1136.D0/15.D0*z3*dx + 13136.D0/
@@ -737,7 +740,7 @@ c    ,         + (1.-x)**2 * (-0.5*DL1-0.25*z2-0.5*z3+5./8.d0)
 * ...Output; if commented out, only the fl11 part is returned
 *
        XLNP3A = CLQQ3 + SP1 * 8.D0 * CF*(CA-2.*CF)**2
-
+       endif
 *
        RETURN
        END FUNCTION

@@ -30,14 +30,13 @@
 *
 * ..F_2: third-order c_2^{nu+nubar} - c_2^{nu-nubar}
 *
-       FUNCTION c2q3dfP (Y, NF)
+       FUNCTION c2q3dfP (Y, DL, NF)
 *
        IMPLICIT REAL*8 (A-Z)
-       INTEGER NF
+       INTEGER IMOD, NF
 *
-       Y1  = 1.- Y 
-       DL  = LOG (Y)
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
 *
        C2Q30 =   273.59 - 44.95* Y - 73.56* Y**2 + 40.68* Y**3
      ,         + 0.1356* DL**5 + 8.483* DL**4 + 55.90* DL**3
@@ -70,14 +69,13 @@
 *
 * ..F_L: third-order c_L^{nu+nubar} - c_L^{nu-nubar}
 *
-       FUNCTION cLq3dfP (Y, NF)
+       FUNCTION cLq3dfP (Y, DL, NF)
 *
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
 *
-       Y1  = 1.- Y
-       DL  = LOG (Y)
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
 *
        CLQ30 = - 620.53 - 394.5* Y + 1609.* Y**2 - 596.2* Y**3
      ,         + 0.217* DL**3 + 62.18* DL**2 + 208.47* DL
@@ -97,14 +95,13 @@
 *
 * ..F_3: third-order c_3^{nu-nubar} - c_3^{nu+nubar}    Note the sign!
 *
-       FUNCTION c3q3dfP (Y, NF)
+       FUNCTION c3q3dfP (Y, DL, NF)
 *
        IMPLICIT REAL*8 (A-Z)
-       INTEGER IMOD, NF
+       INTEGER NF
 *
-       Y1  = 1.- Y
-       DL  = LOG (Y)
-       DL1 = LOG (Y1)
+       Y1  = Y1VAL(Y, DL)
+       DL1 = DL1VAL(Y, DL)
 *
        C3Q30 = - 553.5 + 1412.5* Y - 990.3* Y**2 + 361.1* Y**3
      ,         + 0.1458* DL**5 + 9.688* DL**4 + 90.62* DL**3

@@ -25,13 +25,114 @@
 * =====================================================================
 *
 *
-* ..The regular piece 
 *
-       FUNCTION X2NP3A (X, NF)
+       SUBROUTINE SET_C3SOFT_N3LO(NF)
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+       PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0,
+     ,             Z3 = 1.2020 56903 15959 42854 D0,
+     ,             Z4 = 1.0823 23233 71113 81916 D0, 
+     ,             Z5 = 1.0369 27755 14336 99263 D0 )
+*
+* ..The soft-gluon coefficients for use in X3NS3B and X3NS3C
+*
+       COMMON / C3SOFT / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5 
+
+       CF  = 4./3.D0
+       CA  = 3.D0
+       NF2 = NF*NF
+* 
+
+
+       C3A5 = 
+     &     + 8.D0*cf**3
+       C3A4 =
+     &     - 30.D0*cf**3
+     &     - 220.D0/9.D0*ca*cf**2
+     &     + 40.D0/9.D0*cf**2*nf
+       C3A3 =
+     &     - 36.D0*cf**3
+     &     - 96.D0*z2*cf**3
+     &     + 1732.D0/9.D0*ca*cf**2
+     &     - 32.D0*z2*ca*cf**2
+     &     + 484.D0/27.D0*ca**2*cf
+     &     - 280.D0/9.D0*cf**2*nf
+     &     - 176.D0/27.D0*ca*cf*nf
+     &     + 16.D0/27.D0*cf*nf2
+       C3A2 =
+     &     + 279.D0/2.D0*cf**3
+     &     + 288.D0*z2*cf**3
+     &     + 16.D0*z3*cf**3
+     &     - 8425.D0/18.D0*ca*cf**2
+     &     + 724.D0/3.D0*z2*ca*cf**2
+     &     + 240.D0*z3*ca*cf**2
+     &     - 4649.D0/27.D0*ca**2*cf
+     &     + 88.D0/3.D0*z2*ca**2*cf
+     &     + 683.D0/9.D0*cf**2*nf
+     &     - 112.D0/3.D0*z2*cf**2*nf
+     &     + 1552.D0/27.D0*ca*cf*nf
+     &     - 16.D0/3.D0*z2*ca*cf*nf
+     &     - 116.D0/27.D0*cf*nf2
+       C3A1 =
+     &     + 187.D0/2.D0*cf**3
+     &     + 240.D0*z2*cf**3
+     &     - 360.D0*z3*cf**3
+     &     + 188.D0*z4*cf**3
+     &     - 5563.D0/18.D0*ca*cf**2
+     &     - 972.D0*z2*ca*cf**2
+     &     - 160.D0/3.D0*z3*ca*cf**2
+     &     + 382.D0*z4*ca*cf**2
+     &     + 50689.D0/81.D0*ca**2*cf
+     &     - 680.D0/3.D0*z2*ca**2*cf
+     &     - 264.D0*z3*ca**2*cf
+     &     + 88.D0*z4*ca**2*cf
+     &     + 83.D0/9.D0*cf**2*nf
+     &     + 168.D0*z2*cf**2*nf
+     &     + 112.D0/3.D0*z3*cf**2*nf
+     &     - 15062.D0/81.D0*ca*cf*nf
+     &     + 512.D0/9.D0*z2*ca*cf*nf
+     &     + 16.D0*z3*ca*cf*nf
+     &     + 940.D0/81.D0*cf*nf2
+     &     - 32.D0/9.D0*z2*cf*nf2
+       C3A0 =
+     &     - 1001.D0/8.D0*cf**3
+     &     - 429.D0*z2*cf**3
+     &     + 274.D0*z3*cf**3
+     &     - 525.D0*z4*cf**3
+     &     + 32.D0*z2*z3*cf**3
+     &     + 432.D0*z5*cf**3
+     &     + 16981.D0/24.D0*ca*cf**2
+     &     + 26885.D0/27.D0*z2*ca*cf**2
+     &     - 3304.D0/9.D0*z3*ca*cf**2
+     &     - 1045.D0/2.D0*z4*ca*cf**2
+     &     - 400.D0*z2*z3*ca*cf**2
+     &     - 120.D0*z5*ca*cf**2
+     &     - 599375.D0/729.D0*ca**2*cf
+     &     + 32126.D0/81.D0*z2*ca**2*cf
+     &     + 21032.D0/27.D0*z3*ca**2*cf
+     &     - 326.D0/3.D0*z4*ca**2*cf
+     &     - 176.D0/3.D0*z2*z3*ca**2*cf
+     &     - 232.D0*z5*ca**2*cf
+     &     - 2003.D0/108.D0*cf**2*nf
+     &     - 4226.D0/27.D0*z2*cf**2*nf
+     &     - 60.D0*z3*cf**2*nf
+     &     + 40.D0*z4*cf**2*nf
+     &     + 160906.D0/729.D0*ca*cf*nf
+     &     - 9920.D0/81.D0*z2*ca*cf*nf
+     &     - 776.D0/9.D0*z3*ca*cf*nf
+     &     + 104.D0/3.D0*z4*ca*cf*nf
+     &     - 8714.D0/729.D0*cf*nf2
+     &     + 232.D0/27.D0*z2*cf*nf2
+     &     - 32.D0/27.D0*z3*cf*nf2
+
+       END SUBROUTINE
+
+* ..The regular piece 
+       FUNCTION X2NP3A (X, NF, CC)
 *
        IMPLICIT REAL*8 (A - Z)
        COMPLEX*16 HC1, HC2, HC3, HC4, HC5 
-       INTEGER NF, NF2, N1, N2, NW
+       INTEGER NF, NF2, N1, N2, NW, CC
        PARAMETER ( N1 = -1, N2 = 1, NW = 5 ) 
        DIMENSION HC1(N1:N2),HC2(N1:N2,N1:N2),HC3(N1:N2,N1:N2,N1:N2), 
      ,           HC4(N1:N2,N1:N2,N1:N2,N1:N2), 
@@ -78,6 +179,8 @@
 * ...The coefficient function in terms of the harmonic polylogs
 *    (without the delta(1-x) part, but with the soft contribution)
 *
+       c2qq3 = zero
+       if(CC.eq.0) then
       c2qq3 =
      &  + fl11*dabc2n * (  - 192.D0/5.D0 - 1728.D0/5.D0*x + 1152.D0/5.D0
      &    *x**2 + 5120.D0*z5*x + 1312.D0*z4*x + 1536.D0*z4*x**2 - 2304.D
@@ -162,7 +265,12 @@
       c2qq3 = c2qq3 + fl11*dabc2n * ( 512.D0*Hr5(-1,0,1,0,0) + 1024.D0*
      &    Hr5(-1,0,1,0,0)*x - 512.D0*Hr5(0,1,0,0,1) - 1024.D0*Hr5(0,1,0
      &    ,0,1)*x + 512.D0*Hr5(0,1,1,0,0) + 1024.D0*Hr5(0,1,1,0,0)*x )
-      c2qq3 = c2qq3 + cf*ca**2 * (  - 13824157.D0/36450.D0 + 117537107.D
+      
+       X2NP3A = C2QQ3 
+       return
+       endif
+       if(CC.eq.1) then
+       c2qq3 =  cf*ca**2 * (  - 13824157.D0/36450.D0 + 117537107.D
      &    0/36450.D0*x - 13216.D0/25.D0*x**2 - 88.D0/3.D0*z5 - 560.D0/3.
      &    D0*z5*x - 617.D0/3.D0*z4 + 895.D0/3.D0*z4*x - 752.D0*z4*x**2
      &     + 168.D0*z4*x**3 - 11456.D0/225.D0*dx + 472.D0/3.D0*dp*z5 + 
@@ -1524,93 +1632,15 @@ c    ,                         -1103./4800.d0)
 *
 * ...The soft (`+'-distribution) part of the coefficient function
 *
-       C3A5 = 
-     &     + 8.D0*cf**3
-       C3A4 =
-     &     - 30.D0*cf**3
-     &     - 220.D0/9.D0*ca*cf**2
-     &     + 40.D0/9.D0*cf**2*nf
-       C3A3 =
-     &     - 36.D0*cf**3
-     &     - 96.D0*z2*cf**3
-     &     + 1732.D0/9.D0*ca*cf**2
-     &     - 32.D0*z2*ca*cf**2
-     &     + 484.D0/27.D0*ca**2*cf
-     &     - 280.D0/9.D0*cf**2*nf
-     &     - 176.D0/27.D0*ca*cf*nf
-     &     + 16.D0/27.D0*cf*nf2
-       C3A2 =
-     &     + 279.D0/2.D0*cf**3
-     &     + 288.D0*z2*cf**3
-     &     + 16.D0*z3*cf**3
-     &     - 8425.D0/18.D0*ca*cf**2
-     &     + 724.D0/3.D0*z2*ca*cf**2
-     &     + 240.D0*z3*ca*cf**2
-     &     - 4649.D0/27.D0*ca**2*cf
-     &     + 88.D0/3.D0*z2*ca**2*cf
-     &     + 683.D0/9.D0*cf**2*nf
-     &     - 112.D0/3.D0*z2*cf**2*nf
-     &     + 1552.D0/27.D0*ca*cf*nf
-     &     - 16.D0/3.D0*z2*ca*cf*nf
-     &     - 116.D0/27.D0*cf*nf2
-       C3A1 =
-     &     + 187.D0/2.D0*cf**3
-     &     + 240.D0*z2*cf**3
-     &     - 360.D0*z3*cf**3
-     &     + 188.D0*z4*cf**3
-     &     - 5563.D0/18.D0*ca*cf**2
-     &     - 972.D0*z2*ca*cf**2
-     &     - 160.D0/3.D0*z3*ca*cf**2
-     &     + 382.D0*z4*ca*cf**2
-     &     + 50689.D0/81.D0*ca**2*cf
-     &     - 680.D0/3.D0*z2*ca**2*cf
-     &     - 264.D0*z3*ca**2*cf
-     &     + 88.D0*z4*ca**2*cf
-     &     + 83.D0/9.D0*cf**2*nf
-     &     + 168.D0*z2*cf**2*nf
-     &     + 112.D0/3.D0*z3*cf**2*nf
-     &     - 15062.D0/81.D0*ca*cf*nf
-     &     + 512.D0/9.D0*z2*ca*cf*nf
-     &     + 16.D0*z3*ca*cf*nf
-     &     + 940.D0/81.D0*cf*nf2
-     &     - 32.D0/9.D0*z2*cf*nf2
-       C3A0 =
-     &     - 1001.D0/8.D0*cf**3
-     &     - 429.D0*z2*cf**3
-     &     + 274.D0*z3*cf**3
-     &     - 525.D0*z4*cf**3
-     &     + 32.D0*z2*z3*cf**3
-     &     + 432.D0*z5*cf**3
-     &     + 16981.D0/24.D0*ca*cf**2
-     &     + 26885.D0/27.D0*z2*ca*cf**2
-     &     - 3304.D0/9.D0*z3*ca*cf**2
-     &     - 1045.D0/2.D0*z4*ca*cf**2
-     &     - 400.D0*z2*z3*ca*cf**2
-     &     - 120.D0*z5*ca*cf**2
-     &     - 599375.D0/729.D0*ca**2*cf
-     &     + 32126.D0/81.D0*z2*ca**2*cf
-     &     + 21032.D0/27.D0*z3*ca**2*cf
-     &     - 326.D0/3.D0*z4*ca**2*cf
-     &     - 176.D0/3.D0*z2*z3*ca**2*cf
-     &     - 232.D0*z5*ca**2*cf
-     &     - 2003.D0/108.D0*cf**2*nf
-     &     - 4226.D0/27.D0*z2*cf**2*nf
-     &     - 60.D0*z3*cf**2*nf
-     &     + 40.D0*z4*cf**2*nf
-     &     + 160906.D0/729.D0*ca*cf*nf
-     &     - 9920.D0/81.D0*z2*ca*cf*nf
-     &     - 776.D0/9.D0*z3*ca*cf*nf
-     &     + 104.D0/3.D0*z4*ca*cf*nf
-     &     - 8714.D0/729.D0*cf*nf2
-     &     + 232.D0/27.D0*z2*cf*nf2
-     &     - 32.D0/27.D0*z3*cf*nf2
+       
 *
        C2QQ3L = DM * ( DL1**5 * C3A5 + DL1**4 * C3A4 + DL1**3 * C3A3
      ,               + DL1**2 * C3A2 + DL1    * C3A1 + C3A0 )
 *
 * ...The regular piece of the coefficient function
-*
        X2NP3A = C2QQ3 + CF*(CA-2.*CF)**2 * (8.*SP1 - SP2/3.D0) - C2QQ3L
+       endif
+*
 *
        RETURN
        END
@@ -1640,10 +1670,10 @@ c    ,                         -1103./4800.d0)
 *
 * ..The 'local' piece. Here the d_abc d_abc part does contribute.
 *
-       FUNCTION X2NP3C (Y, NF)
+       FUNCTION X2NP3C (Y, NF, CC)
 *
        IMPLICIT REAL*8 (A - Z)
-       INTEGER NF, NF2
+       INTEGER NF, NF2, CC
        PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0,
      ,             Z3 = 1.2020 56903 15959 42854 D0,
      ,             Z4 = 1.0823 23233 71113 81916 D0, 
@@ -1663,6 +1693,7 @@ c    ,                         -1103./4800.d0)
 *
 * ...The coefficient of delta(1-x)
 *
+       if(CC.eq.1) then
        C3DELT =
      &     - 7255.D0/24.D0*cf**3
      &     - 1129.D0/2.D0*z2*cf**3
@@ -1703,11 +1734,7 @@ c    ,                         -1103./4800.d0)
      &     - 56.D0/3.D0*z2*z3*ca*cf*nf
      &     + 8.D0/3.D0*z5*ca*cf*nf
 *
-     &     + 64.D0*dabc2n*fl11
-     &     + 160.D0*z2*dabc2n*fl11
-     &     + 224.D0/3.D0*z3*dabc2n*fl11
-     &     - 16.D0*z4*dabc2n*fl11
-     &     - 1280.D0/3.D0*z5*dabc2n*fl11
+
 *
      &     - 9517.D0/486.D0*cf*nf2
      &     - 860.D0/27.D0*z2*cf*nf2
@@ -1719,6 +1746,13 @@ c    ,                         -1103./4800.d0)
        X2NP3C =   DL1**6 * C3A5/6.D0 + DL1**5 * C3A4/5.D0 
      ,          + DL1**4 * C3A3/4.D0 + DL1**3 * C3A2/3.D0 
      ,          + DL1**2 * C3A1/2.D0 + DL1 * C3A0 + C3DELT
+       else
+       X2NP3C = 64.D0*dabc2n*fl11
+     &     + 160.D0*z2*dabc2n*fl11
+     &     + 224.D0/3.D0*z3*dabc2n*fl11
+     &     - 16.D0*z4*dabc2n*fl11
+     &     - 1280.D0/3.D0*z5*dabc2n*fl11
+       endif
 *
        RETURN
        END

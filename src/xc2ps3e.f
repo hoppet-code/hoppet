@@ -25,11 +25,11 @@
 *
 * ..This is the regular piece. 
 *
-       FUNCTION X2S3A (X, NF)
+       FUNCTION X2S3A (X, NF, CC)
 *
        IMPLICIT REAL*8 (A - Z)
        COMPLEX*16 HC1, HC2, HC3, HC4, HC5
-       INTEGER NF, NF2, N1, N2, NW
+       INTEGER NF, NF2, N1, N2, NW, CC
        PARAMETER ( N1 = -1, N2 = 1, NW = 5 )
        DIMENSION HC1(N1:N2),HC2(N1:N2,N1:N2),HC3(N1:N2,N1:N2,N1:N2),
      ,           HC4(N1:N2,N1:N2,N1:N2,N1:N2),
@@ -72,6 +72,7 @@
 * ...The coefficient function in terms of the HPLs, fl11 part
 *    (same in non-singlet and pure singlet - with different fl11)
 *
+       if(CC.eq.0) then
       c2qq3 =
      &  + fl11*dabc2n * (  - 192.D0/5.D0 - 1728.D0/5.D0*x + 1152.D0/5.D0
      &    *x**2 + 5120.D0*z5*x + 1312.D0*z4*x + 1536.D0*z4*x**2 - 2304.D
@@ -153,12 +154,14 @@
      &    ,0)*x**2 + 1536.D0/5.D0*Hr4(1,1,0,0)*x**3 + 512.D0/15.D0*Hr4(
      &    1,1,0,0)*dx**2 - 512.D0*Hr5(-1,0,0,0,1) - 1024.D0*Hr5(-1,0,0,
      &    0,1)*x )
-      c2qq3 = c2qq3 + fl11*dabc2n * ( 512.D0*Hr5(-1,0,1,0,0) + 1024.D0*
+       c2qq3 = c2qq3 + fl11*dabc2n * ( 512.D0*Hr5(-1,0,1,0,0) + 1024.D0*
      &    Hr5(-1,0,1,0,0)*x - 512.D0*Hr5(0,1,0,0,1) - 1024.D0*Hr5(0,1,0
      &    ,0,1)*x + 512.D0*Hr5(0,1,1,0,0) + 1024.D0*Hr5(0,1,1,0,0)*x )
+       endif
 *
 * ...The coefficient function in terms of the HPLs: standard parts
 *
+       if(CC.eq.1) then
       c2qps3 =
      &  + nf*cf*ca * ( 488366.D0/243.D0 - 130832.D0/243.D0*x - 510478.D0
      &    /3645.D0*x**2 - 620.D0*z5 - 132.D0*z5*x + 464.D0/3.D0*z4 - 
@@ -561,8 +564,14 @@
      &    ,1,0,1)*x + 16.D0/3.D0*Hr4(0,1,1,0) + 16.D0/3.D0*Hr4(0,1,1,0)
      &    *x + 64.D0/9.D0*Hr4(0,1,1,1) + 64.D0/9.D0*Hr4(0,1,1,1)*x )
 *
-       X2S3A = C2QPS3 + C2QQ3
-*
+       endif
+
+       if(CC.eq.1) then
+              X2S3A = C2QPS3 
+       else
+              X2S3A = C2QQ3
+       endif
+*      
        RETURN
        END
 *

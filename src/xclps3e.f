@@ -25,11 +25,11 @@
 *
 * ..There is only a regular piece. 
 *
-       FUNCTION XLS3A (X, NF)
+       FUNCTION XLS3A (X, NF, CC)
 *
        IMPLICIT REAL*8 (A - Z)
        COMPLEX*16 HC1, HC2, HC3, HC4, HC5
-       INTEGER NF, NF2, N1, N2, NW
+       INTEGER NF, NF2, N1, N2, NW, CC
        PARAMETER ( N1 = -1, N2 = 1, NW = 5 )
        DIMENSION HC1(N1:N2),HC2(N1:N2,N1:N2),HC3(N1:N2,N1:N2,N1:N2),
      ,           HC4(N1:N2,N1:N2,N1:N2,N1:N2),
@@ -65,6 +65,7 @@
 *
 * ...The coefficient function in terms of the HPLs, fl11 part
 *
+       if(CC.eq.0) then
       cLqq3 =
      &  + dabc2n * fl11 * (  - 768.D0/5.D0 - 1152.D0/5.D0*x + 768.D0/
      &    5.D0*x**2 + 2560.D0*z5*x + 512.D0/5.D0*dx - 4864.D0/15.D0*z3
@@ -143,9 +144,11 @@
      &    2048.D0/15.D0*Hr4(1,1,0,0)*dx**2 - 512.D0*Hr5(-1,0,0,0,1)*x
      &     + 512.D0*Hr5(-1,0,1,0,0)*x - 512.D0*Hr5(0,1,0,0,1)*x + 512.D0
      &    *Hr5(0,1,1,0,0)*x )
+       endif
 *
 * ...The coefficient function in terms of the HPLs: standard parts
 *
+       if(CC.eq.1) then
       cLqps3 =
      &  + nf*cf*ca * ( 6272.D0/9.D0 + 30944.D0/27.D0*x - 59152.D0/45.D0
      &    *x**2 - 71344.D0/135.D0*dx - 1824.D0/5.D0*z3 - 4384.D0/45.D0*
@@ -315,8 +318,13 @@
      &     - 64.D0/9.D0*Hr2(0,1)*x**2 + 32.D0/3.D0*Hr2(1,1) - 64.D0/9.D0
      &    *Hr2(1,1)*x**2 - 32.D0/9.D0*Hr2(1,1)*dx - 64.D0*Hr3(0,0,0)*x
      &     + 32.D0/3.D0*Hr3(0,1,1)*x )
+       endif
 *
-       XLS3A = CLQPS3 + CLQQ3
+       if(CC.eq.0) then
+              XLS3A = CLQQ3
+       else
+              XLS3A = CLQPS3 
+       endif
 *
        RETURN
        END

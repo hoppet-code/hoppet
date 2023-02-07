@@ -30,13 +30,15 @@ program structure_functions_example
 
   ! initialise hoppet
   call StartStrFct(sqrts, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
-       param_coefs = .true., Qmin_PDF = Qmin)
+       param_coefs = .false., Qmin_PDF = Qmin)
   call read_PDF()
   call InitStrFct(order_max, .true.)
 
-  call write_f1(6, 100.0_dp, ymax, 100)
-  call write_f2(6, 100.0_dp, ymax, 100)
-  call write_f3(6, 100.0_dp, ymax, 100)
+  open(unit = 99, file = 'structure-functions.dat')
+
+  call write_f1(99, 100.0_dp, ymax, 100)
+  call write_f2(99, 100.0_dp, ymax, 100)
+  call write_f3(99, 100.0_dp, ymax, 100)
 
 contains 
   !----------------------------------------------------------------------

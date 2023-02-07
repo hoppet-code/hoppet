@@ -25,11 +25,11 @@
 *
 * ..There is only a regular piece. 
 *
-       FUNCTION X2G3A (X, NF)
+       FUNCTION X2G3A (X, NF, CC)
 *
        IMPLICIT REAL*8 (A - Z)
        COMPLEX*16 HC1, HC2, HC3, HC4, HC5
-       INTEGER NF, NF2, N1, N2, NW
+       INTEGER NF, NF2, N1, N2, NW, CC
        PARAMETER ( N1 = -1, N2 = 1, NW = 5 )
        DIMENSION HC1(N1:N2),HC2(N1:N2,N1:N2),HC3(N1:N2,N1:N2,N1:N2),
      ,           HC4(N1:N2,N1:N2,N1:N2,N1:N2),
@@ -71,6 +71,7 @@
 *
 * ...The coefficient function in terms of the HPLs, flg11 part
 *
+       if(CC.eq.0) then
       c2gg3 =
      &  + flg11*dabc2a * (  - 4288.D0/225.D0 - 45184.D0/75.D0*x + 51968.
      &    D0/75.D0*x**2 - 3808.D0/15.D0*z4 + 53248.D0/15.D0*z4*x - 
@@ -315,10 +316,12 @@ c    ,         - (1.-x)**4 * (5./8.d0*DL1+z2/8.d0+z3/2.d0-43./192.d0)
        C2GG3 = 64./45.D0 * (27.* SP1 - 6.* SP2 - SP3 + SPX)* 
      ,         DABC2A * FLG11 + C2GG3
        X2G3A = C2GG3
+       endif
 *
 * ...The coefficient function in terms of the HPLs, standard parts
 *
-      c2gg3 = c2gg3 + nf*ca**2 * ( 271171.D0/486.D0 + 2812798.D0/243.D0
+       if(CC.eq.1) then
+      c2gg3 = nf*ca**2 * ( 271171.D0/486.D0 + 2812798.D0/243.D0
      &    *x - 79819747.D0/7290.D0*x**2 - 2612.D0/3.D0*z5 - 1624.D0*z5*
      &    x - 1744.D0/3.D0*z5*x**2 + 227.D0/3.D0*z4 + 17690.D0/9.D0*z4*
      &    x - 4936.D0/3.D0*z4*x**2 - 2592.D0/5.D0*z4*x**3 - 5017249.D0/
@@ -1463,6 +1466,7 @@ c    ,         - (1.-x)**4 * (5./8.d0*DL1+z2/8.d0+z3/2.d0-43./192.d0)
 * ...Output; if commented out, only the flg11 part is returned
 *
        X2G3A = C2GG3 
+       endif
 *
        RETURN
        END
