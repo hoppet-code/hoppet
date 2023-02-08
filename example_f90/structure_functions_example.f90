@@ -15,7 +15,7 @@ program structure_functions_example
   ! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   !implicit none
 
-  ipdf = 90500
+  ipdf = 91200
   sqrts = 13000.0_dp
   order_max = 4
   xmur = one

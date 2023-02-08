@@ -32,6 +32,8 @@ module coefficient_functions_holder
      type(split_mat), pointer :: C2N3LO_fl11, CLN3LO_fl11
      type(split_mat), pointer :: C_NLO(:,:), C_NNLO(:,:), C_N3LO(:,:)
   end type coef_holder
+
+  real(dp), parameter  :: tiny = 1D-10
   
 contains
 
@@ -1335,6 +1337,7 @@ contains
   ! corresponding to C3NSP-C3NSN in W. van Neerven's program.
   function cfN3LO_F3NS_val(y) result(res)
     use xc3ns3p
+    use xc3ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
@@ -1344,11 +1347,11 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       res = C3NM3A(x, -y, nf_int, 1) + C3NS3B(x, -y, nf_int)
+       res = C3NM3A(x, -y, nf_int, 1) + X3NS3B(x, -y, nf_int) !+ C3NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
        res = C3NM3A(x, -y, nf_int, 1)
     case(cc_VIRT)
-       res = - C3NS3B(x, -y, nf_int)
+       res = - X3NS3B(x, -y, nf_int)!- C3NS3B(x, -y, nf_int)
     case(cc_DELTA)
        !res = C3NS3C(zero, nf_int)
        res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
@@ -1879,26 +1882,40 @@ contains
   ! corresponding to C3NSP-C3NSN in W. van Neerven's program.
   function cfN3LO_F3NS_val_e(y) result(res)
     use xc3ns3p
+    use xc3ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
     
     x = exp(-y)
     res = zero
-    
-    select case(cc_piece)
-    case(cc_REAL)
-       res = C3NM3A(x, -y, nf_int, 1) + C3NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = C3NM3A(x, -y, nf_int, 1)
-    case(cc_VIRT)
-       res = - C3NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       !res = C3NS3C(zero, nf_int)
-       res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
-                                  !     and where is the diff piece between C3NM3C and C3NP3C ?
-    end select
-    
+    CALL SET_C3SOFT_N3LO(nf_int)
+    if(x.lt.(one - tiny)) then ! AK: The exact expressions seem unstable close to x=1. 
+                              ! So we switch to the parametrised versions in this case. 
+                              ! I have checked explicitly that changing tiny by a factor 10 
+                              ! up or down has no visible effect on the resulting structure function.                        
+      select case(cc_piece)
+      case(cc_REAL)
+         res = X3NM3A(x, -y, nf_int, 1) + X3NS3B(x, -y, nf_int)
+      case(cc_REALVIRT)
+         res = X3NM3A(x, -y, nf_int, 1)
+      case(cc_VIRT)
+         res = - X3NS3B(x, -y, nf_int)
+      case(cc_DELTA)
+         res = X3NS3C(zero, -y, nf_int) 
+      end select
+   else
+      select case(cc_piece)
+      case(cc_REAL)
+         res = C3NM3A(x, -y, nf_int, 1) + C3NS3B(x, -y, nf_int)
+      case(cc_REALVIRT)
+         res = C3NM3A(x, -y, nf_int, 1)
+      case(cc_VIRT)
+         res = - C3NS3B(x, -y, nf_int)
+      case(cc_DELTA)
+         res = C3NM3C(zero, nf_int) 
+      end select
+   endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
   end function cfN3LO_F3NS_val_e
@@ -1908,25 +1925,40 @@ contains
   ! corresponding to C3NSP-C3NSN in W. van Neerven's program.
   function cfN3LO_F3NS_minus_e(y) result(res)
     use xc3ns3e
+    use xc3ns3p
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
     
     x = exp(-y)
     res = zero
-    
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X3NM3A(x, nf_int, 0) + X3NS3B(x, nf_int)
-    case(cc_REALVIRT)
-       res = X3NM3A(x, nf_int, 0)
-    case(cc_VIRT)
-       res = - X3NS3B(x, nf_int)
-    case(cc_DELTA)
-       !res = C3NS3C(zero, nf_int)
-       res = X3NS3C(x, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
-                                  !     and where is the diff piece between C3NM3C and C3NP3C ?
-    end select
+    CALL SET_C3SOFT_N3LO(nf_int)
+   if(x.lt.(one - tiny)) then ! AK: The exact expressions seem unstable close to x=1. 
+                              ! So we switch to the parametrised versions in this case. 
+                              ! I have checked explicitly that changing tiny by a factor 10 
+                              ! up or down has no visible effect on the resulting structure function.                        
+      select case(cc_piece)
+      case(cc_REAL)
+         res = X3NM3A(x, -y, nf_int, 0) + X3NS3B(x, -y, nf_int)
+      case(cc_REALVIRT)
+         res = X3NM3A(x, -y, nf_int, 0)
+      case(cc_VIRT)
+         res = - X3NS3B(x, -y, nf_int)
+      case(cc_DELTA)
+         res = X3NS3C(zero, -y, nf_int) 
+      end select
+   else
+      select case(cc_piece)
+      case(cc_REAL)
+         res = C3NM3A(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
+      case(cc_REALVIRT)
+         res = C3NM3A(x, -y, nf_int, 0)
+      case(cc_VIRT)
+         res = - C3NS3B(x, -y, nf_int)
+      case(cc_DELTA)
+         res = C3NM3C(zero, nf_int) 
+      end select
+   endif
     
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
@@ -1937,6 +1969,7 @@ contains
   ! corresponding to C3NSP-C3NSN in W. van Neerven's program.
   function cfN3LO_F3NS_plus_e(y) result(res)
     use xc3ns3p
+    use xc3ns3e
     use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
@@ -1944,20 +1977,33 @@ contains
     
     x = exp(-y)
     res = zero
-    
-    select case(cc_piece)
-    case(cc_REAL)
-       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + C3NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
-    case(cc_VIRT)
-       res = - C3NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       !res = C3NS3C(zero, nf_int)
-       res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
-                                  !     and where is the diff piece between C3NM3C and C3NP3C ?
-    end select
-
+    CALL SET_C3SOFT_N3LO(nf_int)
+    if(x.lt.(one - tiny)) then ! AK: The exact expressions seem unstable close to x=1. 
+                              ! So we switch to the parametrised versions in this case. 
+                              ! I have checked explicitly that changing tiny by a factor 10 
+                              ! up or down has no visible effect on the resulting structure function.                        
+      select case(cc_piece)
+      case(cc_REAL)
+         res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + X3NS3B(x, -y, nf_int)
+      case(cc_REALVIRT)
+         res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
+      case(cc_VIRT)
+         res = - X3NS3B(x, -y, nf_int)
+      case(cc_DELTA)
+         res = X3NS3C(zero, -y, nf_int) 
+      end select
+   else
+      select case(cc_piece)
+      case(cc_REAL)
+         res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + C3NS3B(x, -y, nf_int)
+      case(cc_REALVIRT)
+         res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
+      case(cc_VIRT)
+         res = - C3NS3B(x, -y, nf_int)
+      case(cc_DELTA)
+         res = C3NM3C(zero, nf_int) 
+      end select
+   endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
   end function cfN3LO_F3NS_plus_e
@@ -1971,23 +2017,40 @@ contains
   ! multiplies.
   function cfN3LO_F2NS_plus_e(y) result(res)
     use xc2ns3p
+    use xc2ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
     
     x = exp(-y)
     res = zero
-    select case(cc_piece)
-    case(cc_REAL)
-       res = C2NP3A(x, -y, nf_int, 1) + C2NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = C2NP3A(x, -y, nf_int, 1)
-    case(cc_VIRT)
-       res = - C2NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = C2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
-    end select
-
+    CALL SET_C2SOFT_N3LO(nf_int)
+    if(x.lt.(one - tiny)) then ! AK: The exact expressions seem unstable close to x=1. 
+                              ! So we switch to the parametrised versions in this case. 
+                              ! I have checked explicitly that changing tiny by a factor 10 
+                              ! up or down has no visible effect on the resulting structure function. 
+      select case(cc_piece)
+      case(cc_REAL)
+         res = X2NP3A(x, nf_int, 1) + X2NS3B(x, nf_int)
+      case(cc_REALVIRT)
+         res = X2NP3A(x, nf_int, 1)
+      case(cc_VIRT)
+         res = - X2NS3B(x, nf_int)
+      case(cc_DELTA)
+         res = X2NP3C(zero, nf_int, 1)        
+      end select
+    else
+      select case(cc_piece)
+      case(cc_REAL)
+         res = C2NP3A(x, -y, nf_int, 1) + C2NS3B(x, -y, nf_int)
+      case(cc_REALVIRT)
+         res = C2NP3A(x, -y, nf_int, 1)
+      case(cc_VIRT)
+         res = - C2NS3B(x, -y, nf_int)
+      case(cc_DELTA)
+         res = C2NP3C(zero, nf_int, 1)        
+      end select
+    endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
   end function cfN3LO_F2NS_plus_e
@@ -2004,7 +2067,7 @@ contains
     x = exp(-y)
     res = zero
 
-    call SET_C3SOFT_N3LO(nf_int)
+    call SET_C2SOFT_N3LO(nf_int)
     select case(cc_piece)
     case(cc_REAL)
        res = X2NP3A(x, nf_int, 0)
@@ -2013,7 +2076,7 @@ contains
     case(cc_VIRT)
        res = res
     case(cc_DELTA)
-       res = X2NP3C(x, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
+       res = X2NP3C(zero, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -2036,31 +2099,33 @@ contains
     
     x = exp(-y)
     res = zero
-    ! AK: These exact coefficient functions are causing problems with the Gaussian integrator.
-
-    !call SET_C3SOFT_N3LO(nf_int)
-    !select case(cc_piece)
-    !case(cc_REAL)
-    !   res = X2NP3A(x, nf_int, 1) - C2Q3DFP(x, -y, nf_int) + X2NS3B(x, nf_int)
-    !case(cc_REALVIRT)
-    !   res = X2NP3A(x, nf_int, 1) - C2Q3DFP(x, -y, nf_int)
-    !case(cc_VIRT)
-    !   res = - X2NS3B(x, nf_int)
-    !case(cc_DELTA)
-    !   res = X2NP3C(x, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
-    !end select
-
-    select case(cc_piece)
-    case(cc_REAL)
-       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int) + C2NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = C2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int)
-    case(cc_VIRT)
-       res = - C2NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = C2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
-    end select
-
+    CALL SET_C2SOFT_N3LO(nf_int)
+    if(x.lt.(one - tiny)) then ! AK: The exact expressions seem unstable close to x=1. 
+                              ! So we switch to the parametrised versions in this case. 
+                              ! I have checked explicitly that changing tiny by a factor 10 
+                              ! up or down has no visible effect on the resulting structure function. 
+      select case(cc_piece)
+      case(cc_REAL)
+         res = X2NP3A(x, nf_int, 1) - C2Q3DFP(x, -y, nf_int) + X2NS3B(x, nf_int)
+      case(cc_REALVIRT)
+         res = X2NP3A(x, nf_int, 1) - C2Q3DFP(x, -y, nf_int)
+      case(cc_VIRT)
+         res = - X2NS3B(x, nf_int)
+      case(cc_DELTA)
+         res = X2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+      end select
+   else
+      select case(cc_piece)
+      case(cc_REAL)
+         res = C2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int) + C2NS3B(x, -y, nf_int)
+      case(cc_REALVIRT)
+         res = C2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int)
+      case(cc_VIRT)
+         res = - C2NS3B(x, -y, nf_int)
+      case(cc_DELTA)
+         res = C2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+      end select
+   endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
   end function cfN3LO_F2NS_minus_e
@@ -2078,7 +2143,7 @@ contains
     x = exp(-y)
     res = zero
 
-    call SET_C3SOFT_N3LO(nf_int)
+    call SET_C2SOFT_N3LO(nf_int)
     select case(cc_piece)
     case(cc_REAL)
        res = X2NP3A(x, nf_int, 0)
@@ -2087,7 +2152,7 @@ contains
     case(cc_VIRT)
        res = res
     case(cc_DELTA)
-       res = X2NP3C(x, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
+       res = X2NP3C(zero, nf_int, 0) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???       
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3

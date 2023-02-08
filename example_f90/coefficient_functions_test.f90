@@ -38,26 +38,86 @@ contains
 !    use XCLSG3PV
     implicit none
     integer, parameter :: nf_lc = 5, nbins=100
-    real(dp), parameter :: logxmin = -12_dp, logxmax=zero
+    real(dp), parameter :: logxmin = -30_dp
+    real(dp), parameter ::  logxmax=zero
     integer :: ix
     real(dp) :: logx, delx, x, y, param, exact
-    character (len=400) :: filename
+    character (len=400) :: filename,cc_piece_str
 
     delx = (logxmax - logxmin) / dble(nbins)
 
     ! First we do the FL coefficient functions
    do cc_piece = 1,4
+   select case(cc_piece)
+      case(cc_REAL)
+      cc_piece_str = 'cc_REAL'
+      case(cc_REALVIRT)
+      cc_piece_str = 'cc_REALVIRT'
+      case(cc_VIRT)
+      cc_piece_str = 'cc_VIRT'
+      case(cc_DELTA)
+      cc_piece_str = 'cc_DELTA'
+   end select
+   filename = 'coefficient-functions/cfN3LO_F3NS_val_'//trim(cc_piece_str)//'.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
     do ix = 1, nbins
        logx = logxmin + (ix - 0.5_dp) * delx
-       x = exp(logx)
-       y = -logx
+       x = one - exp(logx)
+       y = -log(x)
 
-       !param = cfN3LO_F2NS_plus_e(y)
+       param = cfN3LO_F3NS_val(y)
+       exact = cfN3LO_F3NS_val_e(y)
 
-       write(99,*) logx, param, exact, one - exact/param
+       write(99,*) 1-x, param, exact, one - exact/param
+    enddo
+
+    filename = 'coefficient-functions/cfN3LO_F2NS_minus_'//trim(cc_piece_str)//'.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = one - exp(logx)
+       y = -log(x)
+
+       param = cfN3LO_F2NS_minus(y)
+       exact = cfN3LO_F2NS_minus_e(y)
+
+       write(99,*) 1-x, param, exact, one - exact/param
+    enddo
+
+    filename = 'coefficient-functions/cfN3LO_F2NS_minus_fl11'//trim(cc_piece_str)//'.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = one - exp(logx)
+       y = -log(x)
+
+       param = cfN3LO_F2NS_minus_fl11(y)
+       exact = cfN3LO_F2NS_minus_fl11_e(y)
+
+       write(99,*) 1-x, param, exact, one - exact/param
+    enddo
+
+    filename = 'coefficient-functions/cfN3LO_FLNS_minus_'//trim(cc_piece_str)//'.dat'
+    open(unit = 99, file = trim(filename))
+    logx = zero
+    do ix = 1, nbins
+       logx = logxmin + (ix - 0.5_dp) * delx
+       x = one - exp(logx)
+       y = -log(x)
+
+       param = cfN3LO_FLNS_minus(y)
+       exact = cfN3LO_FLNS_minus_e(y)
+
+       write(99,*) 1-x, param, exact, one - exact/param
     enddo
     enddo
-    filename = 'CL_NS_3loop_param_vs_exact.dat'
+
+    
+
+    filename = 'coefficient-functions/CL_NS_3loop_param_vs_exact.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -73,7 +133,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'CL_PS_3loop_param_vs_exact.dat'
+    filename = 'coefficient-functions/CL_PS_3loop_param_vs_exact.dat'
 
     open(unit = 99, file = trim(filename))
     logx = zero
@@ -91,7 +151,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'CL_gluon_3loop_param_vs_exact.dat'
+    filename = 'coefficient-functions/CL_gluon_3loop_param_vs_exact.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -109,23 +169,23 @@ contains
 
     ! Then we do the F2 coefficient functions
    call SET_C3SOFT_N3LO(nf_lc)
-    filename = 'C2_NS_3loop_param_vs_exact_A.dat'
+    filename = 'coefficient-functions/C2_NS_3loop_param_vs_exact_A.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
-       logx = logxmin + (ix - 0.5_dp) * delx
-       x = exp(logx)
-       y = -logx
+      logx = logxmin + (ix - 0.5_dp) * delx
+       x = one - exp(logx)
+       y = -log(x)
 
        param = C2NP3A(x, -y, nf_lc, 1) + C2NP3A(x, -y, nf_lc, 0)
 
        exact = X2NP3A(x,nf_lc,1) + X2NP3A(x,nf_lc,0)
 
-       write(99,*) logx, param, exact, one - exact/param
+       write(99,*) 1-x, param, exact, one - exact/param
     enddo
     close(unit = 99)
 
-    filename = 'C2_NS_3loop_param_vs_exact_B.dat'
+    filename = 'coefficient-functions/C2_NS_3loop_param_vs_exact_B.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -141,7 +201,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C2_NS_3loop_param_vs_exact_C.dat'
+    filename = 'coefficient-functions/C2_NS_3loop_param_vs_exact_C.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -157,7 +217,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C2_PS_3loop_param_vs_exact.dat'
+    filename = 'coefficient-functions/C2_PS_3loop_param_vs_exact.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -173,7 +233,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C2_gluon_3loop_param_vs_exact.dat'
+    filename = 'coefficient-functions/C2_gluon_3loop_param_vs_exact.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -189,7 +249,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C3_NS_3loop_param_vs_exact_A_minus.dat'
+    filename = 'coefficient-functions/C3_NS_3loop_param_vs_exact_A_minus.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -199,29 +259,29 @@ contains
 
        param = C3NM3A(x, -y, nf_lc, 0) 
 
-       exact = X3NM3A(x,nf_lc,0) 
+       exact = X3NM3A(x,-y,nf_lc,0) 
 
        write(99,*) logx, param, exact, one - exact/param
     enddo
     close(unit = 99)
 
-    filename = 'C3_NS_3loop_param_vs_exact_A_valence.dat'
+    filename = 'coefficient-functions/C3_NS_3loop_param_vs_exact_A_valence.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
-       logx = logxmin + (ix - 0.5_dp) * delx
-       x = exp(logx)
-       y = -logx
+logx = logxmin + (ix - 0.5_dp) * delx
+       x = one - exp(logx)
+       y = -log(x)
 
        param = C3NM3A(x, -y, nf_lc, 1) 
 
-       exact = X3NM3A(x,nf_lc,1) 
+       exact = X3NM3A(x,-y,nf_lc,1) 
 
-       write(99,*) logx, param, exact, one - exact/param
+       write(99,*) 1-x, param, exact, one - exact/param
     enddo
     close(unit = 99)
 
-    filename = 'C3_NS_3loop_param_vs_exact_B.dat'
+    filename = 'coefficient-functions/C3_NS_3loop_param_vs_exact_B.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -231,13 +291,13 @@ contains
 
        param = C3NS3B(x, -y, nf_lc)
 
-       exact = X3NS3B(x,nf_lc) 
+       exact = X3NS3B(x,-y,nf_lc) 
 
        write(99,*) logx, param, exact, one - exact/param
     enddo
     close(unit = 99)
 
-    filename = 'C3_NS_3loop_param_vs_exact_C.dat'
+    filename = 'coefficient-functions/C3_NS_3loop_param_vs_exact_C.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -247,14 +307,14 @@ contains
 
        param = C3NM3C(x, nf_lc) 
 
-       exact = X3NS3C(x,nf_lc) 
+       exact = X3NS3C(x,-y,nf_lc) 
 
        write(99,*) logx, param, exact, one - exact/param
     enddo
     close(unit = 99)
 
     call SET_C3SOFT(nf_lc)
-    filename = 'C3_NS_2loop_param_vs_exact_A.dat'
+    filename = 'coefficient-functions/C3_NS_2loop_param_vs_exact_A.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -270,7 +330,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C3_NS_2loop_param_vs_exact_B.dat'
+    filename = 'coefficient-functions/C3_NS_2loop_param_vs_exact_B.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -286,7 +346,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C3_NS_2loop_param_vs_exact_C.dat'
+    filename = 'coefficient-functions/C3_NS_2loop_param_vs_exact_C.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -303,7 +363,7 @@ contains
     close(unit = 99)
 
 
-    filename = 'C2_diff_3loop_param_vs_param_low_mom.dat'
+    filename = 'coefficient-functions/C2_diff_3loop_param_vs_param_low_mom.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -319,7 +379,7 @@ contains
     enddo
     close(unit = 99)
 
-   filename = 'CL_diff_3loop_param_vs_param_low_mom.dat'
+   filename = 'coefficient-functions/CL_diff_3loop_param_vs_param_low_mom.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -335,7 +395,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C3_diff_3loop_param_vs_param_low_mom.dat'
+    filename = 'coefficient-functions/C3_diff_3loop_param_vs_param_low_mom.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -351,7 +411,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C2_diff_3loop_param_vs_param_low_mom_1.dat'
+    filename = 'coefficient-functions/C2_diff_3loop_param_vs_param_low_mom_1.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -367,7 +427,7 @@ contains
     enddo
     close(unit = 99)
 
-   filename = 'CL_diff_3loop_param_vs_param_low_mom_1.dat'
+   filename = 'coefficient-functions/CL_diff_3loop_param_vs_param_low_mom_1.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -383,7 +443,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C3_diff_3loop_param_vs_param_low_mom_1.dat'
+    filename = 'coefficient-functions/C3_diff_3loop_param_vs_param_low_mom_1.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -399,7 +459,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C2_diff_3loop_param_vs_param_low_mom_2.dat'
+    filename = 'coefficient-functions/C2_diff_3loop_param_vs_param_low_mom_2.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -415,7 +475,7 @@ contains
     enddo
     close(unit = 99)
 
-   filename = 'CL_diff_3loop_param_vs_param_low_mom_2.dat'
+   filename = 'coefficient-functions/CL_diff_3loop_param_vs_param_low_mom_2.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
@@ -431,7 +491,7 @@ contains
     enddo
     close(unit = 99)
 
-    filename = 'C3_diff_3loop_param_vs_param_low_mom_2.dat'
+    filename = 'coefficient-functions/C3_diff_3loop_param_vs_param_low_mom_2.dat'
     open(unit = 99, file = trim(filename))
     logx = zero
     do ix = 1, nbins
