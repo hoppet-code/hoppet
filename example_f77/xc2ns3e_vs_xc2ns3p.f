@@ -8,7 +8,7 @@
 
 ! Set reasonable default values
 
-      x = 0.1D0
+      x = 0.99999d0
       nf = 5
 
       call getarg(1,x_char)

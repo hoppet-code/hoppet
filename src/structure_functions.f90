@@ -75,7 +75,7 @@ module structure_functions
   ! these log terms are only used for scale_choice = 0,1, to speed up the code
   real(dp), save      :: log_muF2_over_Q2, log_muR2_over_Q2
   real(dp), save      :: Qmin
-  real(dp), public, save :: toy_alphas_Q0 = 0.1185_dp
+  real(dp), public, save :: toy_alphas_Q0 = 0.35_dp ! Roughly αS(sqrt(2))
   type(running_coupling), public, save :: toy_coupling
 
   ! scale choices

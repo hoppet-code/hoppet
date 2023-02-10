@@ -1347,11 +1347,11 @@ contains
     
     select case(cc_piece)
     case(cc_REAL)
-       res = C3NM3A(x, -y, nf_int, 1) + X3NS3B(x, -y, nf_int) !+ C3NS3B(x, -y, nf_int)
+       res = C3NM3A(x, -y, nf_int, 1) + C3NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
        res = C3NM3A(x, -y, nf_int, 1)
     case(cc_VIRT)
-       res = - X3NS3B(x, -y, nf_int)!- C3NS3B(x, -y, nf_int)
+       res = - C3NS3B(x, -y, nf_int)
     case(cc_DELTA)
        !res = C3NS3C(zero, nf_int)
        res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
@@ -1413,8 +1413,7 @@ contains
        res = - C3NS3B(x, -y, nf_int)
     case(cc_DELTA)
        !res = C3NS3C(zero, nf_int)
-       res = C3NM3C(zero, nf_int) ! FD: Why is this C3NM3C instead of C3NS3C as in the NNLO case ???
-                                  !     and where is the diff piece between C3NM3C and C3NP3C ?
+       res = C3NM3C(zero, nf_int) + c3q3dfPC (zero, nf_int) 
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -1501,7 +1500,7 @@ contains
     case(cc_VIRT)
        res = - C2NS3B(x, -y, nf_int)
     case(cc_DELTA)
-       res = C2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+       res = C2NP3C(zero, nf_int, 1) - c2q3dfPC (zero, nf_int) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -1585,7 +1584,7 @@ contains
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = zero!C2S3C(zero, nf_int)
+       res = C2S3C(zero, nf_int) !  This piece has an fl11 contribution only
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -1640,7 +1639,7 @@ contains
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = zero!C2G3C(zero, nf_int)
+       res = zero
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -1697,7 +1696,7 @@ contains
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = zero!CLNP3C(zero, nf_int)
+       res = zero
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -1748,13 +1747,13 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DFP(x, -y, nf_int)
+       res = CLNP3A(x, -y, nf_int, 0) 
     case(cc_REALVIRT)
-       res = CLNP3A(x, -y, nf_int, 0) - CLQ3DFP(x, -y, nf_int)
+       res = CLNP3A(x, -y, nf_int, 0) 
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = zero!CLNP3C(zero, nf_int)
+       res = zero
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -1990,7 +1989,7 @@ contains
       case(cc_VIRT)
          res = - X3NS3B(x, -y, nf_int)
       case(cc_DELTA)
-         res = X3NS3C(zero, -y, nf_int) 
+         res = X3NS3C(zero, -y, nf_int) + c3q3dfPC (zero, nf_int)
       end select
    else
       select case(cc_piece)
@@ -2001,7 +2000,7 @@ contains
       case(cc_VIRT)
          res = - C3NS3B(x, -y, nf_int)
       case(cc_DELTA)
-         res = C3NM3C(zero, nf_int) 
+         res = C3NM3C(zero, nf_int) + c3q3dfPC (x, nf_int)
       end select
    endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -2112,7 +2111,7 @@ contains
       case(cc_VIRT)
          res = - X2NS3B(x, nf_int)
       case(cc_DELTA)
-         res = X2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+         res = X2NP3C(zero, nf_int, 1) - c2q3dfPC (zero, nf_int) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
       end select
    else
       select case(cc_piece)
@@ -2123,7 +2122,7 @@ contains
       case(cc_VIRT)
          res = - C2NS3B(x, -y, nf_int)
       case(cc_DELTA)
-         res = C2NP3C(zero, nf_int, 1) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+         res = C2NP3C(zero, nf_int, 1) - c2q3dfPC (zero, nf_int)! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
       end select
    endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -2207,7 +2206,7 @@ contains
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
-       res = zero
+       res = X2S3C (x, nf_int)
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -2370,9 +2369,9 @@ contains
     res = zero
     select case(cc_piece)
     case(cc_REAL)
-       res = XLNP3A(x, nf_int, 0) - CLQ3DFP(x, -y, nf_int)
+       res = XLNP3A(x, nf_int, 0) 
     case(cc_REALVIRT)
-       res = XLNP3A(x, nf_int, 0) - CLQ3DFP(x, -y, nf_int)
+       res = XLNP3A(x, nf_int, 0) 
     case(cc_VIRT)
        res = zero
     case(cc_DELTA)
