@@ -61,8 +61,7 @@ module structure_functions
   integer, parameter :: F1gZ = 0, F2gZ = -6, F3gZ = 7
   
   ! constants and fixed parameters
-  real(dp), parameter :: quark_masses_sf(3:6) = &
-       & (/ 0.95_dp, 1.275_dp, 4.18_dp, 173.21_dp/)
+  real(dp), save      :: quark_masses_sf(4:6) = quark_masses_def(4:6)
   logical,  save      :: use_mass_thresholds
   real(dp), parameter :: viW = 1/sqrt(two), aiW = viW
   real(dp), save      :: vi2_ai2_avg_W, two_vi_ai_avg_W
@@ -166,11 +165,23 @@ contains
        call InitCoefHolder(grid, ch, order_max, exact_coefs)
        use_mass_thresholds = .false.
        nf_lcl = nf_int
-       write(6,*) "nf_lcl = ", nf_lcl
+       print*, "Starting the structure functions with fixed number of flavours"
+       write(6,*) "nf = ", nf_lcl
     else
        ! otherwise, use variable flavour number scheme
-       call InitCoefHolder(grid, ch, order_max, exact_coefs, nflo=3, nfhi=5)
+   !    call InitCoefHolder(grid, ch, order_max, exact_coefs, nflo=3, nfhi=5)
+       call InitCoefHolder(grid, ch, order_max, exact_coefs, nflo=3, nfhi=6)
        use_mass_thresholds = .true.
+       
+       !call InitCoefHolder(grid, ch, order_max, exact_coefs)
+       !use_mass_thresholds = .false.
+       quark_masses_sf(4:6) = masses(4:6) ! Takes the thresholds from the streamlined 
+                                          ! interface which should be filled first!
+       !quark_masses_sf(5) = 4.18_dp
+       print*, "Starting the structure functions with mass thresholds at"
+       print*, "mc = ", quark_masses_sf(4) 
+       print*, "mb = ", quark_masses_sf(5) 
+       print*, "mt = ", quark_masses_sf(6) 
        ! and start with a sensible local nf (which will be 5 here) 
        nf_lcl = nf_int
     endif
@@ -483,7 +494,7 @@ contains
        if (use_mass_thresholds) then
           call use_vfns(f, Q)
        endif
-
+   
        ! start with LO
        if (order.ge.1) then
           tables(1)%tab(:,:,iQ) = structure_function_general(ch%C2LO*f, ch%CLLO*f, ch%C3LO*f)
@@ -1463,21 +1474,33 @@ contains
   end function muF
   
   subroutine use_vfns (f, Q)
+    implicit none
     real(dp), intent(in) :: Q
     real(dp), intent(inout) :: f(0:grid%ny,ncompmin:ncompmax)
-    integer :: inf, current_nf
+    integer :: inf, current_nf, dummy!, nfhi
 
-    ! set the max value for nf
-    current_nf = ch%nfhi
-    
-    ! set pdf to zero if below threshold
-    do inf = 3, 6
-       if (Q.lt.quark_masses_sf(inf)) then
-          f(:,-inf) = zero
-          f(:, inf) = zero
-          if ((inf.lt.current_nf).and.(inf.ge.ch%nflo)) current_nf = inf
-       endif
+    if(ch%nflo.lt.3) stop 'Do you really want to run with fewer than 3 light flavours??'
+
+    ! First set current nf equal to the smallest value it can take
+    current_nf = ch%nflo
+    if(Q.lt.quark_masses_sf(4)) then   
+      current_nf = 3
+    elseif(Q.lt.quark_masses_sf(5)) then 
+      current_nf = 4
+    elseif(Q.lt.quark_masses_sf(6)) then  
+      current_nf = 5
+    elseif(Q.ge.quark_masses_sf(6)) then  
+      current_nf = 6
+    endif      
+
+    current_nf = min(current_nf,ch%nfhi) ! In case we run we force fewer than 6 flavours
+
+    do inf = current_nf + 1, 6 
+      f(:,-inf) = zero
+      f(:, inf) = zero
     enddo
+    
+    nf_lcl = current_nf
 
     ! set nf in coeff fct to current number of flavours above threshold
     call SetNfCoefHolder(ch, current_nf)
