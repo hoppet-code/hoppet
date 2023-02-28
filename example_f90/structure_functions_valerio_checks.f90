@@ -15,7 +15,11 @@ program structure_functions_valerio_checks
   integer  :: order_max, sc_choice,nloop,ix
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
-  
+  ! Couplings needed for the F3 structure functions
+  real(dp), parameter :: mz = 91.1876_dp, mw = 80.398_dp, sin_thw_sq = 1.0_dp - (mw/mz)**2
+  real(dp), parameter :: Ae = - 0.5_dp, Ve = - 0.5_dp + 2.0_dp * sin_thw_sq, Ae2 = Ae**2, &
+       &  Ve2 = Ve**2, Ve2_Ae2 = Ve2 + Ae2, two_Ve_Ae = 2.0_dp * Ve * Ae, &
+       &  sin_2thw_sq = 4.0_dp * (1.0_dp - sin_thw_sq) * sin_thw_sq
 
   sqrts = 13000.0_dp ! This is Qmax
   order_max = 4
@@ -32,7 +36,7 @@ program structure_functions_valerio_checks
   call hoppetSetPoleMassVFN(mc, mb, mt)
 
   call StartStrFct(sqrts, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
-       param_coefs = .true., Qmin_PDF = Qmin)
+       param_coefs = .true., Qmin_PDF = Qmin, wmass = mw, zmass = mz)
   nloop = 3
   asQ = 0.35_dp
   Q0alphas = sqrt(2.0_dp)
@@ -275,6 +279,8 @@ contains
     real(dp), intent(in) :: Qtest, logxomx_min, logxomx_max
     integer, intent(in)  :: idev, nx
     real(dp) :: ytest, xval, mR, mF, F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO, res(-6:7)
+    real(dp) :: F3gZ_LO, F3gZ_NLO, F3gZ_NNLO, F3gZ_N3LO, F3LO, F3NLO, F3NNLO, F3N3LO, &
+            & prop
     integer  :: iy
     !F3 Wp Wm Z
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
@@ -289,16 +295,28 @@ contains
        res = F_LO(ytest, Qtest, mR, mF)
        write(idev,'(3es22.12)',advance='no') xval, res(F3Wp),res(F3Wm)
        F3Z_LO = res(F3Z)
+       F3gZ_LO = res(F3gZ)
        res = F_NLO(ytest, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
        F3Z_NLO = res(F3Z)
+       F3gZ_NLO = res(F3gZ)
        res = F_NNLO(ytest, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
        F3Z_NNLO = res(F3Z)
+       F3gZ_NNLO = res(F3gZ)
        res = F_N3LO(ytest, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
        F3Z_N3LO = res(F3Z)
-       write(idev,'(4es22.12)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
+       F3gZ_N3LO = res(F3gZ)
+       ! Before printing we dress the F3 structure functions with the appropriate couplings 
+       ! as defined in for instance the pink book (notice that there are typos in these 
+       ! equations in the pink book) eqs. 4.20-4.21
+       prop   = Qtest**2 / (Qtest**2 + MZ**2) / sin_2thw_sq
+       F3LO   = - (Ae * prop * F3gZ_LO   - two_Ve_Ae * prop**2 * F3Z_LO)   * 0.5_dp
+       F3NLO  = - (Ae * prop * F3gZ_NLO  - two_Ve_Ae * prop**2 * F3Z_NLO)  * 0.5_dp
+       F3NNLO = - (Ae * prop * F3gZ_NNLO - two_Ve_Ae * prop**2 * F3Z_NNLO) * 0.5_dp
+       F3N3LO = - (Ae * prop * F3gZ_N3LO - two_Ve_Ae * prop**2 * F3Z_N3LO) * 0.5_dp
+       write(idev,'(4es22.12)',advance='no') F3LO, F3NLO, F3NNLO, F3N3LO
        write(idev,*)
     end do
     write(idev,*)
