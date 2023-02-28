@@ -23,7 +23,7 @@
 *    there, and for F_3 the fl02 contributions have to be left out.
 *
 * ..Reference: J. Davies, S. Moch, J. Vermaseren and A. Vogt, 
-*              arXiv:1606.xxxxx 
+*              arXiv:1606.08907
 *
 * ===================================================================== 
 *
