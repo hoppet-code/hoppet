@@ -1,3 +1,8 @@
+2023-03-12 Sun  <gavin.salam@physics.ox.ac.uk>
+
+	* .github/workflows/CI.yml:
+	added an attempt at continuous integration using github actions
+
 2023-03-12  Alexander Puck Neuwirth + small mods by Gavin Salam  <gavin.salam@physics.ox.ac.uk> 
 
 	* src/warnings_and_errors.f90:

@@ -1,4 +1,6 @@
 name: CI
+# adapted from 
+# https://github.com/jacobwilliams/json-fortran/blob/master/.github/workflows/CI.yml
 
 on: [push, pull_request]
 
@@ -12,7 +14,7 @@ jobs:
         os: [ubuntu-latest]
         gcc_v: [10] # Version of GFortran we want to use.
         #gcc_v: [7,8,9,10] # Version of GFortran we want to use.
-        python-version: [3.9]
+        #python-version: [3.9]
     env:
       FC: gfortran-${{matrix.gcc_v}}
       GCC_V: ${{matrix.gcc_v}}
@@ -24,7 +26,7 @@ jobs:
       run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
 
