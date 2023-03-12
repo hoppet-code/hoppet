@@ -147,6 +147,8 @@ contains
     !call error('')
     write(stddev,*)
     !stop
+    !! NB: this is non-standard, but seems to be supported by gfortran
+    !!     and ifort
     call exit(1)
     !call abort
   end subroutine wae_error
