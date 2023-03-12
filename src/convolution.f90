@@ -1179,7 +1179,7 @@ contains
           write(0,*) 'WgtGridQuant: &
                &requested function value outside y range'
           write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
-          stop
+          error stop
        end if
        
        npnt = min(npnt_max, max(npnt_min, abs(grid%order)))
