@@ -146,7 +146,8 @@ contains
     ! stop
     !call error('')
     write(stddev,*)
-    stop
+    !stop
+    call exit(1)
     !call abort
   end subroutine wae_error
   

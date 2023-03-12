@@ -537,8 +537,10 @@ contains
     type(grid_def), intent(in) :: gd1, gd2
     character(len=*), intent(in) :: source
     if (.not. (gd1 == gd2)) then
-       write(0,*) 'Problem validating two grid defs in ',source
-       stop
+
+       call wae_error('Problem validating two grid defs in ',source)
+       !write(0,*) 'Problem validating two grid defs in ',source
+       !stop
     end if
   end subroutine ValidateGD
 
@@ -1057,14 +1059,19 @@ contains
     integer :: i, ny, npnt, isub
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
+    character(len=80) :: string1, string2
 
     !write(0,*) y,grid%ny, ubound(gq,dim=1)
     ny = assert_eq(grid%ny,ubound(gq,dim=1),"EvalGridQuant")
     if (y > grid%ymax*(one+warn_tolerance)) then
-       write(0,*) 'EvalGridQuant: &
+       write(string1,*) 'EvalGridQuant: &
             &requested function value beyond maximum'
-       write(0,*) 'y = ', y, 'ymax=',grid%ymax
-       stop
+       write(string2,*) 'y = ', y, 'ymax=',grid%ymax
+       call wae_error(trim(string1), trim(string2))
+       !write(0,*) 'EvalGridQuant: &
+       !     &requested function value beyond maximum'
+       !write(0,*) 'y = ', y, 'ymax=',grid%ymax
+       !stop
     end if
     if (grid%nsub /= 0) then
        isub = conv_BestIsub(grid,y)
@@ -1103,14 +1110,19 @@ contains
     !real(dp) :: ey, df
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
+    character(len=80) :: string1, string2
 
     !write(0,*) y,grid%ny, ubound(gq,dim=1)
     ny = assert_eq(grid%ny,ubound(gq,dim=1),"EvalGridQuant")
     if (y > grid%ymax*(one+warn_tolerance)) then
-       write(0,*) 'EvalGridQuant: &
+       write(string1,*) 'EvalGridQuant: &
             &requested function value beyond maximum'
-       write(0,*) 'y = ', y, 'ymax=',grid%ymax
-       stop
+       write(string2,*) 'y = ', y, 'ymax=',grid%ymax
+       call wae_error(trim(string1), trim(string2))
+       !write(0,*) 'EvalGridQuant: &
+       !     &requested function value beyond maximum'
+       !write(0,*) 'y = ', y, 'ymax=',grid%ymax
+       !stop
     end if
     if (grid%nsub /= 0) then
        isub = conv_BestIsub(grid,y)
@@ -1166,6 +1178,7 @@ contains
     !-----------------------------------------
     integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: ny, npnt, isub
+    character(len=80) :: string1, string2
 
     ny = grid%ny
     if (grid%nsub /= 0) then
@@ -1176,10 +1189,14 @@ contains
        ! nan fails all comparison tests; arrange the tests so that
        ! if we have a nan, then we will get something out of range.
        if (.not.(y <= grid%ymax*(one+warn_tolerance) .and. y >= -warn_tolerance)) then
-          write(0,*) 'WgtGridQuant: &
+          write(string1,*) 'WgtGridQuant: &
                &requested function value outside y range'
-          write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
-          stop
+          write(string2,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
+          call wae_error(trim(string1), trim(string2))
+          !write(0,*) 'WgtGridQuant: &
+          !     &requested function value outside y range'
+          !write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
+          !stop
        end if
        
        npnt = min(npnt_max, max(npnt_min, abs(grid%order)))
@@ -1753,9 +1770,11 @@ contains
     end if
 
     if (istat /= 0) then
-       write(0,*) 'ERROR: problems with deallocation in conv_DelGridConv_0d'
+
+       call wae_error('conv_DelGridConv_0d: problems with deallocation')
+       !write(0,*) 'ERROR: problems with deallocation in conv_DelGridConv_0d'
        !write(0,*) one/sqrt(sin(zero))
-       stop
+       !stop
     end if
     
   end subroutine conv_DelGridConv_0d
