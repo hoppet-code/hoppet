@@ -6,7 +6,8 @@
       double precision c2np3a, c2ns3b, c2np3c
       double precision x2np3a, x2ns3b, x2np3c
 
-! Set reasonable default values
+! Set reasonable default values. The exact and parametrised versions of
+! the F2 and Fl coefficient functions differ at large x.
 
       x = 0.99999d0
       nf = 5
