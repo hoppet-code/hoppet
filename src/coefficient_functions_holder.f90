@@ -2122,6 +2122,9 @@ contains
       case(cc_VIRT)
          res = - C2NS3B(x, -y, nf_int)
       case(cc_DELTA)
+         ! GPS WARNING: when cc_DELTA, this parametrised version is
+         !      always being used, which is probably not the intended
+         !      thing. 
          res = C2NP3C(zero, nf_int, 1) - c2q3dfPC (zero, nf_int)! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
       end select
    endif
