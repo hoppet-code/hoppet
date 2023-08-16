@@ -435,7 +435,8 @@ coupling equation:
   \label{eq:as-ev}
   \frac{d\as}{d\ln Q^2} = \beta\lp \aq\rp = -\as (\beta_0\as +
   \beta_1\as^2 + 
-  \beta_2\as^3) \ .
+  \beta_2\as^3 + 
+  \beta_3\as^4) \ .
 \end{equation}
 
 The evolution of the strong coupling and the parton distributions can
@@ -2007,7 +2008,7 @@ The running coupling object is initialised so that at scale \ttt{Q}
 the coupling is equal to \ttt{alfas}. The running is carried out with
 the \ttt{nloop} $\beta$-function. 
 %
-The highest value current supported is 4 loops.
+The highest value currently supported is 4 loops.
 %
 If the \ttt{fixnf} argument is
 present, then the number of flavours is kept fixed at that
@@ -2647,21 +2648,22 @@ for the user wishing to write their own F95 code for \hoppet.
 As of \hoppet version 1.3.0 the code provides access to the
 (anti)-proton structure functions. The structure functions are
 expressed as convolutions of a set of hard coefficient functions and
-PDFs, and makes use of the tabulated PDFs and streamlined interface as
+PDFs, and make use of the tabulated PDFs and streamlined interface as
 described in the sections above. The structure functions are provided
 such that they can be used directly for cross section computations in
 DIS or VBF, the latter which has already been implemented in the {\tt
   proVBFH}
 package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
 
-An example of how to use the structure functions can be found in
-\ttt{example\_f90/structure\_functions\_example.f90}. The structure
-functions have been found to be in reasonable agreement with those
-which can be obtained with APFEL++. The benchmarks can be found in
+The structure functions have been found to be in reasonable agreement
+with those which can be obtained with APFEL++. The benchmarks and the
+code used to carry them out can be found in
 \ttt{benchmarking/structure\_functions\_benchmark\_checks.f90} and are
 described in detail in Ref.~\cite{bertonekarlberg}. Technical details
 on the implementation of the structure functions in \hoppet can also
-be found therein.
+be found therein. An example of how to use the structure functions can
+be found in \ttt{example\_f90/structure\_functions\_example.f90}.
+
 
 The structure functions have been implemented up to
 N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
