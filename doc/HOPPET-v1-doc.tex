@@ -18,6 +18,8 @@
 \usepackage{color}
 \usepackage{listings}
 \usepackage{hyperref}
+%\usepackage[style=numeric,citestyle=numeric-comp,sorting=ynt,defernumbers=true,backend=biber]{biblatex}
+\usepackage[sort&compress,numbers]{natbib}
 
 % \textwidth 21cm
 % \linewidth 21cm
@@ -107,7 +109,7 @@ version 1.2.0-devel
 %  a.k.a.\ HOPPETv1
 }
 \author{G.~P. Salam and J.~Rojo\\
-  with contributions from Fr\'d\'eric Dreyer and Alexander Karlberg as
+  with contributions from Fr\'ed\'eric Dreyer and Alexander Karlberg as
   of v1.2
 }
 
@@ -2417,7 +2419,9 @@ calculations~\cite{caesar,DisResum}.
 %
 One could also imagine using it to obtain tables of
 (flavour-separated) structure functions, if one were to convolute with
-coefficient functions rather than splitting functions.
+coefficient functions rather than splitting functions. As of version
+1.3.0 this is possible and we provide some details in
+section~\ref{sec:structure-funcs}.
 
 There are instances in which it is useful to extract the PDF at all
 $x$ values for a given $Q$. This is the case, for efficiency reasons,
@@ -2636,6 +2640,117 @@ found in \ttt{src/streamlined\_interface.f90} and may provide inspiration
 for the user wishing to write their own F95 code for \hoppet.
 
 
+%======================================================================
+%======================================================================
+\section{Hadronic Structure Functions}
+\label{sec:structure-funcs}
+As of \hoppet version 1.3.0 the code provides access to the
+(anti)-proton structure functions. The structure functions are
+expressed as convolutions of a set of hard coefficient functions and
+PDFs, and makes use of the tabulated PDFs and streamlined interface as
+described in the sections above. The structure functions are provided
+such that they can be used directly for cross section computations in
+DIS or VBF, the latter which has already been implemented in the {\tt
+  proVBFH}
+package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
+
+An example of how to use the structure functions can be found in
+\ttt{example\_f90/structure\_functions\_example.f90}. The structure
+functions have been found to be in reasonable agreement with those
+which can be obtained with APFEL++. The benchmarks can be found in
+\ttt{benchmarking/structure\_functions\_benchmark\_checks.f90} and are
+described in detail in Ref.~\cite{bertonekarlberg}. Technical details
+on the implementation of the structure functions in \hoppet can also
+be found therein.
+
+The structure functions have been implemented up to
+N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
+which are needed to claim this accuracy are not currently fully
+known\comment{AK: Should we cite some partial results?}.} using both
+the exact and parametrised coefficient functions found in
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
+
+\subsection{Initialisation}
+\label{sec:structure-funcs-init}
+In order to set up the structure functions one needs to call 
+\begin{lstlisting}
+  call StartStrFct(rts, order_max [, nflav] [, xR] [, xF] [, sc_choice] [, cmu]&
+                  & [ ,param_coefs] [ ,Qmin_PDF] [ ,wmass] [ ,zmass])
+\end{lstlisting}
+specifying as a minimum the largest value of $Q$ which one needs to
+access (through \ttt{rts}) and the perturbative order -- currently
+\ttt{order\_max}$\le 4$.
+
+If \ttt{nf} is not specified the structure functions are initialised
+with a variable flavour scheme using the quark masses as set by the
+streamlined interface. Otherwise a fixed number of light flavours is
+used.
+
+Together \ttt{xR}, \ttt{xF}, \ttt{sc\_choice}, and \ttt{cmu} control
+the renormalisation and factorisation scales. The default value for
+\ttt{sc\_choice} is $1$ which means that $Q$ multiplied by \ttt{xR} or
+\ttt{xF} is used as the renormalisation or factorisation scale
+respectively. The choice $0$ corresponds to a fixed scale \ttt{cmu}
+(multiplied by \ttt{xR} or \ttt{xF}). Should a user wish to use some
+arbitrary scale choice, \ttt{sc\_choice} should be set to $2$. In this
+case the structure functions are saved as arrays not only in $Q$ but
+also $\mu_R$ and $\mu_F$. This makes for a slightly slower evaluation
+compared to the two other scale choices.
+
+If \ttt{param\_coefs} is set to \ttt{.true.}  then the structure
+functions are computed using the (very precise) parametrisations found
+in
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}. Otherwise
+the exact versions are used. This however means that the
+initialisation becomes very slow, and since the parametrised
+expressions are good to $10^{-4}$ for most values of $x$, it is
+recommended to use the parametrised option for most applications. Note
+that the exact expressions rely on a extended version of
+\ttt{hplog}~\cite{FortranPolyLog} that is able to handle harmonic
+polylogarithms up to weight 6.\comment{AK: Not sure what to do here
+  since the exact expressions return something wrong}.
+
+\ttt{Qmin\_PDF} sets the lowest value at which the PDF is
+reliable. The mass of the electroweak vector bosons can also be passed
+to this routine.
+
+The routine calls \ttt{hoppetStartExtended} and initialises all the
+tables needed for the structure functions. In order to fill the
+tables, one first needs to set up a \ttt{running\_coupling} object and
+evolve the initial PDF with e.g.~\ttt{hoppetEvolve} as described in
+sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. With the PDF
+table filled one calls
+\begin{lstlisting}
+  call InitStrFct(order, separate_orders)
+\end{lstlisting}
+specifying the order at which one would like to compute the structure
+functions. The flag \ttt{separate\_orders} can be set to \ttt{.true.}
+if one wants access to the coefficients in the perturbative expansion
+rather than the sum up to some maximum order. In the latter case only
+\ttt{scale\_choice} $0$ and $1$ are allowed.
+
+\subsection{Accessing the Structure Functions}
+\label{sec:structure-funcs-access}
+At this point the structure functions can be accessed as in the following example
+\begin{lstlisting}
+  real(dp) :: xf(-6:7), y, Q, muR, muF
+  [...]
+  xf = StrFct (y, Q, muR, muF)
+\end{lstlisting}
+at the value $y=\log{x}$ and $Q$. The variables \ttt{muR} and
+\ttt{muF} are not optional, but are only used if \ttt{scale\_choice}
+is $2$. The structure functions are in this example stored in the
+array \ttt{xf}. The components of this array can be accessed through
+the indices
+\begin{lstlisting}
+  integer, parameter :: F1Wp= 1, F2Wp= 2, F3Wp= 3
+  integer, parameter :: F1Wm=-1, F2Wm=-2, F3Wm=-3
+  integer, parameter :: F1Z = 4, F2Z = 5, F3Z = 6
+  integer, parameter :: F1EM = -4, F2EM = -5
+  integer, parameter :: F1gZ = 0, F2gZ = -6, F3gZ = 7
+\end{lstlisting}
+For instance one would access the electromagnetic $F_1$ structure
+function through \ttt{xf(F1EM)}.
 %======================================================================
 %======================================================================
 \section{Benchmarks}
@@ -4556,7 +4671,79 @@ Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
   fortran~90 may be found at
   \url{http://dmoz.org/Computers/Programming/Languages/Fortran/Tutorials/Fortran_90_and_95/}
 
+\bibitem{Cacciari:2015jma}
+M.~Cacciari, F.~A.~Dreyer, A.~Karlberg, G.~P.~Salam and G.~Zanderighi,
+%``Fully Differential Vector-Boson-Fusion Higgs Production at Next-to-Next-to-Leading Order,''
+Phys. Rev. Lett. \textbf{115} (2015) no.8, 082002
+[erratum: Phys. Rev. Lett. \textbf{120} (2018) no.13, 139901]
+doi:10.1103/PhysRevLett.115.082002
+[arXiv:1506.02660 [hep-ph]].
 
+\bibitem{Dreyer:2016oyx}
+F.~A.~Dreyer and A.~Karlberg,
+%``Vector-Boson Fusion Higgs Production at Three Loops in QCD,''
+Phys. Rev. Lett. \textbf{117} (2016) no.7, 072001
+doi:10.1103/PhysRevLett.117.072001
+[arXiv:1606.00840 [hep-ph]].
+
+\bibitem{Dreyer:2018qbw}
+F.~A.~Dreyer and A.~Karlberg,
+%``Vector-Boson Fusion Higgs Pair Production at N$^3$LO,''
+Phys. Rev. D \textbf{98} (2018) no.11, 114016
+doi:10.1103/PhysRevD.98.114016
+[arXiv:1811.07906 [hep-ph]].
+
+\bibitem{Dreyer:2018rfu}
+F.~A.~Dreyer and A.~Karlberg,
+%``Fully differential Vector-Boson Fusion Higgs Pair Production at Next-to-Next-to-Leading Order,''
+Phys. Rev. D \textbf{99} (2019) no.7, 074028
+doi:10.1103/PhysRevD.99.074028
+[arXiv:1811.07918 [hep-ph]].
+
+\bibitem{bertonekarlberg}
+  V. Bertone and A. Karlberg, to appear.
+  
+\bibitem{vanNeerven:1999ca}
+W.~L.~van Neerven and A.~Vogt,
+%``NNLO evolution of deep inelastic structure functions: The Nonsinglet case,''
+Nucl. Phys. B \textbf{568} (2000), 263-286
+doi:10.1016/S0550-3213(99)00668-9
+[arXiv:hep-ph/9907472 [hep-ph]].
+
+\bibitem{Vermaseren:2005qc}
+J.~A.~M.~Vermaseren, A.~Vogt and S.~Moch,
+%``The Third-order QCD corrections to deep-inelastic scattering by photon exchange,''
+Nucl. Phys. B \textbf{724} (2005), 3-182
+doi:10.1016/j.nuclphysb.2005.06.020
+[arXiv:hep-ph/0504242 [hep-ph]].
+
+\bibitem{vanNeerven:2000uj}
+W.~L.~van Neerven and A.~Vogt,
+%``NNLO evolution of deep inelastic structure functions: The Singlet case,''
+Nucl. Phys. B \textbf{588} (2000), 345-373
+doi:10.1016/S0550-3213(00)00480-6
+[arXiv:hep-ph/0006154 [hep-ph]].
+
+\bibitem{Davies:2016ruz}
+J.~Davies, A.~Vogt, S.~Moch and J.~A.~M.~Vermaseren,
+%``Non-singlet coefficient functions for charged-current deep-inelastic scattering to the third order in QCD,''
+PoS \textbf{DIS2016} (2016), 059
+doi:10.22323/1.265.0059
+[arXiv:1606.08907 [hep-ph]].
+
+\bibitem{Moch:2004xu}
+S.~Moch, J.~A.~M.~Vermaseren and A.~Vogt,
+%``The Longitudinal structure function at the third order,''
+Phys. Lett. B \textbf{606} (2005), 123-129
+doi:10.1016/j.physletb.2004.11.063
+[arXiv:hep-ph/0411112 [hep-ph]].
+
+\bibitem{Moch:2008fj}
+S.~Moch, J.~A.~M.~Vermaseren and A.~Vogt,
+%``Third-order QCD corrections to the charged-current structure function F(3),''
+Nucl. Phys. B \textbf{813} (2009), 220-258
+doi:10.1016/j.nuclphysb.2009.01.001
+[arXiv:0812.4168 [hep-ph]].
 \end{thebibliography}
 
 

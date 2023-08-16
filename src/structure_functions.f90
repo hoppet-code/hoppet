@@ -151,7 +151,7 @@ contains
     ymax  = 16.0_dp
     dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
     dlnlnQ = dy/4.0_dp
-    nloop = 3
+    nloop = 3 
     minQval = min(xmuF*Qmin, Qmin)
     maxQval = max(xmuF*rts, rts)
 
@@ -1222,7 +1222,8 @@ contains
   ! calculate the structure function at x, muF
   ! this is the sum over all orders
   function StrFct (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+    real(dp), intent(in)  :: y, Q
+    real(dp), intent(in), optional  :: muR, muF
     real(dp) :: res(-6:7)
     
     if (use_sep_orders) then
@@ -1247,6 +1248,8 @@ contains
     real(dp), intent(in)  :: y, Q, muR, muF
     real(dp) :: res(-6:7)
     real(dp) :: Q_or_muF
+
+    if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
     ! if scale_choice = 0,1, then evaluate tables at Q
     ! (since it is saved as an array in Q)
@@ -1272,6 +1275,8 @@ contains
     real(dp) :: C1f(-6:7), C0P0f(-6:7)
     real(dp) :: Q_or_muF
 
+    if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
+    
     as2pi = alphasLocal(muR) / (twopi)
 
     ! if scale_choice = 0,1, then evaluate tables at Q
@@ -1310,6 +1315,8 @@ contains
     real(dp) :: C1f(-6:7), C0P0f(-6:7), C2f(-6:7), C0P0sqf(-6:7)
     real(dp) :: C0P1f(-6:7), C1P0f(-6:7)
     real(dp) :: Q_or_muF
+    
+    if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
     as2pi = alphasLocal(muR) / (twopi)
 
@@ -1362,6 +1369,8 @@ contains
     real(dp) :: C0P1f(-6:7), C1P0f(-6:7), C0P0cbf(-6:7), C0P01f(-6:7), C0P10f(-6:7)
     real(dp) :: C1P0sqf(-6:7), C1P1f(-6:7), C2P0f(-6:7), C0P2f(-6:7)
     real(dp) :: Q_or_muF
+    
+    if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
     as2pi = alphasLocal(muR) / (twopi)
 
