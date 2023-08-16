@@ -1,18 +1,17 @@
 !! An example program which prints out the DIS structure functions up
 !! to N3LO. This program produces the checks that were carried out
-!! with Valerio Bertone in Feb 2023, and which are contained in the
-!! folder valerio-checks.!!
+!! with Valerio Bertone in (INSERT ARXIV IDENTIFIER HERE)
 !!
 
-program structure_functions_valerio_checks
+program structure_functions_benchmark_checks
   use hoppet_v1
   use dummy_pdfs
   use streamlined_interface
   use structure_functions
   implicit none
-  real(dp) :: sqrts, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0alphas, muR_Q, Q0pdf
+  real(dp) :: Qmax, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0alphas, muR_Q, Q0pdf
   real(dp) :: xpdf_at_xQ(-6:6)
-  integer  :: order_max, sc_choice,nloop,ix
+  integer  :: order_max, sc_choice,nloop,ix,nf_lcl
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   ! Couplings needed for the F3 structure functions
@@ -21,12 +20,11 @@ program structure_functions_valerio_checks
        &  Ve2 = Ve**2, Ve2_Ae2 = Ve2 + Ae2, two_Ve_Ae = 2.0_dp * Ve * Ae, &
        &  sin_2thw_sq = 4.0_dp * (1.0_dp - sin_thw_sq) * sin_thw_sq
 
-  sqrts = 13000.0_dp ! This is Qmax
+  Qmax = 13000.0_dp 
   order_max = 4
   xmur = one
   xmuf = one
-  sc_choice = 1
-  ! For toy pdf and fixed nf = 5
+  sc_choice = 1 ! Uses Q as the central scale choice
   Qmin = one
 
   ! Set heavy flavour scheme
@@ -35,9 +33,12 @@ program structure_functions_valerio_checks
   mt = 175.0_dp
   call hoppetSetPoleMassVFN(mc, mb, mt)
 
-  call StartStrFct(sqrts, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
+  ! Setup all constants and parameters needed by the structure functions
+  call StartStrFct(Qmax, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
        param_coefs = .true., Qmin_PDF = Qmin, wmass = mw, zmass = mz)
-  nloop = 3
+
+  ! Evolve the PDF
+  nloop = 3 ! NNLO evolution
   asQ = 0.35_dp
   Q0alphas = sqrt(2.0_dp)
   muR_Q = 1.0_dp
@@ -45,15 +46,15 @@ program structure_functions_valerio_checks
   call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, lha_unpolarized_dummy_pdf, Q0pdf)
 
   write(6,*) "Quick test that PDFs have been read in correctly"
-    Q = 100.0_dp
-    print*, 'Q = ', Q, ' GeV'
-    print*, 'αS(Q) = ', Value(coupling, Q)
-
-    write(6,'(a)')
-    write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
-    write(6,'(a5,2a12,a14,a10,a12)') "x",&
+  Q = 100.0_dp
+  print*, 'Q = ', Q, ' GeV'
+  print*, 'αS(Q) = ', Value(coupling, Q)
+  
+  write(6,'(a)')
+  write(6,'(a,f8.3,a)') "Evaluating PDFs at Q = ",Q," GeV"
+  write(6,'(a5,2a12,a14,a10,a12)') "x",&
        & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
-    do ix = 1, size(heralhc_xvals)
+  do ix = 1, size(heralhc_xvals)
      call EvalPdfTable_xQ(tables(0),heralhc_xvals(ix),Q,xpdf_at_xQ)
      write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
           &  xpdf_at_xQ(2)-xpdf_at_xQ(-2), &
@@ -61,134 +62,64 @@ program structure_functions_valerio_checks
           &  2*(xpdf_at_xQ(-1)+xpdf_at_xQ(-2)), &
           &  (xpdf_at_xQ(-4)+xpdf_at_xQ(4)), &
           &  xpdf_at_xQ(0)
-    end do
-    print*, ''
-
-    
-    Q = 500.0_dp
-    call EvalPdfTable_xQ(tables(0),0.01_dp,Q,xpdf_at_xQ)
-    print*, 'Q = ', Q, ' GeV'
-    print*, 'αS(Q) = ', Value(coupling, Q)
-    print*, 'PDF above mt'
-    print*, xpdf_at_xQ(-6:6)
-    print*, ''
-    Q = 100.0_dp
-    call EvalPdfTable_xQ(tables(0),0.01_dp,Q,xpdf_at_xQ)
-    print*, 'Q = ', Q, ' GeV'
-    print*, 'αS(Q) = ', Value(coupling, Q)
-    print*, 'PDF above mb'
-    print*, xpdf_at_xQ(-6:6)
-    print*, ''
-    Q = 2.0_dp
-    call EvalPdfTable_xQ(tables(0),0.01_dp,Q,xpdf_at_xQ)
-    print*, 'Q = ', Q, ' GeV'
-    print*, 'αS(Q) = ', Value(coupling, Q)
-    print*, 'PDF above mc'
-    print*, xpdf_at_xQ(-6:6)
-    print*, ''
+  end do
+  print*, ''
   
-! Fixed nf=5 call below
-  !call StartStrFct(sqrts, order_max, nflav = 5, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
-  !     param_coefs = .true., Qmin_PDF = Qmin)
-!  call read_PDF(toyQ0 = sqrt(2.0_dp), nflav = 5)
-
+  ! Initialise the structure functions using separate order
   call InitStrFct(order_max, .true.)
 
-  open(unit = 99, file = 'valerio-checks/structure-functions-Q-2.0-GeV.dat')
+  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-2.0-GeV.dat')
   Q = 2.0_dp
-  call write_f1_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f2_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f3_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
+  write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
+  call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f2_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'valerio-checks/structure-functions-Q-5.0-GeV.dat')
+  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-5.0-GeV.dat')
   Q = 5.0_dp
-  call write_f1_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f2_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f3_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
+  write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
+  call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f2_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'valerio-checks/structure-functions-Q-10.0-GeV.dat')
+  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-10.0-GeV.dat')
   Q = 10.0_dp
-  call write_f1_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f2_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f3_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
+  write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
+  call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f2_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'valerio-checks/structure-functions-Q-50.0-GeV.dat')
+  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-50.0-GeV.dat')
   Q = 50.0_dp
-  call write_f1_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f2_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f3_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
+  write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
+  call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f2_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'valerio-checks/structure-functions-Q-100.0-GeV.dat')
+  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-100.0-GeV.dat')
   Q = 100.0_dp
-  call write_f1_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f2_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f3_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
+  write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
+  call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f2_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'valerio-checks/structure-functions-Q-500.0-GeV.dat')
+  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-500.0-GeV.dat')
   Q = 500.0_dp
-  call write_f1_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f2_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
-  call write_f3_valerio(99, Q, -3.0_dp, 10.0_dp, 200)
+  write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
+  call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f2_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
+  call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
 contains 
-  !----------------------------------------------------------------------
-  ! fill the streamlined interface PDF table with the toy PDF from Andreas
-!  subroutine read_PDF(toyQ0, xR_PDF, nflav)
-!    real(dp), optional :: toyQ0, xR_PDF
-!    integer, optional :: nflav
-!    interface
-!       subroutine EvolvePDF(x,Q,res)
-!         use types; implicit none
-!         real(dp), intent(in)  :: x,Q
-!         real(dp), intent(out) :: res(*)
-!       end subroutine EvolvePDF
-!    end interface
-!    !----------------
-!    real(dp) :: toy_Q0, Q0pdf, xmuR_PDF, xpdf_at_xQ(-6:6)
-!    real(dp) :: res_lhapdf(-6:6), x, Q
-!    real(dp) :: res_hoppet(-6:6)
-!    real(dp) :: toy_pdf_at_Q0(0:grid%ny,ncompmin:ncompmax)
-!    real(dp), parameter :: mz = 91.2_dp
-!    real(dp) :: pdf_at_Q0(0:grid%ny,ncompmin:ncompmax)
-!    integer :: nf_lcl
-!    real(dp), parameter :: heralhc_xvals(9) = &
-!       & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
-!  integer  :: ix
-!
-!    toy_Q0       = sqrt(2.0_dp)
-!    xmuR_PDF     = one  
-!    if(present(toyQ0)) toy_Q0=toyQ0
-!    if(present(xR_PDF)) xmuR_PDF=xR_PDF
-!    if(present(nflav)) nf_lcl = nflav
-!
-!    if (toy_Q0 > zero) then
-!       write(6,*) "Using toy PDF"
-!       toy_pdf_at_Q0 = unpolarized_dummy_pdf(xValues(grid))
-!       if(present(nflav)) then 
-!         call InitRunningCoupling(coupling, alfas=toy_alphas_Q0, &
-!            &                   nloop = 3, Q = toy_Q0, fixnf=nf_lcl)
-!        else
-!         call InitRunningCoupling(coupling, alfas=toy_alphas_Q0, &
-!            &                   nloop = 3, Q = toy_Q0)
-!        endif
-!       call EvolvePdfTable(tables(0), toy_Q0, toy_pdf_at_Q0, dh, coupling, nloop=3)
-!    else
-!       stop 'Need positive Q starting scale for the toy PDF'
-!    end if
-!
-!    stop
-!
-!  end subroutine read_PDF
-
  !----------------------------------------------------------------------
   ! write the F1 structure function to idev
-  subroutine write_f1_valerio (idev, Qtest, logxomx_min, logxomx_max, nx)
+  subroutine write_f1_benchmark (idev, Qtest, logxomx_min, logxomx_max, nx)
   implicit none
     real(dp), intent(in) :: Qtest, logxomx_min, logxomx_max
     integer, intent(in)  :: idev, nx
@@ -227,11 +158,11 @@ contains
     end do
     write(idev,*)
     write(idev,*)
-  end subroutine write_f1_valerio
+  end subroutine write_f1_benchmark
 
   !----------------------------------------------------------------------
   ! write the F2 structure function to idev
-  subroutine write_f2_valerio (idev, Qtest, logxomx_min, logxomx_max, nx)
+  subroutine write_f2_benchmark (idev, Qtest, logxomx_min, logxomx_max, nx)
   implicit none
     real(dp), intent(in) :: Qtest, logxomx_min, logxomx_max
     integer, intent(in)  :: idev, nx
@@ -270,11 +201,11 @@ contains
     end do
     write(idev,*)
     write(idev,*)
-  end subroutine write_f2_valerio
+  end subroutine write_f2_benchmark
 
   !----------------------------------------------------------------------
   ! write the F3 structure function to idev
-  subroutine write_f3_valerio (idev, Qtest, logxomx_min, logxomx_max, nx)
+  subroutine write_f3_benchmark (idev, Qtest, logxomx_min, logxomx_max, nx)
   implicit none
     real(dp), intent(in) :: Qtest, logxomx_min, logxomx_max
     integer, intent(in)  :: idev, nx
@@ -321,6 +252,6 @@ contains
     end do
     write(idev,*)
     write(idev,*)
-  end subroutine write_f3_valerio
+  end subroutine write_f3_benchmark
 
-end program structure_functions_valerio_checks
+end program structure_functions_benchmark_checks

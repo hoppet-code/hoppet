@@ -1,4 +1,5 @@
-!! An example program using structure functions up to N3LO
+!! An example program using structure functions up to N3LO. The
+!! program uses LHAPDF. 
 !!
 !!
 
@@ -7,7 +8,7 @@ program structure_functions_example
   use dummy_pdfs
   use streamlined_interface
   use structure_functions
-  real(dp) :: sqrts, xmur, xmuf, Qmin, ymax
+  real(dp) :: Qmax, xmur, xmuf, Qmin, ymax
   integer  :: ipdf, order_max, sc_choice
   
   !! if using LHAPDF, rename a couple of hoppet functions which
@@ -16,12 +17,11 @@ program structure_functions_example
   !implicit none
 
   ipdf = 91200
-  sqrts = 13000.0_dp
+  Qmax = 13000.0_dp 
   order_max = 4
   xmur = one
   xmuf = one
   sc_choice = 1
-  ymax = log(1e5) !ymax=20
   
   ! initialize PDF set
   call PDFSET('DEFAULT', dble(ipdf))
@@ -29,13 +29,14 @@ program structure_functions_example
   Qmin = sqrt(Qmin)
 
   ! initialise hoppet
-  call StartStrFct(sqrts, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
-       param_coefs = .false., Qmin_PDF = Qmin)
+  call StartStrFct(Qmax, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
+       param_coefs = .true., Qmin_PDF = Qmin)
   call read_PDF()
   call InitStrFct(order_max, .true.)
 
   open(unit = 99, file = 'structure-functions.dat')
 
+  ymax = log(1e5) !ymax=20
   call write_f1(99, 100.0_dp, ymax, 100)
   call write_f2(99, 100.0_dp, ymax, 100)
   call write_f3(99, 100.0_dp, ymax, 100)

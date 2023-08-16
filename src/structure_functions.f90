@@ -1161,15 +1161,20 @@ contains
 
     ! reset nf_lcl to the full (possibly odd) saved value
     nf_lcl = nf_save
-    
+
+    ! AK 16-08-2023: The factor of two is included in SF in the VBF
+    ! paper by Maltoni et al. It was kept here until today since the
+    ! structure functions were only used with VBF. Now it has been
+    ! removed. WARNING: If running with a version of proVBFH pre this
+    ! fix then a factor of 2 will be missing...
+
     ! overall factor of two that we still haven't fully looked into as
-    ! of 2015-02-24 [GPS TMP]
-    res = res * two
+    ! of 2015-02-24 [GPS TMP] res = res * two
     !! GPS+AK TMP: we have just included a factor of 2 but this plainly
     !! should not be present for the electromagnetic part; so here
     !! we eliminate it again...
-    res(:,F2EM) = half * res(:,F2EM)
-    res(:,F1EM) = half * res(:,F1EM)
+    !res(:,F2EM) = half * res(:,F2EM)
+    !res(:,F1EM) = half * res(:,F1EM)
 
   end function structure_function_general_full
   
