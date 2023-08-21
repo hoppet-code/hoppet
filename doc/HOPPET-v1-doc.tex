@@ -2656,8 +2656,8 @@ DIS or VBF, the latter which has already been implemented in the {\tt
 package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
 
 The structure functions have been found to be in reasonable agreement
-with those which can be obtained with APFEL++. The benchmarks and the
-code used to carry them out can be found in
+with those which can be obtained with APFEL++. The benchmarks with
+APFEL++ and the code used to carry them out can be found in
 \ttt{benchmarking/structure\_functions\_benchmark\_checks.f90} and are
 described in detail in Ref.~\cite{bertonekarlberg}. Technical details
 on the implementation of the structure functions in \hoppet can also
@@ -2703,14 +2703,15 @@ If \ttt{param\_coefs} is set to \ttt{.true.}  then the structure
 functions are computed using the (very precise) parametrisations found
 in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}. Otherwise
-the exact versions are used. This however means that the
-initialisation becomes very slow, and since the parametrised
-expressions are good to $10^{-4}$ for most values of $x$, it is
-recommended to use the parametrised option for most applications. Note
-that the exact expressions rely on a extended version of
-\ttt{hplog}~\cite{FortranPolyLog} that is able to handle harmonic
-polylogarithms up to weight 6.\comment{AK: Not sure what to do here
-  since the exact expressions return something wrong}.
+the exact versions are used\footnote{The LO and NLO coefficient
+functions are always exact as their expressions are very
+compact.}. This however means that the initialisation becomes very
+slow, and since the parametrised expressions are good to $10^{-4}$ for
+most values of $x$, it is recommended to use the parametrised option
+for most applications. Note that the exact expressions rely on a
+extended version of \ttt{hplog}~\cite{FortranPolyLog} that is able to
+handle harmonic polylogarithms up to weight 5.\comment{AK: Not sure
+  what to do here since the exact expressions return something wrong}.
 
 \ttt{Qmin\_PDF} sets the lowest value at which the PDF is
 reliable. The mass of the electroweak vector bosons can also be passed
@@ -2720,7 +2721,13 @@ The routine calls \ttt{hoppetStartExtended} and initialises all the
 tables needed for the structure functions. In order to fill the
 tables, one first needs to set up a \ttt{running\_coupling} object and
 evolve the initial PDF with e.g.~\ttt{hoppetEvolve} as described in
-sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. With the PDF
+sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. Care should
+be taken here such that both the coupling and PDF evolution is carried
+out at the correct perturbative order and with mass thresholds as
+apprpriate. \comment{AK: I wonder if it isn't worth adding the
+  \ttt{read\_PDF} subroutine from the example to the structure
+  function module such that when one starts/initialises the structure
+  functions one also sets up these two mandatory bits.} With the PDF
 table filled one calls
 \begin{lstlisting}
   call InitStrFct(order, separate_orders)
@@ -2737,9 +2744,10 @@ At this point the structure functions can be accessed as in the following exampl
 \begin{lstlisting}
   real(dp) :: xf(-6:7), y, Q, muR, muF
   [...]
-  xf = StrFct (y, Q, muR, muF)
+  call InitStrFct(4, .true.)
+  xf = StrFct(y, Q, muR, muF)
 \end{lstlisting}
-at the value $y=\log{x}$ and $Q$. The variables \ttt{muR} and
+at the value $y=-\log{x}$ and $Q$. The variables \ttt{muR} and
 \ttt{muF} are not optional, but are only used if \ttt{scale\_choice}
 is $2$. The structure functions are in this example stored in the
 array \ttt{xf}. The components of this array can be accessed through
@@ -2752,7 +2760,25 @@ the indices
   integer, parameter :: F1gZ = 0, F2gZ = -6, F3gZ = 7
 \end{lstlisting}
 For instance one would access the electromagnetic $F_1$ structure
-function through \ttt{xf(F1EM)}.
+function through \ttt{xf(F1EM)}. It is returned at the \ttt{order}
+that was specified in \ttt{InitStrFct}. Since one is often interested
+in more than one order in $\as$ at a time, the structure functions can
+also be order by order if the \ttt{separate\_orders} flag was set to
+\ttt{.true.} when initialising. This can be done as follows
+\begin{lstlisting}
+  real(dp) :: xflo(-6:7), xfnlo(-6:7), xfnnlo(-6:7), xfn3lo(-6:7), y, Q, muR, muF
+  [...]
+  call InitStrFct(4, .true.)
+  xflo   = F_LO(y, Q, muR, muF)
+  xfnlo  = F_NLO(y, Q, muR, muF)
+  xfnnlo = F_NNLO(y, Q, muR, muF)
+  xfn3lo = F_N3LO(y, Q, muR, muF)
+\end{lstlisting}
+The functions return the individual contributions at each order in
+$\as$. Hence the sum of \ttt{xflo}, \ttt{xfnlo}, \ttt{xfnnlo}, and
+\ttt{xfn3lo} would return the full structure function at N3LO as
+contained in \ttt{xf} in the example above.
+
 %======================================================================
 %======================================================================
 \section{Benchmarks}
