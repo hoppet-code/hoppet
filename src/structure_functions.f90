@@ -193,7 +193,7 @@ contains
 
     ! AK: Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
     tables(1:)%tab_iflv_max = 7
-
+ 
   end subroutine StartStrFct
 
   
@@ -1140,24 +1140,48 @@ contains
     ! for our W calculations; switch back later
     nf_save = nf_lcl
     nf_lcl = (nf_lcl/2) * 2
-    
-    !--- deal with Wp case -----------------------------------------
-    res(:,F2Wp) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
-    ! temporarily put FL into F1;
-    res(:,F1Wp) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
-    ! then convert to F1
-    res(:,F1Wp) = (res(:,F2Wp) - res(:,F1Wp)) / two_xvals
-    res(:,F3Wp) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
-    res(:,F3Wp) = res(:,F3Wp)/xValues(grid)
 
-    !--- deal with Wm case -----------------------------------------
-    res(:,F2Wm) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
+    ! AK It looks like we have swapped the meaning of Wp and
+    !Wm. Looking at eq. 18.19 in the PDF and eq. 8 in 1206.7007 W-
+    !should couple to u + dbar
+
+    ! --- deal with Wm case
+    !-----------------------------------------
+    res(:,F2Wm) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
     ! temporarily put FL into F1;
-    res(:,F1Wm) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
+    res(:,F1Wm) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
     ! then convert to F1
     res(:,F1Wm) = (res(:,F2Wm) - res(:,F1Wm)) / two_xvals
-    res(:,F3Wm) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
+    res(:,F3Wm) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
     res(:,F3Wm) = res(:,F3Wm)/xValues(grid)
+
+    !--- deal with Wp case -----------------------------------------
+    res(:,F2Wp) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
+    ! temporarily put FL into F1;
+    res(:,F1Wp) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
+    ! then convert to F1
+    res(:,F1Wp) = (res(:,F2Wp) - res(:,F1Wp)) / two_xvals
+    res(:,F3Wp) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
+    res(:,F3Wp) = res(:,F3Wp)/xValues(grid)
+
+!    ! --- deal with Wp case
+!    !-----------------------------------------
+!    res(:,F2Wp) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
+!    ! temporarily put FL into F1;
+!    res(:,F1Wp) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
+!    ! then convert to F1
+!    res(:,F1Wp) = (res(:,F2Wp) - res(:,F1Wp)) / two_xvals
+!    res(:,F3Wp) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
+!    res(:,F3Wp) = res(:,F3Wp)/xValues(grid)
+!
+!    !--- deal with Wm case -----------------------------------------
+!    res(:,F2Wm) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
+!    ! temporarily put FL into F1;
+!    res(:,F1Wm) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
+!    ! then convert to F1
+!    res(:,F1Wm) = (res(:,F2Wm) - res(:,F1Wm)) / two_xvals
+!    res(:,F3Wm) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
+!    res(:,F3Wm) = res(:,F3Wm)/xValues(grid)
 
     ! reset nf_lcl to the full (possibly odd) saved value
     nf_lcl = nf_save
