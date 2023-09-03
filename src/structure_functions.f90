@@ -47,7 +47,7 @@ module structure_functions
   private
   public :: InitStrFct, StartStrFct, write_f1, write_f2, write_f3
   public :: F1Wp, F2Wp, F3Wp, F1Wm, F2Wm, F3Wm, F1Z, F2Z, F3Z, F1EM, F2EM, F1gZ, F2gZ, F3gZ
-  public :: F_LO, F_NLO, F_NNLO, F_N3LO
+  public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct
   public :: muR, muF, quark_masses_sf
   
   ! holds the coefficient functions
@@ -159,7 +159,7 @@ contains
     call hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
          &         order,factscheme_MSbar)
 
-    if (present(nflav)) then
+    if (present(nflav).and.nflav.gt.0) then
        ! if nflav is present, then use a fixed flavour number
        call qcd_SetNf(nflav)
        call InitCoefHolder(grid, ch, order_max, exact_coefs)

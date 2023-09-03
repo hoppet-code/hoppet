@@ -4,20 +4,35 @@
 #define __HOPPET_V1__
 
 // define nicer forms of standard f77 naming
-#define hoppetStart            hoppetstart_
-#define hoppetStartExtended    hoppetstartextended_
-#define hoppetAssign           hoppetassign_
-#define hoppetEvolve           hoppetevolve_        
-#define hoppetPreEvolve        hoppetpreevolve_     
-#define hoppetCachedEvolve     hoppetcachedevolve_
-#define hoppetAlphaS           hoppetalphas_ 
-#define hoppetSetFFN           hoppetsetffn_       
-#define hoppetSetVFN           hoppetsetvfn_       
-#define hoppetSetPoleMassVFN   hoppetsetpolemassvfn_       
-#define hoppetSetMSbarMassVFN  hoppetsetmsbarmassvfn_       
-#define hoppetEval             hoppeteval_          
-#define hoppetEvalSplit        hoppetevalsplit_
+#define hoppetStart                    hoppetstart_
+#define hoppetStartExtended            hoppetstartextended_
+#define hoppetAssign                   hoppetassign_
+#define hoppetEvolve                   hoppetevolve_        
+#define hoppetPreEvolve                hoppetpreevolve_     
+#define hoppetCachedEvolve             hoppetcachedevolve_
+#define hoppetAlphaS                   hoppetalphas_ 
+#define hoppetSetFFN                   hoppetsetffn_       
+#define hoppetSetVFN                   hoppetsetvfn_       
+#define hoppetSetPoleMassVFN           hoppetsetpolemassvfn_       
+#define hoppetSetMSbarMassVFN          hoppetsetmsbarmassvfn_       
+#define hoppetEval                     hoppeteval_          
+#define hoppetEvalSplit                hoppetevalsplit_
+#define hoppetStartStrFct              hoppetstartstrfct_
+#define hoppetStartStrFctExtended      hoppetstartstrfctextended_
+#define hoppetInitStrFct               hoppetinitstrfct_
+#define hoppetStrFct                   hoppetstrfct_
+#define hoppetStrFctFLO                hoppetstrfctflo_
+#define hoppetStrFctFNLO               hoppetstrfctfnlo_
+#define hoppetStrFctFNNLO              hoppetstrfctfnnlo_
+#define hoppetStrFctFN3LO              hoppetstrfctfn3lo_
 
+// indices for the different structure functions
+int F1Wp= 1+6, F2Wp= 2+6, F3Wp= 3+6;
+int F1Wm=-1+6, F2Wm=-2+6, F3Wm=-3+6;
+int F1Z = 4+6, F2Z = 5+6, F3Z = 6+6;
+int F1EM = -4+6, F2EM = -5+6;
+int F1gZ = 0+6, F2gZ = -6+6, F3gZ = 7+6;
+  
 extern "C" {
 
   /// initialise the underlying grid, splitting functions and pdf-table
@@ -133,6 +148,74 @@ extern "C" {
                        const int    & iloop,
                        const int    & nf,
                        double * f);
+  
+  //----------------------------------------------------------------------
+  // Setup of constants and parameters needed for structure functions
+  void hoppetStartStrFct(const double & rts,
+			 const int & order_max);
+			 
+  
+  //----------------------------------------------------------------------
+  // Setup of constants and parameters needed for structure functions
+  void hoppetStartStrFctExtended(const double & rts,
+				 const int & order_max,
+				 const int & nflav,
+				 const double & xR,
+				 const double & xF,
+				 const int & sc_choice,
+				 const double & cmu,
+				 const bool & param_coefs,
+				 const double & Qmin_PDF,
+				 const double & wmass,
+				 const double & zmass);
+  
+  // Initialize the structure functions up to specified order
+  // this requires the PDF to have been set up beforehand, and filled in tables(0)
+  void hoppetInitStrFct(const int & order_max,
+			const bool & separate_orders);
 
+
+  // F
+  // calculate the structure function at x, muF
+  // this is the sum over all orders
+  void hoppetStrFct(const double & y,
+		    const double & Q,
+		    const double & muR_in,
+		    const double & muF_in,
+		    double * F);
+  
+  // F_LO
+  // calculate the leading order structure function at x, muF
+  //
+  void hoppetStrFctFLO(const double & y,
+		       const double & Q,
+		       const double & muR_in,
+		       const double & muF_in,
+		       double * F);
+  // F_NLO
+  // calculate the next-to-leading order structure function at x, muF
+  //
+  void hoppetStrFctFNLO(const double & y,
+			const double & Q,
+			const double & muR_in,
+			const double & muF_in,
+			double * F);
+  // F_NNLO
+  // calculate the next-to-next-to-leading order structure function at x, muF
+  //
+  void hoppetStrFctFNNLO(const double & y,
+			 const double & Q,
+			 const double & muR_in,
+			 const double & muF_in,
+			 double * F);
+  // F_N3LO
+  // calculate the next-to-next-to-next-to-leading order structure function at x, muF
+  //
+  void hoppetStrFctFN3LO(const double & y,
+			 const double & Q,
+			 const double & muR_in,
+			 const double & muF_in,
+			 double * F);
+  
 }
 #endif // __HOPPET_V1__
