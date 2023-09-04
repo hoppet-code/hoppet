@@ -164,7 +164,7 @@ extern "C" {
 				 const double & xF,
 				 const int & sc_choice,
 				 const double & cmu,
-				 const bool & param_coefs,
+				 const int & param_coefs,
 				 const double & Qmin_PDF,
 				 const double & wmass,
 				 const double & zmass);
@@ -172,7 +172,7 @@ extern "C" {
   // Initialize the structure functions up to specified order
   // this requires the PDF to have been set up beforehand, and filled in tables(0)
   void hoppetInitStrFct(const int & order_max,
-			const bool & separate_orders);
+			const int & separate_orders);
 
 
   // F
