@@ -21,10 +21,10 @@
 #define hoppetStartStrFctExtended      hoppetstartstrfctextended_
 #define hoppetInitStrFct               hoppetinitstrfct_
 #define hoppetStrFct                   hoppetstrfct_
-#define hoppetStrFctFLO                hoppetstrfctflo_
-#define hoppetStrFctFNLO               hoppetstrfctfnlo_
-#define hoppetStrFctFNNLO              hoppetstrfctfnnlo_
-#define hoppetStrFctFN3LO              hoppetstrfctfn3lo_
+#define hoppetStrFctLO                 hoppetstrfctlo_
+#define hoppetStrFctNLO                hoppetstrfctnlo_
+#define hoppetStrFctNNLO               hoppetstrfctnnlo_
+#define hoppetStrFctN3LO               hoppetstrfctn3lo_
 
 // indices for the different structure functions
 int F1Wp= 1+6, F2Wp= 2+6, F3Wp= 3+6;
@@ -187,7 +187,7 @@ extern "C" {
   // F_LO
   // calculate the leading order structure function at x, muF
   //
-  void hoppetStrFctFLO(const double & y,
+  void hoppetStrFctLO(const double & y,
 		       const double & Q,
 		       const double & muR_in,
 		       const double & muF_in,
@@ -195,7 +195,7 @@ extern "C" {
   // F_NLO
   // calculate the next-to-leading order structure function at x, muF
   //
-  void hoppetStrFctFNLO(const double & y,
+  void hoppetStrFctNLO(const double & y,
 			const double & Q,
 			const double & muR_in,
 			const double & muF_in,
@@ -203,7 +203,7 @@ extern "C" {
   // F_NNLO
   // calculate the next-to-next-to-leading order structure function at x, muF
   //
-  void hoppetStrFctFNNLO(const double & y,
+  void hoppetStrFctNNLO(const double & y,
 			 const double & Q,
 			 const double & muR_in,
 			 const double & muF_in,
@@ -211,7 +211,7 @@ extern "C" {
   // F_N3LO
   // calculate the next-to-next-to-next-to-leading order structure function at x, muF
   //
-  void hoppetStrFctFN3LO(const double & y,
+  void hoppetStrFctN3LO(const double & y,
 			 const double & Q,
 			 const double & muR_in,
 			 const double & muF_in,
