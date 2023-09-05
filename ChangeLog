@@ -5,6 +5,22 @@
 	initialising non-standard iflv_max and fixed bug where F3gZ was
 	set equal to F3Z
 
+2023-03-12 Sun  <gavin.salam@physics.ox.ac.uk>
+
+	* .github/workflows/CI.yml:
+	added an attempt at continuous integration using github actions
+
+2023-03-12  Alexander Puck Neuwirth + small mods by Gavin Salam  <gavin.salam@physics.ox.ac.uk> 
+
+	* src/warnings_and_errors.f90:
+	wae_error(...): replaced "stop" with "call exit(-1)", which
+	should return a failure exit code. Note, this is non-standard, but
+	seems to be supported in both intel and gfortran.
+
+	* src/convolution.f90:
+	replaced several "stop" instructions with calls to wae_error(...)
+
+
 2023-02-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk> (with Alexander Karlberg)
 
 	* src/pdf_tabulate.f90:
