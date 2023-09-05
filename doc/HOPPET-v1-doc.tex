@@ -2668,8 +2668,9 @@ be found in \ttt{example\_f90/structure\_functions\_example.f90}.
 The structure functions have been implemented up to
 N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
 which are needed to claim this accuracy are not currently fully
-known\comment{AK: Should we cite some partial results?}.} using both
-the exact and parametrised coefficient functions found in
+known. At the time of writting partial results have been presented in
+Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm}.}
+using both the exact and parametrised coefficient functions found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
 
 \subsection{Initialisation}
@@ -2724,10 +2725,7 @@ evolve the initial PDF with e.g.~\ttt{hoppetEvolve} as described in
 sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. Care should
 be taken here such that both the coupling and PDF evolution is carried
 out at the correct perturbative order and with mass thresholds as
-apprpriate. \comment{AK: I wonder if it isn't worth adding the
-  \ttt{read\_PDF} subroutine from the example to the structure
-  function module such that when one starts/initialises the structure
-  functions one also sets up these two mandatory bits.} With the PDF
+appropriate. With the PDF
 table filled one calls
 \begin{lstlisting}
   call InitStrFct(order, separate_orders)
@@ -2753,11 +2751,20 @@ is $2$. The structure functions are in this example stored in the
 array \ttt{xf}. The components of this array can be accessed through
 the indices
 \begin{lstlisting}
-  integer, parameter :: F1Wp= 1, F2Wp= 2, F3Wp= 3
-  integer, parameter :: F1Wm=-1, F2Wm=-2, F3Wm=-3
-  integer, parameter :: F1Z = 4, F2Z = 5, F3Z = 6
-  integer, parameter :: F1EM = -4, F2EM = -5
-  integer, parameter :: F1gZ = 0, F2gZ = -6, F3gZ = 7
+  integer, parameter :: F1Wp= 1   
+  integer, parameter :: F2Wp= 2   
+  integer, parameter :: F3Wp= 3   
+  integer, parameter :: F1Wm=-1   
+  integer, parameter :: F2Wm=-2   
+  integer, parameter :: F3Wm=-3   
+  integer, parameter :: F1Z = 4   
+  integer, parameter :: F2Z = 5   
+  integer, parameter :: F3Z = 6   
+  integer, parameter :: F1EM = -4   
+  integer, parameter :: F2EM = -5   
+  integer, parameter :: F1gZ = 0  
+  integer, parameter :: F2gZ = -6 
+  integer, parameter :: F3gZ = 7  
 \end{lstlisting}
 For instance one would access the electromagnetic $F_1$ structure
 function through \ttt{xf(F1EM)}. It is returned at the \ttt{order}
@@ -2779,6 +2786,51 @@ $\as$. Hence the sum of \ttt{xflo}, \ttt{xfnlo}, \ttt{xfnnlo}, and
 \ttt{xfn3lo} would return the full structure function at N3LO as
 contained in \ttt{xf} in the example above.
 
+\subsection{Streamlined interface}
+\label{sec:structure-functions-streamlined}
+The structure functions can also be accessed through the streamlined
+interface, so that they may be called for instance from C/C++. The
+functions to be called are very similar to those described above. In
+particular a user should call either
+\begin{lstlisting}
+  call hoppetStartStrFct(rts, order_max)
+\end{lstlisting}
+with \ttt{rts} the maximum energy and \ttt{order\_max} the maximal
+order in $\as$, or the extended version of the interface
+\ttt{hoppetStartStrFctExtended} which takes all the same arguments as
+\ttt{StartStrFct} described above. After evolving or reading in a PDF,
+the user then calls
+\begin{lstlisting}
+  call hoppetInitStrFct(order, separate_orders)
+\end{lstlisting}
+to initialise the actual structure functions. The structure functions
+can then be access through the subroutines
+\begin{lstlisting}
+  real(dp) :: xflo(-6:7), xfnlo(-6:7), xfnnlo(-6:7), xfn3lo(-6:7), y, Q, muR, muF
+  [...]
+  call hoppetStrFct(y, Q, muR, muF, xf)         ! Full structure function   
+  call hoppetStrFctLO(y, Q, muR, muF, xflo)     ! LO coefficient
+  call hoppetStrFctNLO(y, Q, muR, muF, xfnlo)   ! NLO coefficient
+  call hoppetStrFctNNLO(y, Q, muR, muF, xfnnlo) ! NNLO coefficient
+  call hoppetStrFctN3LO(y, Q, muR, muF, xfn3lo) ! NNLO coefficient
+\end{lstlisting}
+The C++ header contains mapped indices for the structure functions
+\begin{lstlisting}
+  int F1Wp = 1+6;
+  int F2Wp = 2+6;
+  int F3Wp = 3+6;
+  int F1Wm =-1+6;
+  int F2Wm =-2+6;
+  int F3Wm =-3+6;
+  int F1Z  = 4+6;
+  int F2Z  = 5+6;
+  int F3Z  = 6+6;
+  int F1EM =-4+6;
+  int F2EM =-5+6;
+  int F1gZ = 0+6;
+  int F2gZ =-6+6;
+  int F3gZ = 7+6;
+\end{lstlisting}
 %======================================================================
 %======================================================================
 \section{Benchmarks}
@@ -4772,6 +4824,38 @@ S.~Moch, J.~A.~M.~Vermaseren and A.~Vogt,
 Nucl. Phys. B \textbf{813} (2009), 220-258
 doi:10.1016/j.nuclphysb.2009.01.001
 [arXiv:0812.4168 [hep-ph]].
+
+%\cite{Moch:2021qrk}
+\bibitem{Moch:2021qrk}
+S.~Moch, B.~Ruijl, T.~Ueda, J.~A.~M.~Vermaseren and A.~Vogt,
+%``Low moments of the four-loop splitting functions in QCD,''
+Phys. Lett. B \textbf{825} (2022), 136853
+doi:10.1016/j.physletb.2021.136853
+[arXiv:2111.15561 [hep-ph]].
+%32 citations counted in INSPIRE as of 05 Sep 2023
+
+%\cite{Falcioni:2023luc}
+\bibitem{Falcioni:2023luc}
+G.~Falcioni, F.~Herzog, S.~Moch and A.~Vogt,
+%``Four-loop splitting functions in QCD \textendash{} The quark-quark case,''
+Phys. Lett. B \textbf{842} (2023), 137944
+doi:10.1016/j.physletb.2023.137944
+[arXiv:2302.07593 [hep-ph]].
+%5 citations counted in INSPIRE as of 05 Sep 2023
+
+%\cite{Falcioni:2023vqq}
+\bibitem{Falcioni:2023vqq}
+G.~Falcioni, F.~Herzog, S.~Moch and A.~Vogt,
+%``Four-loop splitting functions in QCD -- The gluon-to-quark case,''
+[arXiv:2307.04158 [hep-ph]].
+%1 citations counted in INSPIRE as of 05 Sep 2023
+
+%\cite{Gehrmann:2023cqm}
+\bibitem{Gehrmann:2023cqm}
+T.~Gehrmann, A.~von Manteuffel, V.~Sotnikov and T.~Z.~Yang,
+%``Complete $N_f^2$ contributions to four-loop pure-singlet splitting functions,''
+[arXiv:2308.07958 [hep-ph]].
+%0 citations counted in INSPIRE as of 05 Sep 2023
 \end{thebibliography}
 
 
