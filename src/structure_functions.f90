@@ -53,12 +53,21 @@ module structure_functions
   ! holds the coefficient functions
   type(coef_holder), save :: ch
   
-  ! indices for the different structure functions
-  integer, parameter :: F1Wp= 1, F2Wp= 2, F3Wp= 3
-  integer, parameter :: F1Wm=-1, F2Wm=-2, F3Wm=-3
-  integer, parameter :: F1Z = 4, F2Z = 5, F3Z = 6
-  integer, parameter :: F1EM = -4, F2EM = -5
-  integer, parameter :: F1gZ = 0, F2gZ = -6, F3gZ = 7
+  ! indices for the different structure functions (D=d,s,b, U=u,c)
+  integer, parameter :: F1Wp= 1   !< F1 W+ : D + Ubar 
+  integer, parameter :: F2Wp= 2   !< F2 W+ : D + Ubar 
+  integer, parameter :: F3Wp= 3   !< F3 W+ : D + Ubar 
+  integer, parameter :: F1Wm=-1   !< F1 W- : Dbar + U 
+  integer, parameter :: F2Wm=-2   !< F2 W- : Dbar + U 
+  integer, parameter :: F3Wm=-3   !< F3 W- : Dbar + U 
+  integer, parameter :: F1Z = 4   !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter :: F2Z = 5   !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter :: F3Z = 6   !< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up
+  integer, parameter :: F1EM = -4 !< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
+  integer, parameter :: F2EM = -5 !< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
+  integer, parameter :: F1gZ = 0  !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter :: F2gZ = -6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter :: F3gZ = 7  !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
   
   ! constants and fixed parameters
   real(dp), save      :: quark_masses_sf(4:6) = quark_masses_def(4:6)
@@ -1193,7 +1202,8 @@ contains
     ! fix then a factor of 2 will be missing...
 
     ! overall factor of two that we still haven't fully looked into as
-    ! of 2015-02-24 [GPS TMP] res = res * two
+    ! of 2015-02-24 [GPS TMP] 
+    ! res = res * two
     !! GPS+AK TMP: we have just included a factor of 2 but this plainly
     !! should not be present for the electromagnetic part; so here
     !! we eliminate it again...
