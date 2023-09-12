@@ -23,7 +23,8 @@ C----------------------------------------------------------------------
       ! initialise an LHAPDF set
       !call InitPDFsetByName("cteq61.LHgrid")
       !call InitPDFsetByName("CT10nlo.LHgrid")
-      call InitPDFsetByName("PDF4LHC15_nnlo_30")
+      !call InitPDFsetByName("PDF4LHC15_nnlo_30")
+      call InitPDFsetByName("CT18NLO")
       call InitPDF(0)
 
       ! start the dglap evolution/convolution package 

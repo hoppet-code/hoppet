@@ -232,6 +232,7 @@ module convolution
   integer :: nconv_with_override_off = 0 ! 
   public :: GetDerivedProbes, SetDerivedConv
   public :: SetDerivedConv_nodealloc
+  public :: DisableGridLocking, RestoreGridLocking
 
   ! actual subroutine is to be found in welcome_message.f90
   interface
@@ -256,8 +257,8 @@ contains
     integer,        intent(in), optional :: order
     real(dp),       intent(in), optional :: eps
     logical, save :: first_call = .true.
-    character(len=80) :: string1, string2
-    integer, save     :: warn_dy = 4
+    character(len=200) :: err_string1, err_string2
+    integer, save     :: nwarn_dy = 4
 
     if (first_call) then
        first_call = .false.
@@ -274,16 +275,16 @@ contains
     grid%ny   = nint(ymax / dy)
     if (grid%ny < 2) then
        
-       write(string1,*) 'InitGridDef: requested too small a number of bins'
-       write(string2,*) '                 dy and ymax were',dy,ymax
-       call wae_error(trim(string1),trim(string2))
+       write(err_string1,*) 'InitGridDef: requested too small a number of bins'
+       write(err_string2,*) '                 dy and ymax were',dy,ymax
+       call wae_error(trim(err_string1),trim(err_string2))
     end if
     
     grid%dy   = ymax / grid%ny
     if (abs(grid%dy/dy - one) > 0.001_dp) then
-       write(string1,*) 'InitGridDef: requested dy of ', dy
-       write(string2,*) '                         provided  dy of ', grid%dy
-       call wae_warn(warn_dy,trim(string1),trim(string2))
+       write(err_string1,*) 'InitGridDef: requested dy of ', dy
+       write(err_string2,*) '                         provided  dy of ', grid%dy
+       call wae_warn(nwarn_dy,trim(err_string1),trim(err_string2))
     end if
 
     if (present(order)) then
@@ -316,8 +317,8 @@ contains
     type(grid_def), pointer :: subgd(:) ! shorthand
     ! temp needed for workaround on ifort 8.0.039
     real(dp) :: gdarraydy(size(gdarray))
-    character(len=80) :: string1, string2
-    integer, save     :: warn_locking = 4
+    character(len=200) :: err_string1, err_string2
+    integer, save      :: nwarn_locking = 4
 
     !-- enforce one layer only
     if (any(gdarray(:)%nsub /= 0)) then
@@ -346,11 +347,11 @@ contains
           subgd(i) = gdarray(indx(i))
           if (i > 1) then 
              if (subgd(i)%ymax <  subgd(i-1)%ymax) then
-                write(string1,*) &
+                write(err_string1,*) &
                      &'ERROR in conv_InitGridDef_multi: for locking,'
-                write(string2,*) 'gdarray with smaller dy should&
+                write(err_string2,*) 'gdarray with smaller dy should&
                      & also have smaller gdarray%ymax'
-                call wae_error(trim(string1), trim(string2))
+                call wae_error(trim(err_string1), trim(err_string2))
                 ! for testing ifort_8_0_039...
                 !write(0,*) 'dy   values (i-1,i)', subgd(i-1:i)%dy
                 !write(0,*) 'ymax values (i-1,i)', subgd(i-1:i)%ymax
@@ -369,26 +370,26 @@ contains
           dyratio = subgd(i+1)%dy / subgd(i)%dy
           subgd(i)%dy = subgd(i+1)%dy / nint(dyratio)
           if (abs(dyratio-nint(dyratio)) > warn_tolerance*dyratio) then
-             write(string1,'(a,i2,a,f18.14)') ' InitGridDef (locking):&
+             write(err_string1,'(a,i2,a,f18.14)') ' InitGridDef (locking):&
                   & redefined dy(', i,') to be ', subgd(i)%dy
-             call wae_warn(warn_locking, trim(string1))
+             call wae_warn(nwarn_locking, trim(err_string1))
           end if
           ! after fixing dy one must still have an integer number of bins
           approx_ny = subgd(i)%ymax/subgd(i)%dy
           subgd(i)%ny = ceiling(approx_ny - warn_tolerance)
           new_ymax = subgd(i)%ny * subgd(i)%dy
           if (abs(new_ymax-subgd(i)%ymax) > warn_tolerance*new_ymax) then
-             write(string1,'(a,i2,a,f18.14)') ' InitGridDef (locking):&
+             write(err_string1,'(a,i2,a,f18.14)') ' InitGridDef (locking):&
                   & redefined ymax(', i,') to be ', new_ymax
-             call wae_warn(warn_locking, trim(string1))
+             call wae_warn(nwarn_locking, trim(err_string1))
           end if
           subgd(i)%ymax = new_ymax
           subgd(i)%ny   = nint(subgd(i)%ymax / subgd(i)%dy)
           ! condition on order must still hold
           if (abs(subgd(i)%order)+1 > subgd(i)%ny) then
-             write(string1,'(a)') 'Error in InitGridDef (locking):'
-             write(string2,'(a,i2,a)') '       For grid def ',i,' |order|+1 > ny'
-             call wae_error(trim(string1),trim(string2))
+             write(err_string1,'(a)') 'Error in InitGridDef (locking):'
+             write(err_string2,'(a,i2,a)') '       For grid def ',i,' |order|+1 > ny'
+             call wae_error(trim(err_string1),trim(err_string2))
           end if
        end do
     else
@@ -558,8 +559,10 @@ contains
     type(grid_def), intent(in) :: gd1, gd2
     character(len=*), intent(in) :: source
     if (.not. (gd1 == gd2)) then
-       write(0,*) 'Problem validating two grid defs in ',source
-       stop
+
+       call wae_error('Problem validating two grid defs in ',source)
+       !write(0,*) 'Problem validating two grid defs in ',source
+       !stop
     end if
   end subroutine ValidateGD
 
@@ -1078,14 +1081,19 @@ contains
     integer :: i, ny, npnt, isub
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
+    character(len=200) :: err_string1, err_string2
 
     !write(0,*) y,grid%ny, ubound(gq,dim=1)
     ny = assert_eq(grid%ny,ubound(gq,dim=1),"EvalGridQuant")
     if (y > grid%ymax*(one+warn_tolerance)) then
-       write(0,*) 'EvalGridQuant: &
+       write(err_string1,*) 'EvalGridQuant: &
             &requested function value beyond maximum'
-       write(0,*) 'y = ', y, 'ymax=',grid%ymax
-       stop
+       write(err_string2,*) 'y = ', y, 'ymax=',grid%ymax
+       call wae_error(trim(err_string1), trim(err_string2))
+       !write(0,*) 'EvalGridQuant: &
+       !     &requested function value beyond maximum'
+       !write(0,*) 'y = ', y, 'ymax=',grid%ymax
+       !stop
     end if
     if (grid%nsub /= 0) then
        isub = conv_BestIsub(grid,y)
@@ -1124,14 +1132,19 @@ contains
     !real(dp) :: ey, df
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
+    character(len=200) :: err_string1, err_string2
 
     !write(0,*) y,grid%ny, ubound(gq,dim=1)
     ny = assert_eq(grid%ny,ubound(gq,dim=1),"EvalGridQuant")
     if (y > grid%ymax*(one+warn_tolerance)) then
-       write(0,*) 'EvalGridQuant: &
+       write(err_string1,*) 'EvalGridQuant: &
             &requested function value beyond maximum'
-       write(0,*) 'y = ', y, 'ymax=',grid%ymax
-       stop
+       write(err_string2,*) 'y = ', y, 'ymax=',grid%ymax
+       call wae_error(trim(err_string1), trim(err_string2))
+       !write(0,*) 'EvalGridQuant: &
+       !     &requested function value beyond maximum'
+       !write(0,*) 'y = ', y, 'ymax=',grid%ymax
+       !stop
     end if
     if (grid%nsub /= 0) then
        isub = conv_BestIsub(grid,y)
@@ -1187,6 +1200,7 @@ contains
     !-----------------------------------------
     integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: ny, npnt, isub
+    character(len=200) :: err_string1, err_string2
 
     ny = grid%ny
     if (grid%nsub /= 0) then
@@ -1194,11 +1208,17 @@ contains
        call WgtGridQuant(grid%subgd(isub), y, iylo, wgts)
        iylo = iylo + grid%subiy(isub)
     else
-       if (y > grid%ymax*(one+warn_tolerance) .or. y < -warn_tolerance) then
-          write(0,*) 'WgtGridQuant: &
+       ! nan fails all comparison tests; arrange the tests so that
+       ! if we have a nan, then we will get something out of range.
+       if (.not.(y <= grid%ymax*(one+warn_tolerance) .and. y >= -warn_tolerance)) then
+          write(err_string1,*) 'WgtGridQuant: &
                &requested function value outside y range'
-          write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
-          stop
+          write(err_string2,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
+          call wae_error(trim(err_string1), trim(err_string2))
+          !write(0,*) 'WgtGridQuant: &
+          !     &requested function value outside y range'
+          !write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
+          !stop
        end if
        
        npnt = min(npnt_max, max(npnt_min, abs(grid%order)))
@@ -1786,9 +1806,11 @@ contains
     end if
 
     if (istat /= 0) then
-       write(0,*) 'ERROR: problems with deallocation in conv_DelGridConv_0d'
+
+       call wae_error('conv_DelGridConv_0d: problems with deallocation')
+       !write(0,*) 'ERROR: problems with deallocation in conv_DelGridConv_0d'
        !write(0,*) one/sqrt(sin(zero))
-       stop
+       !stop
     end if
     
   end subroutine conv_DelGridConv_0d
@@ -1927,7 +1949,10 @@ contains
        ! regularly done in BFKL). NB Not documented in any CCN -- hopefully
        ! straightforward enough that it can be done in one's head?
        order = -gc%grid%order
-       do i = 1, ny
+       ! limit goes to ny+1 to ensure that everything that can contribute
+       ! to entry at ny is covered (otherwise entry at ny is dicontinuous 
+       ! relative to earlier entries)
+       do i = 1, ny+1
           !-- this is the range of interest
           yl = (i-1) * dy
           yh =  i    * dy
@@ -2791,7 +2816,7 @@ contains
     override_grid_locking = .false.
     if (nconv_with_override_off /= 0) call wae_error(&
          &'SetDerivedConv_nodealloc',&
-         &'Detected convolutions while lock overried off')
+         &'Detected convolutions while lock override off')
 
     if (gc%grid%nsub /= 0) then
        do isub = 1, gc%grid%nsub
@@ -2828,4 +2853,20 @@ contains
     end if
   end subroutine SetDerivedConv_nodealloc
   
+  !------------------------------------------------------------
+  !! Globally disables grid locking -- use with extreme
+  !! care, and when done call RestoreGridLocking
+  subroutine DisableGridLocking()
+    override_grid_locking = .true.
+    nconv_with_override_off = 0
+  end subroutine DisableGridLocking
+
+  !------------------------------------------------------------
+  !! Globally restores normal grid locking
+  subroutine RestoreGridLocking()
+   if (nconv_with_override_off /= 0) call wae_error(&
+     &'RestoreGridLocking',&
+      &'Detected unexpected convolutions with lock override off')
+   override_grid_locking = .false.
+  end subroutine RestoreGridLocking
 end module convolution

@@ -1,8 +1,96 @@
+2023-03-12 Sun  <gavin.salam@physics.ox.ac.uk>
+
+	* .github/workflows/CI.yml:
+	added an attempt at continuous integration using github actions
+
+2023-03-12  Alexander Puck Neuwirth + small mods by Gavin Salam  <gavin.salam@physics.ox.ac.uk> 
+
+	* src/warnings_and_errors.f90:
+	wae_error(...): replaced "stop" with "call exit(-1)", which
+	should return a failure exit code. Note, this is non-standard, but
+	seems to be supported in both intel and gfortran.
+
+	* src/convolution.f90:
+	replaced several "stop" instructions with calls to wae_error(...)
+
+2023-02-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk> (with Alexander Karlberg)
+
+	* src/pdf_tabulate.f90:
+	started to add support for table interpolation to use a
+	non-standard iflv_max
+
+2023-01-29  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/welcome_message.f90:
+	updated date in welcome message
+
+2022-07-20  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/dglap_holders.f90 (InitDglapHolder): 
+	* src/dglap_objects.f90 (InitSplitMatTimeNLO): 
+	* src/splitting_functions.f90:
+	added ingredients needed for FFN time-like evolution at NLO. Tests
+	ongoing. 
+
+2021-09-22 Wed  <gavin.salam@physics.ox.ac.uk>
+
+	* src/convolution.f90:
+	arrange in-range tests for y-in-range to make sure that if y is nan
+	then the test fails.
+
+2021-07-25  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/convolution.f90:
+	added DisableGridLocking() and RestoreGridLocking()
+	for user programs to be able to more safely handle
+	grid locking suspension.
+
+	Implemented minor fix to grid_conv initialisation with negative
+	orders, whereby the ny entry of the grid_conv matrix missed one
+	contribution. This doesn't affect normal evolution with physical
+	PDFs, because that element of the grid_conv entry multiplies the
+	pdf at iy=0, which is zero in physical PDFs. But it can affect the
+	use of the grid_conv entries when they are to be interpreted as
+	physical quantities in their own right.
+
+2021-05-21  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/special_functions.f90:
+	* src/integrator.f90:
+	replaced a set of number-terminated do loops with end do
+	constructs; ran make check to verify results have not changed.
+
+2021-05-12  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/CMakeLists.txt:
+	added this from Gregory Soyez to facilitate
+	use with other projects
+
+2020-08-29 Gavin Salam<gavin.salam@physics.ox.ac.uk>
+
+	* src/pdf_tabulate.f90:
+	replaced intent(out) with intent(inout) so that
+	automatic deletion works
+
+2020-08-27 Gavin Salam<gavin.salam@physics.ox.ac.uk>
+
+	* src/pdf_tabulate.f90
+	This should now detect if a table had previously been allocated
+	and delete it accordingly.
+
+2020-07-08  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/pdf_representation.f90:
+	removed "pure" from pdfr_HumanToEvln_sc, because it wasn't being
+	relied on and caused issues with the -fno-automatic option
+	that is used in POWHEG.
+
 2020-04-14  Gavin Salam  <gavin.salam@cern.ch>
 
 	* benchmarking/benchmark.f90:
 	changed sub_defs_io "use" to avoid conflicts with 
 	Value(...) from hoppet (as reported by Federico Buccioni)
+
 
 2018-12-27  Gavin Salam  <gavin.salam@cern.ch>
 

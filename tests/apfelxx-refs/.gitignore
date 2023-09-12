@@ -1,0 +1,4 @@
+*.bak
+/Makefile
+/apfel_dglap_test_streamlined
+apfelxx-testsplit

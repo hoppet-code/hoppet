@@ -1,5 +1,7 @@
 *.o
 *~
+.vscode
 /.compiler
 /config.log
 /hoppet-config
+src/.vscode
