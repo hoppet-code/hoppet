@@ -5,7 +5,10 @@ QED merging notes (2023-09)
 ===========================
 
 - [ ] understand 'CHECK 111 case' warning in qcd_qed_coupling.f90
-- [ ] see if any changes were made in lepton structure function work
+- [x] see if any changes were made in lepton structure function work
+- [ ] decide how to document things
+- [ ] create benchmark / "make check" files?
+      (start from tests/test_qed_lepton_evol.f90?)
 
 
 

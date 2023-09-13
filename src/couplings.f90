@@ -323,7 +323,7 @@ contains
          & in_range(tofQ(masses(:)) + tofQ(def%muMatch_M), cpl%t_lo, cpl%t_hi)
     
     ! the following error message should now be redundant since all
-    ! masses are put at edges (this means that at results at edges
+    ! masses are put at edges (this means that results at edges
     ! may not be predictable).
     if (any(cpl%segment_boundaries > cpl%t_hi .or.&
          &  cpl%segment_boundaries < cpl%t_lo)) call wae_error('new_Coupling',&
