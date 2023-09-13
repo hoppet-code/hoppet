@@ -45,7 +45,7 @@ program test_qed
           & one/Value(qed_alpha, mu), 1/cpls(2), one/Value(qed_alpha, mu)-1/cpls(2), &
           & alphas, cpls(1), alphas-cpls(1)
   end do
-  stop !************************************
+  !stop !************************************
   
   write(6,'(a)') "========== testing sum rules ========================="
   call setup_grid_def()

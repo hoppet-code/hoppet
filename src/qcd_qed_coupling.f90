@@ -49,8 +49,7 @@ contains
     !----------------------------------------------------------------------
     type(QCDQEDThreshold), target  :: thresholds(0:n_thresholds)
     type(QCDQEDThreshold), pointer :: threshold, last
-    type(CouplingDefinition) :: cpl_def
-    integer  :: i, nflav_idx, ii, indices(0:n_thresholds)
+    integer  :: i, indices(0:n_thresholds)
     integer  :: nloops, nloops_tot, loops_int(20)=-1
     logical :: qcd_target, qed_target
     type(CouplingTerm), allocatable :: beta_terms(:,:), thr_terms(:,:), rthr_terms(:,:)

@@ -64,7 +64,7 @@ contains
     !--------------------------------------------
     integer :: i
     
-    if (mc > m_tau) call wae_error("InitQEDCoupling", "mc > m_tau")
+    if (mc > m_tau) call wae_error("InitQEDCoupling", "mc > m_tau, but that is not currently supported")
 
     coupling%n_thresholds = n_thresholds
     
