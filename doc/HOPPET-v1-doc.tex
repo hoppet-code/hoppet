@@ -62,7 +62,8 @@
 \newcommand{\GeV}{\;\mathrm{GeV}}
 \newcommand{\TeV}{\;\mathrm{TeV}}
 \newcommand{\as}{\alpha_s}
-\newcommand{\comment}[1]{\textbf{[#1]}}
+
+
 \newcommand{\eg}{e.g.\ }
 \newcommand{\ie}{i.e.\ }
 \newcommand{\cf}{cf.\ }
@@ -71,6 +72,10 @@
 \newcommand{\ttt}[1]{\texttt{#1}}
 \newcommand{\order}[1]{{\cal O}\left(#1\right)}
 \newcommand{\fn}{\scriptsize}
+
+\newcommand{\comment}[1]{\textbf{[#1]}}
+\newcommand{\gps}[1]{{\textcolor{red}{\comment{#1}$_\text{GPS}$}}}
+\newcommand{\ak}[1]{{\textcolor{blue}{\comment{#1}$_\text{AK}$}}}
 
 \newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,coriano,GuzziThesis,nnpdf,Kosower:1997hg,Ratcliffe:2000kp}
 
@@ -2675,8 +2680,14 @@ Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Mo
 The coefficient functions were also computed in
 Ref.~\cite{Blumlein:2022gpp} and found to be in agreement with the
 previous calculations.
+
 \subsection{Initialisation}
 \label{sec:structure-funcs-init}
+
+\gps{Do we need to comment that things are in the
+  \ttt{structure\_functions} module? Or accessible by prefixing
+  function names with \ttt{hoppet}?}
+
 In order to set up the structure functions one needs to call 
 \begin{lstlisting}
   call StartStrFct(rts, order_max [, nflav] [, xR] [, xF] [, sc_choice] [, cmu]&
@@ -2690,30 +2701,49 @@ If \ttt{nf} is not specified the structure functions are initialised
 with a variable flavour scheme using the quark masses as set by the
 streamlined interface. Otherwise a fixed number of light flavours is
 used.
+%
+\gps{Do we need to note that currently StartStrFct itself
+  calls the streamline interface initialisation?}
+%
+\gps{Do we need to comment on where masses get set? And more generally
+  on fact that structure function calculations for massive quarks are
+  not valid unless $Q \gg m$?}
 
 Together \ttt{xR}, \ttt{xF}, \ttt{sc\_choice}, and \ttt{cmu} control
-the renormalisation and factorisation scales. The default value for
-\ttt{sc\_choice} is $1$ which means that $Q$ multiplied by \ttt{xR} or
-\ttt{xF} is used as the renormalisation or factorisation scale
-respectively. The choice $0$ corresponds to a fixed scale \ttt{cmu}
-(multiplied by \ttt{xR} or \ttt{xF}). Should a user wish to use some
-arbitrary scale choice, \ttt{sc\_choice} should be set to $2$. In this
-case the structure functions are saved as arrays not only in $Q$ but
-also $\mu_R$ and $\mu_F$. This makes for a slightly slower evaluation
-compared to the two other scale choices.
+the renormalisation and factorisation scales.
+%
+The default value for \ttt{sc\_choice} is $1$ which means that $Q$
+multiplied by \ttt{xR} or \ttt{xF} is used as the renormalisation or
+factorisation scale respectively.
+%
+The choice $0$ corresponds to a fixed scale \ttt{cmu} (multiplied by
+\ttt{xR} or \ttt{xF}).
+%
+Should a user wish to use some arbitrary scale choice,
+\ttt{sc\_choice} should be set to $2$.
+%
+\gps{Do we want to introduce some constants such as
+  \ttt{sc\_choice\_Q=1}, \ttt{sc\_choice\_fixed=0}, \ttt{sc\_choice\_arbitrary=2}?}
+%
+In this last case, the structure functions are saved as arrays not only in
+$Q$ but also $\mu_R$ and $\mu_F$.
+%
+This makes for a slightly slower evaluation compared to the two other
+scale choices.
 
-If \ttt{param\_coefs} is set to \ttt{.true.}  then the structure
+If \ttt{param\_coefs} is set to \ttt{.true.} \gps{(its default)} then the structure
 functions are computed using the (very precise) parametrisations found
 in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}. Otherwise
 the exact versions are used\footnote{The LO and NLO coefficient
 functions are always exact as their expressions are very
 compact.}. This however means that the initialisation becomes very
-slow, and since the parametrised expressions are good to $10^{-4}$ for
+slow, and since the parametrised expressions are good to \gps{a relative?}
+accuracy of $10^{-4}$ for
 most values of $x$, it is recommended to use the parametrised option
 for most applications. Note that the exact expressions rely on a
 extended version of \ttt{hplog}~\cite{FortranPolyLog} that is able to
-handle harmonic polylogarithms up to weight 5.\comment{AK: Not sure
+handle harmonic polylogarithms up to weight 5.\ak{Not sure
   what to do here since the exact expressions return something wrong}.
 
 \ttt{Qmin\_PDF} sets the lowest value at which the PDF is
@@ -2728,7 +2758,7 @@ sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. Care should
 be taken here such that both the coupling and PDF evolution is carried
 out at the correct perturbative order and with mass thresholds as
 appropriate. With the PDF
-table filled one calls
+table filled \gps{in the streamlined interface} one calls
 \begin{lstlisting}
   call InitStrFct(order, separate_orders)
 \end{lstlisting}
@@ -2749,7 +2779,12 @@ At this point the structure functions can be accessed as in the following exampl
 \end{lstlisting}
 at the value $y=-\log{x}$ and $Q$. The variables \ttt{muR} and
 \ttt{muF} are not optional, but are only used if \ttt{scale\_choice}
-is $2$. The structure functions are in this example stored in the
+is $2$.
+%
+\gps{What is the logic of supplying $y$ rather than $x$? For example,
+  hoppetEval takes $x$ --- should we not use the same convention?}
+%
+The structure functions are in this example stored in the
 array \ttt{xf}. The components of this array can be accessed through
 the indices
 \begin{lstlisting}

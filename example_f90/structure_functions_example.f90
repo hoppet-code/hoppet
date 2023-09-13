@@ -36,6 +36,8 @@ program structure_functions_example
   call read_PDF(toyQ0 = sqrt(2.0_dp))
   call InitStrFct(order_max, .true.)
 
+  ! write out the structure functions
+  write(6,*) "Writing structure functions to structure-functions.dat"
   open(unit = 99, file = 'structure-functions.dat')
 
   ymax = log(1e5) !ymax=20
@@ -80,6 +82,7 @@ contains
 !    elseif (Q0pdf > zero) then
 !       write(6,*) "WARNING: Using internal HOPPET DGLAP evolution"
 !       call InitPDF_LHAPDF(grid, pdf_at_Q0, EvolvePDF, Q0pdf)
+!       ! fixed nf. -1000000045 gives variable nf
 !       call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , 4,&
 !            & -1000000045, quark_masses_sf(4:6), .true.)
 !       call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
