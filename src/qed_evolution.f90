@@ -18,6 +18,8 @@ module qed_evolution
   integer             :: ev_nqcdloop_qed
   type(qed_coupling), pointer :: ev_coupling_qed
   
+  logical, public :: with_Plp_nnloqed=.false.
+  
 contains
 
   subroutine QEDQCDEvolvePDF(dh, qed_sm, pdf, coupling_qcd, coupling_qed,&
@@ -148,6 +150,12 @@ contains
     if (ev_nqcdloop_qed >= 1) then
        dpdf = dpdf + (ev_conv_last_as2pi * alpha/twopi * ev_conv_last_jacobian) &
             &        * (qed_sm_copy%nlo * pdf)
+    end if
+
+    ! add Plq splitting at NNLO QED 
+    if ( with_Plp_nnloqed ) then
+       dpdf = dpdf + ( (alpha/twopi)**2 * ev_conv_last_jacobian) &
+            &        * (qed_sm_copy%nnlo * pdf)
     end if
 
   end subroutine ev_conv_qed

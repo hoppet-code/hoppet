@@ -1,3 +1,10 @@
+2023-09-13  Giulia Zanderighi  <zanderi@mpp.mpg.de>
+
+	* src/qed_evolution.f90:
+	* src/qed_objects.f90:
+	* src/qed_splitting_functions.f90:
+	incorporated NNLO QED Plq splitting function, as used in Lepton PDF project.
+
 2023-03-12 Sun  <gavin.salam@physics.ox.ac.uk>
 
 	* .github/workflows/CI.yml:

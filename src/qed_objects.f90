@@ -21,10 +21,18 @@ module qed_objects
      integer         :: nu, nd, nl, nf
   end type qed_split_mat_nlo
 
+  ! a NNLO splitting matrix (multiplies ( alpha/(2pi) )^2
+  ! contains only Plq splitting!
+  type qed_split_mat_nnlo 
+     type(grid_conv) :: Plq_02
+     integer         :: nu, nd, nl, nf
+  end type qed_split_mat_nnlo
+
   ! a container for both LO and NLO splitting matrices
   type qed_split_mat
      type(qed_split_mat_lo)  :: lo
      type(qed_split_mat_nlo) :: nlo
+     type(qed_split_mat_nnlo) :: nnlo
    ! only with F2003
    !contains
    !  procedure :: SetNf => QEDSplitMatSetNf
@@ -32,14 +40,15 @@ module qed_objects
   public :: qed_split_mat
   public :: InitQEDSplitMat
   public :: QEDSplitMatSetNf
+
   
   interface operator(*)
-     module procedure conv_qed_lo, conv_qed_nlo
+     module procedure conv_qed_lo, conv_qed_nlo, conv_qed_nnlo
   end interface operator(*)
   public :: operator(*)
 
   interface Copy
-     module procedure Copy_qed_split_mat_lo, Copy_qed_split_mat_nlo, Copy_qed_split_mat
+     module procedure Copy_qed_split_mat_lo, Copy_qed_split_mat_nlo, Copy_qed_split_mat_nnlo, Copy_qed_split_mat
   end interface Copy
   public :: Copy
   
@@ -56,6 +65,7 @@ module qed_objects
   integer, parameter, public :: iflv_muon     = 10
   integer, parameter, public :: iflv_tau      = 11
 
+  logical, public :: OffLeptonChargesFrom=.false.,OffLeptonChargesTo=.false.,OffNlGammaGamma=.false.
   
 contains
 
@@ -105,6 +115,8 @@ contains
     call InitGridConv(grid, qed_split%nlo%Pgq_11, sf_Pgq_11)
     call InitGridConv(qed_split%nlo%Pyq_11, qed_split%nlo%Pgq_11) ! identical...
 
+    call InitGridConv(grid, qed_split%nnlo%Plq_02, sf_Plq_02)
+
     ! set some vaguely sensible values (the splitting functions
     ! themselves don't depend on nf at the order we are dealing with)
     nl = 3
@@ -127,6 +139,11 @@ contains
     qed_sm%nlo%nd = nd
     qed_sm%nlo%nu = nu
     qed_sm%nlo%nf = nd+nu
+
+    qed_sm%nnlo%nl = nl
+    qed_sm%nnlo%nd = nd
+    qed_sm%nnlo%nu = nu
+    qed_sm%nnlo%nf = nd+nu    
   end subroutine QEDSplitMatSetNf
   
 
@@ -143,7 +160,7 @@ contains
     ! allow for photon branching to them...
     real(dp) :: chg2_fromflv(ncompmin:ncompmaxLeptons)
     ! the charge, colour, etc. factor when branching to a flavour
-    real(dp) :: chg2_toflv   (ncompmin:ncompmaxLeptons)
+    real(dp) :: chg2_toflv   (ncompmin:ncompmaxLeptons), sum_chg2_tofl
     
 
     ! for now we force this...
@@ -158,15 +175,30 @@ contains
     chg2_fromflv( 1:( 2*qed_lo%nd-1):+2) = e_dn2
     chg2_fromflv(-2:(-2*qed_lo%nu ):-2) = e_up2
     chg2_fromflv( 2:( 2*qed_lo%nu ):+2) = e_up2
-    chg2_fromflv(9:9+qed_lo%nl-1) = one
+    if(OffLeptonChargesFrom) then
+       chg2_fromflv(9:9+qed_lo%nl-1) = 0
+    else
+       chg2_fromflv(9:9+qed_lo%nl-1) = one       
+    endif
 
     ! then set up a charge * multiplicity for branching to a given component
     chg2_toflv = zero
     ! include a factor of CA for the quarks
     chg2_toflv(-6:6) = CA * chg2_fromflv(-6:6)
+
     ! include a factor of 2 for the leptons, because we sum leptons and
     ! anti-leptons
-    chg2_toflv(9:11) = chg2_fromflv(9:11) * two
+    chg2_toflv(9:9+qed_lo%nl-1) = two
+
+    if(OffNlGammaGamma) then
+       sum_chg2_tofl=sum(chg2_toflv(-6:6))
+    else
+       sum_chg2_tofl=sum(chg2_toflv)
+    endif
+
+    if(OffLeptonChargesTo) then
+       chg2_toflv(9:9+qed_lo%nl-1) = 0
+    endif
 
     !write(6,*) nf_int
     !write(6,*) chg2_fromflv
@@ -188,7 +220,7 @@ contains
     ! Include a factor of 1/2 because we sum explicitly over quarks and anti-quarks
     ! whereas the original normalisation from eqs.(21&22) of 1512.00612 involves
     ! only a sum over flavours, not anti-flavours
-    gout(:,8) = gout(:,8) + (half * sum(chg2_toflv)) * (qed_lo%Pyy_01 * gq(:,8))
+    gout(:,8) = gout(:,8) + (half * sum_chg2_tofl) * (qed_lo%Pyy_01 * gq(:,8))
 
     ! now the evolution of the quarks and leptons:
     ! first calculate the generic splitting from a photon to a fermion
@@ -276,6 +308,61 @@ contains
   end function conv_qed_nlo
 
   !----------------------------------------------------------------------
+  function conv_qed_nnlo(qed_nnlo, gq) result(gout)
+    type(qed_split_mat_nnlo), intent(in) :: qed_nnlo
+    real(dp),                intent(in) :: gq(0:, ncompmin:)
+    real(dp)                            :: gout(0:ubound(gq,dim=1), ncompmin:ubound(gq,dim=2))
+    !---------------------------------------
+    real(dp) :: flvsum(0:ubound(gq,dim=1)), flvout(0:ubound(gq,dim=1))
+    integer  :: i
+    ! the charge, colour, etc. factor when branching from a flavour;
+    ! we allow for the leptons here, even if not using them, to
+    ! allow for photon branching to them...
+    real(dp) :: chg2_fromflv(ncompmin:ncompmaxPhoton)
+    ! the sum over charges (just flavours)
+    real(dp) :: chg2sum
+    ! the charge, colour, etc. factor when branching to a flavour
+    real(dp) :: chg2_toflv   (ncompmin:ncompmaxLeptons), sum_chg2_tofl
+
+    ! for now we force this...
+    if (GetPdfRep(gq(:,:ncompmax)) /= pdfr_Human) call wae_error('conv_qed_nnlo',&
+         &'gq is not in "Human" format')
+    if (ubound(gq,dim=2) < ncompmaxPhoton) call wae_error('conv_qed_nnlo',&
+         &'gq appears not to have photon component')
+
+    ! set up the squared electric charges of each of the components
+    ! only use quarks here, because leptons don't contribute at O(alpha alpha_s)
+    chg2_fromflv = zero
+    chg2_fromflv(-1:(-2*qed_nnlo%nd+1):-2) = e_dn2
+    chg2_fromflv( 1:( 2*qed_nnlo%nd-1):+2) = e_dn2
+    chg2_fromflv(-2:(-2*qed_nnlo%nu ):-2) = e_up2
+    chg2_fromflv( 2:( 2*qed_nnlo%nu ):+2) = e_up2
+
+    ! then set up a charge * multiplicity for branching to a given component
+    chg2_toflv = zero
+    ! turn on only leptons
+    ! include a factor of 2 for the leptons, because we sum leptons and
+    ! anti-leptons
+    chg2_toflv(9:9+qed_nnlo%nl-1) = two
+
+    ! now get the full "photon"-emission power
+    flvsum = zero
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxPhoton)
+       if (chg2_fromflv(i) /= zero) flvsum = flvsum + chg2_fromflv(i) * gq(:,i)
+    end do
+    
+    ! now set the result
+    gout = zero
+    ! we add only the splitting from a quark to a lepton        
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxLeptons)
+       if (chg2_toflv(i) /= zero) then
+          gout(:,i) = qed_nnlo%Plq_02 * flvsum * chg2_toflv(i)
+       end if
+    end do
+        
+  end function conv_qed_nnlo
+
+  !----------------------------------------------------------------------
   subroutine Copy_qed_split_mat_lo(in,out)
     type(qed_split_mat_lo), intent(inout) :: in
     type(qed_split_mat_lo), intent(out)   :: out
@@ -311,11 +398,23 @@ contains
   end subroutine Copy_qed_split_mat_nlo
 
   !----------------------------------------------------------------------
+  subroutine Copy_qed_split_mat_nnlo(in,out)
+    type(qed_split_mat_nnlo), intent(inout) :: in
+    type(qed_split_mat_nnlo), intent(out)   :: out
+    out%nu = in%nu
+    out%nd = in%nd
+    out%nl = in%nl
+    out%nf = in%nf
+    call InitGridConv(out%Plq_02, in%Plq_02)
+  end subroutine Copy_qed_split_mat_nnlo
+  
+  !----------------------------------------------------------------------
   subroutine Copy_qed_split_mat(in,out)
     type(qed_split_mat), intent(inout) :: in
     type(qed_split_mat), intent(out)   :: out
     call Copy(in%lo , out%lo )
     call Copy(in%nlo, out%nlo)
+    call Copy(in%nnlo, out%nnlo)
   end subroutine Copy_qed_split_mat
   
 end module qed_objects

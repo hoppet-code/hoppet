@@ -30,6 +30,9 @@ module qed_splitting_functions
   public :: sf_Pqg_11, sf_Pyg_11, sf_Pgg_11
   public :: sf_PqqV_11, sf_PqqbarV_11, sf_Pgq_11
 
+  ! just one of the NNLO QED splitting functions, as
+  ! needed for the QED lepton PDFs (cf. arXiv:2109.10924 and refs therein)
+  public :: sf_Plq_02
 contains
 
   !----------------------------------------------------------------------
@@ -226,5 +229,32 @@ contains
     if (cc_piece /= cc_DELTA) res = res * x
   end function sf_Pgq_11
   
+  !======================================================================
+  ! now the NNLO ones
+
+  !----------------------------------------------------------------------
+  ! this is to be multiplied by eq^2*el^2
+  function sf_Plq_02(y) result(res)
+    real(dp), intent(in) :: y
+    real(dp)             :: res
+    real(dp)             :: x, lnx, ln1mx, pqg
+    x = exp(-y)
+    lnx = -y
+    ln1mx = log(one - x)
+    res = zero
+
+    select case(cc_piece)
+    case(cc_REAL,cc_REALVIRT)
+       res = 20.0_dp/9.0_dp/x - 2.0_dp + 6.0_dp*x - 56.0_dp/9.0_dp*x**2 &
+            & + (1.0_dp + 5.0_dp*x + 8.0_dp/3.0_dp*x**2)*lnx &
+            & - (1.0_dp + x)*lnx**2
+    end select
+    select case(cc_piece)
+    case(cc_VIRT,cc_REALVIRT)
+    case(cc_DELTA)
+    end select
+
+    if (cc_piece /= cc_DELTA) res = res * x
+  end function sf_Plq_02
 
 end module qed_splitting_functions
