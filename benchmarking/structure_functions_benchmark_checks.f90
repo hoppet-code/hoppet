@@ -68,6 +68,7 @@ program structure_functions_benchmark_checks
   ! Initialise the structure functions using separate order
   call InitStrFct(order_max, .true.)
 
+  write(6,'(a)') "Writing structure function benchmarks to structure-functions-benchmarks/ directory"
   open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-2.0-GeV.dat')
   Q = 2.0_dp
   write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
