@@ -33,7 +33,7 @@ program structure_functions_benchmark_checks
   mt = 175.0_dp
   call hoppetSetPoleMassVFN(mc, mb, mt)
 
-    ! Streamlined initialization
+  ! Streamlined initialization
   ! including  parameters for x-grid
   order = -6 
   ymax  = 16.0_dp

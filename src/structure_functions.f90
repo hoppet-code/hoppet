@@ -147,7 +147,7 @@ contains
     ! default settings
     xmuR = one
     xmuF = one
-    scale_choice_save = 1
+    scale_choice_save = scale_choice_Q
     exact_coefs  = .false.
     cst_mu       = zero
     Qmin         = one

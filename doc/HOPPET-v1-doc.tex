@@ -2652,12 +2652,12 @@ for the user wishing to write their own F95 code for \hoppet.
 \label{sec:structure-funcs}
 As of \hoppet version 1.3.0 the code provides access to the
 (anti)-proton structure functions. The structure functions are
-expressed as convolutions of a set of hard coefficient functions and
-PDFs, and make use of the tabulated PDFs and streamlined interface as
-described in the sections above. The structure functions are provided
-such that they can be used directly for cross section computations in
-DIS or VBF, the latter which has already been implemented in the {\tt
-  proVBFH}
+expressed as convolutions of a set of massless hard coefficient
+functions and PDFs, and make use of the tabulated PDFs and streamlined
+interface as described in the sections above. The structure functions
+are provided such that they can be used directly for cross section
+computations in DIS or VBF, the latter which has already been
+implemented in the {\tt proVBFH}
 package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
 
 The structure functions have been found to be in reasonable agreement
@@ -2686,12 +2686,18 @@ previous calculations.
 
 \gps{Do we need to comment that things are in the
   \ttt{structure\_functions} module? Or accessible by prefixing
-  function names with \ttt{hoppet}?}
+  function names with \ttt{hoppet}?}\ak{Added text to that effect}
 
-In order to set up the structure functions one needs to call 
+The structure functions can be accessed from inside the module
+\ttt{structure\_functions}. They can also be accessed through the
+streamlined interface by prefixing \ttt{hoppet} as described in
+section~\ref{sec:structure-functions-streamlined}. In order to set up
+the structure functions one needs first to set up a \ttt{running\_coupling} object, as described in  specify a flavour scheme
+and initialise the streamlined interface through \ttt{hoppetStart} or
+\ttt{hoppetStartExtended}. Then one calls
 \begin{lstlisting}
-  call StartStrFct(rts, order_max [, nflav] [, xR] [, xF] [, sc_choice] [, cmu]&
-                  & [ ,param_coefs] [ ,Qmin_PDF] [ ,wmass] [ ,zmass])
+  call StartStrFct(rts, order_max [, nflav] [, xR] [, xF] [, scale_choice] &
+                  & [, constant_mu] [ ,param_coefs] [ ,Qmin_PDF] [ ,wmass] [ ,zmass])
 \end{lstlisting}
 specifying as a minimum the largest value of $Q$ which one needs to
 access (through \ttt{rts}) and the perturbative order -- currently
@@ -2700,33 +2706,36 @@ access (through \ttt{rts}) and the perturbative order -- currently
 If \ttt{nf} is not specified the structure functions are initialised
 with a variable flavour scheme using the quark masses as set by the
 streamlined interface. Otherwise a fixed number of light flavours is
-used.
+used. Note that specifying a variable flavour scheme only has an
+impact on the evolution, as the coefficient functions themselves
+assume massless quarks. Hence in a variable flavour scheme the
+structure functions should only be considered reliable for $Q \gg m$.
 %
 \gps{Do we need to note that currently StartStrFct itself
   calls the streamline interface initialisation? Actually, I see that
   dy gets set automatically to $0.05$. Is there a reason why the call
   to \ttt{hoppetStart} should not be left to the user? It might be
-  cleaner, even if it requires an extra line of code from them.} 
+  cleaner, even if it requires an extra line of code from them.} \ak{Done.}
 %
 \gps{Do we need to comment on where masses get set? And more generally
   on fact that structure function calculations for massive quarks are
-  not valid unless $Q \gg m$?}
+  not valid unless $Q \gg m$?} \ak{Done}
 
-Together \ttt{xR}, \ttt{xF}, \ttt{sc\_choice}, and \ttt{cmu} control
+Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
 the renormalisation and factorisation scales.
 %
-The default value for \ttt{sc\_choice} is $1$ which means that $Q$
+The default value for \ttt{scale\_choice} is \ttt{scale\_choice\_Q} which means that $Q$
 multiplied by \ttt{xR} or \ttt{xF} is used as the renormalisation or
 factorisation scale respectively.
 %
-The choice $0$ corresponds to a fixed scale \ttt{cmu} (multiplied by
-\ttt{xR} or \ttt{xF}).
+The choice \ttt{scale\_choice\_fixed} corresponds to a fixed scale
+\ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF}).
 %
 Should a user wish to use some arbitrary scale choice,
-\ttt{sc\_choice} should be set to $2$.
+\ttt{scale\_choice} should be set to \ttt{scale\_choice\_arbitrary}.
 %
 \gps{Do we want to introduce some constants such as
-  \ttt{sc\_choice\_Q=1}, \ttt{sc\_choice\_fixed=0}, \ttt{sc\_choice\_arbitrary=2}?}
+  \ttt{scale\_choice\_Q=1}, \ttt{scale\_choice\_fixed=0}, \ttt{scale\_choice\_arbitrary=2}?} \ak{Yes, and done!}
 %
 In this last case, the structure functions are saved as arrays not only in
 $Q$ but also $\mu_R$ and $\mu_F$.
@@ -2734,18 +2743,18 @@ $Q$ but also $\mu_R$ and $\mu_F$.
 This makes for a slightly slower evaluation compared to the two other
 scale choices.
 
-If \ttt{param\_coefs} is set to \ttt{.true.} \gps{(its default)} then the structure
+If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the structure
 functions are computed using the (very precise) parametrisations found
 in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
 %
-\gps{This is both at NNLO and N3LO?}
+\gps{This is both at NNLO and N3LO?}\ak{at the moment yes}
 %
 Otherwise
 the exact versions are used\footnote{The LO and NLO coefficient
 functions are always exact as their expressions are very
 compact.}. This however means that the initialisation becomes very
-slow, and since the parametrised expressions are good to \gps{a relative?}
+slow, and since the parametrised expressions are good to a relative
 accuracy of $10^{-4}$ for
 most values of $x$, it is recommended to use the parametrised option
 for most applications. Note that the exact expressions rely on a
@@ -2757,15 +2766,15 @@ handle harmonic polylogarithms up to weight 5.\ak{Not sure
 reliable. The mass of the electroweak vector bosons can also be passed
 to this routine.
 
-The routine calls \ttt{hoppetStartExtended} and initialises all the
-tables needed for the structure functions. In order to fill the
-tables, one first needs to set up a \ttt{running\_coupling} object and
-evolve the initial PDF with e.g.~\ttt{hoppetEvolve} as described in
+At this point all the tables that are needed for the structure
+functions have been initialised. In order to fill the tables, one
+first needs to set up a \ttt{running\_coupling} object and evolve the
+initial PDF with e.g.~\ttt{hoppetEvolve} as described in
 sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. Care should
 be taken here such that both the coupling and PDF evolution is carried
 out at the correct perturbative order and with mass thresholds as
-appropriate. With the PDF
-table filled \gps{in the streamlined interface} one calls
+appropriate. With the PDF table filled in the streamlined interface
+one calls
 \begin{lstlisting}
   call InitStrFct(order, separate_orders)
 \end{lstlisting}
@@ -2779,17 +2788,18 @@ rather than the sum up to some maximum order. In the latter case only
 \label{sec:structure-funcs-access}
 At this point the structure functions can be accessed as in the following example
 \begin{lstlisting}
-  real(dp) :: xf(-6:7), y, Q, muR, muF
+  real(dp) :: xf(-6:7), x, Q, muR, muF
   [...]
   call InitStrFct(4, .true.)
-  xf = StrFct(y, Q, muR, muF)
+  xf = StrFct(x, Q, muR, muF)
 \end{lstlisting}
-at the value $y=-\log{x}$ and $Q$. The variables \ttt{muR} and
-\ttt{muF} are not optional, but are only used if \ttt{scale\_choice}
-is $2$.
+at the value $x$ and $Q$. The variables \ttt{muR} and \ttt{muF} are
+not optional, but are only used if \ttt{scale\_choice} is
+\ttt{scale\_choice\_arbitrary}. Note that the routine returns $x$
+times the structure function.
 %
 \gps{What is the logic of supplying $y$ rather than $x$? For example,
-  hoppetEval takes $x$ --- should we not use the same convention?}
+  hoppetEval takes $x$ --- should we not use the same convention?} \ak{Indeed - fixed!}
 %
 The structure functions are in this example stored in the
 array \ttt{xf}. The components of this array can be accessed through
@@ -2814,16 +2824,16 @@ For instance one would access the electromagnetic $F_1$ structure
 function through \ttt{xf(F1EM)}. It is returned at the \ttt{order}
 that was specified in \ttt{InitStrFct}. Since one is often interested
 in more than one order in $\as$ at a time, the structure functions can
-also be order by order if the \ttt{separate\_orders} flag was set to
-\ttt{.true.} when initialising. This can be done as follows
+also be accessed order by order if the \ttt{separate\_orders} flag was
+set to \ttt{.true.} when initialising. This can be done as follows
 \begin{lstlisting}
-  real(dp) :: xflo(-6:7), xfnlo(-6:7), xfnnlo(-6:7), xfn3lo(-6:7), y, Q, muR, muF
+  real(dp) :: xflo(-6:7), xfnlo(-6:7), xfnnlo(-6:7), xfn3lo(-6:7), x, Q, muR, muF
   [...]
   call InitStrFct(4, .true.)
-  xflo   = F_LO(y, Q, muR, muF)
-  xfnlo  = F_NLO(y, Q, muR, muF)
-  xfnnlo = F_NNLO(y, Q, muR, muF)
-  xfn3lo = F_N3LO(y, Q, muR, muF)
+  xflo   = F_LO(x, Q, muR, muF)
+  xfnlo  = F_NLO(x, Q, muR, muF)
+  xfnnlo = F_NNLO(x, Q, muR, muF)
+  xfn3lo = F_N3LO(x, Q, muR, muF)
 \end{lstlisting}
 The functions return the individual contributions at each order in
 $\as$. Hence the sum of \ttt{xflo}, \ttt{xfnlo}, \ttt{xfnnlo}, and
@@ -2842,21 +2852,22 @@ particular a user should call either
 with \ttt{rts} the maximum energy and \ttt{order\_max} the maximal
 order in $\as$, or the extended version of the interface
 \ttt{hoppetStartStrFctExtended} which takes all the same arguments as
-\ttt{StartStrFct} described above. After evolving or reading in a PDF,
-the user then calls
+\ttt{StartStrFct} described above. One difference is that in order to
+use a variable flavour scheme the user should set \ttt{nflav} to a
+negative value. After evolving or reading in a PDF, the user then calls
 \begin{lstlisting}
   call hoppetInitStrFct(order, separate_orders)
 \end{lstlisting}
 to initialise the actual structure functions. The structure functions
-can then be access through the subroutines
+can then be accessed through the subroutines
 \begin{lstlisting}
-  real(dp) :: xflo(-6:7), xfnlo(-6:7), xfnnlo(-6:7), xfn3lo(-6:7), y, Q, muR, muF
+  real(dp) :: xflo(-6:7), xfnlo(-6:7), xfnnlo(-6:7), xfn3lo(-6:7), x, Q, muR, muF
   [...]
-  call hoppetStrFct(y, Q, muR, muF, xf)         ! Full structure function   
-  call hoppetStrFctLO(y, Q, muR, muF, xflo)     ! LO coefficient
-  call hoppetStrFctNLO(y, Q, muR, muF, xfnlo)   ! NLO coefficient
-  call hoppetStrFctNNLO(y, Q, muR, muF, xfnnlo) ! NNLO coefficient
-  call hoppetStrFctN3LO(y, Q, muR, muF, xfn3lo) ! NNLO coefficient
+  call hoppetStrFct(x, Q, muR, muF, xf)         ! Full structure function   
+  call hoppetStrFctLO(x, Q, muR, muF, xflo)     ! LO coefficient
+  call hoppetStrFctNLO(x, Q, muR, muF, xfnlo)   ! NLO coefficient
+  call hoppetStrFctNNLO(x, Q, muR, muF, xfnnlo) ! NNLO coefficient
+  call hoppetStrFctN3LO(x, Q, muR, muF, xfn3lo) ! NNLO coefficient
 \end{lstlisting}
 The C++ header contains mapped indices for the structure functions
 \begin{lstlisting}
