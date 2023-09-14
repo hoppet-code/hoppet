@@ -10,8 +10,8 @@ program structure_functions_benchmark_checks
   use structure_functions
   implicit none
   real(dp) :: Qmax, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0alphas, muR_Q, Q0pdf
-  real(dp) :: xpdf_at_xQ(-6:6)
-  integer  :: order_max, sc_choice,nloop,ix,nf_lcl
+  real(dp) :: xpdf_at_xQ(-6:6), dy, dlnlnQ, minQval, maxQval
+  integer  :: order_max, sc_choice,nloop,ix,nf_lcl,order
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   ! Couplings needed for the F3 structure functions
@@ -33,8 +33,22 @@ program structure_functions_benchmark_checks
   mt = 175.0_dp
   call hoppetSetPoleMassVFN(mc, mb, mt)
 
+    ! Streamlined initialization
+  ! including  parameters for x-grid
+  order = -6 
+  ymax  = 16.0_dp
+  dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
+  dlnlnQ = dy/4.0_dp
+  nloop = 3 
+  minQval = min(xmuF*Qmin, Qmin)
+  maxQval = max(xmuF*Qmax, Qmax)
+  
+  ! initialise the grid and dglap holder
+  call hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
+       &         order,factscheme_MSbar)
+
   ! Setup all constants and parameters needed by the structure functions
-  call StartStrFct(Qmax, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
+  call StartStrFct(Qmax, order_max, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
        param_coefs = .true., Qmin_PDF = Qmin, wmass = mw, zmass = mz)
 
   ! Evolve the PDF

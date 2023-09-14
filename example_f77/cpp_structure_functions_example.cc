@@ -22,21 +22,30 @@ int main () {
   double mt = 175.0;
   
   hoppetSetPoleMassVFN(mc,mb,mt);
+
+  double Qmax   = 13000.0;
+  double Qmin   = 1.0;
+  int order      = -6; 
+  double ymax    = 16.0;
+  double dy      = 0.05;
+  double dlnlnQ  = dy/4.0;
+  int    nloop   = 3;
+  double xmuR   = 1.0;
+  double xmuF   = 1.0;
+  double minQval = min(xmuF*Qmin, Qmin);
+  double maxQval = max(xmuF*Qmax, Qmax);
+
+  hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop,order,factscheme_MSbar);
   
   int nflav = -5;
-  double Qmax   = 13000.0;
   int order_max = 4;
-  double xmur   = 1.0;
-  double xmuf   = 1.0;
   int sc_choice = 1 ;
-  double Qmin   = 1.0;
   double zmass = 91.2;
   double wmass = 81.0;
   bool param_coefs = true;
 
-  hoppetStartStrFctExtended(Qmax, order_max, nflav, xmur,xmuf,sc_choice,zmass,param_coefs,Qmin,wmass,zmass);
+  hoppetStartStrFctExtended(Qmax, order_max, nflav, xmuR,xmuF,sc_choice,zmass,param_coefs,Qmin,wmass,zmass);
     
-  int    nloop    = 3;
   double asQ      = 0.35;
   double Q0       = sqrt(2.0);
   double muR_Q    = 1.0;

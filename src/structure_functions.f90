@@ -88,8 +88,10 @@ module structure_functions
 
   ! scale choices
   real(dp), save :: cst_mu, xmuR, xmuF
-  integer, save  :: scale_choice
-
+  integer, save  :: scale_choice_save
+  integer, parameter :: scale_choice_Q=1, scale_choice_fixed=0,&
+       & scale_choice_arbitrary=2
+  
   logical, save  :: use_sep_orders
   logical, save  :: exact_coefs
   integer :: nf_lcl, order_setup
@@ -99,16 +101,20 @@ contains
 
   !----------------------------------------------------------------------
   ! Setup of constants and parameters needed for structure functions
-  subroutine StartStrFct(rts, order_max, nflav, xR, xF, sc_choice, cmu, param_coefs, &
+  subroutine StartStrFct(rts, order_max, nflav, xR, xF, scale_choice, constant_mu, param_coefs, &
        & Qmin_PDF, wmass, zmass)
     real(dp), intent(in) :: rts
     integer, intent(in)  :: order_max
-    integer, optional    :: nflav, sc_choice
-    real(dp), optional   :: xR, xF, cmu, Qmin_PDF, wmass, zmass
+    integer, optional    :: nflav, scale_choice
+    real(dp), optional   :: xR, xF, constant_mu, Qmin_PDF, wmass, zmass
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
-    real(dp) :: sin_thw_sq, ymax, dy, minQval, maxQval, dlnlnQ, mw, mz
-    integer  :: nloop, order
+    real(dp) :: sin_thw_sq, mw, mz
+    integer  :: order
+
+    if(.not.alloc_already_done) then
+       call wae_error('StartStrFct', 'hoppetStart not called!')
+    endif
 
     ! take sensible default value for mw and mz
     mw = 80.398_dp
@@ -141,7 +147,7 @@ contains
     ! default settings
     xmuR = one
     xmuF = one
-    scale_choice = 1
+    scale_choice_save = 1
     exact_coefs  = .false.
     cst_mu       = zero
     Qmin         = one
@@ -149,24 +155,10 @@ contains
     ! change to user input if specified
     if(present(xR)) xmuR=xR
     if(present(xF)) xmuF=xF
-    if(present(sc_choice)) scale_choice=sc_choice
-    if(present(cmu)) cst_mu=cmu
+    if(present(scale_choice)) scale_choice_save=scale_choice
+    if(present(constant_mu)) cst_mu=constant_mu
     if(present(param_coefs)) exact_coefs = .not.param_coefs
     if(present(Qmin_PDF)) Qmin=Qmin_PDF
-
-    ! Streamlined initialization
-    ! including  parameters for x-grid
-    order = -6 
-    ymax  = 16.0_dp
-    dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
-    dlnlnQ = dy/4.0_dp
-    nloop = 3 
-    minQval = min(xmuF*Qmin, Qmin)
-    maxQval = max(xmuF*rts, rts)
-
-    ! initialise the grid and dglap holder
-    call hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
-         &         order,factscheme_MSbar)
 
     if (present(nflav).and.nflav.gt.0) then
        ! if nflav is present, then use a fixed flavour number
@@ -196,8 +188,8 @@ contains
     endif
     
     ! if mass thresholds are used in the structure functions, only scale_choice 0 and 1 are allowed
-    if ((use_mass_thresholds).and.(scale_choice.gt.1)) then
-       call wae_error('StartStrFct', 'illegal value for scale_choice with mass thresholds turned on', intval = scale_choice)
+    if ((use_mass_thresholds).and.(scale_choice_save.gt.1)) then
+       call wae_error('StartStrFct', 'illegal value for scale_choice with mass thresholds turned on', intval = scale_choice_save)
     end if
 
     ! AK: Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
@@ -229,7 +221,7 @@ contains
        ! First we treat the case where we want to separate out each order in
        ! the final structure functions.
        ! This is slower, but is needed e.g. for VBFH
-       if (scale_choice.le.1) then
+       if (scale_choice_save.le.1) then
           ! if scale_choice = 0,1 use fast implementation
           ! tables is saved as an array in Q, and only tables(0),
           ! tables(1), tables(2), tables(4), tables(8) are non zero
@@ -249,8 +241,8 @@ contains
        endif
     else
        ! Now set up the default case where we sum up everything right away.
-       if (scale_choice.gt.1) & ! only allow for scale_choice = 0,1
-            & call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice)
+       if (scale_choice_save.gt.1) & ! only allow for scale_choice = 0,1
+            & call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice_save)
        call set_structure_functions_upto(order)
     endif
 
@@ -289,7 +281,7 @@ contains
     enddo
 
     ! Re-set the structure functions using updated PDF
-    if (scale_choice.le.1) then
+    if (scale_choice_save.le.1) then
        if (order.ge.1) call set_LO_structure_functions()
        if (order.ge.2) call set_NLO_structure_functions()
        if (order.ge.3) call set_NNLO_structure_functions()
@@ -327,7 +319,7 @@ contains
     enddo
     
     ! Re-set the structure functions using updated PDF
-    if (scale_choice.le.1) then
+    if (scale_choice_save.le.1) then
        if (order.ge.1) call set_LO_structure_functions()
        if (order.ge.2) call set_NLO_structure_functions()
        if (order.ge.3) call set_NNLO_structure_functions()
@@ -511,7 +503,7 @@ contains
        
        ! now add NLO terms
        if (order.ge.2) then
-          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+          if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
              ! For central scale with scale_choice=1, we don't need to do all
              ! the convolutions of the splitting functions
              f2 = ch%C2NLO * f
@@ -533,7 +525,7 @@ contains
 
        ! now add NNLO terms
        if (order.ge.3) then
-          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+          if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
              ! For central scale with scale_choice=1, we don't need to do all
              ! the convolutions of the splitting functions
              f2 = ch%C2NNLO * f
@@ -557,7 +549,7 @@ contains
 
        ! and finally, add the N3LO terms
        if (order.ge.4) then
-          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+          if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
              ! For central scale with scale_choice=1 (i.e. mur=muf=Q), we don't
              ! need to do all the convolutions of the splitting functions
              f2 = ch%C2N3LO * f
@@ -659,7 +651,7 @@ contains
           call use_vfns(f, Q)
        endif
 
-       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1, we don't need to do all
        ! the convolutions of the splitting functions
           f2 = ch%C2NLO * f
@@ -755,7 +747,7 @@ contains
           call use_vfns(f, Q)
        endif
        
-       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1, we don't need to do all
        ! the convolutions of the splitting functions
           f2 = ch%C2NNLO * f
@@ -894,7 +886,7 @@ contains
           call use_vfns(f, Q)
        endif
        
-       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1 (i.e. mur=muf=Q), we don't
        ! need to do all the convolutions of the splitting functions
           f2 = ch%C2N3LO * f
@@ -1290,7 +1282,7 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.2) Q_or_muF = muF
 
     call EvalPdfTable_xQ(tables(1), x, Q_or_muF, res)
     
@@ -1318,14 +1310,14 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.2) Q_or_muF = muF
     
     ! C_NLO x f (x) in C1f(:) 
     call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
     res = C1f
     
     ! if scale_choice = 0,1 then this term is already taken care of
-    if (scale_choice.ge.2) then
+    if (scale_choice_save.ge.2) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
        call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
@@ -1359,14 +1351,14 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.2) Q_or_muF = muF
     
     ! C_NNLO x f (x) in C2f(:,3) 
     call EvalPdfTable_xQ(tables(4), x, Q_or_muF, C2f)
     res = C2f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
-    if (scale_choice.ge.2) then
+    if (scale_choice_save.ge.2) then
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
@@ -1413,14 +1405,14 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.2) Q_or_muF = muF
     
     ! C_N3LO x f (x) in C2f(:,8) 
     call EvalPdfTable_xQ(tables(8), x, Q_or_muF, C3f)
     res = C3f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
-    if (scale_choice.ge.2) then
+    if (scale_choice_save.ge.2) then
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
@@ -1494,14 +1486,14 @@ contains
   real(dp) function muR(Q)
     real(dp), intent(in) :: Q
     muR = zero
-    if (scale_choice.eq.0) then
+    if (scale_choice_save.eq.scale_choice_fixed) then
        ! scale_choice = 0 : muF = xmuF * cst_mu
        muR = xmuR * cst_mu
-    elseif (scale_choice.eq.1) then
+    elseif (scale_choice_save.eq.scale_choice_Q) then
        ! scale_choice = 1 : mu_R = xmuR * Q
        muR = xmuR * Q
     else
-       call wae_error('muR(Q)', 'illegal value for scale_choice', intval = scale_choice)
+       call wae_error('muR(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
     endif
   end function muR
 
@@ -1510,14 +1502,14 @@ contains
   real(dp) function muF(Q)
     real(dp), intent(in) :: Q
     muF = zero
-    if (scale_choice.eq.0) then
+    if (scale_choice_save.eq.scale_choice_fixed) then
        ! scale_choice = 0 : muF = xmuF * cst_mu
        muF = xmuF * cst_mu
-    elseif (scale_choice.eq.1) then
+    elseif (scale_choice_save.eq.scale_choice_Q) then
        ! scale_choice = 1 : muF = xmuF * Q
        muF = xmuF * Q
     else
-       call wae_error('muF(Q)', 'illegal value for scale_choice', intval = scale_choice)
+       call wae_error('muF(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
     endif
   end function muF
   
@@ -1575,16 +1567,17 @@ end subroutine hoppetStartStrFct
 !----------------------------------------------------------------------
 ! Setup of constants and parameters needed for structure functions
 subroutine hoppetStartStrFctExtended(rts, order_max, nflav, xR, xF,&
-     & sc_choice , cmu, param_coefs, Qmin_PDF, wmass, zmass)
+     & scale_choice , constant_mu, param_coefs, Qmin_PDF, wmass,&
+     & zmass)
   use streamlined_interface; use structure_functions
   implicit none
-  real(dp), intent(in) :: rts, xR, xF, cmu, Qmin_PDF, wmass, zmass
-  integer, intent(in)  :: order_max, nflav, sc_choice
+  real(dp), intent(in) :: rts, xR, xF, constant_mu, Qmin_PDF, wmass, zmass
+  integer, intent(in)  :: order_max, nflav, scale_choice
   logical , intent(in) :: param_coefs
   !----------------------------------------------------------------------
 
-call StartStrFct(rts, order_max, nflav, xR, xF, sc_choice&
-     &, cmu, param_coefs, Qmin_PDF, wmass, zmass)
+call StartStrFct(rts, order_max, nflav, xR, xF, scale_choice&
+     &, constant_mu, param_coefs, Qmin_PDF, wmass, zmass)
   
 end subroutine hoppetStartStrFctExtended
 
