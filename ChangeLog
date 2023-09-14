@@ -1,5 +1,43 @@
+2023-09-14  Alexander Karlberg  <alexander.karlberg@cern.ch>
 
-2023-03-12 Sun  <gavin.salam@physics.ox.ac.uk>
+	* src/streamlined_interface.f90
+	* src/hoppet_v1.h:
+	added functions to call the structure functions in the
+	streamlined interface
+
+	* example_f77/cpp_structure_functions_example.cc:
+	added a C++ example for structure functions use
+
+	* example_f90/structure_functions_example.f90:
+	added an F90 example for structure functions use
+
+	* src/coefficient_functions_holder.f90
+	* src/structure_functions.f90
+	* src/hplog5.f
+	* src/xc2gl3e.f
+	* src/xc2ns3e.f
+	* src/xc2ps3e.f
+	* src/xc3ns3e.f
+	* src/xclgl3e.f
+	* src/xclns3e.f
+	* src/xclps3e.f:
+	added the exact 3-loop DIS coefficient functions. Currently they
+	do not work due to a numerical issue in hplog5. Removed factor 2
+	in structure functions introduced for VBF but which should not be
+	there in the DIS definition. Swapped Wp/Wm to align with DIS
+	convention. Fixed a number of bugs in the fl11 term of the NC N3LO
+	structure functions as reported by Valerio Bertone. Fixed
+	couplings for the EM and Zgamma structure functions which were
+	never used in VBF and therefore not tested.
+
+	* benchmarking/structure_functions_benchmark_checks.f90:
+	added file for structure function benchmarks. Should reproduce the
+	results that will be published with Valerio Bertone.
+
+	* scripts/check:
+	added a check for the structure functions
+
+2023-03-12 Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* .github/workflows/CI.yml:
 	added an attempt at continuous integration using github actions

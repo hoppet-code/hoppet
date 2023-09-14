@@ -6,7 +6,8 @@ program structure_functions_example
   use streamlined_interface
   use structure_functions
   implicit none
-  real(dp) :: Qmax, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0alphas, muR_Q, Q0pdf
+  real(dp) :: Qmax, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0,&
+       & muR_Q
     integer  :: order_max, sc_choice,nloop
   
   Qmax = 13000.0_dp 
@@ -29,17 +30,17 @@ program structure_functions_example
   ! Evolve the PDF
   nloop = 3 ! NNLO evolution
   asQ = 0.35_dp
-  Q0alphas = sqrt(2.0_dp)
+  Q0 = sqrt(2.0_dp)
   muR_Q = 1.0_dp
-  Q0pdf = sqrt(2.0_dp) ! The initial evolution scale
-  call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, lha_unpolarized_dummy_pdf, Q0pdf)
+
+  call hoppetEvolve(asQ, Q0, nloop,muR_Q, lha_unpolarized_dummy_pdf, Q0)
   
   ! Initialise the structure functions using separate order
   call InitStrFct(order_max, .true.)
 
   ! write out the structure functions
-  write(6,*) "Writing structure functions to structure-functions.dat"
-  open(unit = 99, file = 'structure-functions.dat')
+  write(6,*) "Writing structure functions to structure_functions_example.dat"
+  open(unit = 99, file = 'structure_functions_example.dat')
 
   ymax = log(1e5) !ymax=20
   Q = 100.0_dp

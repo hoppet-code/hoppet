@@ -45,6 +45,9 @@ tabulation_example: tabulation_example.o
 cpp_tabulation_example: cpp_tabulation_example.o
 	$(CXX) -o cpp_tabulation_example $<  $(LIBS) -lm $(F90LIB4GCC)
 
+cpp_structure_functions_example: cpp_structure_functions_example.o
+	$(CXX) -o cpp_structure_functions_example $<  $(LIBS) -lm $(F90LIB4GCC)
+
 compare_lhapdf_hoppet: compare_lhapdf_hoppet.o
 	$(FC) -o compare_lhapdf_hoppet $< $(LHAPDFLIBS)  $(LIBS)
 
