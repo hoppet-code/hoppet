@@ -54,7 +54,7 @@ int main () {
   printf("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon       F1γ         F2γ         F1Z         F2Z         F3Z\n");
   for (int ix = 0; ix < 9; ix++) {
     hoppetEval(xvals[ix], Q, pdf);
-    hoppetStrFct(  -log(xvals[ix]),Q,Q,Q,StrFct);
+    hoppetStrFct(xvals[ix],Q,Q,Q,StrFct);
     printf("%7.1E %11.4E %11.4E %11.4E %11.4E %11.4E %11.4E %11.4E %11.4E %11.4E %11.4E\n",xvals[ix],
            pdf[6+2]-pdf[6-2], 
            pdf[6+1]-pdf[6-1], 

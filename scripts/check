@@ -26,7 +26,7 @@ fi
 
 
 example_f90/structure_functions_example
-mv example_f90/structure_functions_example.dat check.tmp.new
+mv structure_functions_example.dat check.tmp.new
 
 grep -vi '^[a-z]' example_f90/structure_functions_example.default_output > check.tmp.orig
 

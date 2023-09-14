@@ -361,21 +361,21 @@ contains
        ytest = iy * ymax / ny
        xval = exp(-ytest)
        if (use_sep_orders) then
-          res = F_LO(ytest, Qtest, mR, mF)
+          res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es22.12)',advance='no') xval, res(F1Wp),res(F1Wm)
           F1Z_LO = res(F1Z)
-          res = F_NLO(ytest, Qtest, mR, mF)
+          res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_NLO = res(F1Z)
-          res = F_NNLO(ytest, Qtest, mR, mF)
+          res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_NNLO = res(F1Z)
-          res = F_N3LO(ytest, Qtest, mR, mF)
+          res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_N3LO = res(F1Z)
           write(idev,'(4es22.12)',advance='no') F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO
        else
-          res = StrFct(ytest, Qtest, mR, mF)
+          res = StrFct(xval, Qtest, mR, mF)
           write(idev,'(4es22.12)',advance='no') xval, res(F1Wp),res(F1Wm), res(F1Z)
        endif
        write(idev,*)
@@ -405,21 +405,21 @@ contains
        ytest = iy * ymax / ny
        xval = exp(-ytest)
        if (use_sep_orders) then
-          res = F_LO(ytest, Qtest, mR, mF)
+          res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es22.12)',advance='no') xval, res(F2Wp),res(F2Wm)
           F2Z_LO = res(F2Z)
-          res = F_NLO(ytest, Qtest, mR, mF)
+          res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_NLO = res(F2Z)
-          res = F_NNLO(ytest, Qtest, mR, mF)
+          res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_NNLO = res(F2Z)
-          res = F_N3LO(ytest, Qtest, mR, mF)
+          res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_N3LO = res(F2Z)
           write(idev,'(4es22.12)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
        else
-          res = StrFct(ytest, Qtest, mR, mF)
+          res = StrFct(xval, Qtest, mR, mF)
           write(idev,'(4es22.12)',advance='no') xval, res(F2Wp),res(F2Wm), res(F2Z)
        endif
        write(idev,*)
@@ -449,21 +449,21 @@ contains
        ytest = iy * ymax / ny
        xval = exp(-ytest)
        if (use_sep_orders) then
-          res = F_LO(ytest, Qtest, mR, mF)
+          res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es22.12)',advance='no') xval, res(F3Wp),res(F3Wm)
           F3Z_LO = res(F3Z)
-          res = F_NLO(ytest, Qtest, mR, mF)
+          res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_NLO = res(F3Z)
-          res = F_NNLO(ytest, Qtest, mR, mF)
+          res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_NNLO = res(F3Z)
-          res = F_N3LO(ytest, Qtest, mR, mF)
+          res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_N3LO = res(F3Z)
           write(idev,'(4es22.12)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
        else
-          res = StrFct(ytest, Qtest, mR, mF)
+          res = StrFct(xval, Qtest, mR, mF)
           write(idev,'(4es22.12)',advance='no') xval, res(F3Wp),res(F3Wm), res(F3Z)
        endif
        write(idev,*)
@@ -1255,20 +1255,20 @@ contains
   ! F
   ! calculate the structure function at x, muF
   ! this is the sum over all orders
-  function StrFct (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q
+  function StrFct (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q
     real(dp), intent(in), optional  :: muR, muF
     real(dp) :: res(-6:7)
     
     if (use_sep_orders) then
        ! if we kept each order separate, then add up all the fixed order terms one by one
-       if (order_setup.ge.1) res = F_LO(y, Q, muR, muF)
-       if (order_setup.ge.2) res = res + F_NLO(y, Q, muR, muF)
-       if (order_setup.ge.3) res = res + F_NNLO(y, Q, muR, muF)
-       if (order_setup.ge.4) res = res + F_N3LO(y, Q, muR, muF)
+       if (order_setup.ge.1) res = F_LO(x, Q, muR, muF)
+       if (order_setup.ge.2) res = res + F_NLO(x, Q, muR, muF)
+       if (order_setup.ge.3) res = res + F_NNLO(x, Q, muR, muF)
+       if (order_setup.ge.4) res = res + F_N3LO(x, Q, muR, muF)
     else
        ! if we haven't kept each order separate, then everything is in tables(1)
-       call EvalPdfTable_yQ(tables(1), y, Q, res)
+       call EvalPdfTable_xQ(tables(1), x, Q, res)
     endif
     
   end function StrFct
@@ -1278,8 +1278,8 @@ contains
   ! F_LO
   ! calculate the leading order structure function at x, muF
   !
-  function F_LO (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+  function F_LO (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7)
     real(dp) :: Q_or_muF
 
@@ -1292,7 +1292,7 @@ contains
     ! (since it is saved as an array in muF)
     if (scale_choice.ge.2) Q_or_muF = muF
 
-    call EvalPdfTable_yQ(tables(1), y, Q_or_muF, res)
+    call EvalPdfTable_xQ(tables(1), x, Q_or_muF, res)
     
   end function F_LO
 
@@ -1303,8 +1303,8 @@ contains
   ! LRQ2 == ln muR^2/Q^2
   ! LFQ2 == ln muF^2/Q^2
   !
-  function F_NLO (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+  function F_NLO (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7)
     real(dp) :: Q_or_muF
@@ -1321,14 +1321,14 @@ contains
     if (scale_choice.ge.2) Q_or_muF = muF
     
     ! C_NLO x f (x) in C1f(:) 
-    call EvalPdfTable_yQ(tables(2), y, Q_or_muF, C1f)
+    call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
     res = C1f
     
     ! if scale_choice = 0,1 then this term is already taken care of
     if (scale_choice.ge.2) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
-       call EvalPdfTable_yQ(tables(3), y, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
        res = res - C0P0f * LFQ2
     endif
     
@@ -1343,8 +1343,8 @@ contains
   !
   ! LRQ2 == ln muR^2/Q^2
   ! LFQ2 == ln muF^2/Q^2
-  function F_NNLO (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+  function F_NNLO (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7), C2f(-6:7), C0P0sqf(-6:7)
     real(dp) :: C0P1f(-6:7), C1P0f(-6:7)
@@ -1362,7 +1362,7 @@ contains
     if (scale_choice.ge.2) Q_or_muF = muF
     
     ! C_NNLO x f (x) in C2f(:,3) 
-    call EvalPdfTable_yQ(tables(4), y, Q_or_muF, C2f)
+    call EvalPdfTable_xQ(tables(4), x, Q_or_muF, C2f)
     res = C2f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
@@ -1370,15 +1370,15 @@ contains
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
-       call EvalPdfTable_yQ(tables(2), y, Q_or_muF, C1f)
+       call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
        ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_yQ(tables(3), y, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
        ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_yQ(tables(5), y, Q_or_muF, C0P0sqf)
+       call EvalPdfTable_xQ(tables(5), x, Q_or_muF, C0P0sqf)
        ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_yQ(tables(6), y, Q_or_muF, C0P1f)
+       call EvalPdfTable_xQ(tables(6), x, Q_or_muF, C0P1f)
        ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_yQ(tables(7), y, Q_or_muF, C1P0f)
+       call EvalPdfTable_xQ(tables(7), x, Q_or_muF, C1P0f)
        ! add up all the different pieces
        res = res - C1P0f * LFQ2 + C0P0sqf * half * LFQ2**2 &
             & - twopi * beta0 * C0P0f * (LRQ2*LFQ2 - half*LFQ2**2) &
@@ -1396,8 +1396,8 @@ contains
   !
   ! LRQ2 == ln muR^2/Q^2
   ! LFQ2 == ln muF^2/Q^2
-  function F_N3LO (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+  function F_N3LO (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7), C3f(-6:7), C0P0sqf(-6:7), C2f(-6:7)
     real(dp) :: C0P1f(-6:7), C1P0f(-6:7), C0P0cbf(-6:7), C0P01f(-6:7), C0P10f(-6:7)
@@ -1416,7 +1416,7 @@ contains
     if (scale_choice.ge.2) Q_or_muF = muF
     
     ! C_N3LO x f (x) in C2f(:,8) 
-    call EvalPdfTable_yQ(tables(8), y, Q_or_muF, C3f)
+    call EvalPdfTable_xQ(tables(8), x, Q_or_muF, C3f)
     res = C3f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
@@ -1424,32 +1424,32 @@ contains
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
-       call EvalPdfTable_yQ(tables(2), y, Q_or_muF, C1f)
+       call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
        ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_yQ(tables(3), y, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
        ! C_NNLO x f (x) in C2f(:,3) 
-       call EvalPdfTable_yQ(tables(4), y, Q_or_muF, C2f)
+       call EvalPdfTable_xQ(tables(4), x, Q_or_muF, C2f)
        ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_yQ(tables(5), y, Q_or_muF, C0P0sqf)
+       call EvalPdfTable_xQ(tables(5), x, Q_or_muF, C0P0sqf)
        ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_yQ(tables(6), y, Q_or_muF, C0P1f)
+       call EvalPdfTable_xQ(tables(6), x, Q_or_muF, C0P1f)
        ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_yQ(tables(7), y, Q_or_muF, C1P0f)
+       call EvalPdfTable_xQ(tables(7), x, Q_or_muF, C1P0f)
        
        ! C_LO x P_LO^3 x f (x) in C0P0cbf
-       call EvalPdfTable_yQ(tables(9), y, Q_or_muF, C0P0cbf)
+       call EvalPdfTable_xQ(tables(9), x, Q_or_muF, C0P0cbf)
        ! C_LO x P_LO x P_NLO x f (x) in C0P01f
-       call EvalPdfTable_yQ(tables(10), y, Q_or_muF, C0P01f)
+       call EvalPdfTable_xQ(tables(10), x, Q_or_muF, C0P01f)
        ! C_LO x P_LO x P_NLO x f (x) in C0P10f
-       call EvalPdfTable_yQ(tables(11), y, Q_or_muF, C0P10f)
+       call EvalPdfTable_xQ(tables(11), x, Q_or_muF, C0P10f)
        ! C_NLO x P_LO^2 x f (x) in C1P0sqf
-       call EvalPdfTable_yQ(tables(12), y, Q_or_muF, C1P0sqf)
+       call EvalPdfTable_xQ(tables(12), x, Q_or_muF, C1P0sqf)
        ! C_NLO x P_NLO x f (x) in C1P1f
-       call EvalPdfTable_yQ(tables(13), y, Q_or_muF, C1P1f)
+       call EvalPdfTable_xQ(tables(13), x, Q_or_muF, C1P1f)
        ! C_NNLO x P_LO x f (x) in C2P0f
-       call EvalPdfTable_yQ(tables(14), y, Q_or_muF, C2P0f)
+       call EvalPdfTable_xQ(tables(14), x, Q_or_muF, C2P0f)
        ! C_LO x P_NNLO x f (x) in C0P2f
-       call EvalPdfTable_yQ(tables(15), y, Q_or_muF, C0P2f)
+       call EvalPdfTable_xQ(tables(15), x, Q_or_muF, C0P2f)
     
        ! add up all the different pieces
        ! The commented lines are copy/pasted from mathematica
