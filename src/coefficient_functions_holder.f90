@@ -844,7 +844,6 @@ contains
   ! corresponding to C3NSP-C3NSN in W. van Neerven's program.
   function cfN3LO_F3NS_val(y) result(res)
     use xc3ns3p
-    use xc3ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x

@@ -4,7 +4,7 @@
 # 
 # Run it from the top-level directory as scripts/check
 #
-# Created by GPS on 2009-09-05
+# Created by GPS on 2009-09-05 and subsequently adapted by AK.
 #----------------------------------------------------------------------
 
 example_f90/tabulation_example | grep -vi '^[a-z]' | tee check.tmp.new

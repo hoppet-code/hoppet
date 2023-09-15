@@ -1,13 +1,29 @@
 2023-09-15 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* benchmarking/structure_functions_benchmark_checks.f90:
-	added options -exact-coefs (to turn on exact coefficient functions, instead of parametrised)
-	and -outdir to select the output directory.
+	added options -exact-coefs (to turn on exact coefficient functions,
+	instead of parametrised) and -outdir to select the output directory.
 
-	* coefficient_functions_holder.f90:
-	* coefficient_functions_holder_exact.f90:
+	* src/coefficient_functions_holder.f90:
+	* src/exact-coeffs/coefficient_functions_holder_exact.f90:
 	moved exact NNLO and N3LO coefficient functions into a separate
 	file, with a view to facilitating conditional compilation
+
+	* src/no-exact-coefs/coefficient_functions_holder_exact.f90:
+	the alternative file to use when exact coefficient functions 
+	are not being compiled in 
+
+	* src/xc*e.f -> src/exact-coefs:
+	moved all the exact coefficient function files into a separate
+	directory, which is only included if the --enable-exact-coefs option
+	is passed to configure
+
+	* configure:
+	added --enable-exact-coefs option to turn on compilation
+	of exact coefficient special_functions
+
+	* .github/workflows/CI.yml:
+	added a check that the exact coefficient functions compile
 
 2023-09-15  Alexander Karlberg  <alexander.karlberg@cern.ch>
 

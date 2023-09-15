@@ -48,4 +48,9 @@ jobs:
         # build and run unit tests
         ./configure FC=gfortran-${{matrix.gcc_v}}
         make -j4 check
+        # then make sure we can build also with the exact coefficient functions
+        make clean
+        ./configure FC=gfortran-${{matrix.gcc_v}} --enable-exact-coefs
+        make -j4 check
+
 
