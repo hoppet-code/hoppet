@@ -19,7 +19,7 @@
 	exact-coefs sub-directory; without the option looks for anything in
 	a no-exact-coefs sub-directory)
 
-	* src/xc*e.f -> src/exact-coefs:
+	* src/xc*e.f -> src/exact-coefs/:
 	moved all the exact coefficient function files into a separate
 	directory, which is only included if the --enable-exact-coefs option
 	is passed to configure
