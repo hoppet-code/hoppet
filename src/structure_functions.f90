@@ -1598,63 +1598,63 @@ end subroutine hoppetInitStrFct
 ! F
 ! calculate the structure function at x, muF
 ! this is the sum over all orders
-subroutine hoppetStrFct(y, Q, muR_in, muF_in, res) 
+subroutine hoppetStrFct(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
-  real(dp) :: y, Q
+  real(dp) :: x, Q
   real(dp) :: muR_in, muF_in
   real(dp) :: res(-6:7)
 
-  res = StrFct(y, Q, muR_in, muF_in)
+  res = StrFct(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFct
 
 !----------------------------------------------------------------------
 ! F_LO
 ! calculate the leading order structure function at x, muF
 !
-subroutine hoppetStrFctLO(y, Q, muR_in, muF_in, res) 
+subroutine hoppetStrFctLO(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
-  real(dp) :: y, Q
+  real(dp) :: x, Q
   real(dp) :: muR_in, muF_in
   real(dp) :: res(-6:7)
 
-  res = F_LO(y, Q, muR_in, muF_in)
+  res = F_LO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctLO
 
   !----------------------------------------------------------------------
   ! F_NLO
   ! calculate the next-to-leading order structure function at x, muF
   !
-subroutine hoppetStrFctNLO(y, Q, muR_in, muF_in, res) 
+subroutine hoppetStrFctNLO(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
-  real(dp) :: y, Q
+  real(dp) :: x, Q
   real(dp) :: muR_in, muF_in
   real(dp) :: res(-6:7)
 
-  res = F_NLO(y, Q, muR_in, muF_in)
+  res = F_NLO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctNLO
 
   !----------------------------------------------------------------------
   ! F_NNLO
   ! calculate the next-to-next-to-leading order structure function at x, muF
   !
-subroutine hoppetStrFctNNLO(y, Q, muR_in, muF_in, res) 
+subroutine hoppetStrFctNNLO(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
-  real(dp) :: y, Q
+  real(dp) :: x, Q
   real(dp) :: muR_in, muF_in
   real(dp) :: res(-6:7)
 
-  res = F_NNLO(y, Q, muR_in, muF_in)
+  res = F_NNLO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctNNLO
 
   !----------------------------------------------------------------------
   ! F_N3LO
   ! calculate the next-to-next-tonext-to-leading order structure function at x, muF
   !
-subroutine hoppetStrFctN3LO(y, Q, muR_in, muF_in, res) 
+subroutine hoppetStrFctN3LO(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
-  real(dp) :: y, Q
+  real(dp) :: x, Q
   real(dp) :: muR_in, muF_in
   real(dp) :: res(-6:7)
 
-  res = F_N3LO(y, Q, muR_in, muF_in)
+  res = F_N3LO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctN3LO

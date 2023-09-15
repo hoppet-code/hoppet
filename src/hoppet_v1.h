@@ -190,7 +190,7 @@ extern "C" {
   /// F
   /// calculate the structure function at x, muF
   /// this is the sum over all orders
-  void hoppetStrFct(const double & y,
+  void hoppetStrFct(const double & x,
 		    const double & Q,
 		    const double & muR_in,
 		    const double & muF_in,
@@ -199,7 +199,7 @@ extern "C" {
   /// F_LO
   /// calculate the leading order structure function at x, muF
   ///
-  void hoppetStrFctLO(const double & y,
+  void hoppetStrFctLO(const double & x,
 		       const double & Q,
 		       const double & muR_in,
 		       const double & muF_in,
@@ -207,7 +207,7 @@ extern "C" {
   /// F_NLO
   /// calculate the next-to-leading order structure function at x, muF
   ///
-  void hoppetStrFctNLO(const double & y,
+  void hoppetStrFctNLO(const double & x,
 			const double & Q,
 			const double & muR_in,
 			const double & muF_in,
@@ -215,7 +215,7 @@ extern "C" {
   /// F_NNLO
   /// calculate the next-to-next-to-leading order structure function at x, muF
   ///
-  void hoppetStrFctNNLO(const double & y,
+  void hoppetStrFctNNLO(const double & x,
 			 const double & Q,
 			 const double & muR_in,
 			 const double & muF_in,
@@ -223,7 +223,7 @@ extern "C" {
   /// F_N3LO
   /// calculate the next-to-next-to-next-to-leading order structure function at x, muF
   ///
-  void hoppetStrFctN3LO(const double & y,
+  void hoppetStrFctN3LO(const double & x,
 			 const double & Q,
 			 const double & muR_in,
 			 const double & muF_in,
