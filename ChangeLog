@@ -1,7 +1,18 @@
+2023-09-15 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* benchmarking/structure_functions_benchmark_checks.f90:
+	added options -exact-coefs (to turn on exact coefficient functions, instead of parametrised)
+	and -outdir to select the output directory.
+
+	* coefficient_functions_holder.f90:
+	* coefficient_functions_holder_exact.f90:
+	moved exact NNLO and N3LO coefficient functions into a separate
+	file, with a view to facilitating conditional compilation
+
 2023-09-15  Alexander Karlberg  <alexander.karlberg@cern.ch>
 
-	* src/streamlined_interface.f90
-	* src/structure_functions.f90
+	* src/streamlined_interface.f90:
+	* src/structure_functions.f90:
 	* src/hoppet_v1.h:
 	changed the argument that StrFct() etc takes from y = -log(x) to x
 	to conform with the rest of the code. Moved the call to
