@@ -1,6 +1,7 @@
 2023-09 Structure function branch merging notes
 ===============================================
 - [ ] add conditional compilation of hplog5 and exact coefficient functions
+- [ ] add mention of coefficient function to welcome_message
 
 Old notes
 =========
