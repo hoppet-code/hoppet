@@ -13,14 +13,20 @@
 	the alternative file to use when exact coefficient functions 
 	are not being compiled in 
 
+	* configure:
+	added --enable-exact-coefs option to turn on compilation
+	of exact coefficient special_functions (looks for anything in an
+	exact-coefs sub-directory; without the option looks for anything in
+	a no-exact-coefs sub-directory)
+
 	* src/xc*e.f -> src/exact-coefs:
 	moved all the exact coefficient function files into a separate
 	directory, which is only included if the --enable-exact-coefs option
 	is passed to configure
 
-	* configure:
-	added --enable-exact-coefs option to turn on compilation
-	of exact coefficient special_functions
+	* example_f90/{ => exact-coefs}/coefficient_functions_test.f90:
+	moved this into a sub-directory so that it is compiled
+	only when exact coefficient functions are included
 
 	* .github/workflows/CI.yml:
 	added a check that the exact coefficient functions compile
