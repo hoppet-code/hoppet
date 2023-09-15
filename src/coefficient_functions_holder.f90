@@ -1,3 +1,24 @@
+
+module coefficient_functions_holder_internal
+  use types; 
+  use convolution_communicator
+  use dglap_objects
+  use coefficient_functions 
+  implicit none
+ 
+  type coef_holder
+    integer        :: nloop
+    integer        :: nf, nflo, nfhi
+    real(dp)       :: C2LO,   CLLO,   C3LO
+    type(split_mat), pointer :: C2NLO,  CLNLO,  C3NLO
+    type(split_mat), pointer :: C2NNLO, CLNNLO, C3NNLO
+    type(split_mat), pointer :: C2N3LO, CLN3LO, C3N3LO
+    type(split_mat), pointer :: C2N3LO_fl11, CLN3LO_fl11
+    type(split_mat), pointer :: C_NLO(:,:), C_NNLO(:,:), C_N3LO(:,:)
+  end type coef_holder
+
+end module coefficient_functions_holder_internal
+
 ! Module that contains the coefficient functions up to N3LO
 !
 ! Useful references:
@@ -17,24 +38,28 @@ module coefficient_functions_holder
   use convolution
   use dglap_objects
   use coefficient_functions 
+  use coefficient_functions_holder_internal
   implicit none
   !private
   
   public :: coef_holder, InitCoefHolder, SetNfCoefHolder
   
-  type coef_holder
-     integer        :: nloop
-     integer        :: nf, nflo, nfhi
-     real(dp)       :: C2LO,   CLLO,   C3LO
-     type(split_mat), pointer :: C2NLO,  CLNLO,  C3NLO
-     type(split_mat), pointer :: C2NNLO, CLNNLO, C3NNLO
-     type(split_mat), pointer :: C2N3LO, CLN3LO, C3N3LO
-     type(split_mat), pointer :: C2N3LO_fl11, CLN3LO_fl11
-     type(split_mat), pointer :: C_NLO(:,:), C_NNLO(:,:), C_N3LO(:,:)
-  end type coef_holder
-
   real(dp), parameter  :: tiny = 1D-10
   
+  !! to facilitate conditional compilation of exact coefficient functions
+  !! (which add about 20s to the compilation time), we define an
+  !! external function that handles the exact coefficient functions.
+  !! If support is not compiled in, it should simply give an error.
+  interface
+     subroutine InitCoefHolderExact(grid, ch, nloop, nflcl)
+        use types; use coefficient_functions_holder_internal
+        implicit none
+        type(grid_def), intent(in) :: grid
+        type(coef_holder), intent(inout), target :: ch
+        integer, intent(in) :: nloop, nflcl
+     end subroutine InitCoefHolderExact
+  end interface
+
 contains
 
   !----------------------------------------------------------------------
