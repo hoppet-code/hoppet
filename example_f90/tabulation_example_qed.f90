@@ -28,7 +28,7 @@ program tabulation_example
   !! hold the PDF tabulation
   type(pdf_table)       :: table
   !! hold the coupling
-  real(dp)               :: quark_masses(4:6)
+  real(dp)               :: effective_light_quark_masses, quark_masses(4:6)
   type(running_coupling) :: coupling
   !! hold the initial pdf
   real(dp), pointer :: pdf0(:,:)
@@ -102,14 +102,18 @@ program tabulation_example
   call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop_qcd,&
        &                   quark_masses = quark_masses)
 
-       ! this simply evolves up, with some manually set turning on
-  ! of nf=3 QCD at some low scale m_light_quarks (defined in qed_coupling.f90)
-  call InitQEDCoupling(coupling_qed, quark_masses(4), quark_masses(5), quark_masses(6))
+  ! this simply evolves up, with all light quarks simultaneously
+  ! turning on at some specified effective scale; the choice of
+  ! 0.109 GeV results in a fairly accurate value of alpha(mZ)
+  ! (keeping in mind that this is only 1-loop QED running, so 
+  ! it is slightly inaccurate at mtau)
+  effective_light_quark_masses = 0.109_dp
+  call InitQEDCoupling(coupling_qed, effective_light_quark_masses, quark_masses(4:6))
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
-  call AllocPdfTable(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
-       & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true., iflv_max_table = ncompmaxLeptons)
+  call AllocPdfTableWithLeptons(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
+       & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
   ! add information about the nf transitions to the table (improves
   ! interpolation quality)
   call AddNfInfoToPdfTable(table,coupling)

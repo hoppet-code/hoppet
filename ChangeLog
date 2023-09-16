@@ -6,7 +6,12 @@
 	to obtain a tabulated QED PDF and included default output
 
 	* src/qed_coupling.f90:
-	updated alpha(0) and lepton masses to 2022 PDG value_at_scale_0
+	updated alpha(0) and lepton masses to 2022 PDG value_at_scale_0.
+
+	Also updated interface to InitQEDCoupling so that the user can
+	make their own choice for the effective light quark masses,
+	which they can tune so that alpha(0) and alpha(mZ) are both
+	reasonably sensible.
 
 	* src/hoppet_v1.f90:
 	included the QED modules
