@@ -1,3 +1,19 @@
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/CMakeLists.txt:
+	reworked this to enable conditional compilation of exact
+	coefficient functions, and to allow for installation
+	of library + include files (but not yet .mod files)
+
+	* src/{ => unused}/xclns3p-orig.f:
+	moved this out of the way to avoid confusing build system without
+	two identical copies
+
+	* src/integrator.f90:
+	* src/xclns3p.f:
+	removed some DO with line label termination (which is a deleted
+	feature in F2018 and so was causing warnings)
+
 2023-09-15 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* benchmarking/structure_functions_benchmark_checks.f90:
