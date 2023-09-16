@@ -4,11 +4,17 @@ QED merging notes (2023-09)
 
 - [ ] understand 'CHECK 111 case' warning in qcd_qed_coupling.f90
 - [x] see if any changes were made in lepton structure function work
-- [ ] decide how to document things
+      NB: addition of with_Plp_nnloqed in qed_evolution, included 
+      but is the interface right?
 - [ ] create benchmark / "make check" files?
-      (start from tests/test_qed_lepton_evol.f90?)
-
-
+      (start from tests/test_qed_lepton_evol.f90? See gen_qed_grid.f90 in photon project)
+- [ ] create some kind of streamlined interface?      
+- [ ] document 
+  * [ ] InitQEDSplitMat (and its structure)
+  * [ ] AllocPDFWithLeptons
+  * [ ] QEDQCDEvolvePDF
+  * [ ] EvolvePdfTableQED (+ how to create the correctly-sized table in the first place)
+  * [ ] NB: what do we do with QCDQEDCoupling, which is not currently used?
 
 Old notes
 =========

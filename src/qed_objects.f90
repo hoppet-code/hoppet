@@ -46,6 +46,10 @@ module qed_objects
      module procedure conv_qed_lo, conv_qed_nlo, conv_qed_nnlo
   end interface operator(*)
   public :: operator(*)
+  interface operator(.conv.)
+     module procedure conv_qed_lo, conv_qed_nlo, conv_qed_nnlo
+  end interface operator(.conv.)
+  public :: operator(.conv.)
 
   interface Copy
      module procedure Copy_qed_split_mat_lo, Copy_qed_split_mat_nlo, Copy_qed_split_mat_nnlo, Copy_qed_split_mat
@@ -183,7 +187,7 @@ contains
 
     ! then set up a charge * multiplicity for branching to a given component
     chg2_toflv = zero
-    ! include a factor of CA for the quarks
+    ! include a factor of CA=NC for the quarks
     chg2_toflv(-6:6) = CA * chg2_fromflv(-6:6)
 
     ! include a factor of 2 for the leptons, because we sum leptons and
