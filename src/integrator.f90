@@ -337,7 +337,7 @@ contains
 2   C1=HF*(BB+AA) 
     C2=HF*(BB-AA) 
     S8=0 
-    DO 3 I = 1,4 
+    DO I = 1,4 
        U=C2*X(I)
        if (abs(c1+u).lt.1d-5) then
           pmult = one + lcl_wgtadd + (c1+u)*expand1 + ((c1+u)**2)*expand2
@@ -351,9 +351,10 @@ contains
        endif
        ! pmult = product(c1+u - zero_nodes) * norm_nodes + lcl_wgtadd
        ! mmult = product(c1-u - zero_nodes) * norm_nodes + lcl_wgtadd
-3      S8=S8+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+       S8=S8+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+    END DO
     S16=0 
-    DO 4 I = 5,12 
+    DO I = 5,12 
        U=C2*X(I) 
        if (abs(c1+u).lt.1e-5_dp) then
           pmult = one + lcl_wgtadd + (c1+u)*expand1 + ((c1+u)**2)*expand2
@@ -367,7 +368,8 @@ contains
        endif
        ! pmult = product(c1+u - zero_nodes) * norm_nodes + lcl_wgtadd
        ! mmult = product(c1-u - zero_nodes) * norm_nodes + lcl_wgtadd
-4      S16=S16+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult) 
+       S16=S16+W(I)*(F(C1+U)*pmult+F(C1-U)*mmult)
+    END DO
     S16=C2*S16 
     IF(ABS(S16-C2*S8) .LE. EPS*(1+ABS(S16))) THEN 
        H=H+S16 

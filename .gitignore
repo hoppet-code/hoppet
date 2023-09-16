@@ -1,4 +1,7 @@
 *.o
+.vscode
 /.compiler
 /config.log
 /hoppet-config
+benchmarking/structure_functions_benchmark_checks
+src/.vscode

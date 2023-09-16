@@ -10,5 +10,6 @@ module hoppet_v1
   use qcd
   use pdf_tabulate
   use structure_functions
+  use coefficient_functions_holder_exact
   implicit none
 end module hoppet_v1

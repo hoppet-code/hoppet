@@ -144,10 +144,11 @@
       ALFA=H+H
       B1=ZERO
       B2=ZERO
-      DO 1 I = 18,0,-1
+      DO I = 18,0,-1
          B0=C(I)+ALFA*B1-B2
          B2=B1
-    1 B1=B0
+         B1=B0
+      END DO
       DDILOG=-(S*(B0-H*B2)+A)
       RETURN
       END
@@ -230,10 +231,11 @@ C
        ALFA=H+H
        B1=0
        B2=0
-       DO 1 I = 19,0,-1
-       B0=C(I)+ALFA*B1-B2
-       B2=B1
-    1  B1=B0
+       DO I = 19,0,-1
+         B0=C(I)+ALFA*B1-B2
+         B2=B1
+         B1=B0
+       END DO
        H=-(S*(B0-H*B2)+A)
       ENDIF
 

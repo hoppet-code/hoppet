@@ -1,3 +1,116 @@
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/CMakeLists.txt:
+	reworked this to enable conditional compilation of exact
+	coefficient functions, and to allow for installation
+	of library + include files (but not yet .mod files)
+
+	* src/{ => unused}/xclns3p-orig.f:
+	moved this out of the way to avoid confusing build system without
+	two identical copies
+
+	* src/integrator.f90:
+	* src/xclns3p.f:
+	removed some DO with line label termination (which is a deleted
+	feature in F2018 and so was causing warnings)
+
+2023-09-15 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* benchmarking/structure_functions_benchmark_checks.f90:
+	added options -exact-coefs (to turn on exact coefficient functions,
+	instead of parametrised) and -outdir to select the output directory.
+
+	* src/coefficient_functions_holder.f90:
+	* src/exact-coeffs/coefficient_functions_holder_exact.f90:
+	moved exact NNLO and N3LO coefficient functions into a separate
+	file, with a view to facilitating conditional compilation
+
+	* src/no-exact-coefs/coefficient_functions_holder_exact.f90:
+	the alternative file to use when exact coefficient functions 
+	are not being compiled in 
+
+	* configure:
+	added --enable-exact-coefs option to turn on compilation
+	of exact coefficient special_functions (looks for anything in an
+	exact-coefs sub-directory; without the option looks for anything in
+	a no-exact-coefs sub-directory)
+
+	* src/xc*e.f -> src/exact-coefs/:
+	moved all the exact coefficient function files into a separate
+	directory, which is only included if the --enable-exact-coefs option
+	is passed to configure
+
+	* example_f90/{ => exact-coefs}/coefficient_functions_test.f90:
+	moved this into a sub-directory so that it is compiled
+	only when exact coefficient functions are included
+
+	* .github/workflows/CI.yml:
+	added a check that the exact coefficient functions compile
+
+2023-09-15  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90:
+	* src/structure_functions.f90:
+	* src/hoppet_v1.h:
+	changed the argument that StrFct() etc takes from y = -log(x) to x
+	to conform with the rest of the code. Moved the call to
+	hoppetStartExtended outside the structure functions so a user can
+	more easily decide on the grids to use.
+
+2023-09-14  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90
+	* src/hoppet_v1.h:
+	added functions to call the structure functions in the
+	streamlined interface
+
+	* example_f77/cpp_structure_functions_example.cc:
+	added a C++ example for structure functions use
+
+	* example_f90/structure_functions_example.f90:
+	added an F90 example for structure functions use
+
+	* src/coefficient_functions_holder.f90
+	* src/structure_functions.f90
+	* src/hplog5.f
+	* src/xc2gl3e.f
+	* src/xc2ns3e.f
+	* src/xc2ps3e.f
+	* src/xc3ns3e.f
+	* src/xclgl3e.f
+	* src/xclns3e.f
+	* src/xclps3e.f:
+	added the exact 3-loop DIS coefficient functions. Currently they
+	do not work due to a numerical issue in hplog5. Removed factor 2
+	in structure functions introduced for VBF but which should not be
+	there in the DIS definition. Swapped Wp/Wm to align with DIS
+	convention. Fixed a number of bugs in the fl11 term of the NC N3LO
+	structure functions as reported by Valerio Bertone. Fixed
+	couplings for the EM and Zgamma structure functions which were
+	never used in VBF and therefore not tested.
+
+	* benchmarking/structure_functions_benchmark_checks.f90:
+	added file for structure function benchmarks. Should reproduce the
+	results that will be published with Valerio Bertone.
+
+	* scripts/check:
+	added a check for the structure functions
+
+2023-03-12 Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* .github/workflows/CI.yml:
+	added an attempt at continuous integration using github actions
+
+2023-03-12  Alexander Puck Neuwirth + small mods by Gavin Salam  <gavin.salam@physics.ox.ac.uk> 
+
+	* src/warnings_and_errors.f90:
+	wae_error(...): replaced "stop" with "call exit(-1)", which
+	should return a failure exit code. Note, this is non-standard, but
+	seems to be supported in both intel and gfortran.
+
+	* src/convolution.f90:
+	replaced several "stop" instructions with calls to wae_error(...)
+
 2023-02-01  Alexander Karlberg  <alexander.karlberg@cern.ch> 
 
 	* src/structure_functions.f90:

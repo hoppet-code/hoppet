@@ -47,18 +47,27 @@ module structure_functions
   private
   public :: InitStrFct, StartStrFct, write_f1, write_f2, write_f3
   public :: F1Wp, F2Wp, F3Wp, F1Wm, F2Wm, F3Wm, F1Z, F2Z, F3Z, F1EM, F2EM, F1gZ, F2gZ, F3gZ
-  public :: F_LO, F_NLO, F_NNLO, F_N3LO
+  public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct
   public :: muR, muF, quark_masses_sf
   
   ! holds the coefficient functions
   type(coef_holder), save :: ch
   
-  ! indices for the different structure functions
-  integer, parameter :: F1Wp= 1, F2Wp= 2, F3Wp= 3
-  integer, parameter :: F1Wm=-1, F2Wm=-2, F3Wm=-3
-  integer, parameter :: F1Z = 4, F2Z = 5, F3Z = 6
-  integer, parameter :: F1EM = -4, F2EM = -5
-  integer, parameter :: F1gZ = 0, F2gZ = -6, F3gZ = 7
+  ! indices for the different structure functions (D=d,s,b, U=u,c)
+  integer, parameter :: F1Wp= 1   !< F1 W+ : D + Ubar 
+  integer, parameter :: F2Wp= 2   !< F2 W+ : D + Ubar 
+  integer, parameter :: F3Wp= 3   !< F3 W+ : D + Ubar 
+  integer, parameter :: F1Wm=-1   !< F1 W- : Dbar + U 
+  integer, parameter :: F2Wm=-2   !< F2 W- : Dbar + U 
+  integer, parameter :: F3Wm=-3   !< F3 W- : Dbar + U 
+  integer, parameter :: F1Z = 4   !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter :: F2Z = 5   !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter :: F3Z = 6   !< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up
+  integer, parameter :: F1EM = -4 !< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
+  integer, parameter :: F2EM = -5 !< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
+  integer, parameter :: F1gZ = 0  !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter :: F2gZ = -6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter :: F3gZ = 7  !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
   
   ! constants and fixed parameters
   real(dp), save      :: quark_masses_sf(4:6) = quark_masses_def(4:6)
@@ -79,8 +88,10 @@ module structure_functions
 
   ! scale choices
   real(dp), save :: cst_mu, xmuR, xmuF
-  integer, save  :: scale_choice
-
+  integer, save  :: scale_choice_save
+  integer, parameter :: scale_choice_Q=1, scale_choice_fixed=0,&
+       & scale_choice_arbitrary=2
+  
   logical, save  :: use_sep_orders
   logical, save  :: exact_coefs
   integer :: nf_lcl, order_setup
@@ -90,16 +101,20 @@ contains
 
   !----------------------------------------------------------------------
   ! Setup of constants and parameters needed for structure functions
-  subroutine StartStrFct(rts, order_max, nflav, xR, xF, sc_choice, cmu, param_coefs, &
+  subroutine StartStrFct(rts, order_max, nflav, xR, xF, scale_choice, constant_mu, param_coefs, &
        & Qmin_PDF, wmass, zmass)
     real(dp), intent(in) :: rts
     integer, intent(in)  :: order_max
-    integer, optional    :: nflav, sc_choice
-    real(dp), optional   :: xR, xF, cmu, Qmin_PDF, wmass, zmass
+    integer, optional    :: nflav, scale_choice
+    real(dp), optional   :: xR, xF, constant_mu, Qmin_PDF, wmass, zmass
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
-    real(dp) :: sin_thw_sq, ymax, dy, minQval, maxQval, dlnlnQ, mw, mz
-    integer  :: nloop, order
+    real(dp) :: sin_thw_sq, mw, mz
+    integer  :: order
+
+    if(.not.alloc_already_done) then
+       call wae_error('StartStrFct', 'hoppetStart not called!')
+    endif
 
     ! take sensible default value for mw and mz
     mw = 80.398_dp
@@ -132,7 +147,7 @@ contains
     ! default settings
     xmuR = one
     xmuF = one
-    scale_choice = 1
+    scale_choice_save = scale_choice_Q
     exact_coefs  = .false.
     cst_mu       = zero
     Qmin         = one
@@ -140,26 +155,12 @@ contains
     ! change to user input if specified
     if(present(xR)) xmuR=xR
     if(present(xF)) xmuF=xF
-    if(present(sc_choice)) scale_choice=sc_choice
-    if(present(cmu)) cst_mu=cmu
+    if(present(scale_choice)) scale_choice_save=scale_choice
+    if(present(constant_mu)) cst_mu=constant_mu
     if(present(param_coefs)) exact_coefs = .not.param_coefs
     if(present(Qmin_PDF)) Qmin=Qmin_PDF
 
-    ! Streamlined initialization
-    ! including  parameters for x-grid
-    order = -6 
-    ymax  = 16.0_dp
-    dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
-    dlnlnQ = dy/4.0_dp
-    nloop = 3 
-    minQval = min(xmuF*Qmin, Qmin)
-    maxQval = max(xmuF*rts, rts)
-
-    ! initialise the grid and dglap holder
-    call hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
-         &         order,factscheme_MSbar)
-
-    if (present(nflav)) then
+    if (present(nflav).and.nflav.gt.0) then
        ! if nflav is present, then use a fixed flavour number
        call qcd_SetNf(nflav)
        call InitCoefHolder(grid, ch, order_max, exact_coefs)
@@ -187,13 +188,13 @@ contains
     endif
     
     ! if mass thresholds are used in the structure functions, only scale_choice 0 and 1 are allowed
-    if ((use_mass_thresholds).and.(scale_choice.gt.1)) then
-       call wae_error('StartStrFct', 'illegal value for scale_choice with mass thresholds turned on', intval = scale_choice)
+    if ((use_mass_thresholds).and.(scale_choice_save.gt.1)) then
+       call wae_error('StartStrFct', 'illegal value for scale_choice with mass thresholds turned on', intval = scale_choice_save)
     end if
 
     ! AK: Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
     tables(1:)%tab_iflv_max = 7
-
+ 
   end subroutine StartStrFct
 
   
@@ -220,7 +221,7 @@ contains
        ! First we treat the case where we want to separate out each order in
        ! the final structure functions.
        ! This is slower, but is needed e.g. for VBFH
-       if (scale_choice.le.1) then
+       if (scale_choice_save.le.1) then
           ! if scale_choice = 0,1 use fast implementation
           ! tables is saved as an array in Q, and only tables(0),
           ! tables(1), tables(2), tables(4), tables(8) are non zero
@@ -240,8 +241,8 @@ contains
        endif
     else
        ! Now set up the default case where we sum up everything right away.
-       if (scale_choice.gt.1) & ! only allow for scale_choice = 0,1
-            & call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice)
+       if (scale_choice_save.gt.1) & ! only allow for scale_choice = 0,1
+            & call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice_save)
        call set_structure_functions_upto(order)
     endif
 
@@ -280,7 +281,7 @@ contains
     enddo
 
     ! Re-set the structure functions using updated PDF
-    if (scale_choice.le.1) then
+    if (scale_choice_save.le.1) then
        if (order.ge.1) call set_LO_structure_functions()
        if (order.ge.2) call set_NLO_structure_functions()
        if (order.ge.3) call set_NNLO_structure_functions()
@@ -318,7 +319,7 @@ contains
     enddo
     
     ! Re-set the structure functions using updated PDF
-    if (scale_choice.le.1) then
+    if (scale_choice_save.le.1) then
        if (order.ge.1) call set_LO_structure_functions()
        if (order.ge.2) call set_NLO_structure_functions()
        if (order.ge.3) call set_NNLO_structure_functions()
@@ -352,21 +353,21 @@ contains
        ytest = iy * ymax / ny
        xval = exp(-ytest)
        if (use_sep_orders) then
-          res = F_LO(ytest, Qtest, mR, mF)
+          res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es22.12)',advance='no') xval, res(F1Wp),res(F1Wm)
           F1Z_LO = res(F1Z)
-          res = F_NLO(ytest, Qtest, mR, mF)
+          res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_NLO = res(F1Z)
-          res = F_NNLO(ytest, Qtest, mR, mF)
+          res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_NNLO = res(F1Z)
-          res = F_N3LO(ytest, Qtest, mR, mF)
+          res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_N3LO = res(F1Z)
           write(idev,'(4es22.12)',advance='no') F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO
        else
-          res = StrFct(ytest, Qtest, mR, mF)
+          res = StrFct(xval, Qtest, mR, mF)
           write(idev,'(4es22.12)',advance='no') xval, res(F1Wp),res(F1Wm), res(F1Z)
        endif
        write(idev,*)
@@ -396,21 +397,21 @@ contains
        ytest = iy * ymax / ny
        xval = exp(-ytest)
        if (use_sep_orders) then
-          res = F_LO(ytest, Qtest, mR, mF)
+          res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es22.12)',advance='no') xval, res(F2Wp),res(F2Wm)
           F2Z_LO = res(F2Z)
-          res = F_NLO(ytest, Qtest, mR, mF)
+          res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_NLO = res(F2Z)
-          res = F_NNLO(ytest, Qtest, mR, mF)
+          res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_NNLO = res(F2Z)
-          res = F_N3LO(ytest, Qtest, mR, mF)
+          res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_N3LO = res(F2Z)
           write(idev,'(4es22.12)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
        else
-          res = StrFct(ytest, Qtest, mR, mF)
+          res = StrFct(xval, Qtest, mR, mF)
           write(idev,'(4es22.12)',advance='no') xval, res(F2Wp),res(F2Wm), res(F2Z)
        endif
        write(idev,*)
@@ -440,21 +441,21 @@ contains
        ytest = iy * ymax / ny
        xval = exp(-ytest)
        if (use_sep_orders) then
-          res = F_LO(ytest, Qtest, mR, mF)
+          res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es22.12)',advance='no') xval, res(F3Wp),res(F3Wm)
           F3Z_LO = res(F3Z)
-          res = F_NLO(ytest, Qtest, mR, mF)
+          res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_NLO = res(F3Z)
-          res = F_NNLO(ytest, Qtest, mR, mF)
+          res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_NNLO = res(F3Z)
-          res = F_N3LO(ytest, Qtest, mR, mF)
+          res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_N3LO = res(F3Z)
           write(idev,'(4es22.12)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
        else
-          res = StrFct(ytest, Qtest, mR, mF)
+          res = StrFct(xval, Qtest, mR, mF)
           write(idev,'(4es22.12)',advance='no') xval, res(F3Wp),res(F3Wm), res(F3Z)
        endif
        write(idev,*)
@@ -502,7 +503,7 @@ contains
        
        ! now add NLO terms
        if (order.ge.2) then
-          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+          if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
              ! For central scale with scale_choice=1, we don't need to do all
              ! the convolutions of the splitting functions
              f2 = ch%C2NLO * f
@@ -524,7 +525,7 @@ contains
 
        ! now add NNLO terms
        if (order.ge.3) then
-          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+          if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
              ! For central scale with scale_choice=1, we don't need to do all
              ! the convolutions of the splitting functions
              f2 = ch%C2NNLO * f
@@ -548,7 +549,7 @@ contains
 
        ! and finally, add the N3LO terms
        if (order.ge.4) then
-          if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+          if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
              ! For central scale with scale_choice=1 (i.e. mur=muf=Q), we don't
              ! need to do all the convolutions of the splitting functions
              f2 = ch%C2N3LO * f
@@ -650,7 +651,7 @@ contains
           call use_vfns(f, Q)
        endif
 
-       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1, we don't need to do all
        ! the convolutions of the splitting functions
           f2 = ch%C2NLO * f
@@ -746,7 +747,7 @@ contains
           call use_vfns(f, Q)
        endif
        
-       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1, we don't need to do all
        ! the convolutions of the splitting functions
           f2 = ch%C2NNLO * f
@@ -885,7 +886,7 @@ contains
           call use_vfns(f, Q)
        endif
        
-       if ((scale_choice.eq.1).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
        ! For central scale with scale_choice=1 (i.e. mur=muf=Q), we don't
        ! need to do all the convolutions of the splitting functions
           f2 = ch%C2N3LO * f
@@ -1140,24 +1141,48 @@ contains
     ! for our W calculations; switch back later
     nf_save = nf_lcl
     nf_lcl = (nf_lcl/2) * 2
-    
-    !--- deal with Wp case -----------------------------------------
-    res(:,F2Wp) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
-    ! temporarily put FL into F1;
-    res(:,F1Wp) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
-    ! then convert to F1
-    res(:,F1Wp) = (res(:,F2Wp) - res(:,F1Wp)) / two_xvals
-    res(:,F3Wp) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
-    res(:,F3Wp) = res(:,F3Wp)/xValues(grid)
 
-    !--- deal with Wm case -----------------------------------------
-    res(:,F2Wm) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
+    ! AK It looks like we have swapped the meaning of Wp and
+    !Wm. Looking at eq. 18.19 in the PDF and eq. 8 in 1206.7007 W-
+    !should couple to u + dbar
+
+    ! --- deal with Wm case
+    !-----------------------------------------
+    res(:,F2Wm) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
     ! temporarily put FL into F1;
-    res(:,F1Wm) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
+    res(:,F1Wm) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
     ! then convert to F1
     res(:,F1Wm) = (res(:,F2Wm) - res(:,F1Wm)) / two_xvals
-    res(:,F3Wm) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
+    res(:,F3Wm) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
     res(:,F3Wm) = res(:,F3Wm)/xValues(grid)
+
+    !--- deal with Wp case -----------------------------------------
+    res(:,F2Wp) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
+    ! temporarily put FL into F1;
+    res(:,F1Wp) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
+    ! then convert to F1
+    res(:,F1Wp) = (res(:,F2Wp) - res(:,F1Wp)) / two_xvals
+    res(:,F3Wp) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
+    res(:,F3Wp) = res(:,F3Wp)/xValues(grid)
+
+!    ! --- deal with Wp case
+!    !-----------------------------------------
+!    res(:,F2Wp) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
+!    ! temporarily put FL into F1;
+!    res(:,F1Wp) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
+!    ! then convert to F1
+!    res(:,F1Wp) = (res(:,F2Wp) - res(:,F1Wp)) / two_xvals
+!    res(:,F3Wp) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
+!    res(:,F3Wp) = res(:,F3Wp)/xValues(grid)
+!
+!    !--- deal with Wm case -----------------------------------------
+!    res(:,F2Wm) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
+!    ! temporarily put FL into F1;
+!    res(:,F1Wm) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
+!    ! then convert to F1
+!    res(:,F1Wm) = (res(:,F2Wm) - res(:,F1Wm)) / two_xvals
+!    res(:,F3Wm) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
+!    res(:,F3Wm) = res(:,F3Wm)/xValues(grid)
 
     ! reset nf_lcl to the full (possibly odd) saved value
     nf_lcl = nf_save
@@ -1169,7 +1194,8 @@ contains
     ! fix then a factor of 2 will be missing...
 
     ! overall factor of two that we still haven't fully looked into as
-    ! of 2015-02-24 [GPS TMP] res = res * two
+    ! of 2015-02-24 [GPS TMP] 
+    ! res = res * two
     !! GPS+AK TMP: we have just included a factor of 2 but this plainly
     !! should not be present for the electromagnetic part; so here
     !! we eliminate it again...
@@ -1221,20 +1247,20 @@ contains
   ! F
   ! calculate the structure function at x, muF
   ! this is the sum over all orders
-  function StrFct (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q
+  function StrFct (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q
     real(dp), intent(in), optional  :: muR, muF
     real(dp) :: res(-6:7)
     
     if (use_sep_orders) then
        ! if we kept each order separate, then add up all the fixed order terms one by one
-       if (order_setup.ge.1) res = F_LO(y, Q, muR, muF)
-       if (order_setup.ge.2) res = res + F_NLO(y, Q, muR, muF)
-       if (order_setup.ge.3) res = res + F_NNLO(y, Q, muR, muF)
-       if (order_setup.ge.4) res = res + F_N3LO(y, Q, muR, muF)
+       if (order_setup.ge.1) res = F_LO(x, Q, muR, muF)
+       if (order_setup.ge.2) res = res + F_NLO(x, Q, muR, muF)
+       if (order_setup.ge.3) res = res + F_NNLO(x, Q, muR, muF)
+       if (order_setup.ge.4) res = res + F_N3LO(x, Q, muR, muF)
     else
        ! if we haven't kept each order separate, then everything is in tables(1)
-       call EvalPdfTable_yQ(tables(1), y, Q, res)
+       call EvalPdfTable_xQ(tables(1), x, Q, res)
     endif
     
   end function StrFct
@@ -1244,8 +1270,8 @@ contains
   ! F_LO
   ! calculate the leading order structure function at x, muF
   !
-  function F_LO (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+  function F_LO (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7)
     real(dp) :: Q_or_muF
 
@@ -1256,9 +1282,9 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.2) Q_or_muF = muF
 
-    call EvalPdfTable_yQ(tables(1), y, Q_or_muF, res)
+    call EvalPdfTable_xQ(tables(1), x, Q_or_muF, res)
     
   end function F_LO
 
@@ -1269,8 +1295,8 @@ contains
   ! LRQ2 == ln muR^2/Q^2
   ! LFQ2 == ln muF^2/Q^2
   !
-  function F_NLO (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+  function F_NLO (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7)
     real(dp) :: Q_or_muF
@@ -1284,17 +1310,17 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.2) Q_or_muF = muF
     
     ! C_NLO x f (x) in C1f(:) 
-    call EvalPdfTable_yQ(tables(2), y, Q_or_muF, C1f)
+    call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
     res = C1f
     
     ! if scale_choice = 0,1 then this term is already taken care of
-    if (scale_choice.ge.2) then
+    if (scale_choice_save.ge.2) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
-       call EvalPdfTable_yQ(tables(3), y, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
        res = res - C0P0f * LFQ2
     endif
     
@@ -1309,8 +1335,8 @@ contains
   !
   ! LRQ2 == ln muR^2/Q^2
   ! LFQ2 == ln muF^2/Q^2
-  function F_NNLO (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+  function F_NNLO (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7), C2f(-6:7), C0P0sqf(-6:7)
     real(dp) :: C0P1f(-6:7), C1P0f(-6:7)
@@ -1325,26 +1351,26 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.2) Q_or_muF = muF
     
     ! C_NNLO x f (x) in C2f(:,3) 
-    call EvalPdfTable_yQ(tables(4), y, Q_or_muF, C2f)
+    call EvalPdfTable_xQ(tables(4), x, Q_or_muF, C2f)
     res = C2f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
-    if (scale_choice.ge.2) then
+    if (scale_choice_save.ge.2) then
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
-       call EvalPdfTable_yQ(tables(2), y, Q_or_muF, C1f)
+       call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
        ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_yQ(tables(3), y, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
        ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_yQ(tables(5), y, Q_or_muF, C0P0sqf)
+       call EvalPdfTable_xQ(tables(5), x, Q_or_muF, C0P0sqf)
        ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_yQ(tables(6), y, Q_or_muF, C0P1f)
+       call EvalPdfTable_xQ(tables(6), x, Q_or_muF, C0P1f)
        ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_yQ(tables(7), y, Q_or_muF, C1P0f)
+       call EvalPdfTable_xQ(tables(7), x, Q_or_muF, C1P0f)
        ! add up all the different pieces
        res = res - C1P0f * LFQ2 + C0P0sqf * half * LFQ2**2 &
             & - twopi * beta0 * C0P0f * (LRQ2*LFQ2 - half*LFQ2**2) &
@@ -1362,8 +1388,8 @@ contains
   !
   ! LRQ2 == ln muR^2/Q^2
   ! LFQ2 == ln muF^2/Q^2
-  function F_N3LO (y, Q, muR, muF) result(res)
-    real(dp), intent(in)  :: y, Q, muR, muF
+  function F_N3LO (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7), C3f(-6:7), C0P0sqf(-6:7), C2f(-6:7)
     real(dp) :: C0P1f(-6:7), C1P0f(-6:7), C0P0cbf(-6:7), C0P01f(-6:7), C0P10f(-6:7)
@@ -1379,43 +1405,43 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.2) Q_or_muF = muF
     
     ! C_N3LO x f (x) in C2f(:,8) 
-    call EvalPdfTable_yQ(tables(8), y, Q_or_muF, C3f)
+    call EvalPdfTable_xQ(tables(8), x, Q_or_muF, C3f)
     res = C3f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
-    if (scale_choice.ge.2) then
+    if (scale_choice_save.ge.2) then
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
-       call EvalPdfTable_yQ(tables(2), y, Q_or_muF, C1f)
+       call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
        ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_yQ(tables(3), y, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
        ! C_NNLO x f (x) in C2f(:,3) 
-       call EvalPdfTable_yQ(tables(4), y, Q_or_muF, C2f)
+       call EvalPdfTable_xQ(tables(4), x, Q_or_muF, C2f)
        ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_yQ(tables(5), y, Q_or_muF, C0P0sqf)
+       call EvalPdfTable_xQ(tables(5), x, Q_or_muF, C0P0sqf)
        ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_yQ(tables(6), y, Q_or_muF, C0P1f)
+       call EvalPdfTable_xQ(tables(6), x, Q_or_muF, C0P1f)
        ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_yQ(tables(7), y, Q_or_muF, C1P0f)
+       call EvalPdfTable_xQ(tables(7), x, Q_or_muF, C1P0f)
        
        ! C_LO x P_LO^3 x f (x) in C0P0cbf
-       call EvalPdfTable_yQ(tables(9), y, Q_or_muF, C0P0cbf)
+       call EvalPdfTable_xQ(tables(9), x, Q_or_muF, C0P0cbf)
        ! C_LO x P_LO x P_NLO x f (x) in C0P01f
-       call EvalPdfTable_yQ(tables(10), y, Q_or_muF, C0P01f)
+       call EvalPdfTable_xQ(tables(10), x, Q_or_muF, C0P01f)
        ! C_LO x P_LO x P_NLO x f (x) in C0P10f
-       call EvalPdfTable_yQ(tables(11), y, Q_or_muF, C0P10f)
+       call EvalPdfTable_xQ(tables(11), x, Q_or_muF, C0P10f)
        ! C_NLO x P_LO^2 x f (x) in C1P0sqf
-       call EvalPdfTable_yQ(tables(12), y, Q_or_muF, C1P0sqf)
+       call EvalPdfTable_xQ(tables(12), x, Q_or_muF, C1P0sqf)
        ! C_NLO x P_NLO x f (x) in C1P1f
-       call EvalPdfTable_yQ(tables(13), y, Q_or_muF, C1P1f)
+       call EvalPdfTable_xQ(tables(13), x, Q_or_muF, C1P1f)
        ! C_NNLO x P_LO x f (x) in C2P0f
-       call EvalPdfTable_yQ(tables(14), y, Q_or_muF, C2P0f)
+       call EvalPdfTable_xQ(tables(14), x, Q_or_muF, C2P0f)
        ! C_LO x P_NNLO x f (x) in C0P2f
-       call EvalPdfTable_yQ(tables(15), y, Q_or_muF, C0P2f)
+       call EvalPdfTable_xQ(tables(15), x, Q_or_muF, C0P2f)
     
        ! add up all the different pieces
        ! The commented lines are copy/pasted from mathematica
@@ -1460,14 +1486,14 @@ contains
   real(dp) function muR(Q)
     real(dp), intent(in) :: Q
     muR = zero
-    if (scale_choice.eq.0) then
+    if (scale_choice_save.eq.scale_choice_fixed) then
        ! scale_choice = 0 : muF = xmuF * cst_mu
        muR = xmuR * cst_mu
-    elseif (scale_choice.eq.1) then
+    elseif (scale_choice_save.eq.scale_choice_Q) then
        ! scale_choice = 1 : mu_R = xmuR * Q
        muR = xmuR * Q
     else
-       call wae_error('muR(Q)', 'illegal value for scale_choice', intval = scale_choice)
+       call wae_error('muR(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
     endif
   end function muR
 
@@ -1476,14 +1502,14 @@ contains
   real(dp) function muF(Q)
     real(dp), intent(in) :: Q
     muF = zero
-    if (scale_choice.eq.0) then
+    if (scale_choice_save.eq.scale_choice_fixed) then
        ! scale_choice = 0 : muF = xmuF * cst_mu
        muF = xmuF * cst_mu
-    elseif (scale_choice.eq.1) then
+    elseif (scale_choice_save.eq.scale_choice_Q) then
        ! scale_choice = 1 : muF = xmuF * Q
        muF = xmuF * Q
     else
-       call wae_error('muF(Q)', 'illegal value for scale_choice', intval = scale_choice)
+       call wae_error('muF(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
     endif
   end function muF
   
@@ -1522,3 +1548,113 @@ contains
   end subroutine use_vfns
 
 end module structure_functions
+
+
+!----------------------------------------------------------------------
+! Setup of constants and parameters needed for structure functions
+! using a minimal number of input. 
+subroutine hoppetStartStrFct(rts, order_max)
+  use streamlined_interface; use structure_functions
+  implicit none
+  real(dp), intent(in) :: rts
+  integer, intent(in)  :: order_max
+  !----------------------------------------------------------------------
+  
+  call StartStrFct(rts, order_max)
+  
+end subroutine hoppetStartStrFct
+
+!----------------------------------------------------------------------
+! Setup of constants and parameters needed for structure functions
+subroutine hoppetStartStrFctExtended(rts, order_max, nflav, xR, xF,&
+     & scale_choice , constant_mu, param_coefs, Qmin_PDF, wmass,&
+     & zmass)
+  use streamlined_interface; use structure_functions
+  implicit none
+  real(dp), intent(in) :: rts, xR, xF, constant_mu, Qmin_PDF, wmass, zmass
+  integer, intent(in)  :: order_max, nflav, scale_choice
+  logical , intent(in) :: param_coefs
+  !----------------------------------------------------------------------
+
+call StartStrFct(rts, order_max, nflav, xR, xF, scale_choice&
+     &, constant_mu, param_coefs, Qmin_PDF, wmass, zmass)
+  
+end subroutine hoppetStartStrFctExtended
+
+!----------------------------------------------------------------------
+! Initialize the structure functions up to specified order
+! this requires the PDF to have been set up beforehand, and filled in tables(0)
+subroutine hoppetInitStrFct(order, separate_orders)
+  use streamlined_interface; use structure_functions
+  implicit none
+  integer, intent(in) :: order
+  logical, intent(in) :: separate_orders
+  
+  call InitStrFct(order, separate_orders)
+
+end subroutine hoppetInitStrFct
+
+!----------------------------------------------------------------------
+! F
+! calculate the structure function at x, muF
+! this is the sum over all orders
+subroutine hoppetStrFct(x, Q, muR_in, muF_in, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  real(dp) :: res(-6:7)
+
+  res = StrFct(x, Q, muR_in, muF_in)
+end subroutine hoppetStrFct
+
+!----------------------------------------------------------------------
+! F_LO
+! calculate the leading order structure function at x, muF
+!
+subroutine hoppetStrFctLO(x, Q, muR_in, muF_in, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  real(dp) :: res(-6:7)
+
+  res = F_LO(x, Q, muR_in, muF_in)
+end subroutine hoppetStrFctLO
+
+  !----------------------------------------------------------------------
+  ! F_NLO
+  ! calculate the next-to-leading order structure function at x, muF
+  !
+subroutine hoppetStrFctNLO(x, Q, muR_in, muF_in, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  real(dp) :: res(-6:7)
+
+  res = F_NLO(x, Q, muR_in, muF_in)
+end subroutine hoppetStrFctNLO
+
+  !----------------------------------------------------------------------
+  ! F_NNLO
+  ! calculate the next-to-next-to-leading order structure function at x, muF
+  !
+subroutine hoppetStrFctNNLO(x, Q, muR_in, muF_in, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  real(dp) :: res(-6:7)
+
+  res = F_NNLO(x, Q, muR_in, muF_in)
+end subroutine hoppetStrFctNNLO
+
+  !----------------------------------------------------------------------
+  ! F_N3LO
+  ! calculate the next-to-next-tonext-to-leading order structure function at x, muF
+  !
+subroutine hoppetStrFctN3LO(x, Q, muR_in, muF_in, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  real(dp) :: res(-6:7)
+
+  res = F_N3LO(x, Q, muR_in, muF_in)
+end subroutine hoppetStrFctN3LO

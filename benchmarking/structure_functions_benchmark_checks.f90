@@ -8,10 +8,11 @@ program structure_functions_benchmark_checks
   use dummy_pdfs
   use streamlined_interface
   use structure_functions
+  use sub_defs_io !< for command-line access
   implicit none
   real(dp) :: Qmax, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0alphas, muR_Q, Q0pdf
-  real(dp) :: xpdf_at_xQ(-6:6)
-  integer  :: order_max, sc_choice,nloop,ix,nf_lcl
+  real(dp) :: xpdf_at_xQ(-6:6), dy, dlnlnQ, minQval, maxQval
+  integer  :: order_max, sc_choice,nloop,ix,nf_lcl,order
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   ! Couplings needed for the F3 structure functions
@@ -19,6 +20,8 @@ program structure_functions_benchmark_checks
   real(dp), parameter :: Ae = - 0.5_dp, Ve = - 0.5_dp + 2.0_dp * sin_thw_sq, Ae2 = Ae**2, &
        &  Ve2 = Ve**2, Ve2_Ae2 = Ve2 + Ae2, two_Ve_Ae = 2.0_dp * Ve * Ae, &
        &  sin_2thw_sq = 4.0_dp * (1.0_dp - sin_thw_sq) * sin_thw_sq
+  logical :: param_coefs = .true.
+  character(len=1024) :: outdir
 
   Qmax = 13000.0_dp 
   order_max = 4
@@ -33,9 +36,28 @@ program structure_functions_benchmark_checks
   mt = 175.0_dp
   call hoppetSetPoleMassVFN(mc, mb, mt)
 
+  ! Streamlined initialization
+  ! including  parameters for x-grid
+  order = -6 
+  ymax  = 16.0_dp
+  dy    = dble_val_opt("-dy",0.05_dp)
+  param_coefs = .not. log_val_opt("-exact-coefs")
+  outdir = string_val_opt("-outdir","structure-functions-benchmarks")
+  dlnlnQ = dy/4.0_dp
+  nloop = 3 
+  minQval = min(xmuF*Qmin, Qmin)
+  maxQval = max(xmuF*Qmax, Qmax)
+  
+  ! initialise the grid and dglap holder
+  write(6,'(a)') "Initialising splitting functions"
+  call hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop,&
+       &         order,factscheme_MSbar)
+
   ! Setup all constants and parameters needed by the structure functions
-  call StartStrFct(Qmax, order_max, xR = xmur, xF = xmuf, sc_choice = sc_choice, &
-       param_coefs = .true., Qmin_PDF = Qmin, wmass = mw, zmass = mz)
+  write(6,'(a)') "Initialising coefficient functions for structure functions"
+  if (.not. param_coefs) write(6,('(a)')) "NB: this is being done with exact coefficient functions and will take about a minute "
+  call StartStrFct(Qmax, order_max, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
+       param_coefs = param_coefs, Qmin_PDF = Qmin, wmass = mw, zmass = mz)
 
   ! Evolve the PDF
   nloop = 3 ! NNLO evolution
@@ -45,7 +67,7 @@ program structure_functions_benchmark_checks
   Q0pdf = sqrt(2.0_dp) ! The initial evolution scale
   call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, lha_unpolarized_dummy_pdf, Q0pdf)
 
-  write(6,*) "Quick test that PDFs have been read in correctly"
+  write(6,'(a)') "Quick output of alphas and PDFs, e.g. to enable consistency checks with other codes"
   Q = 100.0_dp
   print*, 'Q = ', Q, ' GeV'
   print*, 'αS(Q) = ', Value(coupling, Q)
@@ -66,9 +88,11 @@ program structure_functions_benchmark_checks
   print*, ''
   
   ! Initialise the structure functions using separate order
+  write(6,'(a)') "Initialising tabulated structure functions"
   call InitStrFct(order_max, .true.)
 
-  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-2.0-GeV.dat')
+  write(6,'(a)') "Writing structure function benchmarks to ** " // trim(outdir) // "/ ** directory"
+  open(unit = 99, file = trim(outdir) // '/structure-functions-Q-2.0-GeV.dat')
   Q = 2.0_dp
   write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
   call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
@@ -76,7 +100,7 @@ program structure_functions_benchmark_checks
   call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-5.0-GeV.dat')
+  open(unit = 99, file = trim(outdir) // '/structure-functions-Q-5.0-GeV.dat')
   Q = 5.0_dp
   write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
   call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
@@ -84,7 +108,7 @@ program structure_functions_benchmark_checks
   call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-10.0-GeV.dat')
+  open(unit = 99, file = trim(outdir) // '/structure-functions-Q-10.0-GeV.dat')
   Q = 10.0_dp
   write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
   call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
@@ -92,7 +116,7 @@ program structure_functions_benchmark_checks
   call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-50.0-GeV.dat')
+  open(unit = 99, file = trim(outdir) // '/structure-functions-Q-50.0-GeV.dat')
   Q = 50.0_dp
   write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
   call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
@@ -100,7 +124,7 @@ program structure_functions_benchmark_checks
   call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-100.0-GeV.dat')
+  open(unit = 99, file = trim(outdir) // '/structure-functions-Q-100.0-GeV.dat')
   Q = 100.0_dp
   write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
   call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
@@ -108,7 +132,7 @@ program structure_functions_benchmark_checks
   call write_f3_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
   close(99)
   
-  open(unit = 99, file = 'structure-functions-benchmarks/structure-functions-Q-500.0-GeV.dat')
+  open(unit = 99, file = trim(outdir) // '/structure-functions-Q-500.0-GeV.dat')
   Q = 500.0_dp
   write(6,'(a,f5.1,a)') "Printing structure functions at Q = ",Q," GeV"
   call write_f1_benchmark(99, Q, -3.0_dp, 10.0_dp, 200)
@@ -136,19 +160,19 @@ contains
        ytest = logxomx_max + iy * (logxomx_min - logxomx_max) / nx
        xval = exp(-ytest)/(one+exp(-ytest))
        ytest = - log(xval)
-       res = F_LO(ytest, Qtest, mR, mF)
+       res = F_LO(xval, Qtest, mR, mF)
        write(idev,'(3es22.12)',advance='no') xval, res(F1Wp),res(F1Wm)
        F1Z_LO = res(F1Z)
        F1g_LO = res(F1EM)
-       res = F_NLO(ytest, Qtest, mR, mF)
+       res = F_NLO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
        F1Z_NLO = res(F1Z)
        F1g_NLO = res(F1EM)
-       res = F_NNLO(ytest, Qtest, mR, mF)
+       res = F_NNLO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
        F1Z_NNLO = res(F1Z)
        F1g_NNLO = res(F1EM)
-       res = F_N3LO(ytest, Qtest, mR, mF)
+       res = F_N3LO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
        F1Z_N3LO = res(F1Z)
        F1g_N3LO = res(F1EM)
@@ -179,19 +203,19 @@ contains
        ytest = logxomx_max + iy * (logxomx_min - logxomx_max) / nx
        xval = exp(-ytest)/(one+exp(-ytest))
        ytest = - log(xval)
-       res = F_LO(ytest, Qtest, mR, mF)
+       res = F_LO(xval, Qtest, mR, mF)
        write(idev,'(3es22.12)',advance='no') xval, res(F2Wp),res(F2Wm)
        F2Z_LO = res(F2Z)
        F2g_LO = res(F2EM)
-       res = F_NLO(ytest, Qtest, mR, mF)
+       res = F_NLO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
        F2Z_NLO = res(F2Z)
        F2g_NLO = res(F2EM)
-       res = F_NNLO(ytest, Qtest, mR, mF)
+       res = F_NNLO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
        F2Z_NNLO = res(F2Z)
        F2g_NNLO = res(F2EM)
-       res = F_N3LO(ytest, Qtest, mR, mF)
+       res = F_N3LO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
        F2Z_N3LO = res(F2Z)
        F2g_N3LO = res(F2EM)
@@ -223,19 +247,19 @@ contains
        ytest = logxomx_max + iy * (logxomx_min - logxomx_max) / nx
        xval = exp(-ytest)/(one+exp(-ytest))
        ytest = - log(xval)
-       res = F_LO(ytest, Qtest, mR, mF)
+       res = F_LO(xval, Qtest, mR, mF)
        write(idev,'(3es22.12)',advance='no') xval, res(F3Wp),res(F3Wm)
        F3Z_LO = res(F3Z)
        F3gZ_LO = res(F3gZ)
-       res = F_NLO(ytest, Qtest, mR, mF)
+       res = F_NLO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
        F3Z_NLO = res(F3Z)
        F3gZ_NLO = res(F3gZ)
-       res = F_NNLO(ytest, Qtest, mR, mF)
+       res = F_NNLO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
        F3Z_NNLO = res(F3Z)
        F3gZ_NNLO = res(F3gZ)
-       res = F_N3LO(ytest, Qtest, mR, mF)
+       res = F_N3LO(xval, Qtest, mR, mF)
        write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
        F3Z_N3LO = res(F3Z)
        F3gZ_N3LO = res(F3gZ)

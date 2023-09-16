@@ -467,4 +467,3 @@ subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
 
 end subroutine hoppetEvalSplit
 
-
