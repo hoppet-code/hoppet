@@ -90,6 +90,12 @@ module pdf_tabulate
           & pdftab_AllocTab_1d, pdftab_AllocTab_fromorig_1d
   end interface
 
+  interface AllocPdfTableWithLeptons
+     module procedure pdftab_AllocTabWithLeptons_, pdftab_AllocTabWithLeptons_1d
+  end interface
+  public :: AllocPdfTableWithLeptons
+
+
   interface AddNfInfoToPdfTable
      module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
   end interface
@@ -166,6 +172,7 @@ contains
     !write(0,*) 'pdf_table info: Number of Q bins is ',tab%nQ
     if (present(iflv_max_table)) then
        call AllocGridQuant(grid, tab%tab, iflv_min, iflv_max_table, 0, tab%nQ)
+       if (iflv_max_table /= ncompmax) tab%tab_iflv_max = iflv_max_table
     else
        call AllocPDF(grid,tab%tab,0,tab%nQ)
     end if
@@ -198,6 +205,29 @@ contains
        call pdftab_AllocTab_(grid, tab(i), Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table)
     end do
   end subroutine pdftab_AllocTab_1d
+
+
+  subroutine pdftab_AllocTabWithLeptons_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+   use qed_objects
+   type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab
+    real(dp), intent(in)           :: Qmin, Qmax
+    real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
+    call AllocPdfTable(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table=ncompmaxLeptons)
+  end subroutine pdftab_AllocTabWithLeptons_
+  
+  subroutine pdftab_AllocTabWithLeptons_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+    use qed_objects
+    type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab(:)
+    real(dp), intent(in)           :: Qmin, Qmax
+    real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
+    call AllocPdfTable(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table=ncompmaxLeptons)
+  end subroutine pdftab_AllocTabWithLeptons_1d
 
 
   !---------------------------------------------------------------

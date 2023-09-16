@@ -10,18 +10,21 @@ module qed_coupling_module
   implicit none
   private
 
+  ! use 0.109 to get alpha(mZ) = 1/127.95
+  !real(dp), parameter :: m_light_quarks = 0.109_dp ! DECIDE ON THIS
   real(dp), parameter :: m_light_quarks = 1.000_dp ! DECIDE ON THIS
 
-  ! lepton masses from from 2014 PDG
-  real(dp), parameter, public :: m_electron = 0.510998928e-3_dp ! +-(11) on last digits
-  real(dp), parameter, public :: m_muon     = 105.6583715e-3_dp ! +-(35) on last digits
-  real(dp), parameter, public :: m_tau      = 1776.82e-3_dp ! +-(16) on last digits
+  ! lepton masses from from 2022 PDG (plus 2023 update)
+  real(dp), parameter, public :: m_electron = 0.51099895000e-3_dp ! +-(15) MeV
+  real(dp), parameter, public :: m_muon     = 105.6583755e-3_dp   ! +-(23)
+  real(dp), parameter, public :: m_tau      = 1776.86e-3_dp ! +-0.12
 
   real(dp), parameter, public :: e_dn2 = (one/three)**2
   real(dp), parameter, public :: e_up2 = (two/three)**2
 
-  ! from the PDG rpp2014-rev-phys-constants
-  real(dp), parameter :: alpha_qed_scale_0 = one/137.035999074_dp ! +-(44) is uncertainty
+  ! 2022 PDG: summary table + EW review
+  ! 1/alpha(0) = 137.035999180(10), 1/alpha(mZ) = 127.951±0.009
+  real(dp), parameter :: alpha_qed_scale_0 = one/137.035999180_dp ! +-(10) is uncertainty
   public :: alpha_qed_scale_0
   
   integer, parameter :: n_thresholds = 7

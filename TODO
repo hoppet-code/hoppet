@@ -1,4 +1,9 @@
 
+Generic TODO
+============
+- [ ] change mZ from 91.2 to 91.1876±0.0021? (Any impact on results checks?)
+- [ ] similarly, check EM coupling at 0 and mZ
+
 QED merging notes (2023-09)
 ===========================
 
@@ -6,9 +11,13 @@ QED merging notes (2023-09)
 - [x] see if any changes were made in lepton structure function work
       NB: addition of with_Plp_nnloqed in qed_evolution, included 
       but is the interface right?
+
 - [ ] create benchmark / "make check" files?
       (start from tests/test_qed_lepton_evol.f90? See gen_qed_grid.f90 in photon project)
-- [ ] create some kind of streamlined interface?      
+
+- [ ] Interface improvements
+  * [ ] create some kind of streamlined interface?      
+  * [ ] introduce AllocPdfTableWithLeptons?
 - [ ] document 
   * [ ] InitQEDSplitMat (and its structure)
   * [ ] AllocPDFWithLeptons

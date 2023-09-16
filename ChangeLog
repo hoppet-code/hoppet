@@ -1,3 +1,23 @@
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* example_f90/tabulation_example_qed.f90:  *** ADDED ***
+	* example_f90/tabulation_example_qed.default_output:  *** ADDED ***
+	added this example to show how to use basic QED + QCD evolution
+	to obtain a tabulated QED PDF and included default output
+
+	* src/qed_coupling.f90:
+	updated alpha(0) and lepton masses to 2022 PDG value_at_scale_0
+
+	* src/hoppet_v1.f90:
+	included the QED modules
+
+	* src/pdf_tabulate.f90:
+	fixed an issue where tab%tab_iflv_max was not being sets
+	correctly, causing returned PDF to be unset beyond iflv=6
+
+	* scripts/check:
+	added a loop over tests to run and make sure failure causes exit 1
+
 2023-09-13  Giulia Zanderighi  <zanderi@mpp.mpg.de>
 
 	* src/qed_evolution.f90:
