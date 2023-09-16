@@ -1,5 +1,10 @@
 2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
 
+	* .github/workflows/CI.yml:
+	added gfortran-13 to matrix of compilers to test
+	
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
 	* src/CMakeLists.txt:
 	reworked this to enable conditional compilation of exact
 	coefficient functions, and to allow for installation
