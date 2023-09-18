@@ -15,6 +15,7 @@
 #define hoppetSetVFN                   hoppetsetvfn_       
 #define hoppetSetPoleMassVFN           hoppetsetpolemassvfn_       
 #define hoppetSetMSbarMassVFN          hoppetsetmsbarmassvfn_       
+#define hoppetSetExactDGLAP            hoppetsetexactdglap_
 #define hoppetEval                     hoppeteval_          
 #define hoppetEvalSplit                hoppetevalsplit_
 /// The fortran subroutines pertaining to the below structure function 
@@ -90,6 +91,11 @@ extern "C" {
   /// quark (MSbar) masses. Thresholds are crossed at the MSbar
   /// masses, both for the coupling and the PDF evolution.
   void  hoppetSetMSbarMassVFN(const double &mc, const double & mb, const double & mt);
+
+  
+  /// Arrange for the use of exact NNLO splitting and mass-threshold
+  /// functions.
+  void hoppetSetExactDGLAP(const int & exact_nf, const int & exact_splitting);
 
   /// Given a pdf_subroutine with the interface shown below, initialise
   /// our internal pdf table.
