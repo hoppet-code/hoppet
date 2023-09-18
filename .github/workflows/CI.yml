@@ -12,8 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        gcc_v: [10] # Version of GFortran we want to use.
+        #gcc_v: [10] # Version of GFortran we want to use.
         #gcc_v: [7,8,9,10] # Version of GFortran we want to use.
+        gcc_v: [10,13] # Version of GFortran we want to use.
         #python-version: [3.9]
     env:
       FC: gfortran-${{matrix.gcc_v}}
@@ -46,6 +47,7 @@ jobs:
         #FC=gfortran-${{matrix.gcc_v}}
         #GCOV=gcov-${{matrix.gcc_v}}
         # build and run unit tests
+        gfortran-${{matrix.gcc_v}} --version
         ./configure FC=gfortran-${{matrix.gcc_v}}
         make -j4 check
         # then make sure we can build also with the exact coefficient functions

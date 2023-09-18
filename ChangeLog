@@ -1,3 +1,15 @@
+2023-09-18  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90 (hoppetSetExactDGLAP)
+	* src/hoppet_v1.h:
+	added a function to the streamlined_interface that allows the user
+	to swap to the exact DGLAP objects
+
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* .github/workflows/CI.yml:
+	added gfortran-13 to matrix of compilers to test
+	
 2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
 
 	* src/CMakeLists.txt:
