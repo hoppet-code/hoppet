@@ -95,7 +95,7 @@ extern "C" {
   
   /// Arrange for the use of exact NNLO splitting and mass-threshold
   /// functions.
-  void hoppetSetExactDGLAP(const int & exact_nf, const int & exact_splitting);
+  void hoppetSetExactDGLAP(const int & exact_nfthreshold, const int & exact_splitting);
 
   /// Given a pdf_subroutine with the interface shown below, initialise
   /// our internal pdf table.

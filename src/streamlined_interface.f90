@@ -414,12 +414,12 @@ end subroutine hoppetSetMSbarMassVFN
 !======================================================================
 !! Arrange for the use of exact NNLO splitting and mass-threshold
 !! functions.
-subroutine hoppetSetExactDGLAP(exact_nf, exact_splitting)
+subroutine hoppetSetExactDGLAP(exact_nfthreshold, exact_splitting)
   use streamlined_interface ! this module which provides access to the array of tables
   implicit none
-  logical :: exact_nf, exact_splitting
+  logical :: exact_nfthreshold, exact_splitting
 
-  if(exact_nf) call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
+  if(exact_nfthreshold) call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
   if(exact_splitting) call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
 
 end subroutine hoppetSetExactDGLAP
