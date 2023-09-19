@@ -2599,6 +2599,13 @@ evolution (some information is lost when caching), and the user
 may wish to check on a case-by-case basis that such differences
 don't matter in practice.
 
+If one wishes to use the exact rather than the default parametrised
+expressions for the NNLO splitting functions and mass thresholds, this
+can be done through a call to
+\begin{lstlisting}
+  call hoppetSetExactDGLAP(exact_nfthreshold, exact_splitting)
+\end{lstlisting}
+
 The tabulation can also be filled with the contents of an external PDF
 package, by calling
 \begin{lstlisting}
