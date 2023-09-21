@@ -7,6 +7,10 @@
 	* src/qed_objects.f90:
 	added Delete for the QED splitting matrices
 
+	* src/qed_evolution.f90:
+	fixed memory leak in QEDQCDEvolvePDF where internal
+	coupling_qcd_zero was not being deleted at the end of the function.
+
 2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
 
 	* example_f90/tabulation_example_qed.f90:  *** ADDED ***

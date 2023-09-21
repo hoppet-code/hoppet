@@ -945,6 +945,7 @@ contains
     type(mass_threshold_mat), intent(inout) :: MTM
     call Delete(MTM%PSHq)
     call Delete(MTM%PSHg)
+    call Delete(MTM%PShg_MSbar)
     call Delete(MTM%NSqq_H)
     call Delete(MTM%Sgg_H)
     call Delete(MTM%Sgq_H)
