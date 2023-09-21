@@ -2635,6 +2635,121 @@ are to be
 found in \ttt{src/streamlined\_interface.f90} and may provide inspiration
 for the user wishing to write their own F95 code for \hoppet.
 
+% ======================================================================
+\section{Evolution including QED contributions}
+\label{sec:qed-evolution}
+
+The joint QED+QCD evolution implemented in \hoppet is as described in
+Refs.~\cite{Photon+Lepton-PDFs}. \comment{Fix Ref!!!}
+%
+In deciding which contributions should be included, those references
+take a consistent set of set within a ``phenomenological'' counting.
+%
+In that counting, one considers $\alpha\sim \as^2$, and takes the
+photon (lepton) PDF to be of order $\alpha L$ ($\alpha^2 L^2$), where
+$L$ is the logarithm of a ratio of two factorisation scales and is
+considered to be of order $L \sim 1/\as$.
+%
+From that point of view, NNLO (3-loop) QCD evolution brings control of
+terms up to $\as^{n+2} L^n \sim \as^2$.
+%
+To achieve a corresponding accuracy when including QED contributions,
+\hoppet can account for
+\begin{itemize}
+\item 1-loop QED splitting functions, which first contribute at order
+  $\alpha L \sim \as$, i.e.\ like NLO in QCD
+  
+\item 2-loop mixed QCD-QED splitting functions~\cite{}, which first contribute
+  at order $\alpha \as L \sim \as^2$, i.e.\ like NNLO QCD.
+
+\item 1-loop QED running coupling, including lepton and quark
+  thresholds, which first contributes at order $\alpha^2 L^2 \sim
+  \as^2$, like NNLO QCD.
+  
+\item optionally, the 2-loop pure QED $P_{\ell q}$ splitting function~\cite{},
+  which brings absolute accuracy $\alpha^2 L\sim \as^3$ to the lepton
+  distribution (which starts at $\alpha^2 L^2 \sim \as^2$).
+  %
+  In an absolute counting of accuracy, this is not needed.
+  % 
+  However, if one wants lepton distributions to have the same relative
+  $\as$ accuracy as the photon distribution, then it should be
+  included.
+\end{itemize}
+\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
+  splitting exists, $\alpha\as^2$ does not?}
+%
+The above counting is to be contrasted with a ``democratic'' scheme
+where one would consider $\alpha \sim \as \sim 1/L$ and one would aim
+to take the same loop order across all couplings and splitting
+functions, regardless of the relative numbers of QCD and QED couplings
+that they involve.
+
+
+% Even within the phenomenological counting, once N3LO QCD splitting
+% functions~\cite{N3LOSplitFn} are fully computed and included in
+% \hoppet, it will make sense to include additional QCD and mixed
+% QED-QCD contributions.
+
+An example involving QED+QCD evolution is to be found in
+\ttt{example\_f90/tabulation\_example\_qed.f90}. \comment{Add
+  hyperlink to github once all merged?}
+%
+A first ingredient is the setup of the QED coupling,
+\begin{lstlisting}
+    use qcd_coupling
+    type(qed_coupling)  :: coupling_qed
+    ! ...
+    call InitQEDCoupling(coupling_qed, effective_light_quark_masses, &
+                         quark_masses(4:6) [,value_at_scale_0])
+\end{lstlisting}
+By default it is initialised with the PDG~\cite{PDG2022} value for the
+electromagnetic coupling at low scales and evolves this up to high
+scales.
+%
+The physical evolution in the region
+$0.1\GeV \lesssim \mu \lesssim 1\GeV$ involves hadronic states, and
+this is mimicked by introducing an effective (identical) mass for all
+three light quarks.
+%
+Using a value of $0.109\GeV$ reproduces the correct QED coupling value at
+the $\tau$ and $Z$-boson masses with a relative $\sim 10^{-4}$
+accuracy.
+%
+Lepton masses are hard-coded to their PDG values~\cite{PDG2022}, as
+coded in the \ttt{src/qed\_coupling.f90} file.
+
+PDFs with QED effects need entries for the photon and lepton flavours.
+%
+Such a PDF can be initialised in analogy with a pure-QCD PDF,
+\begin{lstlisting}
+    use qed_objects
+    real(dp), pointer :: pdf(:,:)
+    ! ...
+    call AllocPDFWithLeptons(grid, pdf)
+\end{lstlisting}
+The flavour (second) index now extends to a value of 11 and four new
+\ttt{iflv_xxx} index values are available:
+\begin{lstlisting}
+  integer, parameter, public :: iflv_photon   =  8
+  integer, parameter, public :: iflv_electron =  9  ! sum electron and positron
+  integer, parameter, public :: iflv_muon     = 10  ! sum of mu^+ and mu^-
+  integer, parameter, public :: iflv_tau      = 11  ! sum of tau^+ and tau^-
+\end{lstlisting}
+For PDFs of hadrons, at the accuracy that we consider, the lepton and
+anti-lepton distribution are identical.
+%
+\comment{Does this persist at higher orders or not?}
+%
+\footnote{Were one to use \hoppet to obtain the distribution of
+  partons inside lepton, then it would become useful to separate
+  lepton and anti-lepton PDFs.
+  %
+  However further consideration arise, notably for the treatment of
+  the $1-x \ll 1$ region.
+  %
+  See for example discussion in Refs.~\cite{FrixioneLepton}
+}
 
 %======================================================================
 %======================================================================
@@ -4556,6 +4671,12 @@ Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
   fortran~90 may be found at
   \url{http://dmoz.org/Computers/Programming/Languages/Fortran/Tutorials/Fortran_90_and_95/}
 
+\bibitem{Manohar:2017eqh}
+A.~V.~Manohar, P.~Nason, G.~P.~Salam and G.~Zanderighi,
+%``The Photon Content of the Proton,''
+JHEP \textbf{12} (2017), 046
+doi:10.1007/JHEP12(2017)046
+[arXiv:1708.01256 [hep-ph]].
 
 \end{thebibliography}
 
