@@ -36,11 +36,12 @@
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.-Y)
+       DL1 = LOG (1.D0-Y)
 *
-       C2S2A =   NF * ( 5.290 * (1./Y-1.) + 4.310 * DL**3   
-     1         - 2.086 * DL**2 + 39.78 * DL - 0.101 * (1.-Y) * DL1**3 
-     2         - (24.75 - 13.80 * Y) * DL**2 * DL1 + 30.23 * DL * DL1 )
+       C2S2A =   NF * ( 5.290D0 * (1.D0/Y-1.D0) + 4.310D0 * DL**3 -
+     $      2.086D0 * DL**2 + 39.78D0 * DL - 0.101D0 * (1.D0-Y) * DL1**3
+     $      - (24.75D0 - 13.80D0 * Y) * DL**2 * DL1 + 30.23D0 * DL * DL1
+     $      )
 *
        RETURN
        END FUNCTION C2S2A
@@ -57,12 +58,12 @@
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.-Y)
+       DL1 = LOG (1.D0-Y)
 *
-       C2G2A =   NF * ( 1./Y * (11.90 + 1494.* DL1) + 5.319 * DL**3  
-     1         - 59.48 * DL**2 - 284.8 * DL + 392.4 - 1483.* DL1
-     2         + (6.445 + 209.4 * (1.-Y)) * DL1**3 - 24.00 * DL1**2
-     3         - 724.1 * DL**2 * DL1 - 871.8 * DL * DL1**2 )
+       C2G2A =   NF * ( 1.D0/Y * (11.90D0 + 1494.D0* DL1) + 5.319D0 * DL
+     $      **3- 59.48D0 * DL**2 - 284.8D0 * DL + 392.4D0 - 1483.D0* DL1
+     $      + (6.445D0 + 209.4D0 * (1.D0-Y)) * DL1**3 - 24.00D0 * DL1**2
+     $      - 724.1D0 * DL**2 * DL1 - 871.8D0 * DL * DL1**2 )
 *
        RETURN
        END FUNCTION C2G2A
@@ -81,7 +82,7 @@
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
 *
-       C2G2C = - NF * 0.28  
+       C2G2C = - NF * 0.28D0  
 *
        RETURN
        END FUNCTION C2G2C
