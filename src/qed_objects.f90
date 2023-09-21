@@ -56,6 +56,12 @@ module qed_objects
   end interface Copy
   public :: Copy
   
+  interface Delete
+     module procedure Delete_qed_split_mat_lo, Delete_qed_split_mat_nlo, Delete_qed_split_mat_nnlo, Delete_qed_split_mat
+  end interface
+  public :: Delete
+
+
   ! 8 is photon, 9,10,11 are leptons (each is lepton + anti-lepton)
   integer, parameter, public :: ncompmaxLeptons = 11
   integer, parameter, public :: ncompmaxPhoton  = 8
@@ -420,5 +426,45 @@ contains
     call Copy(in%nlo, out%nlo)
     call Copy(in%nnlo, out%nnlo)
   end subroutine Copy_qed_split_mat
+
   
+  !----------------------------------------------------------------------
+  subroutine Delete_qed_split_mat_lo(in)
+   type(qed_split_mat_lo), intent(inout) :: in
+   call Delete(in%Pqq_01)
+   call Delete(in%Pqy_01)
+   call Delete(in%Pyq_01)
+   call Delete(in%Pyy_01)    
+ end subroutine Delete_qed_split_mat_lo
+ 
+ !----------------------------------------------------------------------
+ subroutine Delete_qed_split_mat_nlo(in)
+   type(qed_split_mat_nlo), intent(inout) :: in
+
+   call Delete(in%Pqy_11    )
+   call Delete(in%Pyy_11    )
+   call Delete(in%Pgy_11    )
+   call Delete(in%Pqg_11    )
+   call Delete(in%Pyg_11    )
+   call Delete(in%Pgg_11    )
+   call Delete(in%PqqV_11   )
+   call Delete(in%PqqbarV_11)
+   call Delete(in%Pgq_11    )
+   call Delete(in%Pyq_11    )
+ end subroutine Delete_qed_split_mat_nlo
+
+ !----------------------------------------------------------------------
+ subroutine Delete_qed_split_mat_nnlo(in)
+   type(qed_split_mat_nnlo), intent(inout) :: in
+   call Delete(in%Plq_02)
+ end subroutine Delete_qed_split_mat_nnlo
+ 
+ !----------------------------------------------------------------------
+ subroutine Delete_qed_split_mat(in)
+   type(qed_split_mat), intent(inout) :: in
+   call Delete(in%lo)
+   call Delete(in%nlo)
+   call Delete(in%nnlo)
+ end subroutine Delete_qed_split_mat
+
 end module qed_objects

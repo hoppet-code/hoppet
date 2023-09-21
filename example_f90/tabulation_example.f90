@@ -20,7 +20,7 @@ program tabulation_example
   real(dp) :: dy, ymax
   integer  :: order, nloop
   !! holds information about the grid
-  type(grid_def) :: grid, gdarray(4)
+  type(grid_def) :: grid
   !! holds the splitting functions
   type(dglap_holder) :: dh
   !! hold the PDF tabulation
@@ -55,12 +55,8 @@ program tabulation_example
   ymax  = 12.0_dp
   dy    = 0.1_dp
 
-  ! set up the grid itself -- we use 4 nested subgrids
-  call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
-  call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
-  call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
-  call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
-  call InitGridDef(grid,gdarray(1:4),locked=.true.)
+  ! set up the grid itself (this call sets up a nested grid composed of 4 subgrids)
+  call InitGridDefDefault(grid, dy, ymax, order=order)
 
   ! initialise the splitting-function holder
   nloop = 3
