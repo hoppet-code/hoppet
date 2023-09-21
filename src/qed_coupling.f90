@@ -23,7 +23,9 @@ module qed_coupling_module
   real(dp), parameter, public :: e_up2 = (two/three)**2
 
   ! 2022 PDG: summary table + EW review
-  ! 1/alpha(0) = 137.035999180(10), 1/alpha(mZ) = 127.951±0.009
+  ! - 1/alpha(0) = 137.035999180(10)
+  ! - 1/alpha(mtau) = 1/133.471 ± 0.007
+  ! - 1/alpha(mZ) = 127.951±0.009
   real(dp), parameter :: alpha_qed_scale_0 = one/137.035999180_dp ! +-(10) is uncertainty
   public :: alpha_qed_scale_0
   
