@@ -8,8 +8,12 @@
 	added Delete for the QED splitting matrices
 
 	* src/qed_evolution.f90:
-	fixed memory leak in QEDQCDEvolvePDF where internal
+	fixed serious memory leak in QEDQCDEvolvePDF where internal
 	coupling_qcd_zero was not being deleted at the end of the function.
+
+	* src/dglap_objects.f90:
+	fixed minor memory leak, where Delete(MassThresholdMat) was leaving
+	out one piece of the deletion
 
 2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
 
