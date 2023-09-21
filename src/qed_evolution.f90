@@ -122,6 +122,8 @@ contains
        
        nf_old = nf_new
     end do
+
+    call Delete(coupling_qcd_zero)
   end subroutine QEDQCDEvolvePDF
   
 
