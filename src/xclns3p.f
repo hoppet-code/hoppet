@@ -34,33 +34,34 @@
        INTEGER CC ! charged current
        DIMENSION FL(6)
        DATA FL / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
-       PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0 )
+       PARAMETER ( Z2 = 1.6449 34066 84822 64365D0 )
 *
        DL1 = DL1VAL(Y, DL)
-       D81 = 1./81.D0
+       D81 = 1.D0/81.D0
 *
        FL11 = FL(NF)
 *
        CLNP3A = 0.D0
        IF (CC.EQ.1) THEN
-       CLNP3A =  - 2220.5 - 7884.* Y + 4168.* Y**2 
-     ,           - 1280.*D81 *DL**3 - 7456./27.D0 * DL**2 - 1355.7 * DL
-     ,           + 512./27D0 * DL1**4 - 177.40 * DL1**3 + 650.6 *DL1**2
-     ,           - 2729.* DL1 + 208.3 * Y*DL**3 - DL1**3*(1.-Y)* (125.3
-     ,           - 195.6 *DL1) - DL*DL1 * (844.7 * DL + 517.3 * DL1)
-     ,        + NF * ( 408.4 - 9.345 * Y - 919.3 * Y**2 
-     ,           + 1728.*D81 * DL**2 + 200.73 * DL - 1792.*D81* Y*DL**3 
-     ,           + 1024.*D81 * DL1**3 - 112.35 * DL1**2 + 344.1 * DL1
-     ,           + (1.-Y)*DL1**2 * (239.7 + 20.63 * DL1)
-     ,           + DL*DL1 * (887.3 + 294.5 * DL - 59.14 * DL1) )
-     ,        + NF**2 * ( - 19. + (317./6.D0 - 12.*Z2) * Y 
-     ,           + 9.* Y*DL**2 + DL * (-6. + 50.* Y)
-     ,           + 3.* Y*DL1**2 + DL1 * (6. - 25.* Y) 
-     ,           - 6.* Y*DL*DL1 + 6.* Y* DDILOG(Y) ) * 64.* D81
+          CLNP3A =  - 2220.5D0 - 7884.D0* Y + 4168.D0* Y**2 - 1280.D0
+     $         *D81 *DL**3 - 7456.D0/27.D0 * DL**2 - 1355.7D0 * DL +
+     $         512.D0/27D0 * DL1**4 - 177.40D0 * DL1**3 + 650.6D0 *DL1
+     $         **2 - 2729.D0* DL1 + 208.3D0 * Y*DL**3 - DL1**3*(1.D0-Y)*
+     $         (125.3D0 - 195.6D0 *DL1) - DL*DL1 * (844.7D0 * DL +
+     $         517.3D0 * DL1) + NF * ( 408.4D0 - 9.345D0 * Y - 919.3D0 *
+     $         Y**2 + 1728.D0*D81 * DL**2 + 200.73D0 * DL - 1792.D0*D81*
+     $         Y*DL**3 + 1024.D0*D81 * DL1**3 - 112.35D0 * DL1**2 +
+     $         344.1D0 * DL1 + (1.D0-Y)*DL1**2 * (239.7D0 + 20.63D0 *
+     $         DL1) + DL*DL1 * (887.3D0 + 294.5D0 * DL - 59.14D0 * DL1)
+     $         ) + NF**2 * ( - 19.D0 + (317.D0/6.D0 - 12.D0*Z2) * Y +
+     $         9.D0* Y*DL**2 + DL * (-6.D0 + 50.D0* Y) + 3.D0* Y*DL1**2
+     $         + DL1 * (6.D0 - 25.D0* Y) - 6.D0* Y*DL*DL1 + 6.D0* Y*
+     $         DDILOG(Y) ) * 64.D0* D81
        ELSE
-       CLNP3A = FL11*NF * ( (107.0 + 321.05 * Y - 54.62 * Y**2) *(1.-Y)
-     ,           - 26.717 - 320*D81 * DL**3 - 640.*D81 * DL**2 
-     ,           + 9.773 * DL + Y*DL * (363.8 + 68.32 * DL) ) * Y
+          CLNP3A = FL11*NF * ( (107.0D0 + 321.05D0 * Y - 54.62D0 * Y**2)
+     $         *(1.D0-Y)- 26.717D0 - 320.0D0*D81 * DL**3 - 640.D0*D81 *
+     $         DL**2+ 9.773D0 * DL + Y*DL * (363.8D0 + 68.32D0 * DL) ) *
+     $         Y
        ENDIF
 *     
        RETURN
@@ -80,7 +81,7 @@
        RETURN
        END FUNCTION
 
-       DOUBLE PRECISION FUNCTION DDILOG(X)
+      DOUBLE PRECISION FUNCTION DDILOG(X)
       DOUBLE PRECISION X,Y,T,S,A,PI3,PI6,ZERO,ONE,HALF,MALF,MONE,MTWO
       DOUBLE PRECISION C(0:18),H,ALFA,B0,B1,B2
       DATA ZERO /0.0D0/, ONE /1.0D0/
