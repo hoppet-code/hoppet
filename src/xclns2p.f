@@ -35,13 +35,12 @@
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.-Y)
+       DL1 = LOG (1.0D0-Y)
 *
-       CLNN2A = 
-     1          - 40.41 + 97.48 * Y
-     2          + (26.56 * Y - 0.031) * DL**2 - 14.85 * DL 
-     3          + 13.62 * DL1**2 - 55.79 * DL1 - 150.5 * DL * DL1 
-     4        + NF * 16./27.D0 * ( 6.* Y*DL1 - 12.* Y*DL - 25.* Y + 6.)
+       CLNN2A = - 40.41D0 + 97.48D0 * Y + (26.56D0 * Y - 0.031D0) * DL
+     $      **2 - 14.85D0 * DL + 13.62D0 * DL1**2 - 55.79D0 * DL1 -
+     $      150.5D0 * DL * DL1 + NF * 16.0D0/27.0D0 * ( 6.D0* Y*DL1 -
+     $      12.D0* Y*DL - 25.D0* Y + 6.D0)
 *
        RETURN
        END FUNCTION
@@ -59,13 +58,12 @@
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.-Y)
+       DL1 = LOG (1.0D0-Y)
 *
-       CLNC2A = 
-     1          - 52.27 + 100.8 * Y
-     2          + (23.29 * Y - 0.043) * DL**2 - 22.21 * DL 
-     3          + 13.30 * DL1**2 - 59.12 * DL1 - 141.7 * DL * DL1 
-     4        + NF * 16./27.D0 * ( 6.* Y*DL1 - 12.* Y*DL - 25.* Y + 6.)
+       CLNC2A = - 52.27D0 + 100.8D0 * Y + (23.29D0 * Y - 0.043D0) * DL
+     $      **2 - 22.21D0 * DL + 13.30D0 * DL1**2 - 59.12D0 * DL1 -
+     $      141.7D0 * DL * DL1 + NF * 16.D0/27.D0 * ( 6.D0* Y*DL1 -
+     $      12.D0* Y*DL - 25.D0* Y + 6.D0)
 *
        RETURN
        END FUNCTION
@@ -80,7 +78,7 @@
        FUNCTION CLNN2C (Y)
        IMPLICIT REAL*8 (A-Z)
 *
-       CLNN2C = -0.164
+       CLNN2C = -0.164D0
 *
        RETURN
        END FUNCTION
@@ -95,7 +93,7 @@
        FUNCTION CLNC2C (Y)
        IMPLICIT REAL*8 (A-Z)
 *
-       CLNC2C = -0.150
+       CLNC2C = -0.150D0
 *
        RETURN
        END FUNCTION

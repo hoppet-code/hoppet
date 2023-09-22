@@ -24,13 +24,13 @@ contains
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
        lnx = log(x); ln1mx = log(one - x)
-       res = CF*(two*(ln1mx/(1-x)) - 1.5_dp/(1-x) - (1+x)*ln1mx&
-            & - (1+x**2)/(1-x)*lnx + 3 + 2*x)
+       res = CF*(two*(ln1mx/(one-x)) - 1.5_dp/(one-x) - (one+x)*ln1mx&
+            & - (one+x**2)/(one-x)*lnx + 3.0_dp + two*x)
     end select
     select case(cc_piece)
     case(cc_VIRT,cc_REALVIRT)
        ln1mx = log(one - x) ! spiacente di farlo due volte
-       res = res - CF*(two*(ln1mx/(1-x)) - 1.5_dp/(1-x))
+       res = res - CF*(two*(ln1mx/(one-x)) - 1.5_dp/(one-x))
     case(cc_DELTA)
        res =  -CF*(pi**2/3.0_dp + 9.0_dp*half)
     end select
@@ -51,7 +51,7 @@ contains
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
        lnx = log(x); ln1mx = log(one - x)
-       res = TR*(((1-x)**2+x**2)*(ln1mx-lnx)-8*x**2+8*x-1)
+       res = TR*(((one-x)**2+x**2)*(ln1mx-lnx)-8.0_dp*x**2+8.0_dp*x-one)
     end select
     select case(cc_piece)
     case(cc_VIRT,cc_REALVIRT)
@@ -93,7 +93,7 @@ contains
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
-       res = four*TR * x*(1-x)
+       res = four*TR * x*(one-x)
     end select
     select case(cc_piece)
     case(cc_VIRT,cc_REALVIRT)
