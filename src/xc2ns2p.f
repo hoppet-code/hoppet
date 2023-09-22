@@ -35,7 +35,8 @@
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.D0-Y)
+       OMY = 1.0D0 - Y
+       DL1 = LOG (OMY)
 *
        C2NN2A = 
      1          - 69.59D0 - 1008.D0* Y
@@ -64,7 +65,8 @@
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.D0-Y)
+       OMY = 1.0D0 - Y
+       DL1 = LOG (OMY)
 *
        C2NC2A = 
      1          - 84.18D0 - 1010.D0* Y
@@ -90,8 +92,9 @@
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
 *
-       DL1 = LOG (1.D0-Y)
-       DM  = 1.D0/(1.D0-Y)
+       OMY = 1.0D0 - Y
+       DL1 = LOG (OMY)
+       DM  = 1.D0/(OMY)
 *
        C2NS2B = + 14.2222D0 * DL1**3 - 61.3333D0 * DL1**2 - 31.105D0 *
      $      DL1 + 188.64D0 + NF * ( 1.77778D0 * DL1**2 - 8.5926D0 * DL1
@@ -113,7 +116,8 @@
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
 *
-       DL1 = LOG (1.D0-Y)
+       OMY = 1.0D0 - Y
+       DL1 = LOG (OMY)
 *
        C2NN2C = + 3.55555D0 * DL1**4 - 20.4444D0 * DL1**3 - 15.5525D0 *
      $      DL1**2 + 188.64D0 * DL1 - 338.531D0 + 0.485D0 + NF *
@@ -135,7 +139,8 @@
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
 *
-       DL1 = LOG (1.D0-Y)
+       OMY = 1.0D0 - Y 
+       DL1 = LOG (OMY)
 *
        C2NC2C = + 3.55555D0 * DL1**4 - 20.4444D0 * DL1**3 - 15.5525D0 *
      $      DL1**2 + 188.64D0 * DL1 - 338.531D0 + 0.537D0 + NF *

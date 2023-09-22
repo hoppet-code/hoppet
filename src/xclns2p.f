@@ -32,15 +32,18 @@
 *
        FUNCTION CLNN2A (Y, NF)
        IMPLICIT REAL*8 (A-Z)
+       DOUBLE PRECISION D16O27
+       PARAMETER (D16O27 = 16.0D0/27.0D0)
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.0D0-Y)
+       OMY = 1.0D0 - Y
+       DL1 = LOG (OMY)
 *
        CLNN2A = - 40.41D0 + 97.48D0 * Y + (26.56D0 * Y - 0.031D0) * DL
      $      **2 - 14.85D0 * DL + 13.62D0 * DL1**2 - 55.79D0 * DL1 -
-     $      150.5D0 * DL * DL1 + NF * 16.0D0/27.0D0 * ( 6.D0* Y*DL1 -
-     $      12.D0* Y*DL - 25.D0* Y + 6.D0)
+     $      150.5D0 * DL * DL1 + NF * D16O27 * ( 6.D0* Y*DL1 - 12.D0* Y
+     $      *DL - 25.D0* Y + 6.D0)
 *
        RETURN
        END FUNCTION
@@ -55,14 +58,17 @@
 *
        FUNCTION CLNC2A (Y, NF)
        IMPLICIT REAL*8 (A-Z)
+       DOUBLE PRECISION D16O27
+       PARAMETER (D16O27 = 16.0D0/27.0D0)
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.0D0-Y)
+       OMY = 1.0D0 - Y
+       DL1 = LOG (OMY)
 *
        CLNC2A = - 52.27D0 + 100.8D0 * Y + (23.29D0 * Y - 0.043D0) * DL
      $      **2 - 22.21D0 * DL + 13.30D0 * DL1**2 - 59.12D0 * DL1 -
-     $      141.7D0 * DL * DL1 + NF * 16.D0/27.D0 * ( 6.D0* Y*DL1 -
+     $      141.7D0 * DL * DL1 + NF * D16O27 * ( 6.D0* Y*DL1 -
      $      12.D0* Y*DL - 25.D0* Y + 6.D0)
 *
        RETURN

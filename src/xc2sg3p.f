@@ -27,12 +27,12 @@
        INTEGER CC ! charged current
        DATA FL  / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
        DATA FLS /  1.d0, 0.1d0, 0.d0, 0.1d0, 0.018181818d0, 0.1d0 /
-*
-
+       DOUBLE PRECISION D9, D81, D243
+       PARAMETER (D9=1.D0/9.D0, D81=1.0D0/81.0D0, D243=1.0D0/243.0D0)
+*     
+       OY = 1.0D0/Y
        Y1  = Y1VAL(Y, DL)
        DL1 = DL1VAL(Y, DL)
-       D9  = 1.D0/9.D0
-       D81 = D9*D9
        
        FL11 = FL(NF)
        FLS11 = FLS(NF)
@@ -45,13 +45,13 @@
      $         61.50D0 * Y**2 ) * Y1+ DL*DL1 * (8831.D0* DL + 4162.D0*
      $         Y1) - 15.44D0 * Y*DL**5+ 3333.D0* Y*DL**2 + 1615.D0* DL +
      $         1208.D0* DL**2- 333.73D0 * DL**3 + 4244.D0*D81 * DL**4 -
-     $         40.D0*D9 * DL**5- 2731.82D0 * Y1/Y - 414.262D0 * DL/Y
+     $         40.D0*D9 * DL**5- 2731.82D0 * Y1*OY - 414.262D0 * DL*OY
           C2S32 = ( - 64.D0*D81 * DL1**3 + 208.D0*D81 * DL1**2 + 23.09D0
      $         * DL1- 220.27D0 + 59.80D0 * Y - 177.6D0 * Y**2) * Y1 +-
      $         DL*DL1 * (160.3D0 * DL + 135.4D0 * Y1) - 24.14D0 * Y*DL
      $         **3- 215.4D0 * Y*DL**2 - 209.8D0 * DL - 90.38D0 * DL**2-
-     $         3568.D0/243.D0* DL**3 - 184.D0*D81 * DL**4 + 40.2426D0 *
-     $         Y1/Y
+     $         3568.D0*D243* DL**3 - 184.D0*D81 * DL**4 + 40.2426D0 *
+     $         Y1*OY
        C2S3A = NF * ( C2S31 +  NF * C2S32 )
        ELSE
           C2S3F = ( ( 126.42D0 - 50.29D0 * Y - 50.15D0 * Y**2) * Y1 -
@@ -94,11 +94,11 @@
        INTEGER NF
        INTEGER CC ! charged current
        DATA FLG / 1.d0, 0.1d0, 0.d0, 0.1d0, 0.018181818d0, 0.1d0 /
+       DOUBLE PRECISION D9, D81
+       PARAMETER (D9=1.D0/9.D0, D81=1.0D0/81.0D0)
 *
        YI  = 1.D0/Y
        DL1 = DL1VAL(Y, DL)
-       D9  = 1.D0/9.D0
-       D81 = D9*D9
        FLG11 = FLG(NF)
 *
        C2G3A = 0.D0

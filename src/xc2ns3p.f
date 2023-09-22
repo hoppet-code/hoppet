@@ -32,13 +32,13 @@
        INTEGER CC ! charged current
        DIMENSION FL(6)
        DATA FL / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
-*
+       DOUBLE PRECISION D27, D243
+       PARAMETER ( D27  = 1.D0/27.D0, D243 = 1.D0/243.D0)
+*     
        FL11 = FL(NF)
 *
        Y1 = Y1VAL(Y, DL)
        DL1 = DL1VAL(Y, DL)
-       D27  = 1.D0/27.D0
-       D243 = 1.D0/243.D0
 *
        C2NP3A = 0.D0
        IF (CC.EQ.1) THEN
@@ -76,10 +76,11 @@
        FUNCTION C2NS3B (Y, DL, NF)
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
+       DOUBLE PRECISION D81
+       PARAMETER (D81=1.0D0/81.0D0)
 *
        DL1 = DL1VAL(Y, DL)
        DM  = DMVAL(Y, DL)
-       D81 = 1.D0/81.D0
 *
        C2NS3B = + 1536.D0*D81 * DL1**5 - 16320.D0* D81 * DL1**4 +
      $      5.01099D+2 * DL1**3 + 1.17154D+3 * DL1**2 - 7.32845D+3 * DL1
@@ -105,12 +106,12 @@
        INTEGER CC ! charged current
        DIMENSION FL(6)
        DATA FL / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
-*
+       DOUBLE PRECISION D3, D81
+       PARAMETER ( D81 = 1.D0/81.D0, D3  = 1.D0/3.D0)
+*     
        FL11 = FL(NF)
 
        DL1 = LOG (1.D0-Y)
-       D81 = 1.D0/81.D0
-       D3  = 1.D0/3.D0
 *
        C2NP3C = 0.D0
 
@@ -136,12 +137,13 @@
 *     
        FUNCTION Y1VAL (Y, DL)
        IMPLICIT REAL*8 (A - Z)
-
+       DOUBLE PRECISION D2, D6, D24, D120
+       PARAMETER (D2 = 0.5D0, D6 = 1.0D0/6.0D0, D24 = 1.0D0/24.0D0, D120
+     $      = 1.0D0/120.0D0)
        IF (ABS(DL).LT.1D-4) THEN
-       Y1VAL = - DL - DL**2/2.0D0 - DL**3/6.0D0 - DL**4/24.0D0
-     ,         - DL**5/120.0D0
+          Y1VAL = - DL - DL**2*D2 - DL**3*D6 - DL**4*D24 - DL**5*D120
        ELSE
-       Y1VAL = 1.0D0 - Y
+          Y1VAL = 1.0D0 - Y
        ENDIF
 
        RETURN
@@ -153,11 +155,13 @@
 *     
        FUNCTION DL1VAL (Y, DL)
        IMPLICIT REAL*8 (A - Z)
+       DOUBLE PRECISION D2, D24, D2880
+       PARAMETER (D2=0.5D0, D24=1.0D0/24.0D0, D2880=1.0D0/2880.0D0)
 
        IF (ABS(DL).LT.1D-4) THEN
-       DL1VAL = LOG(-DL) +  DL/2.0D0 + DL**2/24.0D0 - DL**4/2880.0D0
+          DL1VAL = LOG(-DL) +  DL*D2 + DL**2*D24 - DL**4*D2880
        ELSE
-       DL1VAL = LOG(1.0D0 - Y)
+          DL1VAL = LOG(1.0D0 - Y)
        ENDIF
 
        RETURN
@@ -168,12 +172,14 @@
 *     
        FUNCTION DMVAL (Y, DL)
        IMPLICIT REAL*8 (A - Z)
+       DOUBLE PRECISION D2, D12, D720, D30240
+       PARAMETER (D2 = 0.5D0, D12 = 1.0D0/12.0D0, D720 = 1.0D0/720.0D0,
+     $      D30240=1.0D0/30240.0D0)
 
        IF (ABS(DL).LT.1D-3) THEN
-       DMVAL  = 0.5D0 - 1.0D0/DL - DL/12.0D0 + DL**3/720.0D0
-     ,         - DL**5/30240.0D0
+          DMVAL  = D2 - 1.0D0/DL - DL*D12 + DL**3*D720 - DL**5*D30240
        ELSE
-       DMVAL = 1.0D0/(1.0D0-Y)
+          DMVAL = 1.0D0/(1.0D0-Y)
        ENDIF
 
        RETURN

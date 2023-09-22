@@ -31,11 +31,12 @@
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.D0-Y)
+       OMY = 1.0D0 - Y
+       DL1 = LOG (OMY)
 *
-       CLS2A = NF * ( (15.94D0 - 5.212D0 * Y) * (1.D0-Y)**2 * DL1 +
-     $      (0.421D0 + 1.520D0 * Y) * DL**2 + 28.09D0 * (1.D0-Y) * DL -
-     $      (2.370D0/Y - 19.27D0) * (1.D0-Y)**3 )
+       CLS2A = NF * ( (15.94D0 - 5.212D0 * Y) * OMY**2 * DL1 + (0.421D0
+     $      + 1.520D0 * Y) * DL**2 + 28.09D0 * OMY * DL - (2.370D0/Y -
+     $      19.27D0) * OMY**3 )
 *
        RETURN
        END FUNCTION
@@ -52,12 +53,12 @@
        INTEGER NF
 *
        DL  = LOG (Y)
-       DL1 = LOG (1.D0-Y)
+       OMY = 1.0D0 - Y
+       DL1 = LOG (OMY)
 *
-       CLG2A = NF * ( (94.74D0 - 49.20D0 * Y) * (1.D0-Y) * DL1**2 +
-     $      864.8D0 * (1.D0-Y) * DL1 + 1161.D0* Y * DL * DL1 + 60.06D0 *
-     $      Y * DL**2 + 39.66D0 * (1.D0-Y) * DL - 5.333D0 * (1.D0/Y -
-     $      1.D0) )
+       CLG2A = NF * ( (94.74D0 - 49.20D0 * Y) * OMY * DL1**2 + 864.8D0 *
+     $      OMY * DL1 + 1161.D0* Y * DL * DL1 + 60.06D0 * Y * DL**2 +
+     $      39.66D0 * OMY * DL - 5.333D0 * (1.D0/Y - 1.D0) )
 *
        RETURN
        END FUNCTION
