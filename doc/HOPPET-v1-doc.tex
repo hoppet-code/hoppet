@@ -61,6 +61,7 @@
 \newcommand{\TeV}{\;\mathrm{TeV}}
 \newcommand{\as}{\alpha_s}
 \newcommand{\comment}[1]{\textbf{[#1]}}
+\newcommand{\commentgz}[1]{{\color{red} [\it GZ:  #1}]}
 \newcommand{\eg}{e.g.\ }
 \newcommand{\ie}{i.e.\ }
 \newcommand{\cf}{cf.\ }
@@ -2639,36 +2640,50 @@ for the user wishing to write their own F95 code for \hoppet.
 \section{Evolution including QED contributions}
 \label{sec:qed-evolution}
 
-The joint QED+QCD evolution implemented in \hoppet is as described in
-Refs.~\cite{Photon+Lepton-PDFs}. \comment{Fix Ref!!!}
+The combined QED+QCD evolution, as implemented in \hoppet since
+version x.x.x\commentgz{add first version number which contains QED
+  evolution?} is as described in
+Refs.~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf}.
 %
-In deciding which contributions should be included, those references
-take a consistent set of set within a ``phenomenological'' counting.
+The determination of which contributions should be included follows a
+consistent approach based on a so-called "phenomenological" counting
+scheme.
 %
-In that counting, one considers $\alpha\sim \as^2$, and takes the
+Within this counting, one considers $\alpha\sim \as^2$, and takes the
 photon (lepton) PDF to be of order $\alpha L$ ($\alpha^2 L^2$), where
 $L$ is the logarithm of a ratio of two factorisation scales and is
-considered to be of order $L \sim 1/\as$.
+considered to be of order $L \sim 1/\as$. In contrast, quark and gluon
+PDFs are considered of order $(\as L)^n={\cal O}(1)$.\footnote{The
+  above counting is to be contrasted with a ``democratic'' scheme, in
+  which considers $\alpha \sim \as \sim 1/L$ and the aim is to maintain
+  the same loop order across all couplings and splitting functions,
+  regardless of the relative numbers of QCD and QED couplings that
+  they involved.}
 %
-From that point of view, NNLO (3-loop) QCD evolution brings control of
+From that point of view, NNLO (3-loop) QCD evolution provides control of
 terms up to $\as^{n+2} L^n \sim \as^2$.
 %
 To achieve a corresponding accuracy when including QED contributions,
-\hoppet can account for
+\hoppet has been extended to account for
 \begin{itemize}
-\item 1-loop QED splitting functions, which first contribute at order
-  $\alpha L \sim \as$, i.e.\ like NLO in QCD
+\item 1-loop QED splitting functions~\cite{Roth:2004ti}, which first
+  contribute at order $\alpha L \sim \as$, i.e.\ count as NLO QCD
+  corrections;
   
-\item 2-loop mixed QCD-QED splitting functions~\cite{}, which first contribute
-  at order $\alpha \as L \sim \as^2$, i.e.\ like NNLO QCD.
+\item 2-loop mixed QCD-QED splitting
+  functions~\cite{deFlorian:2016gvk},
+  %\footnote{One-loop triple collinear splitting functions with photons have been computed in refs~\cite{Sborlini:2014mpa,Sborlini:2014kla}};,
+  which first contribute at order
+  $\alpha \as L \sim \as^2$, i.e.\ count at NNLO QCD corrections;
 
 \item 1-loop QED running coupling, including lepton and quark
   thresholds, which first contributes at order $\alpha^2 L^2 \sim
-  \as^2$, like NNLO QCD.
+  \as^2$, i.e. like NNLO QCD; 
   
-\item optionally, the 2-loop pure QED $P_{\ell q}$ splitting function~\cite{},
-  which brings absolute accuracy $\alpha^2 L\sim \as^3$ to the lepton
-  distribution (which starts at $\alpha^2 L^2 \sim \as^2$).
+\item optionally, the 2-loop pure QED $P_{\ell q}$ splitting
+  function~\cite{deFlorian:2016gvk}, which brings absolute accuracy
+  $\alpha^2 L\sim \as^3$ to the lepton distribution (which starts at
+  $\alpha^2 L^2 \sim \as^2$).
   %
   In an absolute counting of accuracy, this is not needed.
   % 
@@ -2676,22 +2691,27 @@ To achieve a corresponding accuracy when including QED contributions,
   $\as$ accuracy as the photon distribution, then it should be
   included.
 \end{itemize}
-\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
-  splitting exists, $\alpha\as^2$ does not?}
 %
-The above counting is to be contrasted with a ``democratic'' scheme
-where one would consider $\alpha \sim \as \sim 1/L$ and one would aim
-to take the same loop order across all couplings and splitting
-functions, regardless of the relative numbers of QCD and QED couplings
-that they involve.
+The code can be extended systematically to aim at a higher
+accuracy. For instance, if one wishes to reach N$^3$LO accuracy in the
+phenomenological counting, one would need to include 3-loop mixed
+QCD-QED splitting functions at order $\alpha \as^2 L \sim \as^3$,
+which are currently not available, and the well-known 2-loop QED
+running coupling including terms of order $\alpha^2 L^2 \sim \as^3$.
+%
+%\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
+%  splitting exists, $\alpha\as^2$ does not?}
+%
 
+\subsection{Worked-out example using QCD+QED evolution}
 
 % Even within the phenomenological counting, once N3LO QCD splitting
 % functions~\cite{N3LOSplitFn} are fully computed and included in
 % \hoppet, it will make sense to include additional QCD and mixed
 % QED-QCD contributions.
 
-An example involving QED+QCD evolution is to be found in
+An example involving the mixed QED+QCD evolution is to be found in the
+repository in
 \ttt{example\_f90/tabulation\_example\_qed.f90}. \comment{Add
   hyperlink to github once all merged?}
 %
@@ -2703,7 +2723,7 @@ A first ingredient is the setup of the QED coupling,
     call InitQEDCoupling(coupling_qed, effective_light_quark_masses, &
                          quark_masses(4:6) [,value_at_scale_0])
 \end{lstlisting}
-By default it is initialised with the PDG~\cite{PDG2022} value for the
+By default it is initialised with the PDG~\cite{ParticleDataGroup:2022pth} value for the
 electromagnetic coupling at low scales and evolves this up to high
 scales.
 %
@@ -2716,8 +2736,9 @@ Using a value of $0.109\GeV$ reproduces the correct QED coupling value at
 the $\tau$ and $Z$-boson masses with a relative $\sim 10^{-4}$
 accuracy.
 %
-Lepton masses are hard-coded to their PDG values~\cite{PDG2022}, as
-coded in the \ttt{src/qed\_coupling.f90} file.
+Lepton masses are hard-coded to their PDG
+values~\cite{ParticleDataGroup:2022pth} in the
+\ttt{src/qed\_coupling.f90} file.
 
 PDFs with QED effects need entries for the photon and lepton flavours.
 %
@@ -2731,25 +2752,99 @@ Such a PDF can be initialised in analogy with a pure-QCD PDF,
 The flavour (second) index now extends to a value of 11 and four new
 \ttt{iflv\_xxx} index values are available:
 \begin{lstlisting}
-  integer, parameter, public :: iflv_photon   =  8
+  integer, parameter, public :: iflv_photon   =  8  ! photon 
   integer, parameter, public :: iflv_electron =  9  ! sum electron and positron
   integer, parameter, public :: iflv_muon     = 10  ! sum of mu^+ and mu^-
   integer, parameter, public :: iflv_tau      = 11  ! sum of tau^+ and tau^-
 \end{lstlisting}
 For PDFs of hadrons, at the accuracy that we consider, the lepton and
-anti-lepton distribution are identical.
+anti-lepton distribution are identical. Note that if one extends the
+calculation of lepton PDFs to ${\cal O}(\alpha)$, then there would be
+an asymmetry in the lepton and anti-lepton distribution. This is the
+same effect that is responsible for generating a charge asymmetry
+between top and anti-top quarks at the LHC~\cite{Kuhn:1998kw}.
 %
-\comment{Does this persist at higher orders or not?}
+%\comment{Does this persist at higher orders or not?}
 %
 \footnote{Were one to use \hoppet to obtain the distribution of
-  partons inside lepton, then it would become useful to separate
+  partons inside a lepton, then it would become useful to separate
   lepton and anti-lepton PDFs.
   %
   However further consideration arise, notably for the treatment of
   the $1-x \ll 1$ region.
   %
-  See for example discussion in Refs.~\cite{FrixioneLepton}
+  See for example discussion in Refs.~\cite{Frixione:2023gmf}
 }
+
+The variables ${\tt nloop}_{\tt qcd}$ and ${\tt nqcdloop}_{\tt qed}$
+set the order at which QCD and QED corrections are included. Allowed
+values for ${\tt nqloop}_{\tt qcd}$ are from 1 to 3, while allowed
+values for ${\tt nqcdloop}_{\tt qed}$ are zero (QED corrections are
+switched off) or one (one-loop QED effects are included).
+
+The initializaton of the grid to perform the evoluation and of the
+$\ttt{dglap\_holder}$, which stores all the components required for the
+evolution proceeds as in the pure QCD case. Furthermore one needs to
+initialize the QCD splitting matrices using 
+\begin{lstlisting}
+  call InitQEDSplitMat(grid, qed_split)
+\end{lstlisting}
+
+Finally one allocates the table of PDFs including the leptons
+\begin{lstlisting}
+  call AllocPdfTableWithLeptons(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
+       & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
+\end{lstlisting}
+to improve the interpolation quality one can add the information about
+the $n_f$ transitions
+\begin{lstlisting}
+  call AddNfInfoToPdfTable(table,coupling)
+\end{lstlisting}
+and finally one creates the tabulation based on the evolution of the PDF from the starting scale $Q_0$ 
+\begin{lstlisting}
+  call EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
+                         coupling, coupling_qed, nloop_qcd, nqcdloop_qed)
+\end{lstlisting}
+
+The PDFs at scale $Q$ are then computed with, e.g. 
+\begin{lstlisting}
+  Q = 100.0_dp
+  write(6,'(a,f9.4,a)') "           Evaluating PDFs at Q = ",Q," GeV"
+  write(6,'(a5,2a12,a14,a10,a11,4a13)') "x",&
+       & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon",&
+       & "photon","e+ + e-","mu+ + mu-","tau+ + tau-"
+  do ix = 1, size(heralhc_xvals)
+     call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
+     write(6,'(es7.1,9es12.4)') heralhc_xvals(ix), &
+          &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+          &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+          &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+          &  pdf_at_xQ(0), &
+          &  pdf_at_xQ(iflv_photon), &
+          &  pdf_at_xQ(iflv_electron), &
+          &  pdf_at_xQ(iflv_muon),&
+          &  pdf_at_xQ(iflv_tau)          
+  end do
+\end{lstlisting}
+
+Finally, as in the case of pure QCD evolution, one can delete all
+tables and grids created in order to free all the memory.  This is
+important when creating objects repeatedly, so as to avoid memory
+leaks.
+%
+This is done via the following commands: 
+\begin{lstlisting}
+  call Delete(table)
+  call Delete(pdf0)
+  call Delete(dh)
+  call Delete(coupling)
+  call Delete(grid)
+  call Delete(qed_split)
+  call Delete(coupling_qed)
+\end{lstlisting}
+
+\subsection{Streanlined interface}
 
 %======================================================================
 %======================================================================
@@ -4671,12 +4766,110 @@ Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
   fortran~90 may be found at
   \url{http://dmoz.org/Computers/Programming/Languages/Fortran/Tutorials/Fortran_90_and_95/}
 
+%============= QED refs 
+  
+%\cite{Manohar:2016nzj}
+\bibitem{Manohar:2016nzj}
+A.~Manohar, P.~Nason, G.~P.~Salam and G.~Zanderighi,
+%``How bright is the proton? A precise determination of the photon parton distribution function,''
+Phys. Rev. Lett. \textbf{117} (2016) no.24, 242002
+doi:10.1103/PhysRevLett.117.242002
+[arXiv:1607.04266 [hep-ph]].
+
 \bibitem{Manohar:2017eqh}
 A.~V.~Manohar, P.~Nason, G.~P.~Salam and G.~Zanderighi,
 %``The Photon Content of the Proton,''
 JHEP \textbf{12} (2017), 046
 doi:10.1007/JHEP12(2017)046
 [arXiv:1708.01256 [hep-ph]].
+
+%\cite{Buonocore:2020nai}
+\bibitem{Buonocore:2020nai}
+L.~Buonocore, P.~Nason, F.~Tramontano and G.~Zanderighi,
+%``Leptons in the proton,''
+JHEP \textbf{08} (2020) no.08, 019
+doi:10.1007/JHEP08(2020)019
+[arXiv:2005.06477 [hep-ph]].
+
+%\cite{Buonocore:2021bsf}
+\bibitem{Buonocore:2021bsf}
+L.~Buonocore, P.~Nason, F.~Tramontano and G.~Zanderighi,
+%``Photon and leptons induced processes at the LHC,''
+JHEP \textbf{12} (2021), 073
+doi:10.1007/JHEP12(2021)073
+[arXiv:2109.10924 [hep-ph]].
+
+%==============
+
+%\cite{Roth:2004ti}
+\bibitem{Roth:2004ti}
+M.~Roth and S.~Weinzierl,
+%``QED corrections to the evolution of parton distributions,''
+Phys. Lett. B \textbf{590} (2004), 190-198
+doi:10.1016/j.physletb.2004.04.009
+[arXiv:hep-ph/0403200 [hep-ph]].
+
+
+%\cite{Sborlini:2013jba}
+\bibitem{Sborlini:2013jba}
+G.~F.~R.~Sborlini, D.~de Florian and G.~Rodrigo,
+%``Double collinear splitting amplitudes at next-to-leading order,''
+JHEP \textbf{01} (2014), 018
+doi:10.1007/JHEP01(2014)018
+[arXiv:1310.6841 [hep-ph]].
+
+\bibitem{Sborlini:2014mpa}
+G.~F.~R.~Sborlini, D.~de Florian and G.~Rodrigo,
+%``Triple collinear splitting functions at NLO for scattering processes with photons,''
+JHEP \textbf{10} (2014), 161
+doi:10.1007/JHEP10(2014)161
+[arXiv:1408.4821 [hep-ph]].
+
+\bibitem{Sborlini:2014kla}
+G.~F.~R.~Sborlini, D.~de Florian and G.~Rodrigo,
+%``Polarized triple-collinear splitting functions at NLO for processes with photons,''
+JHEP \textbf{03} (2015), 021
+doi:10.1007/JHEP03(2015)021
+[arXiv:1409.6137 [hep-ph]].
+
+%\cite{deFlorian:2015ujt}
+\bibitem{deFlorian:2015ujt}
+D.~de Florian, G.~F.~R.~Sborlini and G.~Rodrigo,
+%``QED corrections to the Altarelli\textendash{}Parisi splitting functions,''
+Eur. Phys. J. C \textbf{76} (2016) no.5, 282
+doi:10.1140/epjc/s10052-016-4131-8
+[arXiv:1512.00612 [hep-ph]].
+
+%\cite{deFlorian:2016gvk}
+\bibitem{deFlorian:2016gvk}
+D.~de Florian, G.~F.~R.~Sborlini and G.~Rodrigo,
+%``Two-loop QED corrections to the Altarelli-Parisi splitting functions,''
+JHEP \textbf{10} (2016), 056
+doi:10.1007/JHEP10(2016)056
+[arXiv:1606.02887 [hep-ph]].
+%51 citations counted in INSPIRE as of 23 Sep 2023
+
+%\cite{ParticleDataGroup:2022pth}
+\bibitem{ParticleDataGroup:2022pth}
+R.~L.~Workman \textit{et al.} [Particle Data Group],
+%``Review of Particle Physics,''
+PTEP \textbf{2022} (2022), 083C01
+doi:10.1093/ptep/ptac097
+
+%\cite{Frixione:2023gmf}
+\bibitem{Frixione:2023gmf}
+S.~Frixione and G.~Stagnitto,
+%``The muon parton distribution functions,''
+[arXiv:2309.07516 [hep-ph]].
+
+%\cite{Kuhn:1998kw}
+\bibitem{Kuhn:1998kw}
+J.~H.~Kuhn and G.~Rodrigo,
+%``Charge asymmetry of heavy quarks at hadron colliders,''
+Phys. Rev. D \textbf{59} (1999), 054017
+doi:10.1103/PhysRevD.59.054017
+[arXiv:hep-ph/9807420 [hep-ph]].
+
 
 \end{thebibliography}
 
