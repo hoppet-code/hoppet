@@ -2651,8 +2651,7 @@ scheme.
 %
 Within this counting, one considers $\alpha\sim \as^2$, and takes the
 photon (lepton) PDF to be of order $\alpha L$ ($\alpha^2 L^2$), where
-$L$ is the logarithm of a ratio of two factorisation scales and is
-considered to be of order $L \sim 1/\as$. In contrast, quark and gluon
+$L$ is the logarithm of a ratio of the factorisation scale to a typical hadronic scale and is considered to be of order $L \sim 1/\as$. In contrast, quark and gluon
 PDFs are considered of order $(\as L)^n={\cal O}(1)$.\footnote{The
   above counting is to be contrasted with a ``democratic'' scheme, in
   which considers $\alpha \sim \as \sim 1/L$ and the aim is to maintain
@@ -2665,16 +2664,16 @@ terms up to $\as^{n+2} L^n \sim \as^2$.
 %
 To achieve a corresponding accuracy when including QED contributions,
 \hoppet has been extended to account for
-\begin{itemize}
+\begin{enumerate}
 \item 1-loop QED splitting functions~\cite{Roth:2004ti}, which first
   contribute at order $\alpha L \sim \as$, i.e.\ count as NLO QCD
   corrections;
   
 \item 2-loop mixed QCD-QED splitting
-  functions~\cite{deFlorian:2016gvk},
+  functions~\cite{deFlorian:2015ujt},
   %\footnote{One-loop triple collinear splitting functions with photons have been computed in refs~\cite{Sborlini:2014mpa,Sborlini:2014kla}};,
   which first contribute at order
-  $\alpha \as L \sim \as^2$, i.e.\ count at NNLO QCD corrections;
+  $\alpha \as L \sim \as^2$, i.e.\ count as NNLO QCD corrections;
 
 \item 1-loop QED running coupling, including lepton and quark
   thresholds, which first contributes at order $\alpha^2 L^2 \sim
@@ -2688,16 +2687,16 @@ To achieve a corresponding accuracy when including QED contributions,
   In an absolute counting of accuracy, this is not needed.
   % 
   However, if one wants lepton distributions to have the same relative
-  $\as$ accuracy as the photon distribution, then it should be
+  NLO accuracy as the photon distribution, then it should be
   included.
-\end{itemize}
+\end{enumerate}
 %
 The code can be extended systematically to aim at a higher
 accuracy. For instance, if one wishes to reach N$^3$LO accuracy in the
 phenomenological counting, one would need to include 3-loop mixed
-QCD-QED splitting functions at order $\alpha \as^2 L \sim \as^3$,
-which are currently not available, and the well-known 2-loop QED
-running coupling including terms of order $\alpha^2 L^2 \sim \as^3$.
+QCD-QED splitting functions at order $\alpha \as^2$ which contribute
+at order $\alpha \as^2 L \sim \as^3$, which are currently not
+available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$ which contribute at order $\alpha^2 \as L^2 \sim \as^3$.
 %
 %\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
 %  splitting exists, $\alpha\as^2$ does not?}
@@ -2717,15 +2716,16 @@ repository in
 %
 A first ingredient is the setup of the QED coupling,
 \begin{lstlisting}
-    use qcd_coupling
+    use qed_coupling_module 
     type(qed_coupling)  :: coupling_qed
     ! ...
     call InitQEDCoupling(coupling_qed, effective_light_quark_masses, &
                          quark_masses(4:6) [,value_at_scale_0])
 \end{lstlisting}
-By default it is initialised with the PDG~\cite{ParticleDataGroup:2022pth} value for the
-electromagnetic coupling at low scales and evolves this up to high
-scales.
+By default it initialises the QED coupling to the
+PDG~\cite{ParticleDataGroup:2022pth} value for the electromagnetic
+coupling at scale zero and evolves it using the 1-loop QED evolution
+up to high scales.
 %
 The physical evolution in the region
 $0.1\GeV \lesssim \mu \lesssim 1\GeV$ involves hadronic states, and
@@ -2762,7 +2762,7 @@ anti-lepton distribution are identical. Note that if one extends the
 calculation of lepton PDFs to ${\cal O}(\alpha)$, then there would be
 an asymmetry in the lepton and anti-lepton distribution. This is the
 same effect that is responsible for generating a charge asymmetry
-between top and anti-top quarks at the LHC~\cite{Kuhn:1998kw}.
+between top and anti-top quarks at the LHC~\cite{Nason:1989zy}.
 %
 %\comment{Does this persist at higher orders or not?}
 %
@@ -2771,16 +2771,11 @@ between top and anti-top quarks at the LHC~\cite{Kuhn:1998kw}.
   lepton and anti-lepton PDFs.
   %
   However further consideration arise, notably for the treatment of
-  the $1-x \ll 1$ region.
+  the $1-x \ll 1$ region.\commentgz{explain better?} 
   %
-  See for example discussion in Refs.~\cite{Frixione:2023gmf}
+  See for example discussion in Ref.~\cite{Frixione:2023gmf}\commentgz{updates refs}.
 }
 
-The variables ${\tt nloop}_{\tt qcd}$ and ${\tt nqcdloop}_{\tt qed}$
-set the order at which QCD and QED corrections are included. Allowed
-values for ${\tt nqloop}_{\tt qcd}$ are from 1 to 3, while allowed
-values for ${\tt nqcdloop}_{\tt qed}$ are zero (QED corrections are
-switched off) or one (one-loop QED effects are included).
 
 The initializaton of the grid to perform the evoluation and of the
 $\ttt{dglap\_holder}$, which stores all the components required for the
@@ -2789,8 +2784,7 @@ initialize the QCD splitting matrices using
 \begin{lstlisting}
   call InitQEDSplitMat(grid, qed_split)
 \end{lstlisting}
-
-Finally one allocates the table of PDFs including the leptons
+and one allocates the table of PDFs including the leptons
 \begin{lstlisting}
   call AllocPdfTableWithLeptons(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
        & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
@@ -2800,14 +2794,23 @@ the $n_f$ transitions
 \begin{lstlisting}
   call AddNfInfoToPdfTable(table,coupling)
 \end{lstlisting}
-and finally one creates the tabulation based on the evolution of the PDF from the starting scale $Q_0$ 
+Finally one creates the tabulation based on the evolution of the PDF from the starting scale $Q_0$ 
 \begin{lstlisting}
   call EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
-                         coupling, coupling_qed, nloop_qcd, nqcdloop_qed)
+                         coupling, coupling_qed, nloop_qcd, nloop_qed)
 \end{lstlisting}
+When the argument ${\tt nloop}_{\tt qed}$ is set to 1 the QED corrections of items 1., 2. and 3. listed in Sec.~\ref{sec:qed-evolution} are included,
+while if it is set to 0 no QED correction is included. Furthermore, if one sets 
+\begin{lstlisting}
+with_Plp_nnloqed=.true.
+\end{lstlisting}
+then also the $P_{lq}$ correction of item 4. is included.\commentgz{Note: at the moment with this flag set to true the $P_{lq}$ contribution is included regardless of the value of $\tt{nloop_qed}$. Perhaps one should change this?} 
 
 The PDFs at scale $Q$ are then computed with, e.g. 
 \begin{lstlisting}
+  real(dp), parameter :: heralhc_xvals(9) = &
+       & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
+  
   Q = 100.0_dp
   write(6,'(a,f9.4,a)') "           Evaluating PDFs at Q = ",Q," GeV"
   write(6,'(a5,2a12,a14,a10,a11,4a13)') "x",&
@@ -2844,7 +2847,7 @@ This is done via the following commands:
   call Delete(coupling_qed)
 \end{lstlisting}
 
-\subsection{Streanlined interface}
+\subsection{Streamlined interface}
 
 %======================================================================
 %======================================================================
@@ -4862,13 +4865,15 @@ S.~Frixione and G.~Stagnitto,
 %``The muon parton distribution functions,''
 [arXiv:2309.07516 [hep-ph]].
 
-%\cite{Kuhn:1998kw}
-\bibitem{Kuhn:1998kw}
-J.~H.~Kuhn and G.~Rodrigo,
-%``Charge asymmetry of heavy quarks at hadron colliders,''
-Phys. Rev. D \textbf{59} (1999), 054017
-doi:10.1103/PhysRevD.59.054017
-[arXiv:hep-ph/9807420 [hep-ph]].
+%\cite{Nason:1989zy}
+\bibitem{Nason:1989zy}
+P.~Nason, S.~Dawson and R.~K.~Ellis,
+%``The One Particle Inclusive Differential Cross-Section for Heavy Quark Production in Hadronic Collisions,''
+Nucl. Phys. B \textbf{327} (1989), 49-92
+[erratum: Nucl. Phys. B \textbf{335} (1990), 260-260]
+doi:10.1016/0550-3213(89)90286-1
+%1222 citations counted in INSPIRE as of 25 Sep 2023
+
 
 
 \end{thebibliography}
