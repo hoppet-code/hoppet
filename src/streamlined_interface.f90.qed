@@ -280,7 +280,6 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
   end interface
   !! hold the initial pdf
   real(dp), pointer :: pdf0(:,:)
-
   ! create our internal pdf object for the initial condition
   if(with_qed) then
      write(*,*)'***********HoppetEvolve, before AllocPDFWithLeptons'
@@ -329,7 +328,8 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
   setup_done(1:) = .false.
 
   ! clean up
-  call Delete(pdf0)
+  call Delete(pdf0) 
+  
 end subroutine hoppetEvolve
 
 
@@ -475,7 +475,7 @@ subroutine hoppetEval(x,Q,f)
   use streamlined_interface
   implicit none
   real(dp), intent(in)  :: x, Q
-  real(dp), intent(out) :: f(-6:6)
+  real(dp), intent(out) :: f(-6:iflv_tau+1)
   
   call EvalPdfTable_xQ(tables(0),x,Q,f)
 end subroutine hoppetEval

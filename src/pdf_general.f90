@@ -230,6 +230,8 @@ contains
     end interface
     !-------------------------------------------
     call InitGridQuantLHAPDF(grid, gq(:,iflv_min:iflv_max), LHAsub, Q)
+    ! PN & GZ: following modifications is needed for streamlined interface of QED evolution
+    ! call InitGridQuantLHAPDF(grid, gq(:,iflv_min:), LHAsub, Q)        
     call LabelPdfAsRep(gq,pdfr_Human)
   end subroutine InitPDF_LHAPDF
   
