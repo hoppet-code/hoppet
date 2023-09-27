@@ -19,7 +19,7 @@ module qed_evolution
   type(qed_coupling), pointer :: ev_coupling_qed
   
   logical, public :: with_Plp_nnloqed=.false.
-  integer, public :: nqcdloop_qed = 1 
+  integer, public :: nqcdloop_qed = 0 
   
 contains
 

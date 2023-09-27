@@ -2669,16 +2669,16 @@ To achieve a corresponding accuracy when including QED contributions,
   contribute at order $\alpha L \sim \as$, i.e.\ count as NLO QCD
   corrections;
   
+\item 1-loop QED running coupling, including lepton and quark
+  thresholds, which first contributes at order $\alpha^2 L^2 \sim
+  \as^2$, i.e. like NNLO QCD; 
+  
 \item 2-loop mixed QCD-QED splitting
   functions~\cite{deFlorian:2015ujt},
   %\footnote{One-loop triple collinear splitting functions with photons have been computed in refs~\cite{Sborlini:2014mpa,Sborlini:2014kla}};,
   which first contribute at order
   $\alpha \as L \sim \as^2$, i.e.\ count as NNLO QCD corrections;
 
-\item 1-loop QED running coupling, including lepton and quark
-  thresholds, which first contributes at order $\alpha^2 L^2 \sim
-  \as^2$, i.e. like NNLO QCD; 
-  
 \item optionally, the 2-loop pure QED $P_{\ell q}$ splitting
   function~\cite{deFlorian:2016gvk}, which brings absolute accuracy
   $\alpha^2 L\sim \as^3$ to the lepton distribution (which starts at
@@ -2794,17 +2794,16 @@ the $n_f$ transitions
 \begin{lstlisting}
   call AddNfInfoToPdfTable(table,coupling)
 \end{lstlisting}
-Finally one creates the tabulation based on the evolution of the PDF from the starting scale $Q_0$ 
+Finally one creates the tabulation based on the evolution of the PDF from the starting scale $Q_0$ including QED corrections of items 1. and 2. listed in Sec.~\ref{sec:qed-evolution}
 \begin{lstlisting}
   call EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
-                         coupling, coupling_qed, nloop_qcd, nloop_qed)
+                         coupling, coupling_qed, nloop_qcd, nloopqcd_qed)
 \end{lstlisting}
-When the argument ${\tt nloop}_{\tt qed}$ is set to 1 the QED corrections of items 1., 2. and 3. listed in Sec.~\ref{sec:qed-evolution} are included,
-while if it is set to 0 no QED correction is included. Furthermore, if one sets 
+When the argument ${\tt nloopqcd\_qed}$ is set to 1 also the mixed QCD $\times$ QED corrections of item 3. are included. Furthermore, if one sets 
 \begin{lstlisting}
 with_Plp_nnloqed=.true.
 \end{lstlisting}
-then also the $P_{lq}$ correction of item 4. is included.\commentgz{Note: at the moment with this flag set to true the $P_{lq}$ contribution is included regardless of the value of $\tt{nloop_qed}$. Perhaps one should change this?} 
+then also the $P_{lq}$ correction of item 4. is included.\commentgz{Note: at the moment with this flag set to true the $P_{lq}$ contribution is included regardless of the value of $\tt{nloopqcd\_qed}$. Perhaps one should change this?} 
 
 The PDFs at scale $Q$ are then computed with, e.g. 
 \begin{lstlisting}
@@ -2847,7 +2846,20 @@ This is done via the following commands:
   call Delete(coupling_qed)
 \end{lstlisting}
 
-\subsection{Streamlined interface}
+\subsection{Streamlined interface with QED effects}
+The streamlined interface including QED effects works as in the case of pure QCD evolution. Six routines have been added:
+\begin{lstlisting}
+  call with_qed_true (or call with_qed_false)
+  call with_qcd_qed_true (or call with_qcd_qed_false) 
+  call with_Plq_true (or call with_Plq_true) 
+\end{lstlisting}
+The first one turns on/off QED evolution at order ${\cal O}(\alpha)$
+(i.e. items 1. and 2. in Sec.~\ref{sec:qed-evolution}). The second
+turns on/off mixed QCD$\times$QED effects in the evolution (i.e. item
+3. in Sec.~\ref{sec:qed-evolution}) and the last turns on/off the
+order $\alpha^2$ $P_{\ell q}$ splitting function (i.e. item 4. in
+Sec.~\ref{sec:qed-evolution}). By default all QED corrections are off. 
+
 
 %======================================================================
 %======================================================================
