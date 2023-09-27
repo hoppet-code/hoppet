@@ -229,9 +229,9 @@ contains
        end subroutine LHAsub
     end interface
     !-------------------------------------------
-    call InitGridQuantLHAPDF(grid, gq(:,iflv_min:iflv_max), LHAsub, Q)
-    ! PN & GZ: following modifications is needed for streamlined interface of QED evolution
-    ! call InitGridQuantLHAPDF(grid, gq(:,iflv_min:), LHAsub, Q)        
+    !call InitGridQuantLHAPDF(grid, gq(:,iflv_min:iflv_max), LHAsub, Q)
+    ! PN & GZ: the following modification is needed for the streamlined interface with QED evolution
+    call InitGridQuantLHAPDF(grid, gq(:,iflv_min:), LHAsub, Q)        
     call LabelPdfAsRep(gq,pdfr_Human)
   end subroutine InitPDF_LHAPDF
   

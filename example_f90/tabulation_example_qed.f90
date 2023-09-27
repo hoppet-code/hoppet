@@ -89,7 +89,8 @@ program tabulation_example
   ! default that we choose has zero lepton and photon PDFs
   ! at starting scale, though this is obviously not physical
   pdf0 = 0.0_dp
-  pdf0(:,:ncompmax) = unpolarized_dummy_pdf(xValues(grid))
+  pdf0(:,:) = unpolarized_dummy_pdf(xValues(grid))  
+
   Q0 = sqrt(2.0_dp)  ! the initial scale
 
   ! allocate and initialise the running coupling with a given
@@ -165,7 +166,7 @@ contains
   !! unpolarized evolution (as used in hep-ph/0511119).
   function unpolarized_dummy_pdf(xvals) result(pdf)
     real(dp), intent(in) :: xvals(:)
-    real(dp)             :: pdf(size(xvals),ncompmin:ncompmax)
+    real(dp)             :: pdf(size(xvals),ncompmin:iflv_tau)
     real(dp) :: uv(size(xvals)), dv(size(xvals))
     real(dp) :: ubar(size(xvals)), dbar(size(xvals))
     !---------------------
@@ -193,6 +194,11 @@ contains
     pdf(:,-iflv_u) = ubar
     pdf(:, iflv_d) = dv + dbar
     pdf(:,-iflv_d) = dbar
+    pdf(:,iflv_photon) = pdf(:, iflv_g)/100._dp+(uv + ubar)/10._dp 
+    pdf(:,iflv_electron) = dbar/10._dp
+    pdf(:,iflv_muon) = ubar/10._dp
+    pdf(:,iflv_tau) = dbar/10._dp         
+
   end function unpolarized_dummy_pdf
 
 end program tabulation_example

@@ -239,10 +239,11 @@ contains
     use random
     real(dp), intent(inout) :: q(0:,ncompmin:)
     integer,  intent(in)    :: irep
-    
-    if (ubound(q,dim=2) /= ncompmax) call wae_error('LabelPdfAsRep',&
-         &'upper bound of q does not correspond to ncompmax; it is:',&
-         &intval=ubound(q,dim=2))
+
+    !PN&GZ: need to comment this out for streamlined interface with QED evolution     
+    !if (ubound(q,dim=2) /= ncompmax) call wae_error('LabelPdfAsRep',&
+    !     &'upper bound of q does not correspond to ncompmax; it is:',&
+    !     &intval=ubound(q,dim=2))
 
     if (ubound(q,dim=1) < 4) call wae_error('LabelPdfAsRep',&
          &'grid is too small to hold pdf flavour representation info; size is:',&
@@ -286,9 +287,10 @@ contains
     real(dp)             :: drep
     real(dp), parameter  :: rep_tolerance = 1e-7_dp
 
-    if (ubound(q,dim=2) /= ncompmax) call wae_error('GetPdfRep',&
-         &'upper bound of q does not correspond to ncompmax; it is:',&
-         &intval=ubound(q,dim=2))
+    !PN&GZ: need to comment this out for streamlined interface with QED evolution         
+    !if (ubound(q,dim=2) /= ncompmax) call wae_error('GetPdfRep',&
+    !     &'upper bound of q does not correspond to ncompmax; it is:',&
+    !     &intval=ubound(q,dim=2))
 
     !if (q(0,iflv_info) == zero .neqv. q(1,iflv_info) == zero) then
     !   call wae_error('GetPdfRep', 'Inconsistent behaviour in iflv_info')

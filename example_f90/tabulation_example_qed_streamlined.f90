@@ -32,7 +32,7 @@ contains
   subroutine LHAsub(x,Q,xpdf)
     use types; use consts_dp; use hoppet_v1; implicit none
     real(dp), intent(in)  :: x,Q
-    real(dp), intent(out) :: xpdf(-6:10)
+    real(dp), intent(out) :: xpdf(-6:iflv_tau)
     real(dp) :: uv, dv
     real(dp) :: ubar, dbar
     !---------------------
@@ -59,6 +59,10 @@ contains
     xpdf(-iflv_u) = ubar
     xpdf(iflv_d) = dv + dbar
     xpdf(-iflv_d) = dbar
+    xpdf(iflv_photon) = xpdf(iflv_g)/100._dp+(uv + ubar)/10._dp
+    xpdf(iflv_electron) = dbar/10._dp
+    xpdf(iflv_muon) = ubar/10._dp
+    xpdf(iflv_tau) = dbar/10._dp
   end subroutine LHAsub
 end module lhasub4streamlinedqed
 
@@ -101,7 +105,7 @@ program tabulation_example_streamlined
   dy    = 0.1_dp
   ! and parameters for Q tabulation
   Qmin=1.0_dp
-  Qmax=28000.0_dp
+  Qmax=10000.0_dp
   dlnlnQ = dy/4.0_dp
   ! and number of loops to initialise!
   nloop = 3
@@ -114,7 +118,6 @@ program tabulation_example_streamlined
   mc = 1.414213563_dp   ! sqrt(2.0_dp) + epsilon
   mb = 4.5_dp
   mt = 175.0_dp
-  write(*,*) '*********** before hoppetSetVNF'
   call hoppetSetVFN(mc, mb, mt)
 
   ! Streamlined evolution
@@ -124,21 +127,19 @@ program tabulation_example_streamlined
   Q0alphas = sqrt(2.0_dp)
   muR_Q = 1.0_dp
   Q0pdf = sqrt(2.0_dp) ! The initial evolution scale
-  write(*,*) '*********** before hoppetEvolve'
+
   call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, LHAsub, Q0pdf)
-  write(6,'(a)') "Evolution done!"
-  
-  
+
   ! get the value of the tabulation at some point
   Q = 100.0_dp
   write(6,'(a)')
   write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
-  write(6,'(a5,2a12,a14,a10,a12)') "x",&
-       & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
+  write(6,'(a5,2a12,a14,a10,4a13)') "x",&
+       & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon",&
+       & "photon","e+ + e-","mu+ + mu-","tau+ + tau-"
   do ix = 1, size(heralhc_xvals)
-     write(*,*) '*********** before hoppetEval'
      call hoppetEval(heralhc_xvals(ix),Q,xpdf_at_xQ)
-     write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
+     write(6,'(es7.1,9es12.4)') heralhc_xvals(ix), &
           &  xpdf_at_xQ(2)-xpdf_at_xQ(-2), &
           &  xpdf_at_xQ(1)-xpdf_at_xQ(-1), &
           &  2*(xpdf_at_xQ(-1)+xpdf_at_xQ(-2)), &

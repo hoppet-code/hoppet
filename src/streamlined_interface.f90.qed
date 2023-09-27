@@ -314,7 +314,7 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
      endif
      write(*,*)'***********HoppetEvolve, before EvolvePdfTableQED'
      call EvolvePdfTableQED(tables(0), Q0pdf, pdf0, dh, qed_split, &
-          coupling, coupling_qed, nloop, nqcdloop_qed)
+          coupling, coupling_qed, nloop, nqcdloop_qed=1)
   else
      call EvolvePdfTable(tables(0), Q0pdf, pdf0, dh, muR_Q=muR_Q, &
           &              coupling=coupling, nloop=nloop)
