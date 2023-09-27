@@ -665,7 +665,7 @@ contains
   !!
   subroutine EvolvePdfTableQED(tab, StartScale, StartDist, dh, qed_sm, &
        & coupling_qcd, coupling_qed, &
-       & nloop_qcd, nqcdloop_qed)
+       & nloop_qcd, nqcdloop_qed_arg)
     use qed_evolution; use qed_coupling_module; use qed_objects
     type(pdf_table),           intent(inout) :: tab
     real(dp),               intent(in)    :: StartScale
@@ -674,7 +674,7 @@ contains
     type(running_coupling), intent(in)    :: coupling_qcd
     type(qed_coupling),     intent(in)    :: coupling_qed
     real(dp),               intent(in)    :: StartDist(:,:)
-    integer,                intent(in)    :: nloop_qcd, nqcdloop_qed
+    integer,                intent(in)    :: nloop_qcd, nqcdloop_qed_arg
     !logical,      optional, intent(in)    :: untie_nf
     !-----------------------------------------------------
     real(dp), allocatable :: dist(:,:)
@@ -698,7 +698,7 @@ contains
        Q_end = invlnln(tab,tab%lnlnQ_vals(i))
 
        call QEDQCDEvolvePDF(dh, qed_sm, dist, coupling_qcd, coupling_qed,&
-                   &        Q_init, Q_end, nloop_qcd, nqcdloop_qed)
+                   &        Q_init, Q_end, nloop_qcd, nqcdloop_qed_arg)
        tab%tab(:,:,i) = dist
        
        last_Q = Q_end
@@ -710,7 +710,7 @@ contains
        Q_init = last_Q
        Q_end = invlnln(tab,tab%lnlnQ_vals(i))
        call QEDQCDEvolvePDF(dh, qed_sm, dist, coupling_qcd, coupling_qed,&
-                   &        Q_init, Q_end, nloop_qcd, nqcdloop_qed)
+                   &        Q_init, Q_end, nloop_qcd, nqcdloop_qed_arg)
        tab%tab(:,:,i) = dist
        
        last_Q = Q_end

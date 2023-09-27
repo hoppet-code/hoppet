@@ -45,7 +45,7 @@ module streamlined_interface
   real(dp), save :: masses(4:6) = quark_masses_def(4:6)
   logical, save :: with_qed = .false.
   !! Additional things for QED
-  integer,  save            :: nqcdloop_qed
+  !integer,  save            :: nqcdloop_qed
   type(qed_coupling),  save :: coupling_qed
   type(qed_split_mat),  save :: qed_split, qed_split_no_Pqgx
   real(dp), save :: effective_light_quark_masses = 0.109_dp
@@ -127,6 +127,29 @@ subroutine with_qed_false
   use streamlined_interface
   with_qed = .false.
 end subroutine with_qed_false
+
+subroutine with_qcd_qed_true
+  use qed_evolution 
+  nqcdloop_qed = 1
+end subroutine with_qcd_qed_true
+
+subroutine with_qcd_qed_false
+  use qed_evolution 
+  nqcdloop_qed = 0
+end subroutine with_qcd_qed_false
+
+subroutine with_Plq_true
+  use qed_evolution 
+  with_Plp_nnloqed=.true.
+end subroutine with_Plq_true
+
+subroutine with_Plq_false
+  use qed_evolution 
+  with_Plp_nnloqed=.false.
+end subroutine with_Plq_false
+
+
+
 
 !======================================================================
 !! initialise the underlying grid, splitting functions and pdf-table
@@ -265,7 +288,7 @@ end subroutine hoppetAssign
 !! Given a pdf_subroutine with the interface shown below, fill the 
 !! table by evolving the PDF from scale Q0pdf, with alphas provided 
 !! at scale Q0alphas
-subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
+subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
   use streamlined_interface ! this module which provides access to the array of tables
   use pdf_representation
   implicit none
@@ -287,7 +310,7 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
   else
      call AllocPDF(grid, pdf0)
   endif
-  
+
   write(*,*)'***********HoppetEvolve, before InitPDF_LHAPDF'
   call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0pdf)
 
@@ -314,7 +337,7 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
      endif
      write(*,*)'***********HoppetEvolve, before EvolvePdfTableQED'
      call EvolvePdfTableQED(tables(0), Q0pdf, pdf0, dh, qed_split, &
-          coupling, coupling_qed, nloop, nqcdloop_qed=1)
+          coupling, coupling_qed, nloop, nqcdloop_qed)
   else
      call EvolvePdfTable(tables(0), Q0pdf, pdf0, dh, muR_Q=muR_Q, &
           &              coupling=coupling, nloop=nloop)

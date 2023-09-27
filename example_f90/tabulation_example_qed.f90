@@ -39,7 +39,6 @@ program tabulation_example
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   integer  :: ix
   !! Additional things for QED
-  integer             :: nqcdloop_qed
   type(qed_coupling)  :: coupling_qed
   type(qed_split_mat) :: qed_split, qed_split_no_Pqgx
 
@@ -68,6 +67,8 @@ program tabulation_example
   ! initialise the splitting-function holder
   nloop_qcd = 3
   nqcdloop_qed = 1
+  with_Plp_nnloqed=.false.
+  
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
        &                      nloop=nloop_qcd,nflo=3,nfhi=6)
   ! and the QED splitting matrices

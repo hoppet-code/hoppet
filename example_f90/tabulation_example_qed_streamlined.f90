@@ -110,6 +110,9 @@ program tabulation_example_streamlined
   ! and number of loops to initialise!
   nloop = 3
   call with_qed_true
+  call with_qcd_qed_true
+  call with_Plq_false 
+  
   call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,&
        &         order,factscheme_MSbar)
   write(6,'(a)') "Streamlined initialization completed!"
