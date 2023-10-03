@@ -1,4 +1,14 @@
-2023-10-03 Tue  <gavin.salam@physics.ox.ac.uk> with Giulia
+2023-10-03 Tue  <gavin.salam@physics.ox.ac.uk> with Giulia and Paolo
+
+	* src/pdf_general.f90:
+	InitPDF_LHAPDF() used to expect the LHAsub to set -6:6; 
+	now it expects -6:6 with plain QCD evolution, but
+	the full size of the flavour dimension if the upper limit
+	is anything other than ncompax=7 (e.g. for QED evolution 
+	it should go up to ncompmaxLeptons=11).
+
+	* src/streamlined_interface.f90:
+	switched this over the version prepared by Giulia and Paolo
 
 	* example_f90/tabulation_example_qed.default_output:
 	* example_f90/tabulation_example_qed.f90:

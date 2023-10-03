@@ -110,7 +110,7 @@ program tabulation_example
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
-  call AllocPdfTableWithLeptons(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
+  call AllocPdfTableWithLeptons(grid, table, Qmin=1.0_dp, Qmax=28000.0_dp, & 
        & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
   ! add information about the nf transitions to the table (improves
   ! interpolation quality)

@@ -32,8 +32,8 @@ contains
   subroutine LHAsub(x,Q,xpdf)
     use types; use consts_dp; use hoppet_v1; implicit none
     real(dp), intent(in)  :: x,Q
-    real(dp), intent(out) :: xpdf(-6:iflv_tau)
-    real(dp) :: uv, dv
+    real(dp), intent(out) :: xpdf(-6:ncompmaxLeptons)
+    real(dp) :: gluon, uv, dv
     real(dp) :: ubar, dbar
     !---------------------
     real(dp), parameter :: N_g = 1.7_dp, N_ls = 0.387975_dp
@@ -45,6 +45,7 @@ contains
     
   
     !-- remember that these are all x*q(x)
+    gluon = N_g * x**(-0.1_dp) * (1-x)**5
     uv = N_uv * x**0.8_dp * (1-x)**3
     dv = N_dv * x**0.8_dp * (1-x)**4
     dbar = N_db * x**(-0.1_dp) * (1-x)**6
@@ -52,17 +53,17 @@ contains
   
     ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
     ! from the main program
-    xpdf(iflv_g) = N_g * x**(-0.1_dp) * (1-x)**5
+    xpdf( iflv_g) = 0.99_dp * gluon
     xpdf(-iflv_s) = 0.2_dp*(dbar + ubar)
-    xpdf(iflv_s) = xpdf(-iflv_s)
-    xpdf(iflv_u) = uv + ubar
-    xpdf(-iflv_u) = ubar
-    xpdf(iflv_d) = dv + dbar
-    xpdf(-iflv_d) = dbar
-    xpdf(iflv_photon) = xpdf(iflv_g)/100._dp+(uv + ubar)/10._dp
+    xpdf( iflv_s) = xpdf(-iflv_s)
+    xpdf( iflv_u) = uv + 0.9_dp * ubar
+    xpdf(-iflv_u) = 0.9_dp * ubar
+    xpdf( iflv_d) = dv + 0.9_dp * dbar
+    xpdf(-iflv_d) = 0.9_dp * dbar
+    xpdf(iflv_photon) = gluon/100._dp + ubar/10._dp 
     xpdf(iflv_electron) = dbar/10._dp
     xpdf(iflv_muon) = ubar/10._dp
-    xpdf(iflv_tau) = dbar/10._dp
+    xpdf(iflv_tau) = dbar/10._dp         
   end subroutine LHAsub
 end module lhasub4streamlinedqed
 
@@ -80,7 +81,7 @@ program tabulation_example_streamlined
   real(dp) :: mc,mb,mt
   integer  :: order, nloop
   !! hold results at some x, Q
-  real(dp) :: Q, xpdf_at_xQ(-6:iflv_tau)
+  real(dp) :: Q, xpdf_at_xQ(-6:ncompmaxLeptons)
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   integer  :: ix
@@ -104,8 +105,8 @@ program tabulation_example_streamlined
   ymax  = 12.0_dp
   dy    = 0.1_dp
   ! and parameters for Q tabulation
-  Qmin=1.0_dp
-  Qmax=10000.0_dp
+  Qmin  = 1.0_dp
+  Qmax  = 28000.0_dp
   dlnlnQ = dy/4.0_dp
   ! and number of loops to initialise!
   nloop = 3
@@ -137,7 +138,7 @@ program tabulation_example_streamlined
   Q = 100.0_dp
   write(6,'(a)')
   write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
-  write(6,'(a5,2a12,a14,a10,4a13)') "x",&
+  write(6,'(a5,2a12,a14,a11,4a13)') "x",&
        & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon",&
        & "photon","e+ + e-","mu+ + mu-","tau+ + tau-"
   do ix = 1, size(heralhc_xvals)
