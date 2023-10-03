@@ -117,37 +117,6 @@ contains
   
 end module streamlined_interface
 
-! !! To be called by the user if one wants pdf's with leptons.
-! subroutine with_qed_true
-!   use streamlined_interface
-!   with_qed = .true.
-! end subroutine with_qed_true
-! 
-! subroutine with_qed_false
-!   use streamlined_interface
-!   with_qed = .false.
-! end subroutine with_qed_false
-! 
-! subroutine with_qcd_qed_true
-!   use qed_evolution 
-!   nqcdloop_qed = 1
-! end subroutine with_qcd_qed_true
-! 
-! subroutine with_qcd_qed_false
-!   use qed_evolution 
-!   nqcdloop_qed = 0
-! end subroutine with_qcd_qed_false
-! 
-! subroutine with_Plq_true
-!   use qed_evolution 
-!   with_Plp_nnloqed=.true.
-! end subroutine with_Plq_true
-! 
-! subroutine with_Plq_false
-!   use qed_evolution 
-!   with_Plp_nnloqed=.false.
-! end subroutine with_Plq_false
-
 !======================================================================
 !! This routine should be called before hoppetStart if one wants
 !! to include QED evolution. Note that it affects expected upper
