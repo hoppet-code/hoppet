@@ -229,9 +229,17 @@ contains
        end subroutine LHAsub
     end interface
     !-------------------------------------------
+    integer :: ncompmax_lcl
+
+    ! if the upper bound of gq(:,:) is the usual ncompmax
+    ! then assume the user's routine will fill -6:6.
+    ! Otherwise the user should fill -6:ubound(gq,dim=2)
+    ncompmax_lcl = ubound(gq,dim=2)
+    if (ncompmax_lcl == ncompmax) ncompmax_lcl = iflv_max
+
     !call InitGridQuantLHAPDF(grid, gq(:,iflv_min:iflv_max), LHAsub, Q)
     ! PN & GZ: the following modification is needed for the streamlined interface with QED evolution
-    call InitGridQuantLHAPDF(grid, gq(:,iflv_min:), LHAsub, Q)        
+    call InitGridQuantLHAPDF(grid, gq(:,iflv_min:ncompmax_lcl), LHAsub, Q)        
     call LabelPdfAsRep(gq,pdfr_Human)
   end subroutine InitPDF_LHAPDF
   

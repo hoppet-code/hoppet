@@ -26,6 +26,22 @@ QED merging notes (2023-09)
   * [ ] NB: what do we do with QCDQEDCoupling, which is not currently used?
   * [ ] mention that cached evolution not yet available
 
+- [ ] question of global option versus arguments to functions
+  * with_Plq_nnloqed, nqcdloop_qed
+
+- Streamlined interface
+  * [ ] resolve any QED-TBD comments
+  * [ ] make sure table-index handling is back in
+  * [ ] introduce hoppetSetQED()
+  * [x] decide muR_Q with QED -> do not support it
+  * [ ] one day, allow for tables with QED convolutions
+    * 1-5 = QCD
+    * 6 = alpha
+    * 7 = alpha * alphas
+    * 8 = alpha^2
+    * 9 = alpha * alphas^2
+- merge from master
+
 Old notes
 =========
 

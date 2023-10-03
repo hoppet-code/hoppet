@@ -768,12 +768,6 @@ contains
        wgts(:,iQ) = y_wgts(:) * lnlnQ_wgts(iQ)
     end do
 
-    ! decide up to what flavour we go -- -6..6 for a standard
-    ! QCD table; or up to the maximum flavour for bigger tables
-    ! (i.e. including flavour 7, the "representation" flavour)
-    iflv_max_table = ubound(tab%tab,dim=2)
-    if (iflv_max_table == ncompmax) iflv_max_table = iflv_max
-
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts?
     do iflv = iflv_min, tab%tab_iflv_max

@@ -75,7 +75,9 @@ module qed_objects
   integer, parameter, public :: iflv_muon     = 10
   integer, parameter, public :: iflv_tau      = 11
 
-  logical, public :: OffLeptonChargesFrom=.false.,OffLeptonChargesTo=.false.,OffNlGammaGamma=.false.
+  logical, public :: OffLeptonChargesFrom=.false.
+  logical, public :: OffLeptonChargesTo=.false.
+  logical, public :: OffNlGammaGamma=.false.
   
 contains
 

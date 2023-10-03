@@ -52,66 +52,66 @@ module streamlined_interface
 
 contains
   
-  ! !----------------------------------------------------------------------
-  ! ! returns the value of the table index for the given iloop and
-  ! ! ensures that the table is actually set up (working down recursively
-  ! ! when iloop is composite)
-  ! recursive integer function tableIndexValue(iloop, nf) result(tabindex)
-  !   use warnings_and_errors
-  !   integer, intent(in) :: iloop, nf
-  !   !------------------------------
-  !   integer :: table_index_source, iloop_P, iQ
+  !----------------------------------------------------------------------
+  ! returns the value of the table index for the given iloop and
+  ! ensures that the table is actually set up (working down recursively
+  ! when iloop is composite)
+  recursive integer function tableIndexValue(iloop, nf) result(tabindex)
+    use warnings_and_errors
+    integer, intent(in) :: iloop, nf
+    !------------------------------
+    integer :: table_index_source, iloop_P, iQ
 
-  !   ! first establish if iloop is "legal"
-  !   if (iloop < 1 .or. iloop > ubound(table_index_from_iloop,dim=1)) then
-  !      call wae_error('tableIndexValue','illegal value for iloop (out of bounds):',&
-  !           &intval=iloop)
-  !   else if (table_index_from_iloop(iloop) < 0) then
-  !      call wae_error('tableIndexValue','illegal value for iloop (lookup < 0):',&
-  !           &intval=iloop)
-  !   end if
-  !   tabindex = table_index_from_iloop(iloop)
+    ! first establish if iloop is "legal"
+    if (iloop < 1 .or. iloop > ubound(table_index_from_iloop,dim=1)) then
+       call wae_error('tableIndexValue','illegal value for iloop (out of bounds):',&
+            &intval=iloop)
+    else if (table_index_from_iloop(iloop) < 0) then
+       call wae_error('tableIndexValue','illegal value for iloop (lookup < 0):',&
+            &intval=iloop)
+    end if
+    tabindex = table_index_from_iloop(iloop)
 
-  !   !write(0,*) 'iloop, tabindex ', iloop, tabindex
-  !   if (.not. setup_done(tabindex) .or. setup_nf(tabindex) /= nf) then
+    !write(0,*) 'iloop, tabindex ', iloop, tabindex
+    if (.not. setup_done(tabindex) .or. setup_nf(tabindex) /= nf) then
 
-  !      if (iloop < 10) then
-  !         table_index_source = 0
-  !         iloop_P = iloop
-  !      else if (iloop < 100) then
-  !         table_index_source = tableIndexValue(mod(iloop,10), nf)
-  !         iloop_P = iloop / 10
-  !      else if (iloop < 1000) then
-  !         table_index_source = tableIndexValue(mod(iloop,100), nf)
-  !         iloop_P = iloop / 100
-  !      else 
-  !         call wae_error('tableIndexValue','unsupported value for iloop (source & iloop_P determination):',&
-  !           &intval=iloop)
-  !      end if
-  !      !write(0,*) 'setting up with source and iloop_P = ', table_index_source, iloop_P
+       if (iloop < 10) then
+          table_index_source = 0
+          iloop_P = iloop
+       else if (iloop < 100) then
+          table_index_source = tableIndexValue(mod(iloop,10), nf)
+          iloop_P = iloop / 10
+       else if (iloop < 1000) then
+          table_index_source = tableIndexValue(mod(iloop,100), nf)
+          iloop_P = iloop / 100
+       else 
+          call wae_error('tableIndexValue','unsupported value for iloop (source & iloop_P determination):',&
+            &intval=iloop)
+       end if
+       !write(0,*) 'setting up with source and iloop_P = ', table_index_source, iloop_P
        
-  !      if (nf < 0) then
-  !         ! use whatever nf is relevant 
-  !         if (.not. tables(0)%nf_info_associated) call wae_error(&
-  !              & 'hoppetEvalSplit','automatic choice of nf (nf<0) but the tabulation has no information on nf')
-  !         do iQ = 0, tables(0)%nQ
-  !            tables(tabindex)%tab(:,:,iQ) = dh%allP(iloop_P, tables(0)%nf_int(iQ)) &
-  !                 &             .conv. tables(table_index_source)%tab(:,:,iQ)
-  !         end do
-  !      else
-  !         ! use a fixed nf
-  !         if (nf < lbound(dh%allP,dim=2) .or. nf > ubound(dh%allP,dim=2)) &
-  !              &call wae_error('hoppetEvalSplit','illegal value for nf:',&
-  !              &intval=nf)
+       if (nf < 0) then
+          ! use whatever nf is relevant 
+          if (.not. tables(0)%nf_info_associated) call wae_error(&
+               & 'hoppetEvalSplit','automatic choice of nf (nf<0) but the tabulation has no information on nf')
+          do iQ = 0, tables(0)%nQ
+             tables(tabindex)%tab(:,:,iQ) = dh%allP(iloop_P, tables(0)%nf_int(iQ)) &
+                  &             .conv. tables(table_index_source)%tab(:,:,iQ)
+          end do
+       else
+          ! use a fixed nf
+          if (nf < lbound(dh%allP,dim=2) .or. nf > ubound(dh%allP,dim=2)) &
+               &call wae_error('hoppetEvalSplit','illegal value for nf:',&
+               &intval=nf)
           
-  !         tables(tabindex)%tab = dh%allP(iloop_P, nf) .conv. tables(table_index_source)%tab
-  !      end if
+          tables(tabindex)%tab = dh%allP(iloop_P, nf) .conv. tables(table_index_source)%tab
+       end if
        
-  !      setup_done(tabindex) = .true.
-  !      setup_nf(tabindex)   = nf
-  ! end if
+       setup_done(tabindex) = .true.
+       setup_nf(tabindex)   = nf
+  end if
 
-  ! end function tableIndexValue
+  end function tableIndexValue
 
   
   
@@ -364,6 +364,8 @@ subroutine hoppetPreEvolve(asQ0, Q0alphas, nloop, muR_Q, Q0pdf)
   real(dp), intent(in) :: asQ0, Q0alphas, muR_Q, Q0pdf
   integer,  intent(in) :: nloop
 
+  if (with_qed) call wae_error("hoppetPreEvolve","Does not support QED evolution")
+
   ! get a running coupling with the desired scale
   if (coupling_initialised) call Delete(coupling) 
   if (ffn_nf > 0) then
@@ -398,6 +400,8 @@ subroutine hoppetCachedEvolve(pdf_subroutine)
   end interface
   !! hold the initial pdf
   real(dp), pointer :: pdf0(:,:)
+
+  if (with_qed) call wae_error("hoppetCachedEvolve","Does not support QED evolution")
 
   ! create our internal pdf object for the initial condition
   call AllocPDF(grid, pdf0)
@@ -498,7 +502,7 @@ subroutine hoppetEval(x,Q,f)
   use streamlined_interface
   implicit none
   real(dp), intent(in)  :: x, Q
-  real(dp), intent(out) :: f(-6:iflv_tau+1)
+  real(dp), intent(out) :: f(-6:ncompmaxLeptons) ! QED-TBD [check it still works without QED]
   
   call EvalPdfTable_xQ(tables(0),x,Q,f)
 end subroutine hoppetEval
@@ -533,17 +537,19 @@ end subroutine hoppetEval
 !! bounded to be <= 3.
 !!
 !! The number of loops must be consistent with iloop
-! subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
-!   use streamlined_interface; use warnings_and_errors
-!   implicit none
-!   real(dp), intent(in)  :: x, Q
-!   integer,  intent(in)  :: iloop, nf
-!   real(dp), intent(out) :: f(-6:6)
-!   integer :: iQ, tabindex
+subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
+  use streamlined_interface; use warnings_and_errors
+  implicit none
+  real(dp), intent(in)  :: x, Q
+  integer,  intent(in)  :: iloop, nf
+  real(dp), intent(out) :: f(-6:6)
+  integer :: iQ, tabindex
 
-!   tabindex = tableIndexValue(iloop, nf)
-!   call EvalPdfTable_xQ(tables(tabindex),x,Q,f)
+  if (with_qed) call wae_error("hoppetEvalSplit","Does not support QED evolution")
 
-! end subroutine hoppetEvalSplit
+  tabindex = tableIndexValue(iloop, nf)
+  call EvalPdfTable_xQ(tables(tabindex),x,Q,f)
+
+end subroutine hoppetEvalSplit
 
 
