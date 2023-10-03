@@ -1,3 +1,12 @@
+2023-10-03 Tue  <gavin.salam@physics.ox.ac.uk> with Giulia
+
+	* example_f90/tabulation_example_qed.default_output:
+	* example_f90/tabulation_example_qed.f90:
+
+	reworked the QED initial condition that had been put in a few
+	commits ago (no ChangeLog entry) so that it conserves momentum sum
+	rule and updated the default output so that make check works...
+
 2023-09-21 Thu  <gavin.salam@physics.ox.ac.uk> + Giulia
 
 	* example_f90/tabulation_example.f90:

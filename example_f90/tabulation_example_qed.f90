@@ -167,8 +167,8 @@ contains
   !! unpolarized evolution (as used in hep-ph/0511119).
   function unpolarized_dummy_pdf(xvals) result(pdf)
     real(dp), intent(in) :: xvals(:)
-    real(dp)             :: pdf(size(xvals),ncompmin:iflv_tau)
-    real(dp) :: uv(size(xvals)), dv(size(xvals))
+    real(dp)             :: pdf(size(xvals),ncompmin:ncompmaxLeptons)
+    real(dp) :: gluon(size(xvals)), uv(size(xvals)), dv(size(xvals))
     real(dp) :: ubar(size(xvals)), dbar(size(xvals))
     !---------------------
     real(dp), parameter :: N_g = 1.7_dp, N_ls = 0.387975_dp
@@ -181,6 +181,7 @@ contains
     call LabelPdfAsHuman(pdf)
 
     !-- remember that these are all xvals*q(xvals)
+    gluon = N_g * xvals**(-0.1_dp) * (1-xvals)**5
     uv = N_uv * xvals**0.8_dp * (1-xvals)**3
     dv = N_dv * xvals**0.8_dp * (1-xvals)**4
     dbar = N_db * xvals**(-0.1_dp) * (1-xvals)**6
@@ -188,14 +189,14 @@ contains
 
     ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
     ! from the main program
-    pdf(:, iflv_g) = N_g * xvals**(-0.1_dp) * (1-xvals)**5
+    pdf(:, iflv_g) = 0.99_dp * gluon
     pdf(:,-iflv_s) = 0.2_dp*(dbar + ubar)
     pdf(:, iflv_s) = pdf(:,-iflv_s)
-    pdf(:, iflv_u) = uv + ubar
-    pdf(:,-iflv_u) = ubar
-    pdf(:, iflv_d) = dv + dbar
-    pdf(:,-iflv_d) = dbar
-    pdf(:,iflv_photon) = pdf(:, iflv_g)/100._dp+(uv + ubar)/10._dp 
+    pdf(:, iflv_u) = uv + 0.9_dp * ubar
+    pdf(:,-iflv_u) = 0.9_dp * ubar
+    pdf(:, iflv_d) = dv + 0.9_dp * dbar
+    pdf(:,-iflv_d) = 0.9_dp * dbar
+    pdf(:,iflv_photon) = gluon/100._dp + ubar/10._dp 
     pdf(:,iflv_electron) = dbar/10._dp
     pdf(:,iflv_muon) = ubar/10._dp
     pdf(:,iflv_tau) = dbar/10._dp         
