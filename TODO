@@ -32,7 +32,7 @@ QED merging notes (2023-09)
 - Streamlined interface
   * [ ] resolve any QED-TBD comments
   * [ ] make sure table-index handling is back in
-  * [ ] introduce hoppetSetQED()
+  * [x] introduce hoppetSetQED()
   * [x] decide muR_Q with QED -> do not support it
   * [ ] one day, allow for tables with QED convolutions
     * 1-5 = QCD

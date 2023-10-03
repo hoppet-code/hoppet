@@ -43,11 +43,11 @@ module streamlined_interface
   integer,  save :: ffn_nf = -1
   logical,  save :: quark_masses_are_MSbar = .false.
   real(dp), save :: masses(4:6) = quark_masses_def(4:6)
-  logical, save :: with_qed = .false.
   !! Additional things for QED
   !integer,  save            :: nqcdloop_qed
   type(qed_coupling),  save :: coupling_qed
-  type(qed_split_mat),  save :: qed_split, qed_split_no_Pqgx
+  type(qed_split_mat),  save :: qed_split
+  logical, save :: with_qed = .false.
   real(dp), save :: effective_light_quark_masses = 0.109_dp
 
 contains
@@ -117,39 +117,60 @@ contains
   
 end module streamlined_interface
 
-!! To be called by the user if one wants pdf's with leptons.
-subroutine with_qed_true
+! !! To be called by the user if one wants pdf's with leptons.
+! subroutine with_qed_true
+!   use streamlined_interface
+!   with_qed = .true.
+! end subroutine with_qed_true
+! 
+! subroutine with_qed_false
+!   use streamlined_interface
+!   with_qed = .false.
+! end subroutine with_qed_false
+! 
+! subroutine with_qcd_qed_true
+!   use qed_evolution 
+!   nqcdloop_qed = 1
+! end subroutine with_qcd_qed_true
+! 
+! subroutine with_qcd_qed_false
+!   use qed_evolution 
+!   nqcdloop_qed = 0
+! end subroutine with_qcd_qed_false
+! 
+! subroutine with_Plq_true
+!   use qed_evolution 
+!   with_Plp_nnloqed=.true.
+! end subroutine with_Plq_true
+! 
+! subroutine with_Plq_false
+!   use qed_evolution 
+!   with_Plp_nnloqed=.false.
+! end subroutine with_Plq_false
+
+!======================================================================
+!! This routine should be called before hoppetStart if one wants
+!! to include QED evolution. Note that it affects expected upper
+!! bounds for all routines that set and access the PDFs
+!!
+!! - use_qed: if true, QED evolution will be included
+!! - use_qcd_qed: if true, the mixed alpha_s*alpha splitting functions will be included
+!! - use_Plq_nnlo: if true, the NNLO Plq splitting functions will be included
+subroutine hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
   use streamlined_interface
-  with_qed = .true.
-end subroutine with_qed_true
+  use qed_evolution
+  implicit none
+  logical, intent(in)  :: use_qed
+  logical, intent(in)  :: use_qcd_qed, use_Plq_nnlo
 
-subroutine with_qed_false
-  use streamlined_interface
-  with_qed = .false.
-end subroutine with_qed_false
-
-subroutine with_qcd_qed_true
-  use qed_evolution 
-  nqcdloop_qed = 1
-end subroutine with_qcd_qed_true
-
-subroutine with_qcd_qed_false
-  use qed_evolution 
-  nqcdloop_qed = 0
-end subroutine with_qcd_qed_false
-
-subroutine with_Plq_true
-  use qed_evolution 
-  with_Plp_nnloqed=.true.
-end subroutine with_Plq_true
-
-subroutine with_Plq_false
-  use qed_evolution 
-  with_Plp_nnloqed=.false.
-end subroutine with_Plq_false
-
-
-
+  with_qed = use_qed
+  if (use_qcd_qed) then 
+    nqcdloop_qed = 1
+  else
+    nqcdloop_qed = 0
+  end if
+  with_Plp_nnloqed = use_Plq_nnlo
+end subroutine hoppetSetQED
 
 !======================================================================
 !! initialise the underlying grid, splitting functions and pdf-table

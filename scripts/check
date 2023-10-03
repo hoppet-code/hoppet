@@ -10,7 +10,9 @@
 # list of tests to run:
 # - for a test labelled $test, there should be a reference output file
 #   $test.default_output
-tests=(example_f90/tabulation_example example_f90/tabulation_example_qed)
+tests=(example_f90/tabulation_example \
+       example_f90/tabulation_example_qed \
+       )
 
 for test in ${tests[@]}; do
   echo

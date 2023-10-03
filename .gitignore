@@ -4,4 +4,5 @@
 /.compiler
 /config.log
 /hoppet-config
+example_f90/tabulation_example_qed_streamlined
 src/.vscode
