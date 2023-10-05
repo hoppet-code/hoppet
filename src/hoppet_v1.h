@@ -17,8 +17,16 @@
 #define hoppetSetMSbarMassVFN  hoppetsetmsbarmassvfn_       
 #define hoppetEval             hoppeteval_          
 #define hoppetEvalSplit        hoppetevalsplit_
+#define hoppetSetQED           hoppetsetqed_
 
 extern "C" {
+
+
+  // The following does not work
+  // void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
+  // There must be a problem in passing boolean from c++ to fortran. Passing them
+  // as integer works, but is it safe? (TBD)
+  void hoppetSetQED(const int & withqed, const int & qcdqed, const int & plq);
 
   /// initialise the underlying grid, splitting functions and pdf-table
   /// objects, using the dy grid spacing and splitting functions up to
