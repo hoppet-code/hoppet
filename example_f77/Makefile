@@ -39,6 +39,9 @@ F90LIB4GCC=   -lgfortran
 LIBS = -L../src -lhoppet_v1 $(F90LIB)
 LHAPDFLIBS = `lhapdf-config --ldflags`
 
+cpp_tabulation_example_qed: cpp_tabulation_example_qed.o
+	$(CXX) -o cpp_tabulation_example_qed $<  $(LIBS) -lm $(F90LIB4GCC)
+
 tabulation_example: tabulation_example.o
 	$(FC) -o tabulation_example $<  $(LIBS) 
 
@@ -63,5 +66,6 @@ clean:
 	rm *.o
 
 realclean: clean
-	rm convolution_example conveg  tabulation_example
+	rm convolution_example conveg  tabulation_example  cpp_tabulation_example_qed
+
 
