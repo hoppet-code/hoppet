@@ -131,7 +131,8 @@ subroutine hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
   implicit none
   logical, intent(in)  :: use_qed
   logical, intent(in)  :: use_qcd_qed, use_Plq_nnlo
-
+  write(*,*) 'hoppetSetQED: use_qed, use_qcd_qed, use_Plq_nnlo=', &
+       & use_qed, use_qcd_qed, use_Plq_nnlo
   with_qed = use_qed
   if (use_qcd_qed) then 
     nqcdloop_qed = 1
