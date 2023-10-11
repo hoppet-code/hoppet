@@ -2702,6 +2702,55 @@ available, and the well-known 2-loop QED running coupling at order $\alpha \alph
 %  splitting exists, $\alpha\as^2$ does not?}
 %
 
+
+\subsection{Implementation of the QED extension}
+A first ingredient is the setup of the QED coupling,
+\begin{lstlisting}
+    InitQEDCoupling(coupling_qed, effective_light_quark_masses, &
+  & quark_masses(4:6) [,value_at_scale_0])
+    type(qed_coupling), intent(out) :: coupling
+    real(dp),           intent(in)  :: m_light_quarks, m_heavy_quarks(4:6)
+    real(dp), optional, intent(in)  :: value_at_scale_0 ! defaults to alpha_qed_scale_0
+    !--------------------------------------------
+    real(dp) :: mc, mb, mt
+\end{lstlisting}
+This call initializes the \ttt{qed\_coupling} type, defined as
+\begin{lstlisting}
+  type qed_coupling 
+     real(dp) :: m_light_quarks
+     real(dp) :: mc, mb, mt
+     integer  :: n_thresholds
+     integer  :: nflav(3, 0:n_thresholds) ! first index: 1 = nleptons, 2=ndown, 3=nup
+     real(dp) :: thresholds(0:n_thresholds+1)  !
+     real(dp) :: b0_values(n_thresholds)
+     real(dp) :: alpha_values(n_thresholds)
+  end type qed_coupling
+\end{lstlisting}
+
+
+
+By default it initialises the parameters relevant to the QED coupling and its running.
+The electromagnetic
+coupling at scale zero, \ttt{value\_at\_scale\_0},
+is set by default to its PDG~\cite{ParticleDataGroup:2022pth} value.
+The running is performed at leading level using seven threshold:
+a common effective mass for the light quarks, the three lepton masses, and the
+three masses of the heavy quarks.
+%
+The common value of the light quark masses is used to mimic the physical evolution in the region
+$0.1\GeV \lesssim \mu \lesssim 1\GeV$, which involves hadronic states.
+%
+Using a value of $0.109\GeV$ reproduces the correct QED coupling value at
+the $\tau$ and $Z$-boson masses with a relative $\sim 10^{-4}$
+accuracy.
+The function \ttt{QEDCouplingValue(qed_coupling,mu}
+%
+Lepton masses are hard-coded to their PDG
+values~\cite{ParticleDataGroup:2022pth} in the
+\ttt{src/qed\_coupling.f90} file.
+
+
+
 \subsection{Worked-out example using QCD+QED evolution}
 
 % Even within the phenomenological counting, once N3LO QCD splitting

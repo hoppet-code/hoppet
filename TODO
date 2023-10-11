@@ -42,6 +42,11 @@ QED merging notes (2023-09)
     * 9 = alpha * alphas^2
 - merge from master
 
+Boolean problem when interfacing c++ to fortran
+==============================================
+Passing booleans by reference between c++ and fortran
+does not work
+
 Old notes
 =========
 
