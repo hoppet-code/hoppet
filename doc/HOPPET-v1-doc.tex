@@ -2704,9 +2704,26 @@ available, and the well-known 2-loop QED running coupling at order $\alpha \alph
 
 
 \subsection{Implementation of the QED extension}
-A first ingredient is the setup of the QED coupling,
+
+\paragraph{QED coupling}
+
+A first ingredient is the setup of the QED coupling object, defined in
+\ttt{module qed\_coupling}:
 \begin{lstlisting}
-    InitQEDCoupling(coupling_qed, effective_light_quark_masses, &
+  type qed_coupling 
+     real(dp) :: m_light_quarks
+     real(dp) :: mc, mb, mt
+     integer  :: n_thresholds
+     integer  :: nflav(3, 0:n_thresholds) ! first index: 1 = nleptons, 2=ndown, 3=nup
+     real(dp) :: thresholds(0:n_thresholds+1)
+     real(dp) :: b0_values(n_thresholds)
+     real(dp) :: alpha_values(n_thresholds)
+  end type qed_coupling
+\end{lstlisting}
+%
+This is initialized through a call to 
+\begin{lstlisting}
+    subroutine InitQEDCoupling(coupling_qed, effective_light_quark_masses, &
   & quark_masses(4:6) [,value_at_scale_0])
     type(qed_coupling), intent(out) :: coupling
     real(dp),           intent(in)  :: m_light_quarks, m_heavy_quarks(4:6)
@@ -2714,41 +2731,147 @@ A first ingredient is the setup of the QED coupling,
     !--------------------------------------------
     real(dp) :: mc, mb, mt
 \end{lstlisting}
-This call initializes the \ttt{qed\_coupling} type, defined as
-\begin{lstlisting}
-  type qed_coupling 
-     real(dp) :: m_light_quarks
-     real(dp) :: mc, mb, mt
-     integer  :: n_thresholds
-     integer  :: nflav(3, 0:n_thresholds) ! first index: 1 = nleptons, 2=ndown, 3=nup
-     real(dp) :: thresholds(0:n_thresholds+1)  !
-     real(dp) :: b0_values(n_thresholds)
-     real(dp) :: alpha_values(n_thresholds)
-  end type qed_coupling
-\end{lstlisting}
 
 
+By default it initialises the parameters relevant to the QED coupling
+and its running.  The electromagnetic coupling at scale zero is set by
+default to its PDG~\cite{ParticleDataGroup:2022pth} value, unless the
+optional argument \ttt{value\_at\_scale\_0} is provided, in which case
+the latter is taken as the value of the QED coupling at zero momentum.
 
-By default it initialises the parameters relevant to the QED coupling and its running.
-The electromagnetic
-coupling at scale zero, \ttt{value\_at\_scale\_0},
-is set by default to its PDG~\cite{ParticleDataGroup:2022pth} value.
-The running is performed at leading level using seven threshold:
-a common effective mass for the light quarks, the three lepton masses, and the
-three masses of the heavy quarks.
+The running is performed at leading order level using seven thresholds:
+a common effective mass for the three light quarks, the three lepton
+masses, and the three masses of the heavy quarks.
 %
-The common value of the light quark masses is used to mimic the physical evolution in the region
-$0.1\GeV \lesssim \mu \lesssim 1\GeV$, which involves hadronic states.
+The common value of the light quark masses is used to mimic the
+physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
+1\GeV$, which involves hadronic states.
 %
 Using a value of $0.109\GeV$ reproduces the correct QED coupling value at
 the $\tau$ and $Z$-boson masses with a relative $\sim 10^{-4}$
 accuracy.
-The function \ttt{QEDCouplingValue(qed_coupling,mu}
 %
 Lepton masses are hard-coded to their PDG
 values~\cite{ParticleDataGroup:2022pth} in the
 \ttt{src/qed\_coupling.f90} file.
+%
+The heavy-quark masses \ttt{quark\_masses(4:6)} are instead required as
+non-optional arguments.
 
+The quark and lepton masses are used to set all thresholds where the
+active matter content changes. This information is then used to set
+the arrary \ttt{nflav(3,0:n\_thresholds)}, where \ttt{nflav(1:3,i)}
+contains an integer array with the number of leptons, down and up
+quarks at a given $Q^2$ such that \ttt{threshold(i-1)}$<Q^2<$
+\ttt{threshold(i)}. \ttt{threshold(1:7)} are active thresholds, while
+\ttt{threshold(0)} is set to zero and \ttt{threshold(8)} to
+$10^{200}$. The integer array \ttt{nflav(1:3,0:n\_thresholds)} is then used to compute the
+$\beta_{0,\rm QED}$ function \ttt{b0\_values(1:n\_thresholds)} at the seven threshold values and this is
+finally used to compute the value of the QED coupling
+\ttt{alpha\_values(1:n\_thresholds)} at the threshold values.
+%
+The function \ttt{Delete(qed\_coupling)} is also provided for
+consistency, although in this case it does nothing.
+
+
+The function \ttt{Value(qed\_coupling,mu)} returns the QED coupling at
+scale $\mu$.
+
+\paragraph{QED splitting matrices}
+
+The QED splitting matrices are stored in the object
+
+\begin{lstlisting}
+  type qed_split_mat
+     type(qed_split_mat_lo)  :: lo
+     type(qed_split_mat_nlo) :: nlo
+     type(qed_split_mat_nnlo) :: nnlo
+  end type qed_split_mat
+\end{lstlisting}
+which contains the LO, NLO and NNLO splitting matrices 
+\begin{lstlisting}
+  ! a leading-order splitting matrix (multiplies alpha/2pi)
+  type qed_split_mat_lo
+     type(grid_conv) :: Pqq_01, Pqy_01, Pyq_01, Pyy_01
+     integer         :: nu, nd, nl, nf
+  end type qed_split_mat_lo
+
+  ! a NLO splitting matrix (multiplies (alpha alpha_s)/(2pi)^2)
+  type qed_split_mat_nlo
+     type(grid_conv) :: Pqy_11, Pyy_11, Pgy_11
+     type(grid_conv) :: Pqg_11, Pyg_11, Pgg_11
+     type(grid_conv) :: PqqV_11, PqqbarV_11, Pgq_11, Pyq_11
+     integer         :: nu, nd, nl, nf
+  end type qed_split_mat_nlo
+
+  ! a NNLO splitting matrix (multiplies ( alpha/(2pi) )^2
+  ! contains only Plq splitting!
+  type qed_split_mat_nnlo 
+     type(grid_conv) :: Plq_02
+     integer         :: nu, nd, nl, nf
+  end type qed_split_mat_nnlo
+\end{lstlisting}     
+
+Above \ttt{y} denotes a photon and the pairs of integers \ttt{01},
+\ttt{11} and \ttt{02} denote order in the QCD and QED couplings,
+respectively. Besides \ttt{nf}, these splitting matrices also need the
+number of up-type quarks (\ttt{nu}), down-type quarks (\ttt{nd}), and
+leptons (\ttt{nl}).
+%
+Note that the splitting functions of order $\alpha$ (i.e.\ \ttt{01})
+for the leptons are not given since they can be obtained from the ones
+involving quarks by adjusting colour factors and couplings.
+
+A call to the subroutine 
+\begin{lstlisting}     
+  subroutine InitQEDSplitMat(grid, qed_split)
+    use qed_splitting_functions
+    type(grid_def),      intent(in)    :: grid
+    type(qed_split_mat), intent(inout) :: qed_split
+\end{lstlisting}     
+initializes all \ttt{qed\_split\_mat} objects and sets all QED
+splitting functions on the given \ttt{grid}.
+This routine also calls
+\begin{lstlisting}  
+  subroutine QEDSplitMatSetNf(qed_sm, nl, nd, nu)
+    type(qed_split_mat) :: qed_sm
+    integer, intent(in) :: nl, nu, nd
+  end subroutine QEDSplitMatSetNf
+\end{lstlisting}
+which sets \ttt{nl,nu,nd,nf} for \ttt{qed\_split\_mat\_lo},
+\ttt{qed\_split\_mat\_nnlo} and \ttt{qed\_split\_mat\_nnlo}.
+
+Subroutines \ttt{Copy} and \ttt{Delete} are also provided for the
+\ttt{qed\_split\_mat} type. As in the pure QCD case, convolutions with
+QED splitting functions can be represented by \ttt{.conv.} operator or
+using the product sign \ttt{*}.
+
+A call to the subroutine
+\begin{lstlisting}  
+  subroutine AllocPDFWithPhoton(grid, pdf)
+    type(grid_def), intent(in) :: grid
+    real(dp),       pointer    :: pdf(:,:)
+  end subroutine AllocPDFWithPhoton
+\end{lstlisting}
+allocates PDFs including photons, while a call to
+\begin{lstlisting}  
+  subroutine AllocPDFWithLeptons(grid, pdf)
+    type(grid_def), intent(in) :: grid
+    real(dp),       pointer    :: pdf(:,:)
+  end subroutine AllocPDFWithLeptons
+\end{lstlisting}
+allocates PDFs including both photons and leptons.
+%
+The flavour indices for photons and leptons in the PDF tables are
+given by
+\begin{lstlisting}  
+  integer, parameter, public :: iflv_photon   =  8
+  integer, parameter, public :: iflv_electron =  9
+  integer, parameter, public :: iflv_muon     = 10
+  integer, parameter, public :: iflv_tau      = 11
+\end{lstlisting}
+where for the leptons the sum of lepton and anti-lepton (which are
+identical) is always given.
 
 
 \subsection{Worked-out example using QCD+QED evolution}
