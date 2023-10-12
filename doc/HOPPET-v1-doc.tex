@@ -62,6 +62,7 @@
 \newcommand{\as}{\alpha_s}
 \newcommand{\comment}[1]{\textbf{[#1]}}
 \newcommand{\commentgz}[1]{{\color{red} [\it GZ:  #1}]}
+\newcommand{\commentpn}[1]{{\color{magenta} [\it PN:  #1}]}
 \newcommand{\eg}{e.g.\ }
 \newcommand{\ie}{i.e.\ }
 \newcommand{\cf}{cf.\ }
@@ -2862,7 +2863,9 @@ allocates PDFs including photons, while a call to
 \end{lstlisting}
 allocates PDFs including both photons and leptons.
 %
-The flavour indices for photons and leptons in the PDF tables are
+The two indices of the \ttt{pdf} refer to
+the number of $x$ values in the \ttt{grid}, and the flavour.
+The flavour indices for photons and leptons in the PDF arrays are
 given by
 \begin{lstlisting}  
   integer, parameter, public :: iflv_photon   =  8
@@ -2872,6 +2875,27 @@ given by
 \end{lstlisting}
 where for the leptons the sum of lepton and anti-lepton (which are
 identical) is always given.
+The subroutine \ttt{AllocPDFWithPhotons} allocates the \ttt{pdf}
+array with the flavour index up to 8,
+while in the subroutine \ttt{AllocPDFWithLeptons},
+the flavour index extends to 11.
+
+Next we must prepair a \ttt{pdf\_table} object forming the interpoleting grid
+for the evolved PDF's. This is initialized by a call to the
+subroutine
+\begin{lstlisting}
+  subroutine AllocPdfTableWithLeptons(grid, pdftable, Qmin=1.0_dp, Qmax=10000.0_dp, & 
+       & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
+\end{lstlisting}
+that is identical to the one without leptons, the only difference is that the
+maximum pdf flavour index now includes the leptons.
+
+The full evolution for filling the table is performed by calling the
+subroutine
+\begin{lstlisting}
+  call EvolvePdfTableQED(pdftable, Q0, pdf0, dh, qed_split, &
+                         coupling, coupling_qed, nloop_qcd, nloopqcd_qed)
+\end{lstlisting}
 
 
 \subsection{Worked-out example using QCD+QED evolution}
@@ -2929,12 +2953,15 @@ The flavour (second) index now extends to a value of 11 and four new
   integer, parameter, public :: iflv_muon     = 10  ! sum of mu^+ and mu^-
   integer, parameter, public :: iflv_tau      = 11  ! sum of tau^+ and tau^-
 \end{lstlisting}
+
 For PDFs of hadrons, at the accuracy that we consider, the lepton and
-anti-lepton distribution are identical. Note that if one extends the
+anti-lepton distributions are identical. Note that if one extends the
 calculation of lepton PDFs to ${\cal O}(\alpha)$, then there would be
 an asymmetry in the lepton and anti-lepton distribution. This is the
 same effect that is responsible for generating a charge asymmetry
 between top and anti-top quarks at the LHC~\cite{Nason:1989zy}.
+\commentpn{Is this really right? an asymmetry can only arise from a
+  \ttt{Plq\_03} splitting function ...}
 %
 %\comment{Does this persist at higher orders or not?}
 %
@@ -2949,9 +2976,12 @@ between top and anti-top quarks at the LHC~\cite{Nason:1989zy}.
 }
 
 
-The initializaton of the grid to perform the evoluation and of the
+The initializaton of the grid to perform the evolution and of the
 $\ttt{dglap\_holder}$, which stores all the components required for the
-evolution proceeds as in the pure QCD case. Furthermore one needs to
+evolution proceeds as in the pure QCD case.
+This starts by calling the \ttt{InitGridDefDefault}
+and \ttt{InitDglapHolder}.
+Furthermore one needs to
 initialize the QCD splitting matrices using 
 \begin{lstlisting}
   call InitQEDSplitMat(grid, qed_split)
