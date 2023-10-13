@@ -154,8 +154,8 @@ contains
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
     write(idev,'(a,a)') '# x  F1Wp(LO) F1Wm(LO) F1Wp(NLO) F1Wm(NLO) F1Wp(NNLO) F1Wm(NNLO)', &
           & ' F1Wp(N3LO) F1Wm(N3LO) F1Z(LO) F1Z(NLO) F1Z(NNLO) F1Z(N3LO) F1γ(LO) F1γ(NLO) F1γ(NNLO) F1γ(N3LO)'
-    mF = muF(Qtest)
-    mR = muR(Qtest)
+    mF = sf_muF(Qtest)
+    mR = sf_muR(Qtest)
     do iy = nx, 0, -1
        ytest = logxomx_max + iy * (logxomx_min - logxomx_max) / nx
        xval = exp(-ytest)/(one+exp(-ytest))
@@ -197,8 +197,8 @@ contains
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
     write(idev,'(a,a)') '# x  F2Wp(LO) F2Wm(LO) F2Wp(NLO) F2Wm(NLO) F2Wp(NNLO) F2Wm(NNLO)', &
           & ' F2Wp(N3LO) F2Wm(N3LO) F2Z(LO) F2Z(NLO) F2Z(NNLO) F2Z(N3LO) F2γ(LO) F2γ(NLO) F2γ(NNLO) F2γ(N3LO)'
-    mF = muF(Qtest)
-    mR = muR(Qtest)
+    mF = sf_muF(Qtest)
+    mR = sf_muR(Qtest)
     do iy = nx, 0, -1
        ytest = logxomx_max + iy * (logxomx_min - logxomx_max) / nx
        xval = exp(-ytest)/(one+exp(-ytest))
@@ -241,8 +241,8 @@ contains
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
     write(idev,'(a,a)') '# x  F3Wp(LO) F3Wm(LO) F3Wp(NLO) F3Wm(NLO) F3Wp(NNLO) F3Wm(NNLO)', &
           & ' F3Wp(N3LO) F3Wm(N3LO) F3Z(LO) F3Z(NLO) F3Z(NNLO) F3Z(N3LO)'
-    mF = muF(Qtest)
-    mR = muR(Qtest)
+    mF = sf_muF(Qtest)
+    mR = sf_muR(Qtest)
     do iy = nx, 0, -1
        ytest = logxomx_max + iy * (logxomx_min - logxomx_max) / nx
        xval = exp(-ytest)/(one+exp(-ytest))

@@ -48,7 +48,7 @@ module structure_functions
   public :: InitStrFct, StartStrFct, write_f1, write_f2, write_f3
   public :: F1Wp, F2Wp, F3Wp, F1Wm, F2Wm, F3Wm, F1Z, F2Z, F3Z, F1EM, F2EM, F1gZ, F2gZ, F3gZ
   public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct
-  public :: muR, muF, quark_masses_sf
+  public :: sf_muR, sf_muF, quark_masses_sf
   
   ! holds the coefficient functions
   type(coef_holder), save :: ch
@@ -264,8 +264,8 @@ contains
     real(dp) :: mF, mR, factor
     real(dp) :: str_fct(-6:7), f2nnlo, f2n3lo, y(0:grid%ny)
     integer :: iy, ii
-    mF = muF(Qval)
-    mR = muR(Qval)
+    mF = sf_muF(Qval)
+    mR = sf_muR(Qval)
     y = yValues(grid)
     do iy = 0, grid%ny
        str_fct(:) = F_LO(y(iy), Qval, mR, mF) + F_NLO(y(iy), Qval, mR, mF) + F_NNLO(y(iy), Qval, mR, mF)
@@ -303,8 +303,8 @@ contains
     real(dp) :: mF, mR, factor
     real(dp) :: str_fct(-6:7), f2nlo, f2nnlo, y(0:grid%ny) 
     integer :: iy, ii
-    mF = muF(Qval) 
-    mR = muR(Qval)
+    mF = sf_muF(Qval) 
+    mR = sf_muR(Qval)
     y = yValues(grid)
     do iy = 0, grid%ny              
        str_fct(:) = F_LO(y(iy), Qval, mR, mF) + F_NLO(y(iy), Qval, mR, mF)
@@ -347,8 +347,8 @@ contains
     else
        write(idev,'(a)') '# x F1Wp F1Wm F1Z'
     endif
-    mF = muF(Qtest)
-    mR = muR(Qtest)
+    mF = sf_muF(Qtest)
+    mR = sf_muR(Qtest)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
@@ -391,8 +391,8 @@ contains
     else
        write(idev,'(a)') '# x F2Wp F2Wm F2Z'
     endif
-    mF = muF(Qtest)
-    mR = muR(Qtest)
+    mF = sf_muF(Qtest)
+    mR = sf_muR(Qtest)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
@@ -435,8 +435,8 @@ contains
     else
        write(idev,'(a)') '# x F3Wp F3Wm F3Z'
     endif
-    mF = muF(Qtest)
-    mR = muR(Qtest)
+    mF = sf_muF(Qtest)
+    mR = sf_muR(Qtest)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
@@ -487,10 +487,10 @@ contains
     do iQ = 0, tables(0)%nQ
        
        Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),muF(Q),f)
+       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
-       as2pi = alphasLocal(muR(Q)) / (twopi)
+       as2pi = alphasLocal(sf_muR(Q)) / (twopi)
        
        if (use_mass_thresholds) then
           call use_vfns(f, Q)
@@ -597,8 +597,8 @@ contains
     ! so simply pass table(0) for each of the pieces
     do iQ = 0, tables(0)%nQ
        Q = tables(0)%Q_vals(iQ)
-       ! explicitly evaluate the PDF at scale muF(Q)
-       call EvalPdfTable_Q(tables(0),muF(Q),f)
+       ! explicitly evaluate the PDF at scale sf_muF(Q)
+       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
        if (use_mass_thresholds) then
           call use_vfns(f, Q)
        endif
@@ -644,7 +644,7 @@ contains
     do iQ = 0, tables(0)%nQ
        
        Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),muF(Q),f)
+       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -702,7 +702,7 @@ contains
     real(dp) :: Q
     
     do iQ = 0, tables(0)%nQ
-       ! Internal Q value effectively corresponds to muF(Q1,Q2)
+       ! Internal Q value effectively corresponds to sf_muF(Q1,Q2)
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
 
@@ -740,7 +740,7 @@ contains
     do iQ = 0, tables(0)%nQ
 
        Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),muF(Q),f)
+       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -879,7 +879,7 @@ contains
     do iQ = 0, tables(0)%nQ
 
        Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),muF(Q),f)
+       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -1477,41 +1477,41 @@ contains
   subroutine set_scale_logs(Q)
     real(dp), intent(in) :: Q
 
-    log_muF2_over_Q2 = two * log(muF(Q) / Q)
-    log_muR2_over_Q2 = two * log(muR(Q) / Q)
+    log_muF2_over_Q2 = two * log(sf_muF(Q) / Q)
+    log_muR2_over_Q2 = two * log(sf_muR(Q) / Q)
   end subroutine set_scale_logs
   
   !----------------------------------------------------------------------
   ! mu_R 
-  real(dp) function muR(Q)
+  real(dp) function sf_muR(Q)
     real(dp), intent(in) :: Q
-    muR = zero
+    sf_muR = zero
     if (scale_choice_save.eq.scale_choice_fixed) then
        ! scale_choice = 0 : muF = xmuF * cst_mu
-       muR = xmuR * cst_mu
+       sf_muR = xmuR * cst_mu
     elseif (scale_choice_save.eq.scale_choice_Q) then
        ! scale_choice = 1 : mu_R = xmuR * Q
-       muR = xmuR * Q
+       sf_muR = xmuR * Q
     else
-       call wae_error('muR(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
+       call wae_error('sf_muR(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
     endif
-  end function muR
+  end function sf_muR
 
   !----------------------------------------------------------------------
   ! mu_F 
-  real(dp) function muF(Q)
+  real(dp) function sf_muF(Q)
     real(dp), intent(in) :: Q
-    muF = zero
+    sf_muF = zero
     if (scale_choice_save.eq.scale_choice_fixed) then
        ! scale_choice = 0 : muF = xmuF * cst_mu
-       muF = xmuF * cst_mu
+       sf_muF = xmuF * cst_mu
     elseif (scale_choice_save.eq.scale_choice_Q) then
        ! scale_choice = 1 : muF = xmuF * Q
-       muF = xmuF * Q
+       sf_muF = xmuF * Q
     else
-       call wae_error('muF(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
+       call wae_error('sf_muF(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
     endif
-  end function muF
+  end function sf_muF
   
   subroutine use_vfns (f, Q)
     implicit none
