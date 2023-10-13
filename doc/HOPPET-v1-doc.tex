@@ -2832,15 +2832,18 @@ A call to the subroutine
 \end{lstlisting}     
 initializes all \ttt{qed\_split\_mat} objects and sets all QED
 splitting functions on the given \ttt{grid}.
-This routine also calls
-\begin{lstlisting}  
-  subroutine QEDSplitMatSetNf(qed_sm, nl, nd, nu)
-    type(qed_split_mat) :: qed_sm
-    integer, intent(in) :: nl, nu, nd
-  end subroutine QEDSplitMatSetNf
-\end{lstlisting}
-which sets \ttt{nl,nu,nd,nf} for \ttt{qed\_split\_mat\_lo},
-\ttt{qed\_split\_mat\_nnlo} and \ttt{qed\_split\_mat\_nnlo}.
+%This routine also calls
+%\begin{lstlisting}  
+%  subroutine QEDSplitMatSetNf(qed_sm, nl, nd, nu)
+%    type(qed_split_mat) :: qed_sm
+%    integer, intent(in) :: nl, nu, nd
+%  end subroutine QEDSplitMatSetNf
+%\end{lstlisting}
+%which sets \ttt{nl,nu,nd,nf} for \ttt{qed\_split\_mat\_lo},
+%\ttt{qed\_split\_mat\_nnlo} and \ttt{qed\_split\_mat\_nnlo}.
+\commentpn{It is unclear to us how crossing the flavour trheshold in
+  evolution are handled. The InitQEDSplitMat seems to work for fixed
+  number of flavours ...}
 
 Subroutines \ttt{Copy} and \ttt{Delete} are also provided for the
 \ttt{qed\_split\_mat} type. As in the pure QCD case, convolutions with
@@ -2894,8 +2897,9 @@ The full evolution for filling the table is performed by calling the
 subroutine
 \begin{lstlisting}
   call EvolvePdfTableQED(pdftable, Q0, pdf0, dh, qed_split, &
-                         coupling, coupling_qed, nloop_qcd, nloopqcd_qed)
+ &  coupling, coupling_qed, nloop_qcd, nloopqcd_qed)
 \end{lstlisting}
+  % Oct 13, 9:56
 
 
 \subsection{Worked-out example using QCD+QED evolution}
