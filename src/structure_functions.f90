@@ -354,21 +354,21 @@ contains
        xval = exp(-ytest)
        if (use_sep_orders) then
           res = F_LO(xval, Qtest, mR, mF)
-          write(idev,'(3es22.12)',advance='no') xval, res(F1Wp),res(F1Wm)
+          write(idev,'(3es12.4)',advance='no') xval, res(F1Wp),res(F1Wm)
           F1Z_LO = res(F1Z)
           res = F_NLO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
+          write(idev,'(2es12.4)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_NLO = res(F1Z)
           res = F_NNLO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
+          write(idev,'(2es12.4)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_NNLO = res(F1Z)
           res = F_N3LO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F1Wp), res(F1Wm)
+          write(idev,'(2es12.4)',advance='no') res(F1Wp), res(F1Wm)
           F1Z_N3LO = res(F1Z)
-          write(idev,'(4es22.12)',advance='no') F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO
+          write(idev,'(4es12.4)',advance='no') F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es22.12)',advance='no') xval, res(F1Wp),res(F1Wm), res(F1Z)
+          write(idev,'(4es12.4)',advance='no') xval, res(F1Wp),res(F1Wm), res(F1Z)
        endif
        write(idev,*)
     end do
@@ -398,21 +398,21 @@ contains
        xval = exp(-ytest)
        if (use_sep_orders) then
           res = F_LO(xval, Qtest, mR, mF)
-          write(idev,'(3es22.12)',advance='no') xval, res(F2Wp),res(F2Wm)
+          write(idev,'(3es12.4)',advance='no') xval, res(F2Wp),res(F2Wm)
           F2Z_LO = res(F2Z)
           res = F_NLO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
+          write(idev,'(2es12.4)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_NLO = res(F2Z)
           res = F_NNLO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
+          write(idev,'(2es12.4)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_NNLO = res(F2Z)
           res = F_N3LO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F2Wp), res(F2Wm)
+          write(idev,'(2es12.4)',advance='no') res(F2Wp), res(F2Wm)
           F2Z_N3LO = res(F2Z)
-          write(idev,'(4es22.12)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
+          write(idev,'(4es12.4)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es22.12)',advance='no') xval, res(F2Wp),res(F2Wm), res(F2Z)
+          write(idev,'(4es12.4)',advance='no') xval, res(F2Wp),res(F2Wm), res(F2Z)
        endif
        write(idev,*)
     end do
@@ -442,21 +442,21 @@ contains
        xval = exp(-ytest)
        if (use_sep_orders) then
           res = F_LO(xval, Qtest, mR, mF)
-          write(idev,'(3es22.12)',advance='no') xval, res(F3Wp),res(F3Wm)
+          write(idev,'(3es12.4)',advance='no') xval, res(F3Wp),res(F3Wm)
           F3Z_LO = res(F3Z)
           res = F_NLO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
+          write(idev,'(2es12.4)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_NLO = res(F3Z)
           res = F_NNLO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
+          write(idev,'(2es12.4)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_NNLO = res(F3Z)
           res = F_N3LO(xval, Qtest, mR, mF)
-          write(idev,'(2es22.12)',advance='no') res(F3Wp), res(F3Wm)
+          write(idev,'(2es12.4)',advance='no') res(F3Wp), res(F3Wm)
           F3Z_N3LO = res(F3Z)
-          write(idev,'(4es22.12)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
+          write(idev,'(4es12.4)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es22.12)',advance='no') xval, res(F3Wp),res(F3Wm), res(F3Z)
+          write(idev,'(4es12.4)',advance='no') xval, res(F3Wp),res(F3Wm), res(F3Z)
        endif
        write(idev,*)
     end do
