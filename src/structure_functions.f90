@@ -45,32 +45,42 @@ module structure_functions
   implicit none
 
   private
+  ! public functions
+  ! those for initialisation and I/O
   public :: InitStrFct, StartStrFct, write_f1, write_f2, write_f3
-  public :: F1Wp, F2Wp, F3Wp, F1Wm, F2Wm, F3Wm, F1Z, F2Z, F3Z, F1EM, F2EM, F1gZ, F2gZ, F3gZ
+  ! those for evaluating the structure functions
   public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct
-  public :: sf_muR, sf_muF, quark_masses_sf
+  ! those for querying the scale choices being used
+  public :: sf_muR, sf_muF
   
+  ! public indices for the different structure functions (D=d,s,b, U=u,c)
+  integer, parameter, public :: F1Wp= 1   !< F1 W+ : D + Ubar 
+  integer, parameter, public :: F2Wp= 2   !< F2 W+ : D + Ubar 
+  integer, parameter, public :: F3Wp= 3   !< F3 W+ : D + Ubar 
+  integer, parameter, public :: F1Wm=-1   !< F1 W- : Dbar + U 
+  integer, parameter, public :: F2Wm=-2   !< F2 W- : Dbar + U 
+  integer, parameter, public :: F3Wm=-3   !< F3 W- : Dbar + U 
+  integer, parameter, public :: F1Z = 4   !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter, public :: F2Z = 5   !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter, public :: F3Z = 6   !< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up
+  integer, parameter, public :: F1EM = -4 !< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
+  integer, parameter, public :: F2EM = -5 !< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
+  integer, parameter, public :: F1gZ = 0  !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter, public :: F2gZ = -6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter, public :: F3gZ = 7  !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
+
+  ! public indices for scale choice options
+  integer, parameter, public :: scale_choice_fixed     = 0 !< muR,muF scales predetermined in the StartStrFct call
+  integer, parameter, public :: scale_choice_Q         = 1 !< muR,muF scales equal to xR,xQ * Q (xR,xQ to be set in StartStrFct)
+  integer, parameter, public :: scale_choice_arbitrary = 2 !< muR,muF scales can be chosen freely in the F_LO (etc.) and StrFct calls
+
+  real(dp), save, public     :: quark_masses_sf(4:6) = quark_masses_def(4:6)
+
   ! holds the coefficient functions
   type(coef_holder), save :: ch
   
-  ! indices for the different structure functions (D=d,s,b, U=u,c)
-  integer, parameter :: F1Wp= 1   !< F1 W+ : D + Ubar 
-  integer, parameter :: F2Wp= 2   !< F2 W+ : D + Ubar 
-  integer, parameter :: F3Wp= 3   !< F3 W+ : D + Ubar 
-  integer, parameter :: F1Wm=-1   !< F1 W- : Dbar + U 
-  integer, parameter :: F2Wm=-2   !< F2 W- : Dbar + U 
-  integer, parameter :: F3Wm=-3   !< F3 W- : Dbar + U 
-  integer, parameter :: F1Z = 4   !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
-  integer, parameter :: F2Z = 5   !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
-  integer, parameter :: F3Z = 6   !< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up
-  integer, parameter :: F1EM = -4 !< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
-  integer, parameter :: F2EM = -5 !< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
-  integer, parameter :: F1gZ = 0  !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
-  integer, parameter :: F2gZ = -6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
-  integer, parameter :: F3gZ = 7  !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
-  
+
   ! constants and fixed parameters
-  real(dp), save      :: quark_masses_sf(4:6) = quark_masses_def(4:6)
   logical,  save      :: use_mass_thresholds
   real(dp), parameter :: viW = 1/sqrt(two), aiW = viW
   real(dp), save      :: vi2_ai2_avg_W, two_vi_ai_avg_W
@@ -89,8 +99,6 @@ module structure_functions
   ! scale choices
   real(dp), save :: cst_mu, xmuR, xmuF
   integer, save  :: scale_choice_save
-  integer, parameter :: scale_choice_Q=1, scale_choice_fixed=0,&
-       & scale_choice_arbitrary=2
   
   logical, save  :: use_sep_orders
   logical, save  :: exact_coefs
@@ -100,7 +108,7 @@ module structure_functions
 contains
 
   !----------------------------------------------------------------------
-  ! Setup of constants and parameters needed for structure functions
+  !! Setup of constants and parameters needed for structure functions
   subroutine StartStrFct(rts, order_max, nflav, xR, xF, scale_choice, constant_mu, param_coefs, &
        & Qmin_PDF, wmass, zmass)
     real(dp), intent(in) :: rts
@@ -110,7 +118,6 @@ contains
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
     real(dp) :: sin_thw_sq, mw, mz
-    integer  :: order
 
     if(.not.alloc_already_done) then
        call wae_error('StartStrFct', 'hoppetStart not called!')
@@ -199,8 +206,13 @@ contains
 
   
   !----------------------------------------------------------------------
-  ! Initialize the structure functions up to specified order
-  ! this requires the PDF to have been set up beforehand, and filled in tables(0)
+  !! Initialize the structure functions up to specified order
+  !! this requires the tabulated PDF to have been set up beforehand in the
+  !! the streamlined interface. 
+  !!
+  !! By default, separate_orders = .false., which means that one
+  !! can only access the sum over all orders. If separate_orders = .true.
+  !! then one can access each order separately, but this is slower.
   subroutine InitStrFct(order, separate_orders)
     integer, intent(in) :: order
     logical, optional :: separate_orders
