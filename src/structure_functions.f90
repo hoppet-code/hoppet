@@ -1,4 +1,13 @@
 !======================================================================
+!!
+!! Module for providing access to the deep inelastic scattering
+!! structure functions up to N3LO
+!!
+
+
+
+! OLD COMMENT BELOW. REMOVE WHEN WE ARE HAPPY WITH NEW COMMENTS
+!======================================================================
 !
 ! Summary of our understanding of the coefficient functions
 ! ---------------------------------------------------------
@@ -46,31 +55,37 @@ module structure_functions
 
   private
   public :: InitStrFct, StartStrFct, write_f1, write_f2, write_f3
-  public :: F1Wp, F2Wp, F3Wp, F1Wm, F2Wm, F3Wm, F1Z, F2Z, F3Z, F1EM, F2EM, F1gZ, F2gZ, F3gZ
+  public :: iF1Wp, iF2Wp, iF3Wp, iF1Wm, iF2Wm, iF3Wm, iF1Z, iF2Z, iF3Z, iF1EM, iF2EM, iF1gZ, iF2gZ, iF3gZ
   public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct
-  public :: sf_muR, sf_muF, quark_masses_sf
-  
-  ! holds the coefficient functions
+  public :: sf_muR, sf_muF, sf_quark_masses
+
+  !!
+  !! holds the coefficient functions
+  !!
   type(coef_holder), save :: ch
-  
-  ! indices for the different structure functions (D=d,s,b, U=u,c)
-  integer, parameter :: F1Wp= 1   !< F1 W+ : D + Ubar 
-  integer, parameter :: F2Wp= 2   !< F2 W+ : D + Ubar 
-  integer, parameter :: F3Wp= 3   !< F3 W+ : D + Ubar 
-  integer, parameter :: F1Wm=-1   !< F1 W- : Dbar + U 
-  integer, parameter :: F2Wm=-2   !< F2 W- : Dbar + U 
-  integer, parameter :: F3Wm=-3   !< F3 W- : Dbar + U 
-  integer, parameter :: F1Z = 4   !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
-  integer, parameter :: F2Z = 5   !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
-  integer, parameter :: F3Z = 6   !< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up
-  integer, parameter :: F1EM = -4 !< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
-  integer, parameter :: F2EM = -5 !< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
-  integer, parameter :: F1gZ = 0  !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
-  integer, parameter :: F2gZ = -6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
-  integer, parameter :: F3gZ = 7  !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
-  
-  ! constants and fixed parameters
-  real(dp), save      :: quark_masses_sf(4:6) = quark_masses_def(4:6)
+
+  !!
+  !! indices for the different structure functions (D=d,s,b, U=u,c)
+  !!
+  integer, parameter :: iF1Wp= 1   !< F1 W+ : D + Ubar 
+  integer, parameter :: iF2Wp= 2   !< F2 W+ : D + Ubar 
+  integer, parameter :: iF3Wp= 3   !< F3 W+ : D + Ubar 
+  integer, parameter :: iF1Wm=-1   !< F1 W- : Dbar + U 
+  integer, parameter :: iF2Wm=-2   !< F2 W- : Dbar + U 
+  integer, parameter :: iF3Wm=-3   !< F3 W- : Dbar + U 
+  integer, parameter :: iF1Z = 4   !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter :: iF2Z = 5   !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter :: iF3Z = 6   !< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up
+  integer, parameter :: iF1EM = -4 !< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
+  integer, parameter :: iF2EM = -5 !< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
+  integer, parameter :: iF1gZ = 0  !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter :: iF2gZ = -6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter :: iF3gZ = 7  !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
+
+  !!
+  !! coupling constants and fixed parameters
+  !!
+  real(dp), save      :: sf_quark_masses(4:6) = quark_masses_def(4:6)
   logical,  save      :: use_mass_thresholds
   real(dp), parameter :: viW = 1/sqrt(two), aiW = viW
   real(dp), save      :: vi2_ai2_avg_W, two_vi_ai_avg_W
@@ -80,13 +95,18 @@ module structure_functions
   real(dp), save      :: two_ai_Z_down, two_ai_Z_up
   real(dp), parameter :: e_up = 2.0_dp/3.0_dp, e_down = - 1.0_dp/3.0_dp
   real(dp), parameter :: e2_up = 4.0_dp/9.0_dp, e2_down = 1.0_dp/9.0_dp
-  ! these log terms are only used for scale_choice = 0,1, to speed up the code
+
+  !!
+  !! these log terms are only used for scale_choice = 0,1, to speed up the code
+  !!
   real(dp), save      :: log_muF2_over_Q2, log_muR2_over_Q2
   real(dp), save      :: Qmin
   real(dp), public, save :: toy_alphas_Q0 = 0.35_dp ! Roughly αS(sqrt(2))
   type(running_coupling), public, save :: toy_coupling
 
-  ! scale choices
+  !!
+  !! scale choices
+  !!
   real(dp), save :: cst_mu, xmuR, xmuF
   integer, save  :: scale_choice_save
   integer, parameter :: scale_choice_Q=1, scale_choice_fixed=0,&
@@ -98,9 +118,20 @@ module structure_functions
 
 
 contains
-
-  !----------------------------------------------------------------------
-  ! Setup of constants and parameters needed for structure functions
+  !> @brief Setup of constants and parameters needed for structure functions
+  !!
+  !! @param[in]      rts            largest value at which we will access the structure functions (collider root S)
+  !! @param[in]      order_max      highest order in QCD to compute (1: LO, 2: NLO, etc)
+  !! @param[opt]     nflav          integer number of flavours (if not present use variable flavour)
+  !! @param[opt]     xR             factor to multiply renormalisation scale
+  !! @param[opt]     xF             factor to multiply factorisation scale
+  !! @param[opt]     scale_choice   (0: fixed scale, 1: use Q, 2: use arbitrary scale)
+  !! @param[opt]     constant_mu    if scale_choice = scale_choice_fixed (= 0) then this is the fixed scale
+  !! @param[opt]     param_coefs    if .true. use parametrised coefficients functions
+  !! @param[opt]     Qmin_PDF       Lowest value accesible in the PDF and hence in the structure functions. 
+  !! @param[opt]     wmass          Mass of the W boson
+  !! @param[opt]     zmass          Mass of the z boson
+  !!
   subroutine StartStrFct(rts, order_max, nflav, xR, xF, scale_choice, constant_mu, param_coefs, &
        & Qmin_PDF, wmass, zmass)
     real(dp), intent(in) :: rts
@@ -176,19 +207,19 @@ contains
        
        !call InitCoefHolder(grid, ch, order_max, exact_coefs)
        !use_mass_thresholds = .false.
-       quark_masses_sf(4:6) = masses(4:6) ! Takes the thresholds from the streamlined 
+       sf_quark_masses(4:6) = masses(4:6) ! Takes the thresholds from the streamlined 
                                           ! interface which should be filled first!
-       !quark_masses_sf(5) = 4.18_dp
+       !sf_quark_masses(5) = 4.18_dp
        print*, "Starting the structure functions with mass thresholds at"
-       print*, "mc = ", quark_masses_sf(4) 
-       print*, "mb = ", quark_masses_sf(5) 
-       print*, "mt = ", quark_masses_sf(6) 
+       print*, "mc = ", sf_quark_masses(4) 
+       print*, "mb = ", sf_quark_masses(5) 
+       print*, "mt = ", sf_quark_masses(6) 
        ! and start with a sensible local nf (which will be 5 here) 
        nf_lcl = nf_int
     endif
     
     ! if mass thresholds are used in the structure functions, only scale_choice 0 and 1 are allowed
-    if ((use_mass_thresholds).and.(scale_choice_save.gt.1)) then
+    if ((use_mass_thresholds).and.(scale_choice_save.ge.scale_choice_arbitrary)) then
        call wae_error('StartStrFct', 'illegal value for scale_choice with mass thresholds turned on', intval = scale_choice_save)
     end if
 
@@ -197,10 +228,15 @@ contains
  
   end subroutine StartStrFct
 
-  
+  !> @brief Initialize the structure functions up to specified order
+  !!
+  !! Initialize the structure functions up to specified order
+  !! this requires the PDF to have been set up beforehand, and filled in tables(0)
+  !!
+  !! @param[in]      order              order at which we initialise the structure functions
+  !! @param[opt]     separate_orders    if .true. separate into individual orders rather than summing
+  !!
   !----------------------------------------------------------------------
-  ! Initialize the structure functions up to specified order
-  ! this requires the PDF to have been set up beforehand, and filled in tables(0)
   subroutine InitStrFct(order, separate_orders)
     integer, intent(in) :: order
     logical, optional :: separate_orders
@@ -221,7 +257,7 @@ contains
        ! First we treat the case where we want to separate out each order in
        ! the final structure functions.
        ! This is slower, but is needed e.g. for VBFH
-       if (scale_choice_save.le.1) then
+       if (scale_choice_save.eq.scale_choice_Q.or.scale_choice_save.eq.scale_choice_fixed) then
           ! if scale_choice = 0,1 use fast implementation
           ! tables is saved as an array in Q, and only tables(0),
           ! tables(1), tables(2), tables(4), tables(8) are non zero
@@ -229,7 +265,7 @@ contains
           if (order.ge.2) call set_NLO_structure_functions()
           if (order.ge.3) call set_NNLO_structure_functions()
           if (order.ge.4) call set_N3LO_structure_functions()
-       else
+       else if(scale_choice_save.eq.scale_choice_arbitrary) then
           ! if scale_choice >= 2 use slower implementation with full
           ! scale choices, such as sqrt(Q1*Q2)
           ! tables is saved as an array in muF now, and all components
@@ -238,10 +274,12 @@ contains
           if (order.ge.2) call set_NLO_structure_functions_anyscale()
           if (order.ge.3) call set_NNLO_structure_functions_anyscale()
           if (order.ge.4) call set_N3LO_structure_functions_anyscale()
+       else
+          call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice_save)
        endif
     else
        ! Now set up the default case where we sum up everything right away.
-       if (scale_choice_save.gt.1) & ! only allow for scale_choice = 0,1
+       if (scale_choice_save.ge.scale_choice_arbitrary) & ! only allow for scale_choice = 0,1
             & call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice_save)
        call set_structure_functions_upto(order)
     endif
@@ -255,85 +293,16 @@ contains
     order_setup = order
     
   end subroutine InitStrFct
-
-  !----------------------------------------------------------------------
-  ! Rescale the PDF by F2 NNLO / F2 N3LO
-  subroutine rescale_pdf_n3lo (Qval, order)
-    real(dp), intent(in) :: Qval
-    integer, intent(in)  :: order
-    real(dp) :: mF, mR, factor
-    real(dp) :: str_fct(-6:7), f2nnlo, f2n3lo, y(0:grid%ny)
-    integer :: iy, ii
-    mF = sf_muF(Qval)
-    mR = sf_muR(Qval)
-    y = yValues(grid)
-    do iy = 0, grid%ny
-       str_fct(:) = F_LO(y(iy), Qval, mR, mF) + F_NLO(y(iy), Qval, mR, mF) + F_NNLO(y(iy), Qval, mR, mF)
-       f2nnlo = str_fct(F2Z)
-       str_fct(:) = str_fct(:) + F_N3LO(y(iy), Qval, mR, mF)
-       f2n3lo = str_fct(F2Z)
-       factor = 1.0_dp
-       if (f2n3lo.gt.0.0_dp) factor = f2nnlo/f2n3lo
-       do ii = ncompmin, ncompmax
-          tables(0)%tab(iy,ii,:) = tables(0)%tab(iy,ii,:) * factor
-       enddo
-       
-    enddo
-
-    ! Re-set the structure functions using updated PDF
-    if (scale_choice_save.le.1) then
-       if (order.ge.1) call set_LO_structure_functions()
-       if (order.ge.2) call set_NLO_structure_functions()
-       if (order.ge.3) call set_NNLO_structure_functions()
-       if (order.ge.4) call set_N3LO_structure_functions()
-    else
-       if (order.ge.1) call set_LO_structure_functions_anyscale()
-       if (order.ge.2) call set_NLO_structure_functions_anyscale()
-       if (order.ge.3) call set_NNLO_structure_functions_anyscale()
-       if (order.ge.4) call set_N3LO_structure_functions_anyscale()
-    endif
-
-  end subroutine rescale_pdf_n3lo
   
-  !---------------------------------------------------------------------- 
-  ! Rescale the PDF by F2 NLO / F2 NNLO
-  subroutine rescale_pdf_nnlo (Qval, order)
-    real(dp), intent(in) :: Qval
-    integer, intent(in)  :: order
-    real(dp) :: mF, mR, factor
-    real(dp) :: str_fct(-6:7), f2nlo, f2nnlo, y(0:grid%ny) 
-    integer :: iy, ii
-    mF = sf_muF(Qval) 
-    mR = sf_muR(Qval)
-    y = yValues(grid)
-    do iy = 0, grid%ny              
-       str_fct(:) = F_LO(y(iy), Qval, mR, mF) + F_NLO(y(iy), Qval, mR, mF)
-       f2nlo = str_fct(F2Z) 
-       str_fct(:) = str_fct(:) + F_NNLO(y(iy), Qval, mR, mF)
-       f2nnlo = str_fct(F2Z)
-       factor = 1.0_dp
-       if (f2nnlo.gt.0.0_dp) factor = f2nlo/f2nnlo
-       do ii = ncompmin, ncompmax
-          tables(0)%tab(iy,ii,:) = tables(0)%tab(iy,ii,:) * factor
-       enddo
-    enddo
-    
-    ! Re-set the structure functions using updated PDF
-    if (scale_choice_save.le.1) then
-       if (order.ge.1) call set_LO_structure_functions()
-       if (order.ge.2) call set_NLO_structure_functions()
-       if (order.ge.3) call set_NNLO_structure_functions()
-       if (order.ge.4) call set_N3LO_structure_functions()
-    else
-       if (order.ge.1) call set_LO_structure_functions_anyscale()
-       if (order.ge.2) call set_NLO_structure_functions_anyscale()
-       if (order.ge.3) call set_NNLO_structure_functions_anyscale()
-       if (order.ge.4) call set_N3LO_structure_functions_anyscale()
-    endif
-  end subroutine rescale_pdf_nnlo
-  
-  !----------------------------------------------------------------------
-  ! write the F1 structure function to idev
+  !> @brief write the F1 structure function to idev
+  !!
+  !! Writes the W and Z F1 structure functions to a file with equal spacing in log(x)
+  !!
+  !! @param[in]     idev     file/device to write to
+  !! @param[in]     Qtest    Value of Q to use
+  !! @param[in]     ymax     Largest value of y = - log(x) to print
+  !! @param[in]     ny       number of bins in y to print
+  !!
   subroutine write_f1 (idev, Qtest, ymax, ny)
     real(dp), intent(in) :: Qtest, ymax
     integer, intent(in)  :: idev, ny
@@ -354,21 +323,21 @@ contains
        xval = exp(-ytest)
        if (use_sep_orders) then
           res = F_LO(xval, Qtest, mR, mF)
-          write(idev,'(3es12.4)',advance='no') xval, res(F1Wp),res(F1Wm)
-          F1Z_LO = res(F1Z)
+          write(idev,'(3es12.4)',advance='no') xval, res(iF1Wp),res(iF1Wm)
+          F1Z_LO = res(iF1Z)
           res = F_NLO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F1Wp), res(F1Wm)
-          F1Z_NLO = res(F1Z)
+          write(idev,'(2es12.4)',advance='no') res(iF1Wp), res(iF1Wm)
+          F1Z_NLO = res(iF1Z)
           res = F_NNLO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F1Wp), res(F1Wm)
-          F1Z_NNLO = res(F1Z)
+          write(idev,'(2es12.4)',advance='no') res(iF1Wp), res(iF1Wm)
+          F1Z_NNLO = res(iF1Z)
           res = F_N3LO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F1Wp), res(F1Wm)
-          F1Z_N3LO = res(F1Z)
+          write(idev,'(2es12.4)',advance='no') res(iF1Wp), res(iF1Wm)
+          F1Z_N3LO = res(iF1Z)
           write(idev,'(4es12.4)',advance='no') F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es12.4)',advance='no') xval, res(F1Wp),res(F1Wm), res(F1Z)
+          write(idev,'(4es12.4)',advance='no') xval, res(iF1Wp),res(iF1Wm), res(iF1Z)
        endif
        write(idev,*)
     end do
@@ -376,8 +345,15 @@ contains
     write(idev,*)
   end subroutine write_f1
   
-  !----------------------------------------------------------------------
-  ! write the F2 structure function to idev
+  !> @brief write the F2 structure function to idev
+  !!
+  !! Writes the W and Z F2 structure functions to a file with equal spacing in log(x)
+  !!
+  !! @param[in]     idev     file/device to write to
+  !! @param[in]     Qtest    Value of Q to use
+  !! @param[in]     ymax     Largest value of y = - log(x) to print
+  !! @param[in]     ny       number of bins in y to print
+  !!
   subroutine write_f2 (idev, Qtest, ymax, ny)
     real(dp), intent(in) :: Qtest, ymax
     integer, intent(in)  :: idev, ny
@@ -398,21 +374,21 @@ contains
        xval = exp(-ytest)
        if (use_sep_orders) then
           res = F_LO(xval, Qtest, mR, mF)
-          write(idev,'(3es12.4)',advance='no') xval, res(F2Wp),res(F2Wm)
-          F2Z_LO = res(F2Z)
+          write(idev,'(3es12.4)',advance='no') xval, res(iF2Wp),res(iF2Wm)
+          F2Z_LO = res(iF2Z)
           res = F_NLO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F2Wp), res(F2Wm)
-          F2Z_NLO = res(F2Z)
+          write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
+          F2Z_NLO = res(iF2Z)
           res = F_NNLO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F2Wp), res(F2Wm)
-          F2Z_NNLO = res(F2Z)
+          write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
+          F2Z_NNLO = res(iF2Z)
           res = F_N3LO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F2Wp), res(F2Wm)
-          F2Z_N3LO = res(F2Z)
+          write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
+          F2Z_N3LO = res(iF2Z)
           write(idev,'(4es12.4)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es12.4)',advance='no') xval, res(F2Wp),res(F2Wm), res(F2Z)
+          write(idev,'(4es12.4)',advance='no') xval, res(iF2Wp),res(iF2Wm), res(iF2Z)
        endif
        write(idev,*)
     end do
@@ -420,8 +396,15 @@ contains
     write(idev,*)
   end subroutine write_f2
 
-  !----------------------------------------------------------------------
-  ! write the F3 structure function to idev
+  !> @brief write the F3 structure function to idev
+  !!
+  !! Writes the W and Z F3 structure functions to a file with equal spacing in log(x)
+  !!
+  !! @param[in]     idev     file/device to write to
+  !! @param[in]     Qtest    Value of Q to use
+  !! @param[in]     ymax     Largest value of y = - log(x) to print
+  !! @param[in]     ny       number of bins in y to print
+  !!
   subroutine write_f3 (idev, Qtest, ymax, ny)
     real(dp), intent(in) :: Qtest, ymax
     integer, intent(in)  :: idev, ny
@@ -442,21 +425,21 @@ contains
        xval = exp(-ytest)
        if (use_sep_orders) then
           res = F_LO(xval, Qtest, mR, mF)
-          write(idev,'(3es12.4)',advance='no') xval, res(F3Wp),res(F3Wm)
-          F3Z_LO = res(F3Z)
+          write(idev,'(3es12.4)',advance='no') xval, res(iF3Wp),res(iF3Wm)
+          F3Z_LO = res(iF3Z)
           res = F_NLO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F3Wp), res(F3Wm)
-          F3Z_NLO = res(F3Z)
+          write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
+          F3Z_NLO = res(iF3Z)
           res = F_NNLO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F3Wp), res(F3Wm)
-          F3Z_NNLO = res(F3Z)
+          write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
+          F3Z_NNLO = res(iF3Z)
           res = F_N3LO(xval, Qtest, mR, mF)
-          write(idev,'(2es12.4)',advance='no') res(F3Wp), res(F3Wm)
-          F3Z_N3LO = res(F3Z)
+          write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
+          F3Z_N3LO = res(iF3Z)
           write(idev,'(4es12.4)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es12.4)',advance='no') xval, res(F3Wp),res(F3Wm), res(F3Z)
+          write(idev,'(4es12.4)',advance='no') xval, res(iF3Wp),res(iF3Wm), res(iF3Z)
        endif
        write(idev,*)
     end do
@@ -1097,43 +1080,43 @@ contains
 
     res = zero
     !--- deal with Z case -----------------------------------------
-    res(:,F2Z) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*vi2_ai2_Z_down + &
+    res(:,iF2Z) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*vi2_ai2_Z_down + &
          &       (ulike(C2_f_NC) + ubarlike(C2_f_NC))*vi2_ai2_Z_up
 
     ! temporarily put FL into F1;
-    res(:,F1Z) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*vi2_ai2_Z_down + &
+    res(:,iF1Z) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*vi2_ai2_Z_down + &
          &       (ulike(CL_f_NC) + ubarlike(CL_f_NC))*vi2_ai2_Z_up
     ! then convert to F1
-    res(:,F1Z) = (res(:,F2Z) - res(:,F1Z)) / two_xvals
+    res(:,iF1Z) = (res(:,iF2Z) - res(:,iF1Z)) / two_xvals
 
-    res(:,F3Z) = (dlike(C3_f) - dbarlike(C3_f))*two_vi_ai_Z_down + &
+    res(:,iF3Z) = (dlike(C3_f) - dbarlike(C3_f))*two_vi_ai_Z_down + &
          &       (ulike(C3_f) - ubarlike(C3_f))*two_vi_ai_Z_up
-    res(:,F3Z) = res(:,F3Z)/xValues(grid)
+    res(:,iF3Z) = res(:,iF3Z)/xValues(grid)
 
     !--- deal with EM case -----------------------------------------
-    res(:,F2EM) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*e2_down + &
+    res(:,iF2EM) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*e2_down + &
          &        (ulike(C2_f_NC) + ubarlike(C2_f_NC))*e2_up
     
     ! temporarily put FL into F1;
-    res(:,F1EM) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*e2_down + &
+    res(:,iF1EM) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*e2_down + &
          &        (ulike(CL_f_NC) + ubarlike(CL_f_NC))*e2_up
     ! then convert to F1
-    res(:,F1EM) = (res(:,F2EM) - res(:,F1EM)) / two_xvals
+    res(:,iF1EM) = (res(:,iF2EM) - res(:,iF1EM)) / two_xvals
     
     !--- deal with gamma-Z case -----------------------------------------
     ! equations taken from section 19 of PDG (19.18)
-    res(:,F2gZ) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*e_down*two_vi_Z_down + &
+    res(:,iF2gZ) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*e_down*two_vi_Z_down + &
          &        (ulike(C2_f_NC) + ubarlike(C2_f_NC))*e_up * two_vi_Z_up
     
     ! temporarily put FL into F1;
-    res(:,F1gZ) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*e_down*two_vi_Z_down + &
+    res(:,iF1gZ) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*e_down*two_vi_Z_down + &
          &        (ulike(CL_f_NC) + ubarlike(CL_f_NC))*e_up * two_vi_Z_up
     ! then convert to F1
-    res(:,F1gZ) = (res(:,F2gZ) - res(:,F1gZ)) / two_xvals
+    res(:,iF1gZ) = (res(:,iF2gZ) - res(:,iF1gZ)) / two_xvals
     
-    res(:,F3gZ) = (dlike(C3_f) - dbarlike(C3_f))*e_down*two_ai_Z_down + &
+    res(:,iF3gZ) = (dlike(C3_f) - dbarlike(C3_f))*e_down*two_ai_Z_down + &
          &        (ulike(C3_f) - ubarlike(C3_f))*e_up * two_ai_Z_up
-    res(:,F3gZ) = res(:,F3gZ)/xValues(grid)
+    res(:,iF3gZ) = res(:,iF3gZ)/xValues(grid)
 
     ! for the W cases, it only makes sense to sum over an even number
     ! of light flavours; so save the actual number of flavours, switch
@@ -1148,41 +1131,41 @@ contains
 
     ! --- deal with Wm case
     !-----------------------------------------
-    res(:,F2Wm) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
+    res(:,iF2Wm) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
     ! temporarily put FL into F1;
-    res(:,F1Wm) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
+    res(:,iF1Wm) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
     ! then convert to F1
-    res(:,F1Wm) = (res(:,F2Wm) - res(:,F1Wm)) / two_xvals
-    res(:,F3Wm) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
-    res(:,F3Wm) = res(:,F3Wm)/xValues(grid)
+    res(:,iF1Wm) = (res(:,iF2Wm) - res(:,iF1Wm)) / two_xvals
+    res(:,iF3Wm) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
+    res(:,iF3Wm) = res(:,iF3Wm)/xValues(grid)
 
     !--- deal with Wp case -----------------------------------------
-    res(:,F2Wp) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
+    res(:,iF2Wp) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
     ! temporarily put FL into F1;
-    res(:,F1Wp) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
+    res(:,iF1Wp) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
     ! then convert to F1
-    res(:,F1Wp) = (res(:,F2Wp) - res(:,F1Wp)) / two_xvals
-    res(:,F3Wp) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
-    res(:,F3Wp) = res(:,F3Wp)/xValues(grid)
+    res(:,iF1Wp) = (res(:,iF2Wp) - res(:,iF1Wp)) / two_xvals
+    res(:,iF3Wp) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
+    res(:,iF3Wp) = res(:,iF3Wp)/xValues(grid)
 
 !    ! --- deal with Wp case
 !    !-----------------------------------------
-!    res(:,F2Wp) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
+!    res(:,iF2Wp) = (ulike(C2_f) + dbarlike(C2_f))*vi2_ai2_avg_W
 !    ! temporarily put FL into F1;
-!    res(:,F1Wp) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
+!    res(:,iF1Wp) = (ulike(CL_f) + dbarlike(CL_f))*vi2_ai2_avg_W
 !    ! then convert to F1
-!    res(:,F1Wp) = (res(:,F2Wp) - res(:,F1Wp)) / two_xvals
-!    res(:,F3Wp) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
-!    res(:,F3Wp) = res(:,F3Wp)/xValues(grid)
+!    res(:,iF1Wp) = (res(:,iF2Wp) - res(:,iF1Wp)) / two_xvals
+!    res(:,iF3Wp) = (ulike(C3_f) - dbarlike(C3_f))*two_vi_ai_avg_W
+!    res(:,iF3Wp) = res(:,iF3Wp)/xValues(grid)
 !
 !    !--- deal with Wm case -----------------------------------------
-!    res(:,F2Wm) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
+!    res(:,iF2Wm) = (dlike(C2_f) + ubarlike(C2_f))*vi2_ai2_avg_W
 !    ! temporarily put FL into F1;
-!    res(:,F1Wm) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
+!    res(:,iF1Wm) = (dlike(CL_f) + ubarlike(CL_f))*vi2_ai2_avg_W
 !    ! then convert to F1
-!    res(:,F1Wm) = (res(:,F2Wm) - res(:,F1Wm)) / two_xvals
-!    res(:,F3Wm) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
-!    res(:,F3Wm) = res(:,F3Wm)/xValues(grid)
+!    res(:,iF1Wm) = (res(:,iF2Wm) - res(:,iF1Wm)) / two_xvals
+!    res(:,iF3Wm) = (dlike(C3_f) - ubarlike(C3_f))*two_vi_ai_avg_W
+!    res(:,iF3Wm) = res(:,iF3Wm)/xValues(grid)
 
     ! reset nf_lcl to the full (possibly odd) saved value
     nf_lcl = nf_save
@@ -1199,8 +1182,8 @@ contains
     !! GPS+AK TMP: we have just included a factor of 2 but this plainly
     !! should not be present for the electromagnetic part; so here
     !! we eliminate it again...
-    !res(:,F2EM) = half * res(:,F2EM)
-    !res(:,F1EM) = half * res(:,F1EM)
+    !res(:,iF2EM) = half * res(:,iF2EM)
+    !res(:,iF1EM) = half * res(:,iF1EM)
 
   end function structure_function_general_full
   
@@ -1243,10 +1226,19 @@ contains
   end function alphasLocal
   
 
-  !----------------------------------------------------------------------
-  ! F
-  ! calculate the structure function at x, muF
-  ! this is the sum over all orders
+  !> @brief calculate the structure function at x, Q, muR, muF summed over all orders
+  !!
+  !! Calculate the structure function at x, Q, muR, muF summed over
+  !! all orders. muR and muF are only needed if we are using the
+  !! scale_choice_arbitrary, as otherwise they are already included in
+  !! the tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in,opt]   muR        renormalisation scale 
+  !! @param[in,opt]   muF        factorisation scale
+  !! @return          an array of all structure functions summed over orders
+  !!
   function StrFct (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q
     real(dp), intent(in), optional  :: muR, muF
@@ -1266,10 +1258,19 @@ contains
   end function StrFct
 
 
-  !----------------------------------------------------------------------
-  ! F_LO
-  ! calculate the leading order structure function at x, muF
-  !
+  !> @brief calculate the leading order structure function at x, Q, muR, muF 
+  !!
+  !! Calculate the leading order structure function at x, Q, muR,
+  !! muF. muR and muF are only needed if we are using the
+  !! scale_choice_arbitrary, as otherwise they are already included in
+  !! the tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in,opt]   muR        renormalisation scale 
+  !! @param[in,opt]   muF        factorisation scale
+  !! @return          an array of all the leading order structure functions
+  !!
   function F_LO (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7)
@@ -1282,19 +1283,24 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice_save.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
 
     call EvalPdfTable_xQ(tables(1), x, Q_or_muF, res)
     
   end function F_LO
 
-  !----------------------------------------------------------------------
-  ! F_NLO
-  ! calculate the next-to-leading order structure function at x, muF
-  !
-  ! LRQ2 == ln muR^2/Q^2
-  ! LFQ2 == ln muF^2/Q^2
-  !
+  !> @brief calculate the NLO structure function at x, Q, muR, muF 
+  !!
+  !! Calculate the NLO structure function at x, Q, muR, muF. muR and
+  !! muF are only needed if we are using the scale_choice_arbitrary,
+  !! as otherwise they are already included in the tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in,opt]   muR        renormalisation scale 
+  !! @param[in,opt]   muF        factorisation scale
+  !! @return          an array of all the NLO structure functions
+  !!
   function F_NLO (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LFQ2
@@ -1310,14 +1316,14 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice_save.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
     
     ! C_NLO x f (x) in C1f(:) 
     call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
     res = C1f
     
     ! if scale_choice = 0,1 then this term is already taken care of
-    if (scale_choice_save.ge.2) then
+    if (scale_choice_save.ge.scale_choice_arbitrary) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
        call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
@@ -1329,12 +1335,18 @@ contains
   end function F_NLO
 
 
-  !----------------------------------------------------------------------
-  ! F_NNLO
-  ! calculate the next-to-next-to-leading order structure function at x, muF
-  !
-  ! LRQ2 == ln muR^2/Q^2
-  ! LFQ2 == ln muF^2/Q^2
+  !> @brief calculate the NNLO structure function at x, Q, muR, muF 
+  !!
+  !! Calculate the NNLO structure function at x, Q, muR, muF. muR and
+  !! muF are only needed if we are using the scale_choice_arbitrary,
+  !! as otherwise they are already included in the tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in,opt]   muR        renormalisation scale 
+  !! @param[in,opt]   muF        factorisation scale
+  !! @return          an array of all the NNLO structure functions
+  !!
   function F_NNLO (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
@@ -1351,14 +1363,14 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice_save.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
     
     ! C_NNLO x f (x) in C2f(:,3) 
     call EvalPdfTable_xQ(tables(4), x, Q_or_muF, C2f)
     res = C2f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
-    if (scale_choice_save.ge.2) then
+    if (scale_choice_save.ge.scale_choice_arbitrary) then
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
@@ -1382,12 +1394,18 @@ contains
   end function F_NNLO
 
   
-  !----------------------------------------------------------------------
-  ! F_N3LO
-  ! calculate the next-to-next-to-next-to-leading order structure function at x, muF
-  !
-  ! LRQ2 == ln muR^2/Q^2
-  ! LFQ2 == ln muF^2/Q^2
+  !> @brief calculate the N3LO structure function at x, Q, muR, muF 
+  !!
+  !! Calculate the N3LO structure function at x, Q, muR, muF. muR and
+  !! muF are only needed if we are using the scale_choice_arbitrary,
+  !! as otherwise they are already included in the tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in,opt]   muR        renormalisation scale 
+  !! @param[in,opt]   muF        factorisation scale
+  !! @return          an array of all the N3LO structure functions
+  !!
   function F_N3LO (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
@@ -1405,14 +1423,14 @@ contains
     Q_or_muF = Q
     ! if scale_choice >= 2, then evaluate tables at muF
     ! (since it is saved as an array in muF)
-    if (scale_choice_save.ge.2) Q_or_muF = muF
+    if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
     
     ! C_N3LO x f (x) in C2f(:,8) 
     call EvalPdfTable_xQ(tables(8), x, Q_or_muF, C3f)
     res = C3f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
-    if (scale_choice_save.ge.2) then
+    if (scale_choice_save.ge.scale_choice_arbitrary) then
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
@@ -1481,8 +1499,16 @@ contains
     log_muR2_over_Q2 = two * log(sf_muR(Q) / Q)
   end subroutine set_scale_logs
   
-  !----------------------------------------------------------------------
-  ! mu_R 
+  !> @brief returns the renormalisation scale used in the structure function tables at Q
+  !!
+  !! Returns the renormalisation scale used in the structure function
+  !! tables at Q. In the case of scale_choice_arbitrary this function
+  !! returns Q, as that is the scale at which the structure functions
+  !! have been set up.
+  !!
+  !! @param[in]       Q          Q value
+  !! @return          the renormalisation scale used in the structure function tables at Q
+  !!
   real(dp) function sf_muR(Q)
     real(dp), intent(in) :: Q
     sf_muR = zero
@@ -1492,13 +1518,24 @@ contains
     elseif (scale_choice_save.eq.scale_choice_Q) then
        ! scale_choice = 1 : mu_R = xmuR * Q
        sf_muR = xmuR * Q
+    elseif (scale_choice_save.eq.scale_choice_arbitrary) then
+       ! scale_choice = 2 : arbitary, return Q
+       sf_muR = Q
     else
        call wae_error('sf_muR(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
     endif
   end function sf_muR
 
-  !----------------------------------------------------------------------
-  ! mu_F 
+  !> @brief returns the factorisation scale used in the structure function tables at Q
+  !!
+  !! Returns the factorisation scale used in the structure function
+  !! tables at Q. In the case of scale_choice_arbitrary this function
+  !! returns Q, as that is the scale at which the structure functions
+  !! have been set up.
+  !!
+  !! @param[in]       Q          Q value
+  !! @return          the factorisation scale used in the structure function tables at Q
+  !!
   real(dp) function sf_muF(Q)
     real(dp), intent(in) :: Q
     sf_muF = zero
@@ -1508,6 +1545,9 @@ contains
     elseif (scale_choice_save.eq.scale_choice_Q) then
        ! scale_choice = 1 : muF = xmuF * Q
        sf_muF = xmuF * Q
+    elseif (scale_choice_save.eq.scale_choice_arbitrary) then
+       ! scale_choice = 2 : arbitary, return Q
+       sf_muF = Q
     else
        call wae_error('sf_muF(Q)', 'illegal value for scale_choice', intval = scale_choice_save)
     endif
@@ -1523,13 +1563,13 @@ contains
 
     ! First set current nf equal to the smallest value it can take
     current_nf = ch%nflo
-    if(Q.lt.quark_masses_sf(4)) then   
+    if(Q.lt.sf_quark_masses(4)) then   
       current_nf = 3
-    elseif(Q.lt.quark_masses_sf(5)) then 
+    elseif(Q.lt.sf_quark_masses(5)) then 
       current_nf = 4
-    elseif(Q.lt.quark_masses_sf(6)) then  
+    elseif(Q.lt.sf_quark_masses(6)) then  
       current_nf = 5
-    elseif(Q.ge.quark_masses_sf(6)) then  
+    elseif(Q.ge.sf_quark_masses(6)) then  
       current_nf = 6
     endif      
 
@@ -1546,6 +1586,88 @@ contains
     call SetNfCoefHolder(ch, current_nf)
     
   end subroutine use_vfns
+
+  
+  !----------------------------------------------------------------------
+  ! Rescale the PDF by F2 NNLO / F2 N3LO
+  subroutine rescale_pdf_n3lo (Qval, order)
+    real(dp), intent(in) :: Qval
+    integer, intent(in)  :: order
+    real(dp) :: mF, mR, factor
+    real(dp) :: str_fct(-6:7), f2nnlo, f2n3lo, y(0:grid%ny)
+    integer :: iy, ii
+    mF = sf_muF(Qval)
+    mR = sf_muR(Qval)
+    y = yValues(grid)
+    do iy = 0, grid%ny
+       str_fct(:) = F_LO(y(iy), Qval, mR, mF) + F_NLO(y(iy), Qval, mR, mF) + F_NNLO(y(iy), Qval, mR, mF)
+       f2nnlo = str_fct(iF2Z)
+       str_fct(:) = str_fct(:) + F_N3LO(y(iy), Qval, mR, mF)
+       f2n3lo = str_fct(iF2Z)
+       factor = 1.0_dp
+       if (f2n3lo.gt.0.0_dp) factor = f2nnlo/f2n3lo
+       do ii = ncompmin, ncompmax
+          tables(0)%tab(iy,ii,:) = tables(0)%tab(iy,ii,:) * factor
+       enddo
+       
+    enddo
+
+    ! Re-set the structure functions using updated PDF
+    if (scale_choice_save.eq.scale_choice_Q.or.scale_choice_save.eq.scale_choice_fixed) then
+       if (order.ge.1) call set_LO_structure_functions()
+       if (order.ge.2) call set_NLO_structure_functions()
+       if (order.ge.3) call set_NNLO_structure_functions()
+       if (order.ge.4) call set_N3LO_structure_functions()
+    else if(scale_choice_save.eq.scale_choice_arbitrary) then
+       if (order.ge.1) call set_LO_structure_functions_anyscale()
+       if (order.ge.2) call set_NLO_structure_functions_anyscale()
+       if (order.ge.3) call set_NNLO_structure_functions_anyscale()
+       if (order.ge.4) call set_N3LO_structure_functions_anyscale()
+    else
+       call wae_error('rescale_pdf_n3lo', 'illegal value for scale_choice', intval = scale_choice_save)
+    endif
+
+  end subroutine rescale_pdf_n3lo
+  
+  !---------------------------------------------------------------------- 
+  ! Rescale the PDF by F2 NLO / F2 NNLO
+  subroutine rescale_pdf_nnlo (Qval, order)
+    real(dp), intent(in) :: Qval
+    integer, intent(in)  :: order
+    real(dp) :: mF, mR, factor
+    real(dp) :: str_fct(-6:7), f2nlo, f2nnlo, y(0:grid%ny) 
+    integer :: iy, ii
+    mF = sf_muF(Qval) 
+    mR = sf_muR(Qval)
+    y = yValues(grid)
+    do iy = 0, grid%ny              
+       str_fct(:) = F_LO(y(iy), Qval, mR, mF) + F_NLO(y(iy), Qval, mR, mF)
+       f2nlo = str_fct(iF2Z) 
+       str_fct(:) = str_fct(:) + F_NNLO(y(iy), Qval, mR, mF)
+       f2nnlo = str_fct(iF2Z)
+       factor = 1.0_dp
+       if (f2nnlo.gt.0.0_dp) factor = f2nlo/f2nnlo
+       do ii = ncompmin, ncompmax
+          tables(0)%tab(iy,ii,:) = tables(0)%tab(iy,ii,:) * factor
+       enddo
+    enddo
+    
+    ! Re-set the structure functions using updated PDF
+    if (scale_choice_save.eq.scale_choice_Q.or.scale_choice_save.eq.scale_choice_fixed) then
+       if (order.ge.1) call set_LO_structure_functions()
+       if (order.ge.2) call set_NLO_structure_functions()
+       if (order.ge.3) call set_NNLO_structure_functions()
+       if (order.ge.4) call set_N3LO_structure_functions()
+    else if(scale_choice_save.eq.scale_choice_arbitrary) then
+       if (order.ge.1) call set_LO_structure_functions_anyscale()
+       if (order.ge.2) call set_NLO_structure_functions_anyscale()
+       if (order.ge.3) call set_NNLO_structure_functions_anyscale()
+       if (order.ge.4) call set_N3LO_structure_functions_anyscale()
+    else
+       call wae_error('rescale_pdf_n3lo', 'illegal value for scale_choice', intval = scale_choice_save)
+    endif
+  end subroutine rescale_pdf_nnlo
+
 
 end module structure_functions
 

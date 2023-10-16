@@ -1,3 +1,15 @@
+2023-10-16  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/structure_functions.f90:
+	Added Doxygen style comments. Relabelled all structure function indices. 
+
+2023-10-13  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/structure_functions.f90:
+	Changed the two public functions muR, muF to sf_muR, sf_muF due to
+	conflicts in other programs that depend on hoppet (reported by
+	ANdrea Banfi for H1jet and HELAC+OpenLoops)
+
 2023-09-22  Alexander Karlberg  <alexander.karlberg@cern.ch>
 
 	* src/xc*p.f:
