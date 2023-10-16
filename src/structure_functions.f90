@@ -54,15 +54,21 @@ module structure_functions
   implicit none
 
   private
+  !!
+  !! public functions
+  !! those for initialisation and I/O
   public :: InitStrFct, StartStrFct, write_f1, write_f2, write_f3
-  public :: iF1Wp, iF2Wp, iF3Wp, iF1Wm, iF2Wm, iF3Wm, iF1Z, iF2Z, iF3Z, iF1EM, iF2EM, iF1gZ, iF2gZ, iF3gZ
+  !!
+  !! those for evaluating the structure functions
+  !!
   public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct
-  public :: sf_muR, sf_muF, sf_quark_masses
-
   !!
-  !! holds the coefficient functions
+  !! those for querying the scale choices being used
   !!
-  type(coef_holder), save :: ch
+  public :: sf_muR, sf_muF
+  
+  public :: iF1Wp, iF2Wp, iF3Wp, iF1Wm, iF2Wm, iF3Wm, iF1Z, iF2Z, iF3Z, iF1EM, iF2EM, iF1gZ, iF2gZ, iF3gZ
+  public :: sf_quark_masses
 
   !!
   !! indices for the different structure functions (D=d,s,b, U=u,c)
@@ -86,6 +92,20 @@ module structure_functions
   !! coupling constants and fixed parameters
   !!
   real(dp), save      :: sf_quark_masses(4:6) = quark_masses_def(4:6)
+
+  ! public indices for scale choice options
+  integer, parameter, public :: scale_choice_fixed     = 0 !< muR,muF scales predetermined in the StartStrFct call
+  integer, parameter, public :: scale_choice_Q         = 1 !< muR,muF scales equal to xR,xQ * Q (xR,xQ to be set in StartStrFct)
+  integer, parameter, public :: scale_choice_arbitrary = 2 !< muR,muF scales can be chosen freely in the F_LO (etc.) and StrFct calls
+
+  !!
+  !! holds the coefficient functions
+  !!
+  type(coef_holder), save :: ch
+
+  !!
+  !! constants and fixed parameters
+  !!
   logical,  save      :: use_mass_thresholds
   real(dp), parameter :: viW = 1/sqrt(two), aiW = viW
   real(dp), save      :: vi2_ai2_avg_W, two_vi_ai_avg_W
@@ -109,8 +129,6 @@ module structure_functions
   !!
   real(dp), save :: cst_mu, xmuR, xmuF
   integer, save  :: scale_choice_save
-  integer, parameter :: scale_choice_Q=1, scale_choice_fixed=0,&
-       & scale_choice_arbitrary=2
   
   logical, save  :: use_sep_orders
   logical, save  :: exact_coefs
@@ -141,7 +159,6 @@ contains
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
     real(dp) :: sin_thw_sq, mw, mz
-    integer  :: order
 
     if(.not.alloc_already_done) then
        call wae_error('StartStrFct', 'hoppetStart not called!')
@@ -231,7 +248,12 @@ contains
   !> @brief Initialize the structure functions up to specified order
   !!
   !! Initialize the structure functions up to specified order
-  !! this requires the PDF to have been set up beforehand, and filled in tables(0)
+  !! this requires the tabulated PDF to have been set up beforehand in the
+  !! the streamlined interface. 
+  !!
+  !! By default, separate_orders = .false., which means that one
+  !! can only access the sum over all orders. If separate_orders = .true.
+  !! then one can access each order separately, but this is slower.
   !!
   !! @param[in]      order              order at which we initialise the structure functions
   !! @param[opt]     separate_orders    if .true. separate into individual orders rather than summing
