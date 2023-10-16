@@ -2895,10 +2895,36 @@ maximum pdf flavour index now includes the leptons.
 
 The full evolution for filling the table is performed by calling the
 subroutine
+
+To fill a table via an evolution from an initial scale, one uses 
 \begin{lstlisting}
-  call EvolvePdfTableQED(pdftable, Q0, pdf0, dh, qed_split, &
- &  coupling, coupling_qed, nloop_qcd, nloopqcd_qed)
+    type(pdf_table),        intent(inout) :: table
+    real(dp),               intent(in)    :: Q0
+    type(dglap_holder),     intent(in)    :: dh
+    type(qed_split_mat),    intent(in)    :: qed_split
+    type(running_coupling), intent(in)    :: coupling
+    type(qed_coupling),     intent(in)    :: coupling_qed
+    real(dp),               intent(in)    :: pdf0(:,:)
+    integer,                intent(in)    :: nloop_qcd, nloopqcd_qed
+    call EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
+    &  coupling, coupling_qed, nloop_qcd, nloopqcd_qed)
+     [...] 
 \end{lstlisting}
+where \ttt{table} is the outpdf, \ttt{Q0} the initial scale and
+\ttt{pdf0} is the PDF at the initial scale. Note that, by default,
+only the leading QED evolution is included. If one wishes to include
+also mixed QCD-QED corrections one needs to set
+\begin{lstlisting}
+    nqcdloop_qed = 1
+\end{lstlisting}
+before this call. Similarly, setting
+\begin{lstlisting}
+    with_Plp_nnloqed=.true.
+\end{lstlisting}
+includes also the NNLO $P_{lq}$ splittings in the evolution. 
+
+
+
   % Oct 13, 9:56
 
 
