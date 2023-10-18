@@ -1,23 +1,15 @@
-!! An example program using a tabulation. It outputs a subset of
-!! table 15 of hep-ph/0511119 and this output should be identical
-!! to the contents of the file tabulation_example.default_output
+!! An example program using a tabulation. It should yield an output identical
+!! to the content of the file tabulation_example_qed.default_output
 !!
-!! NB: for the full functionality used in generating the HeraLHC and
-!!     Les Houches comparison tables, see ../benchmarks/benchmarks.f90
-!!     and carefully read the comments at the beginning. Subtleties
-!!     exist in particular wrt the treatment of scales muF/=muR.
 !!
-!! NB: commented code shows usage with LHAPDF (e.g. for cross-checking 
-!!     some public PDF set's evolution) -- to use this part of the code
-!!     you will also need to link with LHAPDF
-!!
-program tabulation_example
+program tabulation_example_qed
   use hoppet_v1
-  ! extra modules needed for qed
-
-  !! if using LHAPDF, rename a couple of hoppet functions which
-  !! would otherwise conflict with LHAPDF 
+  
+  !! if using LHAPDF, rename the hoppet functions EvolvePDF and InitPDF, which
+  !! would otherwise conflict with LHAPDF, by replacing the use
+  !! statement above with:
   !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+
   implicit none
   real(dp) :: dy, ymax
   integer  :: order, nloop_qcd
@@ -25,22 +17,22 @@ program tabulation_example
   type(grid_def) :: grid
   !! holds the splitting functions
   type(dglap_holder) :: dh
-  !! hold the PDF tabulation
+  !! holds the PDF tabulation
   type(pdf_table)       :: table
-  !! hold the coupling
+  !! holds the coupling
   real(dp)               :: effective_light_quark_masses, quark_masses(4:6)
   type(running_coupling) :: coupling
-  !! hold the initial pdf
+  !! holds the initial pdf
   real(dp), pointer :: pdf0(:,:)
   real(dp) :: Q0
-  !! hold results at some x, Q
+  !! holds results at some x, Q
   real(dp) :: Q, pdf_at_xQ(ncompmin:ncompmaxLeptons)
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   integer  :: ix
   !! Additional things for QED
   type(qed_coupling)  :: coupling_qed
-  type(qed_split_mat) :: qed_split, qed_split_no_Pqgx
+  type(qed_split_mat) :: qed_split
 
 
   !! define the interfaces for LHA pdf (by default not used)
@@ -71,25 +63,21 @@ program tabulation_example
   
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
        &                      nloop=nloop_qcd,nflo=3,nfhi=6)
+
   ! and the QED splitting matrices
   call InitQEDSplitMat(grid, qed_split)
 
   write(6,'(a)') "Splitting functions initialised!"
 
-  !! set up LHAPDF with cteq
-  !call InitPDFsetByName("cteq61.LHgrid")
-  !call InitPDF(0)
-  ! allocate and set up the initial pdf from LHAPDF ...
-  !Q0 = 5.0_dp 
-  !call AllocPDF(grid, pdf0)
-  !call InitPDF_LHAPDF(grid, pdf0, EvolvePDF, Q0)
+  ! allocate a pdf0 array including leptons
+  call AllocPDFWithLeptons(grid, pdf0)
 
   ! initialise a PDF from the function below (must be contained,
   ! in a "used" module, or with an explicitly defined interface)
-  call AllocPDFWithLeptons(grid, pdf0)
-  ! default that we choose has zero lepton and photon PDFs
-  ! at starting scale, though this is obviously not physical
-  pdf0 = 0.0_dp
+  ! pdf0(:,-6:6) are the standard pdf for quarks and gluons,
+  ! pdf0(:,8) is the photon density,
+  ! pdf0(:,9:11) are the sum of lepton-antilepton densities
+  ! for the electron, the muon and the tau.
   pdf0(:,:) = unpolarized_dummy_pdf(xValues(grid))  
 
   Q0 = sqrt(2.0_dp)  ! the initial scale
@@ -100,16 +88,16 @@ program tabulation_example
   call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop_qcd,&
        &                   quark_masses = quark_masses)
 
-  ! this simply evolves up, with all light quarks simultaneously
-  ! turning on at some specified effective scale; the choice of
-  ! 0.109 GeV results in a fairly accurate value of alpha(mZ)
+  ! Initialises coupling_qed object, including thresholds. All
+  ! light quarks turn on simultaneously at some specified effective scale;
+  ! the choice of 0.109 GeV results in a fairly accurate value of alpha(mZ)
   ! (keeping in mind that this is only 1-loop QED running, so 
   ! it is slightly inaccurate at mtau)
   effective_light_quark_masses = 0.109_dp
   call InitQEDCoupling(coupling_qed, effective_light_quark_masses, quark_masses(4:6))
 
-  ! create the tables that will contain our copy of the user's pdf
-  ! as well as the convolutions with the pdf.
+  ! create the table object that will contain the values of the parton
+  ! densities in a grid of x and Q interpolation points.
   call AllocPdfTableWithLeptons(grid, table, Qmin=1.0_dp, Qmax=28000.0_dp, & 
        & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
   ! add information about the nf transitions to the table (improves
@@ -117,11 +105,10 @@ program tabulation_example
   call AddNfInfoToPdfTable(table,coupling)
 
   ! create the tabulation based on the evolution of pdf0 from scale Q0
+  ! up to qmax and down to qmin
   call EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
                          coupling, coupling_qed, nloop_qcd, nqcdloop_qed)
-  ! alternatively "pre-evolve" so that subsequent evolutions are faster
-  !call PreEvolvePdfTable(table, Q0, dh, coupling)
-  !call EvolvePdfTable(table,pdf0)
+
   write(6,'(a)') "Evolution done!"
 
   ! get the value of the tabulation at some point
@@ -132,6 +119,7 @@ program tabulation_example
   write(6,'(a,f6.4,a,f8.3)') " At mtau = ",m_tau," GeV, QED coupling is 1/alpha_qed = ", one/value(coupling_qed, m_tau/1.0000001_dp)
   write(6,'(a)')
 
+  ! Get values at some points and print them 
   Q = 100.0_dp
   write(6,'(a,f9.4,a)') "           Evaluating PDFs at Q = ",Q," GeV"
   write(6,'(a5,2a12,a14,a10,a11,4a13)') "x",&
@@ -203,6 +191,6 @@ contains
 
   end function unpolarized_dummy_pdf
 
-end program tabulation_example
+end program tabulation_example_qed
 
 

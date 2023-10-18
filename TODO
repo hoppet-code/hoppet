@@ -19,14 +19,14 @@ QED merging notes (2023-09)
   * [ ] create some kind of streamlined interface?      
   * [x] introduce AllocPdfTableWithLeptons?
 - [ ] documentation
-  * [ ] InitQEDSplitMat (and its structure)
-  * [ ] AllocPDFWithLeptons
-  * [ ] QEDQCDEvolvePDF
-  * [ ] EvolvePdfTableQED (+ how to create the correctly-sized table in the first place)
+  * [x] InitQEDSplitMat (and its structure)
+  * [x] AllocPDFWithLeptons
+  * [x] QEDQCDEvolvePDF
+  * [x] EvolvePdfTableQED (+ how to create the correctly-sized table in the first place)
   * [ ] NB: what do we do with QCDQEDCoupling, which is not currently used?
-  * [ ] mention that cached evolution not yet available
+  * [x] mention that cached evolution not yet available
 
-- [ ] question of global option versus arguments to functions
+- [x] question of global option versus arguments to functions
   * with_Plq_nnloqed, nqcdloop_qed
 
 - Streamlined interface
@@ -45,7 +45,7 @@ QED merging notes (2023-09)
 Boolean problem when interfacing c++ to fortran
 ==============================================
 Passing booleans by reference between c++ and fortran
-does not work
+does not work; we passed them as integers.
 
 Old notes
 =========
