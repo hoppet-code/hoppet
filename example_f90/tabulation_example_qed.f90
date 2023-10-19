@@ -91,8 +91,7 @@ program tabulation_example_qed
   ! Initialises coupling_qed object, including thresholds. All
   ! light quarks turn on simultaneously at some specified effective scale;
   ! the choice of 0.109 GeV results in a fairly accurate value of alpha(mZ)
-  ! (keeping in mind that this is only 1-loop QED running, so 
-  ! it is slightly inaccurate at mtau)
+  ! and alpha(m_tau).
   effective_light_quark_masses = 0.109_dp
   call InitQEDCoupling(coupling_qed, effective_light_quark_masses, quark_masses(4:6))
 

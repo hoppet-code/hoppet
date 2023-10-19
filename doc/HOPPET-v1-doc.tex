@@ -2980,159 +2980,8 @@ evolves it to scale \ttt{Q\_end}, overwriting the \ttt{pdf} array.
 In order to get interpolated PDF values from the table we use the
 \ttt{EvalPdfTable\_*} calls, described in Section~\ref{sec:acc_table}.
 
-
 Note that at the moment, when QED effects are included, cached evolution is not supported.
 
-
-% \subsection{Worked-out example using QCD+QED evolution}
-
-% % Even within the phenomenological counting, once N3LO QCD splitting
-% % functions~\cite{N3LOSplitFn} are fully computed and included in
-% % \hoppet, it will make sense to include additional QCD and mixed
-% % QED-QCD contributions.
-
-% An example involving the mixed QED+QCD evolution is to be found in the
-% repository in
-% \ttt{example\_f90/tabulation\_example\_qed.f90}. \comment{Add
-%   hyperlink to github once all merged?}
-% %
-% A first ingredient is the setup of the QED coupling,
-% \begin{lstlisting}
-%     use qed_coupling_module 
-%     type(qed_coupling)  :: coupling_qed
-%     ! ...
-%     call InitQEDCoupling(coupling_qed, effective_light_quark_masses, &
-%                          quark_masses(4:6) [,value_at_scale_0])
-% \end{lstlisting}
-% By default it initialises the QED coupling to the
-% PDG~\cite{ParticleDataGroup:2022pth} value for the electromagnetic
-% coupling at scale zero and evolves it using the 1-loop QED evolution
-% up to high scales.
-% %
-% The physical evolution in the region
-% $0.1\GeV \lesssim \mu \lesssim 1\GeV$ involves hadronic states, and
-% this is mimicked by introducing an effective (identical) mass for all
-% three light quarks.
-% %
-% Using a value of $0.109\GeV$ reproduces the correct QED coupling value at
-% the $\tau$ and $Z$-boson masses with a relative $\sim 10^{-4}$
-% accuracy.
-% %
-% Lepton masses are hard-coded to their PDG
-% values~\cite{ParticleDataGroup:2022pth} in the
-% \ttt{src/qed\_coupling.f90} file.
-
-% PDFs with QED effects need entries for the photon and lepton flavours.
-% %
-% Such a PDF can be initialised in analogy with a pure-QCD PDF,
-% \begin{lstlisting}
-%     use qed_objects
-%     real(dp), pointer :: pdf(:,:)
-%     ! ...
-%     call AllocPDFWithLeptons(grid, pdf)
-% \end{lstlisting}
-% The flavour (second) index now extends to a value of 11 and four new
-% \ttt{iflv\_xxx} index values are available:
-% \begin{lstlisting}
-%   integer, parameter, public :: iflv_photon   =  8  ! photon 
-%   integer, parameter, public :: iflv_electron =  9  ! sum electron and positron
-%   integer, parameter, public :: iflv_muon     = 10  ! sum of mu^+ and mu^-
-%   integer, parameter, public :: iflv_tau      = 11  ! sum of tau^+ and tau^-
-% \end{lstlisting}
-
-% For PDFs of hadrons, at the accuracy that we consider, the lepton and
-% anti-lepton distributions are identical. Note that if one extends the
-% calculation of lepton PDFs to ${\cal O}(\alpha)$, then there would be
-% an asymmetry in the lepton and anti-lepton distribution. This is the
-% same effect that is responsible for generating a charge asymmetry
-% between top and anti-top quarks at the LHC~\cite{Nason:1989zy}.
-% \commentpn{Is this really right? an asymmetry can only arise from a
-%   \ttt{Plq\_03} splitting function ...}
-% %
-% %\comment{Does this persist at higher orders or not?}
-% %
-% \footnote{Were one to use \hoppet to obtain the distribution of
-%   partons inside a lepton, then it would become useful to separate
-%   lepton and anti-lepton PDFs.
-%   %
-%   However further consideration arise, notably for the treatment of
-%   the $1-x \ll 1$ region.\commentgz{explain better?} 
-%   %
-%   See for example discussion in Ref.~\cite{Frixione:2023gmf}\commentgz{updates refs}.
-% }
-
-
-% The initializaton of the grid to perform the evolution and of the
-% $\ttt{dglap\_holder}$, which stores all the components required for the
-% evolution proceeds as in the pure QCD case.
-% This starts by calling the \ttt{InitGridDefDefault}
-% and \ttt{InitDglapHolder}.
-% Furthermore one needs to
-% initialize the QCD splitting matrices using 
-% \begin{lstlisting}
-%   call InitQEDSplitMat(grid, qed_split)
-% \end{lstlisting}
-% and one allocates the table of PDFs including the leptons
-% \begin{lstlisting}
-%   call AllocPdfTableWithLeptons(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
-%        & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
-% \end{lstlisting}
-% to improve the interpolation quality one can add the information about
-% the $n_f$ transitions
-% \begin{lstlisting}
-%   call AddNfInfoToPdfTable(table,coupling)
-% \end{lstlisting}
-% Finally one creates the tabulation based on the evolution of the PDF from the starting scale $Q_0$ including QED corrections of items 1. and 2. listed in Sec.~\ref{sec:qed-evolution}
-% \begin{lstlisting}
-%   call EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
-%                          coupling, coupling_qed, nloop_qcd, nloopqcd_qed)
-% \end{lstlisting}
-% When the argument ${\tt nloopqcd\_qed}$ is set to 1 also the mixed QCD $\times$ QED corrections of item 3. are included. Furthermore, if one sets 
-% \begin{lstlisting}
-% with_Plp_nnloqed=.true.
-% \end{lstlisting}
-% then also the $P_{lq}$ correction of item 4. is included.\commentgz{Note: at the moment with this flag set to true the $P_{lq}$ contribution is included regardless of the value of $\tt{nloopqcd\_qed}$. Perhaps one should change this?} 
-
-% The PDFs at scale $Q$ are then computed with, e.g. 
-% \begin{lstlisting}
-%   real(dp), parameter :: heralhc_xvals(9) = &
-%        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
-  
-%   Q = 100.0_dp
-%   write(6,'(a,f9.4,a)') "           Evaluating PDFs at Q = ",Q," GeV"
-%   write(6,'(a5,2a12,a14,a10,a11,4a13)') "x",&
-%        & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon",&
-%        & "photon","e+ + e-","mu+ + mu-","tau+ + tau-"
-%   do ix = 1, size(heralhc_xvals)
-%      call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
-%      write(6,'(es7.1,9es12.4)') heralhc_xvals(ix), &
-%           &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
-%           &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
-%           &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
-%           &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
-%           &  pdf_at_xQ(0), &
-%           &  pdf_at_xQ(iflv_photon), &
-%           &  pdf_at_xQ(iflv_electron), &
-%           &  pdf_at_xQ(iflv_muon),&
-%           &  pdf_at_xQ(iflv_tau)          
-%   end do
-% \end{lstlisting}
-
-% Finally, as in the case of pure QCD evolution, one can delete all
-% tables and grids created in order to free all the memory.  This is
-% important when creating objects repeatedly, so as to avoid memory
-% leaks.
-% %
-% This is done via the following commands: 
-% \begin{lstlisting}
-%   call Delete(table)
-%   call Delete(pdf0)
-%   call Delete(dh)
-%   call Delete(coupling)
-%   call Delete(grid)
-%   call Delete(qed_split)
-%   call Delete(coupling_qed)
-% \end{lstlisting}
 
 \subsection{Streamlined interface with QED effects}
 The streamlined interface including QED effects works as in the case of pure QCD evolution.
@@ -3956,8 +3805,7 @@ program tabulation_example_qed
   ! Initialises coupling_qed object, including thresholds. All
   ! light quarks turn on simultaneously at some specified effective scale;
   ! the choice of 0.109 GeV results in a fairly accurate value of alpha(mZ)
-  ! (keeping in mind that this is only 1-loop QED running, so 
-  ! it is slightly inaccurate at mtau)
+  !  and alpha(m_tau).
   effective_light_quark_masses = 0.109_dp
   call InitQEDCoupling(coupling_qed, effective_light_quark_masses, quark_masses(4:6))
 
