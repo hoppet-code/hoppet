@@ -2642,7 +2642,7 @@ for the user wishing to write their own F95 code for \hoppet.
 \label{sec:qed-evolution}
 
 The combined QED+QCD evolution, as implemented in \hoppet since
-version x.x.x\commentgz{add first version number which contains QED
+version x.x.x,\commentgz{add first version number which contains QED
   evolution?} is as described in
 Refs.~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf}.
 %
@@ -2650,18 +2650,18 @@ The determination of which contributions should be included follows a
 consistent approach based on a so-called "phenomenological" counting
 scheme.
 %
-Within this counting, one considers $\alpha\sim \as^2$, and takes the
+Within this scheme, one considers $\alpha$ to be of order $\as^2$, and takes the
 photon (lepton) PDF to be of order $\alpha L$ ($\alpha^2 L^2$), where
 $L$ is the logarithm of a ratio of the factorisation scale to a typical hadronic scale and is considered to be of order $L \sim 1/\as$. In contrast, quark and gluon
-PDFs are considered of order $(\as L)^n={\cal O}(1)$.\footnote{The
+PDFs are considered to be of order $(\as L)^n={\cal O}(1)$.\footnote{The
   above counting is to be contrasted with a ``democratic'' scheme, in
   which considers $\alpha \sim \as \sim 1/L$ and the aim is to maintain
   the same loop order across all couplings and splitting functions,
   regardless of the relative numbers of QCD and QED couplings that
   they involved.}
 %
-From that point of view, NNLO (3-loop) QCD evolution provides control of
-terms up to $\as^{n+2} L^n \sim \as^2$.
+From this point of view, NNLO (3-loop) QCD evolution provides control of
+terms of order up to $\as^{n+2} L^n \sim \as^2$.
 %
 To achieve a corresponding accuracy when including QED contributions,
 \hoppet has been extended to account for
@@ -2688,7 +2688,7 @@ To achieve a corresponding accuracy when including QED contributions,
   In an absolute counting of accuracy, this is not needed.
   % 
   However, if one wants lepton distributions to have the same relative
-  NLO accuracy as the photon distribution, then it should be
+  NLO accuracy as the photon distribution, it should be
   included.
 \end{enumerate}
 %
@@ -2862,8 +2862,8 @@ allocates PDFs (\ttt{pdf}) including photons, while a call to
 \end{lstlisting}
 allocates PDFs including both photons and leptons.
 %
-The two indices of the \ttt{pdf} refer to
-the number of $x$ values in the \ttt{grid}, and the flavour.
+The two dimensions of the \ttt{pdf} refer to
+the index of the $x$ value in the \ttt{grid}, and to the flavour index.
 The flavour indices for photons and leptons %in the arrays \ttt{pdf}
 are
 given by
@@ -2941,7 +2941,7 @@ where \ttt{table} is the output, \ttt{Q0} the initial scale and
 scale is stored in the object \ttt{table}.
 %
 When \ttt{nloopqcd\_qed} is set to 1 (0) mixed QCD-QED effects are
-(not) included in the evolution.
+(are not) included in the evolution.
 %
 Setting the variable \ttt{with\_Plq\_nnloqed=.true.}, 
 defined in \ttt{module qed\_evolution}, includes also the NNLO $P_{lq}$
