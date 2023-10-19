@@ -90,10 +90,15 @@ module pdf_tabulate
           & pdftab_AllocTab_1d, pdftab_AllocTab_fromorig_1d
   end interface
 
+  interface AllocPdfTableWithPhoton
+     module procedure pdftab_AllocTabWithPhoton_, pdftab_AllocTabWithPhoton_1d
+  end interface
+  public :: AllocPdfTableWithPhoton
+
   interface AllocPdfTableWithLeptons
      module procedure pdftab_AllocTabWithLeptons_, pdftab_AllocTabWithLeptons_1d
   end interface
-  public :: AllocPdfTableWithLeptons
+  public :: AllocPdfTableWithLeptons  
 
 
   interface AddNfInfoToPdfTable
@@ -206,6 +211,29 @@ contains
     end do
   end subroutine pdftab_AllocTab_1d
 
+
+ subroutine pdftab_AllocTabWithPhoton_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+   use qed_objects
+   type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab
+    real(dp), intent(in)           :: Qmin, Qmax
+    real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
+    call AllocPdfTable(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table=ncompmaxPhoton)
+  end subroutine pdftab_AllocTabWithPhoton_
+  
+  subroutine pdftab_AllocTabWithPhoton_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+    use qed_objects
+    type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab(:)
+    real(dp), intent(in)           :: Qmin, Qmax
+    real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
+    call AllocPdfTable(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table=ncompmaxPhoton)
+  end subroutine pdftab_AllocTabWithPhoton_1d
+  
 
   subroutine pdftab_AllocTabWithLeptons_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
    use qed_objects

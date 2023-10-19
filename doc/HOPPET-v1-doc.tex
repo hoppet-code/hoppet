@@ -2729,10 +2729,12 @@ This is initialized through a call to
     type(qed_coupling), intent(out) :: coupling
     real(dp),           intent(in)  :: m_light_quarks, m_heavy_quarks(4:6)
     real(dp), optional, intent(in)  :: value_at_scale_0 ! defaults to alpha_qed_scale_0
+    [...]
+    end subroutine InitQEDCoupling
 \end{lstlisting}
 
 
-By default it initialises the parameters relevant to the QED coupling
+It initialises the parameters relevant to the QED coupling
 and its running.  The electromagnetic coupling at scale zero is set by
 default to its PDG~\cite{ParticleDataGroup:2022pth} value, unless the
 optional argument \ttt{value\_at\_scale\_0} is provided, in which case
@@ -2762,7 +2764,7 @@ accuracy.
 
 The quark and lepton masses are used to set all thresholds where the
 active matter content changes. This information is then used to set
-the arrary \ttt{nflav(3,0:n\_thresholds)}, where \ttt{nflav(1:3,i)}
+the array \ttt{nflav(3,0:n\_thresholds)}, where \ttt{nflav(1:3,i)}
 contains an integer array with the number of leptons, down and up
 quarks at a given $Q^2$ such that \ttt{threshold(i-1)}$<Q^2<$
 \ttt{threshold(i)}. \ttt{threshold(1:7)} are active thresholds, while
@@ -2774,9 +2776,8 @@ finally used to compute the value of the QED coupling
 %
 The function \ttt{Delete(qed\_coupling)} is also provided for
 consistency, although in this case it does nothing.
-
-
-The function \ttt{Value(qed\_coupling,mu)} returns the QED coupling at
+%
+After this initialization, the function \ttt{Value(qed\_coupling,mu)} returns the QED coupling at
 scale $\mu$.
 
 \paragraph{QED splitting matrices.}
@@ -2790,7 +2791,8 @@ The QED splitting matrices are stored in the object
      type(qed_split_mat_nnlo) :: nnlo
   end type qed_split_mat
 \end{lstlisting}
-which contains the LO, NLO and NNLO splitting matrices 
+defined in \ttt{qed\_objects.f90}. 
+This contains the LO, NLO and NNLO splitting matrices 
 \begin{lstlisting}
   ! a leading-order splitting matrix (multiplies alpha/2pi)
   type qed_split_mat_lo
@@ -2806,7 +2808,7 @@ which contains the LO, NLO and NNLO splitting matrices
      integer         :: nu, nd, nl, nf
   end type qed_split_mat_nlo
 
-  ! a NNLO splitting matrix (multiplies (alpha/(2pi) )^2
+  ! a NNLO splitting matrix (multiplies (alpha/(2pi) )^2) 
   ! contains only Plq splitting!
   type qed_split_mat_nnlo 
      type(grid_conv) :: Plq_02
@@ -2830,11 +2832,13 @@ A call to the subroutine
     use qed_splitting_functions
     type(grid_def),      intent(in)    :: grid
     type(qed_split_mat), intent(inout) :: qed_split
+    [...]
+  end subroutine InitQEDSplitMat
 \end{lstlisting}     
 initializes the \ttt{qed\_split\_mat} object \ttt{qed\_split} and sets all QED
 splitting functions on the given \ttt{grid}.
 %
-\commentpn{It is unclear to us how crossing the flavour trheshold in
+\commentpn{It is unclear to us how crossing the flavour threshold in
   evolution are handled. The InitQEDSplitMat seems to work for fixed
   number of flavours ...}
 
@@ -2851,6 +2855,7 @@ A call to the subroutine
   subroutine AllocPDFWithPhoton(grid, pdf)
     type(grid_def), intent(in) :: grid
     real(dp),       pointer    :: pdf(:,:)
+    [...]
   end subroutine AllocPDFWithPhoton
 \end{lstlisting}
 allocates PDFs (\ttt{pdf}) including photons, while a call to
@@ -2858,7 +2863,8 @@ allocates PDFs (\ttt{pdf}) including photons, while a call to
   subroutine AllocPDFWithLeptons(grid, pdf)
     type(grid_def), intent(in) :: grid
     real(dp),       pointer    :: pdf(:,:)
-  end subroutine AllocPDFWithLeptons
+    [...]
+    end subroutine AllocPDFWithLeptons
 \end{lstlisting}
 allocates PDFs including both photons and leptons.
 %
@@ -2882,10 +2888,10 @@ due to the  \ttt{Plq\_03} splitting function.\footnote{
   partons inside a lepton, then it would become useful to separate
   lepton and anti-lepton PDFs.
   % 
-  However further consideration arise, notably for the treatment of
+  However further considerations arise, notably for the treatment of
   the $1-x \ll 1$ region.\commentgz{explain better?} 
   % 
-  See for example discussion in Ref.~\cite{Frixione:2023gmf}\commentgz{updates refs}.}
+  See for example discussion in Ref.~\cite{Frixione:2023gmf}\commentgz{update refs}.}
 
 The subroutine \ttt{AllocPDFWithPhotons} allocates the \ttt{pdf}
 array with the flavour index up to 8,
@@ -2895,7 +2901,7 @@ the flavour index extends to 11.
 
 \paragraph{PDF tables with photons and leptons.}
 
-Next we must prepair a \ttt{pdf\_table} object forming the
+Next one neeeds to prepare a \ttt{pdf\_table} object forming the
 interpolating grid for the evolved PDF's. We remind that the
 \ttt{pdf\_table} object contains a table \ttt{pdf\_table\%tab(:,:,:)}
 that is a grid in $x$-values (first component), $Q^2$-values (second
@@ -2913,6 +2919,8 @@ This is initialized by a call to
    real(dp), intent(in), optional   :: dlnlnQ
    integer,  intent(in), optional   :: lnlnQ_order
    logical,  intent(in), optional   :: freeze_at_Qmin
+   [...]
+   end subroutine AllocPdfTableWithLeptons
 \end{lstlisting}
 that is identical to the one without photon or leptons, the only difference is that the
 maximum pdf flavour index in \ttt{pdf\_table\%tab} now includes the photon and leptons.
@@ -2935,6 +2943,8 @@ To fill a table via an evolution from an initial scale, one calls the subroutine
        type(running_coupling), intent(in)    :: coupling
        type(qed_coupling),     intent(in)    :: coupling_qed
        integer,                intent(in)    :: nloop_qcd, nloopqcd_qed
+       [...]
+    end subroutine EvolvePdfTableQED   
 \end{lstlisting}
 where \ttt{table} is the output, \ttt{Q0} the initial scale and
 \ttt{pdf0} is the PDF at the initial scale. We remind that the upper
@@ -2946,6 +2956,8 @@ When \ttt{nloopqcd\_qed} is set to 1 (0) mixed QCD-QED effects are
 Setting the variable \ttt{with\_Plq\_nnloqed=.true.}, 
 defined in \ttt{module qed\_evolution}, includes also the NNLO $P_{lq}$
 splittings in the evolution.
+\commentgz{Note: at the moment with this flag set to true the $P_{lq}$ contribution is included regardless of the value of $\tt{nloopqcd\_qed}$. Perhaps one should change this?}
+
 
 To perform the evolution \ttt{EvolvePdfTableQED} calls the routine 
 \begin{lstlisting}
@@ -2959,18 +2971,17 @@ To perform the evolution \ttt{EvolvePdfTableQED} calls the routine
        real(dp),               intent(in)         :: Q_init, Q_end
        integer,                intent(in)         :: nloop_qcd
        integer,                intent(in)         :: nqcdloop_qed
+       [...]
+       end subroutine QEDQCDEvolvePDF
 \end{lstlisting}
 which, given the \ttt{pdf} at an initial scale \ttt{Q\_init}, it
-evolves it to scale \ttt{Q\_end}, overwritting the \ttt{pdf} array. 
+evolves it to scale \ttt{Q\_end}, overwriting the \ttt{pdf} array. 
 %
 In order to get interpolated PDF values from the table we use the
 \ttt{EvalPdfTable\_*} calls, described in Section~\ref{sec:acc_table}.
 
 
 Note that at the moment, when QED effects are included, cached evolution is not supported.
-
-
-\commentgz{Note: at the moment with this flag set to true the $P_{lq}$ contribution is included regardless of the value of $\tt{nloopqcd\_qed}$. Perhaps one should change this?}
 
 
 % \subsection{Worked-out example using QCD+QED evolution}

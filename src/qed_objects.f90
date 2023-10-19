@@ -21,7 +21,7 @@ module qed_objects
      integer         :: nu, nd, nl, nf
   end type qed_split_mat_nlo
 
-  ! a NNLO splitting matrix (multiplies ( alpha/(2pi) )^2
+  ! a NNLO splitting matrix (multiplies ( alpha/(2pi) )^2) 
   ! contains only Plq splitting!
   type qed_split_mat_nnlo 
      type(grid_conv) :: Plq_02
