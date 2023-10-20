@@ -44,8 +44,10 @@ contains
   end function sf_Pqq_01
 
   !----------------------------------------------------------------------
-  ! this is to be multplied by the eq^2 -- SHOULD THIS NOT HAVE AN
-  ! EXTRA ACTOR OF NC = CA ?????
+  ! this is to be multplied by the eq^2 -- The extra factor of N_C
+  ! is not included here, see line
+  ! chg2_toflv(-6:6) = CA * chg2_fromflv(-6:6)
+  ! in qed_objects.f90
   function sf_Pqy_01(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
