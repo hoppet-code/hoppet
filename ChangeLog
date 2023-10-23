@@ -1,3 +1,17 @@
+2023-10-23 Mon  <gavin.salam@physics.ox.ac.uk> + Giulia + Paolo + Alexander
+
+	* example_f90/tabulation_example_qed.f90:
+	* src/pdf_tabulate.f90:
+	* src/qed_evolution.f90:
+	* src/streamlined_interface.f90:
+	added with_Plq_nnloqed argument to EvolvePdfTableQED and
+	QEDQCDEvolvePDF and removed the global variable that 
+	was being used previously.
+	Also added check:
+	* with_Plq_nnloqed==.true. is not being used with with_nqcdloop_qed==0 
+	* mismatches of quark masses between QCD and QED couplings
+    * that nqcdloop_qed <= 1
+	
 2023-10-03 Tue  <gavin.salam@physics.ox.ac.uk> with Giulia and Paolo
 
 	* src/pdf_general.f90:

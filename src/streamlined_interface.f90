@@ -47,8 +47,10 @@ module streamlined_interface
   !integer,  save            :: nqcdloop_qed
   type(qed_coupling),  save :: coupling_qed
   type(qed_split_mat),  save :: qed_split
-  logical, save :: with_qed = .false.
+  logical,  save :: with_qed = .false.
   real(dp), save :: effective_light_quark_masses = 0.109_dp
+  integer,  save :: with_nqcdloop_qed = 0
+  logical,  save :: with_Plq_nnloqed = .false.
 
 contains
   
@@ -135,11 +137,11 @@ subroutine hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
        & use_qed, use_qcd_qed, use_Plq_nnlo
   with_qed = use_qed
   if (use_qcd_qed) then 
-    nqcdloop_qed = 1
+    with_nqcdloop_qed = 1
   else
-    nqcdloop_qed = 0
+    with_nqcdloop_qed = 0
   end if
-  with_Plp_nnloqed = use_Plq_nnlo
+  with_Plq_nnloqed = use_Plq_nnlo
 end subroutine hoppetSetQED
 
 !======================================================================
@@ -336,7 +338,7 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
      endif
      write(*,*)'***********HoppetEvolve, before EvolvePdfTableQED'
      call EvolvePdfTableQED(tables(0), Q0pdf, pdf0, dh, qed_split, &
-          coupling, coupling_qed, nloop, nqcdloop_qed)
+          coupling, coupling_qed, nloop, with_nqcdloop_qed, with_Plq_nnloqed)
   else
      call EvolvePdfTable(tables(0), Q0pdf, pdf0, dh, muR_Q=muR_Q, &
           &              coupling=coupling, nloop=nloop)

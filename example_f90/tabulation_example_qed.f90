@@ -12,7 +12,12 @@ program tabulation_example_qed
 
   implicit none
   real(dp) :: dy, ymax
-  integer  :: order, nloop_qcd
+  ! the interpolation order (not the perturbative order!)
+  integer  :: order
+  ! the number of loops in QCD and QED
+  integer  :: nloop_qcd, nqcdloop_qed
+  ! whether to include the alpha^2 Plq term
+  logical  :: with_Plq_nnloqed
   !! holds information about the grid in y=log(1/x)
   type(grid_def) :: grid
   !! holds the splitting functions
@@ -56,11 +61,12 @@ program tabulation_example_qed
   ! set up the grid itself (this call sets up a nested grid composed of 4 subgrids)
   call InitGridDefDefault(grid, dy, ymax, order=order)
 
-  ! initialise the splitting-function holder
+  ! set variables to specify the perturbative accuracy
   nloop_qcd = 3
   nqcdloop_qed = 1
-  with_Plp_nnloqed=.false.
+  with_Plq_nnloqed = .false.
   
+  ! initialise the splitting-function holder
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
        &                      nloop=nloop_qcd,nflo=3,nfhi=6)
 
@@ -106,7 +112,7 @@ program tabulation_example_qed
   ! create the tabulation based on the evolution of pdf0 from scale Q0
   ! up to qmax and down to qmin
   call EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
-                         coupling, coupling_qed, nloop_qcd, nqcdloop_qed)
+                         coupling, coupling_qed, nloop_qcd, nqcdloop_qed, with_Plq_nnloqed)
 
   write(6,'(a)') "Evolution done!"
 

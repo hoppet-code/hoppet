@@ -17,14 +17,12 @@ module qed_evolution
   type(qed_split_mat), save :: qed_sm_copy
   integer             :: ev_nqcdloop_qed
   type(qed_coupling), pointer :: ev_coupling_qed
-  
-  logical, public :: with_Plp_nnloqed=.false.
-  integer, public :: nqcdloop_qed = 0 
+  logical, public :: ev_with_Plq_nnloqed=.false.
   
 contains
 
   subroutine QEDQCDEvolvePDF(dh, qed_sm, pdf, coupling_qcd, coupling_qed,&
-       &                     Q_init, Q_end, nloop_qcd, nqcdloop_qed)
+       &                     Q_init, Q_end, nloop_qcd, nqcdloop_qed, with_Plq_nnloqed)
     type(dglap_holder),     intent(in), target :: dh
     type(qed_split_mat),    intent(in), target :: qed_sm
     type(running_coupling), intent(in), target :: coupling_qcd
@@ -34,6 +32,7 @@ contains
     real(dp),               intent(in)         :: Q_init, Q_end
     integer,                intent(in)         :: nloop_qcd
     integer,                intent(in)         :: nqcdloop_qed
+    logical,  optional,     intent(in)         :: with_Plq_nnloqed
     !------------------------------------------------------
     ! iqed indicates which momentum region of the QED coupling
     ! we are working in
@@ -68,7 +67,10 @@ contains
     end if
 
     ! establish which flavour regions we are working in
-    ! (assume QCD and QED couplings have the same masses)
+    ! (verify QCD and QED couplings have the same masses)
+    if (QuarkMass(coupling_qcd,4) /= coupling_qed%thresholds(4)) call wae_Error("QED-QCD coupling mismatch of charm mass")
+    if (QuarkMass(coupling_qcd,5) /= coupling_qed%thresholds(6)) call wae_Error("QED-QCD coupling mismatch of bottom mass")
+    if (QuarkMass(coupling_qcd,6) /= coupling_qed%thresholds(7)) call wae_Error("QED-QCD coupling mismatch of top mass")
     iqed_init = iQEDThresholdAtQ(coupling_qed, Q_init)
     iqed_end  = iQEDThresholdAtQ(coupling_qed, Q_end )
 
@@ -117,7 +119,11 @@ contains
        if (ev_nloop >= 2) ev_PNLO => dhcopy%P_NLO
        if (ev_nloop >= 3) ev_PNNLO => dhcopy%P_NNLO
        ev_nqcdloop_qed = nqcdloop_qed
-       
+       ev_with_Plq_nnloqed = default_or_opt(.false., with_Plq_nnloqed)
+       if (nqcdloop_qed > 1) call wae_error("QEDQCDEvolvePDF", "No support currently for nqcdloop_qed > 1")
+       if (with_Plq_nnloqed .and. nqcdloop_qed == 0) then
+         call wae_error("QEDQCDEvolvePDF", "with_Plq_nnloqed==.true. inconsistent with nqcdloop_qed == 0")
+       end if
 
        call ev_evolveLocal(pdf, lcl_Q_init, lcl_Q_end, ev_conv_qed)
        
@@ -156,7 +162,7 @@ contains
     end if
 
     ! add Plq splitting at NNLO QED 
-    if ( with_Plp_nnloqed ) then
+    if ( ev_with_Plq_nnloqed ) then
        dpdf = dpdf + ( (alpha/twopi)**2 * ev_conv_last_jacobian) &
             &        * (qed_sm_copy%nnlo * pdf)
     end if
