@@ -65,7 +65,7 @@ module structure_functions
   !! streamlined tables at the same time as the structure functions.
   !!
   type(pdf_table), save :: sf_tables(0:max_table_index)
-
+  logical,         save :: sf_alloc_already_done = .false.
   !!
   !! constants and fixed parameters
   !!
@@ -206,11 +206,13 @@ contains
     if(.not.setup_done(0)) then
        call wae_error('InitStrFct', 'hoppetEvolve not called!')
     endif
-    
+
+    if(sf_alloc_already_done) call Delete(sf_tables)
     ! Now we setup the tables. HoppetStart already called, so we can copy the tables over
     call AllocPdfTable(sf_tables, tables(0))
     ! Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
     sf_tables(1:)%tab_iflv_max = 7
+    sf_alloc_already_done = .true. ! Signals that the tables have been set up.
     
     ! Add nf information to the structure function tables
 !    call AddNfInfoToPdfTable(sf_tables,coupling)
