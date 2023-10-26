@@ -1,3 +1,17 @@
+2023-10-26  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* benchmarking/structure_functions_benchmark_checks.f90
+	* doc/HOPPET-v1-doc.tex
+	* example_f77/cpp_structure_functions_example.cc
+	* example_f90/structure_functions_example.f90
+	* src/hoppet_v1.h
+	* src/structure_functions.f90:
+	Created sf_tables that now hold the structure functions such that
+	the stream lined tables can still be used independently. Also
+	removed unused 'rts' from structure functions. This needs to
+	propagate to proVBFH and disorder. Examples modified and checked.
+
+
 2023-10-16  Alexander Karlberg  <alexander.karlberg@cern.ch>
 
 	* src/structure_functions.f90:

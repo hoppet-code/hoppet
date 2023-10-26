@@ -44,7 +44,6 @@ int iF2EM =-5+6; //< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
 int iF1gZ = 0+6; //< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up 
 int iF2gZ =-6+6; //< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
 int iF3gZ = 7+6; //< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
-
   
 extern "C" {
 
@@ -169,14 +168,12 @@ extern "C" {
   
   ///----------------------------------------------------------------------
   /// Setup of constants and parameters needed for structure functions
-  void hoppetStartStrFct(const double & rts,
-			 const int & order_max);
+  void hoppetStartStrFct(const int & order_max);
 			 
   
   ///----------------------------------------------------------------------
   /// Setup of constants and parameters needed for structure functions
-  void hoppetStartStrFctExtended(const double & rts,
-				 const int & order_max,
+  void hoppetStartStrFctExtended(const int & order_max,
 				 const int & nflav,
 				 const double & xR,
 				 const double & xF,

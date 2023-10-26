@@ -2703,11 +2703,10 @@ the structure functions one needs first to set up a \ttt{running\_coupling} obje
 and initialise the streamlined interface through \ttt{hoppetStart} or
 \ttt{hoppetStartExtended}. Then one calls
 \begin{lstlisting}
-  call StartStrFct(rts, order_max [, nflav] [, xR] [, xF] [, scale_choice] &
+  call StartStrFct(order_max [, nflav] [, xR] [, xF] [, scale_choice] &
                   & [, constant_mu] [ ,param_coefs] [ ,Qmin_PDF] [ ,wmass] [ ,zmass])
 \end{lstlisting}
-specifying as a minimum the largest value of $Q$ which one needs to
-access (through \ttt{rts}) and the perturbative order -- currently
+specifying as a minimum the perturbative order -- currently
 \ttt{order\_max}$\le 4$.
 
 \gps{I should look at the above function a little more}
@@ -2814,20 +2813,20 @@ The structure functions are in this example stored in the
 array \ttt{xf}. The components of this array can be accessed through
 the indices
 \begin{lstlisting}
-  integer, parameter :: F1Wp= 1   
-  integer, parameter :: F2Wp= 2   
-  integer, parameter :: F3Wp= 3   
-  integer, parameter :: F1Wm=-1   
-  integer, parameter :: F2Wm=-2   
-  integer, parameter :: F3Wm=-3   
-  integer, parameter :: F1Z = 4   
-  integer, parameter :: F2Z = 5   
-  integer, parameter :: F3Z = 6   
-  integer, parameter :: F1EM = -4   
-  integer, parameter :: F2EM = -5   
-  integer, parameter :: F1gZ = 0  
-  integer, parameter :: F2gZ = -6 
-  integer, parameter :: F3gZ = 7  
+  integer, parameter :: iF1Wp= 1   
+  integer, parameter :: iF2Wp= 2   
+  integer, parameter :: iF3Wp= 3   
+  integer, parameter :: iF1Wm=-1   
+  integer, parameter :: iF2Wm=-2   
+  integer, parameter :: iF3Wm=-3   
+  integer, parameter :: iF1Z = 4   
+  integer, parameter :: iF2Z = 5   
+  integer, parameter :: iF3Z = 6   
+  integer, parameter :: iF1EM = -4   
+  integer, parameter :: iF2EM = -5   
+  integer, parameter :: iF1gZ = 0  
+  integer, parameter :: iF2gZ = -6 
+  integer, parameter :: iF3gZ = 7  
 \end{lstlisting}
 For instance one would access the electromagnetic $F_1$ structure
 function through \ttt{xf(F1EM)}. It is returned at the \ttt{order}
@@ -2856,7 +2855,7 @@ interface, so that they may be called for instance from C/C++. The
 functions to be called are very similar to those described above. In
 particular a user should call either
 \begin{lstlisting}
-  call hoppetStartStrFct(rts, order_max)
+  call hoppetStartStrFct(order_max)
 \end{lstlisting}
 with \ttt{rts} the maximum energy and \ttt{order\_max} the maximal
 order in $\as$, or the extended version of the interface
@@ -2883,20 +2882,20 @@ The C++ header contains mapped indices for the structure functions
   a bit verbose (there's some significant risk of name clashes, e.g.\
   someone sets up a variable F1Wp}
 \begin{lstlisting}
-  int F1Wp = 1+6;
-  int F2Wp = 2+6;
-  int F3Wp = 3+6;
-  int F1Wm =-1+6;
-  int F2Wm =-2+6;
-  int F3Wm =-3+6;
-  int F1Z  = 4+6;
-  int F2Z  = 5+6;
-  int F3Z  = 6+6;
-  int F1EM =-4+6;
-  int F2EM =-5+6;
-  int F1gZ = 0+6;
-  int F2gZ =-6+6;
-  int F3gZ = 7+6;
+  int iF1Wp = 1+6;
+  int iF2Wp = 2+6;
+  int iF3Wp = 3+6;
+  int iF1Wm =-1+6;
+  int iF2Wm =-2+6;
+  int iF3Wm =-3+6;
+  int iF1Z  = 4+6;
+  int iF2Z  = 5+6;
+  int iF3Z  = 6+6;
+  int iF1EM =-4+6;
+  int iF2EM =-5+6;
+  int iF1gZ = 0+6;
+  int iF2gZ =-6+6;
+  int iF3gZ = 7+6;
 \end{lstlisting}
 %======================================================================
 %======================================================================

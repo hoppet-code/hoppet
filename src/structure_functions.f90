@@ -4,47 +4,6 @@
 !! structure functions up to N3LO
 !!
 
-
-
-! OLD COMMENT BELOW. REMOVE WHEN WE ARE HAPPY WITH NEW COMMENTS
-!======================================================================
-!
-! Summary of our understanding of the coefficient functions
-! ---------------------------------------------------------
-!
-! - F1 = (F2 - FL)/2x
-!
-! - hep-ph/0504042 (MMV): gives F2 and FL results (electromagnetic)
-!
-!   (1/x) F_a = C_{a,ns} \otimes q_{ns}
-!                   +  <e^2> (C_{a,q} \otimes q_s  + C_{a,g} \otimes g)
-!
-!   with z = 2,L, where:
-!
-!   * <e^2> is the average electric charge
-!   * q_{ns} = ???? (we're supposed to deduce it from Eq.(4.2))
-!   * C_{a,q} = C_{a,ns} + C_{a,ps};
-!   * C_{2,ps}^{(0)} = C_{2,ps}^{(1)} = 0 (and presumably for FL too)
-!
-! - http://www.sciencedirect.com/science/article/pii/055032139290087R#
-!   (Zijlstra & van Neerven) has the second-order coefficient
-!   functions. 
-!
-! - from 1109.3717 (Zaro & Co):
-!
-!   * q_{ns,i}^+ = (q_i + qbar_i) - q_s
-!   * q_{ns,i}^- = (q_i - qbar_i) - q_{ns}^v
-!   * q_{ns}^v   = \sum_{i=1}^{n_f} (q_i - qbar_i)
-!   * q_s        = \sum_{i=1}^{n_f} (q_i + qbar_i)
-!
-!   That, together with [C_{a,q} = C_{a,ns} + C_{a,ps}] means that the combination
-! 
-!       q_{ns,j}^+ * C_{i,ns}^+ + q_s * C_{i,q}
-!
-!   reduces to 
-!
-!       (q_j+qbar_j) * C_{i,ns}^+ + q_s * C_{i,ps}
-!
 module structure_functions
   use pdf_representation
   use streamlined_interface
@@ -68,7 +27,6 @@ module structure_functions
   public :: sf_muR, sf_muF
   
   public :: iF1Wp, iF2Wp, iF3Wp, iF1Wm, iF2Wm, iF3Wm, iF1Z, iF2Z, iF3Z, iF1EM, iF2EM, iF1gZ, iF2gZ, iF3gZ
-  public :: sf_quark_masses
 
   !!
   !! indices for the different structure functions (D=d,s,b, U=u,c)
@@ -91,8 +49,6 @@ module structure_functions
   !!
   !! coupling constants and fixed parameters
   !!
-  real(dp), save      :: sf_quark_masses(4:6) = quark_masses_def(4:6)
-
   ! public indices for scale choice options
   integer, parameter, public :: scale_choice_fixed     = 0 !< muR,muF scales predetermined in the StartStrFct call
   integer, parameter, public :: scale_choice_Q         = 1 !< muR,muF scales equal to xR,xQ * Q (xR,xQ to be set in StartStrFct)
@@ -102,6 +58,13 @@ module structure_functions
   !! holds the coefficient functions
   !!
   type(coef_holder), save :: ch
+
+  !!
+  !! Holds the structure functions. The tables are identical to the
+  !! streamlined tables, but separete such that one can use the
+  !! streamlined tables at the same time as the structure functions.
+  !!
+  type(pdf_table), save :: sf_tables(0:max_table_index)
 
   !!
   !! constants and fixed parameters
@@ -138,7 +101,6 @@ module structure_functions
 contains
   !> @brief Setup of constants and parameters needed for structure functions
   !!
-  !! @param[in]      rts            largest value at which we will access the structure functions (collider root S)
   !! @param[in]      order_max      highest order in QCD to compute (1: LO, 2: NLO, etc)
   !! @param[opt]     nflav          integer number of flavours (if not present use variable flavour)
   !! @param[opt]     xR             factor to multiply renormalisation scale
@@ -150,9 +112,8 @@ contains
   !! @param[opt]     wmass          Mass of the W boson
   !! @param[opt]     zmass          Mass of the z boson
   !!
-  subroutine StartStrFct(rts, order_max, nflav, xR, xF, scale_choice, constant_mu, param_coefs, &
+  subroutine StartStrFct(order_max, nflav, xR, xF, scale_choice, constant_mu, param_coefs, &
        & Qmin_PDF, wmass, zmass)
-    real(dp), intent(in) :: rts
     integer, intent(in)  :: order_max
     integer, optional    :: nflav, scale_choice
     real(dp), optional   :: xR, xF, constant_mu, Qmin_PDF, wmass, zmass
@@ -164,12 +125,16 @@ contains
        call wae_error('StartStrFct', 'hoppetStart not called!')
     endif
 
-    ! take sensible default value for mw and mz
-    mw = 80.398_dp
-    mz = 91.187_dp
-    ! otherwise use user input
-    if(present(wmass)) mw = wmass
-    if(present(zmass)) mz = zmass
+    ! Read input
+    mw                = default_or_opt(80.398_dp, wmass)
+    mz                = default_or_opt(91.187_dp, zmass)
+    xmuR              = default_or_opt(one, xR)
+    xmuF              = default_or_opt(one, xF)
+    scale_choice_save = default_or_opt(scale_choice_Q, scale_choice)
+    exact_coefs       = .not.default_or_opt(.true., param_coefs)
+    cst_mu            = default_or_opt(zero, constant_mu)
+    Qmin              = default_or_opt(one, Qmin_PDF)
+    
     ! compute sin(\theta_w) from W/Z mass
     sin_thw_sq = 1.0_dp - (mw/mz)**2
     
@@ -191,22 +156,6 @@ contains
     two_vi_Z_down   = -one + (four/three) * sin_thw_sq
     two_ai_Z_up = one
     two_ai_Z_down   = -one
-    
-    ! default settings
-    xmuR = one
-    xmuF = one
-    scale_choice_save = scale_choice_Q
-    exact_coefs  = .false.
-    cst_mu       = zero
-    Qmin         = one
-    
-    ! change to user input if specified
-    if(present(xR)) xmuR=xR
-    if(present(xF)) xmuF=xF
-    if(present(scale_choice)) scale_choice_save=scale_choice
-    if(present(constant_mu)) cst_mu=constant_mu
-    if(present(param_coefs)) exact_coefs = .not.param_coefs
-    if(present(Qmin_PDF)) Qmin=Qmin_PDF
 
     if (present(nflav).and.nflav.gt.0) then
        ! if nflav is present, then use a fixed flavour number
@@ -222,15 +171,10 @@ contains
        call InitCoefHolder(grid, ch, order_max, exact_coefs, nflo=3, nfhi=6)
        use_mass_thresholds = .true.
        
-       !call InitCoefHolder(grid, ch, order_max, exact_coefs)
-       !use_mass_thresholds = .false.
-       sf_quark_masses(4:6) = masses(4:6) ! Takes the thresholds from the streamlined 
-                                          ! interface which should be filled first!
-       !sf_quark_masses(5) = 4.18_dp
        print*, "Starting the structure functions with mass thresholds at"
-       print*, "mc = ", sf_quark_masses(4) 
-       print*, "mb = ", sf_quark_masses(5) 
-       print*, "mt = ", sf_quark_masses(6) 
+       print*, "mc = ", masses(4) 
+       print*, "mb = ", masses(5) 
+       print*, "mt = ", masses(6) 
        ! and start with a sensible local nf (which will be 5 here) 
        nf_lcl = nf_int
     endif
@@ -239,9 +183,6 @@ contains
     if ((use_mass_thresholds).and.(scale_choice_save.ge.scale_choice_arbitrary)) then
        call wae_error('StartStrFct', 'illegal value for scale_choice with mass thresholds turned on', intval = scale_choice_save)
     end if
-
-    ! AK: Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
-    tables(1:)%tab_iflv_max = 7
  
   end subroutine StartStrFct
 
@@ -258,10 +199,21 @@ contains
   !! @param[in]      order              order at which we initialise the structure functions
   !! @param[opt]     separate_orders    if .true. separate into individual orders rather than summing
   !!
-  !----------------------------------------------------------------------
   subroutine InitStrFct(order, separate_orders)
     integer, intent(in) :: order
     logical, optional :: separate_orders
+    
+    if(.not.setup_done(0)) then
+       call wae_error('InitStrFct', 'hoppetEvolve not called!')
+    endif
+    
+    ! Now we setup the tables. HoppetStart already called, so we can copy the tables over
+    call AllocPdfTable(sf_tables, tables(0))
+    ! Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
+    sf_tables(1:)%tab_iflv_max = 7
+    
+    ! Add nf information to the structure function tables
+!    call AddNfInfoToPdfTable(sf_tables,coupling)
 
     ! To turn off b quarks completely (only for testing and comparison)
     ! uncomment following two lines:
@@ -269,11 +221,7 @@ contains
     ! tables(0)%tab(:,+5,:) = zero
 
     ! default is to sum each order before convolutions (it's faster)
-    if (present(separate_orders)) then
-       use_sep_orders = separate_orders
-    else
-       use_sep_orders = .false.
-    endif
+    use_sep_orders = default_or_opt(.false.,separate_orders)
 
     if (use_sep_orders) then
        ! First we treat the case where we want to separate out each order in
@@ -282,7 +230,7 @@ contains
        if (scale_choice_save.eq.scale_choice_Q.or.scale_choice_save.eq.scale_choice_fixed) then
           ! if scale_choice = 0,1 use fast implementation
           ! tables is saved as an array in Q, and only tables(0),
-          ! tables(1), tables(2), tables(4), tables(8) are non zero
+          ! sf_tables(1), sf_tables(2), sf_tables(4), sf_tables(8) are non zero
           if (order.ge.1) call set_LO_structure_functions()
           if (order.ge.2) call set_NLO_structure_functions()
           if (order.ge.3) call set_NNLO_structure_functions()
@@ -291,7 +239,7 @@ contains
           ! if scale_choice >= 2 use slower implementation with full
           ! scale choices, such as sqrt(Q1*Q2)
           ! tables is saved as an array in muF now, and all components
-          ! of tables are non zero.
+          ! of sf_tables are non zero.
           if (order.ge.1) call set_LO_structure_functions_anyscale()
           if (order.ge.2) call set_NLO_structure_functions_anyscale()
           if (order.ge.3) call set_NNLO_structure_functions_anyscale()
@@ -503,7 +451,7 @@ contains
    
        ! start with LO
        if (order.ge.1) then
-          tables(1)%tab(:,:,iQ) = structure_function_general(ch%C2LO*f, ch%CLLO*f, ch%C3LO*f)
+          sf_tables(1)%tab(:,:,iQ) = structure_function_general(ch%C2LO*f, ch%CLLO*f, ch%C3LO*f)
        endif
        
        ! now add NLO terms
@@ -524,7 +472,7 @@ contains
              f3 = CxNLO_with_logs(ch%C3LO, ch%C3NLO, f, PLO_f)
           endif
 
-          tables(1)%tab(:,:,iQ) = tables(1)%tab(:,:,iQ) + &
+          sf_tables(1)%tab(:,:,iQ) = sf_tables(1)%tab(:,:,iQ) + &
                & as2pi * structure_function_general(f2, fL, f3)
        endif
 
@@ -548,7 +496,7 @@ contains
              f3 = CxNNLO_with_logs(ch%C3LO, ch%C3NLO, ch%C3NNLO, f, PLO_f, PNLO_f, PLO2_f)
           endif
 
-          tables(1)%tab(:,:,iQ) = tables(1)%tab(:,:,iQ) + &
+          sf_tables(1)%tab(:,:,iQ) = sf_tables(1)%tab(:,:,iQ) + &
                (as2pi**2) * structure_function_general(f2, fL, f3)
        endif
 
@@ -584,7 +532,7 @@ contains
           f2_fl11 = ch%C2N3LO_fl11 * f
           fL_fl11 = ch%CLN3LO_fl11 * f
 
-          tables(1)%tab(:,:,iQ) = tables(1)%tab(:,:,iQ) + &
+          sf_tables(1)%tab(:,:,iQ) = sf_tables(1)%tab(:,:,iQ) + &
                & (as2pi**3) * structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
        endif
     end do
@@ -607,7 +555,7 @@ contains
        if (use_mass_thresholds) then
           call use_vfns(f, Q)
        endif
-       tables(1)%tab(:,:,iQ) = structure_function_general(ch%C2LO*f, ch%CLLO*f, ch%C3LO*f)
+       sf_tables(1)%tab(:,:,iQ) = structure_function_general(ch%C2LO*f, ch%CLLO*f, ch%C3LO*f)
     end do
     
   end subroutine set_LO_structure_functions
@@ -627,7 +575,7 @@ contains
           call use_vfns(f, tables(0)%Q_vals(iQ))
        endif
        
-       tables(1)%tab(:,:,iQ) = structure_function_general(&
+       sf_tables(1)%tab(:,:,iQ) = structure_function_general(&
             & f * ch%C2LO, &
             & f * ch%CLLO, &
             & f * ch%C3LO)       
@@ -672,7 +620,7 @@ contains
           f3 = CxNLO_with_logs(ch%C3LO, ch%C3NLO, f, PLO_f)
        endif
           
-       tables(2)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(2)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
     end do
 
@@ -711,20 +659,20 @@ contains
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
 
-       ! Save the NLO pieces in tables(2) and tables(3)
+       ! Save the NLO pieces in sf_tables(2) and sf_tables(3)
       
        ! Get the NLO coefficient function, (C_NLO x f) 
        f2 = (ch%C2NLO * f)
        fL = (ch%CLNLO * f)
        f3 = (ch%C3NLO * f)
-       tables(2)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(2)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now compute the (C_LO x P_LO x f) term
        PLO_f = dh%P_LO * f
        f2 = (ch%C2LO * PLO_f)
        fL = (ch%CLLO * PLO_f)
        f3 = (ch%C3LO * PLO_f)
-       tables(3)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(3)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
     end do
 
   end subroutine set_NLO_structure_functions_anyscale
@@ -770,7 +718,7 @@ contains
           f3 = CxNNLO_with_logs(ch%C3LO, ch%C3NLO, ch%C3NNLO, f, PLO_f, PNLO_f, PLO2_f)
        endif
 
-       tables(4)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(4)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
      
     end do
 
@@ -827,7 +775,7 @@ contains
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
        
-       ! save the NNLO pieces in tables(4:7)
+       ! save the NNLO pieces in sf_tables(4:7)
        
        PLO2_f  = dh%P_LO  * (dh%P_LO * f)
        PLO_f   = dh%P_LO  * f
@@ -837,25 +785,25 @@ contains
        f2 = (ch%C2NNLO * f)
        fL = (ch%CLNNLO * f)
        f3 = (ch%C3NNLO * f)
-       tables(4)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(4)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_LO x P_LO^2 x f) term
        f2 =  (ch%C2LO * PLO2_f)
        fL =  (ch%CLLO * PLO2_f)
        f3 =  (ch%C3LO * PLO2_f)
-       tables(5)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(5)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_LO x P_NLO) term
        f2 = (ch%C2LO * PNLO_f)
        fL = (ch%CLLO * PNLO_f)
        f3 = (ch%C3LO * PNLO_f)
-       tables(6)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(6)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_NLO x P_LO) term
        f2 = (ch%C2NLO * PLO_f)
        fL = (ch%CLNLO * PLO_f)
        f3 = (ch%C3NLO * PLO_f)
-       tables(7)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(7)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
     end do
 
@@ -921,8 +869,8 @@ contains
        f2_fl11 = ch%C2N3LO_fl11 * f
        fL_fl11 = ch%CLN3LO_fl11 * f
 
-       !tables(8)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
-       tables(8)%tab(:,:,iQ) = structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
+       !sf_tables(8)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(8)%tab(:,:,iQ) = structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
      
     end do
 
@@ -1003,7 +951,7 @@ contains
        Q = tables(0)%Q_vals(iQ)
        f = tables(0)%tab(:,:,iQ)
        
-       ! save the N3LO pieces in tables(8:15)
+       ! save the N3LO pieces in sf_tables(8:15)
        
        PLO2_f   = dh%P_LO  * (dh%P_LO * f)
        PLO_f    = dh%P_LO  * f
@@ -1019,50 +967,50 @@ contains
        f3 = (ch%C3N3LO * f)
        f2_fl11 = (ch%C2N3LO_fl11 * f)
        fL_fl11 = (ch%CLN3LO_fl11 * f)
-       ! tables(8)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
-       tables(8)%tab(:,:,iQ) = structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
+       ! sf_tables(8)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(8)%tab(:,:,iQ) = structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
 
        ! Now calculate the (C_LO x P_LO^3 x f) term
        f2 =  (ch%C2LO * PLO3_f)
        fL =  (ch%CLLO * PLO3_f)
        f3 =  (ch%C3LO * PLO3_f)
-       tables(9)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(9)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_LO x P_LO x P_NLO x f) term
        f2 =  (ch%C2LO * PLONLO_f)
        fL =  (ch%CLLO * PLONLO_f)
        f3 =  (ch%C3LO * PLONLO_f)
-       tables(10)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(10)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_LO x P_NLO x P_LO x f) term
        f2 =  (ch%C2LO * PNLOLO_f)
        fL =  (ch%CLLO * PNLOLO_f)
        f3 =  (ch%C3LO * PNLOLO_f)
-       tables(11)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(11)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_NLO x P_LO^2 x f) term
        f2 =  (ch%C2NLO * PLO2_f)
        fL =  (ch%CLNLO * PLO2_f)
        f3 =  (ch%C3NLO * PLO2_f)
-       tables(12)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(12)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_NLO x P_NLO) term
        f2 = (ch%C2NLO * PNLO_f)
        fL = (ch%CLNLO * PNLO_f)
        f3 = (ch%C3NLO * PNLO_f)
-       tables(13)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(13)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_NNLO x P_LO) term
        f2 = (ch%C2NNLO * PLO_f)
        fL = (ch%CLNNLO * PLO_f)
        f3 = (ch%C3NNLO * PLO_f)
-       tables(14)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(14)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
        ! Now calculate the (C_LO x P_NNLO) term
        f2 = (ch%C2LO * PNNLO_f)
        fL = (ch%CLLO * PNNLO_f)
        f3 = (ch%C3LO * PNNLO_f)
-       tables(15)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
+       sf_tables(15)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
 
     end do
 
@@ -1253,7 +1201,7 @@ contains
   !! Calculate the structure function at x, Q, muR, muF summed over
   !! all orders. muR and muF are only needed if we are using the
   !! scale_choice_arbitrary, as otherwise they are already included in
-  !! the tables.
+  !! the sf_tables.
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
@@ -1273,8 +1221,8 @@ contains
        if (order_setup.ge.3) res = res + F_NNLO(x, Q, muR, muF)
        if (order_setup.ge.4) res = res + F_N3LO(x, Q, muR, muF)
     else
-       ! if we haven't kept each order separate, then everything is in tables(1)
-       call EvalPdfTable_xQ(tables(1), x, Q, res)
+       ! if we haven't kept each order separate, then everything is in sf_tables(1)
+       call EvalPdfTable_xQ(sf_tables(1), x, Q, res)
     endif
     
   end function StrFct
@@ -1285,7 +1233,7 @@ contains
   !! Calculate the leading order structure function at x, Q, muR,
   !! muF. muR and muF are only needed if we are using the
   !! scale_choice_arbitrary, as otherwise they are already included in
-  !! the tables.
+  !! the sf_tables.
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
@@ -1300,14 +1248,14 @@ contains
 
     if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
-    ! if scale_choice = 0,1, then evaluate tables at Q
+    ! if scale_choice = 0,1, then evaluate sf_tables at Q
     ! (since it is saved as an array in Q)
     Q_or_muF = Q
-    ! if scale_choice >= 2, then evaluate tables at muF
+    ! if scale_choice >= 2, then evaluate sf_tables at muF
     ! (since it is saved as an array in muF)
     if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
 
-    call EvalPdfTable_xQ(tables(1), x, Q_or_muF, res)
+    call EvalPdfTable_xQ(sf_tables(1), x, Q_or_muF, res)
     
   end function F_LO
 
@@ -1315,7 +1263,7 @@ contains
   !!
   !! Calculate the NLO structure function at x, Q, muR, muF. muR and
   !! muF are only needed if we are using the scale_choice_arbitrary,
-  !! as otherwise they are already included in the tables.
+  !! as otherwise they are already included in the sf_tables.
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
@@ -1333,22 +1281,22 @@ contains
     
     as2pi = alphasLocal(muR) / (twopi)
 
-    ! if scale_choice = 0,1, then evaluate tables at Q
+    ! if scale_choice = 0,1, then evaluate sf_tables at Q
     ! (since it is saved as an array in Q)
     Q_or_muF = Q
-    ! if scale_choice >= 2, then evaluate tables at muF
+    ! if scale_choice >= 2, then evaluate sf_tables at muF
     ! (since it is saved as an array in muF)
     if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
     
     ! C_NLO x f (x) in C1f(:) 
-    call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
+    call EvalPdfTable_xQ(sf_tables(2), x, Q_or_muF, C1f)
     res = C1f
     
     ! if scale_choice = 0,1 then this term is already taken care of
     if (scale_choice_save.ge.scale_choice_arbitrary) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
-       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(sf_tables(3), x, Q_or_muF, C0P0f)
        res = res - C0P0f * LFQ2
     endif
     
@@ -1361,7 +1309,7 @@ contains
   !!
   !! Calculate the NNLO structure function at x, Q, muR, muF. muR and
   !! muF are only needed if we are using the scale_choice_arbitrary,
-  !! as otherwise they are already included in the tables.
+  !! as otherwise they are already included in the sf_tables.
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
@@ -1380,15 +1328,15 @@ contains
     
     as2pi = alphasLocal(muR) / (twopi)
 
-    ! if scale_choice = 0,1, then evaluate tables at Q
+    ! if scale_choice = 0,1, then evaluate sf_tables at Q
     ! (since it is saved as an array in Q)
     Q_or_muF = Q
-    ! if scale_choice >= 2, then evaluate tables at muF
+    ! if scale_choice >= 2, then evaluate sf_tables at muF
     ! (since it is saved as an array in muF)
     if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
     
     ! C_NNLO x f (x) in C2f(:,3) 
-    call EvalPdfTable_xQ(tables(4), x, Q_or_muF, C2f)
+    call EvalPdfTable_xQ(sf_tables(4), x, Q_or_muF, C2f)
     res = C2f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
@@ -1396,15 +1344,15 @@ contains
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
-       call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
+       call EvalPdfTable_xQ(sf_tables(2), x, Q_or_muF, C1f)
        ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(sf_tables(3), x, Q_or_muF, C0P0f)
        ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_xQ(tables(5), x, Q_or_muF, C0P0sqf)
+       call EvalPdfTable_xQ(sf_tables(5), x, Q_or_muF, C0P0sqf)
        ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_xQ(tables(6), x, Q_or_muF, C0P1f)
+       call EvalPdfTable_xQ(sf_tables(6), x, Q_or_muF, C0P1f)
        ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_xQ(tables(7), x, Q_or_muF, C1P0f)
+       call EvalPdfTable_xQ(sf_tables(7), x, Q_or_muF, C1P0f)
        ! add up all the different pieces
        res = res - C1P0f * LFQ2 + C0P0sqf * half * LFQ2**2 &
             & - twopi * beta0 * C0P0f * (LRQ2*LFQ2 - half*LFQ2**2) &
@@ -1420,7 +1368,7 @@ contains
   !!
   !! Calculate the N3LO structure function at x, Q, muR, muF. muR and
   !! muF are only needed if we are using the scale_choice_arbitrary,
-  !! as otherwise they are already included in the tables.
+  !! as otherwise they are already included in the sf_tables.
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
@@ -1440,15 +1388,15 @@ contains
     
     as2pi = alphasLocal(muR) / (twopi)
 
-    ! if scale_choice = 0,1, then evaluate tables at Q
+    ! if scale_choice = 0,1, then evaluate sf_tables at Q
     ! (since it is saved as an array in Q)
     Q_or_muF = Q
-    ! if scale_choice >= 2, then evaluate tables at muF
+    ! if scale_choice >= 2, then evaluate sf_tables at muF
     ! (since it is saved as an array in muF)
     if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
     
     ! C_N3LO x f (x) in C2f(:,8) 
-    call EvalPdfTable_xQ(tables(8), x, Q_or_muF, C3f)
+    call EvalPdfTable_xQ(sf_tables(8), x, Q_or_muF, C3f)
     res = C3f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
@@ -1456,32 +1404,32 @@ contains
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
-       call EvalPdfTable_xQ(tables(2), x, Q_or_muF, C1f)
+       call EvalPdfTable_xQ(sf_tables(2), x, Q_or_muF, C1f)
        ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_xQ(tables(3), x, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(sf_tables(3), x, Q_or_muF, C0P0f)
        ! C_NNLO x f (x) in C2f(:,3) 
-       call EvalPdfTable_xQ(tables(4), x, Q_or_muF, C2f)
+       call EvalPdfTable_xQ(sf_tables(4), x, Q_or_muF, C2f)
        ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_xQ(tables(5), x, Q_or_muF, C0P0sqf)
+       call EvalPdfTable_xQ(sf_tables(5), x, Q_or_muF, C0P0sqf)
        ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_xQ(tables(6), x, Q_or_muF, C0P1f)
+       call EvalPdfTable_xQ(sf_tables(6), x, Q_or_muF, C0P1f)
        ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_xQ(tables(7), x, Q_or_muF, C1P0f)
+       call EvalPdfTable_xQ(sf_tables(7), x, Q_or_muF, C1P0f)
        
        ! C_LO x P_LO^3 x f (x) in C0P0cbf
-       call EvalPdfTable_xQ(tables(9), x, Q_or_muF, C0P0cbf)
+       call EvalPdfTable_xQ(sf_tables(9), x, Q_or_muF, C0P0cbf)
        ! C_LO x P_LO x P_NLO x f (x) in C0P01f
-       call EvalPdfTable_xQ(tables(10), x, Q_or_muF, C0P01f)
+       call EvalPdfTable_xQ(sf_tables(10), x, Q_or_muF, C0P01f)
        ! C_LO x P_LO x P_NLO x f (x) in C0P10f
-       call EvalPdfTable_xQ(tables(11), x, Q_or_muF, C0P10f)
+       call EvalPdfTable_xQ(sf_tables(11), x, Q_or_muF, C0P10f)
        ! C_NLO x P_LO^2 x f (x) in C1P0sqf
-       call EvalPdfTable_xQ(tables(12), x, Q_or_muF, C1P0sqf)
+       call EvalPdfTable_xQ(sf_tables(12), x, Q_or_muF, C1P0sqf)
        ! C_NLO x P_NLO x f (x) in C1P1f
-       call EvalPdfTable_xQ(tables(13), x, Q_or_muF, C1P1f)
+       call EvalPdfTable_xQ(sf_tables(13), x, Q_or_muF, C1P1f)
        ! C_NNLO x P_LO x f (x) in C2P0f
-       call EvalPdfTable_xQ(tables(14), x, Q_or_muF, C2P0f)
+       call EvalPdfTable_xQ(sf_tables(14), x, Q_or_muF, C2P0f)
        ! C_LO x P_NNLO x f (x) in C0P2f
-       call EvalPdfTable_xQ(tables(15), x, Q_or_muF, C0P2f)
+       call EvalPdfTable_xQ(sf_tables(15), x, Q_or_muF, C0P2f)
     
        ! add up all the different pieces
        ! The commented lines are copy/pasted from mathematica
@@ -1521,15 +1469,15 @@ contains
     log_muR2_over_Q2 = two * log(sf_muR(Q) / Q)
   end subroutine set_scale_logs
   
-  !> @brief returns the renormalisation scale used in the structure function tables at Q
+  !> @brief returns the renormalisation scale used in the structure function sf_tables at Q
   !!
   !! Returns the renormalisation scale used in the structure function
-  !! tables at Q. In the case of scale_choice_arbitrary this function
+  !! sf_tables at Q. In the case of scale_choice_arbitrary this function
   !! returns Q, as that is the scale at which the structure functions
   !! have been set up.
   !!
   !! @param[in]       Q          Q value
-  !! @return          the renormalisation scale used in the structure function tables at Q
+  !! @return          the renormalisation scale used in the structure function sf_tables at Q
   !!
   real(dp) function sf_muR(Q)
     real(dp), intent(in) :: Q
@@ -1548,15 +1496,15 @@ contains
     endif
   end function sf_muR
 
-  !> @brief returns the factorisation scale used in the structure function tables at Q
+  !> @brief returns the factorisation scale used in the structure function sf_tables at Q
   !!
   !! Returns the factorisation scale used in the structure function
-  !! tables at Q. In the case of scale_choice_arbitrary this function
+  !! sf_tables at Q. In the case of scale_choice_arbitrary this function
   !! returns Q, as that is the scale at which the structure functions
   !! have been set up.
   !!
   !! @param[in]       Q          Q value
-  !! @return          the factorisation scale used in the structure function tables at Q
+  !! @return          the factorisation scale used in the structure function sf_tables at Q
   !!
   real(dp) function sf_muF(Q)
     real(dp), intent(in) :: Q
@@ -1585,13 +1533,13 @@ contains
 
     ! First set current nf equal to the smallest value it can take
     current_nf = ch%nflo
-    if(Q.lt.sf_quark_masses(4)) then   
+    if(Q.lt.masses(4)) then   
       current_nf = 3
-    elseif(Q.lt.sf_quark_masses(5)) then 
+    elseif(Q.lt.masses(5)) then 
       current_nf = 4
-    elseif(Q.lt.sf_quark_masses(6)) then  
+    elseif(Q.lt.masses(6)) then  
       current_nf = 5
-    elseif(Q.ge.sf_quark_masses(6)) then  
+    elseif(Q.ge.masses(6)) then  
       current_nf = 6
     endif      
 
@@ -1694,40 +1642,61 @@ contains
 end module structure_functions
 
 
-!----------------------------------------------------------------------
-! Setup of constants and parameters needed for structure functions
-! using a minimal number of input. 
-subroutine hoppetStartStrFct(rts, order_max)
+!> @brief  Minimal setup of structure functions
+!!
+!! @param[in]      order_max      highest order in QCD to compute (1: LO, 2: NLO, etc)
+!!
+subroutine hoppetStartStrFct(order_max)
   use streamlined_interface; use structure_functions
   implicit none
-  real(dp), intent(in) :: rts
   integer, intent(in)  :: order_max
   !----------------------------------------------------------------------
   
-  call StartStrFct(rts, order_max)
+  call StartStrFct(order_max)
   
 end subroutine hoppetStartStrFct
 
-!----------------------------------------------------------------------
-! Setup of constants and parameters needed for structure functions
-subroutine hoppetStartStrFctExtended(rts, order_max, nflav, xR, xF,&
+!> @brief  Setup of constants and parameters needed for structure functions
+!!
+!! @param[in]      order_max      highest order in QCD to compute (1: LO, 2: NLO, etc)
+!! @param[opt]     nflav          integer number of flavours (if not present use variable flavour)
+!! @param[opt]     xR             factor to multiply renormalisation scale
+!! @param[opt]     xF             factor to multiply factorisation scale
+!! @param[opt]     scale_choice   (0: fixed scale, 1: use Q, 2: use arbitrary scale)
+!! @param[opt]     constant_mu    if scale_choice = scale_choice_fixed (= 0) then this is the fixed scale
+!! @param[opt]     param_coefs    if .true. use parametrised coefficients functions
+!! @param[opt]     Qmin_PDF       Lowest value accesible in the PDF and hence in the structure functions. 
+!! @param[opt]     wmass          Mass of the W boson
+!! @param[opt]     zmass          Mass of the z boson
+!!
+subroutine hoppetStartStrFctExtended(order_max, nflav, xR, xF,&
      & scale_choice , constant_mu, param_coefs, Qmin_PDF, wmass,&
      & zmass)
   use streamlined_interface; use structure_functions
   implicit none
-  real(dp), intent(in) :: rts, xR, xF, constant_mu, Qmin_PDF, wmass, zmass
+  real(dp), intent(in) :: xR, xF, constant_mu, Qmin_PDF, wmass, zmass
   integer, intent(in)  :: order_max, nflav, scale_choice
   logical , intent(in) :: param_coefs
   !----------------------------------------------------------------------
 
-call StartStrFct(rts, order_max, nflav, xR, xF, scale_choice&
+call StartStrFct(order_max, nflav, xR, xF, scale_choice&
      &, constant_mu, param_coefs, Qmin_PDF, wmass, zmass)
   
 end subroutine hoppetStartStrFctExtended
 
-!----------------------------------------------------------------------
-! Initialize the structure functions up to specified order
-! this requires the PDF to have been set up beforehand, and filled in tables(0)
+!> @brief Initialize the structure functions up to specified order
+!!
+!! Initialize the structure functions up to specified order
+!! this requires the tabulated PDF to have been set up beforehand in the
+!! the streamlined interface. 
+!!
+!! By default, separate_orders = .false., which means that one
+!! can only access the sum over all orders. If separate_orders = .true.
+!! then one can access each order separately, but this is slower.
+!!
+!! @param[in]      order              order at which we initialise the structure functions
+!! @param[opt]     separate_orders    if .true. separate into individual orders rather than summing
+!!
 subroutine hoppetInitStrFct(order, separate_orders)
   use streamlined_interface; use structure_functions
   implicit none
@@ -1738,10 +1707,19 @@ subroutine hoppetInitStrFct(order, separate_orders)
 
 end subroutine hoppetInitStrFct
 
-!----------------------------------------------------------------------
-! F
-! calculate the structure function at x, muF
-! this is the sum over all orders
+!> @brief calculate the structure function at x, Q, muR, muF summed over all orders
+!!
+!! Calculate the structure function at x, Q, muR, muF summed over
+!! all orders. muR and muF are only needed if we are using the
+!! scale_choice_arbitrary, as otherwise they are already included in
+!! the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in,opt]   muR        renormalisation scale 
+!! @param[in,opt]   muF        factorisation scale
+!! @return          an array of all structure functions summed over orders
+!!
 subroutine hoppetStrFct(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
   real(dp) :: x, Q
@@ -1751,10 +1729,19 @@ subroutine hoppetStrFct(x, Q, muR_in, muF_in, res)
   res = StrFct(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFct
 
-!----------------------------------------------------------------------
-! F_LO
-! calculate the leading order structure function at x, muF
-!
+!> @brief calculate the leading order structure function at x, Q, muR, muF 
+!!
+!! Calculate the leading order structure function at x, Q, muR,
+!! muF. muR and muF are only needed if we are using the
+!! scale_choice_arbitrary, as otherwise they are already included in
+!! the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in,opt]   muR        renormalisation scale 
+!! @param[in,opt]   muF        factorisation scale
+!! @return          an array of all the leading order structure functions
+!!
 subroutine hoppetStrFctLO(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
   real(dp) :: x, Q
@@ -1764,10 +1751,18 @@ subroutine hoppetStrFctLO(x, Q, muR_in, muF_in, res)
   res = F_LO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctLO
 
-  !----------------------------------------------------------------------
-  ! F_NLO
-  ! calculate the next-to-leading order structure function at x, muF
-  !
+!> @brief calculate the NLO structure function at x, Q, muR, muF 
+!!
+!! Calculate the NLO structure function at x, Q, muR, muF. muR and
+!! muF are only needed if we are using the scale_choice_arbitrary,
+!! as otherwise they are already included in the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in,opt]   muR        renormalisation scale 
+!! @param[in,opt]   muF        factorisation scale
+!! @return          an array of all the NLO structure functions
+!!
 subroutine hoppetStrFctNLO(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
   real(dp) :: x, Q
@@ -1777,10 +1772,18 @@ subroutine hoppetStrFctNLO(x, Q, muR_in, muF_in, res)
   res = F_NLO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctNLO
 
-  !----------------------------------------------------------------------
-  ! F_NNLO
-  ! calculate the next-to-next-to-leading order structure function at x, muF
-  !
+!> @brief calculate the NNLO structure function at x, Q, muR, muF 
+!!
+!! Calculate the NNLO structure function at x, Q, muR, muF. muR and
+!! muF are only needed if we are using the scale_choice_arbitrary,
+!! as otherwise they are already included in the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in,opt]   muR        renormalisation scale 
+!! @param[in,opt]   muF        factorisation scale
+!! @return          an array of all the NNLO structure functions
+!!
 subroutine hoppetStrFctNNLO(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
   real(dp) :: x, Q
@@ -1790,10 +1793,18 @@ subroutine hoppetStrFctNNLO(x, Q, muR_in, muF_in, res)
   res = F_NNLO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctNNLO
 
-  !----------------------------------------------------------------------
-  ! F_N3LO
-  ! calculate the next-to-next-tonext-to-leading order structure function at x, muF
-  !
+!> @brief calculate the N3LO structure function at x, Q, muR, muF 
+!!
+!! Calculate the N3LO structure function at x, Q, muR, muF. muR and
+!! muF are only needed if we are using the scale_choice_arbitrary,
+!! as otherwise they are already included in the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in,opt]   muR        renormalisation scale 
+!! @param[in,opt]   muF        factorisation scale
+!! @return          an array of all the N3LO structure functions
+!!
 subroutine hoppetStrFctN3LO(x, Q, muR_in, muF_in, res) 
   use streamlined_interface; use structure_functions
   real(dp) :: x, Q

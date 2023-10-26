@@ -44,7 +44,7 @@ int main () {
   double wmass = 81.0;
   bool param_coefs = true;
 
-  hoppetStartStrFctExtended(Qmax, order_max, nflav, xmuR,xmuF,sc_choice,zmass,param_coefs,Qmin,wmass,zmass);
+  hoppetStartStrFctExtended(order_max, nflav, xmuR,xmuF,sc_choice,zmass,param_coefs,Qmin,wmass,zmass);
     
   double asQ      = 0.35;
   double Q0       = sqrt(2.0);
@@ -70,11 +70,11 @@ int main () {
            2*(pdf[6-1]+pdf[6-2]),
            (pdf[6-4]+pdf[6+4]),
            pdf[6+0],
-	   StrFct[F1EM],
-	   StrFct[F2EM],
-	   StrFct[F1Z],
-	   StrFct[F2Z ],
-	   StrFct[F3Z ]);
+	   StrFct[iF1EM],
+	   StrFct[iF2EM],
+	   StrFct[iF1Z],
+	   StrFct[iF2Z ],
+	   StrFct[iF3Z ]);
   }
   
 }

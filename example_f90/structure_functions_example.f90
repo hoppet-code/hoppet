@@ -38,7 +38,7 @@ program structure_functions_example
          &         order,factscheme_MSbar)
 
   ! Setup all constants and parameters needed by the structure functions
-  call StartStrFct(Qmax, order_max, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
+  call StartStrFct(order_max, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
        param_coefs = .true., Qmin_PDF = Qmin)
 
   ! Evolve the PDF
