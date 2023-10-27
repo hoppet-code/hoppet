@@ -1,5 +1,13 @@
 2023-10-27  Gavin Salam  <gavin.salam@physics.ox.ac.uk> + Paolo + Alexander
 
+	* scripts/check:
+	* example_f90/tabulation_example_qed_streamlined.default_output: (*** ADDED ***, symlink)
+	* example_f90/tabulation_example_qed_streamlined.f90:
+	arranged for tabulation_example_qed_streamlined to be added to make check
+
+    * src/hoppet-config.in:
+	added --version output flag
+
 	* many files:
 
 	merged the QED and struct-func-devel-exact-coefficient-functions

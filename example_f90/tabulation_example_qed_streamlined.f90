@@ -143,9 +143,9 @@ program tabulation_example_streamlined
   Q = 100.0_dp
   write(6,'(a)')
   write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
-  write(6,'(a5,2a12,a14,a11,4a13)') "x",&
+  write(6,'(a5,2a12,a14,a11,5a12)') "x",&
        & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon",&
-       & "photon","e+ + e-","mu+ + mu-","tau+ + tau-"
+       & "photon","e+ + e-","mu+ + mu-"," tau+ + tau-"
   do ix = 1, size(heralhc_xvals)
      call hoppetEval(heralhc_xvals(ix),Q,xpdf_at_xQ)
      write(6,'(es7.1,9es12.4)') heralhc_xvals(ix), &
