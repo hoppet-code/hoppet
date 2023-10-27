@@ -15,7 +15,7 @@ Usage:
 
   --prefix='...'        sets the location for installation
   --mod-prefix='...'    sets the location for installation of modules (by default prefix/include/hoppet)
-  --enable-exact-coeffs enables compilation of exact coefficient functions (default is off; NB even when on, they still need to be explicitly requested in the calling code)
+  --enable-exact-coefs  enables compilation of exact coefficient functions (default is off; NB even when on, they still need to be explicitly requested in the calling code)
   FC='...'              sets the fortran (and f90) compiler
   FFLAGS='...'          sets the fortran (and f90) compiler options
   LDLAGS='...'          sets the link options
@@ -37,7 +37,7 @@ my @args;
 foreach my $arg (@ARGV) {
   if    ($arg =~ /^--prefix=(.*)/) { $prefix= $1;}
   elsif ($arg =~ /^--mod-prefix=(.*)/) { $modPrefix= $1;}
-  elsif ($arg =~ /^--enable-exact-coeffs/) { $enableExactCoefs=1;}
+  elsif ($arg =~ /^--enable-exact-coefs/) { $enableExactCoefs=1;}
   else {
     if ($arg =~ /^--/) {die "Unknown option $arg\n";}
     push @args, "\"".$arg."\"";
