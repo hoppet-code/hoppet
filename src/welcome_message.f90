@@ -3,13 +3,13 @@
 !
 subroutine HoppetWelcomeMessage
   write(0,'(a)') '-----------------------------------------------------------'
-  write(0,'(a)') '               Welcome to HOPPET v. 1.2.1-devel            '
+  write(0,'(a)') '               Welcome to HOPPET v. 1.3.0-devel            '
   write(0,'(a)') '   Higher Order Perturbative Parton Evolution Toolkit      '
   write(0,'(a)') '     struct-func-devel-exact-coefficient-functions         '
   write(0,'(a)') ''
-  write(0,'(a)') '        Written by Gavin P. Salam (2001-2023)'
-  write(0,'(a)') '          with contributions from Juan Rojo'
-  write(0,'(a)') '        Frederic Dreyer and Alexander Karlberg'
+  write(0,'(a)') '                   Written (2001-2023) by                  '
+  write(0,'(a)') '     Frederic Dreyer, Alexander Karlberg, Paolo Nason,     '
+  write(0,'(a)') '      Juan Rojo, Gavin P. Salam and Giulia Zanderighi      '
   write(0,'(a)') ''
   write(0,'(a)') ' It is made available under the GNU public license,'
   write(0,'(a)') ' with the additional request that if you use it or any'
