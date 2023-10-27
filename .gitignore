@@ -5,4 +5,5 @@
 /config.log
 /hoppet-config
 example_f90/tabulation_example_qed_streamlined
+benchmarking/structure_functions_benchmark_checks
 src/.vscode

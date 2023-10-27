@@ -2077,7 +2077,7 @@ contains
        cc_piece = cc_REALVIRT
        res = res + ig_LinWeight(func, yl, yh, one, one, eps)
        cc_piece = cc_REAL
-       res = res + ig_PolyWeight(func, yl, yh, nodes, inode, eps,wgtadd=-one)
+       res = res + ig_PolyWeight_expand(func, yl, yh, nodes, inode, eps,wgtadd=-one)
     else
        cc_piece = cc_REAL
        res = ig_PolyWeight(func, yl, yh, nodes, inode, eps)

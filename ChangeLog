@@ -1,3 +1,13 @@
+2023-10-27  Gavin Salam  <gavin.salam@physics.ox.ac.uk> + Paolo + Alexander
+
+	* many files:
+
+	merged the QED and struct-func-devel-exact-coefficient-functions
+	branches into a new 2023-10-pre1.3.0 branch, which is what we
+	should use going forward.
+
+2023-10-27 NOTE That preceding months involve two streams of change (QED and structure functions) which have been kept separate
+
 2023-10-23 Mon  <gavin.salam@physics.ox.ac.uk> + Giulia + Paolo + Alexander
 
 	* example_f90/tabulation_example_qed.f90:
@@ -80,7 +90,153 @@
 	* src/qed_splitting_functions.f90:
 	incorporated NNLO QED Plq splitting function, as used in Lepton PDF project.
 
-2023-03-12 Sun  <gavin.salam@physics.ox.ac.uk>
+2023-10-26  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* benchmarking/structure_functions_benchmark_checks.f90
+	* doc/HOPPET-v1-doc.tex
+	* example_f77/cpp_structure_functions_example.cc
+	* example_f90/structure_functions_example.f90
+	* src/hoppet_v1.h
+	* src/structure_functions.f90:
+	Created sf_tables that now hold the structure functions such that
+	the stream lined tables can still be used independently. Also
+	removed unused 'rts' from structure functions. This needs to
+	propagate to proVBFH and disorder. Examples modified and checked.
+
+
+2023-10-16  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/structure_functions.f90:
+	Added Doxygen style comments. Relabelled all structure function indices. 
+
+2023-10-14 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/structure_functions.f90:
+	some work on comments
+2023-10-13  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/structure_functions.f90:
+	Changed the two public functions muR, muF to sf_muR, sf_muF due to
+	conflicts in other programs that depend on hoppet (reported by
+	Andrea Banfi for H1jet and HELAC+OpenLoops)
+2023-09-22  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/xc*p.f:
+	Rewrote all NNLO and N3LO parametrised coefficient functions to
+	use proper doubles rather than just float. Moved some divisions by
+	constants into parameters and multiplications.
+
+2023-09-18  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90 (hoppetSetExactDGLAP)
+	* src/hoppet_v1.h:
+	added a function to the streamlined_interface that allows the user
+	to swap to the exact DGLAP objects
+
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* .github/workflows/CI.yml:
+	added gfortran-13 to matrix of compilers to test
+
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/CMakeLists.txt:
+	reworked this to enable conditional compilation of exact
+	coefficient functions, and to allow for installation
+	of library + include files (but not yet .mod files)
+
+	* src/{ => unused}/xclns3p-orig.f:
+	moved this out of the way to avoid confusing build system without
+	two identical copies
+
+	* src/integrator.f90:
+	* src/xclns3p.f:
+	removed some DO with line label termination (which is a deleted
+	feature in F2018 and so was causing warnings)
+
+2023-09-15 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* benchmarking/structure_functions_benchmark_checks.f90:
+	added options -exact-coefs (to turn on exact coefficient functions,
+	instead of parametrised) and -outdir to select the output directory.
+
+	* src/coefficient_functions_holder.f90:
+	* src/exact-coeffs/coefficient_functions_holder_exact.f90:
+	moved exact NNLO and N3LO coefficient functions into a separate
+	file, with a view to facilitating conditional compilation
+
+	* src/no-exact-coefs/coefficient_functions_holder_exact.f90:
+	the alternative file to use when exact coefficient functions 
+	are not being compiled in 
+
+	* configure:
+	added --enable-exact-coefs option to turn on compilation
+	of exact coefficient special_functions (looks for anything in an
+	exact-coefs sub-directory; without the option looks for anything in
+	a no-exact-coefs sub-directory)
+
+	* src/xc*e.f -> src/exact-coefs/:
+	moved all the exact coefficient function files into a separate
+	directory, which is only included if the --enable-exact-coefs option
+	is passed to configure
+
+	* example_f90/{ => exact-coefs}/coefficient_functions_test.f90:
+	moved this into a sub-directory so that it is compiled
+	only when exact coefficient functions are included
+
+	* .github/workflows/CI.yml:
+	added a check that the exact coefficient functions compile
+
+2023-09-15  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90:
+	* src/structure_functions.f90:
+	* src/hoppet_v1.h:
+	changed the argument that StrFct() etc takes from y = -log(x) to x
+	to conform with the rest of the code. Moved the call to
+	hoppetStartExtended outside the structure functions so a user can
+	more easily decide on the grids to use.
+
+2023-09-14  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90
+	* src/hoppet_v1.h:
+	added functions to call the structure functions in the
+	streamlined interface
+
+	* example_f77/cpp_structure_functions_example.cc:
+	added a C++ example for structure functions use
+
+	* example_f90/structure_functions_example.f90:
+	added an F90 example for structure functions use
+
+	* src/coefficient_functions_holder.f90
+	* src/structure_functions.f90
+	* src/hplog5.f
+	* src/xc2gl3e.f
+	* src/xc2ns3e.f
+	* src/xc2ps3e.f
+	* src/xc3ns3e.f
+	* src/xclgl3e.f
+	* src/xclns3e.f
+	* src/xclps3e.f:
+	added the exact 3-loop DIS coefficient functions. Currently they
+	do not work due to a numerical issue in hplog5. Removed factor 2
+	in structure functions introduced for VBF but which should not be
+	there in the DIS definition. Swapped Wp/Wm to align with DIS
+	convention. Fixed a number of bugs in the fl11 term of the NC N3LO
+	structure functions as reported by Valerio Bertone. Fixed
+	couplings for the EM and Zgamma structure functions which were
+	never used in VBF and therefore not tested.
+
+	* benchmarking/structure_functions_benchmark_checks.f90:
+	added file for structure function benchmarks. Should reproduce the
+	results that will be published with Valerio Bertone.
+
+	* scripts/check:
+	added a check for the structure functions
+
+2023-03-12 Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* .github/workflows/CI.yml:
 	added an attempt at continuous integration using github actions
@@ -94,6 +250,13 @@
 
 	* src/convolution.f90:
 	replaced several "stop" instructions with calls to wae_error(...)
+
+2023-02-01  Alexander Karlberg  <alexander.karlberg@cern.ch> 
+
+	* src/structure_functions.f90:
+	Fixed wrong couplings used in the FgZ structure functions. Now
+	initialising non-standard iflv_max and fixed bug where F3gZ was
+	set equal to F3Z
 
 2023-02-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk> (with Alexander Karlberg)
 
@@ -203,7 +366,6 @@
 	for running a quick test that the new fixed-coupling functionality
 	works.
 
-
 2017-10-31  Gavin Salam  <gavin.salam@cern.ch>
 
 	* src/welcome_message.f90 (HoppetWelcomeMessage):
@@ -244,6 +406,8 @@
 	evop%cross_mass_threshold not being properly initialised to
 	.false. in that situation. Also removed some redundant code
 	lines.
+
+2016-07-XX NOTE That preceding months involve two streams of change (QED and structure functions) which have been kept separate
 
 2016-07-06  Gavin Salam  <gavin.salam@cern.ch>
 
@@ -401,6 +565,51 @@
 	* src/qed_coupling.f90: *** ADDED ***
 	got a first basic version of a 1-loop QED coupling -- interface
 	may evolve
+2016-07-08  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/structure_functions.f90:
+	added a third implementation of the structure functions, where we add up
+	all orders before the convolution of the coefficient functions with the
+	PDF; this is possible only for scale_choice=0,1.
+
+	* example_f90/structure_functions_example.f90 :
+	added an example program showing sample usage of structure functions module;
+	moved the handling of the pdf outside of structure_functions.f90, and into
+	the actual program.
+
+2016-06-26  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/structure_functions.f90:
+	- added optional variable flavour-number scheme for the structure functions.
+	- added the gamma-Z structure function.
+	these features still need to be cross-checked against other codes.
+
+2016-06-09  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/integrator.f90 (ig_PolyWeight_expand):
+	* src/convolution.f90 (conv_GCAf_Helper):
+	added an additional integrator ig_PolyWeight_expand which expands terms
+	around zero. This avoids numerical issues close to zero for real pieces.
+
+	* src/streamlined_interface.f90:
+	changed size of tables for integration of structure functions in
+	existing framework
+
+	* src/structure_functions.f90:
+	* src/coefficient_functions_holder.f90:
+	* src/xc*.f:
+	fixed numerical convergence issues at large x by taking a series
+	expansion close to x=1.
+
+2016-06-07  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/coefficient_functions_holder.f90:
+	* src/xc*.f:
+	added all the coefficient functions, implemented up to N3LO, with
+	both the parametrised and the exact NNLO implementation.
+
+	* src/structure_functions.f90:
+	added the implementation of the structure functions, as used in proVBFH.
 
 2016-04-04  Gavin Salam  <gavin.salam@cern.ch>
 

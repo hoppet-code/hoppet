@@ -3,6 +3,8 @@ Generic TODO
 ============
 - [ ] change mZ from 91.2 to 91.1876±0.0021? (Any impact on results checks? Not used?)
 - [x] similarly, check EM coupling at 0 and mZ
+- [ ] fix welcome message, version numbers and author list (in manual and welcome)
+- [ ] run ordercite (or use equivalent latex package)
 
 QED merging notes (2023-09)
 ===========================
@@ -46,6 +48,11 @@ Boolean problem when interfacing c++ to fortran
 ==============================================
 Passing booleans by reference between c++ and fortran
 does not work; we passed them as integers.
+
+2023-09 Structure function branch merging notes
+===============================================
+- [x] add conditional compilation of hplog5 and exact coefficient functions
+- [ ] add mention of coefficient function to welcome_message
 
 Old notes
 =========

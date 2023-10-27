@@ -4,7 +4,7 @@
 # 
 # Run it from the top-level directory as scripts/check
 #
-# Created by GPS on 2009-09-05
+# Created by GPS on 2009-09-05 and subsequently adapted by AK.
 #----------------------------------------------------------------------
 
 # list of tests to run:
@@ -12,6 +12,7 @@
 #   $test.default_output
 tests=(example_f90/tabulation_example \
        example_f90/tabulation_example_qed \
+       example_f90/structure_functions_example \
        )
 
 for test in ${tests[@]}; do

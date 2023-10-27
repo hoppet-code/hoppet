@@ -25,7 +25,7 @@ module streamlined_interface
   !!
   !! The array gets initialised in hoppetStartExtended
   integer, save :: table_index_from_iloop(1:111) = -1
-  integer, parameter :: max_table_index = 7
+  integer, parameter :: max_table_index = 15
 
   !!
   !! NB (2012-12-24): 
@@ -306,13 +306,13 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
   real(dp), pointer :: pdf0(:,:)
   ! create our internal pdf object for the initial condition
   if(with_qed) then
-     write(*,*)'***********HoppetEvolve, before AllocPDFWithLeptons'
+     !write(*,*)'***********HoppetEvolve, before AllocPDFWithLeptons'
      call AllocPDFWithLeptons(grid, pdf0)
   else
      call AllocPDF(grid, pdf0)
   endif
 
-  write(*,*)'***********HoppetEvolve, before InitPDF_LHAPDF'
+  !write(*,*)'***********HoppetEvolve, before InitPDF_LHAPDF'
   call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0pdf)
 
   ! get a running coupling with the desired scale
@@ -336,7 +336,7 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
      if(muR_Q /= 1) then
         call wae_error("hoppetEvolve", "muR_Q /= 1 not allowed if qed is included")
      endif
-     write(*,*)'***********HoppetEvolve, before EvolvePdfTableQED'
+     !write(*,*)'***********HoppetEvolve, before EvolvePdfTableQED'
      call EvolvePdfTableQED(tables(0), Q0pdf, pdf0, dh, qed_split, &
           coupling, coupling_qed, nloop, with_nqcdloop_qed, with_Plq_nnloqed)
   else
@@ -495,6 +495,19 @@ subroutine hoppetSetMSbarMassVFN(mc,mb,mt)
   quark_masses_are_MSbar = .true.
 end subroutine hoppetSetMSbarMassVFN
 
+!======================================================================
+!! Arrange for the use of exact NNLO splitting and mass-threshold
+!! functions.
+subroutine hoppetSetExactDGLAP(exact_nfthreshold, exact_splitting)
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  logical :: exact_nfthreshold, exact_splitting
+
+  if(exact_nfthreshold) call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
+  if(exact_splitting) call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
+
+end subroutine hoppetSetExactDGLAP
+
 
 !======================================================================
 !! Return in f(-6:6) the value of the internally stored pdf at the
@@ -561,5 +574,4 @@ subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
   call EvalPdfTable_xQ(tables(tabindex),x,Q,f)
 
 end subroutine hoppetEvalSplit
-
 

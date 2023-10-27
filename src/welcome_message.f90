@@ -5,6 +5,7 @@ subroutine HoppetWelcomeMessage
   write(0,'(a)') '-----------------------------------------------------------'
   write(0,'(a)') '               Welcome to HOPPET v. 1.2.1-devel            '
   write(0,'(a)') '   Higher Order Perturbative Parton Evolution Toolkit      '
+  write(0,'(a)') '     struct-func-devel-exact-coefficient-functions         '
   write(0,'(a)') ''
   write(0,'(a)') '        Written by Gavin P. Salam (2001-2023)'
   write(0,'(a)') '          with contributions from Juan Rojo'
