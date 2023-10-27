@@ -26,11 +26,11 @@ module structure_functions
   !!
   public :: sf_muR, sf_muF
   
-  public :: iF1Wp, iF2Wp, iF3Wp, iF1Wm, iF2Wm, iF3Wm, iF1Z, iF2Z, iF3Z, iF1EM, iF2EM, iF1gZ, iF2gZ, iF3gZ
-
   !!
   !! indices for the different structure functions (D=d,s,b, U=u,c)
   !!
+  public :: iF1Wp, iF2Wp, iF3Wp, iF1Wm, iF2Wm, iF3Wm, iF1Z, iF2Z,&
+       & iF3Z, iF1EM, iF2EM, iF1gZ, iF2gZ, iF3gZ
   integer, parameter :: iF1Wp= 1   !< F1 W+ : D + Ubar 
   integer, parameter :: iF2Wp= 2   !< F2 W+ : D + Ubar 
   integer, parameter :: iF3Wp= 3   !< F3 W+ : D + Ubar 
@@ -66,6 +66,7 @@ module structure_functions
   !!
   type(pdf_table), save :: sf_tables(0:max_table_index)
   logical,         save :: sf_alloc_already_done = .false.
+
   !!
   !! constants and fixed parameters
   !!
@@ -167,7 +168,7 @@ contains
        write(6,*) "nf = ", nf_lcl
     else
        ! otherwise, use variable flavour number scheme
-   !    call InitCoefHolder(grid, ch, order_max, exact_coefs, nflo=3, nfhi=5)
+       !    call InitCoefHolder(grid, ch, order_max, exact_coefs, nflo=3, nfhi=5)
        call InitCoefHolder(grid, ch, order_max, exact_coefs, nflo=3, nfhi=6)
        use_mass_thresholds = .true.
        
@@ -213,9 +214,6 @@ contains
     ! Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
     sf_tables(1:)%tab_iflv_max = 7
     sf_alloc_already_done = .true. ! Signals that the tables have been set up.
-    
-    ! Add nf information to the structure function tables
-!    call AddNfInfoToPdfTable(sf_tables,coupling)
 
     ! To turn off b quarks completely (only for testing and comparison)
     ! uncomment following two lines:
