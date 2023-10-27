@@ -1,7 +1,7 @@
 NEWS for HOPPET
 
 ======================================================================
-Release 1.2.0, 30 October 20120
+Release 1.2.0, 30 October 2020
 ======================================================================
 . hoppetEvalSplit now supports composite iloop value, e.g. iloop=12
   to get PLO*PNLO*pdf
