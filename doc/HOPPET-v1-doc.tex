@@ -64,10 +64,11 @@
 \newcommand{\as}{\alpha_s}
 
 % author comments
+\definecolor{darkgreen}{rgb}{0,0.6,0}
 \newcommand{\comment}[1]{\textbf{[#1]}}
 \newcommand{\commentgz}[1]{{\color{red} [\it GZ:  #1}]}
 \newcommand{\commentpn}[1]{{\color{magenta} [\it PN:  #1}]}
-\newcommand{\gps}[1]{{\textcolor{green}{\comment{#1}$_\text{GPS}$}}}
+\newcommand{\gps}[1]{{\textcolor{darkgreen}{\comment{#1}$_\text{GPS}$}}}
 \newcommand{\ak}[1]{{\textcolor{blue}{\comment{#1}$_\text{AK}$}}}
 
 
@@ -3071,17 +3072,19 @@ previous calculations.
 \subsection{Initialisation}
 \label{sec:structure-funcs-init}
 
-\gps{Do we need to comment that things are in the
-  \ttt{structure\_functions} module? Or accessible by prefixing
-  function names with \ttt{hoppet}?}\ak{Added text to that effect}
-
 The structure functions can be accessed from inside the module
 \ttt{structure\_functions}. They can also be accessed through the
 streamlined interface by prefixing \ttt{hoppet} as described in
-section~\ref{sec:structure-functions-streamlined}. In order to set up
-the structure functions one needs first to set up a \ttt{running\_coupling} object, as described in  specify a flavour scheme
-and initialise the streamlined interface through \ttt{hoppetStart} or
-\ttt{hoppetStartExtended}. Then one calls
+section~\ref{sec:structure-functions-streamlined}.
+%
+The description below corresponds to a high-level interface, which
+relies on elements such as the \ttt{grid} and splitting functions
+having been initialised in the streamlined interface, through a call
+to \ttt{hoppetStart} or \ttt{hoppetStartExtended}, cf.\
+Section~\ref{sec:vanilla}.\footnote{Users needing a lower level
+  interface should inspect the code in \ttt{src/structure\_functions.f90}.}
+%
+Then one calls
 \begin{lstlisting}
   call StartStrFct(order_max [, nflav] [, xR] [, xF] [, scale_choice] &
                   & [, constant_mu] [ ,param_coefs] [ ,Qmin_PDF] [ ,wmass] [ ,zmass])
@@ -3089,47 +3092,63 @@ and initialise the streamlined interface through \ttt{hoppetStart} or
 specifying as a minimum the perturbative order -- currently
 \ttt{order\_max}$\le 4$.
 
-\gps{I should look at the above function a little more}
-
-If \ttt{nf} is not specified the structure functions are initialised
-with a variable flavour scheme using the quark masses as set by the
-streamlined interface. Otherwise a fixed number of light flavours is
-used. Note that specifying a variable flavour scheme only has an
-impact on the evolution, as the coefficient functions themselves
-assume massless quarks. Hence in a variable flavour scheme the
-structure functions should only be considered reliable for $Q \gg m$.
+If \ttt{nflav} is not passed as an argument, the structure functions
+are initialised to support a variable flavour-number scheme (the
+masses that are used at any given stage will be those set in the
+streamlined interface).
 %
-\gps{Do we need to note that currently StartStrFct itself
-  calls the streamline interface initialisation? Actually, I see that
-  dy gets set automatically to $0.05$. Is there a reason why the call
-  to \ttt{hoppetStart} should not be left to the user? It might be
-  cleaner, even if it requires an extra line of code from them.} \ak{Done.}
+Otherwise a fixed number of light flavours is used, as indicated by
+\ttt{nflav}, which speeds up initialisation.
 %
-\gps{Do we need to comment on where masses get set? And more generally
-  on fact that structure function calculations for massive quarks are
-  not valid unless $Q \gg m$?} \ak{Done}
+Note that specifying a variable flavour-number scheme only has an
+impact on the evolution and on $n_f$ terms in the coefficient
+functions.
+%
+The latter, however always assume massless quarks.
+%
+Hence in a variable flavour-number scheme the structure functions
+should only be considered reliable for $Q \gg m$.
 
 Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
-the renormalisation and factorisation scales.
+the renormalisation and factorisation scales and the degree of
+flexibility that will be available in choosing them at later stages.
 %
-The default value for \ttt{scale\_choice} is \ttt{scale\_choice\_Q} which means that $Q$
-multiplied by \ttt{xR} or \ttt{xF} is used as the renormalisation or
-factorisation scale respectively.
+Specifically \ttt{scale\_choice} can take several values:
+\begin{itemize}
+\item \ttt{scale\_choice\_Q} (default) means that the code will always
+  use $Q$ multiplied by \ttt{xR} or \ttt{xF} as the renormalisation
+  and factorisation scale respectively.
+\item \ttt{scale\_choice\_fixed} corresponds to a fixed scale
+  \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF})
+\item \ttt{scale\_choice\_arbitrary} allows the user to choose
+  arbitrary scales at the moment of evaluating the structure
+  functions.
+  %
+  In this last case, the structure functions are saved as arrays not only in
+  $Q$ but also $\mu_R$ and $\mu_F$. \gps{Is this really what is done?}
+  % 
+  This makes for a slightly slower evaluation compared to the two other
+  scale choices.
+\end{itemize}
 %
-The choice \ttt{scale\_choice\_fixed} corresponds to a fixed scale
-\ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF}).
-%
-Should a user wish to use some arbitrary scale choice,
-\ttt{scale\_choice} should be set to \ttt{scale\_choice\_arbitrary}.
-%
-\gps{Do we want to introduce some constants such as
-  \ttt{scale\_choice\_Q=1}, \ttt{scale\_choice\_fixed=0}, \ttt{scale\_choice\_arbitrary=2}?} \ak{Yes, and done!}
-%
-In this last case, the structure functions are saved as arrays not only in
-$Q$ but also $\mu_R$ and $\mu_F$.
-%
-This makes for a slightly slower evaluation compared to the two other
-scale choices.
+% The default value for \ttt{scale\_choice} is \ttt{scale\_choice\_Q} which means that $Q$
+% multiplied by \ttt{xR} or \ttt{xF} is used as the renormalisation or
+% factorisation scale respectively.
+% %
+% The choice \ttt{scale\_choice\_fixed} corresponds to a fixed scale
+% \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF}).
+% %
+% Should a user wish to use some arbitrary scale choice,
+% \ttt{scale\_choice} should be set to \ttt{scale\_choice\_arbitrary}.
+% %
+% \gps{Do we want to introduce some constants such as
+%   \ttt{scale\_choice\_Q=1}, \ttt{scale\_choice\_fixed=0}, \ttt{scale\_choice\_arbitrary=2}?} \ak{Yes, and done!}
+% %
+% In this last case, the structure functions are saved as arrays not only in
+% $Q$ but also $\mu_R$ and $\mu_F$.
+% %
+% This makes for a slightly slower evaluation compared to the two other
+% scale choices.
 
 If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the structure
 functions are computed using the (very precise) parametrisations found
