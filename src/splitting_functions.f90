@@ -142,89 +142,89 @@ contains
 
   !======================================================================
   ! From here onwards, the NLO splitting functions
-!   function sf_P1qqV(y) result(res)
-!    real(dp), intent(in) :: y
-!    real(dp)             :: res
-!    real(dp)             :: x
-!    real(dp) :: lnx, ln1mx, pqq
-!    x = exp(-y)
-!    res = zero
-
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       lnx = log(x); ln1mx = log(one - x)
-!       pqq = two/(one-x) - one - x
-! !!$       res =    cf**2*( -(two*lnx*ln1mx + 1.5_dp*lnx)*pqq&
-! !!$            & -(1.5_dp + 3.5_dp*x)*lnx - half*(one+x)*lnx**2 - 5*(1-x))&
-! !!$            & + cf*ca*( (half*lnx**2 + 11/6.0_dp * lnx&
-! !!$            &          + 67/18.0_dp - pi**2/6.0_dp) * pqq + (1+x)*lnx&
-! !!$            &        + 20/three*(1-x))&
-! !!$            & + cf*tf*(-(two/three*lnx + 10/9.0_dp)*pqq - four/three*(1-x))
-! res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
-!     &     (4*(1 - x))/3._dp) +                                        &
-!     &  CA*CF*((3.7222222222222223_dp + (11*lnx)/6._dp + lnx**2/2._dp -& 
-!     &        Pi**2/6._dp)*pqq + (20*(1 - x))/3._dp + lnx*(1 + x)) +   &
-!     &  CF**2*(((-3*lnx)/2._dp - 2*ln1mx*lnx)*pqq - 5*(1 - x) -        &
-!     &     (lnx**2*(1 + x))/2._dp - lnx*(1.5_dp + (7*x)/2._dp))
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       pqq = -two/(1-x)
-!       res = res + CA*CF*(3.7222222222222223_dp - Pi**2/6._dp)*pqq - (10*CF&
-!           & *pqq*Tf)/9._dp
-!    case(cc_DELTA)
-!       res = -(CF*(0.16666666666666666_dp + (2*Pi**2)/9._dp)*Tf) + CA&
-!           & *CF*(0.7083333333333334_dp + (11*Pi**2)/18._dp - 3*zeta3) +&
-!           & CF**2*(0.375_dp - Pi**2/2._dp + 6*zeta3)
-!    end select
-
-!    if (cc_piece /= cc_DELTA) res = res * x
-   
-!  end function sf_P1qqV
-  
   function sf_P1qqV(y) result(res)
-    use special_functions
-    real(dp), intent(in) :: y
-    real(dp)             :: res
-    real(dp)             :: x, omx
-    real(dp) :: lnx, ln1mx, pqq
-    x = exp(-y)
-    res = zero
+   real(dp), intent(in) :: y
+   real(dp)             :: res
+   real(dp)             :: x
+   real(dp) :: lnx, ln1mx, pqq
+   x = exp(-y)
+   res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       omx = one - x
-       lnx = log(x); ln1mx = log(omx)
-       pqq = two/(omx) - one - x
-     res =   CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -     &
-     &     (4*(omx))/3._dp) +                                          &
-     &  CA*CF*((3.7222222222222223_dp + (11*lnx)/6._dp + lnx**2/2._dp -& 
-     &        Pi**2/6._dp)*pqq + (20*(1 - x))/3._dp + lnx*(1 + x)) +   &
-     &  CF**2*(((-3*lnx)/2._dp - 2*ln1mx*lnx)*pqq - 5*(omx) -          &
-     &     (lnx**2*(1 + x))/2._dp - lnx*(1.5_dp + (7*x)/2._dp)) -      &
-     &  CF*(CF - CA/2._dp)*(0.5_dp - 4*(omx) +                         &
-     &             (-1 + 2.5_dp*x*x)*lnx/(omx) +                       &
-     &             (pqq*(ddilog(omx))))  
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       pqq = -two/(1-x)
-       res = res + CA*CF*(3.7222222222222223_dp - Pi**2/6._dp)*pqq - (10*CF&
-           & *pqq*Tf)/9._dp
-    case(cc_DELTA)
-      res = -CF*Tf*(0.16666666666666666_dp + (2*Pi**2)/9._dp) +      &
-         & CA*CF*(2.33333333333333_dp +(13*Pi**2)/36._dp - 2*zeta3) +&
-         & CF**2*(-2.875_dp + 4*zeta3) +                             &
-         & CF*(CF-CA/2._dp)*(-8*zeta3 - 13._dp + 2*Pi**2)/4._dp
-! = - CF*Tf Integrate[((-10/9 - (2*Log[x])/3)*(1 + x^2)/(1 - x) - (4*(1 - x))/3) - (-10/9)*(2)/(1 - x), {x, 0, 1}]
-!   - CF*CA Integrate[(67/18 + (11*Log[x])/6 + Log[x]^2/2 - Pi^2/6)*(1 + x^2)/(1 - x) + (20*(1 - x))/3 +  Log[x]*(1 + x) - (67/18 - Pi^2/6)*(2)/(1 - x), {x, 0, 1}]
-!   - CF*CF Integrate[(((-3*Log[x])/2 - 2*Log[1 - x]*Log[x])*(1 + x^2)/(1 - x) - 5*(1 - x) - (Log[x]^2 (1 + x))/2 - Log[x]*(3/2 + (7*x)/2)), {x, 0, 1}] 
-!   - CF*(CA/2-CF) * Integrate[(1/2 - 4*(1 - x) + (-1 + 5/2*x*x)* Log[x]/(1 - x) + ((1 + x^2)/(1 - x)*(PolyLog[2, 1 - x]))), {x, 0, 1}]
-    end select
+   select case(cc_piece)
+   case(cc_REAL,cc_REALVIRT)
+      lnx = log(x); ln1mx = log(one - x)
+      pqq = two/(one-x) - one - x
+!!$       res =    cf**2*( -(two*lnx*ln1mx + 1.5_dp*lnx)*pqq&
+!!$            & -(1.5_dp + 3.5_dp*x)*lnx - half*(one+x)*lnx**2 - 5*(1-x))&
+!!$            & + cf*ca*( (half*lnx**2 + 11/6.0_dp * lnx&
+!!$            &          + 67/18.0_dp - pi**2/6.0_dp) * pqq + (1+x)*lnx&
+!!$            &        + 20/three*(1-x))&
+!!$            & + cf*tf*(-(two/three*lnx + 10/9.0_dp)*pqq - four/three*(1-x))
+res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
+    &     (4*(1 - x))/3._dp) +                                        &
+    &  CA*CF*((3.7222222222222223_dp + (11*lnx)/6._dp + lnx**2/2._dp -& 
+    &        Pi**2/6._dp)*pqq + (20*(1 - x))/3._dp + lnx*(1 + x)) +   &
+    &  CF**2*(((-3*lnx)/2._dp - 2*ln1mx*lnx)*pqq - 5*(1 - x) -        &
+    &     (lnx**2*(1 + x))/2._dp - lnx*(1.5_dp + (7*x)/2._dp))
+   end select
+   select case(cc_piece)
+   case(cc_VIRT,cc_REALVIRT)
+      pqq = -two/(1-x)
+      res = res + CA*CF*(3.7222222222222223_dp - Pi**2/6._dp)*pqq - (10*CF&
+          & *pqq*Tf)/9._dp
+   case(cc_DELTA)
+      res = -(CF*(0.16666666666666666_dp + (2*Pi**2)/9._dp)*Tf) + CA&
+          & *CF*(0.7083333333333334_dp + (11*Pi**2)/18._dp - 3*zeta3) +&
+          & CF**2*(0.375_dp - Pi**2/2._dp + 6*zeta3)
+   end select
 
-    if (cc_piece /= cc_DELTA) res = res * x
+   if (cc_piece /= cc_DELTA) res = res * x
+   
+ end function sf_P1qqV
+  
+!   function sf_P1qqV(y) result(res)
+!     use special_functions
+!     real(dp), intent(in) :: y
+!     real(dp)             :: res
+!     real(dp)             :: x, omx
+!     real(dp) :: lnx, ln1mx, pqq
+!     x = exp(-y)
+!     res = zero
+
+!     select case(cc_piece)
+!     case(cc_REAL,cc_REALVIRT)
+!        omx = one - x
+!        lnx = log(x); ln1mx = log(omx)
+!        pqq = two/(omx) - one - x
+!      res =   CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -     &
+!      &     (4*(omx))/3._dp) +                                          &
+!      &  CA*CF*((3.7222222222222223_dp + (11*lnx)/6._dp + lnx**2/2._dp -& 
+!      &        Pi**2/6._dp)*pqq + (20*(1 - x))/3._dp + lnx*(1 + x)) +   &
+!      &  CF**2*(((-3*lnx)/2._dp - 2*ln1mx*lnx)*pqq - 5*(omx) -          &
+!      &     (lnx**2*(1 + x))/2._dp - lnx*(1.5_dp + (7*x)/2._dp)) -      &
+!      &  CF*(CF - CA/2._dp)*(0.5_dp - 4*(omx) +                         &
+!      &             (-1 + 2.5_dp*x*x)*lnx/(omx) +                       &
+!      &             (pqq*(ddilog(omx))))  
+!     end select
+!     select case(cc_piece)
+!     case(cc_VIRT,cc_REALVIRT)
+!        pqq = -two/(1-x)
+!        res = res + CA*CF*(3.7222222222222223_dp - Pi**2/6._dp)*pqq - (10*CF&
+!            & *pqq*Tf)/9._dp
+!     case(cc_DELTA)
+!       res = -CF*Tf*(0.16666666666666666_dp + (2*Pi**2)/9._dp) +      &
+!          & CA*CF*(2.33333333333333_dp +(13*Pi**2)/36._dp - 2*zeta3) +&
+!          & CF**2*(-2.875_dp + 4*zeta3) +                             &
+!          & CF*(CF-CA/2._dp)*(-8*zeta3 - 13._dp + 2*Pi**2)/4._dp
+! ! = - CF*Tf Integrate[((-10/9 - (2*Log[x])/3)*(1 + x^2)/(1 - x) - (4*(1 - x))/3) - (-10/9)*(2)/(1 - x), {x, 0, 1}]
+! !   - CF*CA Integrate[(67/18 + (11*Log[x])/6 + Log[x]^2/2 - Pi^2/6)*(1 + x^2)/(1 - x) + (20*(1 - x))/3 +  Log[x]*(1 + x) - (67/18 - Pi^2/6)*(2)/(1 - x), {x, 0, 1}]
+! !   - CF*CF Integrate[(((-3*Log[x])/2 - 2*Log[1 - x]*Log[x])*(1 + x^2)/(1 - x) - 5*(1 - x) - (Log[x]^2 (1 + x))/2 - Log[x]*(3/2 + (7*x)/2)), {x, 0, 1}] 
+! !   - CF*(CA/2-CF) * Integrate[(1/2 - 4*(1 - x) + (-1 + 5/2*x*x)* Log[x]/(1 - x) + ((1 + x^2)/(1 - x)*(PolyLog[2, 1 - x]))), {x, 0, 1}]
+!     end select
+
+!     if (cc_piece /= cc_DELTA) res = res * x
     
-  end function sf_P1qqV
+!   end function sf_P1qqV
 
 
   !======================================================================
@@ -287,21 +287,21 @@ contains
     real(dp), intent(in) :: y
     real(dp)             :: res
     real(dp)             :: x
-    ! real(dp) :: lnx, pqqmx, S2x
-    real(dp) :: lnx, pqqx, omx
+    real(dp) :: lnx, pqqmx, S2x
+   !  real(dp) :: lnx, pqqx, omx
     x = exp(-y)
     res = zero
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
        lnx = log(x)
-       omx = one - x
-       pqqx = (one+x*x)/omx
-       !pqqmx = two/(one+x) - one + x
-       !S2x   = sf_S2(x)
-       !res = CF*(-CA/2._dp + CF)*(2*pqqmx*S2x + 4*(1 - x) + 2*lnx*(1 + x))
+      !  omx = one - x
+      !  pqqx = (one+x*x)/omx
+       pqqmx = two/(one+x) - one + x
+       S2x   = sf_S2(x)
+       res = CF*(-CA/2._dp + CF)*(2*pqqmx*S2x + 4*(1 - x) + 2*lnx*(1 + x))
 
-       res = zero
+      !  res = zero
     end select
     select case(cc_piece)
     case(cc_VIRT,cc_REALVIRT)
