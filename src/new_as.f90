@@ -30,7 +30,7 @@ module new_as
   !real(dp), parameter :: dt_base = 0.1_dp
   !--------- go from 0.5 GeV to over 10^20 GeV
   real(dp), parameter :: tlo = -1.3862944 !-3.2188758_dp
-  real(dp), parameter :: thi = 93.0_dp 
+  real(dp), parameter :: thi = 193.0_dp !93.0_dp MvB changed this line
   integer,  parameter :: nofixnf = -1000000045
 
   public :: na_handle

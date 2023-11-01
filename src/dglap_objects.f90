@@ -333,13 +333,27 @@ contains
     !======================================================================
   !! Initialise a NLO unpolarised splitting matrix, with the nf value that
   !! is current from the qcd module. (MSbar scheme)
-  subroutine InitSplitMatTimeNLO(grid, P)
+   !subroutine InitSplitMatTimeNLO(grid, P)
+  ! MvB
+   subroutine InitSplitMatTimeNLO(grid, P, factscheme)
     use qcd
     type(grid_def),    intent(in)    :: grid
     type(split_mat),   intent(inout) :: P
+   ! MvB
+    integer, optional, intent(in) :: factscheme
+    integer :: factscheme_local
     !-----------------------------------------
     type(grid_conv) :: P1qqV, P1qqbarV
 
+    ! MvB
+    factscheme_local = default_or_opt(factscheme_default, factscheme)
+    if (factscheme_local /= factscheme_FragMSbar .and. &
+        & factscheme_local /= factscheme_smallR  ) then
+      ! we cannot run with any other type of scheme
+      write(0,*) 'InitSplitMatTimeNLO: unsupported fact scheme', factscheme
+      call wae_error('InitSplitMatTimeNLO: stopping')
+   end if
+    
     !-- info to describe the splitting function
     !P%loops = 2
     P%nf_int = nf_int
@@ -351,6 +365,12 @@ contains
     ! add in the timelike correction
     call AddWithCoeff(P1qqV, sf_TmSP1qqNS)
     call InitGridConv(grid, P1qqbarV, sf_P1qqbarV)
+    ! MvB added
+    if (factscheme_local == factscheme_smallR) then
+      ! in this case we add minus the CF^2 MSbar piece
+      call AddWithCoeff(P1qqV, sf_P1qqNS_MSbardiff)
+    endif
+
 
     !-- PqqV + PqqbarV
     call InitGridConv(P%NS_plus, P1qqV)

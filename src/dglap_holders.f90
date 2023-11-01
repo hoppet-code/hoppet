@@ -305,11 +305,42 @@ contains
           dh%P_LO%gq = dconv
 
           if (dh%nloop >= 2) then
-             call InitSplitMatTimeNLO (grid, dh%P_NLO)
+             ! MvB
+             ! call InitSplitMatTimeNLO (grid, dh%P_NLO)
+             call InitSplitMatTimeNLO (grid, dh%P_NLO, factscheme_FragMSbar)
              call wae_warn(nfragwarn, &
                   & 'DANGER: nloop=2 fragmentation flavour thresholds not implemented')
           end if
-          
+         case (factscheme_smallR)
+            if (dh%nloop >= 3) call wae_error('InitDglapHolder',&
+                 &'nloop >= 3 not supported for fragmentation case')
+            ! recall that equations for timelike evolution (fragmentation
+            ! functions) are different from those for the spacelike case,
+            ! as given for example in Owens, Phys.Lett 76B (1978) 80 and
+            ! so read
+            !
+            ! d/dlnQ^2 Dq = as/2pi * (      Pqq Dq + Pgq Dg)
+            ! d/dlnQ^2 Dg = as/2pi * (sum_q Pqg Dq + Pgg Dg)
+            !
+            ! those the actual Pij are identical to before; so we've transposed
+            ! the matrix and for the singlet formulation also reshuffled
+            ! some 2nf factors
+            !
+            ! start off with default space-like matrix
+            call InitSplitMatLO (grid, dh%P_LO)
+            ! get 2nf factors correct
+            call Multiply(dh%P_LO%qg, one / (2*nflcl))
+            call Multiply(dh%P_LO%gq, one * 2*nflcl)
+            ! exchange qg and gq entries
+            dconv = dh%P_LO%qg       ! tmp
+            dh%P_LO%qg = dh%P_LO%gq
+            dh%P_LO%gq = dconv
+  
+            if (dh%nloop >= 2) then
+               call InitSplitMatTimeNLO (grid, dh%P_NLO, factscheme_smallR)
+               call wae_warn(nfragwarn, &
+                    & 'DANGER: nloop=2 fragmentation flavour thresholds not implemented')
+            end if
        case default
           write(0,*) 'factorisation scheme ',dh%factscheme,&
                &' is not currently supported' 
