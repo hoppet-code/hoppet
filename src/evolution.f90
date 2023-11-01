@@ -7,6 +7,7 @@
 module evolution
   use types; use consts_dp
   use dglap_objects; use qcd_coupling
+  use dglap_holders
   use assertions; use qcd
   use warnings_and_errors
   implicit none
@@ -66,6 +67,7 @@ module evolution
   real(dp) :: ev_tmp_du_ballpark
   !real(dp), parameter :: dt_ballpark = 0.2
 
+  type(dglap_holder),   pointer :: ev_dh
   type(split_mat),      pointer :: ev_PLO, ev_PNLO, ev_PNNLO
   type(running_coupling), pointer :: ev_ash
   integer                  :: ev_nloop
@@ -512,6 +514,7 @@ contains
     if (ev_nloop > dh%nloop) &
          &call wae_error('ev_evolve: dh%nloop must be >= nloop')
 
+    ev_dh   => dh
     ev_PLO  => dh%P_LO
     if (ev_nloop >= 2) ev_PNLO => dh%P_NLO
     if (ev_nloop >= 3) ev_PNNLO => dh%P_NNLO
@@ -670,15 +673,18 @@ contains
   !! 
   subroutine ev_conv(u, pdf, dpdf)
     use pdf_representation
+    use dglap_choices
+    use convolution
     ! The following fails with absoft compiler: see ABSOFT_BUG.txt
-    real(dp), intent(in)  :: u, pdf(:,:)
-    real(dp), intent(out) :: dpdf(:,:)
+    real(dp), intent(in)  :: u, pdf(0:,ncompmin:)
+    real(dp), intent(out) :: dpdf(0:,ncompmin:)
     ! The following fails with the intel compiler! See INTEL_BUG.txt
     !real(dp), intent(in)  :: t, pdf(0:,-ncomponents:)
     !real(dp), intent(out) :: dpdf(0:,-ncomponents:)
     !--------------------------------------
     real(dp) :: as2pi, Q, t, jacobian
     type(split_mat) :: Pfull
+    real(dp) :: modpdf(lbound(pdf,dim=1):ubound(pdf,dim=1),lbound(pdf,dim=2):ubound(pdf,dim=2))
 
     ! for analysing Intel bug
     !write(0,*) 'X',lbound(pdf),lbound(pdf,dim=1),size(pdf,dim=1)
@@ -711,6 +717,18 @@ contains
        end if
        call AddWithCoeff(Pfull, ev_PNLO, as2pi)
        dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
+
+       if (ev_dh%factscheme == factscheme_smallR) then
+          ! additional piece to be added for NLO expansion of use of
+          ! alphas(x * muF) rather than alphas(muF), which we expand as
+          ! alphas(muF) + alphas(muF)^2 * beta0 * ln(1/x)
+          modpdf = as2pi * twopi * beta0 * spread(yValues(Pfull%qq%grid),dim=2,ncopies=size(pdf,dim=2)) * pdf
+          ! leave iflv_info as in the original -- it cannot handle being
+          ! multiplied by x-dependent quantities
+          modpdf(:,iflv_info) = pdf(:,iflv_info) 
+          dpdf = dpdf + (jacobian * as2pi) * (ev_PLO .conv. modpdf)
+       end if
+
        call Delete(Pfull)
     case(3)
        if (fourpibeta0_lnmuR_Q /= zero) then
