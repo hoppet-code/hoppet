@@ -200,7 +200,7 @@ contains
        if (tstart <= nah%seg(i)%thi .and. tstart >= nah%seg(i)%tlo) exit
     end do
     if (i > nah%nhi) &
-         &call wae_Error('na_init: Specified Q in not in supported range')
+         &call wae_Error('na_init: Specified Q not in supported range')
     nseg = i
 
     !-- fill up the starting segment

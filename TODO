@@ -1,3 +1,6 @@
+Old notes
+=========
+
 - more explicit error message when coupling is used (un?)initialised
   [and clean up of whole alphas code?]
 
