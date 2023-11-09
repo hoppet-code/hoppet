@@ -65,7 +65,7 @@
 
 % author comments
 \definecolor{darkgreen}{rgb}{0,0.6,0}
-\newcommand{\comment}[1]{\textbf{[#1]}}
+\newcommand{\comment}[1]{{\color{red}\textbf{[#1]}}}
 \newcommand{\commentgz}[1]{{\color{red} [\it GZ:  #1}]}
 \newcommand{\commentpn}[1]{{\color{magenta} [\it PN:  #1}]}
 \newcommand{\gps}[1]{{\textcolor{darkgreen}{\comment{#1}$_\text{GPS}$}}}
@@ -2667,7 +2667,7 @@ described in
 Refs.~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf}.
 %
 The determination of which contributions should be included follows a
-consistent approach based on a so-called "phenomenological" counting
+consistent approach based on a so-called ``phenomenological'' counting
 scheme.
 %
 Within this scheme, one considers $\alpha$ to be of order $\as^2$, and takes the
@@ -2675,7 +2675,7 @@ photon (lepton) PDF to be of order $\alpha L$ ($\alpha^2 L^2$), where
 $L$ is the logarithm of a ratio of the factorisation scale to a typical hadronic scale and is considered to be of order $L \sim 1/\as$. In contrast, quark and gluon
 PDFs are considered to be of order $(\as L)^n={\cal O}(1)$.\footnote{The
   above counting is to be contrasted with a ``democratic'' scheme, in
-  which considers $\alpha \sim \as \sim 1/L$ and the aim is to maintain
+  which one considers $\alpha \sim \as \sim 1/L$ and the aim is to maintain
   the same loop order across all couplings and splitting functions,
   regardless of the relative numbers of QCD and QED couplings that
   they involved.}
@@ -2686,21 +2686,21 @@ terms of order up to $\as^{n+2} L^n \sim \as^2$.
 To achieve a corresponding accuracy when including QED contributions,
 \hoppet has been extended to account for
 \begin{enumerate}
-\item 1-loop QED splitting functions~\cite{Roth:2004ti}, which first
+\item \label{item:qed1} 1-loop QED splitting functions~\cite{Roth:2004ti}, which first
   contribute at order $\alpha L \sim \as$, i.e.\ count as NLO QCD
   corrections;
   
-\item 1-loop QED running coupling, including lepton and quark
+\item \label{item:qed2} 1-loop QED running coupling, including lepton and quark
   thresholds, which first contributes at order $\alpha^2 L^2 \sim
   \as^2$, i.e. like NNLO QCD; 
   
-\item 2-loop mixed QCD-QED splitting
+\item \label{item:qed3} 2-loop mixed QCD-QED splitting
   functions~\cite{deFlorian:2015ujt},
   %\footnote{One-loop triple collinear splitting functions with photons have been computed in refs~\cite{Sborlini:2014mpa,Sborlini:2014kla}};,
   which first contribute at order
   $\alpha \as L \sim \as^2$, i.e.\ count as NNLO QCD corrections;
 
-\item optionally, the 2-loop pure QED $P_{\ell q}$ splitting
+\item \label{item:qed4} optionally, the 2-loop pure QED $P_{\ell q}$ splitting
   function~\cite{deFlorian:2016gvk}, which brings absolute accuracy
   $\alpha^2 L\sim \as^3$ to the lepton distribution (which starts at
   $\alpha^2 L^2 \sim \as^2$).
@@ -2712,8 +2712,8 @@ To achieve a corresponding accuracy when including QED contributions,
   included.
 \end{enumerate}
 %
-The code can be extended systematically to aim at a higher
-accuracy. For instance, if one wishes to reach N$^3$LO accuracy in the
+The code could be extended systematically to aim at a higher
+accuracy. For instance, if one wished to reach N$^3$LO accuracy in the
 phenomenological counting, one would need to include 3-loop mixed
 QCD-QED splitting functions at order $\alpha \as^2$ which contribute
 at order $\alpha \as^2 L \sim \as^3$, which are currently not
@@ -2745,7 +2745,7 @@ A first ingredient is the setup of the QED coupling object, defined in
 This is initialized through a call to 
 \begin{lstlisting}
     subroutine InitQEDCoupling(coupling, m_light_quarks, &
-  & m_heavy_quarks(4:6) [,value_at_scale_0])
+   &                           m_heavy_quarks(4:6) [,value_at_scale_0])
     type(qed_coupling), intent(out) :: coupling
     real(dp),           intent(in)  :: m_light_quarks, m_heavy_quarks(4:6)
     real(dp), optional, intent(in)  :: value_at_scale_0 ! defaults to alpha_qed_scale_0
@@ -2771,9 +2771,10 @@ The common value of the light quark masses is used to mimic the
 physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
 1\GeV$, which involves hadronic states.
 %
-Using a value of $0.109\GeV$ reproduces the correct QED coupling value at
-the $\tau$ and $Z$-boson masses with a relative $\sim 10^{-4}$
-accuracy.
+Using a value of $0.109\GeV$ generates $\MSbar$ QED coupling values at
+the masses of the $\tau$ ($1/133.458$)and $Z$-boson ($1/127.952$) that
+agree with the PDG ones ($1/(133.471\pm0.007)$ and $1/(127.951\pm0.009)$)
+with a relative $\sim 10^{-4}$ accuracy.
 %
 %Lepton masses are hard-coded to their PDG
 %values~\cite{ParticleDataGroup:2022pth} in the
@@ -2783,11 +2784,13 @@ accuracy.
 %non-optional arguments.
 
 The quark and lepton masses are used to set all thresholds where the
-active matter content changes. This information is then used to set
+fermion content changes. This information is then used to set
 the array \ttt{nflav(3,0:n\_thresholds)}, where \ttt{nflav(1:3,i)}
 contains an integer array with the number of leptons, down and up
 quarks at a given $Q^2$ such that \ttt{threshold(i-1)}$<Q^2<$
-\ttt{threshold(i)}. \ttt{threshold(1:7)} are active thresholds, while
+\ttt{threshold(i)}.
+%
+The \ttt{threshold(1:7)} entires are active thresholds, while
 \ttt{threshold(0)} is set to zero and \ttt{threshold(8)} to
 $10^{200}$. The integer array \ttt{nflav(1:3,0:n\_thresholds)} is then used to compute the
 $\beta_{0,\rm QED}$ function \ttt{b0\_values(1:n\_thresholds)} at the seven threshold values and this is
@@ -2843,7 +2846,7 @@ matrices also need the number of up-type (\ttt{nu}) and down-type
 quarks (\ttt{nd}) separately, and the number of leptons (\ttt{nl}).
 %
 Note that the splitting functions of order $\alpha$ (i.e.\ \ttt{01})
-for the leptons are not given since they can be obtained from the ones
+for the leptons are simply obtained from the ones
 involving quarks by adjusting colour factors and couplings.
 
 A call to the subroutine 
@@ -2869,7 +2872,13 @@ numbers of light leptons, down-type and up-type quarks.
 %
 In practice, this is always handled internally by the QED-QCD
 evolution routines, based on the thresholds encoded in the QED
-coupling. 
+coupling.\footnote{While the QCD splitting functions are initialised
+  and stored separately for each relevant value of $n_f$, in the QED
+  case the parts that depend on the numbers of flavours are separated
+  out.
+  %
+  Only when the convolutions with PDFs are performed are the relevant
+  $n_f$ and electric charge factors included.}
 %
 The one situation where a user would need to call this routine
 directly is if they wish to manually carry out convolutions of the
@@ -2912,7 +2921,8 @@ given by
   integer, parameter, public :: iflv_muon     = 10
   integer, parameter, public :: iflv_tau      = 11
 \end{lstlisting}
-where \ttt{pdf(:,9:11)} contains the sum of lepton and anti-lepton
+where each \ttt{pdf(:,9:11)} contains the sum of a lepton and
+anti-lepton flavour
 (which are identical). Note that if one extends the
 calculation of lepton PDFs to higher order in ${\cal O}(\alpha)$,
 then an asymmetry in the lepton and anti-lepton distribution would arise,
@@ -2936,10 +2946,10 @@ the flavour index extends to 11.
 \paragraph{PDF tables with photons and leptons.}
 
 Next one neeeds to prepare a \ttt{pdf\_table} object forming the
-interpolating grid for the evolved PDF's. We remind that the
-\ttt{pdf\_table} object contains a table \ttt{pdf\_table\%tab(:,:,:)}
-that is a grid in $x$-values (first component), $Q^2$-values (second
-component) and PDF values (third component).
+interpolating grid for the evolved PDF's. We recall that the
+\ttt{pdf\_table} object contains a table \ttt{pdf\_table\%tab(:,:,:)},
+where the first index loops over $x$ values, the second loops over
+flavours and the last loops over $Q^2$ values.
 
 
 This is initialized by a call to 
@@ -2982,8 +2992,10 @@ To fill a table via an evolution from an initial scale, one calls the subroutine
     end subroutine EvolvePdfTableQED   
 \end{lstlisting}
 where \ttt{table} is the output, \ttt{Q0} the initial scale and
-\ttt{pdf0} is the PDF at the initial scale. We remind that the upper
-scale is stored in the object \ttt{table}.
+\ttt{pdf0} is the PDF at the initial scale.
+%
+We recall that the lower and upper limits on 
+scales in the table are as set at initialisation time for the table.
 %
 When \ttt{nloopqcd\_qed} is set to 1 (0) mixed QCD-QED effects are
 (are not) included in the evolution.
@@ -3012,6 +3024,13 @@ evolves it to scale \ttt{Q\_end}, overwriting the \ttt{pdf} array.
 %
 In order to get interpolated PDF values from the table we use the
 \ttt{EvalPdfTable\_*} calls, described in Section~\ref{sec:acc_table}.
+%
+However the \texttt{pdf} array that is passed as an argument and that is
+set by those subroutines should range not from \texttt{(-6:6)} but
+instead from \texttt{(-6:8)} if the PDF just has photons and
+\texttt{(-6:11)} if the PDF also includes leptons.\footnote{Index $7$
+  is an artefact associated with internal \hoppet bookkeeping and
+  should be ignored in the resulting \ttt{pdf} array.}
 
 Note that at the moment, when QED effects are included, cached evolution is not supported.
 
@@ -3026,12 +3045,18 @@ One has to add the following call
 \end{lstlisting}
 before using the streamlined interface routines.
 
-The \ttt{use\_qed} argument turns on/off QED evolution at order ${\cal O}(\alpha)$
-(i.e. items 1. and 2. in Sec.~\ref{sec:qed-evolution}). The \ttt{use\_qcd\_qed} one
-turns on/off mixed QCD$\times$QED effects in the evolution (i.e. item
-3. in Sec.~\ref{sec:qed-evolution}) and \ttt{use\_Plq\_nnlo} turns on/off the
-order $\alpha^2$ $P_{\ell q}$ splitting function (i.e. item 4. in
-Sec.~\ref{sec:qed-evolution}). Without this call all QED corrections are off.
+The \ttt{use\_qed} argument turns on/off QED evolution at order
+${\cal O}(\alpha)$ (i.e.\ items \ref{item:qed1} and \ref{item:qed2} in
+the enumerated list at the beginning of
+Sec.~\ref{sec:qed-evolution}).
+%
+The \ttt{use\_qcd\_qed} one turns
+on/off mixed QCD$\times$QED effects in the evolution (i.e.\ item \ref{item:qed3}) and \ttt{use\_Plq\_nnlo} turns on/off
+the order $\alpha^2 P_{\ell q}$ splitting function (i.e.\
+item \ref{item:qed4}).
+%
+Without this call, all QED corrections
+are off.
 
 
 %======================================================================
@@ -3039,17 +3064,20 @@ Sec.~\ref{sec:qed-evolution}). Without this call all QED corrections are off.
 \section{Hadronic Structure Functions}
 \label{sec:structure-funcs}
 As of \hoppet version 1.3.0 the code provides access to the
-(anti)-proton structure functions. The structure functions are
+hadronic structure functions. The structure functions are
 expressed as convolutions of a set of massless hard coefficient
 functions and PDFs, and make use of the tabulated PDFs and streamlined
 interface as described in the sections above. The structure functions
 are provided such that they can be used directly for cross section
-computations in DIS or VBF, the latter which has already been
+computations in DIS or VBF, the latter of which has already been
 implemented in the {\tt proVBFH}
 package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
 
-The structure functions have been found to be in reasonable agreement
-with those which can be obtained with APFEL++. The benchmarks with
+The structure functions have been found to be in good agreement
+with those which can be obtained with APFEL++ (at the level of
+$10^{-4}$ relative precision).
+%
+The benchmarks with
 APFEL++ and the code used to carry them out can be found in
 \ttt{benchmarking/structure\_functions\_benchmark\_checks.f90} and are
 described in detail in Ref.~\cite{bertonekarlberg}. Technical details
@@ -3061,8 +3089,11 @@ be found in \ttt{example\_f90/structure\_functions\_example.f90}.
 The structure functions have been implemented up to
 N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
 which are needed to claim this accuracy are not currently fully
-known. At the time of writting partial results have been presented in
-Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm}.}
+known. At the time of writing partial results have been presented in
+Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm}.
+%
+\comment{update}
+}
 using both the exact and parametrised coefficient functions found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
 The coefficient functions were also computed in
@@ -3090,7 +3121,7 @@ Then one calls
                   & [, constant_mu] [ ,param_coefs] [ ,Qmin_PDF] [ ,wmass] [ ,zmass])
 \end{lstlisting}
 specifying as a minimum the perturbative order -- currently
-\ttt{order\_max}$\le 4$.
+\ttt{order\_max}$\le 4$ (\ttt{order\_max}$=1$ corresponds to LO).
 
 If \ttt{nflav} is not passed as an argument, the structure functions
 are initialised to support a variable flavour-number scheme (the
@@ -3117,17 +3148,20 @@ Specifically \ttt{scale\_choice} can take several values:
 \begin{itemize}
 \item \ttt{scale\_choice\_Q} (default) means that the code will always
   use $Q$ multiplied by \ttt{xR} or \ttt{xF} as the renormalisation
-  and factorisation scale respectively.
+  and factorisation scale respectively (with \ttt{xR} or \ttt{xF} as
+  set at initialisation).
 \item \ttt{scale\_choice\_fixed} corresponds to a fixed scale
-  \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF})
+  \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF} as set at
+  initialisation).
 \item \ttt{scale\_choice\_arbitrary} allows the user to choose
   arbitrary scales at the moment of evaluating the structure
   functions.
   %
-  In this last case, the structure functions are saved as arrays not only in
-  $Q$ but also $\mu_R$ and $\mu_F$. \gps{Is this really what is done?}
+  In this last case, the structure functions are saved as arrays
+  separated by perturbative order and with dedicated additional arrays
+  for terms proportional to logarithms of $Q/\mu_F$. 
   % 
-  This makes for a slightly slower evaluation compared to the two other
+  This makes for a slower evaluation compared to the two other
   scale choices.
 \end{itemize}
 %
@@ -3150,24 +3184,40 @@ Specifically \ttt{scale\_choice} can take several values:
 % This makes for a slightly slower evaluation compared to the two other
 % scale choices.
 
-If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the structure
-functions are computed using the (very precise) parametrisations found
-in
-Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
-%
-\gps{This is both at NNLO and N3LO?}\ak{at the moment yes}
+If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the
+structure functions are computed using the NNLO and N3LO
+parametrisations found in
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},
+which are stated to have a relative precision of a few per mil (order
+by order) except at particularly small or large values of $x$.
 %
 Otherwise
 the exact versions are used\footnote{The LO and NLO coefficient
 functions are always exact as their expressions are very
-compact.}. This however means that the initialisation becomes very
-slow, and since the parametrised expressions are good to a relative
-accuracy of $10^{-4}$ for
-most values of $x$, it is recommended to use the parametrised option
-for most applications. Note that the exact expressions rely on a
-extended version of \ttt{hplog}~\cite{FortranPolyLog} that is able to
-handle harmonic polylogarithms up to weight 5.\ak{Not sure
-  what to do here since the exact expressions return something wrong}.
+compact.}.
+%
+This however means that the initialisation becomes slow (about two
+minutes rather than a few seconds).
+%
+Given the good accuracy of the parametrised coefficient functions,
+they are to be preferred for most applications.
+% 
+% and since the parametrised
+% expressions are good to a relative accuracy of $10^{-4}$ for most
+% values of $x$, it is recommended to use the parametrised option for
+% most applications.
+% 
+Note that the exact expressions also add to compilation time and need
+to be explicitly enabled with the \ttt{--enable-exact-coefs} configure
+flag.\footnote{ At N3LO they rely on an extended version of
+  \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
+  is able to handle harmonic polylogarithms up to weight 5.
+  %
+  However there appears to be a percent-level issue on the coefficient
+  functions for $x\lesssim 0.1$, connected with the evaluation of the
+  polylogarithms. This is currently under investigation. }
+
+\comment{got here}
 
 \ttt{Qmin\_PDF} sets the lowest value at which the PDF is
 reliable. The mass of the electroweak vector bosons can also be passed
