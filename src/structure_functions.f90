@@ -273,8 +273,9 @@ contains
   !! @param[in]     ymax     Largest value of y = - log(x) to print
   !! @param[in]     ny       number of bins in y to print
   !!
-  subroutine write_f1 (idev, Qtest, ymax, ny)
+  subroutine write_f1 (idev, Qtest, ymax, ny, muF, muR)
     real(dp), intent(in) :: Qtest, ymax
+    real(dp), intent(in), optional :: muF, muR
     integer, intent(in)  :: idev, ny
     real(dp) :: ytest, xval, mR, mF, F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO, res(-6:7)
     integer  :: iy
@@ -286,8 +287,8 @@ contains
     else
        write(idev,'(a)') '# x F1Wp F1Wm F1Z'
     endif
-    mF = sf_muF(Qtest)
-    mR = sf_muR(Qtest)
+    mF = default_or_opt(sf_muF(Qtest),muF)
+    mR = default_or_opt(sf_muR(Qtest),muR)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
@@ -324,8 +325,9 @@ contains
   !! @param[in]     ymax     Largest value of y = - log(x) to print
   !! @param[in]     ny       number of bins in y to print
   !!
-  subroutine write_f2 (idev, Qtest, ymax, ny)
+  subroutine write_f2 (idev, Qtest, ymax, ny, muF, muR)
     real(dp), intent(in) :: Qtest, ymax
+    real(dp), intent(in), optional :: muF, muR
     integer, intent(in)  :: idev, ny
     real(dp) :: ytest, xval, mR, mF, F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO, res(-6:7)
     integer  :: iy
@@ -337,8 +339,8 @@ contains
     else
        write(idev,'(a)') '# x F2Wp F2Wm F2Z'
     endif
-    mF = sf_muF(Qtest)
-    mR = sf_muR(Qtest)
+    mF = default_or_opt(sf_muF(Qtest),muF)
+    mR = default_or_opt(sf_muR(Qtest),muR)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
@@ -375,8 +377,9 @@ contains
   !! @param[in]     ymax     Largest value of y = - log(x) to print
   !! @param[in]     ny       number of bins in y to print
   !!
-  subroutine write_f3 (idev, Qtest, ymax, ny)
+  subroutine write_f3 (idev, Qtest, ymax, ny, muF, muR)
     real(dp), intent(in) :: Qtest, ymax
+    real(dp), intent(in), optional :: muF, muR
     integer, intent(in)  :: idev, ny
     real(dp) :: ytest, xval, mR, mF, F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO, res(-6:7)
     integer  :: iy
@@ -388,8 +391,8 @@ contains
     else
        write(idev,'(a)') '# x F3Wp F3Wm F3Z'
     endif
-    mF = sf_muF(Qtest)
-    mR = sf_muR(Qtest)
+    mF = default_or_opt(sf_muF(Qtest),muF)
+    mR = default_or_opt(sf_muR(Qtest),muR)
     do iy = ny, 1, -1
        ytest = iy * ymax / ny
        xval = exp(-ytest)
