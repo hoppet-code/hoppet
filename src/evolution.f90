@@ -722,12 +722,14 @@ contains
            .or. (ev_dh%factscheme == factscheme_xtheta_sR)) then
           ! additional piece to be added for NLO expansion of use of
           ! alphas(x * muF) rather than alphas(muF), which we expand as
-          ! alphas(muF) + alphas(muF)^2 * beta0 * ln(1/x)
-          modpdf = as2pi * twopi * beta0 * spread(yValues(Pfull%qq%grid),dim=2,ncopies=size(pdf,dim=2)) * pdf
-          ! leave iflv_info as in the original -- it cannot handle being
+          ! alphas(muF) + alphas(muF)^2 * beta0 * ln(1/x).
+          ! To help with this, first create a copy of the pdf multiplied
+          ! by ln(1/x)
+          modpdf = spread(yValues(Pfull%qq%grid),dim=2,ncopies=size(pdf,dim=2)) * pdf
+          ! set iflv_info back to the original -- it cannot handle being
           ! multiplied by x-dependent quantities
           modpdf(:,iflv_info) = pdf(:,iflv_info) 
-          dpdf = dpdf + (jacobian * as2pi) * (ev_PLO .conv. modpdf)
+          dpdf = dpdf + (jacobian * as2pi**2 * twopi * beta0) * (ev_PLO .conv. modpdf)
        end if
 
        call Delete(Pfull)
