@@ -718,7 +718,8 @@ contains
        call AddWithCoeff(Pfull, ev_PNLO, as2pi)
        dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
 
-       if (ev_dh%factscheme == factscheme_smallR) then
+       if ((ev_dh%factscheme == factscheme_xtheta) & 
+           .or. (ev_dh%factscheme == factscheme_xtheta_sR)) then
           ! additional piece to be added for NLO expansion of use of
           ! alphas(x * muF) rather than alphas(muF), which we expand as
           ! alphas(muF) + alphas(muF)^2 * beta0 * ln(1/x)

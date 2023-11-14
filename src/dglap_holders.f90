@@ -118,7 +118,7 @@ contains
        !-- this sets up all the pointers to make it look like a fixed-nf
        !   dh!
        call SetNfDglapHolder(dh, nflcl)
-
+       
        !----- this is the remainder, essentially unchanged ----
        select case (dh%factscheme)
        case (factscheme_MSbar)
@@ -278,7 +278,7 @@ contains
           if (dh%nloop >= 3) call wae_error('InitDglapHolder',&
                &'nloop >= 3 not supported for polarized case')
 
-       case (factscheme_FragMSbar)
+       case (factscheme_FragMSbar, factscheme_xtheta)
           if (dh%nloop >= 3) call wae_error('InitDglapHolder',&
                &'nloop >= 3 not supported for fragmentation case')
 
@@ -311,7 +311,7 @@ contains
              call wae_warn(nfragwarn, &
                   & 'DANGER: nloop=2 fragmentation flavour thresholds not implemented')
           end if
-         case (factscheme_smallR)
+         case (factscheme_smallR, factscheme_xtheta_sR)
             if (dh%nloop >= 3) call wae_error('InitDglapHolder',&
                  &'nloop >= 3 not supported for fragmentation case')
             ! recall that equations for timelike evolution (fragmentation

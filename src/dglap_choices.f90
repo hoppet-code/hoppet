@@ -28,7 +28,9 @@ module dglap_choices
   integer, parameter, public :: factscheme_PolMSbar = 3
   integer, parameter, public :: factscheme_FragMSbar = 4
   ! MvB 
-  integer, parameter, public :: factscheme_smallR   = 5
+  integer, parameter, public :: factscheme_smallR    = 5
+  integer, parameter, public :: factscheme_xtheta    = 6
+  integer, parameter, public :: factscheme_xtheta_sR = 7
   ! have these on split lines so that they are not caught
   ! by naming routines.
   integer, parameter,&

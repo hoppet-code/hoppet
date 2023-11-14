@@ -348,7 +348,9 @@ contains
     ! MvB
     factscheme_local = default_or_opt(factscheme_default, factscheme)
     if (factscheme_local /= factscheme_FragMSbar .and. &
-        & factscheme_local /= factscheme_smallR  ) then
+      & factscheme_local /= factscheme_smallR .and. &
+      & factscheme_local /= factscheme_xtheta .and. &
+      & factscheme_local /= factscheme_xtheta_sR ) then
       ! we cannot run with any other type of scheme
       write(0,*) 'InitSplitMatTimeNLO: unsupported fact scheme', factscheme
       call wae_error('InitSplitMatTimeNLO: stopping')
