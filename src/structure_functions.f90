@@ -109,15 +109,14 @@ contains
   !! @param[opt]     scale_choice   (0: fixed scale, 1: use Q, 2: use arbitrary scale)
   !! @param[opt]     constant_mu    if scale_choice = scale_choice_fixed (= 0) then this is the fixed scale
   !! @param[opt]     param_coefs    if .true. use parametrised coefficients functions
-  !! @param[opt]     Qmin_PDF       Lowest value accesible in the PDF and hence in the structure functions. 
   !! @param[opt]     wmass          Mass of the W boson
   !! @param[opt]     zmass          Mass of the z boson
   !!
-  subroutine StartStrFct(order_max, nflav, xR, xF, scale_choice, constant_mu, param_coefs, &
-       & Qmin_PDF, wmass, zmass)
+  subroutine StartStrFct(order_max, nflav, xR, xF, scale_choice,&
+       & constant_mu, param_coefs, wmass, zmass)
     integer, intent(in)  :: order_max
     integer, optional    :: nflav, scale_choice
-    real(dp), optional   :: xR, xF, constant_mu, Qmin_PDF, wmass, zmass
+    real(dp), optional   :: xR, xF, constant_mu, wmass, zmass
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
     real(dp) :: sin_thw_sq, mw, mz
@@ -134,8 +133,7 @@ contains
     scale_choice_save = default_or_opt(scale_choice_Q, scale_choice)
     exact_coefs       = .not.default_or_opt(.true., param_coefs)
     cst_mu            = default_or_opt(zero, constant_mu)
-    Qmin              = default_or_opt(one, Qmin_PDF)
-    
+        
     ! compute sin(\theta_w) from W/Z mass
     sin_thw_sq = 1.0_dp - (mw/mz)**2
     
@@ -1673,17 +1671,16 @@ end subroutine hoppetStartStrFct
 !! @param[opt]     zmass          Mass of the z boson
 !!
 subroutine hoppetStartStrFctExtended(order_max, nflav, xR, xF,&
-     & scale_choice , constant_mu, param_coefs, Qmin_PDF, wmass,&
-     & zmass)
+     & scale_choice , constant_mu, param_coefs, wmass, zmass)
   use streamlined_interface; use structure_functions
   implicit none
-  real(dp), intent(in) :: xR, xF, constant_mu, Qmin_PDF, wmass, zmass
+  real(dp), intent(in) :: xR, xF, constant_mu, wmass, zmass
   integer, intent(in)  :: order_max, nflav, scale_choice
   logical , intent(in) :: param_coefs
   !----------------------------------------------------------------------
 
 call StartStrFct(order_max, nflav, xR, xF, scale_choice&
-     &, constant_mu, param_coefs, Qmin_PDF, wmass, zmass)
+     &, constant_mu, param_coefs, wmass, zmass)
   
 end subroutine hoppetStartStrFctExtended
 

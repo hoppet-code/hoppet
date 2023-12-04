@@ -188,7 +188,6 @@ extern "C" {
 				 const int & scale_choice,
 				 const double & constant_mu,
 				 const int & param_coefs,
-				 const double & Qmin_PDF,
 				 const double & wmass,
 				 const double & zmass);
   
