@@ -3238,13 +3238,26 @@ described in section~\ref{sec:vanilla_usage}.
 %
 With the PDF table filled in the streamlined interface one calls
 \begin{lstlisting}
-  call InitStrFct(order, separate_orders)
+  call InitStrFct(order[, separate_orders])
 \end{lstlisting}
 specifying the order at which one would like to compute the structure
-functions. The flag \ttt{separate\_orders} can be set to \ttt{.true.}
-if one wants access to the coefficients in the perturbative expansion
-rather than the sum up to some maximum order. In the latter case only
-\ttt{scale\_choice} $0$ and $1$ are allowed.
+functions.
+%
+The flag \ttt{separate\_orders} should be set to \ttt{.true.}\ if one
+wants access to the individual coefficients of the perturbative
+expansion as well as the sum up to some maximum order.
+%
+With \ttt{scale\_choice\_Q} and \ttt{scale\_choice\_fixed}, the
+default of \ttt{.false.}\ causes only the sum over perturbative orders
+to be stored.
+%
+This gives faster evaluations of structure functions because it is
+only necessary to interpolate for the sum over orders, rather than
+interpolate one table for each order.
+%
+With \texttt{scale\_choice\_arbitrary}, the default is \ttt{.true.},
+which is the only allowed option, because separate tables for each
+order are required for the underlying calculations.
 
 \subsection{Accessing the Structure Functions}
 \label{sec:structure-funcs-access}

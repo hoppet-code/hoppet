@@ -220,13 +220,18 @@ contains
     ! tables(0)%tab(:,+5,:) = zero
 
     ! default is to sum each order before convolutions (it's faster)
-    use_sep_orders = default_or_opt(.false.,separate_orders)
+    if (scale_choice_save == scale_choice_arbitrary) then
+       use_sep_orders = .true.
+    else
+       use_sep_orders = .false.
+    endif
+    use_sep_orders = default_or_opt(use_sep_orders, separate_orders)
 
     if (use_sep_orders) then
        ! First we treat the case where we want to separate out each order in
        ! the final structure functions.
        ! This is slower, but is needed e.g. for VBFH
-       if (scale_choice_save.eq.scale_choice_Q.or.scale_choice_save.eq.scale_choice_fixed) then
+       if (scale_choice_save == scale_choice_Q .or. scale_choice_save == scale_choice_fixed) then
           ! if scale_choice = 0,1 use fast implementation
           ! tables is saved as an array in Q, and only tables(0),
           ! sf_tables(1), sf_tables(2), sf_tables(4), sf_tables(8) are non zero
@@ -234,7 +239,7 @@ contains
           if (order.ge.2) call set_NLO_structure_functions()
           if (order.ge.3) call set_NNLO_structure_functions()
           if (order.ge.4) call set_N3LO_structure_functions()
-       else if(scale_choice_save.eq.scale_choice_arbitrary) then
+       else if(scale_choice_save == scale_choice_arbitrary) then
           ! if scale_choice >= 2 use slower implementation with full
           ! scale choices, such as sqrt(Q1*Q2)
           ! tables is saved as an array in muF now, and all components
@@ -248,8 +253,10 @@ contains
        endif
     else
        ! Now set up the default case where we sum up everything right away.
-       if (scale_choice_save.ge.scale_choice_arbitrary) & ! only allow for scale_choice = 0,1
-            & call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice_save)
+       if (scale_choice_save >= scale_choice_arbitrary) & ! only allow for scale_choice = 0,1
+            & call wae_error('InitStrFct', &
+            & 'with scale_choice_arbitrary (or higher), separate_orders must be true, but was false; scale_choice=', &
+            & intval = scale_choice_save)
        call set_structure_functions_upto(order)
     endif
 
