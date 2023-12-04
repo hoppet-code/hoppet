@@ -1667,7 +1667,6 @@ end subroutine hoppetStartStrFct
 !! @param[opt]     scale_choice   (0: fixed scale, 1: use Q, 2: use arbitrary scale)
 !! @param[opt]     constant_mu    if scale_choice = scale_choice_fixed (= 0) then this is the fixed scale
 !! @param[opt]     param_coefs    if .true. use parametrised coefficients functions
-!! @param[opt]     Qmin_PDF       Lowest value accesible in the PDF and hence in the structure functions. 
 !! @param[opt]     wmass          Mass of the W boson
 !! @param[opt]     zmass          Mass of the z boson
 !!
