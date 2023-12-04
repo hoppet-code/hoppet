@@ -39,6 +39,8 @@
 \newcommand{\hoppet}{{\sc hoppet}}
 \newcommand{\apfel}{APFEL++}
 \newcommand{\ttt}[1]{\texttt{#1}}
+\newcommand{\MSbar}{\overline{\mathrm{MS}}}
+
 
 \newcommand{\order}[1]{\mathcal{O}\left(#1\right)}
 \newcommand\sss{\mathchoice%
@@ -76,6 +78,10 @@
   keepspaces=true
 }
 
+% We need slightly different text in the manual and in the release note.
+\newif\ifreleasenote
+\releasenotetrue % comment out to hide answers
+
 \journal{European Physical Journal C}
 
 \begin{document}
@@ -91,6 +97,7 @@ CERN-TH-2023-???,  MPP-2023-???, OUTP-23-???
 \author[2]{Paolo Nason}\ead{paolo.nason@mib.infn.it}
 \author[3,4]{Gavin Salam}\ead{gavin.salam@physics.ox.ac.uk}
 \author[5,6]{Giulia Zanderighi}\ead{zanderi@mpp.mpg.de}
+\author[]{Fr\'ed\'eric Dreyer}\ead{frederic.dreyer@gmail.com}
 
 \affiliation[1]{organization={CERN, Theoretical Physics Department}, postcode={CH-1211} ,city={Geneva 23}, country={Switzerland}}
 \affiliation[2]{organization={INFN, Sezione di Milano-Bicocca, and Universita di Milano-Bicocca, Piazza della Scienza 3}, postcode={20126} ,city={Milano}, country={Italy}}
@@ -118,259 +125,18 @@ We present v.1.3.0 of the \hoppet{} code
 
 \section{Introduction}
 
-%======================================================================
-\section{Hadronic Structure Functions}
-\label{sec:structure-funcs}
-As of \hoppet version 1.3.0 the code provides access to the
-(anti)-proton structure functions. The structure functions are
-expressed as convolutions of a set of massless hard coefficient
-functions and PDFs, and make use of the tabulated PDFs and streamlined
-interface as described in the sections above. The structure functions
-are provided such that they can be used directly for cross section
-computations in DIS or VBF, the latter which has already been
-implemented in the {\tt proVBFH}
-package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
+\input{qed-and-structure-functions.tex}
 
-The structure functions have been found to be in reasonable agreement
-with those which can be obtained with APFEL++. The benchmarks with
-APFEL++ and the code used to carry them out can be found in
-\ttt{benchmarking/structure\_functions\_benchmark\_checks.f90} and are
-described in detail in Ref.~\cite{bertonekarlberg}. Technical details
-on the implementation of the structure functions in \hoppet can also
-be found therein. An example of how to use the structure functions can
-be found in \ttt{example\_f90/structure\_functions\_example.f90}.
-
-
-The structure functions have been implemented up to
-N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
-which are needed to claim this accuracy are not currently fully
-known. At the time of writting partial results have been presented in
-Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm}.}
-using both the exact and parametrised coefficient functions found in
-Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
-The coefficient functions were also computed in
-Ref.~\cite{Blumlein:2022gpp} and found to be in agreement with the
-previous calculations.
-
-\subsection{Initialisation}
-\label{sec:structure-funcs-init}
-
-\gps{Do we need to comment that things are in the
-  \ttt{structure\_functions} module? Or accessible by prefixing
-  function names with \ttt{hoppet}?}\ak{Added text to that effect}
-
-The structure functions can be accessed from inside the module
-\ttt{structure\_functions}. They can also be accessed through the
-streamlined interface by prefixing \ttt{hoppet} as described in
-section~\ref{sec:structure-functions-streamlined}. In order to set up
-the structure functions one needs first to set up a \ttt{running\_coupling} object, as described in  specify a flavour scheme
-and initialise the streamlined interface through \ttt{hoppetStart} or
-\ttt{hoppetStartExtended}. Then one calls
-\begin{lstlisting}
-  call StartStrFct(rts, order_max [, nflav] [, xR] [, xF] [, scale_choice] &
-                  & [, constant_mu] [ ,param_coefs] [ ,Qmin_PDF] [ ,wmass] [ ,zmass])
-\end{lstlisting}
-specifying as a minimum the largest value of $Q$ which one needs to
-access (through \ttt{rts}) and the perturbative order -- currently
-\ttt{order\_max}$\le 4$.
-
-\gps{I should look at the above function a little more}
-
-If \ttt{nf} is not specified the structure functions are initialised
-with a variable flavour scheme using the quark masses as set by the
-streamlined interface. Otherwise a fixed number of light flavours is
-used. Note that specifying a variable flavour scheme only has an
-impact on the evolution, as the coefficient functions themselves
-assume massless quarks. Hence in a variable flavour scheme the
-structure functions should only be considered reliable for $Q \gg m$.
-%
-\gps{Do we need to note that currently StartStrFct itself
-  calls the streamline interface initialisation? Actually, I see that
-  dy gets set automatically to $0.05$. Is there a reason why the call
-  to \ttt{hoppetStart} should not be left to the user? It might be
-  cleaner, even if it requires an extra line of code from them.} \ak{Done.}
-%
-\gps{Do we need to comment on where masses get set? And more generally
-  on fact that structure function calculations for massive quarks are
-  not valid unless $Q \gg m$?} \ak{Done}
-
-Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
-the renormalisation and factorisation scales.
-%
-The default value for \ttt{scale\_choice} is \ttt{scale\_choice\_Q} which means that $Q$
-multiplied by \ttt{xR} or \ttt{xF} is used as the renormalisation or
-factorisation scale respectively.
-%
-The choice \ttt{scale\_choice\_fixed} corresponds to a fixed scale
-\ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF}).
-%
-Should a user wish to use some arbitrary scale choice,
-\ttt{scale\_choice} should be set to \ttt{scale\_choice\_arbitrary}.
-%
-\gps{Do we want to introduce some constants such as
-  \ttt{scale\_choice\_Q=1}, \ttt{scale\_choice\_fixed=0}, \ttt{scale\_choice\_arbitrary=2}?} \ak{Yes, and done!}
-%
-In this last case, the structure functions are saved as arrays not only in
-$Q$ but also $\mu_R$ and $\mu_F$.
-%
-This makes for a slightly slower evaluation compared to the two other
-scale choices.
-
-If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the structure
-functions are computed using the (very precise) parametrisations found
-in
-Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
-%
-\gps{This is both at NNLO and N3LO?}\ak{at the moment yes}
-%
-Otherwise
-the exact versions are used\footnote{The LO and NLO coefficient
-functions are always exact as their expressions are very
-compact.}. This however means that the initialisation becomes very
-slow, and since the parametrised expressions are good to a relative
-accuracy of $10^{-4}$ for
-most values of $x$, it is recommended to use the parametrised option
-for most applications. Note that the exact expressions rely on a
-extended version of \ttt{hplog}~\cite{FortranPolyLog} that is able to
-handle harmonic polylogarithms up to weight 5.\ak{Not sure
-  what to do here since the exact expressions return something wrong}.
-
-\ttt{Qmin\_PDF} sets the lowest value at which the PDF is
-reliable. The mass of the electroweak vector bosons can also be passed
-to this routine.
-
-At this point all the tables that are needed for the structure
-functions have been initialised. In order to fill the tables, one
-first needs to set up a \ttt{running\_coupling} object and evolve the
-initial PDF with e.g.~\ttt{hoppetEvolve} as described in
-sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. Care should
-be taken here such that both the coupling and PDF evolution is carried
-out at the correct perturbative order and with mass thresholds as
-appropriate. With the PDF table filled in the streamlined interface
-one calls
-\begin{lstlisting}
-  call InitStrFct(order, separate_orders)
-\end{lstlisting}
-specifying the order at which one would like to compute the structure
-functions. The flag \ttt{separate\_orders} can be set to \ttt{.true.}
-if one wants access to the coefficients in the perturbative expansion
-rather than the sum up to some maximum order. In the latter case only
-\ttt{scale\_choice} $0$ and $1$ are allowed.
-
-\subsection{Accessing the Structure Functions}
-\label{sec:structure-funcs-access}
-At this point the structure functions can be accessed as in the following example
-\begin{lstlisting}
-  real(dp) :: xf(-6:7), x, Q, muR, muF
-  [...]
-  call InitStrFct(4, .true.)
-  xf = StrFct(x, Q, muR, muF)
-\end{lstlisting}
-at the value $x$ and $Q$. The variables \ttt{muR} and \ttt{muF} are
-not optional, but are only used if \ttt{scale\_choice} is
-\ttt{scale\_choice\_arbitrary}. Note that the routine returns $x$
-times the structure function.
-%
-\gps{What is the logic of supplying $y$ rather than $x$? For example,
-  hoppetEval takes $x$ --- should we not use the same convention?} \ak{Indeed - fixed!}
-%
-The structure functions are in this example stored in the
-array \ttt{xf}. The components of this array can be accessed through
-the indices
-\begin{lstlisting}
-  integer, parameter :: F1Wp= 1   
-  integer, parameter :: F2Wp= 2   
-  integer, parameter :: F3Wp= 3   
-  integer, parameter :: F1Wm=-1   
-  integer, parameter :: F2Wm=-2   
-  integer, parameter :: F3Wm=-3   
-  integer, parameter :: F1Z = 4   
-  integer, parameter :: F2Z = 5   
-  integer, parameter :: F3Z = 6   
-  integer, parameter :: F1EM = -4   
-  integer, parameter :: F2EM = -5   
-  integer, parameter :: F1gZ = 0  
-  integer, parameter :: F2gZ = -6 
-  integer, parameter :: F3gZ = 7  
-\end{lstlisting}
-For instance one would access the electromagnetic $F_1$ structure
-function through \ttt{xf(F1EM)}. It is returned at the \ttt{order}
-that was specified in \ttt{InitStrFct}. Since one is often interested
-in more than one order in $\as$ at a time, the structure functions can
-also be accessed order by order if the \ttt{separate\_orders} flag was
-set to \ttt{.true.} when initialising. This can be done as follows
-\begin{lstlisting}
-  real(dp) :: xflo(-6:7), xfnlo(-6:7), xfnnlo(-6:7), xfn3lo(-6:7), x, Q, muR, muF
-  [...]
-  call InitStrFct(4, .true.)
-  xflo   = F_LO(x, Q, muR, muF)
-  xfnlo  = F_NLO(x, Q, muR, muF)
-  xfnnlo = F_NNLO(x, Q, muR, muF)
-  xfn3lo = F_N3LO(x, Q, muR, muF)
-\end{lstlisting}
-The functions return the individual contributions at each order in
-$\as$. Hence the sum of \ttt{xflo}, \ttt{xfnlo}, \ttt{xfnnlo}, and
-\ttt{xfn3lo} would return the full structure function at N3LO as
-contained in \ttt{xf} in the example above.
-
-\subsection{Streamlined interface}
-\label{sec:structure-functions-streamlined}
-The structure functions can also be accessed through the streamlined
-interface, so that they may be called for instance from C/C++. The
-functions to be called are very similar to those described above. In
-particular a user should call either
-\begin{lstlisting}
-  call hoppetStartStrFct(rts, order_max)
-\end{lstlisting}
-with \ttt{rts} the maximum energy and \ttt{order\_max} the maximal
-order in $\as$, or the extended version of the interface
-\ttt{hoppetStartStrFctExtended} which takes all the same arguments as
-\ttt{StartStrFct} described above. One difference is that in order to
-use a variable flavour scheme the user should set \ttt{nflav} to a
-negative value. After evolving or reading in a PDF, the user then calls
-\begin{lstlisting}
-  call hoppetInitStrFct(order, separate_orders)
-\end{lstlisting}
-to initialise the actual structure functions. The structure functions
-can then be accessed through the subroutines
-\begin{lstlisting}
-  real(dp) :: xflo(-6:7), xfnlo(-6:7), xfnnlo(-6:7), xfn3lo(-6:7), x, Q, muR, muF
-  [...]
-  call hoppetStrFct(x, Q, muR, muF, xf)         ! Full structure function   
-  call hoppetStrFctLO(x, Q, muR, muF, xflo)     ! LO coefficient
-  call hoppetStrFctNLO(x, Q, muR, muF, xfnlo)   ! NLO coefficient
-  call hoppetStrFctNNLO(x, Q, muR, muF, xfnnlo) ! NNLO coefficient
-  call hoppetStrFctN3LO(x, Q, muR, muF, xfn3lo) ! NNLO coefficient
-\end{lstlisting}
-The C++ header contains mapped indices for the structure functions
-\gps{I wonder if these should come with a hoppet prefix, even if it's
-  a bit verbose (there's some significant risk of name clashes, e.g.\
-  someone sets up a variable F1Wp}
-\begin{lstlisting}
-  int F1Wp = 1+6;
-  int F2Wp = 2+6;
-  int F3Wp = 3+6;
-  int F1Wm =-1+6;
-  int F2Wm =-2+6;
-  int F3Wm =-3+6;
-  int F1Z  = 4+6;
-  int F2Z  = 5+6;
-  int F3Z  = 6+6;
-  int F1EM =-4+6;
-  int F2EM =-5+6;
-  int F1gZ = 0+6;
-  int F2gZ =-6+6;
-  int F3gZ = 7+6;
-\end{lstlisting}
-%======================================================================
+\section{Conclusion}
 
 
 \section*{Acknowledgments}
-  AK is grateful to Frédéric Dreyer for initial work on the structure functions in
-  \hoppet{}.
+This work was funded by....
 
 \bibliographystyle{elsarticle-num}
-\bibliography{HOPPET-v1.3-release}
+\begin{thebibliography}{99}
+\input{bibliography.bib}
+\end{thebibliography}
 
 \end{document}
 

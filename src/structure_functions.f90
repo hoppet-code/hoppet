@@ -84,7 +84,7 @@ module structure_functions
   !! these log terms are only used for scale_choice = 0,1, to speed up the code
   !!
   real(dp), save      :: log_muF2_over_Q2, log_muR2_over_Q2
-  real(dp), save      :: Qmin
+  !real(dp), save      :: Qmin
   real(dp), public, save :: toy_alphas_Q0 = 0.35_dp ! Roughly αS(sqrt(2))
   type(running_coupling), public, save :: toy_coupling
 
@@ -1196,12 +1196,12 @@ contains
   !----------------------------------------------------------------------
   real(dp) function alphasLocal(muR)
     real(dp), intent(in) :: muR
-    real(dp) :: muR_lcl
-    muR_lcl = max(muR,Qmin)
+    !real(dp) :: muR_lcl
+    !muR_lcl = max(muR,Qmin)
     ! we use alphas from the LHAPDF PDF
     ! alphasLocal = alphasPDF(muR_lcl)
     ! we use alphas from HOPPET
-    alphasLocal = Value(coupling, muR_lcl)
+    alphasLocal = Value(coupling, muR)
   end function alphasLocal
   
 
