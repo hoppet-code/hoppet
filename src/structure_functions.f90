@@ -174,7 +174,7 @@ contains
        
        write(6,'(a)'      ) "Starting the structure functions with mass thresholds at"
        write(6,'(a,f12.5)') "mc = ", masses(4) 
-       write(6,'(a,f12.5)') "mb = ", masses(5) 
+       write(6,'(a,f12.5)') "mb = ", masses(5)
        write(6,'(a,f12.5)') "mt = ", masses(6) 
        ! and start with a sensible local nf (which will be 5 here) 
        nf_lcl = nf_int
