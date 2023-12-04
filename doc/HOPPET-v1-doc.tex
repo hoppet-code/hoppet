@@ -115,16 +115,17 @@
 %-----------------------------------------
 \title{A Higher Order Perturbative Parton Evolution Toolkit \\
 (\hoppet)\\
-version 1.2.0-devel
+
+version 1.3.0
 %  a.k.a.\ HOPPETv1
 }
 \author{%
   Frederic Dreyer,
   Alexander Karlberg,
   Paolo Nason,
-  Juan Rojo,
+  Juan Rojo,\\
   Gavin P.\ Salam and
-  G. Zanderighi
+  Giulia Zanderighi
 }
 
 \date{}
@@ -3122,9 +3123,9 @@ Section~\ref{sec:vanilla}.\footnote{Users needing a lower level
 Then one calls
 \begin{lstlisting}
   call StartStrFct(order_max [, nflav] [, xR] [, xF] [, scale_choice] &
-                  & [, constant_mu] [ ,param_coefs] [ ,Qmin_PDF] [ ,wmass] [ ,zmass])
+                  & [, constant_mu] [ ,param_coefs] [ ,wmass] [ ,zmass])
 \end{lstlisting}
-specifying as a minimum the perturbative order -- currently
+specifying as a minimum the perturbative order --- currently
 \ttt{order\_max}$\le 4$ (\ttt{order\_max}$=1$ corresponds to LO).
 
 If \ttt{nflav} is not passed as an argument, the structure functions
@@ -3221,14 +3222,13 @@ flag.\footnote{ At N3LO they rely on an extended version of
   functions for $x\lesssim 0.1$, connected with the evaluation of the
   polylogarithms. This is currently under investigation. }
 
-\comment{got here}
-
-\ttt{Qmin\_PDF} sets the lowest value at which the PDF is
-reliable. The mass of the electroweak vector bosons can also be passed
-to this routine.
+The mass of the electroweak vector bosons are used only to calculate
+the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$.
 
 At this point all the tables that are needed for the structure
-functions have been initialised. In order to fill the tables, one
+functions have been allocated.
+%
+In order to fill the tables, one
 first needs to set up a \ttt{running\_coupling} object and evolve the
 initial PDF with e.g.~\ttt{hoppetEvolve} as described in
 sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. Care should

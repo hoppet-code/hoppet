@@ -126,8 +126,9 @@ contains
     endif
 
     ! Read input
-    mw                = default_or_opt(80.398_dp, wmass)
-    mz                = default_or_opt(91.187_dp, zmass)
+    ! mW and mZ defaults are taken from the 2022 PDG 
+    mw                = default_or_opt(80.377_dp, wmass)
+    mz                = default_or_opt(91.1876_dp, zmass)
     xmuR              = default_or_opt(one, xR)
     xmuF              = default_or_opt(one, xF)
     scale_choice_save = default_or_opt(scale_choice_Q, scale_choice)
@@ -172,7 +173,7 @@ contains
        
        write(6,'(a)'      ) "Starting the structure functions with mass thresholds at"
        write(6,'(a,f12.5)') "mc = ", masses(4) 
-       write(6,'(a,f12.5)') "mb = ", masses(5) 
+       write(6,'(a,f12.5)') "mb = ", masses(5)
        write(6,'(a,f12.5)') "mt = ", masses(6) 
        ! and start with a sensible local nf (which will be 5 here) 
        nf_lcl = nf_int
