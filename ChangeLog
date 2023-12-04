@@ -1,3 +1,15 @@
+2023-12-04 Mon  <gavin.salam@physics.ox.ac.uk> + Alexande
+
+	* src/structure_functions.f90:
+	* example_f90/structure_functions_example.f90:
+	* example_f90/structure_functions_example.default_output:
+	- removed redundant Qmin_PDF argument from StartStrFct 
+	  (and associated usage in example)
+	- updated default mW and mZ values to 2022 PDG and 
+	  regenerated default validation output (checking
+	  that things passed prior to the change).
+
+
 2023-11-12 Sun  <gavin.salam@physics.ox.ac.uk>
 
 	* LICENSE: *** ADDED ***
