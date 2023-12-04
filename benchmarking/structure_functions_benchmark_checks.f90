@@ -57,7 +57,7 @@ program structure_functions_benchmark_checks
   write(6,'(a)') "Initialising coefficient functions for structure functions"
   if (.not. param_coefs) write(6,('(a)')) "NB: this is being done with exact coefficient functions and will take about a minute "
   call StartStrFct(order_max, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
-       param_coefs = param_coefs, Qmin_PDF = Qmin, wmass = mw, zmass = mz)
+       param_coefs = param_coefs, wmass = mw, zmass = mz)
 
   ! Evolve the PDF
   nloop = 3 ! NNLO evolution

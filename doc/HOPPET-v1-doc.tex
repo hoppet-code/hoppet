@@ -3228,14 +3228,15 @@ the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$.
 At this point all the tables that are needed for the structure
 functions have been allocated.
 %
-In order to fill the tables, one
-first needs to set up a \ttt{running\_coupling} object and evolve the
-initial PDF with e.g.~\ttt{hoppetEvolve} as described in
-sections~\ref{sec:run-coupl} and \ref{sec:vanilla_usage}. Care should
-be taken here such that both the coupling and PDF evolution is carried
-out at the correct perturbative order and with mass thresholds as
-appropriate. With the PDF table filled in the streamlined interface
-one calls
+In order to fill the tables, one first needs to set up the running
+coupling and evolve the initial PDF with \ttt{hoppetEvolve}, as
+described in section~\ref{sec:vanilla_usage}.
+%
+% Care should be taken here such that both the coupling and PDF
+% evolution are carried out at the correct perturbative order and with
+% mass thresholds as appropriate.
+%
+With the PDF table filled in the streamlined interface one calls
 \begin{lstlisting}
   call InitStrFct(order, separate_orders)
 \end{lstlisting}
