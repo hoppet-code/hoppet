@@ -33,7 +33,8 @@ FFLAGS = -O
 
 # -lgfortran not needed for the gfortran compilations, but it is needed
 # for C++ compilations.
-F90LIB4GCC=   -lgfortran
+#F90LIB4GCC=  -L/opt/homebrew/Cellar/gcc/13.2.0/lib/gcc/13/ -lgfortran
+F90LIB4GCC= -lgfortran
 
 
 LIBS = -L../src -lhoppet_v1 $(F90LIB)

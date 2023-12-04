@@ -6,7 +6,8 @@
 #include<cstdio>
 
 using namespace std;
-
+// this gets us various constants that are useful to have
+using namespace hoppet;
 
 // definition of the initial condition function
 void  lha_unpolarized_dummy_pdf(const double & x,
@@ -39,12 +40,12 @@ int main () {
   
   int nflav = -5;
   int order_max = 4;
-  int sc_choice = 1 ;
-  double zmass = 91.2;
-  double wmass = 81.0;
+  int sc_choice = scale_choice_Q;
+  double zmass = 91.1876;
+  double wmass = 80.377;
   bool param_coefs = true;
 
-  hoppetStartStrFctExtended(order_max, nflav, xmuR,xmuF,sc_choice,zmass,param_coefs,Qmin,wmass,zmass);
+  hoppetStartStrFctExtended(order_max, nflav, xmuR,xmuF,sc_choice,zmass,param_coefs,wmass,zmass);
     
   double asQ      = 0.35;
   double Q0       = sqrt(2.0);

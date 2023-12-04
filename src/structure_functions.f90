@@ -1753,14 +1753,15 @@ end subroutine hoppetInitStrFct
 !> @brief calculate the structure function at x, Q, muR, muF summed over all orders
 !!
 !! Calculate the structure function at x, Q, muR, muF summed over
-!! all orders. muR and muF are only needed if we are using the
-!! scale_choice_arbitrary, as otherwise they are already included in
-!! the sf_tables.
+!! all orders. If using a scale choice other than scale_choice_arbitrary,
+!! muR and muF must be consistent with the scale choice made in the 
+!! hoppetStartStrFct call. See also hoppetStrFctNoMu for a variant
+!! that does not take muR and muF arguments.
 !!
 !! @param[in]       x          x value
 !! @param[in]       Q          Q value
-!! @param[in,opt]   muR        renormalisation scale 
-!! @param[in,opt]   muF        factorisation scale
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
 !! @return          an array of all structure functions summed over orders
 !!
 subroutine hoppetStrFct(x, Q, muR_in, muF_in, res) 
@@ -1771,6 +1772,25 @@ subroutine hoppetStrFct(x, Q, muR_in, muF_in, res)
 
   res = StrFct(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFct
+
+!> @brief calculate the structure function at x, Q, ummed over all orders
+!!
+!! Calculate the structure function at x, Q, for the scale choice as indicated
+!! in hoppetStartStrFct. This can only be used with scale_choice_Q and scale_choice_fixed. 
+!! See also hoppetStrFct for a variant with muR and muF choice. 
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @return          an array of all structure functions summed over orders
+!!
+subroutine hoppetStrFctNoMu(x, Q, res) 
+   use streamlined_interface; use structure_functions
+   real(dp) :: x, Q
+   real(dp) :: res(-6:7)
+ 
+   res = StrFct(x, Q)
+ end subroutine hoppetStrFctNoMu
+ 
 
 !> @brief calculate the leading order structure function at x, Q, muR, muF 
 !!

@@ -1,5 +1,16 @@
 2023-12-04 Mon  <gavin.salam@physics.ox.ac.uk> + Alexande
 
+	* src/hoppet_v1.h:
+	- alignment of interfaces with chances below, including a StrFctNoMu
+	  for evaluations with muR and muF as they are constrained by the
+	  scale choice.
+	- also put structure function and (new) scale-choice indices into a (new) hoppet
+	  namespace
+
+	* src/structure_functions.f90:
+    added checks on muR and muF in StrFct calls (consistency and/or presence
+	as appropriate depending on the scale choice)
+
 	* src/structure_functions.f90:
 	* example_f90/structure_functions_example.f90:
 	* example_f90/structure_functions_example.default_output:
