@@ -1222,13 +1222,49 @@ contains
     real(dp), intent(in)  :: x, Q
     real(dp), intent(in), optional  :: muR, muF
     real(dp) :: res(-6:7)
-    
+    real(dp) :: muR_lcl, muF_lcl
+
+    ! run a bunch of checks to make sure that the requested scales are consistent
+    ! with what is needed here
+    if (scale_choice_save == scale_choice_Q) then
+      muR_lcl = xmuR * Q
+      muF_lcl = xmuF * Q
+      if (present(muR)) then
+         if (abs(muR/muR_lcl-1).gt.1e-10) call wae_error("StrFct (scale_choice_Q): ",&
+               "requested muR inconsistent with initialisation, muR/(xmuR*Q) = ", &
+               dbleval = muR/muR_lcl)
+      endif 
+      if (present(muF)) then
+         if (abs(muF/muF_lcl-1).gt.1e-10) call wae_error("StrFct (scale_choice_Q): ",&
+               "requested muR inconsistent with initialisation, muF/(xmuF*Q) = ", &
+               dbleval = muF/muF_lcl)
+      endif 
+    else if (scale_choice_save == scale_choice_fixed) then
+      muR_lcl = xmuR * cst_mu
+      muF_lcl = xmuF * cst_mu
+      if (present(muR)) then
+         if (abs(muR/muR_lcl-1).gt.1e-10) call wae_error("StrFct (scale_choice_fixed): ",&
+               "requested muR inconsistent with initialisation, muR/(xmuR*cst_mu) = ", &
+               dbleval = muR/muR_lcl)
+      endif 
+      if (present(muF)) then
+         if (abs(muF/muF_lcl-1).gt.1e-10) call wae_error("StrFct (scale_choice_fixed): ",&
+               "requested muR inconsistent with initialisation, muF/(xmuF*cst_mu) = ", &
+               dbleval = muF/muF_lcl)
+      endif 
+    else
+      if (.not. present(muR)) call wae_error("StrFct: muR not present but required for scale_choice_arbitrary")
+      if (.not. present(muF)) call wae_error("StrFct: muF not present but required for scale_choice_arbitrary")
+      muR_lcl = muR
+      muF_lcl = muF
+    endif
+
     if (use_sep_orders) then
        ! if we kept each order separate, then add up all the fixed order terms one by one
-       if (order_setup.ge.1) res = F_LO(x, Q, muR, muF)
-       if (order_setup.ge.2) res = res + F_NLO(x, Q, muR, muF)
-       if (order_setup.ge.3) res = res + F_NNLO(x, Q, muR, muF)
-       if (order_setup.ge.4) res = res + F_N3LO(x, Q, muR, muF)
+       if (order_setup.ge.1) res =       F_LO  (x, Q, muR_lcl, muF_lcl)
+       if (order_setup.ge.2) res = res + F_NLO (x, Q, muR_lcl, muF_lcl)
+       if (order_setup.ge.3) res = res + F_NNLO(x, Q, muR_lcl, muF_lcl)
+       if (order_setup.ge.4) res = res + F_N3LO(x, Q, muR_lcl, muF_lcl)
     else
        ! if we haven't kept each order separate, then everything is in sf_tables(1)
        call EvalPdfTable_xQ(sf_tables(1), x, Q, res)
