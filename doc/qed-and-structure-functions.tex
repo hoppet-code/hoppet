@@ -1,0 +1,735 @@
+% ======================================================================
+\section{Evolution including QED contributions}
+\label{sec:qed-evolution}
+
+The combined QED+QCD evolution, as implemented in \hoppet since
+version 1.3.0 (and earlier in a dedicated \ttt{qed} branch), is as
+described in
+Refs.~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf}.
+%
+The determination of which contributions should be included follows a
+consistent approach based on a so-called ``phenomenological'' counting
+scheme.
+%
+Within this scheme, one considers $\alpha$ to be of order $\as^2$, and takes the
+photon (lepton) PDF to be of order $\alpha L$ ($\alpha^2 L^2$), where
+$L$ is the logarithm of a ratio of the factorisation scale to a typical hadronic scale and is considered to be of order $L \sim 1/\as$. In contrast, quark and gluon
+PDFs are considered to be of order $(\as L)^n={\cal O}(1)$.\footnote{The
+  above counting is to be contrasted with a ``democratic'' scheme, in
+  which one considers $\alpha \sim \as \sim 1/L$ and the aim is to maintain
+  the same loop order across all couplings and splitting functions,
+  regardless of the relative numbers of QCD and QED couplings that
+  they involved.}
+%
+From this point of view, NNLO (3-loop) QCD evolution provides control of
+terms of order up to $\as^{n+2} L^n \sim \as^2$.
+%
+To achieve a corresponding accuracy when including QED contributions,
+\hoppet has been extended to account for
+\begin{enumerate}
+\item \label{item:qed1} 1-loop QED splitting functions~\cite{Roth:2004ti}, which first
+  contribute at order $\alpha L \sim \as$, i.e.\ count as NLO QCD
+  corrections;
+  
+\item \label{item:qed2} 1-loop QED running coupling, including lepton and quark
+  thresholds, which first contributes at order $\alpha^2 L^2 \sim
+  \as^2$, i.e. like NNLO QCD; 
+  
+\item \label{item:qed3} 2-loop mixed QCD-QED splitting
+  functions~\cite{deFlorian:2015ujt},
+  %\footnote{One-loop triple collinear splitting functions with photons have been computed in refs~\cite{Sborlini:2014mpa,Sborlini:2014kla}};,
+  which first contribute at order
+  $\alpha \as L \sim \as^2$, i.e.\ count as NNLO QCD corrections;
+
+\item \label{item:qed4} optionally, the 2-loop pure QED $P_{\ell q}$ splitting
+  function~\cite{deFlorian:2016gvk}, which brings absolute accuracy
+  $\alpha^2 L\sim \as^3$ to the lepton distribution (which starts at
+  $\alpha^2 L^2 \sim \as^2$).
+  %
+  In an absolute counting of accuracy, this is not needed.
+  % 
+  However, if one wants lepton distributions to have the same relative
+  NLO accuracy as the photon distribution, it should be
+  included.
+\end{enumerate}
+%
+The code could be extended systematically to aim at a higher
+accuracy. For instance, if one wished to reach N$^3$LO accuracy in the
+phenomenological counting, one would need to include 3-loop mixed
+QCD-QED splitting functions at order $\alpha \as^2$ which contribute
+at order $\alpha \as^2 L \sim \as^3$, which are currently not
+available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$ which contribute at order $\alpha^2 \as L^2 \sim \as^3$.
+%
+%\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
+%  splitting exists, $\alpha\as^2$ does not?}
+%
+
+
+\subsection{Implementation of the QED extension}
+
+\paragraph{QED coupling.}
+
+A first ingredient is the setup of the QED coupling object, defined in
+\ttt{module qed\_coupling}:
+\begin{lstlisting}
+  type qed_coupling 
+     real(dp) :: m_light_quarks
+     real(dp) :: mc, mb, mt
+     integer  :: n_thresholds
+     integer  :: nflav(3, 0:n_thresholds) ! first index: 1 = nleptons, 2=ndown, 3=nup
+     real(dp) :: thresholds(0:n_thresholds+1)
+     real(dp) :: b0_values(n_thresholds)
+     real(dp) :: alpha_values(n_thresholds)
+  end type qed_coupling
+\end{lstlisting}
+%
+This is initialized through a call to 
+\begin{lstlisting}
+    subroutine InitQEDCoupling(coupling, m_light_quarks, &
+   &                           m_heavy_quarks(4:6) [,value_at_scale_0])
+    type(qed_coupling), intent(out) :: coupling
+    real(dp),           intent(in)  :: m_light_quarks, m_heavy_quarks(4:6)
+    real(dp), optional, intent(in)  :: value_at_scale_0 ! defaults to alpha_qed_scale_0
+    [...]
+    end subroutine InitQEDCoupling
+\end{lstlisting}
+
+
+It initialises the parameters relevant to the QED coupling
+and its running.  The electromagnetic coupling at scale zero is set by
+default to its PDG~\cite{ParticleDataGroup:2022pth} value, unless the
+optional argument \ttt{value\_at\_scale\_0} is provided, in which case
+the latter is taken as the value of the QED coupling at zero momentum.
+
+The running is performed at leading order level using seven
+thresholds: a common effective mass for the three light quarks
+(\ttt{m\_light\_quarks}), the three lepton masses (hard-coded to their PDG
+values~\cite{ParticleDataGroup:2022pth} in the
+\ttt{src/qed\_coupling.f90} file), and the three masses of the heavy quarks
+(\ttt{m\_heavy\_quarks(4:6)}).
+%
+The common value of the light quark masses is used to mimic the
+physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
+1\GeV$, which involves hadronic states.
+%
+Using a value of $0.109\GeV$ generates $\MSbar$ QED coupling values at
+the masses of the $\tau$ ($1/133.458$)and $Z$-boson ($1/127.952$) that
+agree with the PDG ones ($1/(133.471\pm0.007)$ and $1/(127.951\pm0.009)$)
+with a relative $\sim 10^{-4}$ accuracy.
+%
+%Lepton masses are hard-coded to their PDG
+%values~\cite{ParticleDataGroup:2022pth} in the
+%\ttt{src/qed\_coupling.f90} file.
+%
+%The heavy-quark masses \ttt{quark\_masses(4:6)} are instead required as
+%non-optional arguments.
+
+The quark and lepton masses are used to set all thresholds where the
+fermion content changes. This information is then used to set
+the array \ttt{nflav(3,0:n\_thresholds)}, where \ttt{nflav(1:3,i)}
+contains an integer array with the number of leptons, down and up
+quarks at a given $Q^2$ such that \ttt{threshold(i-1)}$<Q^2<$
+\ttt{threshold(i)}.
+%
+The \ttt{threshold(1:7)} entires are active thresholds, while
+\ttt{threshold(0)} is set to zero and \ttt{threshold(8)} to
+$10^{200}$. The integer array \ttt{nflav(1:3,0:n\_thresholds)} is then used to compute the
+$\beta_{0,\rm QED}$ function \ttt{b0\_values(1:n\_thresholds)} at the seven threshold values and this is
+finally used to compute the value of the QED coupling
+\ttt{alpha\_values(1:n\_thresholds)} at the threshold values.
+%
+The function \ttt{Delete(qed\_coupling)} is also provided for
+consistency, although in this case it does nothing.
+%
+After this initialization, the function \ttt{Value(qed\_coupling,mu)} returns the QED coupling at
+scale $\mu$.
+
+\paragraph{QED splitting matrices.}
+
+The QED splitting matrices are stored in the object
+
+\begin{lstlisting}
+  type qed_split_mat
+     type(qed_split_mat_lo)  :: lo
+     type(qed_split_mat_nlo) :: nlo
+     type(qed_split_mat_nnlo) :: nnlo
+  end type qed_split_mat
+\end{lstlisting}
+defined in \ttt{qed\_objects.f90}. 
+This contains the LO, NLO and NNLO splitting matrices 
+\begin{lstlisting}
+  ! a leading-order splitting matrix (multiplies alpha/2pi)
+  type qed_split_mat_lo
+     type(grid_conv) :: Pqq_01, Pqy_01, Pyq_01, Pyy_01
+     integer         :: nu, nd, nl, nf
+  end type qed_split_mat_lo
+
+  ! a NLO splitting matrix (multiplies (alpha alpha_s)/(2pi)^2)
+  type qed_split_mat_nlo
+     type(grid_conv) :: Pqy_11, Pyy_11, Pgy_11
+     type(grid_conv) :: Pqg_11, Pyg_11, Pgg_11
+     type(grid_conv) :: PqqV_11, PqqbarV_11, Pgq_11, Pyq_11
+     integer         :: nu, nd, nl, nf
+  end type qed_split_mat_nlo
+
+  ! a NNLO splitting matrix (multiplies (alpha/(2pi) )^2) 
+  ! contains only Plq splitting!
+  type qed_split_mat_nnlo 
+     type(grid_conv) :: Plq_02
+     integer         :: nu, nd, nl, nf
+  end type qed_split_mat_nnlo
+\end{lstlisting}     
+
+Above \ttt{y} denotes a photon and the pairs of integers \ttt{01},
+\ttt{11} and \ttt{02} denote order in the QCD and QED couplings,
+respectively. Besides the number of quarks \ttt{nf}, these splitting
+matrices also need the number of up-type (\ttt{nu}) and down-type
+quarks (\ttt{nd}) separately, and the number of leptons (\ttt{nl}).
+%
+Note that the splitting functions of order $\alpha$ (i.e.\ \ttt{01})
+for the leptons are simply obtained from the ones
+involving quarks by adjusting colour factors and couplings.
+
+A call to the subroutine 
+\begin{lstlisting}     
+  subroutine InitQEDSplitMat(grid, qed_split)
+    use qed_splitting_functions
+    type(grid_def),      intent(in)    :: grid
+    type(qed_split_mat), intent(inout) :: qed_split
+    [...]
+  end subroutine InitQEDSplitMat
+\end{lstlisting}     
+initializes the \ttt{qed\_split\_mat} object \ttt{qed\_split} and sets all QED
+splitting functions on the given \ttt{grid}.
+%
+The above QED objects can be used for any sensible value of the
+numbers of flavours, on the condition that one first registers
+the current number of flavours with a call to
+\begin{lstlisting}
+  QEDSplitMatSetNf(qed_split, nl, nd, nu)
+\end{lstlisting}
+where \ttt{nl}, \ttt{nd} and \ttt{nu} are respectively the current
+numbers of light leptons, down-type and up-type quarks.
+%
+In practice, this is always handled internally by the QED-QCD
+evolution routines, based on the thresholds encoded in the QED
+coupling.\footnote{While the QCD splitting functions are initialised
+  and stored separately for each relevant value of $n_f$, in the QED
+  case the parts that depend on the numbers of flavours are separated
+  out.
+  %
+  Only when the convolutions with PDFs are performed are the relevant
+  $n_f$ and electric charge factors included.}
+%
+The one situation where a user would need to call this routine
+directly is if they wish to manually carry out convolutions of the
+QED splitting functions with a PDF.
+
+Subroutines \ttt{Copy} and \ttt{Delete} are also provided for the
+\ttt{qed\_split\_mat} type. As in the pure QCD case, convolutions with
+QED splitting functions can be represented by the \ttt{.conv.} operator or
+using the product sign \ttt{*}.
+
+
+\paragraph{PDF arrays with photons and leptons.}
+
+A call to the subroutine
+\begin{lstlisting}  
+  subroutine AllocPDFWithPhoton(grid, pdf)
+    type(grid_def), intent(in) :: grid
+    real(dp),       pointer    :: pdf(:,:)
+    [...]
+  end subroutine AllocPDFWithPhoton
+\end{lstlisting}
+allocates PDFs (\ttt{pdf}) including photons, while a call to
+\begin{lstlisting}  
+  subroutine AllocPDFWithLeptons(grid, pdf)
+    type(grid_def), intent(in) :: grid
+    real(dp),       pointer    :: pdf(:,:)
+    [...]
+    end subroutine AllocPDFWithLeptons
+\end{lstlisting}
+allocates PDFs including both photons and leptons.
+%
+The two dimensions of the \ttt{pdf} refer to
+the index of the $x$ value in the \ttt{grid}, and to the flavour index.
+The flavour indices for photons and leptons %in the arrays \ttt{pdf}
+are
+given by
+\begin{lstlisting}  
+  integer, parameter, public :: iflv_photon   =  8
+  integer, parameter, public :: iflv_electron =  9
+  integer, parameter, public :: iflv_muon     = 10
+  integer, parameter, public :: iflv_tau      = 11
+\end{lstlisting}
+where each \ttt{pdf(:,9:11)} contains the sum of a lepton and
+anti-lepton flavour
+(which are identical). Note that if one extends the
+calculation of lepton PDFs to higher order in ${\cal O}(\alpha)$,
+then an asymmetry in the lepton and anti-lepton distribution would arise,
+due to the  \ttt{Plq\_03} splitting function.
+% \footnote{
+%   Were one to use \hoppet to obtain the distribution of
+%   partons inside a lepton, then it would become useful to separate
+%   lepton and anti-lepton PDFs.
+%   % 
+%   However further considerations arise, notably for the treatment of
+%   the $1-x \ll 1$ region.\commentgz{explain better?} 
+%   % 
+%   See for example discussion in Ref.~\cite{Frixione:2023gmf}\commentgz{update refs}.}
+
+The subroutine \ttt{AllocPDFWithPhotons} allocates the \ttt{pdf}
+array with the flavour index up to 8,
+while in the subroutine \ttt{AllocPDFWithLeptons},
+the flavour index extends to 11.
+
+
+\paragraph{PDF tables with photons and leptons.}
+
+Next one neeeds to prepare a \ttt{pdf\_table} object forming the
+interpolating grid for the evolved PDF's. We recall that the
+\ttt{pdf\_table} object contains a table \ttt{pdf\_table\%tab(:,:,:)},
+where the first index loops over $x$ values, the second loops over
+flavours and the last loops over $Q^2$ values.
+
+
+This is initialized by a call to 
+\begin{lstlisting}
+  subroutine AllocPdfTableWithLeptons(grid, pdftable, Qmin, Qmax & 
+  & [, dlnlnQ] [, lnlnQ_order] [, freeze_at_Qmin])
+   use qed_objects
+   type(grid_def),    intent(in)    :: grid
+   type(pdf_table),   intent(inout) :: pdftable
+   real(dp), intent(in)             :: Qmin, Qmax
+   real(dp), intent(in), optional   :: dlnlnQ
+   integer,  intent(in), optional   :: lnlnQ_order
+   logical,  intent(in), optional   :: freeze_at_Qmin
+   [...]
+   end subroutine AllocPdfTableWithLeptons
+\end{lstlisting}
+that is identical to the one without photon or leptons, the only difference is that the
+maximum pdf flavour index in \ttt{pdf\_table\%tab} now includes the photon and leptons.
+%
+An analogous subroutine \ttt{AllocPdfTableWithPhoton} includes the
+photon but no leptons.
+
+\paragraph{Evolution with photons and leptons.}
+
+
+To fill a table via an evolution from an initial scale, one calls the subroutine 
+\begin{lstlisting}
+    subroutine EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
+    &  coupling, coupling_qed, nloop_qcd, nloopqcd_qed, with_Plq_nnloqed)
+       type(pdf_table),        intent(inout) :: table
+       real(dp),               intent(in)    :: Q0
+       real(dp),               intent(in)    :: pdf0(:,:)
+       type(dglap_holder),     intent(in)    :: dh
+       type(qed_split_mat),    intent(in)    :: qed_split
+       type(running_coupling), intent(in)    :: coupling
+       type(qed_coupling),     intent(in)    :: coupling_qed
+       integer,                intent(in)    :: nloop_qcd, nloopqcd_qed
+       logical,  optional,     intent(in)    :: with_Plq_nnloqed
+       [...]
+    end subroutine EvolvePdfTableQED   
+\end{lstlisting}
+where \ttt{table} is the output, \ttt{Q0} the initial scale and
+\ttt{pdf0} is the PDF at the initial scale.
+%
+We recall that the lower and upper limits on 
+scales in the table are as set at initialisation time for the table.
+%
+When \ttt{nloopqcd\_qed} is set to 1 (0) mixed QCD-QED effects are
+(are not) included in the evolution.
+%
+Setting the variable \ttt{with\_Plq\_nnloqed=.true.} includes also the NNLO $P_{lq}$
+splittings in the evolution.
+
+To perform the evolution \ttt{EvolvePdfTableQED} calls the routine 
+\begin{lstlisting}
+    subroutine QEDQCDEvolvePDF(dh, qed_sm, pdf, coupling_qcd, coupling_qed,&
+    &                     Q_init, Q_end, nloop_qcd, nqcdloop_qed, with_Plq_nnloqed)
+       type(dglap_holder),     intent(in), target :: dh
+       type(qed_split_mat),    intent(in), target :: qed_sm
+       type(running_coupling), intent(in), target :: coupling_qcd
+       type(qed_coupling),     intent(in), target :: coupling_qed
+       real(dp),               intent(inout)      :: pdf(0:,ncompmin:)
+       real(dp),               intent(in)         :: Q_init, Q_end
+       integer,                intent(in)         :: nloop_qcd
+       integer,                intent(in)         :: nqcdloop_qed
+       logical,  optional,     intent(in)         :: with_Plq_nnloqed
+       [...]
+       end subroutine QEDQCDEvolvePDF
+\end{lstlisting}
+which, given the \ttt{pdf} at an initial scale \ttt{Q\_init}, it
+evolves it to scale \ttt{Q\_end}, overwriting the \ttt{pdf} array. 
+%
+In order to get interpolated PDF values from the table we use the
+\ttt{EvalPdfTable\_*} calls, described in
+\ifreleasenote
+Section~7.2 of Ref.~\cite{Salam:2008qg}.
+\else
+Section~\ref{sec:acc_table}.
+\fi
+%
+However the \texttt{pdf} array that is passed as an argument and that is
+set by those subroutines should range not from \texttt{(-6:6)} but
+instead from \texttt{(-6:8)} if the PDF just has photons and
+\texttt{(-6:11)} if the PDF also includes leptons.\footnote{Index $7$
+  is an artefact associated with internal \hoppet bookkeeping and
+  should be ignored in the resulting \ttt{pdf} array.}
+
+Note that at the moment, when QED effects are included, cached evolution is not supported.
+
+
+\subsection{Streamlined interface with QED effects}
+The streamlined interface including QED effects works as in the case of pure QCD evolution.
+One has to add the following call
+\begin{lstlisting}
+  logical use_qed, use_qcd_qed, use_Plq_nnlo
+  ...
+  call hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
+\end{lstlisting}
+before using the streamlined interface routines.
+
+The \ttt{use\_qed} argument turns on/off QED evolution at order
+${\cal O}(\alpha)$ (i.e.\ items \ref{item:qed1} and \ref{item:qed2} in
+the enumerated list at the beginning of
+Sec.~\ref{sec:qed-evolution}).
+%
+The \ttt{use\_qcd\_qed} one turns
+on/off mixed QCD$\times$QED effects in the evolution (i.e.\ item \ref{item:qed3}) and \ttt{use\_Plq\_nnlo} turns on/off
+the order $\alpha^2 P_{\ell q}$ splitting function (i.e.\
+item \ref{item:qed4}).
+%
+Without this call, all QED corrections
+are off.
+
+
+%======================================================================
+%======================================================================
+\section{Hadronic Structure Functions}
+\label{sec:structure-funcs}
+As of \hoppet version 1.3.0 the code provides access to the
+hadronic structure functions. The structure functions are
+expressed as convolutions of a set of massless hard coefficient
+functions and PDFs, and make use of the tabulated PDFs and streamlined
+interface as described in the sections above. The structure functions
+are provided such that they can be used directly for cross section
+computations in DIS or VBF, the latter of which has already been
+implemented in the {\tt proVBFH}
+package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
+
+The structure functions have been found to be in good agreement
+with those which can be obtained with APFEL++ (at the level of
+$10^{-4}$ relative precision).
+%
+The benchmarks with
+APFEL++ and the code used to carry them out can be found in
+\ttt{benchmarking/structure\_functions\_benchmark\_checks.f90} and are
+described in detail in Ref.~\cite{bertonekarlberg}. Technical details
+on the implementation of the structure functions in \hoppet can also
+be found therein. An example of how to use the structure functions can
+be found in \ttt{example\_f90/structure\_functions\_example.f90}.
+
+
+The structure functions have been implemented up to
+N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
+which are needed to claim this accuracy are not currently fully
+known. At the time of writing partial results have been presented in
+Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}.}
+using both the exact and parametrised coefficient functions found in
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
+The coefficient functions were also computed in
+Ref.~\cite{Blumlein:2022gpp} and found to be in agreement with the
+previous calculations.
+
+\subsection{Initialisation}
+\label{sec:structure-funcs-init}
+
+The structure functions can be accessed from inside the module
+\ttt{structure\_functions}. They can also be accessed through the
+streamlined interface by prefixing \ttt{hoppet} as described in
+section~\ref{sec:structure-functions-streamlined}.
+%
+The description below corresponds to a high-level interface, which
+relies on elements such as the \ttt{grid} and splitting functions
+having been initialised in the streamlined interface, through a call
+to \ttt{hoppetStart} or \ttt{hoppetStartExtended}, cf.\
+\ifreleasenote
+Section~8 of Ref.~\cite{Salam:2008qg}.
+\else
+Section~\ref{sec:vanilla}.
+\fi
+\footnote{Users needing a lower level
+  interface should inspect the code in \ttt{src/structure\_functions.f90}.}
+%
+Then one calls
+\begin{lstlisting}
+  call StartStrFct(order_max [, nflav] [, xR] [, xF] [, scale_choice] &
+                  & [, constant_mu] [ ,param_coefs] [ ,wmass] [ ,zmass])
+\end{lstlisting}
+specifying as a minimum the perturbative order --- currently
+\ttt{order\_max}$\le 4$ (\ttt{order\_max}$=1$ corresponds to LO).
+
+If \ttt{nflav} is not passed as an argument, the structure functions
+are initialised to support a variable flavour-number scheme (the
+masses that are used at any given stage will be those set in the
+streamlined interface).
+%
+Otherwise a fixed number of light flavours is used, as indicated by
+\ttt{nflav}, which speeds up initialisation.
+%
+Note that specifying a variable flavour-number scheme only has an
+impact on the evolution and on $n_f$ terms in the coefficient
+functions.
+%
+The latter, however always assume massless quarks.
+%
+Hence in a variable flavour-number scheme the structure functions
+should only be considered reliable for $Q \gg m$.
+
+Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
+the renormalisation and factorisation scales and the degree of
+flexibility that will be available in choosing them at later stages.
+%
+Specifically \ttt{scale\_choice} can take several values:
+\begin{itemize}
+\item \ttt{scale\_choice\_Q} (default) means that the code will always
+  use $Q$ multiplied by \ttt{xR} or \ttt{xF} as the renormalisation
+  and factorisation scale respectively (with \ttt{xR} or \ttt{xF} as
+  set at initialisation).
+\item \ttt{scale\_choice\_fixed} corresponds to a fixed scale
+  \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF} as set at
+  initialisation).
+\item \ttt{scale\_choice\_arbitrary} allows the user to choose
+  arbitrary scales at the moment of evaluating the structure
+  functions.
+  %
+  In this last case, the structure functions are saved as arrays
+  separated by perturbative order and with dedicated additional arrays
+  for terms proportional to logarithms of $Q/\mu_F$. 
+  % 
+  This makes for a slower evaluation compared to the two other
+  scale choices.
+\end{itemize}
+%
+% The default value for \ttt{scale\_choice} is \ttt{scale\_choice\_Q} which means that $Q$
+% multiplied by \ttt{xR} or \ttt{xF} is used as the renormalisation or
+% factorisation scale respectively.
+% %
+% The choice \ttt{scale\_choice\_fixed} corresponds to a fixed scale
+% \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF}).
+% %
+% Should a user wish to use some arbitrary scale choice,
+% \ttt{scale\_choice} should be set to \ttt{scale\_choice\_arbitrary}.
+% %
+% \gps{Do we want to introduce some constants such as
+%   \ttt{scale\_choice\_Q=1}, \ttt{scale\_choice\_fixed=0}, \ttt{scale\_choice\_arbitrary=2}?} \ak{Yes, and done!}
+% %
+% In this last case, the structure functions are saved as arrays not only in
+% $Q$ but also $\mu_R$ and $\mu_F$.
+% %
+% This makes for a slightly slower evaluation compared to the two other
+% scale choices.
+
+If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the
+structure functions are computed using the NNLO and N3LO
+parametrisations found in
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},
+which are stated to have a relative precision of a few per mil (order
+by order) except at particularly small or large values of $x$.
+%
+Otherwise
+the exact versions are used\footnote{The LO and NLO coefficient
+functions are always exact as their expressions are very
+compact.}.
+%
+This however means that the initialisation becomes slow (about two
+minutes rather than a few seconds).
+%
+Given the good accuracy of the parametrised coefficient functions,
+they are to be preferred for most applications.
+% 
+% and since the parametrised
+% expressions are good to a relative accuracy of $10^{-4}$ for most
+% values of $x$, it is recommended to use the parametrised option for
+% most applications.
+% 
+Note that the exact expressions also add to compilation time and need
+to be explicitly enabled with the \ttt{--enable-exact-coefs} configure
+flag.\footnote{ At N3LO they rely on an extended version of
+  \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
+  is able to handle harmonic polylogarithms up to weight 5.
+  %
+  However there appears to be a percent-level issue on the coefficient
+  functions for $x\lesssim 0.1$, connected with the evaluation of the
+  polylogarithms. This is currently under investigation. }
+
+The mass of the electroweak vector bosons are used only to calculate
+the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$.
+
+At this point all the tables that are needed for the structure
+functions have been allocated.
+%
+In order to fill the tables, one first needs to set up the running
+coupling and evolve the initial PDF with \ttt{hoppetEvolve}, as
+described in
+\ifreleasenote
+Section~8.2 of Ref.~\cite{Salam:2008qg}.
+\else
+Section~\ref{sec:vanilla_usage}.
+\fi
+
+%
+% Care should be taken here such that both the coupling and PDF
+% evolution are carried out at the correct perturbative order and with
+% mass thresholds as appropriate.
+%
+With the PDF table filled in the streamlined interface one calls
+\begin{lstlisting}
+  call InitStrFct(order[, separate_orders])
+\end{lstlisting}
+specifying the order at which one would like to compute the structure
+functions.
+%
+The flag \ttt{separate\_orders} should be set to \ttt{.true.}\ if one
+wants access to the individual coefficients of the perturbative
+expansion as well as the sum up to some maximum order.
+%
+With \ttt{scale\_choice\_Q} and \ttt{scale\_choice\_fixed}, the
+default of \ttt{.false.}\ causes only the sum over perturbative orders
+to be stored.
+%
+This gives faster evaluations of structure functions because it is
+only necessary to interpolate for the sum over orders, rather than
+interpolate one table for each order.
+%
+With \texttt{scale\_choice\_arbitrary}, the default is \ttt{.true.},
+which is the only allowed option, because separate tables for each
+order are required for the underlying calculations.
+
+\subsection{Accessing the Structure Functions}
+\label{sec:structure-funcs-access}
+At this point the structure functions can be accessed as in the following example
+\begin{lstlisting}
+  real(dp) :: ff(-6:7), x, Q, muR, muF
+  [...]
+  call InitStrFct(order_max = 4)
+  ff = StrFct(x, Q[, muR] [, muF])
+\end{lstlisting}
+at the value $x$ and $Q$.
+%
+With \ttt{scale\_choice\_arbitrary}, the \ttt{muR} and \ttt{muF}
+arguments must be provided.
+%
+With other scale choices, they do not need to be provided, but if they
+are then they should be consistent with the original scale choice.
+%
+The structure functions are in this example stored in the
+array \ttt{ff}. The components of this array can be accessed through
+the indices
+\begin{lstlisting}
+  integer, parameter :: iF1Wp= 1   
+  integer, parameter :: iF2Wp= 2   
+  integer, parameter :: iF3Wp= 3   
+  integer, parameter :: iF1Wm=-1   
+  integer, parameter :: iF2Wm=-2   
+  integer, parameter :: iF3Wm=-3   
+  integer, parameter :: iF1Z = 4   
+  integer, parameter :: iF2Z = 5   
+  integer, parameter :: iF3Z = 6   
+  integer, parameter :: iF1EM = -4   
+  integer, parameter :: iF2EM = -5   
+  integer, parameter :: iF1gZ = 0  
+  integer, parameter :: iF2gZ = -6 
+  integer, parameter :: iF3gZ = 7  
+\end{lstlisting}
+For instance one would access the electromagnetic $F_1$ structure
+function through \ttt{ff(iF1EM)}. It is returned at the \ttt{order\_max}
+that was specified in \ttt{InitStrFct}.
+%
+The structure functions can also be accessed order by order if the
+\ttt{separate\_orders} flag was set to \ttt{.true.} when initialising.
+%
+They are then obtained as follows
+\begin{lstlisting}
+  real(dp) :: flo(-6:7), fnlo(-6:7), fnnlo(-6:7), fn3lo(-6:7), x, Q, muR, muF
+  [...]
+  call InitStrFct(4, .true.)
+  flo   = F_LO(x, Q, muR, muF)
+  fnlo  = F_NLO(x, Q, muR, muF)
+  fnnlo = F_NNLO(x, Q, muR, muF)
+  fn3lo = F_N3LO(x, Q, muR, muF)
+\end{lstlisting}
+The functions return the individual contributions at each order in
+$\as$, including the relevant factor of $\as^n$.
+%
+Hence the sum of \ttt{flo}, \ttt{fnlo}, \ttt{fnnlo}, and
+\ttt{fn3lo} would return the full structure function at N3LO as
+contained in \ttt{ff} in the example above.
+%
+Note that in the \ttt{F\_LO} etc.\ calls, the \ttt{muR} and \ttt{muF}
+arguments are not optional and that when a prior scale choice has been
+made (e.g. \ttt{scale\_choice\_Q}) they are assumed to be consistent
+with that prior scale choice.
+
+\subsection{Streamlined interface}
+\label{sec:structure-functions-streamlined}
+The structure functions can also be accessed through the streamlined
+interface, so that they may be called for instance from C/C++. The
+functions to be called are very similar to those described above. In
+particular a user should call either
+\begin{lstlisting}
+  call hoppetStartStrFct(order_max)
+\end{lstlisting}
+with \ttt{order\_max} the maximal
+order in $\as$ or, alternatively, the extended version of the interface
+\ttt{hoppetStartStrFctExtended} which takes all the same arguments as
+\ttt{StartStrFct} described above. One difference is that in order to
+use a variable flavour scheme the user should set \ttt{nflav} to a
+negative value. After evolving or reading in a PDF, the user then calls
+\begin{lstlisting}
+  call hoppetInitStrFct(order, separate_orders)
+\end{lstlisting}
+to initialise the actual structure functions. The structure functions
+can then be accessed through the subroutines
+\begin{lstlisting}
+  real(dp) :: ff(-6:7), flo(-6:7), fnlo(-6:7), fnnlo(-6:7), fn3lo(-6:7), x, Q, muR, muF
+  [...]
+  call hoppetStrFct(x, Q, muR, muF, ff)        ! Full structure function
+  ! or instead, without muR and muF
+  call hoppetStrFctNoMu(x, Q, ff)              ! Full structure function
+  call hoppetStrFctLO(x, Q, muR, muF, flo)     ! LO term
+  call hoppetStrFctNLO(x, Q, muR, muF, fnlo)   ! NLO term
+  call hoppetStrFctNNLO(x, Q, muR, muF, fnnlo) ! NNLO term
+  call hoppetStrFctN3LO(x, Q, muR, muF, fn3lo) ! N3LO term
+\end{lstlisting}
+The C++ header contains indices for the structure functions and scale
+choices, which are all in the \ttt{hoppet} namespace.
+%
+\begin{lstlisting}
+  int iF1Wp = 1+6;
+  int iF2Wp = 2+6;
+  int iF3Wp = 3+6;
+  int iF1Wm =-1+6;
+  int iF2Wm =-2+6;
+  int iF3Wm =-3+6;
+  int iF1Z  = 4+6;
+  int iF2Z  = 5+6;
+  int iF3Z  = 6+6;
+  int iF1EM =-4+6;
+  int iF2EM =-5+6;
+  int iF1gZ = 0+6;
+  int iF2gZ =-6+6;
+  int iF3gZ = 7+6;
+
+  const int scale_choice_fixed     = 0;
+  const int scale_choice_Q         = 1;
+  const int scale_choice_arbitrary = 2;
+\end{lstlisting}
+Note that the structure function indices start from 0 and that the C++
+array that is to be passed to functions such as \ttt{hoppetStrFct}
+would be defined as \ttt{double ff[14]}.
+
+%======================================================================
+%======================================================================
