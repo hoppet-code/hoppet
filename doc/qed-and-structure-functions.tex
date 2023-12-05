@@ -44,7 +44,8 @@ To achieve a corresponding accuracy when including QED contributions,
 \item \label{item:qed4} optionally, the 2-loop pure QED $P_{\ell q}$ splitting
   function~\cite{deFlorian:2016gvk}, which brings absolute accuracy
   $\alpha^2 L\sim \as^3$ to the lepton distribution (which starts at
-  $\alpha^2 L^2 \sim \as^2$).
+  $\alpha^2 L^2 \sim \as^2$).\footnote{The implementation of the 2-loop $P_{\ell q}$ splitting
+  function in the hoppet code (\ttt{Plq\_02} in the code) was carried out by Luca Buonocore.}
   %
   In an absolute counting of accuracy, this is not needed.
   % 
@@ -67,7 +68,7 @@ available, and the well-known 2-loop QED running coupling at order $\alpha \alph
 
 \subsection{Implementation of the QED extension}
 
-\paragraph{QED coupling.}
+\myparagraph{QED coupling}
 
 A first ingredient is the setup of the QED coupling object, defined in
 \ttt{module qed\_coupling}:
@@ -144,7 +145,7 @@ consistency, although in this case it does nothing.
 After this initialization, the function \ttt{Value(qed\_coupling,mu)} returns the QED coupling at
 scale $\mu$.
 
-\paragraph{QED splitting matrices.}
+\myparagraph{QED splitting matrices}
 
 The QED splitting matrices are stored in the object
 
@@ -231,7 +232,7 @@ QED splitting functions can be represented by the \ttt{.conv.} operator or
 using the product sign \ttt{*}.
 
 
-\paragraph{PDF arrays with photons and leptons.}
+\myparagraph{PDF arrays with photons and leptons}
 
 A call to the subroutine
 \begin{lstlisting}  
@@ -284,7 +285,7 @@ while in the subroutine \ttt{AllocPDFWithLeptons},
 the flavour index extends to 11.
 
 
-\paragraph{PDF tables with photons and leptons.}
+\myparagraph{PDF tables with photons and leptons}
 
 Next one neeeds to prepare a \ttt{pdf\_table} object forming the
 interpolating grid for the evolved PDF's. We recall that the
@@ -313,7 +314,7 @@ maximum pdf flavour index in \ttt{pdf\_table\%tab} now includes the photon and l
 An analogous subroutine \ttt{AllocPdfTableWithPhoton} includes the
 photon but no leptons.
 
-\paragraph{Evolution with photons and leptons.}
+\myparagraph{Evolution with photons and leptons}
 
 
 To fill a table via an evolution from an initial scale, one calls the subroutine 
