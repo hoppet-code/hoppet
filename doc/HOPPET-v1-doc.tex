@@ -82,7 +82,7 @@
 \newcommand{\fn}{\scriptsize}
 
 
-\newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,coriano,GuzziThesis,nnpdf,Kosower:1997hg,Ratcliffe:2000kp}
+\newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,GuzziThesis,nnpdf,Kosower:1997hg,Ratcliffe:2000kp}
 
 % We need slightly different text in the manual and in the release note.
 \newif\ifreleasenote
@@ -224,13 +224,13 @@ processor). Further details in section~\ref{sec:Timing}.
 There has been considerable discussion over the past years
 (\eg~\cite{\AllDGLAP}) of numerical solutions of the 
 Dokshitzer-Gribov-Lipatov-Altarelli-Parisi (DGLAP)
- equation~\cite{DGLAP} for the Quantum Chromodynamics
+ equation~\cite{Gribov:1972ri,Altarelli:1977zs,Dokshitzer:1977sg} for the Quantum Chromodynamics
 (QCD)
 evolution  of parton distribution functions (PDFs).
 
 
 The DGLAP equation
-\cite{DGLAP} is a renormalisation group equation for the quantity
+\cite{Gribov:1972ri,Altarelli:1977zs,Dokshitzer:1977sg} is a renormalisation group equation for the quantity
 $q_i(x,Q^2)$, the density of partons of type (or flavour) $i$ carrying
 a fraction $x$ of the longitudinal momentum of a hadron, when resolved
 at a scale $Q$. It is one of the fundamental equations of perturbative
@@ -329,7 +329,7 @@ serving as the basis of the well-known  QCDNUM program \cite{Botje},
 and  used also by the CTEQ~\cite{CTEQ} and MRST/MSTW~\cite{MRST}
 global fitting
 collaborations. Higher-order methods in $x$--space have been developed
-in \cite{Schoeffel:1998tz,Pascaud:2001bi,coriano,GuzziThesis,DisResum}, and
+in \cite{Schoeffel:1998tz,Pascaud:2001bi,Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,GuzziThesis,Dasgupta:2001eq,Dasgupta:2002dc}, and
 more recently have been incorporated also in QCDNUM.
 
 \hoppet, the program presented here, uses higher-order methods both for
@@ -351,13 +351,13 @@ request), but had
 never been documented. 
 Those predecessors have  been used in a number of different
 contexts, like resummation of event shapes
-in DIS \cite{DisResum}, automated resummation
+in DIS \cite{Dasgupta:2001eq,Dasgupta:2002dc}, automated resummation
 of event shapes \cite{caesar}, studies of
 resummation in the small-$x$ limit \cite{Ciafaloni:2003rd}, 
 and in a posteriori inclusion
-of PDFs in NLO final-state calculations \cite{APPL,Banfi:2007gu}, as well
+of PDFs in NLO final-state calculations \cite{Carli:2005ji,Carli:2010rw,Banfi:2007gu}, as well
 as  used for benchmark
-comparisons with Pegasus~\cite{Pegasus} in \cite{Benchmarks}.
+comparisons with Pegasus~\cite{Pegasus} in \cite{Giele:2002hx,Dittmar:2005ed}.
 Since the code had
 not hitherto been released in a documented form, 
 it is the authors' hope that availability of
@@ -427,7 +427,7 @@ The related variable $t\equiv \ln Q^2$ is also used
 in various places in \hoppet.
 The splitting functions in eq.~(\ref{eq:dglap-ns})
 are known up to NNLO in the 
-unpolarised case \cite{CFP,NNLO-NS,NNLO-singlet}:
+unpolarised case \cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}:
 \begin{equation}
   \label{eq:dpdf}
    P(z,\aq)=P^{(0)}(z)+\frac{\aq}{2\pi}P^{(1)}(z)+
@@ -440,7 +440,7 @@ is
 to the case of time-like evolution\footnote{
 The general structure of the relation between space-like
 and time-like evolution and splitting functions
- has been investigated in \cite{CFP,Stratmann:1996hn,Dokshitzer:2005bf,Mitov:2006ic,Basso:2006nk,Dokshitzer:2006nm,Beccaria:2007bb}.}, 
+ has been investigated in \cite{Furmanski:1980cm,Curci:1980uw,Stratmann:1996hn,Dokshitzer:2005bf,Mitov:2006ic,Basso:2006nk,Dokshitzer:2006nm,Beccaria:2007bb}.}, 
 relevant for example for fragmentation function analysis,
 where partial NNLO results
 are also available \cite{Mitov:2006ic}.
@@ -696,7 +696,7 @@ n \delta y$), so that $P_{\alpha\beta}$ just depends
 on $\alpha - \beta$, and can be rewritten $\mathcal{P}_{\alpha - \beta}$. A
 slight subtlety arises at large $x$, where if one writes $w_\alpha(y) =
 w(y - y_\alpha)$ one is effectively assuming an interpolation that uses
-identically zero interpolation points for $x\ge 1$~\cite{coriano,
+identically zero interpolation points for $x\ge 1$~\cite{Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,
 Ratcliffe:2000kp},
 even though $xq(x)$ is not formally defined for $x > 1$. In practice
 this is often not too important (because PDFs drop rapidly towards
@@ -2038,7 +2038,7 @@ value. Otherwise flavour thresholds are implemented at scales
 By default the quark masses are taken to be \emph{pole} masses.
 %
 This choice (and the particular default values) was inspired by the
-PDF evolution benchmark comparison~\cite{Benchmarks} in which \hoppet
+PDF evolution benchmark comparison~\cite{Giele:2002hx,Dittmar:2005ed} in which \hoppet
 results were compared to those of Vogt's moment-space code
 QCD-Pegasus~\cite{Pegasus}. 
 %
@@ -2433,9 +2433,9 @@ appropriate structure at some point, \eg via
   call AllocPdfTable(table_deriv_LO, table)
 \end{lstlisting}
 The above mechanism has found use in the a-posteriori PDF
-library~\cite{APPL,Banfi:2007gu} 
+library~\cite{Carli:2005ji,Carli:2010rw,Banfi:2007gu} 
 and in work matching event shapes with fixed-order
-calculations~\cite{caesar,DisResum}.
+calculations~\cite{caesar,Dasgupta:2001eq,Dasgupta:2002dc}.
 %
 One could also imagine using it to obtain tables of
 (flavour-separated) structure functions, if one were to convolute with
@@ -2560,7 +2560,7 @@ renormalisation to factorisation scales \ttt{muR\_Q},\footnote{Note
   the evolution needs the coupling for a given number of flavours
   outside the standard range for that number of flavours (precisely
   because $\ttt{muR\_Q}\ne 1$) and this is done automatically in the
-  evolution. In contrast in the benchmark studies~\cite{Benchmarks},
+  evolution. In contrast in the benchmark studies~\cite{Giele:2002hx,Dittmar:2005ed},
   the flavour thresholds for the coupling were placed at $\ttt{muR\_Q}
   \times m_Q$.  This is a perfectly valid alternative, but can
   complicate the specification of the $\as$ value --- for example with
@@ -2674,7 +2674,7 @@ for the user wishing to write their own F95 code for \hoppet.
 Key questions in assessing the usefulness of a PDF evolution code include
 that of its correctness, its accuracy and its speed. \hoppet's
 correctness has been established with a reasonable degree of
-confidence in the benchmark tests~\cite{Benchmarks} where it was
+confidence in the benchmark tests~\cite{Giele:2002hx,Dittmar:2005ed} where it was
 compared with the Mellin space based
 evolution code QCD-Pegasus \cite{Pegasus}. 
 The program used to carry out those tests
@@ -2682,7 +2682,7 @@ is available as \ttt{benchmarks/benchmarks.f90}. The user should
 carefully read the detailed
 comments at the beginning for usage instructions.
 
-The results used in \cite{Benchmarks} were obtained with very finely
+The results used in \cite{Giele:2002hx,Dittmar:2005ed} were obtained with very finely
 spaced grids, in order to guarantee small numerical errors ($\lesssim
 10^{-7}$).  Such accuracies are useful when comparing and testing two
 independent codes, because differences or bugs in the
@@ -2707,7 +2707,7 @@ with the question of the accuracy.
 \label{sec:Accuracy}
 To measure the accuracy, 
 we use the same initial condition and evolution parameters as
-in~\cite{Benchmarks}:
+in~\cite{Giele:2002hx,Dittmar:2005ed}:
 \begin{subequations}
   \label{eq:init}
   \begin{align}
@@ -2747,7 +2747,7 @@ $\zeta = \ln 1/x + 9(1-x)$ so as to obtain fine coverage at small and
 large $x$. The $Q$ values are chosen more closely spaced at low $Q$
 where the $Q$-dependence is strongest and they are taken slightly correlated
 with $\zeta$ so as to cover a nearly continuous range of
-$Q$.\footnote{This procedure differs from that in \cite{Benchmarks}
+$Q$.\footnote{This procedure differs from that in \cite{Giele:2002hx,Dittmar:2005ed}
   where fewer (500) points were used and one compared not individual
   flavours, but combinations intended to be more directly revealing of
   any deficiencies in the evolution. This reflects the difference in
@@ -2999,7 +2999,7 @@ evaluated is $\order{10^3}$. For much smaller numbers of points
 Pegasus becomes superior (because of the significantly smaller ratio
 $t_c/t_{xQ}$), while for much larger numbers of points \hoppet becomes
 better. Other NNLO evolution codes published in recent years 
-\cite{Weinzierl:2002mv,coriano,Botje}
+\cite{Weinzierl:2002mv,Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,Botje}
  are generally less competitive
 either in terms of accuracy or speed.
 
@@ -3050,7 +3050,7 @@ Features that might be envisaged for future releases include DIS
 coefficient functions, full support for the DIS factorisation scheme,
 and the addition of time-like evolution, relevant
 for phenomenological fits to fragmentation functions
-as in \cite{de Florian:2007hc}.  
+as in \cite{deFlorian:2007hc}.  
 In principle, the
 information presented here is sufficient to allow a user to implement
 the coefficient functions themselves, while the DIS scheme and
@@ -3108,7 +3108,7 @@ and polarised evolution.
 \section*{Acknowledgements}
 
 This work was initiated in the context of DIS event shape resummation
-and matching studies \cite{DisResum} with Mrinal Dasgupta.
+and matching studies \cite{Dasgupta:2001eq,Dasgupta:2002dc} with Mrinal Dasgupta.
 %
 Its subsequent development into a fully-featured NNLO evolution code
 owes much to Andreas Vogt's regular encouragement, and his suggestions
@@ -3139,7 +3139,7 @@ ST/T000864/1 and ST/X000761/1 (GPS).
 \label{sec:example_gen}
 
 The program below generates a subset of table~15 of the NNLO benchmark
-evolution in the second reference of~\cite{Benchmarks}. It is to be
+evolution in the second reference of~\cite{Giele:2002hx,Dittmar:2005ed}. It is to be
 found (in a slightly more commented form) in
 \ttt{example\_f90/tabulation\_example.f90}. Compilation instructions
 are to be found in the \ttt{README} file in the main directory of the
@@ -3283,7 +3283,7 @@ and the parametrised versions of the NNLO splitting functions and mass
 threshold terms.
 %
 The reader may verify that they correspond to those given in the top
-panel of table~15 of the second reference of \cite{Benchmarks} ($\mu_F
+panel of table~15 of the second reference of \cite{Giele:2002hx,Dittmar:2005ed} ($\mu_F
 = \mu_R$).
 
 \subsection{Streamlined interface}
@@ -3599,7 +3599,7 @@ evolution without tabulation.
 %
 The programs in the \ttt{benchmarking/} directory are the ones that
 have been used in benchmark PDF evolution
-comparisons~\cite{Benchmarks} and in determining the accuracies and
+comparisons~\cite{Giele:2002hx,Dittmar:2005ed} and in determining the accuracies and
 speeds shown in section~\ref{sec:benchmarks}.
 
 One particular usage question that has arisen, relative to the example
@@ -4074,7 +4074,7 @@ parametrised NNLO splitting functions also provided in
 guaranteed to be accurate to within $0.1\%$ --- in practice since they
 come in relatively suppressed by two powers of $\as$, the impact on
 the evolution tends to be of the order of a  $10^{-5}$ relative effect
-\cite{Benchmarks}.
+\cite{Giele:2002hx,Dittmar:2005ed}.
 
 The user can choose whether to obtain the exact or parametrised NNLO
 splitting functions using the following calls (to be made before
@@ -4385,8 +4385,9 @@ will do the same thing.
 
 %=============================================================
 
-\input{bibliography}
-
+%\input{bibliography}
+\bibliographystyle{elsarticle-num}
+\bibliography{hoppet.bib}
 
 %=====================================================================
 
