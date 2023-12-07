@@ -432,10 +432,9 @@ can be found in
 %
 Technical details on the implementation of the structure functions in
 \hoppet can also be found therein, and in
-Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik}. An example of their
-usage can be found in
+Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik}. A small sample program
+that prints out the structure functions can be found in
 \masterlink{example\_f90/structure\_functions\_example.f90}.
-
 
 The structure functions have been implemented up to
 N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
@@ -446,10 +445,15 @@ splitting functions up to three-loops were already implemented in
 \hoppet as of version 1.1.0, and can be found
 in~\cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}} using
 both the exact and parametrised coefficient functions found in
-Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
-The coefficient functions were also computed in
-Ref.~\cite{Blumlein:2022gpp} and found to be in agreement with the
-previous calculations.
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz,Blumlein:2022gpp},
+and the splitting functions up to three-loops already implemented in
+\hoppet as of version
+1.1.0~\cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}. Additionally
+the running coupling in \hoppet has been extended to four loops using
+the results of
+Ref.~\cite{vanRitbergen:1997va,Czakon:2004bu}.\footnote{The
+implementation does not allow for non-standard values of the QCD
+Casimir numbers beyond three loops.}
 
 \subsection{Initialisation}
 \label{sec:structure-funcs-init}
@@ -464,14 +468,14 @@ relies on elements such as the \ttt{grid} and splitting functions
 having been initialised in the streamlined interface, through a call
 to \ttt{hoppetStart} or \ttt{hoppetStartExtended}, cf.\
 \ifreleasenote
-Section~8 of Ref.~\cite{Salam:2008qg}.
-\else
-Section~\ref{sec:vanilla}.
-\fi
-\footnote{Users needing a lower level
+Section~8 of Ref.~\cite{Salam:2008qg}.\footnote{Users needing a lower level
   interface should inspect the code in \masterlink{src/structure\_functions.f90}.}
+\else
+Section~\ref{sec:vanilla}.\footnote{Users needing a lower level
+  interface should inspect the code in \masterlink{src/structure\_functions.f90}.}
+\fi
 %
-Then one calls
+After this initialisation has been carried out one calls
 \begin{lstlisting}
   call StartStrFct(order_max [, nflav] [, xR] [, xF] [, scale_choice] &
                   & [, constant_mu] [ ,param_coefs] [ ,wmass] [ ,zmass])
@@ -544,13 +548,13 @@ If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the
 structure functions are computed using the NNLO and N3LO
 parametrisations found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},
-which are stated to have a relative precision of a few per mil (order
+which are stated to have a relative precision of a few permille (order
 by order) except at particularly small or large values of $x$.
 %
 Otherwise
-the exact versions are used\footnote{The LO and NLO coefficient
+the exact versions are used.\footnote{The LO and NLO coefficient
 functions are always exact as their expressions are very
-compact.}.
+compact.}
 %
 This however means that the initialisation becomes slow (about two
 minutes rather than a few seconds).
@@ -574,7 +578,8 @@ flag.\footnote{ At N3LO they rely on an extended version of
   polylogarithms. This is currently under investigation. }
 
 The mass of the electroweak vector bosons are used only to calculate
-the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$.
+the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$, which
+enters in the neutral-current structure functions.
 
 At this point all the tables that are needed for the structure
 functions have been allocated.
@@ -716,20 +721,20 @@ The C++ header contains indices for the structure functions and scale
 choices, which are all in the \ttt{hoppet} namespace.
 %
 \begin{lstlisting}
-  int iF1Wp = 1+6;
-  int iF2Wp = 2+6;
-  int iF3Wp = 3+6;
-  int iF1Wm =-1+6;
-  int iF2Wm =-2+6;
-  int iF3Wm =-3+6;
-  int iF1Z  = 4+6;
-  int iF2Z  = 5+6;
-  int iF3Z  = 6+6;
-  int iF1EM =-4+6;
-  int iF2EM =-5+6;
-  int iF1gZ = 0+6;
-  int iF2gZ =-6+6;
-  int iF3gZ = 7+6;
+  const int iF1Wp = 1+6;
+  const int iF2Wp = 2+6;
+  const int iF3Wp = 3+6;
+  const int iF1Wm =-1+6;
+  const int iF2Wm =-2+6;
+  const int iF3Wm =-3+6;
+  const int iF1Z  = 4+6;
+  const int iF2Z  = 5+6;
+  const int iF3Z  = 6+6;
+  const int iF1EM =-4+6;
+  const int iF2EM =-5+6;
+  const int iF1gZ = 0+6;
+  const int iF2gZ =-6+6;
+  const int iF3gZ = 7+6;
 
   const int scale_choice_fixed     = 0;
   const int scale_choice_Q         = 1;
