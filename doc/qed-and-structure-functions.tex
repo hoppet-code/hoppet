@@ -3,12 +3,12 @@
 \label{sec:qed-evolution}
 
 The combined QED+QCD evolution, as implemented in \hoppet since
-version 1.3.0 (and earlier in a dedicated \ttt{qed} branch), is as
+version 1.3.0 (and earlier in a dedicated \ttt{qed} branch), was first
 described in
 Refs.~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf}.
 %
-The determination of which contributions should be included follows a
-consistent approach based on a so-called ``phenomenological'' counting
+The determination of which contributions to include follows a
+consistent approach based on the so-called ``phenomenological'' counting
 scheme.
 %
 Within this scheme, one considers $\alpha$ to be of order $\as^2$, and takes the
@@ -86,28 +86,27 @@ A first ingredient is the setup of the QED coupling object, defined in
 %
 This is initialized through a call to 
 \begin{lstlisting}
-    subroutine InitQEDCoupling(coupling, m_light_quarks, &
+  subroutine InitQEDCoupling(coupling, m_light_quarks, &
    &                           m_heavy_quarks(4:6) [,value_at_scale_0])
     type(qed_coupling), intent(out) :: coupling
     real(dp),           intent(in)  :: m_light_quarks, m_heavy_quarks(4:6)
     real(dp), optional, intent(in)  :: value_at_scale_0 ! defaults to alpha_qed_scale_0
     [...]
-    end subroutine InitQEDCoupling
+  end subroutine InitQEDCoupling
 \end{lstlisting}
 
-
-It initialises the parameters relevant to the QED coupling
-and its running.  The electromagnetic coupling at scale zero is set by
-default to its PDG~\cite{ParticleDataGroup:2022pth} value, unless the
-optional argument \ttt{value\_at\_scale\_0} is provided, in which case
-the latter is taken as the value of the QED coupling at zero momentum.
+It initialises the parameters relevant to the QED coupling and its
+running.  The electromagnetic coupling at scale zero is set by default
+to its PDG~\cite{ParticleDataGroup:2022pth} value, unless the optional
+argument \ttt{value\_at\_scale\_0} is provided, in which case the
+latter is taken as the value of the QED coupling at zero momentum.
 
 The running is performed at leading order level using seven
 thresholds: a common effective mass for the three light quarks
-(\ttt{m\_light\_quarks}), the three lepton masses (hard-coded to their PDG
-values~\cite{ParticleDataGroup:2022pth} in the
-\ttt{src/qed\_coupling.f90} file), and the three masses of the heavy quarks
-(\ttt{m\_heavy\_quarks(4:6)}).
+(\ttt{m\_light\_quarks}), the three lepton masses (hard-coded to their
+PDG values~\cite{ParticleDataGroup:2022pth} in the
+\ttt{src/qed\_coupling.f90} file), and the three masses of the heavy
+quarks (\ttt{m\_heavy\_quarks(4:6)}).
 %
 The common value of the light quark masses is used to mimic the
 physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
@@ -128,11 +127,11 @@ with a relative $\sim 10^{-4}$ accuracy.
 The quark and lepton masses are used to set all thresholds where the
 fermion content changes. This information is then used to set
 the array \ttt{nflav(3,0:n\_thresholds)}, where \ttt{nflav(1:3,i)}
-contains an integer array with the number of leptons, down and up
+contains an integer array with the number of leptons, down, and up
 quarks at a given $Q^2$ such that \ttt{threshold(i-1)}$<Q^2<$
 \ttt{threshold(i)}.
 %
-The \ttt{threshold(1:7)} entires are active thresholds, while
+The \ttt{threshold(1:7)} entries are active thresholds, while
 \ttt{threshold(0)} is set to zero and \ttt{threshold(8)} to
 $10^{200}$. The integer array \ttt{nflav(1:3,0:n\_thresholds)} is then used to compute the
 $\beta_{0,\rm QED}$ function \ttt{b0\_values(1:n\_thresholds)} at the seven threshold values and this is
@@ -151,8 +150,8 @@ The QED splitting matrices are stored in the object
 
 \begin{lstlisting}
   type qed_split_mat
-     type(qed_split_mat_lo)  :: lo
-     type(qed_split_mat_nlo) :: nlo
+     type(qed_split_mat_lo)   :: lo
+     type(qed_split_mat_nlo)  :: nlo
      type(qed_split_mat_nnlo) :: nnlo
   end type qed_split_mat
 \end{lstlisting}
@@ -266,9 +265,9 @@ given by
 where each \ttt{pdf(:,9:11)} contains the sum of a lepton and
 anti-lepton flavour
 (which are identical). Note that if one extends the
-calculation of lepton PDFs to higher order in ${\cal O}(\alpha)$,
+calculation of lepton PDFs to higher order in $\alpha$,
 then an asymmetry in the lepton and anti-lepton distribution would arise,
-due to the  \ttt{Plq\_03} splitting function.
+due to the  \ttt{Plq\_03} splitting function\ak{I think this needs more explanation}.
 % \footnote{
 %   Were one to use \hoppet to obtain the distribution of
 %   partons inside a lepton, then it would become useful to separate
@@ -287,7 +286,7 @@ the flavour index extends to 11.
 
 \myparagraph{PDF tables with photons and leptons}
 
-Next one neeeds to prepare a \ttt{pdf\_table} object forming the
+Next one needs to prepare a \ttt{pdf\_table} object forming the
 interpolating grid for the evolved PDF's. We recall that the
 \ttt{pdf\_table} object contains a table \ttt{pdf\_table\%tab(:,:,:)},
 where the first index loops over $x$ values, the second loops over
@@ -372,14 +371,15 @@ Section~7.2 of Ref.~\cite{Salam:2008qg}.
 Section~\ref{sec:acc_table}.
 \fi
 %
-However the \texttt{pdf} array that is passed as an argument and that is
-set by those subroutines should range not from \texttt{(-6:6)} but
+However the \texttt{pdf} array that is passed as an argument and that
+is set by those subroutines should range not from \texttt{(-6:6)} but
 instead from \texttt{(-6:8)} if the PDF just has photons and
 \texttt{(-6:11)} if the PDF also includes leptons.\footnote{Index $7$
-  is an artefact associated with internal \hoppet bookkeeping and
-  should be ignored in the resulting \ttt{pdf} array.}
+is a historical artefact associated with internal \hoppet bookkeeping
+and should be ignored in the resulting \ttt{pdf} array.}
 
-Note that at the moment, when QED effects are included, cached evolution is not supported.
+Note that at the moment, when QED effects are included, cached
+evolution is not supported.
 
 
 \subsection{Streamlined interface with QED effects}
@@ -410,35 +410,42 @@ are off.
 %======================================================================
 \section{Hadronic Structure Functions}
 \label{sec:structure-funcs}
-As of \hoppet version 1.3.0 the code provides access to the
-hadronic structure functions. The structure functions are
-expressed as convolutions of a set of massless hard coefficient
-functions and PDFs, and make use of the tabulated PDFs and streamlined
-interface as described in the sections above. The structure functions
-are provided such that they can be used directly for cross section
-computations in DIS or VBF, the latter of which has already been
-implemented in the {\tt proVBFH}
-package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
+As of \hoppet version 1.3.0 the code provides access to the hadronic
+structure functions. The structure functions are expressed as
+convolutions of a set of massless hard coefficient functions and PDFs,
+and make use of the tabulated PDFs and streamlined interface as
+described in the sections above. The structure functions are provided
+such that they can be used directly for cross section computations in
+DIS or VBF, the latter of which has already been implemented in the
+{\tt proVBFH}
+package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu},
+for which this work was originally developed.
 
-The structure functions have been found to be in good agreement
-with those which can be obtained with APFEL++ (at the level of
-$10^{-4}$ relative precision).
+The structure functions have been found to be in good agreement with
+those which can be obtained with APFEL++~\cite{Bertone:2017gds} (at
+the level of $10^{-4}$ relative precision).
 %
-The benchmarks with
-APFEL++ and the code used to carry them out can be found in
-\ttt{benchmarking/structure\_functions\_benchmark\_checks.f90} and are
-described in detail in Ref.~\cite{bertonekarlberg}. Technical details
-on the implementation of the structure functions in \hoppet can also
-be found therein. An example of how to use the structure functions can
-be found in \ttt{example\_f90/structure\_functions\_example.f90}.
+The benchmarks with APFEL++ and the code used to carry
+them out are described in detail in Ref.~\cite{bertonekarlberg} and
+can be found in
+\masterlink{benchmarking/structure\_functions\_benchmark\_checks.f90}.
+%
+Technical details on the implementation of the structure functions in
+\hoppet can also be found therein, and in
+Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik}. An example of their
+usage can be found in
+\masterlink{example\_f90/structure\_functions\_example.f90}.
 
 
 The structure functions have been implemented up to
 N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
 which are needed to claim this accuracy are not currently fully
 known. At the time of writing partial results have been presented in
-Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}.}
-using both the exact and parametrised coefficient functions found in
+Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}. The
+splitting functions up to three-loops were already implemented in
+\hoppet as of version 1.1.0, and can be found
+in~\cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}} using
+both the exact and parametrised coefficient functions found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}.
 The coefficient functions were also computed in
 Ref.~\cite{Blumlein:2022gpp} and found to be in agreement with the
@@ -462,7 +469,7 @@ Section~8 of Ref.~\cite{Salam:2008qg}.
 Section~\ref{sec:vanilla}.
 \fi
 \footnote{Users needing a lower level
-  interface should inspect the code in \ttt{src/structure\_functions.f90}.}
+  interface should inspect the code in \masterlink{src/structure\_functions.f90}.}
 %
 Then one calls
 \begin{lstlisting}
