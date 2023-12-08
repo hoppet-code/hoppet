@@ -16,7 +16,7 @@ photon (lepton) PDF to be of order $\alpha L$ ($\alpha^2 L^2$), where
 $L$ is the logarithm of a ratio of the factorisation scale to a typical hadronic scale and is considered to be of order $L \sim 1/\as$. In contrast, quark and gluon
 PDFs are considered to be of order $(\as L)^n={\cal O}(1)$.\footnote{The
   above counting is to be contrasted with a ``democratic'' scheme, in
-  which one considers $\alpha \sim \as \sim 1/L$ and the aim is to maintain
+  which one considers $\alpha \sim \as \sim 1/L$ and where the aim would be to maintain
   the same loop order across all couplings and splitting functions,
   regardless of the relative numbers of QCD and QED couplings that
   they involved.}
@@ -58,8 +58,8 @@ The code could be extended systematically to aim at a higher
 accuracy. For instance, if one wished to reach N$^3$LO accuracy in the
 phenomenological counting, one would need to include 3-loop mixed
 QCD-QED splitting functions at order $\alpha \as^2$ which contribute
-at order $\alpha \as^2 L \sim \as^3$, which are currently not
-available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$ which contribute at order $\alpha^2 \as L^2 \sim \as^3$.
+at order $\alpha \as^2 L \sim \as^3$, but are currently not
+available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$ which contributes at order $\alpha^2 \as L^2 \sim \as^3$.
 %
 %\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
 %  splitting exists, $\alpha\as^2$ does not?}
@@ -113,7 +113,7 @@ physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
 1\GeV$, which involves hadronic states.
 %
 Using a value of $0.109\GeV$ generates $\MSbar$ QED coupling values at
-the masses of the $\tau$ ($1/133.458$)and $Z$-boson ($1/127.952$) that
+the masses of the $\tau$ lepton ($1/133.458$)and $Z$-boson ($1/127.952$) that
 agree with the PDG ones ($1/(133.471\pm0.007)$ and $1/(127.951\pm0.009)$)
 with a relative $\sim 10^{-4}$ accuracy.
 %
@@ -132,11 +132,13 @@ quarks at a given $Q^2$ such that \ttt{threshold(i-1)}$<Q^2<$
 \ttt{threshold(i)}.
 %
 The \ttt{threshold(1:7)} entries are active thresholds, while
-\ttt{threshold(0)} is set to zero and \ttt{threshold(8)} to
-$10^{200}$. The integer array \ttt{nflav(1:3,0:n\_thresholds)} is then used to compute the
-$\beta_{0,\rm QED}$ function \ttt{b0\_values(1:n\_thresholds)} at the seven threshold values and this is
-finally used to compute the value of the QED coupling
-\ttt{alpha\_values(1:n\_thresholds)} at the threshold values.
+\ttt{threshold(0)} is set to zero and \ttt{threshold(8)} to an
+arbitrary large number. The integer array
+\ttt{nflav(1:3,0:n\_thresholds)} is then used to compute the
+$\beta_{0,\rm QED}$ function \ttt{b0\_values(1:n\_thresholds)} at the
+seven threshold values and this is finally used to compute the value
+of the QED coupling \ttt{alpha\_values(1:n\_thresholds)} at the
+threshold values.
 %
 The function \ttt{Delete(qed\_coupling)} is also provided for
 consistency, although in this case it does nothing.
@@ -180,8 +182,8 @@ This contains the LO, NLO and NNLO splitting matrices
   end type qed_split_mat_nnlo
 \end{lstlisting}     
 
-Above \ttt{y} denotes a photon and the pairs of integers \ttt{01},
-\ttt{11} and \ttt{02} denote order in the QCD and QED couplings,
+Above, \ttt{y} denotes a photon and the pairs of integers \ttt{01},
+\ttt{11} and \ttt{02} denote the orders in the QCD and QED couplings,
 respectively. Besides the number of quarks \ttt{nf}, these splitting
 matrices also need the number of up-type (\ttt{nu}) and down-type
 quarks (\ttt{nd}) separately, and the number of leptons (\ttt{nl}).
@@ -251,7 +253,7 @@ allocates PDFs (\ttt{pdf}) including photons, while a call to
 \end{lstlisting}
 allocates PDFs including both photons and leptons.
 %
-The two dimensions of the \ttt{pdf} refer to
+The two dimensions of the \ttt{pdf} refer respectively to
 the index of the $x$ value in the \ttt{grid}, and to the flavour index.
 The flavour indices for photons and leptons %in the arrays \ttt{pdf}
 are
@@ -263,11 +265,13 @@ given by
   integer, parameter, public :: iflv_tau      = 11
 \end{lstlisting}
 where each \ttt{pdf(:,9:11)} contains the sum of a lepton and
-anti-lepton flavour
-(which are identical). Note that if one extends the
-calculation of lepton PDFs to higher order in $\alpha$,
-then an asymmetry in the lepton and anti-lepton distribution would arise,
-due to the  \ttt{Plq\_03} splitting function\ak{I think this needs more explanation}.
+anti-lepton flavour (which are identical). Note that if one were to
+extend the calculation of lepton PDFs to higher order in $\alpha$,
+then an asymmetry in the lepton and anti-lepton distribution would
+arise, due to the \ttt{Plq\_03} splitting function\ak{I think this
+  needs more explanation}.  In that case it would become recommended
+to have separare indices for leptons and anti-leptons.
+
 % \footnote{
 %   Were one to use \hoppet to obtain the distribution of
 %   partons inside a lepton, then it would become useful to separate
@@ -279,9 +283,9 @@ due to the  \ttt{Plq\_03} splitting function\ak{I think this needs more explanat
 %   See for example discussion in Ref.~\cite{Frixione:2023gmf}\commentgz{update refs}.}
 
 The subroutine \ttt{AllocPDFWithPhotons} allocates the \ttt{pdf}
-array with the flavour index up to 8,
+array with the flavour index from -6 to 8,
 while in the subroutine \ttt{AllocPDFWithLeptons},
-the flavour index extends to 11.
+the flavour index extends from -6 to 11.
 
 
 \myparagraph{PDF tables with photons and leptons}
@@ -360,7 +364,7 @@ To perform the evolution \ttt{EvolvePdfTableQED} calls the routine
        [...]
        end subroutine QEDQCDEvolvePDF
 \end{lstlisting}
-which, given the \ttt{pdf} at an initial scale \ttt{Q\_init}, it
+Given the \ttt{pdf} at an initial scale \ttt{Q\_init}, it
 evolves it to scale \ttt{Q\_end}, overwriting the \ttt{pdf} array. 
 %
 In order to get interpolated PDF values from the table we use the
@@ -391,7 +395,7 @@ One has to add the following call
   call hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
 \end{lstlisting}
 before using the streamlined interface routines.
-
+%
 The \ttt{use\_qed} argument turns on/off QED evolution at order
 ${\cal O}(\alpha)$ (i.e.\ items \ref{item:qed1} and \ref{item:qed2} in
 the enumerated list at the beginning of
@@ -422,7 +426,7 @@ package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu},
 for which this work was originally developed.
 
 The structure functions have been found to be in good agreement with
-those which can be obtained with APFEL++~\cite{Bertone:2017gds} (at
+those that can be obtained with APFEL++~\cite{Bertone:2017gds} (at
 the level of $10^{-4}$ relative precision).
 %
 The benchmarks with APFEL++ and the code used to carry
@@ -436,7 +440,7 @@ Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik}. A small sample program
 that prints out the structure functions can be found in
 \masterlink{example\_f90/structure\_functions\_example.f90}.
 
-The structure functions have been implemented up to
+The structure functions have been implemented including only QCD corrections up to
 N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
 which are needed to claim this accuracy are not currently fully
 known. At the time of writing partial results have been presented in
@@ -577,7 +581,7 @@ flag.\footnote{ At N3LO they rely on an extended version of
   functions for $x\lesssim 0.1$, connected with the evaluation of the
   polylogarithms. This is currently under investigation. }
 
-The mass of the electroweak vector bosons are used only to calculate
+The masses of the electroweak vector bosons are used only to calculate
 the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$, which
 enters in the neutral-current structure functions.
 
@@ -605,7 +609,7 @@ With the PDF table filled in the streamlined interface one calls
 specifying the order at which one would like to compute the structure
 functions.
 %
-The flag \ttt{separate\_orders} should be set to \ttt{.true.}\ if one
+The logical flag \ttt{separate\_orders} should be set to \ttt{.true.}\ if one
 wants access to the individual coefficients of the perturbative
 expansion as well as the sum up to some maximum order.
 %
@@ -614,7 +618,7 @@ default of \ttt{.false.}\ causes only the sum over perturbative orders
 to be stored.
 %
 This gives faster evaluations of structure functions because it is
-only necessary to interpolate for the sum over orders, rather than
+only necessary to interpolate the sum over orders, rather than
 interpolate one table for each order.
 %
 With \texttt{scale\_choice\_arbitrary}, the default is \ttt{.true.},
@@ -638,7 +642,7 @@ arguments must be provided.
 With other scale choices, they do not need to be provided, but if they
 are then they should be consistent with the original scale choice.
 %
-The structure functions are in this example stored in the
+The structure functions in this example are stored in the
 array \ttt{ff}. The components of this array can be accessed through
 the indices
 \begin{lstlisting}
@@ -740,7 +744,7 @@ choices, which are all in the \ttt{hoppet} namespace.
   const int scale_choice_Q         = 1;
   const int scale_choice_arbitrary = 2;
 \end{lstlisting}
-Note that the structure function indices start from 0 and that the C++
+Note that in C++ the structure function indices start from 0 and that the C++
 array that is to be passed to functions such as \ttt{hoppetStrFct}
 would be defined as \ttt{double ff[14]}.
 
