@@ -418,7 +418,8 @@ As of \hoppet version 1.3.0 the code provides access to the hadronic
 structure functions. The structure functions are expressed as
 convolutions of a set of massless hard coefficient functions and PDFs,
 and make use of the tabulated PDFs and streamlined interface as
-described in the sections above. The structure functions are provided
+described in the sections above.\commentgz{there are no sections above here}
+The structure functions are provided
 such that they can be used directly for cross section computations in
 DIS or VBF, the latter of which has already been implemented in the
 {\tt proVBFH}
@@ -485,7 +486,7 @@ After this initialisation has been carried out one calls
                   & [, constant_mu] [ ,param_coefs] [ ,wmass] [ ,zmass])
 \end{lstlisting}
 specifying as a minimum the perturbative order --- currently
-\ttt{order\_max}$\le 4$ (\ttt{order\_max}$=1$ corresponds to LO).
+\ttt{order\_max} $ \le 4$ (\ttt{order\_max} $ =1$ corresponds to LO).
 
 If \ttt{nflav} is not passed as an argument, the structure functions
 are initialised to support a variable flavour-number scheme (the
@@ -515,8 +516,8 @@ Specifically \ttt{scale\_choice} can take several values:
   and factorisation scale respectively (with \ttt{xR} or \ttt{xF} as
   set at initialisation).
 \item \ttt{scale\_choice\_fixed} corresponds to a fixed scale
-  \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF} as set at
-  initialisation).
+  \ttt{constant\_mu}, multiplied by \ttt{xR} or \ttt{xF} as set at
+  initialisation.
 \item \ttt{scale\_choice\_arbitrary} allows the user to choose
   arbitrary scales at the moment of evaluating the structure
   functions.
@@ -549,7 +550,7 @@ Specifically \ttt{scale\_choice} can take several values:
 % scale choices.
 
 If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the
-structure functions are computed using the NNLO and N3LO
+structure functions are computed using the NNLO and N$^3$LO
 parametrisations found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},
 which are stated to have a relative precision of a few permille (order
@@ -573,7 +574,7 @@ they are to be preferred for most applications.
 % 
 Note that the exact expressions also add to compilation time and need
 to be explicitly enabled with the \ttt{--enable-exact-coefs} configure
-flag.\footnote{ At N3LO they rely on an extended version of
+flag.\footnote{At N$^3$LO they rely on an extended version of
   \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
   is able to handle harmonic polylogarithms up to weight 5.
   %
@@ -611,7 +612,7 @@ functions.
 %
 The logical flag \ttt{separate\_orders} should be set to \ttt{.true.}\ if one
 wants access to the individual coefficients of the perturbative
-expansion as well as the sum up to some maximum order.
+expansion as well as the sum up to some maximum order.\commentgz{the maximum order is ``order''?}
 %
 With \ttt{scale\_choice\_Q} and \ttt{scale\_choice\_fixed}, the
 default of \ttt{.false.}\ causes only the sum over perturbative orders
@@ -682,7 +683,7 @@ The functions return the individual contributions at each order in
 $\as$, including the relevant factor of $\as^n$.
 %
 Hence the sum of \ttt{flo}, \ttt{fnlo}, \ttt{fnnlo}, and
-\ttt{fn3lo} would return the full structure function at N3LO as
+\ttt{fn3lo} would return the full structure function at N$^3$LO as
 contained in \ttt{ff} in the example above.
 %
 Note that in the \ttt{F\_LO} etc.\ calls, the \ttt{muR} and \ttt{muF}
