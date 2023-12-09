@@ -44,7 +44,9 @@
 \newcommand{\apfel}{APFEL++}
 \newcommand{\ttt}[1]{\texttt{#1}}
 \newcommand{\MSbar}{\overline{\mathrm{MS}}}
-\newcommand{\masterlink}[1]{\href{https://github.com/gavinsalam/hoppet/blob/master/#1}{\ttt{#1}}}
+%\newcommand{\repolink}[2]{\href{https://github.com/gavinsalam/hoppet/blob/master/#1}{\ttt{#2}}}
+\newcommand{\repolink}[2]{\href{https://github.com/gavinsalam/hoppet/blob/2023-10-pre1.3.0/#1}{\ttt{#2}}}
+\newcommand{\masterlink}[1]{\repolink{#1}{#1}}
 
 
 \newcommand{\order}[1]{\mathcal{O}\left(#1\right)}
@@ -115,7 +117,8 @@ CERN-TH-2023-???,  MPP-2023-???, OUTP-23-???
   We document the two main new features in release 1.3.0 of the
   \hoppet parton distribution function evolution code, specifically
   support for QED evolution and for the determination of hadronic
-  structure functions.
+  structure functions. \gps{Do we add some details. E.g. structure
+    functions up to N$^3$LO and some suitable statement for QED?}
 \end{abstract}
 
 \begin{keyword}
@@ -160,7 +163,8 @@ to the original 1.1.0 release documented in
 %
 Unified documentation of the whole \hoppet package is part of the
 distribution at \url{https://github.com/gavinsalam/hoppet} in the
-\masterlink{doc/} directory.
+\masterlink{doc/} directory. \gps{I think I'd still be more
+  comfortable with something like https://github.com/hoppet-code/hoppet}
 %
 Details of the other changes since release 1.1.0 can be found in the
 \masterlink{NEWS} and \masterlink{ChangeLog} files from the
@@ -179,13 +183,15 @@ of benefit beyond the projects where they have already been used.
 
 
 \section*{Acknowledgments}
-This work was funded by
+
+GPS wishes to acknowledge funding from a Royal Society Research
+Professorship (grant RP$\backslash$R$\backslash$231001) and from the Science and
+Technology Facilities Council (STFC) under grant ST/X000761/1.
 %
-\comment{GPS: RS and STFC.}
-We acknowledge the work of Luca Buonocore
+We gratefully acknowledge the work of Luca Buonocore
 for the implementation of the $P_{lq}$ splitting function in the QED code.
 % 
-
+\comment{We also wish to thank Juan Rojo for comments}
 
 \bibliographystyle{elsarticle-num}
 \bibliography{hoppet.bib}

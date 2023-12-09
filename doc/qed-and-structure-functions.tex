@@ -11,7 +11,7 @@ The determination of which contributions to include follows a
 consistent approach based on the so-called ``phenomenological'' counting
 scheme.
 %
-Within this scheme, one considers $\alpha$ to be of order $\as^2$, and takes the
+Within this scheme, one considers the QED coupling $\alpha$ to be of order $\as^2$, and takes the
 photon (lepton) PDF to be of order $\alpha L$ ($\alpha^2 L^2$), where
 $L$ is the logarithm of a ratio of the factorisation scale to a typical hadronic scale and is considered to be of order $L \sim 1/\as$. In contrast, quark and gluon
 PDFs are considered to be of order $(\as L)^n={\cal O}(1)$.\footnote{The
@@ -112,10 +112,13 @@ The common value of the light quark masses is used to mimic the
 physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
 1\GeV$, which involves hadronic states.
 %
-Using a value of $0.109\GeV$ generates $\MSbar$ QED coupling values at
+Using a value of $0.109\GeV$ generates QED coupling values at
 the masses of the $\tau$ lepton ($1/133.458$)and $Z$-boson ($1/127.952$) that
-agree with the PDG ones ($1/(133.471\pm0.007)$ and $1/(127.951\pm0.009)$)
-with a relative $\sim 10^{-4}$ accuracy.
+agree with the PDG $\MSbar$  ones ($1/(133.471\pm0.007)$ and $1/(127.951\pm0.009)$)
+with a relative $\sim 10^{-4}$ accuracy. \gps{We don't really have a
+  QED renormalisation scheme defined and $1/137$ that we use for $\alpha(0)$
+  is not, I think, an $\MSbar$ value; hence the rephrasing putting
+  MSbar in front of PDG rather than in front of our coupling.}
 %
 %Lepton masses are hard-coded to their PDG
 %values~\cite{ParticleDataGroup:2022pth} in the
@@ -133,7 +136,9 @@ quarks at a given $Q^2$ such that \ttt{threshold(i-1)}$<Q^2<$
 %
 The \ttt{threshold(1:7)} entries are active thresholds, while
 \ttt{threshold(0)} is set to zero and \ttt{threshold(8)} to an
-arbitrary large number. The integer array
+arbitrary large number (currently $10^{200}$).
+%
+The integer array
 \ttt{nflav(1:3,0:n\_thresholds)} is then used to compute the
 $\beta_{0,\rm QED}$ function \ttt{b0\_values(1:n\_thresholds)} at the
 seven threshold values and this is finally used to compute the value
@@ -269,7 +274,12 @@ anti-lepton flavour (which are identical). Note that if one were to
 extend the calculation of lepton PDFs to higher order in $\alpha$,
 then an asymmetry in the lepton and anti-lepton distribution would
 arise, due to the \ttt{Plq\_03} splitting function\ak{I think this
-  needs more explanation}.  In that case it would become recommended
+  needs more explanation}.
+%
+\gps{Giulia had found a ref that gave a nice explanation, maybe we can
+  add that ref here?}
+%
+In that case it would become useful
 to have separare indices for leptons and anti-leptons.
 
 % \footnote{
@@ -292,7 +302,7 @@ the flavour index extends from -6 to 11.
 
 Next one needs to prepare a \ttt{pdf\_table} object forming the
 interpolating grid for the evolved PDF's. We recall that the
-\ttt{pdf\_table} object contains a table \ttt{pdf\_table\%tab(:,:,:)},
+\ttt{pdf\_table} object contains an underlying array \ttt{pdf\_table\%tab(:,:,:)},
 where the first index loops over $x$ values, the second loops over
 flavours and the last loops over $Q^2$ values.
 
@@ -345,7 +355,7 @@ scales in the table are as set at initialisation time for the table.
 When \ttt{nloopqcd\_qed} is set to 1 (0) mixed QCD-QED effects are
 (are not) included in the evolution.
 %
-Setting the variable \ttt{with\_Plq\_nnloqed=.true.} includes also the NNLO $P_{lq}$
+Setting the variable \ttt{with\_Plq\_nnloqed=.true.}\ includes also the NNLO $P_{lq}$
 splittings in the evolution.
 
 To perform the evolution \ttt{EvolvePdfTableQED} calls the routine 
@@ -396,19 +406,37 @@ One has to add the following call
 \end{lstlisting}
 before using the streamlined interface routines.
 %
-The \ttt{use\_qed} argument turns on/off QED evolution at order
+The \ttt{use\_qed} argument turns QED evolution on/off at order
 ${\cal O}(\alpha)$ (i.e.\ items \ref{item:qed1} and \ref{item:qed2} in
 the enumerated list at the beginning of
 Sec.~\ref{sec:qed-evolution}).
 %
 The \ttt{use\_qcd\_qed} one turns
-on/off mixed QCD$\times$QED effects in the evolution (i.e.\ item \ref{item:qed3}) and \ttt{use\_Plq\_nnlo} turns on/off
-the order $\alpha^2 P_{\ell q}$ splitting function (i.e.\
+mixed QCD$\times$QED effects on/off in the evolution (i.e.\ item \ref{item:qed3}) and \ttt{use\_Plq\_nnlo} turns 
+the order $\alpha^2 P_{\ell q}$ splitting function on/off (i.e.\
 item \ref{item:qed4}).
 %
 Without this call, all QED corrections
 are off.
 
+With the above, the streamlined interface can then be used as normal.
+%
+E.g.\ by calling the \ttt{hoppetEvolve(...)} function to fill the PDF
+table and \ttt{hoppetEval(x,Q,f)} to evaluate the PDF at a given $x$
+and $Q$.
+%
+Note that the \ttt{f} array in the latter call must be
+suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons.
+%
+An example of the streamlined interface being used with QED evolution
+can be found in
+\begin{quote}
+  \repolink{example_f90/tabulation_example_qed_streamlined.f90}{example\_f90/tabulation\_example\_qed\_streamlined.f90}\\
+  \repolink{example_f77/cpp_tabulation_example_qed.cc}{example\_f77/cpp\_tabulation\_example\_qed.cc}
+\end{quote}
+\gps{added this last paragraph}
+\gps{NB: to make links work, I've hard-coded them to the current
+  branch, but we should switch over to the master/main branch}
 
 %======================================================================
 %======================================================================
@@ -424,7 +452,8 @@ such that they can be used directly for cross section computations in
 DIS or VBF, the latter of which has already been implemented in the
 {\tt proVBFH}
 package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu},
-for which this work was originally developed.
+for which this work was originally developed. \gps{``work developed''
+  is weird phrasing}
 
 The structure functions have been found to be in good agreement with
 those that can be obtained with APFEL++~\cite{Bertone:2017gds} (at
@@ -446,9 +475,12 @@ N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
 which are needed to claim this accuracy are not currently fully
 known. At the time of writing partial results have been presented in
 Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}. The
-splitting functions up to three-loops were already implemented in
+splitting functions up to three loops were already implemented in
 \hoppet as of version 1.1.0, and can be found
-in~\cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}} using
+in~\cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}
+%
+\gps{Last sentence is already in the main text}
+} using
 both the exact and parametrised coefficient functions found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz,Blumlein:2022gpp},
 and the splitting functions up to three-loops already implemented in
@@ -458,7 +490,7 @@ the running coupling in \hoppet has been extended to four loops using
 the results of
 Ref.~\cite{vanRitbergen:1997va,Czakon:2004bu}.\footnote{The
 implementation does not allow for non-standard values of the QCD
-Casimir numbers beyond three loops.}
+Casimir numbers \gps{numbers $\to$ invariants?} beyond three loops.}
 
 \subsection{Initialisation}
 \label{sec:structure-funcs-init}
@@ -509,7 +541,7 @@ Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
 the renormalisation and factorisation scales and the degree of
 flexibility that will be available in choosing them at later stages.
 %
-Specifically \ttt{scale\_choice} can take several values:
+Specifically (integer) \ttt{scale\_choice} argument can take several values:
 \begin{itemize}
 \item \ttt{scale\_choice\_Q} (default) means that the code will always
   use $Q$ multiplied by \ttt{xR} or \ttt{xF} as the renormalisation
@@ -632,10 +664,10 @@ At this point the structure functions can be accessed as in the following exampl
 \begin{lstlisting}
   real(dp) :: ff(-6:7), x, Q, muR, muF
   [...]
-  call InitStrFct(order_max = 4)
+  call InitStrFct(order_max = 4, scale_choice = scale_choice_Q)
   ff = StrFct(x, Q[, muR] [, muF])
 \end{lstlisting}
-at the value $x$ and $Q$.
+at the value $x$ and $Q$. \gps{Added explicit scale choice arg in init}
 %
 With \ttt{scale\_choice\_arbitrary}, the \ttt{muR} and \ttt{muF}
 arguments must be provided.
@@ -690,6 +722,12 @@ Note that in the \ttt{F\_LO} etc.\ calls, the \ttt{muR} and \ttt{muF}
 arguments are not optional and that when a prior scale choice has been
 made (e.g. \ttt{scale\_choice\_Q}) they are assumed to be consistent
 with that prior scale choice.
+
+An example of structure function evaluations using the Fortran~90
+interface is to be found in
+\repolink{example_f90/structure_functions_example.f90}{example\_f90/structure\_functions\_example.f90}. 
+%
+\gps{added this}
 
 \subsection{Streamlined interface}
 \label{sec:structure-functions-streamlined}
@@ -749,5 +787,19 @@ Note that in C++ the structure function indices start from 0 and that the C++
 array that is to be passed to functions such as \ttt{hoppetStrFct}
 would be defined as \ttt{double ff[14]}.
 
+An example of structure function evaluations using the C++ version of
+the streamlined interface is to be found in
+\repolink{example_f77/cpp_structure_functions_example.cc}{example\_f77/cpp\_structure\_functions\_example.cc}.
+%
+\gps{added this}
+
+
+
 %======================================================================
 %======================================================================
+
+ 	
+
+%%% Local Variables:
+%%% TeX-master: "HOPPET-v1.3-release.tex"
+%%% End:
