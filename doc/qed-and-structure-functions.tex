@@ -60,7 +60,11 @@ phenomenological counting, one would need to include 3-loop mixed
 QCD-QED splitting functions at order $\alpha \as^2$ which contribute
 at order $\alpha \as^2 L \sim \as^3$, but are currently not
 available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$ which contributes at order $\alpha^2 \as L^2 \sim \as^3$.
-%
+\commentpn{I would put the comma differently (as before, Gavin decides):
+   at order $\alpha \as^2$, which contribute
+at order $\alpha \as^2 L \sim \as^3$ but are currently not
+available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$, which contributes at order $\alpha^2 \as L^2 \sim \as^3$.}
+% 
 %\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
 %  splitting exists, $\alpha\as^2$ does not?}
 %
@@ -119,7 +123,8 @@ with a relative $\sim 10^{-4}$ accuracy. \gps{We don't really have a
   QED renormalisation scheme defined and $1/137$ that we use for $\alpha(0)$
   is not, I think, an $\MSbar$ value; hence the rephrasing putting
   MSbar in front of PDG rather than in front of our coupling.}
-%
+\commentpn{Actually the Thomson value IS equal the MSbar value below all thresholds}
+% 
 %Lepton masses are hard-coded to their PDG
 %values~\cite{ParticleDataGroup:2022pth} in the
 %\ttt{src/qed\_coupling.f90} file.
@@ -278,6 +283,7 @@ arise, due to the \ttt{Plq\_03} splitting function\ak{I think this
 %
 \gps{Giulia had found a ref that gave a nice explanation, maybe we can
   add that ref here?}
+\commentpn{What about: In fact, at that order, there are graphs with three vertices on the quark line and three vertices on the lepton line, that change sign if the lepton line is charge-conjugated.}
 %
 In that case it would become useful
 to have separate indices for leptons and anti-leptons.

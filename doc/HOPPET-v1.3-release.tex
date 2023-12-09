@@ -69,6 +69,8 @@
 \newcommand{\ak}[1]{\textcolor{violet}{{\bf [#1]$_{\text{AK}}$}}}
 \newcommand{\gps}[1]{{\textcolor{red}{\comment{#1}$_\text{GPS}$}}}
 
+\newcommand{\commentpn}[1]{{\color{darkgreen} [\bf PN:  #1}]$_\text{PN}$}
+
 \definecolor{comment}{rgb}{0,0.3,0}
 \definecolor{identifier}{rgb}{0.0,0,0.3}
 
@@ -141,7 +143,7 @@ in Fortran~95, with interfaces also for C/C++ and earlier dialects of
 Fortran.
 %
 It offers both a high-level PDF evolution interface and user-access to
-lower-level functionality for operations such as convolutions of
+lower-level functionality \commentpn{I would say functionalities (but let Gavin decide...} for operations such as convolutions of
 coefficient functions and PDFs, and is designed to provide flexible and
 fast evolution.
 
