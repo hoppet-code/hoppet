@@ -22,7 +22,7 @@ subroutine HoppetWelcomeMessage
   write(0,'(a)') ' for LO, NLO and NNLO splitting functions, the QCD         '
   write(0,'(a)') ' 1, 2, 3, and 4 loop beta functions and the PDF and        '
   write(0,'(a)') ' coupling mass threshold matching functions. Additionally  '
-  write(0,'()')  ' the DIS coefficient functions should be cited when used.  '
+  write(0,'(a)')  ' the DIS coefficient functions should be cited when used.  '
   write(0,'(a)') '-----------------------------------------------------------'
 end subroutine HoppetWelcomeMessage
   
