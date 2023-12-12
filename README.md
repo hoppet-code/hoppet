@@ -22,7 +22,7 @@ for a user to extend the facilities already provided.
 
 The latest version can always be obtained from
 
-    git clone https://github.com/gavinsalam/hoppet
+    git clone https://github.com/hoppet-code/hoppet
 
 Details of changes are to be found in the file ChangeLog, while
 summaries of changes between releases are in ReleaseNotes.
@@ -96,6 +96,12 @@ LHAPDF ([compare_lhapdf_hoppet.f](example_f77/compare_lhapdf_hoppet.f)),
 and show how to use the feature of getting convolutions with splitting
 functions (convolution_example.f).
 
+There is also an example program illustrating the QED evolution
+feature of hoppet in
+[tabulation_example_qed_streamlined.f90](example_f90/tabulation_example_qed_streamlined.f90)
+and one that uses the structure functions
+[structure_functions_example.f90.](example_f90/structure_functions_example.f90).
+
 ----------------------------------------------------------------------
 Documentation
 -------------
@@ -136,16 +142,7 @@ object (.o) files are essentially empty.
 Branches
 --------
 
-The [master](https://github.com/gavinsalam/hoppet/tree/master) branch
-provides the official HOPPET release. Two additional branches are in use
-for specific physics applications:
-
-- the [qed](https://github.com/gavinsalam/hoppet/tree/qed) branch
-  provides evolution including QED and mixed QED+QCD splitting
-  functions, as used in the [LUXqed](http://luxqed.web.cern.ch/luxqed/)
-  project. 
-- the
-  [struct-func-devel](https://github.com/gavinsalam/hoppet/tree/struct-func-devel)
-  branch provides tools for calculating structure functions, as used in the
-  [proVBFH](https://provbfh.hepforge.org/) project.
+The [master](https://github.com/hoppet-code/hoppet/tree/master) branch
+provides the official HOPPET release. There are currently no other
+branches under active development.
 
