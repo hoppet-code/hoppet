@@ -96,7 +96,7 @@
 \begin{document}
 \begin{frontmatter}
 \begin{flushright}
-CERN-TH-2023-237,  MPP-2023-???, OUTP-23-15P
+CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
 \end{flushright}
 \title{\hoppet{} {\tt v1.3.0} release note}
 
@@ -109,7 +109,7 @@ CERN-TH-2023-237,  MPP-2023-???, OUTP-23-15P
 \author[]{Fr\'ed\'eric Dreyer}\ead{frederic.dreyer@gmail.com}
 
 \affiliation[1]{organization={CERN, Theoretical Physics Department}, postcode={CH-1211} ,city={Geneva 23}, country={Switzerland}}
-\affiliation[2]{organization={INFN, Sezione di Milano-Bicocca, and Universita di Milano-Bicocca, Piazza della Scienza 3}, postcode={20126} ,city={Milano}, country={Italy}}
+\affiliation[2]{organization={INFN, Sezione di Milano-Bicocca, and Universita di Milano-Bicocca, \mbox{Piazza della Scienza 3}}, postcode={20126} ,city={Milano}, country={Italy}}
 \affiliation[3]{organization={Rudolf Peierls Centre for Theoretical Physics, Clarendon Laboratory, Parks Road}, postcode={OX1 3PU} ,city={Oxford}, country={UK}}
 \affiliation[4]{organization={All Souls College}, postcode={OX1 4AL,} ,city={Oxford}, country={UK}}
 \affiliation[5]{organization={Max-Planck-Institut fur Physik, Boltzmannstr. 8}, postcode={85748} ,city={Garching}, country={Germany}}
@@ -118,9 +118,9 @@ CERN-TH-2023-237,  MPP-2023-???, OUTP-23-15P
 \begin{abstract}
   We document the two main new features in release 1.3.0 of the
   \hoppet parton distribution function evolution code, specifically
-  support for QED evolution and for the determination of hadronic
-  structure functions. \gps{Do we add some details. E.g. structure
-    functions up to N$^3$LO and some suitable statement for QED?}
+  support for QED evolution to an accuracy phenomenologically equivalent to NNLO QCD, 
+  and for the determination of hadronic
+  structure functions for massless quarks up to N$^3$LO. 
 \end{abstract}
 
 \begin{keyword}
@@ -143,7 +143,7 @@ in Fortran~95, with interfaces also for C/C++ and earlier dialects of
 Fortran.
 %
 It offers both a high-level PDF evolution interface and user-access to
-lower-level functionality \commentpn{I would say functionalities (but let Gavin decide...} for operations such as convolutions of
+lower-level functionality for operations such as convolutions of
 coefficient functions and PDFs, and is designed to provide flexible and
 fast evolution.
 
@@ -190,10 +190,12 @@ GPS wishes to acknowledge funding from a Royal Society Research
 Professorship (grant RP$\backslash$R$\backslash$231001) and from the Science and
 Technology Facilities Council (STFC) under grant ST/X000761/1.
 %
+PN thanks the Humboldt Foundation for support. 
+%
 We gratefully acknowledge the work of Luca Buonocore
 for the implementation of the $P_{lq}$ splitting function in the QED code.
 % 
-\comment{We also wish to thank Juan Rojo for comments}
+We also wish to thank Juan Rojo for useful discussions. 
 
 \bibliographystyle{elsarticle-num}
 \bibliography{hoppet.bib}
