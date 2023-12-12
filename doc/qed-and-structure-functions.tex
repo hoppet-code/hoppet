@@ -682,11 +682,13 @@ order are required for the underlying calculations.
 At this point the structure functions can be accessed as in the following example
 \begin{lstlisting}
   real(dp) :: ff(-6:7), x, Q, muR, muF
+  
+  call StartStrFct(order_max = 4, scale_choice = scale_choice_Q)
   [...]
   call InitStrFct(order_max = 4)
   ff = StrFct(x, Q[, muR] [, muF])
 \end{lstlisting}
-at the value $x$ and $Q$.\gps{For Alexander to fix}
+at the value $x$ and $Q$.
 %\gps{Added explicit scale choice arg in init}\ak{Not sure I understand, that's not the signature of the routine}
 %
 With \ttt{scale\_choice\_arbitrary}, the \ttt{muR} and \ttt{muF}
