@@ -59,13 +59,13 @@ To achieve a corresponding accuracy when including QED contributions,
 The code could be extended systematically to aim at a higher
 accuracy. For instance, if one wished to reach N$^3$LO accuracy in the
 phenomenological counting, one would need to include 3-loop mixed
-QCD-QED splitting functions at order $\alpha \as^2$ which contribute
-at order $\alpha \as^2 L \sim \as^3$, but are currently not
-available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$ which contributes at order $\alpha^2 \as L^2 \sim \as^3$.
-\commentpn{I would put the comma differently (as before, Gavin decides):
-   at order $\alpha \as^2$, which contribute
+QCD-QED splitting functions at order $\alpha \as^2$, which contribute
 at order $\alpha \as^2 L \sim \as^3$ but are currently not
-available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$, which contributes at order $\alpha^2 \as L^2 \sim \as^3$.}
+available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$, which contributes at order $\alpha^2 \as L^2 \sim \as^3$.
+%\commentpn{I would put the comma differently (as before, Gavin decides):
+%   at order $\alpha \as^2$, which contribute
+%at order $\alpha \as^2 L \sim \as^3$ but are currently not
+%available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$, which contributes at order $\alpha^2 \as L^2 \sim \as^3$.}
 % 
 %\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
 %  splitting exists, $\alpha\as^2$ does not?}
@@ -100,17 +100,17 @@ This is initialized through a call to
     [...]
   end subroutine InitQEDCoupling
 \end{lstlisting}
-
-\commentpn{No paragraph here}
+%
 It initialises the parameters relevant to the QED coupling and its
 running.  The electromagnetic coupling at scale zero is set by default
-to its PDG~\cite{ParticleDataGroup:2022pth} value, unless the optional
+to its PDG Thomson value~\cite{ParticleDataGroup:2022pth} value, unless the optional
 argument \ttt{value\_at\_scale\_0} is provided, in which case the
-latter is taken as the value of the QED coupling at zero momentum.
-\commentpn{prefer:  is set by default
-to its PDG~\cite{ParticleDataGroup:2022pth} Thomson value, unless the optional
-argument \ttt{value\_at\_scale\_0} is provided, in which case the
-latter is used.}
+latter is taken.
+% as the value of the QED coupling at zero momentum.
+%\commentpn{prefer:  is set by default
+%to its PDG~\cite{ParticleDataGroup:2022pth} Thomson value, unless the optional
+%argument \ttt{value\_at\_scale\_0} is provided, in which case the
+%latter is used.}
 
 The running is performed at leading order level using seven
 thresholds: a common effective mass for the three light quarks
@@ -124,13 +124,14 @@ physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
 1\GeV$, which involves hadronic states.
 %
 Using a value of $0.109\GeV$ generates QED coupling values at
-the masses of the $\tau$ lepton ($1/133.458$)and $Z$-boson ($1/127.952$) that
+the masses of the $\tau$ lepton ($1/133.458$) and $Z$-boson ($1/127.952$) that
 agree with the PDG $\MSbar$  ones ($1/(133.471\pm0.007)$ and $1/(127.951\pm0.009)$)
-with a relative $\sim 10^{-4}$ accuracy. \gps{We don't really have a
-  QED renormalisation scheme defined and $1/137$ that we use for $\alpha(0)$
-  is not, I think, an $\MSbar$ value; hence the rephrasing putting
-  MSbar in front of PDG rather than in front of our coupling.}
-\commentpn{Actually the Thomson value IS equal the MSbar value below all thresholds.}
+with a relative $\sim 10^{-4}$ accuracy.
+%\gps{We don't really have a
+%  QED renormalisation scheme defined and $1/137$ that we use for $\alpha(0)$
+%  is not, I think, an $\MSbar$ value; hence the rephrasing putting
+%  MSbar in front of PDG rather than in front of our coupling.}
+%\commentpn{Actually the Thomson value IS equal the MSbar value below all thresholds.}
 % 
 %Lepton masses are hard-coded to their PDG
 %values~\cite{ParticleDataGroup:2022pth} in the
@@ -198,8 +199,8 @@ This contains the LO, NLO and NNLO splitting matrices
      integer         :: nu, nd, nl, nf
   end type qed_split_mat_nnlo
 \end{lstlisting}     
-
-\commentpn{No paragraph here}
+%
+%\commentpn{No paragraph here}
 Above, \ttt{y} denotes a photon and the pairs of integers \ttt{01},
 \ttt{11} and \ttt{02} denote the orders in the QCD and QED couplings,
 respectively. Besides the number of quarks \ttt{nf}, these splitting
@@ -286,13 +287,16 @@ where each \ttt{pdf(:,9:11)} contains the sum of a lepton and
 anti-lepton flavour (which are identical). Note that if one were to
 extend the calculation of lepton PDFs to higher order in $\alpha$,
 then an asymmetry in the lepton and anti-lepton distribution would
-arise, due to the \ttt{Plq\_03} splitting function\ak{I think this
-  needs more explanation}.
+arise, due to the \ttt{Plq\_03} splitting function.
+%\ak{I think this
+%  needs more explanation}.
 %
-\gps{Giulia had found a ref that gave a nice explanation, maybe we can
-  add that ref here?}
-\commentpn{What about: In fact, at that order, there are also graphs with three
-  electromagnetic vertices on the quark line and three on the lepton line, that change sign if the lepton line is charge-conjugated.}
+%\gps{Giulia had found a ref that gave a nice explanation, maybe we can
+%  add that ref here?}
+%\commentpn{What about:
+In fact, at that order, there are also graphs with three
+electromagnetic vertices on the quark line and three on the lepton line, that change sign if the lepton line is charge-conjugated.\footnote{Analogous terms appear in the non-singlet three-loop splitting functions~\cite{NNLO-NS}.}
+%
 %
 In that case it would become useful
 to have separate indices for leptons and anti-leptons.
@@ -443,15 +447,15 @@ and $Q$.
 Note that the \ttt{f} array in the latter call must be
 suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons.
 %
-An example of the streamlined interface being used with QED evolution
+Examples of the streamlined interface being used with QED evolution
 can be found in
 \begin{quote}
   \repolink{example_f90/tabulation_example_qed_streamlined.f90}{example\_f90/tabulation\_example\_qed\_streamlined.f90}\\
   \repolink{example_f77/cpp_tabulation_example_qed.cc}{example\_f77/cpp\_tabulation\_example\_qed.cc}
 \end{quote}
-\gps{added this last paragraph}
-\gps{NB: to make links work, I've hard-coded them to the current
-  branch, but we should switch over to the master/main branch}
+%\gps{added this last paragraph}
+%\gps{NB: to make links work, I've hard-coded them to the current
+%  branch, but we should switch over to the master/main branch}
 
 %======================================================================
 %======================================================================
@@ -477,9 +481,10 @@ can be found in
 %
 Technical details on the implementation of the structure functions in
 \hoppet can also be found therein, and in
-Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik}. A small sample program
-that prints out the structure functions can be found in
-\masterlink{example\_f90/structure\_functions\_example.f90}.
+Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik}.
+%A small sample program
+%that prints out the structure functions can be found in
+%\masterlink{example\_f90/structure\_functions\_example.f90}.
 
 The structure functions have been implemented including only QCD
 corrections up to N$^3$LO\footnote{With the caveat that the 4-loop
@@ -541,19 +546,20 @@ functions.
 The latter, however always assume massless quarks.
 %
 Hence in both the fixed and variable flavour-number scheme the
-structure functions should only be considered reliable for $Q \gg m$.
-\commentpn{Actually this is also true in a fixed flavour number
-  scheme, as long as mass effects are not being included in the
-  coefficient functions, i.e. for $Q\gg m$ variable flavour is the
-  same as fixed flavours (including the flavour of mass $m$ as a light
-  flavour.)}\ak{I added a mentioning of the fixed flavour
-  limitations as well}
+structure functions should not be considered reliable if  $Q$ is comparable to the quark mass.
+%structure functions should only be considered reliable for $Q \gg m$.
+%\commentpn{Actually this is also true in a fixed flavour number
+%  scheme, as long as mass effects are not being included in the
+%  coefficient functions, i.e. for $Q\gg m$ variable flavour is the
+%  same as fixed flavours (including the flavour of mass $m$ as a light
+%  flavour.)}\ak{I added a mentioning of the fixed flavour
+%  limitations as well}
 
 Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
 the renormalisation and factorisation scales and the degree of
 flexibility that will be available in choosing them at later stages.
 %
-Specifically \commentpn{the} (integer) \ttt{scale\_choice}
+Specifically the (integer) \ttt{scale\_choice}
 argument can take several values:
 \begin{itemize}
 \item \ttt{scale\_choice\_Q} (default) means that the code will always
@@ -567,9 +573,8 @@ argument can take several values:
   arbitrary scales at the moment of evaluating the structure
   functions.
   %
-  In this last case, the structure functions are saved as arrays
-  separated by perturbative order \commentpn{I would prefer:
-    as arrays, one for each perturbative order,} and with dedicated additional arrays
+  In this last case, the structure functions are saved as separate arrays, 
+  one for each perturbative order, and with dedicated additional arrays
   for terms proportional to logarithms of $Q/\mu_F$. 
   % 
   This makes for a slower evaluation compared to the two other
@@ -678,10 +683,11 @@ At this point the structure functions can be accessed as in the following exampl
 \begin{lstlisting}
   real(dp) :: ff(-6:7), x, Q, muR, muF
   [...]
-  call InitStrFct(order_max = 4, scale_choice = scale_choice_Q)
+  call InitStrFct(order_max = 4)
   ff = StrFct(x, Q[, muR] [, muF])
 \end{lstlisting}
-at the value $x$ and $Q$. \gps{Added explicit scale choice arg in init}\ak{Not sure I understand, that's not the signature of the routine}
+at the value $x$ and $Q$.\gps{For Alexander to fix}
+%\gps{Added explicit scale choice arg in init}\ak{Not sure I understand, that's not the signature of the routine}
 %
 With \ttt{scale\_choice\_arbitrary}, the \ttt{muR} and \ttt{muF}
 arguments must be provided.
@@ -740,8 +746,8 @@ with that prior scale choice.
 An example of structure function evaluations using the Fortran~90
 interface is to be found in
 \repolink{example_f90/structure_functions_example.f90}{example\_f90/structure\_functions\_example.f90}. 
-%
-\gps{added this link}\ak{It is also at the beginning of the section}
+%%
+%\gps{added this link}\ak{It is also at the beginning of the section}
 
 \subsection{Streamlined interface}
 \label{sec:structure-functions-streamlined}
@@ -805,7 +811,7 @@ An example of structure function evaluations using the C++ version of
 the streamlined interface is to be found in
 \repolink{example_f77/cpp_structure_functions_example.cc}{example\_f77/cpp\_structure\_functions\_example.cc}.
 %
-\gps{added this link}
+%\gps{added this link}
 
 
 
