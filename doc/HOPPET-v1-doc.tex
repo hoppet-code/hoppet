@@ -162,58 +162,58 @@ version 1.3.0
   evolution part of the code from F77 and C/C++.  \smallskip
 \end{abstract}
 
-\newpage
+% \newpage
 
 
-\noindent {\Large \textbf{Program Summary}}\\
-
-\noindent {\em Title of program\/}: \hoppet \\[2mm]
-{\em Version\/}: 1.1.5%
-%  (including documentation of some updates upto 2011-02-21)
-\\[2mm]
-{\em Catalogue identifier\/}: \\[2mm]
-{\em Program obtainable from\/}:
-\url{http://projects.hepforge.org/hoppet/}
-\\[2mm]
-{\em Distribution format\/}: compressed tar file \\[2mm]
-{\em E-mail\/}: {\tt salam@lpthe.jussieu.fr}, 
-{\tt rojo@lpthe.jussieu.fr} \\[2mm]
-{\em License\/}: GNU Public License \\[2mm]
-{\em Computers\/}: all \\[2mm]
-{\em Operating systems\/}: all \\[2mm]
-{\em Program language\/}: Fortran~95 \\[2mm]
-{\em Memory required to execute\/}:  $\lesssim$ 10 MB \\[2mm]
-{\em Other programs called\/}: none \\[2mm]
-{\em External files needed\/}: none \\[2mm]
-{\em Number of bytes in distributed program, including test data
-  etc.\/}: $\sim 350$~kB\\[2mm]
-{\em Keywords\/}: unpolarised and longitudinally polarised parton
-space-like distribution functions (PDFs), DGLAP evolution equations,
-$x$--space solutions.
-\\[2mm]
-{\em Nature of the physical problem\/}: Solution of the DGLAP
-evolution equations up to NNLO (NLO) for unpolarised (longitudinally
-polarised) PDFs, and provision of tools to facilitate manipulation
-(convolutions, etc.) of PDFs with user-defined coefficient and
-splitting functions.
-\\[2mm]
-%
-{\em Method of solution\/}:
-representation of PDFs on a grid in $x$, adaptive integration of
-splitting functions to reduce them to a discretised
-form, obtaining fast
-convolutions that are equivalent to integration with an interpolated
-form of the PDFs; Runge Kutta solution of the $Q$ evolution, and
-its caching so as to speed up repeated evolution with different
-initial conditions.
-\\[2mm]
-{\em Restrictions on complexity of the problem\/}: PDFs should be
-smooth on the scale of the discretisation in $x$.
-\\[2mm]
-{\em Typical running time\/}: a few seconds for initialisation, then
-$\sim 10$~ms for creating a tabulation with a relative accuracy of
-$10^{-4}$ from a new initial condition (on a 3.4~GHz Pentium~IV
-processor). Further details in section~\ref{sec:Timing}.
+% \noindent {\Large \textbf{Program Summary}}\\
+% 
+% \noindent {\em Title of program\/}: \hoppet \\[2mm]
+% {\em Version\/}: 1.1.5%
+% %  (including documentation of some updates upto 2011-02-21)
+% \\[2mm]
+% {\em Catalogue identifier\/}: \\[2mm]
+% {\em Program obtainable from\/}:
+% \url{http://projects.hepforge.org/hoppet/}
+% \\[2mm]
+% {\em Distribution format\/}: compressed tar file \\[2mm]
+% {\em E-mail\/}: {\tt salam@lpthe.jussieu.fr}, 
+% {\tt rojo@lpthe.jussieu.fr} \\[2mm]
+% {\em License\/}: GNU Public License \\[2mm]
+% {\em Computers\/}: all \\[2mm]
+% {\em Operating systems\/}: all \\[2mm]
+% {\em Program language\/}: Fortran~95 \\[2mm]
+% {\em Memory required to execute\/}:  $\lesssim$ 10 MB \\[2mm]
+% {\em Other programs called\/}: none \\[2mm]
+% {\em External files needed\/}: none \\[2mm]
+% {\em Number of bytes in distributed program, including test data
+%   etc.\/}: $\sim 350$~kB\\[2mm]
+% {\em Keywords\/}: unpolarised and longitudinally polarised parton
+% space-like distribution functions (PDFs), DGLAP evolution equations,
+% $x$--space solutions.
+% \\[2mm]
+% {\em Nature of the physical problem\/}: Solution of the DGLAP
+% evolution equations up to NNLO (NLO) for unpolarised (longitudinally
+% polarised) PDFs, and provision of tools to facilitate manipulation
+% (convolutions, etc.) of PDFs with user-defined coefficient and
+% splitting functions.
+% \\[2mm]
+% %
+% {\em Method of solution\/}:
+% representation of PDFs on a grid in $x$, adaptive integration of
+% splitting functions to reduce them to a discretised
+% form, obtaining fast
+% convolutions that are equivalent to integration with an interpolated
+% form of the PDFs; Runge Kutta solution of the $Q$ evolution, and
+% its caching so as to speed up repeated evolution with different
+% initial conditions.
+% \\[2mm]
+% {\em Restrictions on complexity of the problem\/}: PDFs should be
+% smooth on the scale of the discretisation in $x$.
+% \\[2mm]
+% {\em Typical running time\/}: a few seconds for initialisation, then
+% $\sim 10$~ms for creating a tabulation with a relative accuracy of
+% $10^{-4}$ from a new initial condition (on a 3.4~GHz Pentium~IV
+% processor). Further details in section~\ref{sec:Timing}.
 
 \newpage
 \tableofcontents
