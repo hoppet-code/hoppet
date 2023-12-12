@@ -460,15 +460,11 @@ can be found in
 As of \hoppet version 1.3.0 the code provides access to the hadronic
 structure functions. The structure functions are expressed as
 convolutions of a set of massless hard coefficient functions and PDFs,
-and make use of the tabulated PDFs and streamlined interface as
-described in the sections above.\commentgz{there are no sections above here}
-The structure functions are provided
-such that they can be used directly for cross section computations in
-DIS or VBF, the latter of which has already been implemented in the
-{\tt proVBFH}
-package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu},
-for which this work was originally developed. \gps{``work developed''
-  is weird phrasing}
+and make use of the tabulated PDFs and streamlined interface.  They
+are provided such that they can be used directly for cross section
+computations in DIS or VBF, the latter of which has already been
+implemented in the {\tt proVBFH}
+package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
 
 The structure functions have been found to be in good agreement with
 those that can be obtained with APFEL++~\cite{Bertone:2017gds} (at
@@ -485,18 +481,13 @@ Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik}. A small sample program
 that prints out the structure functions can be found in
 \masterlink{example\_f90/structure\_functions\_example.f90}.
 
-The structure functions have been implemented including only QCD corrections up to
-N$^3$LO\footnote{With the caveat that the 4-loop splitting functions
-which are needed to claim this accuracy are not currently fully
-known. At the time of writing partial results have been presented in
-Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}. The
-splitting functions up to three loops were already implemented in
-\hoppet as of version 1.1.0, and can be found
-in~\cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}
-%
-\gps{Last sentence is already in the main text}
-} using
-both the exact and parametrised coefficient functions found in
+The structure functions have been implemented including only QCD
+corrections up to N$^3$LO\footnote{With the caveat that the 4-loop
+splitting functions which are needed to claim this accuracy are not
+currently fully known. At the time of writing partial results have
+been presented in
+Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}.}
+using both the exact and parametrised coefficient functions found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz,Blumlein:2022gpp},
 and the splitting functions up to three-loops already implemented in
 \hoppet as of version
@@ -505,7 +496,7 @@ the running coupling in \hoppet has been extended to four loops using
 the results of
 Ref.~\cite{vanRitbergen:1997va,Czakon:2004bu}.\footnote{The
 implementation does not allow for non-standard values of the QCD
-Casimir numbers \gps{numbers $\to$ invariants?} beyond three loops.}
+Casimir invariants beyond three loops.}
 
 \subsection{Initialisation}
 \label{sec:structure-funcs-init}
@@ -549,12 +540,14 @@ functions.
 %
 The latter, however always assume massless quarks.
 %
-Hence in a variable flavour-number scheme the structure functions
-should only be considered reliable for $Q \gg m$.
-\commentpn{Actually this is also true in a fixed flavour number scheme,
-  as long as mass effects are not being included in the coefficient functions,
-  i.e. for $Q\gg m$ variable flavour is the same as fixed flavours
-  (including the flavour of mass $m$ as a light flavour.)}
+Hence in both the fixed and variable flavour-number scheme the
+structure functions should only be considered reliable for $Q \gg m$.
+\commentpn{Actually this is also true in a fixed flavour number
+  scheme, as long as mass effects are not being included in the
+  coefficient functions, i.e. for $Q\gg m$ variable flavour is the
+  same as fixed flavours (including the flavour of mass $m$ as a light
+  flavour.)}\ak{I added a mentioning of the fixed flavour
+  limitations as well}
 
 Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
 the renormalisation and factorisation scales and the degree of
@@ -665,7 +658,7 @@ functions.
 %
 The logical flag \ttt{separate\_orders} should be set to \ttt{.true.}\ if one
 wants access to the individual coefficients of the perturbative
-expansion as well as the sum up to some maximum order.\commentgz{the maximum order is ``order''?}
+expansion as well as the sum up to some maximum order, \ttt{order}.
 %
 With \ttt{scale\_choice\_Q} and \ttt{scale\_choice\_fixed}, the
 default of \ttt{.false.}\ causes only the sum over perturbative orders
@@ -688,7 +681,7 @@ At this point the structure functions can be accessed as in the following exampl
   call InitStrFct(order_max = 4, scale_choice = scale_choice_Q)
   ff = StrFct(x, Q[, muR] [, muF])
 \end{lstlisting}
-at the value $x$ and $Q$. \gps{Added explicit scale choice arg in init}
+at the value $x$ and $Q$. \gps{Added explicit scale choice arg in init}\ak{Not sure I understand, that's not the signature of the routine}
 %
 With \ttt{scale\_choice\_arbitrary}, the \ttt{muR} and \ttt{muF}
 arguments must be provided.
@@ -748,7 +741,7 @@ An example of structure function evaluations using the Fortran~90
 interface is to be found in
 \repolink{example_f90/structure_functions_example.f90}{example\_f90/structure\_functions\_example.f90}. 
 %
-\gps{added this link}
+\gps{added this link}\ak{It is also at the beginning of the section}
 
 \subsection{Streamlined interface}
 \label{sec:structure-functions-streamlined}
