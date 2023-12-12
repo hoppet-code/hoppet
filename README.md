@@ -1,3 +1,6 @@
+[![Build
+Status](https://img.shields.io/github/actions/workflow/status/hoppet-code/hoppet/CI.yml?label=build&logo=github&style=flat-square)](https://github.com/hoppet-code/hoppet/actions/workflows/CI.yml)
+
 HOPPET: Higher Order Perturbative Parton Evolution Toolkit
 ==========================================================
 
