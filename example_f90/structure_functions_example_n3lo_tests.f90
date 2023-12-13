@@ -10,14 +10,6 @@ program structure_functions_example
 
   dirname = 'structure_functions_example_n3lo_tests_results/'
 
-  filename = trim(dirname)//'nnlo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat'
-  open(unit = 99, file = trim(filename))
-  call start_evolve_init_write(3,3,1.0_dp,1.0_dp,1.0_dp,99)
-
-  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-1.0.dat'
-  open(unit = 99, file = trim(filename))
-  call start_evolve_init_write(4,2,1.0_dp,1.0_dp,1.0_dp,99)
-
   filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat'
   open(unit = 99, file = trim(filename))
   call start_evolve_init_write(4,3,1.0_dp,1.0_dp,1.0_dp,99)
@@ -33,10 +25,19 @@ program structure_functions_example
   filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat'
   open(unit = 99, file = trim(filename))
   call start_evolve_init_write(4,3,1.0_dp,1.0_dp,2.0_dp,99)
-
+  
   filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat'
   open(unit = 99, file = trim(filename))
   call start_evolve_init_write(4,3,1.0_dp,1.0_dp,0.5_dp,99)
+
+  filename = trim(dirname)//'nnlo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(3,3,1.0_dp,1.0_dp,1.0_dp,99)
+
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-1.0.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,2,1.0_dp,1.0_dp,1.0_dp,99)
+
 
 contains
 
@@ -53,10 +54,11 @@ contains
     Qmin = one
     
     ! Set heavy flavour scheme
-    mc = 1.414213563_dp   ! sqrt(2.0_dp) + epsilon
-    mb = 4.5_dp
-    mt = 175.0_dp
-    call hoppetSetPoleMassVFN(mc, mb, mt)
+    !mc = 1.414213563_dp   ! sqrt(2.0_dp) + epsilon
+    !mb = 4.5_dp
+    !mt = 175.0_dp
+    !call hoppetSetPoleMassVFN(mc, mb, mt)
+    call hoppetSetFFN(5)
     
     ! Streamlined initialization
     ! including  parameters for x-grid
@@ -73,7 +75,7 @@ contains
          &         order,factscheme_MSbar)
     
     ! Setup all constants and parameters needed by the structure functions
-    call StartStrFct(nloop_coefs, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
+    call StartStrFct(nloop_coefs, nflav = 5, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
          param_coefs = .true.)
     
     ! Evolve the PDF
@@ -89,6 +91,7 @@ contains
     
     ymax = log(1e5) !ymax=20
     Q = 100.0_dp
+    !Q = Q0
     
     call write_f(idev, Q, ymax, 100)
     
@@ -102,8 +105,39 @@ contains
     call write_f1(idev, Qtest, ymax, 100)
     call write_f2(idev, Qtest, ymax, 100)
     call write_f3(idev, Qtest, ymax, 100)
+    call write_pdf(idev, Qtest, ymax, 100)
     
   end subroutine write_f
+
+  !> @brief write the F1 structure function to idev
+  !!
+  !! Writes the W and Z F1 structure functions to a file with equal spacing in log(x)
+  !!
+  !! @param[in]     idev     file/device to write to
+  !! @param[in]     Qtest    Value of Q to use
+  !! @param[in]     ymax     Largest value of y = - log(x) to print
+  !! @param[in]     ny       number of bins in y to print
+  !!
+  subroutine write_pdf(idev, Qtest, ymax, ny)
+    real(dp), intent(in) :: Qtest, ymax
+    integer, intent(in)  :: idev, ny
+    real(dp) :: ytest, xval, xpdf_at_xQ(-6:6)
+    integer  :: iy
+    !F1 Wp Wm Z
+    write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
+    write(idev,'(a)') '# x pdf(-6:6)'
+    
+    do iy = ny, 1, -1
+       ytest = iy * ymax / ny
+       xval = exp(-ytest)
+       call hoppetEval(xval,Qtest,xpdf_at_xQ)
+       write(idev,'(14es12.4)') xval, xpdf_at_xQ
+    end do
+    write(idev,*)
+    write(idev,*)
+  end subroutine write_pdf
+  
+
   
 end program structure_functions_example
 

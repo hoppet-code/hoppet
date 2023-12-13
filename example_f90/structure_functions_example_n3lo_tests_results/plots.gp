@@ -19,15 +19,14 @@ set mytics
 set grid
 set log x
 set format x "10^{%T}"
-#set xrange [*:3]
-#set yrange [1*2**offset:1e11*2**offset]
+ii=1
+
+
 set key top left
 set title 'F2Z, Q = 100 GeV'
 
 set ylabel 'Ratio to N^3LO, NNLO_{ev}, x_R = 1.0, x_{R,ev} = 1.0'
 set xlabel 'x'
-
-ii=1
 
 plot 1 lw 2 lc rgb 'black' notitle,\
      '<paste n3lo-coef-xmur-2.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($10+$11+$12+$13)/($23+$24+$25+$26)) lw 2 title 'N^3LO, NNLO_{ev}, x_R = 2.0, x_{R,ev} = 1.0',\
@@ -35,25 +34,51 @@ plot 1 lw 2 lc rgb 'black' notitle,\
      '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($10+$11+$12+$13)/($23+$24+$25+$26)) lw 2 title 'N^3LO, NNLO_{ev}, x_R = 1.0, x_{R,ev} = 2.0',\
      '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($10+$11+$12+$13)/($23+$24+$25+$26)) lw 2 title 'N^3LO, NNLO_{ev}, x_R = 1.0, x_{R,ev} = 0.5'
 
-reset
-set mxtics
-set mytics
-set grid
-set log x
-set format x "10^{%T}"
-#set xrange [*:3]
-#set yrange [1*2**offset:1e11*2**offset]
+
 set key top right
 set title 'F2Z, Q = 100 GeV'
 
 set ylabel 'Difference'
 set xlabel 'x'
 
-ii=1
+plot 0 lw 2 lc rgb 'black' notitle,\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat nnlo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($10+$11+$12+$13)-($23+$24+$25)) lw 2 title 'N^3LO - NNLO, NNLO_{ev}',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-1.0.dat' i ii u 1:(($10+$11+$12+$13)-($23+$24+$25+$26)) lw 2 title 'N^3LO, NNLO_{ev} - NLO_{ev}'
+
+
+set key top left
+set title 'F2W^+, Q = 100 GeV'
+
+set ylabel 'Ratio to N^3LO, NNLO_{ev}, x_R = 1.0, x_{R,ev} = 1.0'
+set xlabel 'x'
+
+plot 1 lw 2 lc rgb 'black' notitle,\
+     '<paste n3lo-coef-xmur-2.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($2+$4+$6+$8)/($15+$17+$19+$21)) lw 2 title 'N^3LO, NNLO_{ev}, x_R = 2.0, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-0.5-xmuf-1.0-nnlo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($2+$4+$6+$8)/($15+$17+$19+$21)) lw 2 title 'N^3LO, NNLO_{ev}, x_R = 0.5, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($2+$4+$6+$8)/($15+$17+$19+$21)) lw 2 title 'N^3LO, NNLO_{ev}, x_R = 1.0, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($2+$4+$6+$8)/($15+$17+$19+$21)) lw 2 title 'N^3LO, NNLO_{ev}, x_R = 1.0, x_{R,ev} = 0.5'
+
+
+set key top right
+set title 'F2W^+, Q = 100 GeV'
+
+set ylabel 'Difference'
+set xlabel 'x'
 
 plot 0 lw 2 lc rgb 'black' notitle,\
-     '<paste n3lo-coef-xmur-2.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat nnlo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($10+$11+$12+$13)-($23+$24+$25+$26)) lw 2 title 'N^3LO - NNLO, NNLO_{ev}',\
-     '<paste n3lo-coef-xmur-2.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-1.0.dat' i ii u 1:(($10+$11+$12+$13)-($23+$24+$25+$26)) lw 2 title 'N^3LO, NNLO_{ev} - NLO_{ev}'
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat nnlo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i ii u 1:(($2+$4+$6+$8)-($15+$17+$19)) lw 2 title 'N^3LO - NNLO, NNLO_{ev}',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-1.0.dat' i ii u 1:(($2+$4+$6+$8)-($15+$17+$19+$21)) lw 2 title 'N^3LO, NNLO_{ev} - NLO_{ev}'
+
+
+set key top right
+set title 'gluon, Q = 100 GeV'
+
+set ylabel 'Ratio to central'
+set xlabel 'x'
+
+plot 1 lw 2 lc rgb 'black' notitle,\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 title 'NNLO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 title 'NNLO_{ev}, x_{R,ev} = 0.5'
 
 
 
