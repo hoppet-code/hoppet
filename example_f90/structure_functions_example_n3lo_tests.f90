@@ -79,8 +79,10 @@ contains
          param_coefs = .true.)
     
     ! Evolve the PDF
-    asQ = 0.35_dp
-    Q0 = sqrt(2.0_dp)
+!    asQ = 0.35_dp
+!    Q0 = sqrt(2.0_dp)
+    asQ = 0.30_dp
+    Q0 = 2.0_dp
     
     call hoppetEvolve(asQ, Q0, nloop_evolv,xmur_evolv, lha_unpolarized_dummy_pdf, Q0)
     

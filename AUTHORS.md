@@ -4,10 +4,10 @@ hoppet development team
 Developers past/present
 -----------------
 
-* [Frederic Dreyer        ](mailto:                                  "email")
+* Frederic Dreyer
 * [Alexander Karlberg     ](mailto:alexander.karlberg@cern.ch        "email")
-* [Paolo Nason            ](mailto:                                  "email")
-* [Juan Rojo              ](https://gsalam.web.cern.ch/gsalam/       "Homepage")
-* [Gavin Salam            ](                                         "Homepage")
-* [Giulia Zanderighi      ](                                         "Homepage")
+* [Paolo Nason            ](mailto:paolo.nason@mib.infn.it           "email")
+* [Juan Rojo              ](https://research.vu.nl/en/persons/juan-rojo "homepage")
+* [Gavin Salam            ](https://www.physics.ox.ac.uk/our-people/salam "homepage")
+* [Giulia Zanderighi      ](https://www.mpp.mpg.de/en/about-us/organization/directors/prof-dr-giulia-zanderighi "homepage")
 
