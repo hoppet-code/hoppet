@@ -79,15 +79,16 @@ Usage in `CMake`-based projects
 If hoppet is build with `CMake` it is possible to import its targets into other projects.
 Namely, a minimal working project 
 
-  cmake_minimum_required(VERSION 3.12)
-  project(mytest LANGUAGES Fortran)
-  find_package(hoppet)
-  add_executable(tabulation_example tabulation_example.f90)
-  target_link_libraries(tabulation_example PUBLIC hoppet::hoppet_static)
+   cmake_minimum_required(VERSION 3.12)
+   project(mytest LANGUAGES Fortran)
+   find_package(hoppet)
+   add_executable(tabulation_example tabulation_example.f90)
+   target_link_libraries(tabulation_example PUBLIC hoppet::hoppet_static)
 
 could be configured with 
 
-  cmake -S . -B BUILD -Dhoppet_DIR=hoppet/installation/share/hoppet/cmake
+   cmake -S . -B BUILD -Dhoppet_DIR=hoppet/installation/share/hoppet/cmake
+
 
 Example programs
 ----------------
