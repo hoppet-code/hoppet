@@ -11,3 +11,4 @@ Developers past/present
 * [Gavin Salam            ](https://www.physics.ox.ac.uk/our-people/salam "homepage")
 * [Giulia Zanderighi      ](https://www.mpp.mpg.de/en/about-us/organization/directors/prof-dr-giulia-zanderighi "homepage")
 
+Additionally, Andrii Verbytskyi contributed significant parts of the CMake infarstructure.
