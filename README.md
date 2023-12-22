@@ -29,7 +29,7 @@ summaries of changes between releases are in ReleaseNotes.
 
 
 ----------------------------------------------------------------------
-F95 compilers
+Note on F95 compilers
 -------------
 
 You will need a Fortran 95 compiler to compile this package. 
@@ -43,8 +43,8 @@ as with commercial compilers.
 The code has also been tested with the intel (ifort, versions 8.1.033
 upwards) and lahey (lf95) compilers.
 
-Compilation
------------
+Build with `configure` script
+-----------------------------
 For details see the INSTALL file. To get moving quickly, just specify
 an installation prefix and a fortran compiler (FC), and then do
 
@@ -56,6 +56,40 @@ an installation prefix and a fortran compiler (FC), and then do
 
 This is not autotools based: if you're used to more advanced usage of
 autotools scripts, you'll be disappointed here...
+
+Build with `CMake`
+------------------
+
+   mkdir build
+   cmake -S . -B build <extra flags>
+   cmake --build  build -j 
+   cmake --install build
+   ctest --test-dir build
+
+The extra flags might be:
+- generic `CMake` flags, e.g. `-DCMAKE_INSTALL_PREFIX=/my/home/dir`, `-DCMAKE_Fortran_COMPILER=ifort`, `-DCMAKE_Fortran_FLAGS="-O2 -g"`, etc.
+- flags pointing to the dependencies, `-DLHAPDF_DIR=/where/the/LHAPDF/is`,
+- `HOPPET_USE_EXACT_COEF`    Use exact coefficient functions.
+- `HOPPET_BUILD_EXAMPLES`    Build examples.
+- `HOPPET_ENABLE_TESTING`    Enable testing. Requires building the examples.
+- `HOPPET_BUILD_BENCHMARK`   Build benchmark.
+
+Usage in `CMake`-based projects
+-------------------------------
+If hoppet is build with `CMake` it is possible to import its targets into other projects.
+Namely, a minimal working project 
+
+    cmake_minimum_required(VERSION 3.12)
+    project(mytest LANGUAGES Fortran)
+    find_package(hoppet)
+    add_executable(tabulation_example tabulation_example.f90)
+    target_link_libraries(tabulation_example PUBLIC hoppet::hoppet_static)
+
+could be configured with 
+
+
+    cmake -S . -B BUILD -Dhoppet_DIR=hoppet/installation/share/hoppet/cmake
+
 
 Example programs
 ----------------
@@ -71,8 +105,11 @@ An equivalent program based on the streamlined interface is given as
 [tabulation_example_streamlined](example_f90/tabulation_example_streamlined.f90).
 
 Some users may prefer a pure f77 interface. Corresponding examples are
-to be found in the [example_f77/](example_f77) directory. Look inside
-the suppplied Makefile and if need be edit it manually.
+to be found in the [example_f77/](example_f77) directory. 
+
+For the `CMake` based build the examples are compiled  if 
+`-DHOPPET_BUILD_EXAMPLES=ON` flag is set. To build the examples with 
+`configure` look inside the suppplied Makefile and if need be edit it manually.
 
      cd ../example_f77
      # <edit the Makefile directly>

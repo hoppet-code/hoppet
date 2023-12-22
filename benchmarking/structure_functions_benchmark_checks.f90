@@ -70,7 +70,8 @@ program structure_functions_benchmark_checks
   write(6,'(a)') "Quick output of alphas and PDFs, e.g. to enable consistency checks with other codes"
   Q = 100.0_dp
   print*, 'Q = ', Q, ' GeV'
-  print*, 'αS(Q) = ', Value(coupling, Q)
+  !AV commented out because it is an error in non-GNU compilers
+  !print*, 'αS(Q) = ', Value(coupling, Q)
   
   write(6,'(a)')
   write(6,'(a,f8.3,a)') "Evaluating PDFs at Q = ",Q," GeV"

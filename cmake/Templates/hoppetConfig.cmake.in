@@ -1,0 +1,14 @@
+@PACKAGE_INIT@
+
+SET(hoppet_VERSION @hoppet_VERSION@)
+SET(hoppet_VERSION_MAJOR  @hoppet_VERSION_MAJOR@)
+SET(hoppet_VERSION_MINOR  @hoppet_VERSION_MINOR@)
+SET(hoppet_VERSION_PATCH  @hoppet_VERSION_PATCH@)
+
+set_and_check(hoppet_INCLUDE_DIR @PACKAGE_CMAKE_INSTALL_INCLUDEDIR@)
+find_library(hoppet_LIB NAMES hoppet_v1 HINTS @PACKAGE_CMAKE_INSTALL_LIBDIR@)
+
+set(hoppet_LIBRARIES ${hoppet_LIB})
+
+include(${CMAKE_CURRENT_LIST_DIR}/hoppetTargets.cmake)
+
