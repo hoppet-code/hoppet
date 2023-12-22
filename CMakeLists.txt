@@ -7,9 +7,9 @@
 
 cmake_minimum_required(VERSION 3.15)
 # set the project name
-project(hoppet VERSION 1.2.1 LANGUAGES C CXX Fortran)
-set(hoppet_VERSION 1.2.1)
-set(PROJECT_VERSION 1.2.1)
+project(hoppet VERSION 1.3.0 LANGUAGES C CXX Fortran)
+set(hoppet_VERSION 1.3.0-devel)
+set(PROJECT_VERSION 1.3.0-devel)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 include("GNUInstallDirs")

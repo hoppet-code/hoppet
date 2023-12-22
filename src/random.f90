@@ -8,17 +8,18 @@ module random
   implicit none
   private
 
-  public :: ran,rangen, SetSeed, GetSeed
+  public :: ran_one,rangen, SetSeed, GetSeed
 
   integer, save :: iseed(2) = (/123450,678900/)
 contains
-  function ran()
-    real(dp) :: ran
+  !! returns one random number (in double precision) between 0 and 1
+  function ran_one()
+    real(dp) :: ran_one
     real(dp) :: rann(1)
     !call random_number(ran)
     call rangen(rann)
-    ran = rann(1)
-  end function ran
+    ran_one = rann(1)
+  end function ran_one
  
   subroutine rangen(r)
     implicit none
@@ -45,7 +46,6 @@ contains
     integer, intent(in) :: iseed_in(2)
     iseed = iseed_in
   end subroutine SetSeed
-  
 
   subroutine GetSeed(iseed_out)
     integer, intent(out) :: iseed_out(2)

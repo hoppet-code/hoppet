@@ -259,7 +259,7 @@ contains
        !q(1,iflv_info)  = one+ran()
        !q(2:,iflv_info) = zero
        q(0,iflv_info)   = pi*1e-1_dp
-       q(1,iflv_info)   = one+ran()
+       q(1,iflv_info)   = one+ran_one()
        q(2:3,iflv_info) = irep*q(0:1,iflv_info)
        q(4:,iflv_info) = zero
     case default
