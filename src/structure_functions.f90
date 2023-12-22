@@ -97,7 +97,7 @@ module structure_functions
   logical, save  :: use_sep_orders
   logical, save  :: exact_coefs
   integer :: nf_lcl, order_setup
-
+  logical :: branch1
 
 contains
   !> @brief Setup of constants and parameters needed for structure functions
@@ -157,7 +157,13 @@ contains
     two_ai_Z_up = one
     two_ai_Z_down   = -one
 
-    if (present(nflav).and.nflav.gt.0) then
+    branch1 = .true.
+    if (.not. present(nflav) ) then
+     branch1 = .false.
+    else
+      if (nflav.le.0) branch1 = .false. 
+    endif 
+    if (branch1) then
        ! if nflav is present, then use a fixed flavour number
        call qcd_SetNf(nflav)
        call InitCoefHolder(grid, ch, order_max, exact_coefs)

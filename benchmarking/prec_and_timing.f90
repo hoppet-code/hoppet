@@ -177,7 +177,8 @@ program prec_and_timing
      call InitRunningCoupling(coupling, alfas=0.35_dp, Q=Qinit, &
           &nloop=nloop)
   end do
-  write(0,*) Value(coupling,91.2d0)
+  !AV commented out because it is an error in non-GNU compilers 
+  !write(0,*) Value(coupling,91.2d0)
 
   ! set up the table
   dlnlnQ = dble_val_opt('-dlnlnQ',0.07_dp)

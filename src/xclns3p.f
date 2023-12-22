@@ -29,7 +29,7 @@
 *
        FUNCTION CLNP3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A - Z)
-       COMPLEX*16 WGPLG	
+       COMPLEX*16 WGPLG
        INTEGER NF
        INTEGER CC ! charged current
        DIMENSION FL(6)
