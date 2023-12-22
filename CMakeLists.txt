@@ -5,7 +5,7 @@
 ## cmake --install build
 ## ctest --test-dir build
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.15)
 # set the project name
 project(hoppet VERSION 1.2.1 LANGUAGES C CXX Fortran)
 set(hoppet_VERSION 1.2.1)
@@ -14,16 +14,34 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 include("GNUInstallDirs")
 
-# add an option to decide whether to use the exact coefficient functions
-option(HOPPET_USE_EXACT_COEF "Use exact coefficient functions" OFF)
-option(HOPPET_BUILD_EXAMPLES "Build examples"                   ON)
-option(HOPPET_ENABLE_TESTING "Enable testing. Requires building the examples." ON)
+# Add options ==========================================================
+option(HOPPET_USE_EXACT_COEF  "Use exact coefficient functions"  OFF)
+option(HOPPET_BUILD_EXAMPLES  "Build examples" ON)
+option(HOPPET_ENABLE_TESTING  "Enable testing. Requires building the examples." ON)
 option(HOPPET_BUILD_BENCHMARK "Build benchmark." ON)
 
+
+set(CMAKE_BUILD_TYPE Release)
+# Flags for compilers ==============================================
+# GNU
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wall>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wextra;-Wno-unused-parameter;-Wno-unused-variable>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-unused-dummy-argument;-Wno-maybe-uninitialized>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-unused;-Wno-uninitialized;-Wno-conversion>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-compare-reals;-Wno-character-truncation;-Wno-function-elimination>")
+
+# Intel
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-diag-disable 10448;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,InteLLVM>:-warn;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
+
+# NVidia
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn>")
+
 # Output of config info   ==============================================
+message(STATUS "HOPPET: CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
+message(STATUS "HOPPET: CMAKE_Fortran_FLAGS, CMAKE_Fortran_FLAGS_${CMAKE_BUILD_TYPE} ${CMAKE_Fortran_FLAGS} ${CMAKE_Fortran_FLAGS_${CMAKE_BUILD_TYPE}}" )
 message(STATUS "HOPPET: CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
 message(STATUS "HOPPET: CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "HOPPET: CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
 message(STATUS "HOPPET: HOPPET_USE_EXACT_COEF=${HOPPET_USE_EXACT_COEF}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
 message(STATUS "HOPPET: HOPPET_ENABLE_TESTING=${HOPPET_ENABLE_TESTING}")
@@ -169,7 +187,7 @@ if (HOPPET_BUILD_BENCHMARK)
     target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
     set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/${b}_modules
       POSITION_INDEPENDENT_CODE TRUE
      )
   endforeach()
