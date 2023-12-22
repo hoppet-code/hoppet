@@ -5,7 +5,7 @@
 ## cmake --install build
 ## ctest --test-dir build
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 # set the project name
 project(hoppet VERSION 1.2.1 LANGUAGES C CXX Fortran)
 set(hoppet_VERSION 1.2.1)
@@ -18,7 +18,7 @@ include("GNUInstallDirs")
 option(HOPPET_USE_EXACT_COEF "Use exact coefficient functions" OFF)
 option(HOPPET_BUILD_EXAMPLES "Build examples"                   ON)
 option(HOPPET_ENABLE_TESTING "Enable testing. Requires building the examples." ON)
-option(HOPPET_ENABLE_BENCHMARKING "Enable benchmarking." ON)
+option(HOPPET_BUILD_BENCHMARK "Build benchmark." ON)
 
 # Output of config info   ==============================================
 message(STATUS "HOPPET: CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
@@ -27,7 +27,7 @@ message(STATUS "HOPPET: CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
 message(STATUS "HOPPET: HOPPET_USE_EXACT_COEF=${HOPPET_USE_EXACT_COEF}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
 message(STATUS "HOPPET: HOPPET_ENABLE_TESTING=${HOPPET_ENABLE_TESTING}")
-message(STATUS "HOPPET: HOPPET_ENABLE_BENCHMARKING=${HOPPET_ENABLE_BENCHMARKING}")
+message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
 find_package(LHAPDF) 
 message(STATUS "HOPPET: LHAPDF_VERSION=${LHAPDF_VERSION} LHAPDF_LIBRARIES=${LHAPDF_LIBRARIES} LHAPDF_INCLUDE_DIRS=${LHAPDF_INCLUDE_DIRS}")
 
@@ -68,7 +68,7 @@ endif()
 
 #  Libraries ===========================================================
 add_library(hoppet SHARED ${SOURCES})
-target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet>  )
+target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
 set_target_properties(hoppet PROPERTIES OUTPUT_NAME hoppet_v1
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
@@ -81,7 +81,7 @@ add_library(hoppet::hoppet ALIAS hoppet)
 
 
 add_library(hoppet_static STATIC ${SOURCES})
-target_include_directories(hoppet_static PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet>  )
+target_include_directories(hoppet_static PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
 set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet_v1
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
@@ -90,8 +90,8 @@ set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet_v1
     EXPORT_NAME hoppet::hoppet_static
     )
 add_library(hoppet::hoppet_static ALIAS hoppet_static)
-# Examples
 
+# Examples =============================================================
 if (HOPPET_BUILD_EXAMPLES)
   set( f90programs_f90 
                    structure_functions_example  
@@ -161,9 +161,8 @@ if (HOPPET_BUILD_EXAMPLES)
       set_tests_properties( ${ex}_compare PROPERTIES DEPENDS "${ex};${ex}_copy")
     endforeach()    
   endif()
-  
 endif()
-if (HOPPET_ENABLE_BENCHMARKING)
+if (HOPPET_BUILD_BENCHMARK)
   set( bms benchmark prec_and_timing structure_functions_benchmark_checks) 
   foreach ( b ${bms})
     add_executable( ${b} benchmarking/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
@@ -176,8 +175,6 @@ if (HOPPET_ENABLE_BENCHMARKING)
   endforeach()
 
 endif()
-
-
 
 # Cmake config files   #################################################
 include(CMakePackageConfigHelpers)
