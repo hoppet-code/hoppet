@@ -13,7 +13,7 @@ module NameSelect
   public :: NameOfCode
   public :: code_val_opt
 
-  integer, parameter :: maxlen_name = 40
+  integer, parameter :: maxlen_name = 180
   integer, parameter :: maxlen_longname = 120
   integer, parameter, public :: NameSelect_maxlen_name = maxlen_name
   integer, parameter, public :: NameSelect_maxlen_longname = maxlen_longname

@@ -60,7 +60,8 @@ contains
 ! imp64.inc                                                             
 !                                                                       
                                                                         
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      INTEGER I 
 ! 12 "dilog64.F" 2                                                      
                                                                         
       DIMENSION C(0:19) 
@@ -172,7 +173,8 @@ contains
 !                                                                       
 ! imp64.inc                                                             
 !                                                                       
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      INTEGER I
 !                                                                       
       CHARACTER*(*) NAME 
       PARAMETER(NAME='GAMMA/DGAMMA') 
@@ -267,7 +269,8 @@ contains
 ! imp64.inc                                                             
 !                                                                       
                                                                         
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      INTEGER K,I,IX,J,K1,NB
 !                                                                       
       CHARACTER*(*) NAME 
       PARAMETER(NAME='RPSIPG/dpsipg') 
@@ -606,7 +609,8 @@ contains
                                                                         
                                                                         
                                                                         
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      INTEGER N,M,INDEX,IT,J,K,L,M1,N1,NC,IX,NB 
 !# 13 "cgplg64.F" 2                                                     
 !# 1 "gen/defc64.inc" 1                                                 
 !                                                                       
