@@ -239,6 +239,7 @@ contains
     use hoppetrandom
     real(dp), intent(inout) :: q(0:,ncompmin:)
     integer,  intent(in)    :: irep
+
     !PN&GZ: need to comment this out for streamlined interface with QED evolution     
     !if (ubound(q,dim=2) /= ncompmax) call wae_error('LabelPdfAsRep',&
     !     &'upper bound of q does not correspond to ncompmax; it is:',&

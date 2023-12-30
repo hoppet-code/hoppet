@@ -94,7 +94,7 @@
 ******************************************************************************
       subroutine hplog5(x,nw,Hc1,Hc2,Hc3,Hc4,Hc5,
      $                       Hr1,Hr2,Hr3,Hr4,Hr5,
-     $                       Hi1,Hi2,Hi3,Hi4,Hi5,n1,n2)  
+     $                       Hi1,Hi2,Hi3,Hi4,Hi5,n1,n2)
 ******
 ** x is the argument of the 1dHPL's (1 dimensional Harmonic PolyLogarithms)
 **   to be evaluated;
@@ -1172,6 +1172,7 @@
       end
 ***
       subroutine pprinter3(na,nb,nc)
+
       integer na,nb,nc
       write(11,'(''g [H('',$)')
       call psubprint(11,na)
@@ -1203,6 +1204,7 @@
       end
 ***
       subroutine pprinter4(na,nb,nc,nd)
+
       integer na,nb,nc,nd
       write(11,'(''g [H('',$)')
       call psubprint(11,na)

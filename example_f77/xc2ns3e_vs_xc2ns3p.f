@@ -1291,6 +1291,7 @@
       end
 ***
       subroutine pprinter3(na,nb,nc)
+
       integer na,nb,nc
       write(11,'(''g [H('',$)')
       call psubprint(11,na)
@@ -1322,6 +1323,7 @@
       end
 ***
       subroutine pprinter4(na,nb,nc,nd)
+
       integer na,nb,nc,nd
       write(11,'(''g [H('',$)')
       call psubprint(11,na)
