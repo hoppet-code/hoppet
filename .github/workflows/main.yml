@@ -20,31 +20,10 @@ jobs:
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
     - name: Compile
       run: |
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON
+          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build BUILD -j
           cmake --install BUILD
           ctest --test-dir BUILD -j 2
-
-  compilejobFedora38:
-    name: hoppet_on_Fedora38
-    runs-on: ubuntu-latest
-    container:
-        image: fedora:38
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Install 
-      run: |
-           yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
-    - name: Compile
-      run: |
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON
-          cmake --build BUILD -j
-          cmake --install BUILD
-          ctest --test-dir BUILD -j 2
-
-
-
 
   compilejobOSX:
     runs-on: macos-latest
