@@ -42,8 +42,10 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
 endif()
 
 # Intel
-add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-diag-disable 10448;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
-add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,InteLLVM>:-warn;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-diag-disable 8291;-diag-disable 10448;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,IntelLLVM>:-warn;-diag-disable 8291;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-implicitnone>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,IntelLLVM>:-implicitnone>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -check")
 endif()
