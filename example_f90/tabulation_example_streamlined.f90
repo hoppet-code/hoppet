@@ -76,7 +76,7 @@ program tabulation_example_streamlined
   real(dp) :: mc,mb,mt
   integer  :: order, nloop
   !! hold results at some x, Q
-  real(dp) :: Q, xpdf_at_xQ(-6:6)
+  real(dp) :: Q, xpdf_at_xQ(-6:ncompmaxLeptons)
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   integer  :: ix
