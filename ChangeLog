@@ -1,3 +1,12 @@
+2024-01-03 Wed  <gavin.salam@physics.ox.ac.uk>
+
+	* src/qed_splitting_functions.f90: moved calculation of ln1mx inside
+	case(cc_REAL,cc_REALVIRT), as in QCD splitting functions, so that
+	it's not called when all that's being done is evaluation of the
+	DELTA piece. This should resolve an FPE issue reported by Andrii
+	Verbytskyi, which came about because the cc_DELTA piece is always
+	called with y=0, x=1.
+
 2023-12-22 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* src/pdf_representation.f90:

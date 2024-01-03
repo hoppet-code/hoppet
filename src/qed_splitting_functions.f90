@@ -87,12 +87,12 @@ contains
     real(dp)             :: res
     real(dp)             :: x, lnx, ln1mx, pqg
     x = exp(-y)
-    lnx = -y
-    ln1mx = log(one - x)
     res = zero
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
+       lnx = -y
+       ln1mx = log(one - x)
        pqg   = x**2 + (one-x)**2
        res = TR * half*(4 - 9*x - (1-4*x)*lnx - (1-2*x)*lnx**2 + 4*ln1mx&
              + pqg*(2*(ln1mx-lnx)**2 - 4*(ln1mx-lnx) - two*pisq/three + 10))
@@ -153,13 +153,13 @@ contains
     real(dp)             :: res
     real(dp)             :: x, lnx, ln1mx, pqq
     x = exp(-y)
-    lnx = -y
-    ln1mx = log(one - x)
     res = zero
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
-       pqq = two/(one-x) - one - x
+      lnx = -y
+      ln1mx = log(one - x)
+      pqq = two/(one-x) - one - x
        res = -two*CF*(&
             &  (2*lnx*ln1mx + 1.5_dp*lnx)*pqq&
             &   + (three+7.0_dp*x)/two * lnx&
@@ -182,13 +182,13 @@ contains
     real(dp)             :: res
     real(dp)             :: x, lnx, ln1mx, pqqmx
     x = exp(-y)
-    lnx = -y
-    ln1mx = log(one - x)
     res = zero
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
-       pqqmx = two/(one+x) - one + x
+      lnx = -y
+      ln1mx = log(one - x)
+      pqqmx = two/(one+x) - one + x
        res = two*CF*(&
             &   4*(1-x)&
             &  + 2*(1+x)*lnx&
@@ -210,13 +210,13 @@ contains
     real(dp)             :: res
     real(dp)             :: x, lnx, ln1mx, pgq
     x = exp(-y)
-    lnx = -y
-    ln1mx = log(one - x)
     res = zero
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
-       pgq = (one + (one-x)**2)/x
+      lnx = -y
+      ln1mx = log(one - x)
+      pgq = (one + (one-x)**2)/x
        res = CF*(&
             &  -(three*ln1mx + ln1mx**2)*pgq&
             &  + (two + 7.0_dp/two * x)*lnx&
@@ -241,13 +241,13 @@ contains
     real(dp)             :: res
     real(dp)             :: x, lnx, ln1mx, pqg
     x = exp(-y)
-    lnx = -y
-    ln1mx = log(one - x)
     res = zero
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
-       res = 20.0_dp/9.0_dp/x - 2.0_dp + 6.0_dp*x - 56.0_dp/9.0_dp*x**2 &
+      lnx = -y
+      ln1mx = log(one - x)
+         res = 20.0_dp/9.0_dp/x - 2.0_dp + 6.0_dp*x - 56.0_dp/9.0_dp*x**2 &
             & + (1.0_dp + 5.0_dp*x + 8.0_dp/3.0_dp*x**2)*lnx &
             & - (1.0_dp + x)*lnx**2
     end select
