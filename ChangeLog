@@ -7,6 +7,9 @@
 	Verbytskyi, which came about because the cc_DELTA piece is always
 	called with y=0, x=1.
 
+	* src/streamlined_interface.f90:
+	trying another solution for the variables bounds issue in hoppetEval.
+
 2023-12-22 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* src/pdf_representation.f90:
