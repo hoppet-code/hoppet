@@ -35,6 +35,11 @@ add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,InteLLVM>:-warn;-diag-disab
 
 # NVidia
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Mchkptr>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Mbounds>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-traceback>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Mnofpapprox>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-target=multicore;-stdpar=multicore>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI" OR ${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC")
     set(CMAKE_Fortran_FLAGS_DEBUG   "-g")
     set(CMAKE_Fortran_FLAGS_RELEASE   "")
