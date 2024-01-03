@@ -43,7 +43,7 @@ jobs:
           cmake -S . -B BUILD  -DCMAKE_Fortran_COMPILER=nvfortran -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
           cmake --build BUILD -j
           cmake --install BUILD
-          ctest --test-dir BUILD -j 2
+          ctest --test-dir BUILD -j 2 --output-on-failure
 
 
 
