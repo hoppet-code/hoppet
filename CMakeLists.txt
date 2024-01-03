@@ -21,7 +21,6 @@ option(HOPPET_ENABLE_TESTING  "Enable testing. Requires building the examples." 
 option(HOPPET_BUILD_BENCHMARK "Build benchmark." ON)
 
 
-set(CMAKE_BUILD_TYPE Release)
 # Flags for compilers ==============================================
 # GNU
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wall>")
@@ -36,6 +35,10 @@ add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,InteLLVM>:-warn;-diag-disab
 
 # NVidia
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn>")
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI" OR ${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC")
+    set(CMAKE_Fortran_FLAGS_DEBUG   "-g")
+    set(CMAKE_Fortran_FLAGS_RELEASE   "")
+endif()
 
 # Output of config info   ==============================================
 message(STATUS "HOPPET: CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
