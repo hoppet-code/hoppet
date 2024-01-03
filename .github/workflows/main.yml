@@ -46,7 +46,7 @@ jobs:
     - name: Compile_with_ifort
       run: |
           cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort
-          cmake --build BUILDifx -j
+          cmake --build BUILDifort -j
           cmake --install BUILDifort
           ctest --test-dir BUILDifort -j 2 --output-on-failure
 
