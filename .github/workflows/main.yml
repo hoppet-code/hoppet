@@ -26,6 +26,27 @@ jobs:
           ctest --test-dir BUILD -j 2
 
 
+  compilejobRocky8_NVHPC:
+    name: hoppet_on_Rocky8_NVHPC
+    runs-on: ubuntu-latest
+    container:
+        image: nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-rockylinux8
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install 
+      run: |
+           yum -y install epel-release
+           yum -y install  gcc gcc-c++ make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+    - name: Compile
+      run: |
+          cmake -S . -B BUILD  -DCMAKE_Fortran_COMPILER=nvfortran -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
+          cmake --build BUILD -j
+          cmake --install BUILD
+          ctest --test-dir BUILD -j 2
+
+
+
   compilejobOSX:
     runs-on: macos-latest
     name: hoppet_on_OSX
