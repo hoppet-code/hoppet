@@ -25,6 +25,7 @@ jobs:
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
 
+
   compilejobOSX:
     runs-on: macos-latest
     name: hoppet_on_OSX

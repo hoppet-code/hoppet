@@ -2,7 +2,6 @@
       implicit double precision (a-h,o-z)
       complex*16 Hc1,Hc2,Hc3,Hc4,Hc5
       common/Hrs/Hr1,Hr2,Hr3,Hr4,Hr5
-      integer n1,n2,nw
       PARAMETER ( N1 = -1, N2 = 1, NW = 5 )
 !$omp threadprivate(/Hrs/)
       dimension Hc1(-1:1),Hc2(-1:1,-1:1),Hc3(-1:1,-1:1,-1:1),
@@ -111,7 +110,6 @@
 **    (0,1), (-1,0), (-1,1) ;
 ******
       implicit double precision (a-h,o-z)
-      integer n1,n2,nw,infilldim,infill         
       complex*16 Hc1,Hc2,Hc3,Hc4,Hc5
       dimension Hc1(n1:n2),Hc2(n1:n2,n1:n2),Hc3(n1:n2,n1:n2,n1:n2),
      $          Hc4(n1:n2,n1:n2,n1:n2,n1:n2),
@@ -203,7 +201,6 @@
 ** evaluates 1dhpl's in the 0-range  -(r2-1) < y <= (r2-1)
 ** by direct series expansion (Bernoulli-accelerated)
       implicit double precision (a-h,o-z)
-      integer n1,n2,nw      
       complex*16 H1,H2,H3,H4,H5
       dimension H1(n1:n2),H2(n1:n2,n1:n2),H3(n1:n2,n1:n2,n1:n2),
      $          H4(n1:n2,n1:n2,n1:n2,n1:n2),
@@ -228,7 +225,6 @@
      $                   HY1,HY2,HY3,HY4,HY5,Hi1,Hi2,Hi3,Hi4,Hi5,n1,n2)
 ** evaluates 1dhpl's for y=1 (explicit values are tabulated)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2
       complex*16 H1,H2,H3,H4,H5
       dimension H1(n1:n2),H2(n1:n2,n1:n2),H3(n1:n2,n1:n2,n1:n2),
      $          H4(n1:n2,n1:n2,n1:n2,n1:n2),
@@ -273,7 +269,6 @@
 ** evaluating first the H(..,r=(1-y)/(1+y)) by calling eval1dhplat0(r)
 ** and then expressing H(..,y=(1-r)/(1+r)) in terms of H(..,r)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2
       complex*16 H1,H2,H3,H4,H5
       dimension H1(n1:n2),H2(n1:n2,n1:n2),H3(n1:n2,n1:n2,n1:n2),
      $          H4(n1:n2,n1:n2,n1:n2,n1:n2),
@@ -313,7 +308,6 @@
 ** evaluating first the H(..,x=1/y) by calling eval1dhplat0(x)
 ** and then expressing H(..,y=1/x) in terms of H(..,x)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2      
       complex*16 H1,H2,H3,H4,H5
       dimension H1(n1:n2),H2(n1:n2,n1:n2),H3(n1:n2,n1:n2,n1:n2),
      $          H4(n1:n2,n1:n2,n1:n2,n1:n2),
@@ -351,8 +345,6 @@
      $                 HY1,HY2,HY3,HY4,HY5,Hi1,Hi2,Hi3,Hi4,Hi5,n1,n2)
 ** evaluates 1dhpl's for y=-1 (explicit values are tabulated)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2,infilldim,infill,istorfill,nphase,k1,k2,k3,k4,k5
-      integer i,nph1,nph2,nph3,nph4,nph5
       complex*16 H1,H2,H3,H4,H5
       complex*16 G1,G2,G3,G4,G5
       dimension H1(n1:n2),H2(n1:n2,n1:n2),H3(n1:n2,n1:n2,n1:n2),
@@ -468,8 +460,6 @@
 ** evaluating first the H(..,-y) by calling eval1dhplat1(-y),
 ** and then expressing H(..,y) in terms of H(..,-y)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2,infilldim,infill,istorfill,nphase,k1,k2,k3,k4,k5
-      integer i,nph1,nph2,nph3,nph4,nph5      
       complex*16 H1,H2,H3,H4,H5
       complex*16 G1,G2,G3,G4,G5
       dimension H1(n1:n2),H2(n1:n2,n1:n2),H3(n1:n2,n1:n2,n1:n2),
@@ -569,8 +559,6 @@
 ** evaluating first the H(..,-y) by calling eval1dhplatinf(-y),
 ** and then expressing H(..,y) in terms of H(..,-y)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2,i,infilldim,infill,istorfill,k1,k2,k3,k4,k5
-      integer nph1,nph2,nph3,nph4,nph5,nphase     
       complex*16 H1,H2,H3,H4,H5
       complex*16 G1,G2,G3,G4,G5
       dimension H1(n1:n2),H2(n1:n2,n1:n2),H3(n1:n2,n1:n2,n1:n2),
@@ -666,7 +654,6 @@
       subroutine psetzero(nw,Hi1,Hi2,Hi3,Hi4,Hi5,n1,n2)
 ** initializes with 0 the elements of the arrays
       implicit double precision (a-h,o-z)
-      integer n1,n2,nw,k1,k2,k3,k4,k5      
       dimension Hi1(n1:n2),Hi2(n1:n2,n1:n2),Hi3(n1:n2,n1:n2,n1:n2),
      $          Hi4(n1:n2,n1:n2,n1:n2,n1:n2),
      $          Hi5(n1:n2,n1:n2,n1:n2,n1:n2,n1:n2)
@@ -700,7 +687,6 @@
      $                 HY1,HY2,HY3,HY4,HY5,Hi1,Hi2,Hi3,Hi4,Hi5,n1,n2)
 * fills the reducible 1dhpl from the irreducible set
       implicit double precision (a-h,o-z)
-      integer n1,n2,nw,k1,k2,k3,k4,k5,ia,ib,ic,id,iflag,infilldim,infill     
       complex*16 H1,H2,H3,H4,H5
       dimension H1(n1:n2),H2(n1:n2,n1:n2),H3(n1:n2,n1:n2,n1:n2),
      $          H4(n1:n2,n1:n2,n1:n2,n1:n2),
@@ -789,7 +775,6 @@
 ************************************************************************
       subroutine pFILLREDHPL2(iflag,H1,H2,i1,i2,na,nb)
       implicit double precision (a-h,o-z)
-      integer iflag,i1,i2,na,nb
       complex*16 H1,H2
       dimension H1(i1:i2),H2(i1:i2,i1:i2)
 *23456789012345678901234567890123456789012345678901234567890123456789012
@@ -808,8 +793,6 @@
 ************************************************************************
       subroutine pFILLREDHPL3(iflag,H1,H2,H3,i1,i2,ia,ib,ic)
       implicit double precision (a-h,o-z)
-      integer iflag,i1,i2,ia,ib,ic
-      integer na,nb,nc,nd      
       complex*16 H1,H2,H3
       dimension H1(i1:i2),H2(i1:i2,i1:i2),H3(i1:i2,i1:i2,i1:i2)
 * must be called with "properly ordered" indices
@@ -872,7 +855,6 @@
 ************************************************************************
       subroutine pFILLREDHPL4(iflag,H1,H2,H3,H4,i1,i2,ia,ib,ic,id)
       implicit double precision (a-h,o-z)
-      integer na,nb,nc,nd,ia,ib,ic,id,iflag,i1,i2
       complex*16 H1,H2,H3,H4
       dimension H1(i1:i2),H2(i1:i2,i1:i2),H3(i1:i2,i1:i2,i1:i2)
       dimension H4(i1:i2,i1:i2,i1:i2,i1:i2)
@@ -1146,7 +1128,6 @@
       end
 ************************************************************************
       subroutine pprinter2(na,nb)
-      integer na,nb
 
       write(11,'(''g [H('',$)')
       call psubprint(11,na)
@@ -1173,7 +1154,6 @@
 ***
       subroutine pprinter3(na,nb,nc)
 
-      integer na,nb,nc
       write(11,'(''g [H('',$)')
       call psubprint(11,na)
       write(11,'('','',$)')
@@ -1205,7 +1185,6 @@
 ***
       subroutine pprinter4(na,nb,nc,nd)
 
-      integer na,nb,nc,nd
       write(11,'(''g [H('',$)')
       call psubprint(11,na)
       write(11,'('','',$)')
@@ -1246,7 +1225,6 @@
       end
 ***
       subroutine psubprint(n,na)
-      integer na,n,i1,i2
       if ( na.lt.0 ) then
         write (n,102) na
       else
@@ -1260,7 +1238,6 @@
 
       subroutine pFILLREDHPL5(iflag,HZ1,HZ2,HZ3,HZ4,HZ5,n1,n2)
       implicit double precision (a-h,o-z)
-      integer iflag,n1,n2
       complex*16 HZ1,HZ2,HZ3,HZ4,HZ5
       dimension HZ1(n1:n2),HZ2(n1:n2,n1:n2),HZ3(n1:n2,n1:n2,n1:n2)
       dimension HZ4(n1:n2,n1:n2,n1:n2,n1:n2)
@@ -2719,7 +2696,6 @@
       subroutine pfillh1(y,H1,HY1,Hi1,n1,n2)
 ** fillh1 evaluates the 1dhpl's of weight 1
       implicit double precision (a-h,o-z)
-      integer n1,n2  
       complex*16 H1
       dimension H1(n1:n2)
       dimension HY1(n1:n2)
@@ -2764,7 +2740,6 @@
 **
 ** for y < 0 DOES NOT evaluates the immaginary part of H(0,y) = log(y)
       implicit double precision (a-h,o-z)
-      integer n1,n2,nw
       dimension HY1(n1:n2),HY2(n1:n2,n1:n2),HY3(n1:n2,n1:n2,n1:n2),
      $          HY4(n1:n2,n1:n2,n1:n2,n1:n2),
      $          HY5(n1:n2,n1:n2,n1:n2,n1:n2,n1:n2)
@@ -4036,7 +4011,6 @@
 ** it is guaranteed that nw is in the range 2:4, and that (n1,n2)
 ** take one of the pairs of values (0,1), (-1,0) or (-1,1)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2
       dimension HR1(-1:1),HR2(-1:1,-1:1),HR3(-1:1,-1:1,-1:1),
      $          HR4(-1:1,-1:1,-1:1,-1:1),
      $          HR5(-1:1,-1:1,-1:1,-1:1,-1:1)
@@ -9911,7 +9885,6 @@
 ** it is guaranteed that nw is in the range 2:4, and that (n1,n2)
 ** take one of the pairs of values (0,1), (-1,0) or (-1,1)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2      
       dimension HX1(n1:n2),HX2(n1:n2,n1:n2),HX3(n1:n2,n1:n2,n1:n2),
      $          HX4(n1:n2,n1:n2,n1:n2,n1:n2),
      $          HX5(n1:n2,n1:n2,n1:n2,n1:n2,n1:n2)
@@ -12272,7 +12245,6 @@
 ** it is guaranteed that nw is in the range 2:4, and that (n1,n2)
 ** take one of the pairs of values (0,1), (-1,0) or (-1,1)
       implicit double precision (a-h,o-z)
-      integer nw,n1,n2
       dimension HY1(n1:n2),HY2(n1:n2,n1:n2),HY3(n1:n2,n1:n2,n1:n2),
      $          HY4(n1:n2,n1:n2,n1:n2,n1:n2),
      $          HY5(n1:n2,n1:n2,n1:n2,n1:n2,n1:n2)
