@@ -86,6 +86,9 @@ jobs:
           uname -a
           ls
           pwd
+          cd work
+          ls
+          pwd
           cd cmake.src
           ./bootstrap --prefix=$(pwd)/../cmake.bin --parallel=4 -DCMAKE_USE_OPENSSL=OFF
           make -j
@@ -99,6 +102,9 @@ jobs:
         options: -v ${{ github.workspace }}:/work --platform=linux/ppc64le -e LICENSE=accept
         run: |
           uname -a
+          cd work
+          ls
+          pwd
           export PATH=$(pwd)/cmake.bin:$PATH
           cmake -S . -B BUILDxlf -DCMAKE_Fortran_COMPILER=xlf -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLxlf
           cmake --build BUILDxlf -j
