@@ -79,6 +79,8 @@ jobs:
           ls
           cd work
           export PATH=/opt/ibm/xlf/16.1.1/bin/:$PATH
+          export LICENSE=accept 
+          xlf_configure <<< 1 >/dev/null
           cmake3 -S . -B BUILDxlf -DCMAKE_Fortran_COMPILER=xlf -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLxlf
           cmake3 --build BUILDxlf -j
           cmake3 --install BUILDxlf
