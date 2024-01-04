@@ -20,11 +20,36 @@ jobs:
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
     - name: Compile
       run: |
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
+          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build BUILD -j
           cmake --install BUILD
-          ctest --test-dir BUILD -j 2
+          ctest --test-dir BUILD -j 2 --output-on-failure
 
+
+  compilejob:
+    name: hoppet_on_Rocky9_Intel_HPCKIT
+    runs-on: ubuntu-latest
+    container:
+        image: intel/oneapi-hpckit:2024.0.1-devel-rockylinux9
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install 
+      run: |
+           yum -y install epel-release
+           yum -y install make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+    - name: Compile_with_ifx
+      run: |
+          cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
+          cmake --build BUILDifx -j
+          cmake --install BUILDifx
+          ctest --test-dir BUILDifx -j 2 --output-on-failure
+    - name: Compile_with_ifort
+      run: |
+          cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort
+          cmake --build BUILDifort -j
+          cmake --install BUILDifort
+          ctest --test-dir BUILDifort -j 2 --output-on-failure
 
   compilejobOSX:
     runs-on: macos-latest
@@ -39,7 +64,7 @@ jobs:
           brew install lhapdf
     - name: Compile
       run: |
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-13
+          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-13  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build BUILD -j 2
           cmake --install BUILD
-          ctest --test-dir BUILD -j 2
+          ctest --test-dir BUILD -j 2 --output-on-failure

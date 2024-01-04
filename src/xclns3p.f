@@ -85,6 +85,7 @@
       DOUBLE PRECISION FUNCTION DDILOG(X)
       DOUBLE PRECISION X,Y,T,S,A,PI3,PI6,ZERO,ONE,HALF,MALF,MONE,MTWO
       DOUBLE PRECISION C(0:18),H,ALFA,B0,B1,B2
+      INTEGER I
       DATA ZERO /0.0D0/, ONE /1.0D0/
       DATA HALF /0.5D0/, MALF /-0.5D0/, MONE /-1.0D0/, MTWO /-2.0D0/
       DATA PI3 /3.28986 81336 96453D0/, PI6 /1.64493 40668 48226D0/
@@ -157,7 +158,7 @@
 
 * FD: This defines the dilogarithm function needed in CLNP3A.
 *     Taken from cernroutines.
-      FUNCTION LI2 (X)
+      DOUBLE PRECISION FUNCTION LI2 (X)
 C      IMPLICIT REAL* 8 (A - Z)
 C*
 C      LI2 = DDILOG(Y)
@@ -168,6 +169,7 @@ C      END FUNCTION
 C
       
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      INTEGER I
 
       DIMENSION C(0:19)
 

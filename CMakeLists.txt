@@ -19,23 +19,48 @@ option(HOPPET_USE_EXACT_COEF  "Use exact coefficient functions"  OFF)
 option(HOPPET_BUILD_EXAMPLES  "Build examples" ON)
 option(HOPPET_ENABLE_TESTING  "Enable testing. Requires building the examples." ON)
 option(HOPPET_BUILD_BENCHMARK "Build benchmark." ON)
+option(HOPPET_ENABLE_FPES     "Enable trapping for the floating point exceptions." OFF)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RELEASE")
+  message(STATUS "HOPPET: Build type not specified, use: ${CMAKE_BUILD_TYPE}")
+endif()
 
-set(CMAKE_BUILD_TYPE Release)
+string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+message(STATUS "HOPPET: CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+
 # Flags for compilers ==============================================
 # GNU
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wall>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wextra;-Wno-unused-parameter;-Wno-unused-variable>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-unused-dummy-argument;-Wno-maybe-uninitialized>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-unused;-Wno-uninitialized;-Wno-conversion>")
-add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-compare-reals;-Wno-character-truncation;-Wno-function-elimination>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-compare-reals;-Wno-function-elimination>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-integer-division>")
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+  set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -fbacktrace -fcheck=all")
+endif()
 
 # Intel
-add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-diag-disable 10448;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
-add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,InteLLVM>:-warn;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-diag-disable 8291;-diag-disable 10448;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,IntelLLVM>:-warn;-diag-disable 8291;-diag-disable 8889;-diag-disable 6717;-diag-disable 8291;-diag-disable 7712;-diag-disable 5194>")
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
+  set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -check")
+endif()
 
 # NVidia
-add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn;>")
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC")
+  set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -Mbounds -Mchkptr")
+endif()
+
+
+if (HOPPET_ENABLE_FPES)
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-ffpe-trap=zero,overflow,underflow,invalid,denormal>")
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-fpe0>")
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,IntelLLVM>:-fpe0>")
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Ktrap=divz,denorm,fp,inexact,inv,ovf,unf>")
+endif()
 
 
 
@@ -54,6 +79,7 @@ message(STATUS "HOPPET: HOPPET_USE_EXACT_COEF=${HOPPET_USE_EXACT_COEF}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
 message(STATUS "HOPPET: HOPPET_ENABLE_TESTING=${HOPPET_ENABLE_TESTING}")
 message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
+message(STATUS "HOPPET: HOPPET_ENABLE_FPES=${HOPPET_ENABLE_FPES}")
 find_package(LHAPDF) 
 message(STATUS "HOPPET: LHAPDF_VERSION=${LHAPDF_VERSION} LHAPDF_LIBRARIES=${LHAPDF_LIBRARIES} LHAPDF_INCLUDE_DIRS=${LHAPDF_INCLUDE_DIRS}")
 
