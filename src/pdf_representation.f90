@@ -236,7 +236,7 @@ contains
   !! in the Evln representation they will not accidentally give
   !! something in the human representation.
   subroutine LabelPdfAsRep(q,irep)
-    use random
+    use hoppetrandom
     real(dp), intent(inout) :: q(0:,ncompmin:)
     integer,  intent(in)    :: irep
 
