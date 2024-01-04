@@ -67,6 +67,7 @@ jobs:
         options: -v ${{ github.workspace }}:/work --platform=linux/ppc64le -e LICENSE=accept
         run: |
           uname -a
+          sudo  apt install --yes cmake
           cmake -S . -B BUILDxlf -DCMAKE_Fortran_COMPILER=xlf -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
           cmake --build BUILDxlf -j
           cmake --install BUILDxlf
