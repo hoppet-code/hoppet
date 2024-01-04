@@ -1,3 +1,15 @@
+2024-01-04 Thu  <gavin.salam@physics.ox.ac.uk>
+
+	* src/NameSelect.pl:
+	* benchmarking/NameSelect.f90:
+	changed generation script to incorporate longer name length as 
+	included in PR #5
+
+	* [various]:
+	merged changes from Andrii Verbytskii (PR #5) to CI, renaming of
+	random -> hoppetrandom (to avoid conflicts), addressing some
+	implicit variable typing but not all. 
+
 2024-01-03 Wed  <gavin.salam@physics.ox.ac.uk>
 
 	* src/qed_splitting_functions.f90: moved calculation of ln1mx inside
