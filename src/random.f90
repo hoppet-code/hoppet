@@ -3,7 +3,7 @@
 !! is sufficient for simple uses (want something that above all is
 !! quick) . Original code comes via herwig.
 !!
-module random
+module hoppetrandom
   use types
   implicit none
   private
@@ -52,4 +52,4 @@ contains
     iseed_out = iseed
   end subroutine GetSeed
 
-end module random
+end module hoppetrandom

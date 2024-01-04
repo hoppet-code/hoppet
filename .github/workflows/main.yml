@@ -20,10 +20,10 @@ jobs:
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
     - name: Compile
       run: |
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
+          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build BUILD -j
           cmake --install BUILD
-          ctest --test-dir BUILD -j 2
+          ctest --test-dir BUILD -j 2 --output-on-failure
 
 
   compilejobRocky8_NVHPC:
@@ -60,7 +60,7 @@ jobs:
           brew install lhapdf
     - name: Compile
       run: |
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-13
+          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-13  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build BUILD -j 2
           cmake --install BUILD
-          ctest --test-dir BUILD -j 2
+          ctest --test-dir BUILD -j 2 --output-on-failure

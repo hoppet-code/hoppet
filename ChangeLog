@@ -1,3 +1,15 @@
+2024-01-04 Thu  <gavin.salam@physics.ox.ac.uk>
+
+	* src/NameSelect.pl:
+	* benchmarking/NameSelect.f90:
+	changed generation script to incorporate longer name length as 
+	included in PR #5
+
+	* [various]:
+	merged changes from Andrii Verbytskii (PR #5) to CI, renaming of
+	random -> hoppetrandom (to avoid conflicts), addressing some
+	implicit variable typing but not all. 
+
 2024-01-03 Wed  <gavin.salam@physics.ox.ac.uk>
 
 	* src/qed_splitting_functions.f90: moved calculation of ln1mx inside
@@ -6,6 +18,9 @@
 	DELTA piece. This should resolve an FPE issue reported by Andrii
 	Verbytskyi, which came about because the cc_DELTA piece is always
 	called with y=0, x=1.
+
+	* src/streamlined_interface.f90:
+	trying another solution for the variables bounds issue in hoppetEval.
 
 2023-12-22 Fri  <gavin.salam@physics.ox.ac.uk>
 

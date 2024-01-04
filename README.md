@@ -73,6 +73,8 @@ The extra flags might be:
 - `HOPPET_BUILD_EXAMPLES`    Build examples.
 - `HOPPET_ENABLE_TESTING`    Enable testing. Requires building the examples.
 - `HOPPET_BUILD_BENCHMARK`   Build benchmark.
+- `HOPPET_ENABLE_FPES`       Enable trapping of the floating point exceptions. Recommended for usage with debug builds, 
+   i.e. `-DCMAKE_BUILDTYPE=DEBUG`
 
 Usage in `CMake`-based projects
 -------------------------------
