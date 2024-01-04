@@ -66,7 +66,7 @@ jobs:
     - name: Compile_with_xlf
       uses: addnab/docker-run-action@v3
       with:
-        image: ppc64le/centos7
+        image: ppc64le/centos
         options: -v ${{ github.workspace }}:/work --platform=linux/ppc64le 
         run: |
           yum enable epel-release
