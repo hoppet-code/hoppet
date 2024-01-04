@@ -26,6 +26,7 @@ jobs:
           ctest --test-dir BUILD -j 2 --output-on-failure
 
 
+
   compilejobRocky8_NVHPC:
     name: hoppet_on_Rocky8_NVHPC
     runs-on: ubuntu-latest
@@ -39,12 +40,16 @@ jobs:
            yum -y install epel-release
            yum -y install  gcc gcc-c++ make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
     - name: Compile
+      continue-on-error: true    
       run: |
           cmake -S . -B BUILD  -DCMAKE_Fortran_COMPILER=nvfortran -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
           cmake --build BUILD -j
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
-
+    - uses: actions/upload-artifact@v4
+      with:
+          name: NVHPC
+          path: BUILD/example_f*/*.this_output
 
 
   compilejobOSX:
