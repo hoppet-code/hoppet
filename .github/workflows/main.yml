@@ -78,6 +78,7 @@ jobs:
           pwd 
           ls
           cd work
+          export PATH=/opt/ibm/xlf/16.1.1/bin/:$PATH
           cmake3 -S . -B BUILDxlf -DCMAKE_Fortran_COMPILER=xlf -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLxlf
           cmake3 --build BUILDxlf -j
           cmake3 --install BUILDxlf
