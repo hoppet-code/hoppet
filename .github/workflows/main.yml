@@ -62,7 +62,7 @@ jobs:
       run: |
           sudo apt update && sudo  apt install --yes binfmt-support qemu-user-static wget
           wget -SL https://github.com/Kitware/CMake/releases/download/v3.17.0-rc3/cmake-3.17.0-rc3.tar.gz
-          mkdir -p cmake-3.17.0-rc3.src
+          mkdir -p cmake.src
           tar -xvf cmake-3.17.0-rc3.tar.gz --strip-components=1 -C cmake.src
     - name: Check_cmake_cache
       uses: actions/cache@v3
