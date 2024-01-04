@@ -60,7 +60,8 @@ jobs:
       uses: actions/checkout@v3
     - name: QEMU
       run: |
-           sudo apt update && sudo  apt install --yes binfmt-support qemu-user-static wget
+           sudo apt update
+           sudo  apt install --yes binfmt-support qemu-user-static wget
            wget  https://github.com/Kitware/CMake/releases/download/v3.17.0-rc3/cmake-3.17.0-rc3.tar.gz
            mkdir -p cmake.src
            tar -xf cmake-3.17.0-rc3.tar.gz --strip-components=1 -C cmake.src
