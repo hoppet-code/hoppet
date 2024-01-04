@@ -69,9 +69,15 @@ jobs:
         image: ppc64le/centos
         options: -v ${{ github.workspace }}:/work --platform=linux/ppc64le 
         run: |
-          yum -y install epel-release
-          yum -y install https://public.dhe.ibm.com/software/server/POWER/Linux/xl-compiler/eval/ppc64le/rhel7/ibm-xl-compiler-eval.repo
+          sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+          sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+          yum -y install epel-release wget
+          wget https://public.dhe.ibm.com/software/server/POWER/Linux/xl-compiler/eval/ppc64le/rhel7/ibm-xl-compiler-eval.repo -O /etc/yum.repos.d/ibm-xl-compiler-eval.repo
+          sed -i 's/http:/https:/g' /etc/yum.repos.d/ibm-xl-compiler-eval.repo
           yum -y install xlf cmake3 lhapdf-devel wget
+          pwd 
+          ls
+          cd work
           cmake3 -S . -B BUILDxlf -DCMAKE_Fortran_COMPILER=xlf -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLxlf
           cmake3 --build BUILDxlf -j
           cmake3 --install BUILDxlf
