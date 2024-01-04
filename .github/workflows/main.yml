@@ -53,7 +53,7 @@ jobs:
 
 
   compilejobCentos7_IBM_XL:
-    name: hoppet_on_Ubuntu_IBM_XL
+    name: hoppet_on_Centos7ppc64le_IBM_XL
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
