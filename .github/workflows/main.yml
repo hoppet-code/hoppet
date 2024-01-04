@@ -90,7 +90,7 @@ jobs:
           ls
           pwd
           cd cmake.src
-          ./bootstrap --prefix=$(pwd)/../cmake.bin --parallel=4 -DCMAKE_USE_OPENSSL=OFF
+          ./bootstrap --prefix=$(pwd)/../cmake.bin --parallel=4  -- -DCMAKE_USE_OPENSSL=OFF
           make -j
           make install
           cd ..
