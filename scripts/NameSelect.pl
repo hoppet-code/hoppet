@@ -40,6 +40,11 @@ if ($#ARGV < 0) {
   exit 0;
 }
 
+# store the command line including the command itself
+$CommandLine = $0 . " " . join(' ',@ARGV);
+print STDERR "Command line: $CommandLine\n";
+
+
 while ($arg = shift @ARGV) {
   if ($arg =~ /^-/) {
     if ($arg eq '-prefix') {
@@ -95,9 +100,10 @@ if ($#consts < 0) {
 
 open (MODULE, "> $ThisModuleName.f90") || die "Could not open output module";
 
+
 print MODULE "
 !!
-!! Module generated automatically by NameSelect.pl
+!! Module generated automatically by $CommandLine
 !! Provides conversion from string codes to integer codes
 !!
 module $ThisModuleName\n";
@@ -113,10 +119,8 @@ print MODULE "
   public :: $NameOfCode
   public :: $code_val_opt
 
-  integer, parameter :: maxlen_name = 40
-  integer, parameter :: maxlen_longname = 120
+  integer, parameter :: maxlen_name = 180
   integer, parameter, public :: ${ThisModuleName}_maxlen_name = maxlen_name
-  integer, parameter, public :: ${ThisModuleName}_maxlen_longname = maxlen_longname
 
 contains
 
