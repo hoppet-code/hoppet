@@ -71,7 +71,7 @@ jobs:
         path: cmake.bin
         key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
-    - name: Compile_cmake_with_xlf
+    - name: Compile_cmake_for_ppc64le
       if: steps.cache.outputs.cache-hit != 'true'
       uses: addnab/docker-run-action@v3
       with:
@@ -80,7 +80,7 @@ jobs:
         run: |
           uname -a
           cd cmake.src
-          ./bootstrap --prefix=$(pwd)/../cmake.bin --parallel=4
+          ./bootstrap --prefix=$(pwd)/../cmake.bin --parallel=4 -DCMAKE_USE_OPENSSL=OFF
           make -j
           make install
           cd ..
