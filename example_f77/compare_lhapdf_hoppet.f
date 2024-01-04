@@ -16,7 +16,7 @@ C----------------------------------------------------------------------
       !---------------
       double precision alphasPDF
       external         evolvePDF, alphasPDF
-      double precision x, Q, lhapdf(-6:6), ourpdf(-6:11)
+      double precision x, Q, lhapdf(-6:6), ourpdf(-6:6)
       double precision mz, asmz, Q0, xmu
       integer          iloop,  nf, iflv, i, scheme
 

@@ -2,7 +2,7 @@
       implicit none
       !---------------
       external         evolvePDF
-      double precision x, Q, lhapdf(-6:6), ourpdf(-6:11)
+      double precision x, Q, lhapdf(-6:6), ourpdf(-6:6)
       double precision PLO_conv_ourpdf(-6:6), PNLO_conv_ourpdf(-6:6)
       double precision dy
       integer          iloop, nloop, nf, iflv

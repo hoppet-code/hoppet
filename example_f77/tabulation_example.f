@@ -22,7 +22,7 @@ C----------------------------------------------------------------------
       integer          nloop, order
       !---------------
       external         heralhc_init
-      double precision Q, ourpdf(-6:11)
+      double precision Q, ourpdf(-6:6)
       double precision asQ0, Q0, xmu
       integer          ix, scheme
       double precision heralhc_xvals(9)
