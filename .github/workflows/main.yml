@@ -52,7 +52,7 @@ jobs:
           ctest --test-dir BUILDifort -j 2 --output-on-failure
 
 
- compilejobFedora_AOCC:
+  compilejobFedora_AOCC:
     name: hoppet_on_Fedora_AOCC
     runs-on: ubuntu-latest
     container:
