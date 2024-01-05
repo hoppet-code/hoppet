@@ -62,7 +62,7 @@ jobs:
       uses: actions/checkout@v3
     - name: Install 
       run: |
-           yum -y install  gcc gcc-c++ make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+           yum -y install  gcc gcc-c++ make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel libquadmath-devel libquadmath
            yum -y install https://download.amd.com/developer/eula/aocc/aocc-4-1/aocc-compiler-4.1.0-1.x86_64.rpm
     - name: Compile
       continue-on-error: true    
