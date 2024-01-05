@@ -67,6 +67,7 @@ jobs:
     - name: Compile
       continue-on-error: true    
       run: |
+          source /opt/AMD/aocc-compiler-4.1.0/setenv_AOCC.sh
           export PATH=$PATH:/opt/AMD/aocc-compiler-4.1.0/bin/
           cmake -S . -B BUILD  -DCMAKE_Fortran_COMPILER=flang -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
           cmake --build BUILD -j
