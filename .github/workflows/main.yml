@@ -51,6 +51,33 @@ jobs:
           cmake --install BUILDifort
           ctest --test-dir BUILDifort -j 2 --output-on-failure
 
+
+ compilejobFedora_AOCC:
+    name: hoppet_on_Fedora_AOCC
+    runs-on: ubuntu-latest
+    container:
+        image: fedora:latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install 
+      run: |
+           yum -y install epel-release
+           yum -y install  gcc gcc-c++ make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+           yum -y install https://download.amd.com/developer/eula/aocc/aocc-4-1/aocc-compiler-4.1.0-1.x86_64.rpm
+    - name: Compile
+      continue-on-error: true    
+      run: |
+          export PATH=$PATH:/opt/AMD/aocc-compiler-4.1.0/bin/
+          cmake -S . -B BUILD  -DCMAKE_Fortran_COMPILER=flang -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
+          cmake --build BUILD -j
+          cmake --install BUILD
+          ctest --test-dir BUILD -j 2 --output-on-failure
+    - uses: actions/upload-artifact@v4
+      with:
+          name: AOCC
+          path: BUILD/example_f*/*.this_output
+
   compilejobOSX:
     runs-on: macos-latest
     name: hoppet_on_OSX
