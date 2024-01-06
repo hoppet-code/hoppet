@@ -671,7 +671,7 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuant_func(grid%subgd(isub), &
@@ -702,7 +702,7 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuant_func_a(grid%subgd(isub), &
@@ -735,7 +735,7 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuant_func_ai(grid%subgd(isub), &
@@ -766,14 +766,14 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny, n
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuant_func2d(grid%subgd(isub), &
                &gq(grid%subiy(isub):grid%subiy(isub+1)-1,:), func)
        end do
     else
-       n  = ubound(gq, dim=2)
+       n  = size(gq, dim=2)-1
        do iy = 0, ny
           gq(iy,:) = func(iy*grid%dy, n)
        end do
@@ -800,14 +800,14 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny, n
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func2d_a")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func2d_a")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuant_func2d_a(grid%subgd(isub), &
                &gq(grid%subiy(isub):grid%subiy(isub+1)-1,:), func, axtra)
        end do
     else
-       n  = ubound(gq, dim=2)
+       n  = size(gq, dim=2)-1
        do iy = 0, ny
           gq(iy,:) = func(iy*grid%dy, axtra, n)
        end do
@@ -835,14 +835,14 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny, n
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func2d_a")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func2d_a")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuant_func2d_ai(grid%subgd(isub), &
                &gq(grid%subiy(isub):grid%subiy(isub+1)-1,:), func, axtra, ixtra)
        end do
     else
-       n  = ubound(gq, dim=2)
+       n  = size(gq, dim=2)-1
        do iy = 0, ny
           gq(iy,:) = func(iy*grid%dy, axtra, ixtra, n)
        end do
@@ -868,7 +868,7 @@ contains
     integer  :: iy, isub, ny
     real(dp) :: f(size(gq,dim=2))
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call InitGridQuantLHAPDF(grid%subgd(isub), &
@@ -897,7 +897,7 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuantSub_2d(grid%subgd(isub), &
@@ -924,7 +924,7 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuantSub_2d_a(grid%subgd(isub), &
@@ -953,7 +953,7 @@ contains
     !-----------------------------------------
     integer :: iy, isub, ny
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuantSub_2d_ai(grid%subgd(isub), &
@@ -987,7 +987,7 @@ contains
     ! -- GZ:make a copy shifting indices to make it compatible with pgf90 
     real(dp) :: gq_cpy(1:size(gq,dim=1),1:size(gq,dim=2))
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuantSub_2d(grid%subgd(isub), &
@@ -1018,7 +1018,7 @@ contains
     integer :: iy, isub, ny
     real(dp) :: gq_cpy(1:size(gq,dim=1),1:size(gq,dim=2))
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuantSub_2d_a(grid%subgd(isub), &
@@ -1051,7 +1051,7 @@ contains
     integer :: iy, isub, ny
     real(dp) :: gq_cpy(1:size(gq,dim=1),1:size(gq,dim=2))
 
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"conv_InitGridQuant_func")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"conv_InitGridQuant_func")
     if (grid%nsub /= 0) then
        do isub = 1, grid%nsub
           call conv_InitGridQuantSub_2d_ai(grid%subgd(isub), &
@@ -1084,7 +1084,7 @@ contains
     character(len=200) :: err_string1, err_string2
 
     !write(0,*) y,grid%ny, ubound(gq,dim=1)
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"EvalGridQuant")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"EvalGridQuant")
     if (y > grid%ymax*(one+warn_tolerance)) then
        write(err_string1,*) 'EvalGridQuant: &
             &requested function value beyond maximum'
@@ -1135,7 +1135,7 @@ contains
     character(len=200) :: err_string1, err_string2
 
     !write(0,*) y,grid%ny, ubound(gq,dim=1)
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"EvalGridQuant")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"EvalGridQuant")
     if (y > grid%ymax*(one+warn_tolerance)) then
        write(err_string1,*) 'EvalGridQuant: &
             &requested function value beyond maximum'
@@ -1264,7 +1264,7 @@ contains
             & multiple grids not yet supported'
     end if
     
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),"MomGridQuant")
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,"MomGridQuant")
     dy = grid%dy
     if (omega == zero) then
        weight = grid%dy
@@ -1297,7 +1297,7 @@ contains
     real(dp) :: dy_local, y, q
     integer :: ny, i, dev_local
     
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),'PrintGridQuant')
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,'PrintGridQuant')
     if (grid%nsub /= 0) then
        dy_local = default_or_opt(maxval(grid%subgd%dy),dy)
     else
@@ -1324,8 +1324,8 @@ contains
     real(dp) :: dy_local, y,  q,q2
     integer :: ny, i, dev_local
     
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),&
-         & ubound(gq2,dim=1),'PrintGridQuant')
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,&
+         & size(gq2,dim=1)-1,'PrintGridQuant')
     if (grid%nsub /= 0) then
        dy_local = default_or_opt(maxval(grid%subgd%dy),dy)
     else
@@ -1353,8 +1353,8 @@ contains
     real(dp) :: dy_local, y, x, q,q2,q3
     integer :: ny, i, dev_local
     
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),&
-         & ubound(gq2,dim=1),ubound(gq3,dim=1),&
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,&
+         & size(gq2,dim=1)-1,size(gq3,dim=1)-1,&
          & 'PrintGridQuant: distributions must be same size')
     if (grid%nsub /= 0) then
        dy_local = default_or_opt(maxval(grid%subgd%dy),dy)
@@ -1384,8 +1384,8 @@ contains
     real(dp) :: dy_local, y, q,q2,q3, q4
     integer :: ny, i, dev_local
     
-    ny = assert_eq(grid%ny,ubound(gq,dim=1),&
-         & ubound(gq2,dim=1),ubound(gq3,dim=1),ubound(gq4,dim=1),&
+    ny = assert_eq(grid%ny,size(gq,dim=1)-1,&
+         & size(gq2,dim=1)-1,size(gq3,dim=1)-1,size(gq4,dim=1)-1,&
          & 'PrintGridQuant: distributions must be same size')
     if (grid%nsub /= 0) then
        dy_local = default_or_opt(maxval(grid%subgd%dy),dy)
@@ -1448,8 +1448,8 @@ contains
     
     ! Check dimensions are correct
     ! write(6,*) gd%ny, ubound(gq,dim=1)
-    ny = assert_eq(gd%ny,ubound(gq,dim=1),"EvalGridQuant")
-    if( gd%ny .ne. ubound(gq,dim=1) ) &
+    ny = assert_eq(gd%ny,size(gq,dim=1)-1,"EvalGridQuant")
+    if( gd%ny .ne. size(gq,dim=1)-1 ) &
          & call wae_error("Different dimensions for ",&
          & "grid quantity and grid in conv_TruncatedMoment_1d")
 
@@ -2143,7 +2143,7 @@ contains
   recursive function conv_ConvGridQuant_scalar(gc,gq) result(gqout)
     type(grid_conv),  intent(in)    :: gc
     real(dp),         intent(in)    :: gq(0:)
-    real(dp)                        :: gqout(0:ubound(gq,dim=1))
+    real(dp)                        :: gqout(0:size(gq,dim=1)-1)
     !---------------------------------------------
     integer :: i, ny !, j
     integer :: order
@@ -2174,7 +2174,7 @@ contains
        return
     end if
 
-    ny = assert_eq(gc%grid%ny,ubound(gq,dim=1),"conv_ConvGridQuant")
+    ny = assert_eq(gc%grid%ny,size(gq,dim=1)-1,"conv_ConvGridQuant")
     order = gc%grid%order
 
     !-- Hopefully this will avoid some wasted convolutions?
@@ -2457,11 +2457,11 @@ contains
   function conv_ConvGridQuant_mat(gc,gq) result(gqout)
     type(grid_conv),  intent(in)    :: gc(:,:)
     real(dp),         intent(in)    :: gq(0:,:)
-    real(dp)                        :: gqout(0:ubound(gq,dim=1),size(gc,dim=1))
+    real(dp)                        :: gqout(0:size(gq,dim=1)-1,size(gc,dim=1))
     !---------------------------------------------
     integer :: ny, ic, ir, ncol, nrow
 
-    ny = assert_eq(gc(1,1)%grid%ny,ubound(gq,dim=1),"conv_ConvGridQuant")
+    ny = assert_eq(gc(1,1)%grid%ny,size(gq,dim=1)-1,"conv_ConvGridQuant")
     ncol = assert_eq(size(gc,dim=2),size(gq,dim=2),"conv_ConvGridQuant")
     nrow = size(gc,dim=1)
 
@@ -2495,7 +2495,7 @@ contains
     real(dp)             :: lumi(0:grid%ny)
     integer :: i, isub, lo, hi, ny
 
-    ny = assert_eq(grid%ny, ubound(gq1,1),ubound(gq2,1),"conv_Luminosity_plain")
+    ny = assert_eq(grid%ny, size(gq1,1)-1,size(gq2,1)-1,"conv_Luminosity_plain")
     if (grid%nsub == 0) then
       lumi(0) = zero
       do i = 1, ny
@@ -2526,7 +2526,7 @@ contains
   function conv_Luminosity_multi(grid, gq1, gq2) result(lumi)
     type(grid_def), intent(in) :: grid
     real(dp), intent(in) :: gq1(0:), gq2(0:)
-    real(dp)             :: lumi(0:ubound(gq1,1))
+    real(dp)             :: lumi(0:size(gq1,1)-1)
     !-----------------------
     type(grid_def), pointer :: fine, coarse
     integer  :: isub, iy, step
@@ -2576,8 +2576,8 @@ contains
     real(dp), intent(inout) :: lumi_coarse(0:)
     !--------------------------------------
     integer  :: ny_fine, ny_coarse, max_ny_coarse
-    real(dp) :: gq1_tmp(0:2*ubound(gq1_fine,1))
-    real(dp) :: gq2_tmp(0:2*ubound(gq2_fine,1))
+    real(dp) :: gq1_tmp(0:2*(size(gq1_fine,1)-1))
+    real(dp) :: gq2_tmp(0:2*(size(gq2_fine,1)-1))
     integer  :: order, range_up, range_down, range_down_last
     integer, parameter :: nmax = 9 ! max order, as uniform_interpolation_weights
     real(dp) :: weights(0:nmax,nint(grid_coarse%dy / grid_fine%dy)-1)

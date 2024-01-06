@@ -1038,7 +1038,7 @@ contains
     real(dp), intent(in) :: C2_f(0:,ncompmin:), CL_f(0:,ncompmin:), C3_f(0:,ncompmin:)
     real(dp) :: C2_f_fl11(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: CL_f_fl11(0:grid%ny,ncompmin:ncompmax)
-    real(dp) :: res(0:ubound(C2_f,dim=1), -6:7)
+    real(dp) :: res(0:size(C2_f,dim=1)-1, -6:7)
     C2_f_fl11 = zero
     CL_f_fl11 = zero
     res = structure_function_general_full(C2_f, CL_f, C3_f, C2_f_fl11, CL_f_fl11)
@@ -1052,7 +1052,7 @@ contains
     real(dp), intent(in) :: C2_f_fl11(0:,ncompmin:), CL_f_fl11(0:,ncompmin:)
     real(dp) :: C2_f_NC(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: CL_f_NC(0:grid%ny,ncompmin:ncompmax)
-    real(dp)             :: res(0:ubound(C2_f,dim=1), -6:7)
+    real(dp)             :: res(0:size(C2_f,dim=1)-1, -6:7)
     !----------------------
     ! not just up and down, but the sum 
     real(dp) :: u(0:grid%ny), d(0:grid%ny), ubar(0:grid%ny), dbar(0:grid%ny) 
@@ -1176,25 +1176,25 @@ contains
   !----------------------------------------------------------------------
   function ulike(f) result(res)
     real(dp), intent(in) :: f(0:,ncompmin:)
-    real(dp)             :: res(0:ubound(f,dim=1))
+    real(dp)             :: res(0:size(f,dim=1)-1)
     res = sum(f(:, 2: nf_lcl: 2), dim=2)
   end function ulike
   !----------------------------------------------------------------------
   function dlike(f) result(res)
     real(dp), intent(in) :: f(0:,ncompmin:)
-    real(dp)             :: res(0:ubound(f,dim=1))
+    real(dp)             :: res(0:size(f,dim=1)-1)
     res = sum(f(:, 1: nf_lcl: 2), dim=2)
   end function dlike
   !----------------------------------------------------------------------
   function ubarlike(f) result(res)
     real(dp), intent(in) :: f(0:,ncompmin:)
-    real(dp)             :: res(0:ubound(f,dim=1))
+    real(dp)             :: res(0:size(f,dim=1)-1)
     res = sum(f(:,-2:-nf_lcl:-2), dim=2)
   end function ubarlike
   !----------------------------------------------------------------------
   function dbarlike(f) result(res)
     real(dp), intent(in) :: f(0:,ncompmin:)
-    real(dp)             :: res(0:ubound(f,dim=1))
+    real(dp)             :: res(0:size(f,dim=1)-1)
     res = sum(f(:,-1:-nf_lcl:-2), dim=2)
   end function dbarlike
   

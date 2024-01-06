@@ -549,7 +549,7 @@ contains
          & current_operation_glb => cpl%def%beta_terms(:,nf)
     cpl_def_glb => cpl%def
     nf_glb = nf
-    n = ubound(fine,2)
+    n = size(fine,2)-1
 
     init_it(1) = max(0,floor((t-subseg%t_lo)/subseg%dt))
     init_it(2) = min(n, init_it(1) + 1)
