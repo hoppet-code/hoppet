@@ -24,7 +24,7 @@ module streamlined_interface
   !! tables, most of which would be redundant)
   !!
   !! The array gets initialised in hoppetStartExtended
-  integer, save :: table_index_from_iloop(1:111) = -1
+  integer, save :: table_index_from_iloop(1:1111) = -1
   integer, parameter :: max_table_index = 15
 
   !!
@@ -86,6 +86,9 @@ contains
        else if (iloop < 1000) then
           table_index_source = tableIndexValue(mod(iloop,100), nf)
           iloop_P = iloop / 100
+       else if (iloop < 10000) then
+          table_index_source = tableIndexValue(mod(iloop,1000), nf)
+          iloop_P = iloop / 1000
        else 
           call wae_error('tableIndexValue','unsupported value for iloop (source & iloop_P determination):',&
             &intval=iloop)
@@ -152,7 +155,7 @@ subroutine hoppetStart(dy,nloop)
   implicit none
   !--------------------------------------
   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
-  integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=3)
+  integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=4)
   !--------------------------------------
   real(dp) :: ymax, Qmin, Qmax, dlnlnQ
   integer  :: order
@@ -175,7 +178,7 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
   real(dp), intent(in) :: Qmin, Qmax !! range in Q
   real(dp), intent(in) :: dlnlnQ !! internal table spacing in lnlnQ
-  integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=3)
+  integer,  intent(in) :: nloop  !! the maximum number of loops we'll want (<=4)
   integer,  intent(in) :: order  !! order of numerical interpolation (+ve v. -ve: see below)
   integer,  intent(in) :: factscheme !! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
   !-------------------------------------

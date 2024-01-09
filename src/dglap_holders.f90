@@ -34,7 +34,7 @@ module dglap_holders
      !-----------------------  nloop, nf  --------------
      type(split_mat), pointer :: allP(:,   :)  
      
-     type(split_mat), pointer :: P_LO, P_NLO, P_NNLO
+     type(split_mat), pointer :: P_LO, P_NLO, P_NNLO, P_N3LO
      type(coeff_mat), pointer :: allC(:,:)
      type(coeff_mat), pointer :: C2, C2_1, CL_1
      !-- indep of nf for the time being ----------------
@@ -95,8 +95,8 @@ contains
 
     dh%factscheme = default_or_opt(factscheme_default, factscheme)
     dh%nloop     = default_or_opt(2, nloop)
-    if (dh%nloop > 3 .or. dh%nloop < 1) then
-       call wae_error('InitDglapHolder: nloop must be between 1 and 3')
+    if (dh%nloop > 4 .or. dh%nloop < 1) then
+       call wae_error('InitDglapHolder: nloop must be between 1 and 4')
     end if
     dh%grid = grid
 
@@ -133,6 +133,16 @@ contains
                 call InitMTMNNLO(grid,dh%MTM2)
                 dh%MTM2_exists = .true.
              end if
+          end if
+          if (dh%nloop >= 4) then
+             call InitSplitMatN3LO(grid, dh%P_N3LO, dh%factscheme)
+             !-- do this once, and only if really needed
+!             if (lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2) &
+!                  &.and. mass_steps_on &
+!                  &.and. nflcl == lbound(dh%allP,dim=2)) then
+!                call InitMTMNNLO(grid,dh%MTM2)
+!                dh%MTM2_exists = .true.
+!             end if
           end if
 
           call cobj_InitCoeff(grid, dh%C2)
@@ -377,6 +387,12 @@ contains
        dh%P_NNLO => dh%allP(3,nflcl)
     else
        nullify(dh%P_NNLO)
+    end if
+    
+    if (dh%nloop >= 4) then
+       dh%P_N3LO => dh%allP(4,nflcl)
+    else
+       nullify(dh%P_N3LO)
     end if
     
     dh%C2 => dh%allC(1,nflcl)

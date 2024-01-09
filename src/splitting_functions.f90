@@ -20,6 +20,7 @@ module splitting_functions
   !!use splitting_functions_nnlo_p
   ! this one gives a set that depends on imod.
   use splitting_functions_nnlo
+  use splitting_functions_n3lo
   implicit none
   private
 
@@ -36,6 +37,9 @@ module splitting_functions
 
   public :: sf_P2gg, sf_P2qg2nf, sf_P2PS, sf_P2gq
   public :: sf_P2NSPlus, sf_P2NSMinus, sf_P2NSS
+
+  public :: sf_P3gg, sf_P3qg2nf, sf_P3PS, sf_P3gq
+  public :: sf_P3NSPlus, sf_P3NSMinus, sf_P3NSS
 
   public :: sf_DPqq, sf_DPqg, sf_DPgq, sf_DPgg 
   public :: sf_DP1qqV, sf_DP1qqbarV, sf_DP1qqS

@@ -22,7 +22,7 @@ module evolution_helper
   real(dp) :: ev_tmp_du_ballpark
   !real(dp), parameter :: dt_ballpark = 0.2
 
-  type(split_mat),      pointer :: ev_PLO, ev_PNLO, ev_PNNLO
+  type(split_mat),      pointer :: ev_PLO, ev_PNLO, ev_PNNLO, ev_PN3LO
   type(running_coupling), pointer :: ev_ash
   integer                  :: ev_nloop
   real(dp) :: ev_muR_Q, fourpibeta0_lnmuR_Q
@@ -205,6 +205,39 @@ contains
           call InitSplitMat(Pfull, ev_PLO)
           call AddWithCoeff(Pfull, ev_PNLO, as2pi)
           call AddWithCoeff(Pfull, ev_PNNLO, as2pi**2)
+       end if
+       dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
+       call Delete(Pfull)
+    case(4)
+       if (fourpibeta0_lnmuR_Q /= zero) then
+          ! From Mathematica:
+          !as2pi**3*P3NLO + (1 + 4*as2pi*beta0*L*Pi + 
+          !-     8*as2pi**2*L*(beta1 + 2*beta0**2*L)*Pi**2 + 
+          !-     as2pi**3*(16*beta2*L*Pi**3 + 
+          !-        80*beta0*beta1*L**2*Pi**3 + 64*beta0**3*L**3*Pi**3)
+          !-     )*PLO + (as2pi + 8*as2pi**2*beta0*L*Pi + 
+          !-     as2pi**3*(16*beta1*L*Pi**2 + 48*beta0**2*L**2*Pi**2))*
+          !-   PNLO + (as2pi**2 + 12*as2pi**3*beta0*L*Pi)*PNNLO
+          call InitSplitMat(Pfull, ev_PLO, one &
+               &   + as2pi * fourpibeta0_lnmuR_Q&
+               &   + as2pi**2 * ((as2pi * fourpibeta0_lnmuR_Q)**2&
+               &                 + (twopi**2*beta1) * two * log(ev_muR_Q))&
+               &   + as2pi**3 * ((as2pi * fourpibeta0_lnmuR_Q)**3&
+               &                  + fourpibeta0_lnmuR_Q * 5.0_dp * twopi**2 * beta1 * log(ev_muR_Q) &
+               &                  + (twopi**3*beta2) * two * log(ev_muR_Q)))
+          call AddWithCoeff(Pfull, ev_PNLO, as2pi &
+               & * (one + two*as2pi*fourpibeta0_lnmuR_Q&
+               & + 3.0_dp*(as2pi*fourpibeta0_lnmuR_Q)**2&
+               & + as2pi**2*(twopi**2*beta1)*4.0_dp*log(ev_muR_Q)))
+          call AddWithCoeff(Pfull, ev_PNNLO, as2pi**2 &
+               & * (one + 3.0_dp*as2pi*fourpibeta0_lnmuR_Q))
+          call AddWithCoeff(Pfull, ev_PN3LO, as2pi**3)
+          !call wae_error('ev_conv: NNL evolution not supported with muR_Q/=1')
+       else
+          call InitSplitMat(Pfull, ev_PLO)
+          call AddWithCoeff(Pfull, ev_PNLO,  as2pi)
+          call AddWithCoeff(Pfull, ev_PNNLO, as2pi**2)
+          call AddWithCoeff(Pfull, ev_PN3LO, as2pi**3)
        end if
        dpdf = (jacobian * as2pi) * (Pfull .conv. pdf)
        call Delete(Pfull)
@@ -753,6 +786,7 @@ contains
     ev_PLO  => dh%P_LO
     if (ev_nloop >= 2) ev_PNLO => dh%P_NLO
     if (ev_nloop >= 3) ev_PNNLO => dh%P_NNLO
+    if (ev_nloop >= 4) ev_PN3LO => dh%P_N3LO
 
     call ev_evolveLocal(pdf_ev, Q_init, Q_end, ev_conv)
 

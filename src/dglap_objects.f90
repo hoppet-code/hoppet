@@ -93,7 +93,7 @@ module dglap_objects
 
   public :: cobj_InitSplitLinks
   public :: InitSplitMatLO, InitSplitMatNLO
-  public :: InitSplitMatNNLO
+  public :: InitSplitMatNNLO, InitSplitMatN3LO
   public :: InitSplitMatTimeNLO
   public :: InitSplitMatPolLO, InitSplitMatPolNLO
 
@@ -329,6 +329,58 @@ contains
     call InitGridConv(grid, P%qq, sf_P2PS)
     call AddWithCoeff(P%qq, P%NS_plus)
   end subroutine InitSplitMatNNLO
+
+
+  !======================================================================
+  !! Initialise a N3LO unpolarised splitting matrix, with the nf value that
+  !! is current from the qcd module. (MSbar scheme)
+  subroutine InitSplitMatN3LO(grid, P, factscheme)
+    use qcd; use convolution_communicator
+    type(grid_def),    intent(in)    :: grid
+    type(split_mat),   intent(inout) :: P
+    integer, optional, intent(in) :: factscheme
+    integer :: factscheme_local
+    !-----------------------------------------
+    type(grid_conv) :: P3NSS
+    real(dp) :: dummy
+
+    !call wae_error('InitSplitMatN3LO: N3LO not yet implemented')
+    factscheme_local = default_or_opt(factscheme_default, factscheme)
+    if (factscheme_local /= factscheme_MSbar) then
+       write(0,*) 'InitSplitMatN3LO: unsupported fact scheme', factscheme
+       call wae_error('InitSplitMatN3LO: stopping')
+    end if
+    
+    !-- info to describe the splitting function
+    !P%loops = 3
+    P%nf_int = nf_int
+
+    ! NO LONGER NECESSARY
+!!$    !-- dummy to initialize Vogt routines (needed in exact cases 
+!!$    !   for the A3 piece to be set up). Do it better later on if it works?
+!!$    cc_piece = cc_real
+!!$    dummy = sf_P3NSMinus(0.5_dp)
+!!$    dummy = sf_P3gg(0.5_dp)
+
+    call cobj_InitSplitLinks(P)
+
+    call InitGridConv(grid, P%NS_plus, sf_P3NSPlus)
+    call InitGridConv(grid, P%NS_minus, sf_P3NSMinus)
+    
+    !-- if understanding of convention is right then P_V = P_- + P_S
+    call InitGridConv(P%NS_V, P%NS_minus)
+    call InitGridConv(grid, P3NSS, sf_P3NSS)
+    call AddWithCoeff(P%NS_V, P3NSS)    
+    call Delete(P3NSS)
+
+    !-- now the singlet functions
+    call InitGridConv(grid, P%qg, sf_P3qg2nf)
+    call InitGridConv(grid, P%gg, sf_P3gg)
+    call InitGridConv(grid, P%gq, sf_P3gq)
+    !-- qq = "pure-singlet" + P+
+    call InitGridConv(grid, P%qq, sf_P3PS)
+    call AddWithCoeff(P%qq, P%NS_plus)
+  end subroutine InitSplitMatN3LO
 
     !======================================================================
   !! Initialise a NLO unpolarised splitting matrix, with the nf value that
