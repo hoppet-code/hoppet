@@ -19,6 +19,15 @@ module dglap_choices
   integer, parameter, public :: nnlo_splitting_Nfiterr2 =  2
   integer, public :: nnlo_splitting_variant = nnlo_splitting_param
 
+  integer, parameter, public :: n3lo_splitting_exact = -2
+  integer, parameter, public :: n3lo_splitting_param = -1
+  ! these three should keep their numerical values because
+  ! of a correspondence with vogt imod values
+  integer, parameter, public :: n3lo_splitting_Nfitav   =  0
+  integer, parameter, public :: n3lo_splitting_Nfiterr1 =  1
+  integer, parameter, public :: n3lo_splitting_Nfiterr2 =  2
+  integer, public :: n3lo_splitting_variant = n3lo_splitting_param
+
   integer, parameter, public :: nnlo_nfthreshold_exact = -12
   integer, parameter, public :: nnlo_nfthreshold_param = -11
   integer, public :: nnlo_nfthreshold_variant = nnlo_nfthreshold_param
@@ -35,6 +44,7 @@ module dglap_choices
        &public :: factscheme_Poldefault = factscheme_PolMSbar
 
   public :: dglap_Set_nnlo_splitting
+  public :: dglap_Set_n3lo_splitting
   public :: dglap_Set_nnlo_nfthreshold
 contains
 
@@ -43,6 +53,12 @@ contains
     integer, intent(in) :: variant
     nnlo_splitting_variant = variant
   end subroutine dglap_Set_nnlo_splitting
+
+  !-------- overkill ----------------------------------------
+  subroutine dglap_Set_n3lo_splitting(variant)
+    integer, intent(in) :: variant
+    n3lo_splitting_variant = variant
+  end subroutine dglap_Set_n3lo_splitting
 
   !-------- overkill ----------------------------------------
   subroutine dglap_Set_nnlo_nfthreshold(variant)
