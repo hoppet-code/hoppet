@@ -51,6 +51,41 @@ jobs:
           cmake --install BUILDifort
           ctest --test-dir BUILDifort -j 2 --output-on-failure
 
+
+  compilejobCentos7_IBM_XL:
+    name: hoppet_on_Centos7ppc64le_IBM_XL
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: QEMU
+      run: |
+           set -x
+           sudo apt update
+           sudo  apt install --yes binfmt-support qemu-user-static wget
+    - name: Compile_with_xlf
+      uses: addnab/docker-run-action@v3
+      with:
+        image: ppc64le/centos
+        options: -v ${{ github.workspace }}:/work --platform=linux/ppc64le 
+        run: |
+          sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+          sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+          yum -y install epel-release wget
+          wget https://public.dhe.ibm.com/software/server/POWER/Linux/xl-compiler/eval/ppc64le/rhel7/ibm-xl-compiler-eval.repo -O /etc/yum.repos.d/ibm-xl-compiler-eval.repo
+          sed -i 's/http:/https:/g' /etc/yum.repos.d/ibm-xl-compiler-eval.repo
+          yum -y install xlf cmake3 lhapdf-devel wget
+          pwd 
+          ls
+          cd work
+          export PATH=/opt/ibm/xlf/16.1.1/bin/:$PATH
+          export LICENSE=accept 
+          xlf_configure <<< 1 >/dev/null
+          cmake3 -S . -B BUILDxlf -DCMAKE_Fortran_COMPILER=xlf -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLxlf
+          cmake3 --build BUILDxlf -j
+          cmake3 --install BUILDxlf
+          ctest3 --test-dir BUILDxlf -j 2 --output-on-failure
+
   compilejobOSX:
     runs-on: macos-latest
     name: hoppet_on_OSX
