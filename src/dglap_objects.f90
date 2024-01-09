@@ -1074,9 +1074,9 @@ contains
   function cobj_CConv(C,q) result(Cxq)
     type(coeff_mat), intent(in) :: C
     real(dp),   intent(in) :: q(0:,0:)
-    real(dp)               :: Cxq(0:ubound(q,dim=1))
+    real(dp)               :: Cxq(0:size(q,dim=1)-1)
     !--------------------------------------------------
-    real(dp) :: ud(0:ubound(q,dim=1))
+    real(dp) :: ud(0:size(q,dim=1)-1)
     real(dp), parameter :: uq2 = (4.0_dp/9.0_dp)
     real(dp), parameter :: dq2 = (1.0_dp/9.0_dp)
 
