@@ -54,19 +54,18 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -Mbounds -Mchkptr")
 endif()
 
-<<<<<<< HEAD
 # NAG
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NAG>:-dcfuns;-dusty>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "NAG")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -C=all -mtrace -gline")
-=======
+endif()
+
 # XL
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qfree;-qextname;-qhalt=s>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qstackprotect=all>")
 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -qcheck -qsigtrap")
->>>>>>> origin/master
 endif()
 
 if (HOPPET_ENABLE_FPES)
