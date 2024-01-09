@@ -281,7 +281,7 @@ contains
     type(grid_conv), intent(inout) :: gc
     real(dp),        intent(in)    :: gq(0:)
     integer :: ny, isub
-    ny = assert_eq(gc%grid%ny, size(gq,1)-1,"conv_AddGridConv_gq")
+    ny = assert_eq(gc%grid%ny, ubound(gq,1),"conv_AddGridConv_gq")
     if (gc%grid%nsub == 0) then
       gc%conv(:,1) = gq * gc%grid%dy
     else
@@ -298,7 +298,7 @@ contains
     real(dp), allocatable :: matrix(:,:), nodesA(:), nodesB(:)
     integer :: ny, isub, i, j, k, order, n
 
-    ny = assert_eq(gc%grid%ny, size(gq,1)-1,"conv_AddGridConv_gq")
+    ny = assert_eq(gc%grid%ny, ubound(gq,1),"conv_AddGridConv_gq")
     if (gc%grid%nsub == 0) then
       ! now prepare an interpolating setup
       order = abs(gc%grid%order)
