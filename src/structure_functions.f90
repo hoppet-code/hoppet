@@ -208,12 +208,14 @@ contains
   subroutine InitStrFct(order, separate_orders)
     integer, intent(in) :: order
     logical, optional :: separate_orders
-    
+    integer :: min_zero_index, i
+
     if(.not.setup_done(0)) then
        call wae_error('InitStrFct', 'hoppetEvolve not called!')
     endif
 
     if(sf_alloc_already_done) call Delete(sf_tables)
+
     ! Now we setup the tables. HoppetStart already called, so we can copy the tables over
     call AllocPdfTable(sf_tables, tables(0))
     ! Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
@@ -1330,6 +1332,11 @@ contains
 
     if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
+    if (order_setup < 2) then
+      res = zero
+      return
+    end if
+
     as2pi = alphasLocal(muR) / (twopi)
 
     ! if scale_choice = 0,1, then evaluate sf_tables at Q
@@ -1376,7 +1383,12 @@ contains
     real(dp) :: Q_or_muF
     
     if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
-    
+        
+    if (order_setup < 3) then
+      res = zero
+      return
+    end if
+
     as2pi = alphasLocal(muR) / (twopi)
 
     ! if scale_choice = 0,1, then evaluate sf_tables at Q
@@ -1437,6 +1449,11 @@ contains
     
     if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
+    if (order_setup < 4) then
+      res = zero
+      return
+    end if
+
     as2pi = alphasLocal(muR) / (twopi)
 
     ! if scale_choice = 0,1, then evaluate sf_tables at Q

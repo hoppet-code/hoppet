@@ -343,6 +343,7 @@ contains
     !-----------------------------------------
     type(grid_conv) :: P3NSS
     real(dp) :: dummy
+    integer, save :: nwarn_nf_lo = 5, nwarn_nf_hi = 5
 
     !call wae_error('InitSplitMatN3LO: N3LO not yet implemented')
     factscheme_local = default_or_opt(factscheme_default, factscheme)
@@ -355,7 +356,14 @@ contains
     !P%loops = 3
     ! The splitting matrices are currently hard coded for nf=3,4,5
     nf_store = nf_int
-    nf_int = min(max(nf_int,3),5)
+    if (nf_int < 3) then
+      nf_int = 3
+      call wae_warn(nwarn_nf_lo, "InitSplitMatN3LO: nf_int < 3, setting to 3; nf_int was", intval = nf_store)
+    else if (nf_int > 5) then
+      nf_int = 5
+      call wae_warn(nwarn_nf_hi, "InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was", intval = nf_store)
+    end if
+    !nf_int = min(max(nf_int,3),5)
     P%nf_int = nf_int
 
     ! NO LONGER NECESSARY
