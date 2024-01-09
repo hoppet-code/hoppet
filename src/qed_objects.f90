@@ -163,7 +163,7 @@ contains
   function conv_qed_lo(qed_lo, gq) result(gout)
     type(qed_split_mat_lo), intent(in) :: qed_lo
     real(dp),               intent(in) :: gq(0:, ncompmin:)
-    real(dp)                           :: gout(0:size(gq,dim=1)-1, ncompmin:size(gq,dim=2)-1)
+    real(dp)                           :: gout(0:size(gq,dim=1)-1, ncompmin:ncompmin+size(gq,dim=2)-1)
     !---------------------------------------
     real(dp) :: flvsum(0:size(gq,dim=1)-1), flvout(0:size(gq,dim=1)-1)
     integer  :: i
@@ -178,7 +178,7 @@ contains
     ! for now we force this...
     if (GetPdfRep(gq(:,:ncompmax)) /= pdfr_Human) call wae_error('conv_qed_lo',&
          &'gq is not in "Human" format')
-    if (size(gq,dim=2)-1 < ncompmaxPhoton) call wae_error('conv_qed_lo',&
+    if (ubound(gq,dim=2) < ncompmaxPhoton) call wae_error('conv_qed_lo',&
          &'gq appears not to have photon component')
     
     ! set up the squared electric charges of each of the components
@@ -220,7 +220,7 @@ contains
     ! include leptons, then the branching from them is not included
     ! (even if nl /= 0 in the splitting matrix)
     flvsum = zero
-    do i = ncompmin, min(size(gq,dim=2)-1, ncompmaxLeptons)
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxLeptons)
        if (chg2_fromflv(i) /= zero) flvsum = flvsum + chg2_fromflv(i) * gq(:,i)
     end do
     
@@ -239,7 +239,7 @@ contains
     ! without any charge or colour factors
     flvout    = qed_lo%Pqy_01 * gq(:,8)
     ! then add it in with appropriate charges
-    do i = ncompmin, min(size(gq,dim=2)-1, ncompmaxLeptons)
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxLeptons)
        if (chg2_toflv(i) /= zero) then
           gout(:,i) = chg2_toflv(i) * flvout
           gout(:,i) = gout(:,i) + chg2_fromflv(i) * (qed_lo%Pqq_01 * gq(:,i))
@@ -253,7 +253,7 @@ contains
   function conv_qed_nlo(qed_nlo, gq) result(gout)
     type(qed_split_mat_nlo), intent(in) :: qed_nlo
     real(dp),                intent(in) :: gq(0:, ncompmin:)
-    real(dp)                            :: gout(0:size(gq,dim=1)-1, ncompmin:size(gq,dim=2)-1)
+    real(dp)                            :: gout(0:size(gq,dim=1)-1, ncompmin:ncompmin+size(gq,dim=2)-1)
     !---------------------------------------
     real(dp) :: flvsum(0:size(gq,dim=1)-1), flvout(0:size(gq,dim=1)-1)
     integer  :: i
@@ -267,7 +267,7 @@ contains
     ! for now we force this...
     if (GetPdfRep(gq(:,:ncompmax)) /= pdfr_Human) call wae_error('conv_qed_nlo',&
          &'gq is not in "Human" format')
-    if (size(gq,dim=2)-1 < ncompmaxPhoton) call wae_error('conv_qed_nlo',&
+    if (ubound(gq,dim=2) < ncompmaxPhoton) call wae_error('conv_qed_nlo',&
          &'gq appears not to have photon component')
 
     ! set up the squared electric charges of each of the components
@@ -288,7 +288,7 @@ contains
     ! include leptons, then the branching from them is not included
     ! (even if nl /= 0 in the splitting matrix)
     flvsum = zero
-    do i = ncompmin, min(size(gq,dim=2)-1, ncompmaxPhoton)
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxPhoton)
        if (chg2_fromflv(i) /= zero) flvsum = flvsum + chg2_fromflv(i) * gq(:,i)
     end do
     
@@ -309,7 +309,7 @@ contains
     ! without any charge or colour factors
     flvout    = (qed_nlo%Pqy_11 * gq(:,8) + qed_nlo%Pqg_11 * gq(:,0))
     ! then add it in with appropriate charges
-    do i = ncompmin, min(size(gq,dim=2)-1, ncompmaxPhoton)
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxPhoton)
        if (chg2_fromflv(i) /= zero) then
           gout(:,i) = chg2_fromflv(i) * flvout
           gout(:,i) = gout(:,i) + chg2_fromflv(i) * (&
@@ -323,7 +323,7 @@ contains
   function conv_qed_nnlo(qed_nnlo, gq) result(gout)
     type(qed_split_mat_nnlo), intent(in) :: qed_nnlo
     real(dp),                intent(in) :: gq(0:, ncompmin:)
-    real(dp)                            :: gout(0:size(gq,dim=1)-1, ncompmin:size(gq,dim=2)-1)
+    real(dp)                            :: gout(0:size(gq,dim=1)-1, ncompmin:ncompmin+size(gq,dim=2)-1)
     !---------------------------------------
     real(dp) :: flvsum(0:size(gq,dim=1)-1), flvout(0:size(gq,dim=1)-1)
     integer  :: i
@@ -339,7 +339,7 @@ contains
     ! for now we force this...
     if (GetPdfRep(gq(:,:ncompmax)) /= pdfr_Human) call wae_error('conv_qed_nnlo',&
          &'gq is not in "Human" format')
-    if (size(gq,dim=2)-1 < ncompmaxPhoton) call wae_error('conv_qed_nnlo',&
+    if (ubound(gq,dim=2) < ncompmaxPhoton) call wae_error('conv_qed_nnlo',&
          &'gq appears not to have photon component')
 
     ! set up the squared electric charges of each of the components
@@ -359,14 +359,14 @@ contains
 
     ! now get the full "photon"-emission power
     flvsum = zero
-    do i = ncompmin, min(size(gq,dim=2)-1, ncompmaxPhoton)
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxPhoton)
        if (chg2_fromflv(i) /= zero) flvsum = flvsum + chg2_fromflv(i) * gq(:,i)
     end do
     
     ! now set the result
     gout = zero
     ! we add only the splitting from a quark to a lepton        
-    do i = ncompmin, min(size(gq,dim=2)-1, ncompmaxLeptons)
+    do i = ncompmin, min(ubound(gq,dim=2), ncompmaxLeptons)
        if (chg2_toflv(i) /= zero) then
           gout(:,i) = qed_nnlo%Plq_02 * flvsum * chg2_toflv(i)
        end if
