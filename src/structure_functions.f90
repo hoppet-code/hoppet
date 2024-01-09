@@ -970,13 +970,13 @@ contains
        
        ! save the N3LO pieces in sf_tables(8:15)
        
-       PLO2_f   = dh%P_LO  * (dh%P_LO * f)
        PLO_f    = dh%P_LO  * f
+       PLO2_f   = dh%P_LO  * PLO_f
        PNLO_f   = dh%P_NLO * f
        PNNLO_f  = dh%P_NNLO * f
        PLONLO_f = dh%P_LO   * PNLO_f
        PNLOLO_f = dh%P_NLO  * PLO_f
-       PLO3_f   = dh%P_LO   * (dh%P_LO * PLO_f)
+       PLO3_f   = dh%P_LO   * PLO2_f
 
        ! first calculate the pure N3LO term, (C_N3LO x f) 
        f2 = (ch%C2N3LO * f)

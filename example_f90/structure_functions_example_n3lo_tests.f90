@@ -7,6 +7,38 @@ program structure_functions_example
   use structure_functions
   implicit none
   character (len=400) :: filename,dirname
+  real(dp) :: Qmax, Qmin, ymax, Q, mc, mb, mt, asQ, Q0,&
+  & muR_Q, dy, dlnlnQ, minQval, maxQval
+  integer  :: order, nloop_max = 4
+
+  Qmax = 13000.0_dp 
+  Qmin = one
+  
+  ! Set heavy flavour scheme
+  !mc = 1.414213563_dp   ! sqrt(2.0_dp) + epsilon
+  !mb = 4.5_dp
+  !mt = 175.0_dp
+  !call hoppetSetPoleMassVFN(mc, mb, mt)
+  call hoppetSetFFN(5)
+  
+  ! Streamlined initialization
+  ! including  parameters for x-grid
+  order = -6 ! interpolation order, not perturbative order in alphas!
+  ymax  = 16.0_dp
+  dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
+  dlnlnQ = dy/4.0_dp
+  minQval = Qmin
+  maxQval = Qmax 
+
+  ! initialise the grid and dglap holder, using the streamlined
+  ! interface for simplicity
+  call hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop_max,&
+    &         order,factscheme_MSbar)
+
+  ! Setup all constants and parameters needed by the structure functions
+  !call StartStrFct(nloop_max, nflav = 5, scale_choice = scale_choice_Q, &
+  !       param_coefs = .true.)
+
 
   dirname = 'structure_functions_example_n3lo_tests_results/'
 
@@ -64,69 +96,45 @@ contains
     implicit none
     integer,  intent(in) :: nloop_coefs, nloop_evolv, idev
     real(dp), intent(in) :: xmur, xmuf, xmur_evolv
-    real(dp) :: Qmax, Qmin, ymax, Q, mc, mb, mt, asQ, Q0,&
-         & muR_Q, dy, dlnlnQ, minQval, maxQval
-    integer  :: sc_choice, order
     
-    Qmax = 13000.0_dp 
-    sc_choice = scale_choice_Q ! Uses Q as the central scale choice
-    Qmin = one
-    
-    ! Set heavy flavour scheme
-    !mc = 1.414213563_dp   ! sqrt(2.0_dp) + epsilon
-    !mb = 4.5_dp
-    !mt = 175.0_dp
-    !call hoppetSetPoleMassVFN(mc, mb, mt)
-    call hoppetSetFFN(5)
-    
-    ! Streamlined initialization
-    ! including  parameters for x-grid
-    order = -6 ! interpolation order, not perturbative order in alphas!
-    ymax  = 16.0_dp
-    dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
-    dlnlnQ = dy/4.0_dp
-    minQval = min(xmuF*Qmin, Qmin)
-    maxQval = max(xmuF*Qmax, Qmax)
-    
-    ! initialise the grid and dglap holder, using the streamlined
-    ! interface for simplicity
-    call hoppetStartExtended(ymax,dy,minQval,maxQval,dlnlnQ,nloop_evolv,&
-         &         order,factscheme_MSbar)
-    
-    ! Setup all constants and parameters needed by the structure functions
-    call StartStrFct(nloop_coefs, nflav = 5, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
-         param_coefs = .true.)
-    
+    ! Set up all constants and parameters needed by the structure functions
+    write(6,'(a)') "Filling structure function coefficient tables"
+    call StartStrFct(nloop_coefs, nflav = 5, xR = xmur, xF = xmuf, scale_choice = scale_choice_Q, &
+       param_coefs = .true.)
+
     ! Evolve the PDF
-!    asQ = 0.35_dp
-!    Q0 = sqrt(2.0_dp)
+    ! asQ = 0.35_dp
+    ! Q0 = sqrt(2.0_dp)
     asQ = 0.30_dp
     Q0 = 2.0_dp
     
+    write(6,'(a)') "Doing evolution to fill PDF table"
     call hoppetEvolve(asQ, Q0, nloop_evolv,xmur_evolv, lha_unpolarized_dummy_pdf, Q0)
     
     ! Initialise the structure functions using separate orders 
     ! NB: this uses the PDFs that were set up in the streamlined interface
     ! with the hoppetEvolve routine
+    write(6,'(a)') "Filling StrFct tables"
     call InitStrFct(nloop_coefs, .true.)
     
     ymax = log(1e5) !ymax=20
     Q = 100.0_dp
     !Q = Q0
     
-    call write_f(idev, Q, ymax, 100)
+    call write_f(idev, Q, ymax, 100, xmur, xmuf)
     
   end subroutine start_evolve_init_write
   
-  subroutine write_f(idev, Qtest, ymax, ny)
+  subroutine write_f(idev, Qtest, ymax, ny, xmur, xmuf)
     implicit none
     real(dp), intent(in) :: Qtest, ymax
-    integer, intent(in)  :: idev, ny
+    integer,  intent(in) :: idev, ny
+    real(dp), intent(in) :: xmur, xmuf
     
-    call write_f1(idev, Qtest, ymax, 100)
-    call write_f2(idev, Qtest, ymax, 100)
-    call write_f3(idev, Qtest, ymax, 100)
-    call write_pdf(idev, Qtest, ymax, 100)
+    call write_f1 (idev, Qtest, ymax, ny, muF = xmuf*Qtest, muR = xmur*Qtest)
+    call write_f2 (idev, Qtest, ymax, ny, muF = xmuf*Qtest, muR = xmur*Qtest)
+    call write_f3 (idev, Qtest, ymax, ny, muF = xmuf*Qtest, muR = xmur*Qtest)
+    call write_pdf(idev, Qtest, ymax, ny)
     
   end subroutine write_f
 
