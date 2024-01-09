@@ -73,12 +73,79 @@ plot 0 lw 2 lc rgb 'black' notitle,\
 set key top right
 set title 'gluon, Q = 100 GeV'
 
+set ylabel 'Ratio to central NNLO'
+set xlabel 'x'
+set yrange [0.94:1.14]
+
+plot 1 lw 2 lc rgb 'black' notitle,\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 lc rgb 'red' title 'N3LO_{ev}, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 lc rgb 'red' title 'N3LO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 lc rgb 'red' title 'N3LO_{ev}, x_{R,ev} = 0.5',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 lc rgb 'black' title 'NNLO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 lc rgb 'black' title 'NNLO_{ev}, x_{R,ev} = 0.5',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 lc rgb 'blue' title 'NLO_{ev}, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 lc rgb 'blue' title 'NLO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 lc rgb 'blue' title 'NLO_{ev}, x_{R,ev} = 0.5'
+
+
+
+set key top right
+set title 'u, Q = 100 GeV'
+
 set ylabel 'Ratio to central'
 set xlabel 'x'
 
 plot 1 lw 2 lc rgb 'black' notitle,\
-     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 title 'NNLO_{ev}, x_{R,ev} = 2.0',\
-     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($8/$22) lw 2 title 'NNLO_{ev}, x_{R,ev} = 0.5'
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($10/$24) lw 2 title 'N3LO_{ev}, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($10/$24) lw 2 title 'NNLO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($10/$24) lw 2 title 'NNLO_{ev}, x_{R,ev} = 0.5'
+
+
+set key top right
+set title 'd, Q = 100 GeV'
+
+set ylabel 'Ratio to central'
+set xlabel 'x'
+
+plot 1 lw 2 lc rgb 'black' notitle,\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($9/$23) lw 2 title 'N3LO_{ev}, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($9/$23) lw 2 title 'NNLO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($9/$23) lw 2 title 'NNLO_{ev}, x_{R,ev} = 0.5'
+
+set key top right
+set title 'ubar, Q = 100 GeV'
+
+set ylabel 'Ratio to central'
+set xlabel 'x'
+
+plot 1 lw 2 lc rgb 'black' notitle,\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($6/$20) lw 2 title 'N3LO_{ev}, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($6/$20) lw 2 title 'NNLO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($6/$20) lw 2 title 'NNLO_{ev}, x_{R,ev} = 0.5'
+
+
+set key top right
+set title 'dbar, Q = 100 GeV'
+
+set ylabel 'Ratio to central'
+set xlabel 'x'
+
+plot 1 lw 2 lc rgb 'black' notitle,\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($7/$21) lw 2 title 'N3LO_{ev}, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($7/$21) lw 2 title 'NNLO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($7/$21) lw 2 title 'NNLO_{ev}, x_{R,ev} = 0.5'
+
+
+set key top right
+set title 's, Q = 100 GeV'
+
+set ylabel 'Ratio to central'
+set xlabel 'x'
+
+plot 1 lw 2 lc rgb 'black' notitle,\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-1.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($11/$25) lw 2 title 'N3LO_{ev}, x_{R,ev} = 1.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($11/$25) lw 2 title 'NNLO_{ev}, x_{R,ev} = 2.0',\
+     '<paste n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat' i 3 u 1:($11/$25) lw 2 title 'NNLO_{ev}, x_{R,ev} = 0.5'
 
 
 

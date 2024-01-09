@@ -339,7 +339,7 @@ contains
     type(grid_def),    intent(in)    :: grid
     type(split_mat),   intent(inout) :: P
     integer, optional, intent(in) :: factscheme
-    integer :: factscheme_local
+    integer :: factscheme_local, nf_store
     !-----------------------------------------
     type(grid_conv) :: P3NSS
     real(dp) :: dummy
@@ -353,6 +353,9 @@ contains
     
     !-- info to describe the splitting function
     !P%loops = 3
+    ! The splitting matrices are currently hard coded for nf=3,4,5
+    nf_store = nf_int
+    nf_int = min(max(nf_int,3),5)
     P%nf_int = nf_int
 
     ! NO LONGER NECESSARY
@@ -380,6 +383,9 @@ contains
     !-- qq = "pure-singlet" + P+
     call InitGridConv(grid, P%qq, sf_P3PS)
     call AddWithCoeff(P%qq, P%NS_plus)
+
+    ! Restore nf_int
+    nf_int = nf_store
   end subroutine InitSplitMatN3LO
 
     !======================================================================

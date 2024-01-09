@@ -26,7 +26,7 @@ module dglap_choices
   integer, parameter, public :: n3lo_splitting_Nfitav   =  0
   integer, parameter, public :: n3lo_splitting_Nfiterr1 =  1
   integer, parameter, public :: n3lo_splitting_Nfiterr2 =  2
-  integer, public :: n3lo_splitting_variant = n3lo_splitting_param
+  integer, public :: n3lo_splitting_variant = n3lo_splitting_Nfitav
 
   integer, parameter, public :: nnlo_nfthreshold_exact = -12
   integer, parameter, public :: nnlo_nfthreshold_param = -11

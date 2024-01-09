@@ -220,9 +220,9 @@ contains
           !-   PNLO + (as2pi**2 + 12*as2pi**3*beta0*L*Pi)*PNNLO
           call InitSplitMat(Pfull, ev_PLO, one &
                &   + as2pi * fourpibeta0_lnmuR_Q&
-               &   + as2pi**2 * ((as2pi * fourpibeta0_lnmuR_Q)**2&
+               &   + as2pi**2 * (fourpibeta0_lnmuR_Q**2&
                &                 + (twopi**2*beta1) * two * log(ev_muR_Q))&
-               &   + as2pi**3 * ((as2pi * fourpibeta0_lnmuR_Q)**3&
+               &   + as2pi**3 * (fourpibeta0_lnmuR_Q**3&
                &                  + fourpibeta0_lnmuR_Q * 5.0_dp * twopi**2 * beta1 * log(ev_muR_Q) &
                &                  + (twopi**3*beta2) * two * log(ev_muR_Q)))
           call AddWithCoeff(Pfull, ev_PNLO, as2pi &

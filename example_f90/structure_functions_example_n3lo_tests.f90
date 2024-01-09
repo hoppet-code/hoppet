@@ -10,9 +10,41 @@ program structure_functions_example
 
   dirname = 'structure_functions_example_n3lo_tests_results/'
 
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-1.0.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,4,1.0_dp,1.0_dp,1.0_dp,99)
+
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-0.5.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,4,1.0_dp,1.0_dp,0.5_dp,99)
+
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-2.0.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,4,1.0_dp,1.0_dp,2.0_dp,99)
+
   filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat'
   open(unit = 99, file = trim(filename))
   call start_evolve_init_write(4,3,1.0_dp,1.0_dp,1.0_dp,99)
+
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,3,1.0_dp,1.0_dp,0.5_dp,99)
+
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,3,1.0_dp,1.0_dp,2.0_dp,99)
+
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-1.0.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,2,1.0_dp,1.0_dp,1.0_dp,99)
+
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-2.0.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,2,1.0_dp,1.0_dp,2.0_dp,99)
+
+  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-0.5.dat'
+  open(unit = 99, file = trim(filename))
+  call start_evolve_init_write(4,2,1.0_dp,1.0_dp,0.5_dp,99)
 
   filename = trim(dirname)//'n3lo-coef-xmur-2.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat'
   open(unit = 99, file = trim(filename))
@@ -22,22 +54,9 @@ program structure_functions_example
   open(unit = 99, file = trim(filename))
   call start_evolve_init_write(4,3,0.5_dp,1.0_dp,1.0_dp,99)
 
-  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-2.0.dat'
-  open(unit = 99, file = trim(filename))
-  call start_evolve_init_write(4,3,1.0_dp,1.0_dp,2.0_dp,99)
-  
-  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-0.5.dat'
-  open(unit = 99, file = trim(filename))
-  call start_evolve_init_write(4,3,1.0_dp,1.0_dp,0.5_dp,99)
-
   filename = trim(dirname)//'nnlo-coef-xmur-1.0-xmuf-1.0-nnlo-evol-xmur-1.0.dat'
   open(unit = 99, file = trim(filename))
   call start_evolve_init_write(3,3,1.0_dp,1.0_dp,1.0_dp,99)
-
-  filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-nlo-evol-xmur-1.0.dat'
-  open(unit = 99, file = trim(filename))
-  call start_evolve_init_write(4,2,1.0_dp,1.0_dp,1.0_dp,99)
-
 
 contains
 
