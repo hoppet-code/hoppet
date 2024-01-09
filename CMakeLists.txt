@@ -56,13 +56,22 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -Mbounds -Mchkptr")
 endif()
 
+# XL
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qfree;-qextname;-qhalt=s>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qstackprotect=all>")
+
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL")
+  set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -qcheck -qsigtrap")
+endif()
 
 if (HOPPET_ENABLE_FPES)
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-ffpe-trap=zero,overflow,underflow,invalid,denormal>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-fpe0>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,IntelLLVM>:-fpe0>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Ktrap=divz,denorm,fp,inexact,inv,ovf,unf>")
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qflttrap=overflow:underflow:invalid:zerodivide:enable>")
 endif()
+
 
 # Output of config info   ==============================================
 message(STATUS "HOPPET: CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
@@ -86,7 +95,9 @@ configure_file("${PROJECT_SOURCE_DIR}/hoppet-config.in" "${PROJECT_BINARY_DIR}/b
 
 
 # Sources ==============================================================
-file(GLOB SOURCES src/*.f90 src/*.f)
+file(GLOB SOURCESf90 src/*.f90)
+file(GLOB SOURCESf src/*.f)
+
 
 # alternative is a manual list (NB: this specific list is not complete)
 # set(SOURCES
@@ -101,20 +112,30 @@ file(GLOB SOURCES src/*.f90 src/*.f)
 #   xpij2p.f90 xpns2n.f90 xpns2p.f90)
 
 # and additionally in the directories used for conditional compilation
-file(GLOB EXACT_COEF_SOURCES src/exact-coefs/*.f src/exact-coefs/*.f90)
+file(GLOB EXACT_COEF_SOURCESf90 src/exact-coefs/*.f90)
+file(GLOB EXACT_COEF_SOURCESf src/exact-coefs/*.f)
 file(GLOB NO_EXACT_COEF_SOURCES src/no-exact-coefs/*.f src/no-exact-coefs/*.f90)
+file(GLOB NO_EXACT_COEF_SOURCESf90 src/no-exact-coefs/*.f90)
+file(GLOB NO_EXACT_COEF_SOURCESf src/no-exact-coefs/*.f90)
 
+
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
+ set_source_files_properties( ${SOURCESf}  PROPERTIES COMPILE_OPTIONS "-qfixed")
+endif()
 
 # if HOPPET_USE_EXACT_COEF is ON, use the exact coefficient functions sources
 if(HOPPET_USE_EXACT_COEF)
-  set(SOURCES ${SOURCES} ${EXACT_COEF_SOURCES})
+  set(SOURCESf90 ${SOURCESf90} ${EXACT_COEF_SOURCESf90})
+  set(SOURCESf ${SOURCESf} ${EXACT_COEF_SOURCESf})
 else()
-  set(SOURCES ${SOURCES} ${NO_EXACT_COEF_SOURCES})
+  set(SOURCESf90 ${SOURCESf90} ${NO_EXACT_COEF_SOURCESf90})
+  set(SOURCESf ${SOURCESf} ${NO_EXACT_COEF_SOURCESf})
 endif()
 
+
 #  Libraries ===========================================================
-add_library(hoppet SHARED ${SOURCES})
-target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet_shared> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
+add_library(hoppet SHARED ${SOURCESf90} ${SOURCESf})
+target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
 set_target_properties(hoppet PROPERTIES OUTPUT_NAME hoppet_v1
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
@@ -126,7 +147,7 @@ set_target_properties(hoppet PROPERTIES OUTPUT_NAME hoppet_v1
 add_library(hoppet::hoppet ALIAS hoppet)
 
 
-add_library(hoppet_static STATIC ${SOURCES})
+add_library(hoppet_static STATIC ${SOURCESf90} ${SOURCESf})
 target_include_directories(hoppet_static PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
 set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet_v1
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
@@ -167,6 +188,9 @@ if (HOPPET_BUILD_EXAMPLES)
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
       POSITION_INDEPENDENT_CODE TRUE
      )
+    if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
+      set_source_files_properties( example_f90/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
+    endif()     
   endforeach()
   set( f77programs_f
        tabulation_example
@@ -183,6 +207,9 @@ if (HOPPET_BUILD_EXAMPLES)
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
       POSITION_INDEPENDENT_CODE TRUE
      )
+    if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
+      set_source_files_properties( example_f77/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
+    endif()     
   endforeach()
   if (LHAPDF_FOUND)
     target_link_libraries(compare_lhapdf_hoppet_f77 PUBLIC LHAPDF::LHAPDF)

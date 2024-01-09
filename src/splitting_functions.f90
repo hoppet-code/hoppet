@@ -536,7 +536,7 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
       pgg   = (one/(one-x) + one/x -two + x*(one-x))
       pggmx = (one/(one+x) - one/x -two - x*(one+x))
       S2x   = sf_S2(x)
-      res =   CF*Tf*(-4 + 12*x + -164/9.0_dp*x**2 &
+      res =   CF*Tf*(-4 + 12*x  -164/9.0_dp*x**2 &
            &         + (10 + 14*x +  16/3._dp*x**2 + 16/(3*x))*lnx&
            &         + 92/(9*x) + 2*(1+x)*lnx**2)&
            &+ CA*Tf*(2*(1-x) + 26/9._dp*(x**2-1/x) &
