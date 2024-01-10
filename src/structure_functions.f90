@@ -210,7 +210,7 @@ contains
 
     if(sf_alloc_already_done) call Delete(sf_tables)
 
-    ! Now we setup the tables. HoppetStart already called, so we can copy the tables over
+    ! Now we set up the tables. HoppetStart already called, so we can copy over the structure
     call AllocPdfTable(sf_tables, tables(0))
     ! Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
     sf_tables(1:)%tab_iflv_max = 7

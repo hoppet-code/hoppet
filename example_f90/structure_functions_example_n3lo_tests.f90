@@ -24,7 +24,7 @@ program structure_functions_example
   ! Streamlined initialization
   ! including  parameters for x-grid
   order = -6 ! interpolation order, not perturbative order in alphas!
-  ymax  = 16.0_dp
+  ymax  = 12.0_dp
   dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
   dlnlnQ = dy/4.0_dp
   minQval = Qmin
@@ -108,23 +108,35 @@ contains
     asQ = 0.30_dp
     Q0 = 2.0_dp
     
+    call write_time()
     write(6,'(a)') "Doing evolution to fill PDF table"
     call hoppetEvolve(asQ, Q0, nloop_evolv, xmur_evolv, lha_unpolarized_dummy_pdf, Q0)
     
     ! Initialise the structure functions using separate orders 
     ! NB: this uses the PDFs that were set up in the streamlined interface
     ! with the hoppetEvolve routine
+    call write_time()
     write(6,'(a)') "Filling StrFct tables"
     call InitStrFct(nloop_coefs, .true., xmur, xmuf)
     
     ymax = log(1e5) !ymax=20
     Q = 100.0_dp
     !Q = Q0
-    
+
+    call write_time()
     call write_f(idev, Q, ymax, 100, xmur, xmuf)
     
   end subroutine start_evolve_init_write
   
+  ! write the time since the last call to this routine (or since start of the program)
+  subroutine write_time()
+    implicit none
+    real(dp), save :: time, last_time = 0.0_dp
+    call cpu_time(time)
+    write(6,'(a,f10.4)') "Time since last call: ", time - last_time
+    last_time = time
+  end subroutine write_time
+
   subroutine write_f(idev, Qtest, ymax, ny, xmur, xmuf)
     implicit none
     real(dp), intent(in) :: Qtest, ymax
