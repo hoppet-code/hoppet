@@ -526,7 +526,7 @@ Section~\ref{sec:vanilla}.\footnote{Users needing a lower level
 %
 After this initialisation has been carried out one calls
 \begin{lstlisting}
-  call StartStrFct(order_max [, nflav] [, xR] [, xF] [, scale_choice] &
+  call StartStrFct(order_max [, nflav] [, scale_choice] &
                   & [, constant_mu] [ ,param_coefs] [ ,wmass] [ ,zmass])
 \end{lstlisting}
 specifying as a minimum the perturbative order --- currently
@@ -555,7 +555,7 @@ structure functions should not be considered reliable if  $Q$ is comparable to t
 %  same as fixed flavours (including the flavour of mass $m$ as a light
 %  flavour.)}\ak{I added a mentioning of the fixed flavour
 %  limitations as well}
-
+\ak{Need to adapt this to what the code acutally does}
 Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
 the renormalisation and factorisation scales and the degree of
 flexibility that will be available in choosing them at later stages.
@@ -657,7 +657,7 @@ Section~\ref{sec:vanilla_usage}.
 %
 With the PDF table filled in the streamlined interface one calls
 \begin{lstlisting}
-  call InitStrFct(order[, separate_orders])
+  call InitStrFct(order[, separate_orders] [, xR] [, xF])
 \end{lstlisting}
 specifying the order at which one would like to compute the structure
 functions.

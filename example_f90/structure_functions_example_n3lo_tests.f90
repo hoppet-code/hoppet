@@ -36,8 +36,9 @@ program structure_functions_example
     &         order,factscheme_MSbar)
 
   ! Setup all constants and parameters needed by the structure functions
-  ! call StartStrFct(nloop_max, nflav = 5, scale_choice = scale_choice_Q, &
-  !        param_coefs = .true.)
+  write(6,'(a)') "Filling structure function coefficient tables"
+   call StartStrFct(nloop_max, nflav = 5, scale_choice =&
+        & scale_choice_Q, param_coefs = .true.)
 
 
   dirname = 'structure_functions_example_n3lo_tests_results/'
@@ -98,9 +99,8 @@ contains
     real(dp), intent(in) :: xmur, xmuf, xmur_evolv
     
     ! Set up all constants and parameters needed by the structure functions
-    write(6,'(a)') "Filling structure function coefficient tables"
-    call StartStrFct(nloop_coefs, nflav = 5, xR = xmur, xF = xmuf, scale_choice = scale_choice_Q, &
-       param_coefs = .true.)
+    ! call StartStrFct(nloop_coefs, nflav = 5, xR = xmur, xF = xmuf, scale_choice = scale_choice_Q, &
+    !   param_coefs = .true.)
 
     ! Evolve the PDF
     ! asQ = 0.35_dp
@@ -115,7 +115,7 @@ contains
     ! NB: this uses the PDFs that were set up in the streamlined interface
     ! with the hoppetEvolve routine
     write(6,'(a)') "Filling StrFct tables"
-    call InitStrFct(nloop_coefs, .true.)
+    call InitStrFct(nloop_coefs, .true., xmur, xmuf)
     
     ymax = log(1e5) !ymax=20
     Q = 100.0_dp

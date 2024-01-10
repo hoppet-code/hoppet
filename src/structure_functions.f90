@@ -103,19 +103,17 @@ contains
   !!
   !! @param[in]      order_max      highest order in QCD to compute (1: LO, 2: NLO, etc)
   !! @param[opt]     nflav          integer number of flavours (if not present use variable flavour)
-  !! @param[opt]     xR             factor to multiply renormalisation scale
-  !! @param[opt]     xF             factor to multiply factorisation scale
   !! @param[opt]     scale_choice   (0: fixed scale, 1: use Q, 2: use arbitrary scale)
   !! @param[opt]     constant_mu    if scale_choice = scale_choice_fixed (= 0) then this is the fixed scale
   !! @param[opt]     param_coefs    if .true. use parametrised coefficients functions
   !! @param[opt]     wmass          Mass of the W boson
   !! @param[opt]     zmass          Mass of the z boson
   !!
-  subroutine StartStrFct(order_max, nflav, xR, xF, scale_choice,&
-       & constant_mu, param_coefs, wmass, zmass)
+  subroutine StartStrFct(order_max, nflav, scale_choice, constant_mu,&
+       & param_coefs, wmass, zmass)
     integer, intent(in)  :: order_max
     integer, optional    :: nflav, scale_choice
-    real(dp), optional   :: xR, xF, constant_mu, wmass, zmass
+    real(dp), optional   :: constant_mu, wmass, zmass
     logical, optional    :: param_coefs
     !----------------------------------------------------------------------
     real(dp) :: sin_thw_sq, mw, mz
@@ -128,8 +126,6 @@ contains
     ! mW and mZ defaults are taken from the 2022 PDG 
     mw                = default_or_opt(80.377_dp, wmass)
     mz                = default_or_opt(91.1876_dp, zmass)
-    xmuR              = default_or_opt(one, xR)
-    xmuF              = default_or_opt(one, xF)
     scale_choice_save = default_or_opt(scale_choice_Q, scale_choice)
     exact_coefs       = .not.default_or_opt(.true., param_coefs)
     cst_mu            = default_or_opt(zero, constant_mu)
@@ -197,14 +193,20 @@ contains
   !!
   !! @param[in]      order              order at which we initialise the structure functions
   !! @param[opt]     separate_orders    if .true. separate into individual orders rather than summing
+  !! @param[opt]     xR             factor to multiply renormalisation scale
+  !! @param[opt]     xF             factor to multiply factorisation scale
   !!
-  subroutine InitStrFct(order, separate_orders)
+  subroutine InitStrFct(order, separate_orders, xR, xF)
     integer, intent(in) :: order
+    real(dp), optional   :: xR, xF
     logical, optional :: separate_orders
 
     if(.not.setup_done(0)) then
        call wae_error('InitStrFct', 'hoppetEvolve not called!')
     endif
+
+    xmuR              = default_or_opt(one, xR)
+    xmuF              = default_or_opt(one, xF)
 
     if(sf_alloc_already_done) call Delete(sf_tables)
 
@@ -1721,25 +1723,23 @@ end subroutine hoppetStartStrFct
 !!
 !! @param[in]      order_max      highest order in QCD to compute (1: LO, 2: NLO, etc)
 !! @param[opt]     nflav          integer number of flavours (if not present use variable flavour)
-!! @param[opt]     xR             factor to multiply renormalisation scale
-!! @param[opt]     xF             factor to multiply factorisation scale
 !! @param[opt]     scale_choice   (0: fixed scale, 1: use Q, 2: use arbitrary scale)
 !! @param[opt]     constant_mu    if scale_choice = scale_choice_fixed (= 0) then this is the fixed scale
 !! @param[opt]     param_coefs    if .true. use parametrised coefficients functions
 !! @param[opt]     wmass          Mass of the W boson
 !! @param[opt]     zmass          Mass of the z boson
 !!
-subroutine hoppetStartStrFctExtended(order_max, nflav, xR, xF,&
-     & scale_choice , constant_mu, param_coefs, wmass, zmass)
+subroutine hoppetStartStrFctExtended(order_max, nflav, scale_choice,&
+     & constant_mu, param_coefs, wmass, zmass)
   use streamlined_interface; use structure_functions
   implicit none
-  real(dp), intent(in) :: xR, xF, constant_mu, wmass, zmass
+  real(dp), intent(in) :: constant_mu, wmass, zmass
   integer, intent(in)  :: order_max, nflav, scale_choice
   logical , intent(in) :: param_coefs
   !----------------------------------------------------------------------
 
-call StartStrFct(order_max, nflav, xR, xF, scale_choice&
-     &, constant_mu, param_coefs, wmass, zmass)
+call StartStrFct(order_max, nflav, scale_choice, constant_mu,&
+     & param_coefs, wmass, zmass)
   
 end subroutine hoppetStartStrFctExtended
 
@@ -1755,14 +1755,17 @@ end subroutine hoppetStartStrFctExtended
 !!
 !! @param[in]      order              order at which we initialise the structure functions
 !! @param[opt]     separate_orders    if .true. separate into individual orders rather than summing
+!! @param[opt]     xR             factor to multiply renormalisation scale
+!! @param[opt]     xF             factor to multiply factorisation scale
 !!
-subroutine hoppetInitStrFct(order, separate_orders)
+subroutine hoppetInitStrFct(order, separate_orders, xR, xF)
   use streamlined_interface; use structure_functions
   implicit none
   integer, intent(in) :: order
   logical, intent(in) :: separate_orders
+  real(dp), intent(in) :: xR, xF
   
-  call InitStrFct(order, separate_orders)
+  call InitStrFct(order, separate_orders, xR, xF)
 
 end subroutine hoppetInitStrFct
 
