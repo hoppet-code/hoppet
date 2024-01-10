@@ -168,7 +168,7 @@ if (HOPPET_BUILD_EXAMPLES)
                    tabulation_example_qed  
                    tabulation_example_streamlined
        )
-  set( f90programs_f hplog5_tests )
+  set( f90programs_f )
   foreach ( p ${f90programs_f90})
     add_executable( ${p}_f90 example_f90/${p}.f90)
     target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static)
