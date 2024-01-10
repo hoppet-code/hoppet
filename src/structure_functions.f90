@@ -97,7 +97,6 @@ module structure_functions
   logical, save  :: use_sep_orders
   logical, save  :: exact_coefs
   integer :: nf_lcl, order_setup
-  logical :: branch1
 
 contains
   !> @brief Setup of constants and parameters needed for structure functions
@@ -157,13 +156,7 @@ contains
     two_ai_Z_up = one
     two_ai_Z_down   = -one
 
-    branch1 = .true.
-    if (.not. present(nflav) ) then
-     branch1 = .false.
-    else
-      if (nflav.le.0) branch1 = .false. 
-    endif 
-    if (branch1) then
+    if (default_or_opt(-1, nflav) > 0) then
        ! if nflav is present, then use a fixed flavour number
        call qcd_SetNf(nflav)
        call InitCoefHolder(grid, ch, order_max, exact_coefs)
@@ -208,7 +201,6 @@ contains
   subroutine InitStrFct(order, separate_orders)
     integer, intent(in) :: order
     logical, optional :: separate_orders
-    integer :: min_zero_index, i
 
     if(.not.setup_done(0)) then
        call wae_error('InitStrFct', 'hoppetEvolve not called!')
@@ -1213,6 +1205,58 @@ contains
   end function alphasLocal
   
 
+  subroutine GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
+   real(dp), intent(in)  :: Q
+   real(dp), intent(in),  optional :: muR, muF
+   real(dp), intent(out) :: muR_lcl, muF_lcl, mu_table
+
+   ! run a bunch of checks to make sure that the requested scales are consistent
+   ! with what is needed here
+   if (scale_choice_save == scale_choice_Q) then
+      muR_lcl = xmuR * Q
+      muF_lcl = xmuF * Q
+      mu_table = Q
+      if (present(muR)) then
+         if (abs(muR/muR_lcl-1).gt.1e-10) call wae_error("GetStrFctScales (scale_choice_Q): ",&
+               "requested muR inconsistent with initialisation, muR/(xmuR*Q) = ", &
+               dbleval = muR/muR_lcl)
+      endif 
+      if (present(muF)) then
+         if (abs(muF/muF_lcl-1).gt.1e-10) call wae_error("GetStrFctScales (scale_choice_Q): ",&
+               "requested muR inconsistent with initialisation, muF/(xmuF*Q) = ", &
+               dbleval = muF/muF_lcl)
+      endif 
+    else if (scale_choice_save == scale_choice_fixed) then
+      muR_lcl = xmuR * cst_mu
+      muF_lcl = xmuF * cst_mu
+      mu_table = Q
+      if (present(muR)) then
+         if (abs(muR/muR_lcl-1).gt.1e-10) call wae_error("GetStrFctScales (scale_choice_fixed): ",&
+               "requested muR inconsistent with initialisation, muR/(xmuR*cst_mu) = ", &
+               dbleval = muR/muR_lcl)
+      endif 
+      if (present(muF)) then
+         if (abs(muF/muF_lcl-1).gt.1e-10) call wae_error("GetStrFctScales (scale_choice_fixed): ",&
+               "requested muR inconsistent with initialisation, muF/(xmuF*cst_mu) = ", &
+               dbleval = muF/muF_lcl)
+      endif 
+    else if (scale_choice_save == scale_choice_arbitrary) then
+      if (.not. present(muR)) call wae_error("GetStrFctScales: muR not present but required for scale_choice_arbitrary")
+      if (.not. present(muF)) call wae_error("GetStrFctScales: muF not present but required for scale_choice_arbitrary")
+      muR_lcl = muR
+      muF_lcl = muF
+      mu_table = muF
+    else
+      call wae_error("GetStrFctScales: scale_choice_save not recognised", intval = scale_choice_save)
+    endif
+
+    ! consistency check for use_sep_orders and scale choice
+    if (.not. use_sep_orders .and. mu_table .ne. Q) then 
+      call wae_error("GetStrFctScales: mu_table /= Q but use_sep_orders = .false.")
+    end if
+  end subroutine GetStrFctScales
+
+  !---------------------------------------------------------------------
   !> @brief calculate the structure function at x, Q, muR, muF summed over all orders
   !!
   !! Calculate the structure function at x, Q, muR, muF summed over
@@ -1230,52 +1274,19 @@ contains
     real(dp), intent(in)  :: x, Q
     real(dp), intent(in), optional  :: muR, muF
     real(dp) :: res(-6:7)
-    real(dp) :: muR_lcl, muF_lcl
+    real(dp) :: muR_lcl, muF_lcl, mu_table
 
-    ! run a bunch of checks to make sure that the requested scales are consistent
-    ! with what is needed here
-    if (scale_choice_save == scale_choice_Q) then
-      muR_lcl = xmuR * Q
-      muF_lcl = xmuF * Q
-      if (present(muR)) then
-         if (abs(muR/muR_lcl-1).gt.1e-10) call wae_error("StrFct (scale_choice_Q): ",&
-               "requested muR inconsistent with initialisation, muR/(xmuR*Q) = ", &
-               dbleval = muR/muR_lcl)
-      endif 
-      if (present(muF)) then
-         if (abs(muF/muF_lcl-1).gt.1e-10) call wae_error("StrFct (scale_choice_Q): ",&
-               "requested muR inconsistent with initialisation, muF/(xmuF*Q) = ", &
-               dbleval = muF/muF_lcl)
-      endif 
-    else if (scale_choice_save == scale_choice_fixed) then
-      muR_lcl = xmuR * cst_mu
-      muF_lcl = xmuF * cst_mu
-      if (present(muR)) then
-         if (abs(muR/muR_lcl-1).gt.1e-10) call wae_error("StrFct (scale_choice_fixed): ",&
-               "requested muR inconsistent with initialisation, muR/(xmuR*cst_mu) = ", &
-               dbleval = muR/muR_lcl)
-      endif 
-      if (present(muF)) then
-         if (abs(muF/muF_lcl-1).gt.1e-10) call wae_error("StrFct (scale_choice_fixed): ",&
-               "requested muR inconsistent with initialisation, muF/(xmuF*cst_mu) = ", &
-               dbleval = muF/muF_lcl)
-      endif 
-    else
-      if (.not. present(muR)) call wae_error("StrFct: muR not present but required for scale_choice_arbitrary")
-      if (.not. present(muF)) call wae_error("StrFct: muF not present but required for scale_choice_arbitrary")
-      muR_lcl = muR
-      muF_lcl = muF
-    endif
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
     if (use_sep_orders) then
-       ! if we kept each order separate, then add up all the fixed order terms one by one
-       if (order_setup.ge.1) res =       F_LO  (x, Q, muR_lcl, muF_lcl)
-       if (order_setup.ge.2) res = res + F_NLO (x, Q, muR_lcl, muF_lcl)
-       if (order_setup.ge.3) res = res + F_NNLO(x, Q, muR_lcl, muF_lcl)
-       if (order_setup.ge.4) res = res + F_N3LO(x, Q, muR_lcl, muF_lcl)
+      ! if we kept each order separate, then add up all the fixed order terms one by one
+      if (order_setup.ge.1) res =       F_LO  (x, Q, muR_lcl, muF_lcl)
+      if (order_setup.ge.2) res = res + F_NLO (x, Q, muR_lcl, muF_lcl)
+      if (order_setup.ge.3) res = res + F_NNLO(x, Q, muR_lcl, muF_lcl)
+      if (order_setup.ge.4) res = res + F_N3LO(x, Q, muR_lcl, muF_lcl)
     else
-       ! if we haven't kept each order separate, then everything is in sf_tables(1)
-       call EvalPdfTable_xQ(sf_tables(1), x, Q, res)
+      ! if we haven't kept each order separate, then everything is in sf_tables(1)
+      call EvalPdfTable_xQ(sf_tables(1), x, mu_table, res)
     endif
     
   end function StrFct
@@ -1297,18 +1308,13 @@ contains
   function F_LO (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7)
-    real(dp) :: Q_or_muF
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
     if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
-    ! if scale_choice = 0,1, then evaluate sf_tables at Q
-    ! (since it is saved as an array in Q)
-    Q_or_muF = Q
-    ! if scale_choice >= 2, then evaluate sf_tables at muF
-    ! (since it is saved as an array in muF)
-    if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
-
-    call EvalPdfTable_xQ(sf_tables(1), x, Q_or_muF, res)
+    call EvalPdfTable_xQ(sf_tables(1), x, mu_table, res)
     
   end function F_LO
 
@@ -1328,7 +1334,9 @@ contains
     real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7)
-    real(dp) :: Q_or_muF
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
     if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
@@ -1338,23 +1346,16 @@ contains
     end if
 
     as2pi = alphasLocal(muR) / (twopi)
-
-    ! if scale_choice = 0,1, then evaluate sf_tables at Q
-    ! (since it is saved as an array in Q)
-    Q_or_muF = Q
-    ! if scale_choice >= 2, then evaluate sf_tables at muF
-    ! (since it is saved as an array in muF)
-    if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
     
     ! C_NLO x f (x) in C1f(:) 
-    call EvalPdfTable_xQ(sf_tables(2), x, Q_or_muF, C1f)
+    call EvalPdfTable_xQ(sf_tables(2), x, mu_table, C1f)
     res = C1f
     
     ! if scale_choice = 0,1 then this term is already taken care of
     if (scale_choice_save.ge.scale_choice_arbitrary) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
-       call EvalPdfTable_xQ(sf_tables(3), x, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(sf_tables(3), x, mu_table, C0P0f)
        res = res - C0P0f * LFQ2
     endif
     
@@ -1380,8 +1381,10 @@ contains
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7), C2f(-6:7), C0P0sqf(-6:7)
     real(dp) :: C0P1f(-6:7), C1P0f(-6:7)
-    real(dp) :: Q_or_muF
-    
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
+
     if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
         
     if (order_setup < 3) then
@@ -1390,16 +1393,9 @@ contains
     end if
 
     as2pi = alphasLocal(muR) / (twopi)
-
-    ! if scale_choice = 0,1, then evaluate sf_tables at Q
-    ! (since it is saved as an array in Q)
-    Q_or_muF = Q
-    ! if scale_choice >= 2, then evaluate sf_tables at muF
-    ! (since it is saved as an array in muF)
-    if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
     
     ! C_NNLO x f (x) in C2f(:,3) 
-    call EvalPdfTable_xQ(sf_tables(4), x, Q_or_muF, C2f)
+    call EvalPdfTable_xQ(sf_tables(4), x, mu_table, C2f)
     res = C2f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
@@ -1407,15 +1403,15 @@ contains
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
-       call EvalPdfTable_xQ(sf_tables(2), x, Q_or_muF, C1f)
+       call EvalPdfTable_xQ(sf_tables(2), x, mu_table, C1f)
        ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_xQ(sf_tables(3), x, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(sf_tables(3), x, mu_table, C0P0f)
        ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_xQ(sf_tables(5), x, Q_or_muF, C0P0sqf)
+       call EvalPdfTable_xQ(sf_tables(5), x, mu_table, C0P0sqf)
        ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_xQ(sf_tables(6), x, Q_or_muF, C0P1f)
+       call EvalPdfTable_xQ(sf_tables(6), x, mu_table, C0P1f)
        ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_xQ(sf_tables(7), x, Q_or_muF, C1P0f)
+       call EvalPdfTable_xQ(sf_tables(7), x, mu_table, C1P0f)
        ! add up all the different pieces
        res = res - C1P0f * LFQ2 + C0P0sqf * half * LFQ2**2 &
             & - twopi * beta0 * C0P0f * (LRQ2*LFQ2 - half*LFQ2**2) &
@@ -1445,7 +1441,9 @@ contains
     real(dp) :: C1f(-6:7), C0P0f(-6:7), C3f(-6:7), C0P0sqf(-6:7), C2f(-6:7)
     real(dp) :: C0P1f(-6:7), C1P0f(-6:7), C0P0cbf(-6:7), C0P01f(-6:7), C0P10f(-6:7)
     real(dp) :: C1P0sqf(-6:7), C1P1f(-6:7), C2P0f(-6:7), C0P2f(-6:7)
-    real(dp) :: Q_or_muF
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
     
     if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
     
@@ -1456,15 +1454,8 @@ contains
 
     as2pi = alphasLocal(muR) / (twopi)
 
-    ! if scale_choice = 0,1, then evaluate sf_tables at Q
-    ! (since it is saved as an array in Q)
-    Q_or_muF = Q
-    ! if scale_choice >= 2, then evaluate sf_tables at muF
-    ! (since it is saved as an array in muF)
-    if (scale_choice_save.ge.scale_choice_arbitrary) Q_or_muF = muF
-    
     ! C_N3LO x f (x) in C2f(:,8) 
-    call EvalPdfTable_xQ(sf_tables(8), x, Q_or_muF, C3f)
+    call EvalPdfTable_xQ(sf_tables(8), x, mu_table, C3f)
     res = C3f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
@@ -1472,32 +1463,32 @@ contains
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
        ! C_NLO x f (x) in C1f
-       call EvalPdfTable_xQ(sf_tables(2), x, Q_or_muF, C1f)
+       call EvalPdfTable_xQ(sf_tables(2), x, mu_table, C1f)
        ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_xQ(sf_tables(3), x, Q_or_muF, C0P0f)
+       call EvalPdfTable_xQ(sf_tables(3), x, mu_table, C0P0f)
        ! C_NNLO x f (x) in C2f(:,3) 
-       call EvalPdfTable_xQ(sf_tables(4), x, Q_or_muF, C2f)
+       call EvalPdfTable_xQ(sf_tables(4), x, mu_table, C2f)
        ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_xQ(sf_tables(5), x, Q_or_muF, C0P0sqf)
+       call EvalPdfTable_xQ(sf_tables(5), x, mu_table, C0P0sqf)
        ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_xQ(sf_tables(6), x, Q_or_muF, C0P1f)
+       call EvalPdfTable_xQ(sf_tables(6), x, mu_table, C0P1f)
        ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_xQ(sf_tables(7), x, Q_or_muF, C1P0f)
+       call EvalPdfTable_xQ(sf_tables(7), x, mu_table, C1P0f)
        
        ! C_LO x P_LO^3 x f (x) in C0P0cbf
-       call EvalPdfTable_xQ(sf_tables(9), x, Q_or_muF, C0P0cbf)
+       call EvalPdfTable_xQ(sf_tables(9), x, mu_table, C0P0cbf)
        ! C_LO x P_LO x P_NLO x f (x) in C0P01f
-       call EvalPdfTable_xQ(sf_tables(10), x, Q_or_muF, C0P01f)
+       call EvalPdfTable_xQ(sf_tables(10), x, mu_table, C0P01f)
        ! C_LO x P_LO x P_NLO x f (x) in C0P10f
-       call EvalPdfTable_xQ(sf_tables(11), x, Q_or_muF, C0P10f)
+       call EvalPdfTable_xQ(sf_tables(11), x, mu_table, C0P10f)
        ! C_NLO x P_LO^2 x f (x) in C1P0sqf
-       call EvalPdfTable_xQ(sf_tables(12), x, Q_or_muF, C1P0sqf)
+       call EvalPdfTable_xQ(sf_tables(12), x, mu_table, C1P0sqf)
        ! C_NLO x P_NLO x f (x) in C1P1f
-       call EvalPdfTable_xQ(sf_tables(13), x, Q_or_muF, C1P1f)
+       call EvalPdfTable_xQ(sf_tables(13), x, mu_table, C1P1f)
        ! C_NNLO x P_LO x f (x) in C2P0f
-       call EvalPdfTable_xQ(sf_tables(14), x, Q_or_muF, C2P0f)
+       call EvalPdfTable_xQ(sf_tables(14), x, mu_table, C2P0f)
        ! C_LO x P_NNLO x f (x) in C0P2f
-       call EvalPdfTable_xQ(sf_tables(15), x, Q_or_muF, C0P2f)
+       call EvalPdfTable_xQ(sf_tables(15), x, mu_table, C0P2f)
     
        ! add up all the different pieces
        ! The commented lines are copy/pasted from mathematica

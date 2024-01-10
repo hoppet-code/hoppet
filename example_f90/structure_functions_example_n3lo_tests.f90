@@ -36,8 +36,8 @@ program structure_functions_example
     &         order,factscheme_MSbar)
 
   ! Setup all constants and parameters needed by the structure functions
-  !call StartStrFct(nloop_max, nflav = 5, scale_choice = scale_choice_Q, &
-  !       param_coefs = .true.)
+  ! call StartStrFct(nloop_max, nflav = 5, scale_choice = scale_choice_Q, &
+  !        param_coefs = .true.)
 
 
   dirname = 'structure_functions_example_n3lo_tests_results/'
@@ -109,7 +109,7 @@ contains
     Q0 = 2.0_dp
     
     write(6,'(a)') "Doing evolution to fill PDF table"
-    call hoppetEvolve(asQ, Q0, nloop_evolv,xmur_evolv, lha_unpolarized_dummy_pdf, Q0)
+    call hoppetEvolve(asQ, Q0, nloop_evolv, xmur_evolv, lha_unpolarized_dummy_pdf, Q0)
     
     ! Initialise the structure functions using separate orders 
     ! NB: this uses the PDFs that were set up in the streamlined interface
