@@ -12,7 +12,7 @@
 !! Internal choices (accuracy etc.)
 !! --------------------------------
 !! -dy    dy        spacing in y
-!! -dt    dt        4*du
+!! -dt    dt        old form of spacing in t=lnQ; default is dy
 !! -order order     interpolation order
 !! -ceps  eps       precision for integrations to get splitting fn.s
 !! -lock            whether to lock subgrids together (recommended)
@@ -27,7 +27,7 @@
 !! ---------------
 !! -nloop nloop     # of loops
 !! -muR_Q muR_Q     ratio of renorm. to fact. scale
-!! -nomasssteps     turn of corrections when going through thresholds
+!! -nomasssteps     turn off corrections when going through thresholds
 !! -nnlo {exact|param|Nfitav|Nfiterr1|Nfiterr2} 
 !!                  which of the NNLO split fns. to use (default param)
 !! -nnlo_nfthreshold {exact|param}
@@ -170,7 +170,7 @@ program main_tablevogt
   dy    = dble_val_opt('-dy',0.1_dp)
   order = int_val_opt('-order',7)
   nloop = int_val_opt('-nloop',2)
-  dt    = dble_val_opt('-dt',0.4_dp)
+  dt    = dble_val_opt('-dt',dy)
   ceps  = dble_val_opt('-eps',1e-7_dp)
   muR_Q = dble_val_opt('-muR_Q', one)               !
   muR_Q = sqrt(dble_val_opt('-mu2R_Q', muR_Q**2))   ! allow both specifications
