@@ -160,11 +160,11 @@ program main_tablevogt
   integer  :: im, ix, id, nrepeat, irepeat, nfdefault
   integer  :: idev6, idev7, idev8, idev9, idev10
   integer  :: lcl_vogt_imod, factscheme, pdfid
-  logical  :: gnuplot, highprec_out, lock, polarized
+  logical  :: gnuplot, highprec_out, polarized
   logical  :: precalc_evln
 
 
-  write(0,*) '=============== DISEVEL starting ==================='
+  write(0,*) '=============== HOPPET benchmark starting ==================='
 
 
   dy    = dble_val_opt('-dy',0.1_dp)
@@ -179,7 +179,7 @@ program main_tablevogt
   mass_steps_on = log_val_opt('-masssteps',.true.)
   gnuplot = log_val_opt('-gnuplot')
   highprec_out = log_val_opt('-high')
-  lock    = log_val_opt('-lock',.false.)
+  !lock    = log_val_opt('-lock',.false.)
   nrepeat = int_val_opt('-repeat',1)
   precalc_evln = log_val_opt('-precalc')
 
@@ -195,8 +195,7 @@ program main_tablevogt
   call dglap_Set_nnlo_nfthreshold(&
        &code_val_opt('-nnlo_nfthreshold',nnlo_nfthreshold_variant,&
        &              prefix='nnlo_nfthreshold_'))
-  
-     
+       
 
   polarized = log_val_opt('-pol')
   if (polarized) then
@@ -204,7 +203,6 @@ program main_tablevogt
   else
      factscheme = factscheme_MSbar
   end if
-
 
 
   call print_comments(prefix='',idev=0)
@@ -231,10 +229,10 @@ program main_tablevogt
   idev10 = idev_open_arg(1,'.10')
 
 
-  call InitGridDef(gdarray(3),dy*0.1_dp,0.5_dp, order=order)
-  call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
-  call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
-  call InitGridDef(grid,gdarray(1:3),locked=lock)
+  ! call InitGridDef(gdarray(3),dy*0.1_dp,0.5_dp, order=order)
+  ! call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
+  ! call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
+  call InitGridDefDefault(grid, dy, ymax, order)
   
   call qcd_SetNf(nfdefault) ! <-- CHECK THIS
   if (varnf) then
@@ -356,12 +354,14 @@ contains
     character(len=*), parameter :: fe='(a,es15.5)'
     character(len=*), parameter :: fi='(a,i6)'
     character(len=*), parameter :: fl='(a,l2)'
+    character(len=200) :: arg1
 
-    write(idev,fa) prefix//'Output will be sent to '//trim(string_val_arg(1))//'.[678]'
+    arg1 = trim(string_val_arg(1))
+    write(idev,fa) prefix//'Output will be sent to '//arg1//'.[678]'
     write(idev,fd) prefix//'dy = ', dy
     write(idev,fd) prefix//'dt = ', dt
     write(idev,fi) prefix//'num order = ', order
-    write(idev,fl) prefix//'locking is ', lock
+    !write(idev,fl) prefix//'locking is ', lock
     write(idev,fi) prefix//'nloop = ', nloop
     write(idev,fe) prefix//'conv_eps = ', ceps
     write(idev,fd) prefix//'muR_Q = ', muR_Q
