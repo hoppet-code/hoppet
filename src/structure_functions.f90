@@ -1312,7 +1312,9 @@ contains
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
-    if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
+    if(.not.use_sep_orders) then 
+      call wae_error('F_LO: you did not initialise the Structure Functions with separate orders. Exiting.')
+    endif
     
     call EvalPdfTable_xQ(sf_tables(1), x, mu_table, res)
     
