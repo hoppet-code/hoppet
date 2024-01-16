@@ -27,7 +27,7 @@ contains
     integer,  parameter :: nmax = 9
     !                                           order=n
     real(dp), save      :: normalisation(0:nmax,0:nmax) = zero
-    real(dp)            :: dists(0:ubound(weights,dim=1)), prod
+    real(dp)            :: dists(0:size(weights,dim=1)-1), prod
     integer             :: n, i
     
     n = ubound(weights,dim=1)

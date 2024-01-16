@@ -349,7 +349,7 @@ contains
   function lumi_multi(grid, gq1, gq2) result(lumi)
     type(grid_def), intent(in) :: grid
     real(dp), intent(in) :: gq1(0:), gq2(0:)
-    real(dp)             :: lumi(0:ubound(gq1,1))
+    real(dp)             :: lumi(0:size(gq1,1)-1)
     !-----------------------
     type(grid_def), pointer :: fine, coarse
     integer  :: isub, iy, step
@@ -406,8 +406,8 @@ contains
     real(dp), intent(inout) :: lumi_coarse(0:)
     !--------------------------------------
     integer  :: ny_fine, ny_coarse, max_ny_coarse
-    real(dp) :: gq1_tmp(0:2*ubound(gq1_fine,1))
-    real(dp) :: gq2_tmp(0:2*ubound(gq2_fine,1))
+    real(dp) :: gq1_tmp(0:2*(size(gq1_fine,1)-1))
+    real(dp) :: gq2_tmp(0:2*(size(gq2_fine,1)-1))
     !real(dp) :: gq1_tmp(0:nint(grid_coarse%dy / grid_fine%dy)*grid_coarse%ny)
     !real(dp) :: gq2_tmp(0:nint(grid_coarse%dy / grid_fine%dy)*grid_coarse%ny)
     integer  :: order, range_up, range_down, range_down_last
@@ -496,7 +496,7 @@ contains
   function lumi_multi2(grid, gq1, gq2) result(lumi)
     type(grid_def), intent(in) :: grid
     real(dp), intent(in) :: gq1(0:), gq2(0:)
-    real(dp)             :: lumi(0:ubound(gq1,1))
+    real(dp)             :: lumi(0:size(gq1,1)-1)
     !-----------------------
     type(grid_def), pointer :: fine, coarse
     integer  :: isub, iy, step
@@ -736,7 +736,7 @@ contains
   function lumi_simple(grid, gq1, gq2) result(lumi)
     type(grid_def), intent(in) :: grid
     real(dp), intent(in) :: gq1(0:), gq2(0:)
-    real(dp)             :: lumi(0:ubound(gq1,1))
+    real(dp)             :: lumi(0:size(gq1,1)-1)
     integer :: i, ny
 
     type(grid_conv) :: gc

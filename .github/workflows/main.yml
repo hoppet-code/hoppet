@@ -8,7 +8,7 @@ on:
 
 jobs:
   compilejobFedora:
-    name: hoppet_on_Fedora
+    name: Fedorax86_64_GNU
     runs-on: ubuntu-latest
     container:
         image: fedora:latest
@@ -27,7 +27,7 @@ jobs:
 
 
   compilejob:
-    name: hoppet_on_Rocky9_Intel_HPCKIT
+    name: Rocky9x86_64_Intel_HPCKIT
     runs-on: ubuntu-latest
     container:
         image: intel/oneapi-hpckit:2024.0.1-devel-rockylinux9
@@ -51,9 +51,59 @@ jobs:
           cmake --install BUILDifort
           ctest --test-dir BUILDifort -j 2 --output-on-failure
 
+  compilejobFedora_AOCC:
+    name: Fedorax86_64_AOCC
+    runs-on: ubuntu-latest
+    container:
+        image: fedora:latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3    
+    - name: Install 
+      run: |
+           yum -y install  gcc gcc-c++ make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel libquadmath-devel libquadmath
+           yum -y install https://download.amd.com/developer/eula/aocc/aocc-4-1/aocc-compiler-4.1.0-1.x86_64.rpm
+    - name: Compile
+      continue-on-error: true    
+      run: |
+           source /opt/AMD/aocc-compiler-4.1.0/setenv_AOCC.sh 
+           export PATH=$PATH:/opt/AMD/aocc-compiler-4.1.0/bin/ 
+           cmake -S . -B BUILD  -DCMAKE_Fortran_COMPILER=flang -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
+           cmake --build BUILD -j
+           cmake --install BUILD
+           ctest --test-dir BUILD -j 2 --output-on-failure
+
+    - uses: actions/upload-artifact@v4
+      with:
+          name: AOCC
+          path: BUILD/example_f*/*.this_output
+
+  compilejobRocky8_NVHPC:
+    name: Rocky8x86_64_NVHPC
+    runs-on: ubuntu-latest
+    container:
+        image: nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-rockylinux8
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install 
+      run: |
+           yum -y install epel-release
+           yum -y install  gcc gcc-c++ make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+    - name: Compile
+      continue-on-error: true    
+      run: |
+          cmake -S . -B BUILD  -DCMAKE_Fortran_COMPILER=nvfortran -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
+          cmake --build BUILD -j
+          cmake --install BUILD
+          ctest --test-dir BUILD -j 2 --output-on-failure
+    - uses: actions/upload-artifact@v4
+      with:
+          name: NVHPC
+          path: BUILD/example_f*/*.this_output
 
   compilejobCentos7_IBM_XL:
-    name: hoppet_on_Centos7ppc64le_IBM_XL
+    name: Centos7ppc64le_IBM_XL
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -86,9 +136,49 @@ jobs:
           cmake3 --install BUILDxlf
           ctest3 --test-dir BUILDxlf -j 2 --output-on-failure
 
+
+  compilejobRocky9_ARM:
+    name: Rocky9aarch64_ARM
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: QEMU
+      run: |
+           set -x
+           sudo apt update
+           sudo  apt install --yes binfmt-support qemu-user-static wget
+    - name: Compile_with_arm
+      continue-on-error: true     
+      uses: addnab/docker-run-action@v3
+      with:
+        image: arm64v8/rockylinux:9
+        options: -v ${{ github.workspace }}:/work --platform=linux/arm64/v8
+        run: |
+          yum -y install epel-release wget 
+          yum -y install procps  lhapdf-devel wget glibc-devel cmake environment-modules which
+          wget -q https://armkeil.blob.core.windows.net/developer/Files/downloads/hpc/arm-compiler-for-linux/23-10/arm-compiler-for-linux_23.10_RHEL-9_aarch64.tar
+          tar -xvf arm-compiler-for-linux_23.10_RHEL-9_aarch64.tar
+          cd arm-compiler-for-linux_23.10_RHEL-9
+          sh ./arm-compiler-for-linux_23.10_RHEL-9.sh -a
+          source /etc/profile.d/modules.sh
+          export MODULEPATH=$MODULEPATH:/opt/arm/modulefiles/
+          module load acfl/23.10
+          module load gnu/12.2.0
+          cd ..
+          cd work
+          cmake -S . -B BUILDarmflang -DCMAKE_Fortran_COMPILER=armflang -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLarmflang
+          cmake --build BUILDarmflang -j
+          cmake --install BUILDarmflang
+          ctest --test-dir BUILDarmflang -j 2 --output-on-failure
+    - uses: actions/upload-artifact@v4
+      with:
+          name: ARM
+          path: BUILDarmflang/example_f*/*.this_output
+
   compilejobOSX:
     runs-on: macos-latest
-    name: hoppet_on_OSX
+    name: OSXx86_64_GNU
     steps:
     - name: Checkout
       uses: actions/checkout@v3
