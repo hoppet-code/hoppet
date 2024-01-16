@@ -133,24 +133,8 @@ contains
     if (present(intval))  write(stddev,*) intval
     if (present(dbleval)) write(stddev,*) dbleval
 
-    ! write(stddev,*)
-    ! write(stddev,'(a)') &
-    !      &'----- Error handler will now attempt to dump core and  stop'
-    ! a = 1.0
-    ! b = 1.0
-    ! write(stddev,*) 1.0/sqrt(a-b)
-    ! !-- in case division by zero didn't solve problem
-    ! !-- works only with lf95? Needs --trace compile-time flag
-    ! !call error('lf95 specific traceback follows:')
-    ! !--
-    ! stop
-    !call error('')
     write(stddev,*)
-    !stop
-    !! NB: this is non-standard, but seems to be supported by gfortran
-    !!     and ifort
-    call exit(1)
-    !call abort
+    stop 1
   end subroutine wae_error
   
   !!
