@@ -672,7 +672,7 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
 
   
   !======================================================================
-  ! What follows is stuff for VFNS.
+  ! What follows is stuff for VFNS at order(as^2)
   ! It has been hacked in one way or another from the code provided
   ! by W.L. van Neerven (~/src/HEP/vannerven-vfns.f), and appropriate 
   ! citations are
@@ -950,8 +950,7 @@ res=    CF*Tf*((-1.1111111111111112_dp - (2*lnx)/3._dp)*pqq -          &
     !-- recall that above results are for (as/4pi)^2, whereas
     !   we actually use (as/2pi)^2
     res = res * 0.25_dp
-  end function sf_A2PShq
-  
+  end function sf_A2PShq  
 
   !======================================================================
   ! polarized splitting functions...
