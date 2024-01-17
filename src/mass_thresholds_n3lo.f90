@@ -7,11 +7,29 @@
 !  J. McGowan, et. al.,    arXiv:2207.04739 -- MSHT parametrisations
 !  H. Kawamura, et. al.,   arXiv:1205.5727  -- KPMV parametrisations (A3PShg & A3PShq, eqs 3.49-3.53, old moments)
 !  I. Bierenbaum, et. al., arXiv:0904.3563  -- BBK: moments up to N=12-14, for all structures, defs in (6.1-6.3)
+!  J. Ablinger, et. al.,   arXiv:1008.3347  -- A3PSqq_H, A3Sqg_H, all moments but only N-space
+!  J. Ablinger, et. al.,   arXiv:1403.6356  -- A3PSqq_H, A3Sqg_H, A3PShq x-space eqs. 604 + 605 ! The appendix seems to have a lot, maybe only log parts?
 !  J. Ablinger, et. al.,   arXiv:1406.4654  -- A3NSqq_H, all moments & x-space (App.B, even/odd to be understood)
-!  J. Ablinger, et. al.,   arXiv:1409.1135  -- A3PShq, all moments & x-space (Eq. 5.41)
+!  J. Ablinger, et. al.,   arXiv:1409.1135  -- A3PShq, all moments & x-space (Eq. 5.41) <-- already computed above. Why twice?
 !  J. Ablinger, et. al.,   arXiv:1402.0359  -- A3Sgq_H, x-space (Eq 6.45)
 ! 
-!  J. Ablinger, et. al.,   arXiv:2211.05462 -- A3Sgg_H
+!  J. Ablinger, et. al.,   arXiv:2211.05462 -- A3Sgg_H, x-space in eqs. 4.6 (δ), 4.7 (+) and ancilliary file with full result 
+!  J. Ablinger, et. al.,   arXiv:2311.00644 -- A3PShg, x-space in ancilliary file with full result
+!
+!  The below table tries to summarise our understanding
+!  exact = all moments known and x-space derived as exact inverse Mellin transform
+!  approx = all moments known but x-space parametrised
+!  approx = Not all moments known
+!
+!             |      BBK        |      KPMV       |      14XX        |   2211 + 2311    |        MSHT     |
+!   ------------------------------------------------------------------------------------------------------|
+!   A3NSqq_H  | N-space, approx |                 | x,N-space, exact |                  | x-space, approx |
+!   A3PSqq_H  | N-space, approx |                 | x,N-space, exact |                  | x-space, approx |
+!   A3Sqg_H   | N-space, approx |                 | x,N-space, exact |                  |                 |
+!   A3PShg    | N-space, approx | x-space, approx |                  | x,N-space, exact | x-space, approx |
+!   A3PShq    | N-space, approx | x-space, approx | x,N-space, exact |                  | x-space, param  |
+!   A3Sgq_H   | N-space, approx |                 | x,N-space, exact |                  | x-space, param  |
+!   A3Sgg_H   | N-space, approx |                 |                  | x,N-space, exact |                 |                      
 !
 !
 ! Pieces that are going to be needed for my purposes are those from that
