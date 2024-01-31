@@ -1,3 +1,13 @@
+2024-01-31  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/structure_function.f90:
+	Moved the setting of muF and muR to InitStrFcts so that one only
+	has to start once to run with different scales. At the same time
+	streamlined how the scales are passed around and put in some
+	checks that the structure functions are actually called with the
+	scales that they initialised with. Propagated changes to the
+	examples.
+
 2024-01-04 Thu  <gavin.salam@physics.ox.ac.uk>
 
 	* src/NameSelect.pl:

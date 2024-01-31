@@ -39,8 +39,8 @@ program structure_functions_example
          &         order,factscheme_MSbar)
 
   ! Setup all constants and parameters needed by the structure functions
-  call StartStrFct(nloop_coefs, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
-       param_coefs = .true.)
+  call StartStrFct(nloop_coefs, scale_choice = sc_choice, param_coefs&
+       & = .true.)
 
   ! Evolve the PDF
   asQ = 0.35_dp
@@ -52,7 +52,7 @@ program structure_functions_example
   ! Initialise the structure functions using separate orders 
   ! NB: this uses the PDFs that were set up in the streamlined interface
   ! with the hoppetEvolve routine
-  call InitStrFct(nloop_coefs, .true.)
+  call InitStrFct(nloop_coefs, .true., xR = xmur, xF = xmuf)
 
   ! write out the structure functions
   ymax = log(1e5) !ymax=20

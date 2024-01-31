@@ -56,8 +56,8 @@ program structure_functions_benchmark_checks
   ! Setup all constants and parameters needed by the structure functions
   write(6,'(a)') "Initialising coefficient functions for structure functions"
   if (.not. param_coefs) write(6,('(a)')) "NB: this is being done with exact coefficient functions and will take about a minute "
-  call StartStrFct(order_max, xR = xmur, xF = xmuf, scale_choice = sc_choice, &
-       param_coefs = param_coefs, wmass = mw, zmass = mz)
+  call StartStrFct(order_max, scale_choice = sc_choice, param_coefs =&
+       & param_coefs, wmass = mw, zmass = mz)
 
   ! Evolve the PDF
   nloop = 3 ! NNLO evolution
@@ -90,7 +90,7 @@ program structure_functions_benchmark_checks
   
   ! Initialise the structure functions using separate order
   write(6,'(a)') "Initialising tabulated structure functions"
-  call InitStrFct(order_max, .true.)
+  call InitStrFct(order_max, .true., xR = xmur, xF = xmuf)
 
   write(6,'(a)') "Writing structure function benchmarks to ** " // trim(outdir) // "/ ** directory"
   open(unit = 99, file = trim(outdir) // '/structure-functions-Q-2.0-GeV.dat')
