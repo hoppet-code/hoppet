@@ -21,15 +21,15 @@
 !  appr = Not all moments known
 !  parm  = parametrised results
 !
-!             |   BBK   |      KPMV     |      14XX      |2211 + 2311|      MSHT      |
-!   ----------------------------------------------------------------------------------|
-!   A3NSqq_H  | N, appr |               | x,N, exct (06) |           | x, appr, parm  |
-!   A3PSqq_H  | N, appr |               | x,N, exct (03) |           |                | <-- MSHT claim these are subleading
-!   A3Sqg_H   | N, appr |               | x,N, exct (03) |           |                | <-- MSHT claim these are subleading 
-!   A3PShg    | N, appr | x, appr, parm |                | x,N,~exct | x, appr, parm  | <-- 2311.00644 only first-order factorisable
-!   A3PShq    | N, appr | x, appr, parm | x,N, exct (09) |           | x, exct, parm  |
-!   A3Sgq_H   | N, appr |               | x,N, exct (02) |           | x, exct, parm  |
-!   A3Sgg_H   | N, appr |               |                | x,N, exct | x, appr, parm  | 
+!             |   BBK   |      KPMV     |      14XX      |2211 + 2311|      MSHT       |
+!   -----------------------------------------------------------------------------------|
+!   A3NSqq_H  | N, appr |               | x,N, exct (06) |           | x, appr, parm   |
+!   A3PSqq_H  | N, appr |               | x,N, exct (03) |           |                 | <-- MSHT claim these are subleading
+!   A3Sqg_H   | N, appr |               | x,N, exct (03) |           |                 | <-- MSHT claim these are subleading 
+!   A3PShg    | N, appr | x, appr, parm |                | x,N,~exct | x, appr, parm   | <-- 2311.00644 only first-order factorisable
+!   A3PShq    | N, appr | x, appr, parm | x,N, exct (09) |           | x, ~exct, parm  |
+!   A3Sgq_H   | N, appr |               | x,N, exct (02) |           | x, ~exct, parm  |
+!   A3Sgg_H   | N, appr |               |                | x,N, exct | x, appr, parm   | 
 !
 !
 ! Pieces that are going to be needed for my purposes are those from that
