@@ -270,17 +270,26 @@ contains
   ! 
   ! If const is present then it is added to the weight function
   !
-  ! This version expands around the series x~0 for small x to avoid
-  ! numerical issues with convolution of real pieces
+  ! This version expands around the series in powers of
+  ! v=(x-nodes(inode_one))~0 when v is small, to avoid numerical issues
+  ! with convolution of real pieces
   Recursive FUNCTION ig_PolyWeight_expand(F,A,B,nodes,inode_one,EPS,wgtadd) result(cgauss64)
+    use warnings_and_errors
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd
     real(dp) :: zero_nodes(size(nodes)-1), norm_nodes, lcl_wgtadd, expand1, expand2
-    integer  :: i, j, k
+    integer  :: i, j, k, l
     REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
     real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
     real(dp) :: X(12), W(12)
+    ! the expansion threshold determines how close to inode we get
+    ! before we switch to the expansion around inode. The
+    ! switch location is about epsilon**(1/3)*dy, corresponding
+    ! to the fact that we include terms up to (x-inode)**2
+    ! (we assume nodes have relatively uniform spacing). 
+    real(dp), parameter :: expansion_threshold_fraction = 3e-6_dp
+    real(dp) :: expansion_threshold
     interface
        function f(x)
          use types; implicit none
@@ -313,12 +322,19 @@ contains
     end do
     norm_nodes = 1.0_dp / product(nodes(inode_one) - zero_nodes)
     
+    ! use the spacing between the first two nodes to decide the actual
+    ! expansion threshold
+    expansion_threshold = expansion_threshold_fraction * abs(nodes(2) - nodes(1))
     expand1 = zero
     expand2 = zero
-    do i=1, size(zero_nodes)
+    ! GPS 2024-02-06: I think that the code is only correct when nodes(inode_one) is zero
+    ! -- otherwise one should replace -1/zero_nodes(i) with 1/(nodes(inode_one) - zero_nodes(i))
+    if (nodes(inode_one) /= zero) call wae_error("ig_PolyWeight_expand: nodes(inode_one) /= zero but is instead", &
+                               &   dbleval = nodes(inode_one))
+    do i = 1, size(zero_nodes)
        expand1 = expand1 - 1.0_dp / zero_nodes(i)
        do k=i+1, size(zero_nodes)
-          expand2 = expand2 + one/(zero_nodes(i)*zero_nodes(k))
+         expand2 = expand2 + one/(zero_nodes(i)*zero_nodes(k))
        end do
     end do
 
@@ -339,13 +355,17 @@ contains
     S8=0 
     DO I = 1,4 
        U=C2*X(I)
-       if (abs(c1+u).lt.1d-5) then
-          pmult = one + lcl_wgtadd + (c1+u)*expand1 + ((c1+u)**2)*expand2
+       if (abs(c1+u) < expansion_threshold) then
+          ! NB: in situations where lcl_wgtadd is exactly -one, (one +
+          ! lcl_wgtadd) should be evaluated before anything else, giving
+          ! exactly zero, and ensuring that we have high accuracy for
+          ! the remaining terms.
+          pmult = (one + lcl_wgtadd) + (c1+u)*expand1 + ((c1+u)**2)*expand2
        else
           pmult = product(c1+u - zero_nodes) * norm_nodes + lcl_wgtadd
        endif
-       if (abs(c1-u).lt.1d-5) then
-          mmult = one + lcl_wgtadd + (c1-u)*expand1 + ((c1-u)**2)*expand2
+       if (abs(c1-u) < expansion_threshold) then
+          mmult = (one + lcl_wgtadd) + (c1-u)*expand1 + ((c1-u)**2)*expand2
        else
           mmult = product(c1-u - zero_nodes) * norm_nodes + lcl_wgtadd
        endif
@@ -356,13 +376,13 @@ contains
     S16=0 
     DO I = 5,12 
        U=C2*X(I) 
-       if (abs(c1+u).lt.1e-5_dp) then
-          pmult = one + lcl_wgtadd + (c1+u)*expand1 + ((c1+u)**2)*expand2
+       if (abs(c1+u) < expansion_threshold) then
+          pmult = (one + lcl_wgtadd) + (c1+u)*expand1 + ((c1+u)**2)*expand2
        else
           pmult = product(c1+u - zero_nodes) * norm_nodes + lcl_wgtadd
        endif
-       if (abs(c1-u).lt.1e-5_dp) then
-          mmult = one + lcl_wgtadd + (c1-u)*expand1 + ((c1-u)**2)*expand2
+       if (abs(c1-u) < expansion_threshold) then
+          mmult = (one + lcl_wgtadd) + (c1-u)*expand1 + ((c1-u)**2)*expand2
        else
           mmult = product(c1-u - zero_nodes) * norm_nodes + lcl_wgtadd
        endif
