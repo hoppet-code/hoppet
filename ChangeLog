@@ -1,3 +1,44 @@
+2024-02-06 Tue  <gavin.salam@physics.ox.ac.uk>
+
+	Investigation of small differences in PDF outputs (at fairly large x
+	values) between this version of hoppet and 1.2.x series, which are
+	typically of the kind [-5.436262e-05-] v. {+5.436261e-05+},
+	i.e. at the level of 2e-7. Some differences are up to 6e-7 (possibly
+	rounding-amplified), and mostly at larger x values. 
+
+	The differences turn out to be due to the replacement, in
+	convolution.f90, of a call to ig_PolyWeight with one to
+	ig_PolyWeight_expand. The latter uses a second order expansion of the
+	interpolation when close to y=0, which was originally introduced in
+	order to work around issues with coefficient functions (which have
+	[log^n(1-x)]_+ structures that are delicate near x=1). 
+
+	However the transition, at 1e-5, seems to be a bit too early, and
+	should instead be at epsilon**(1/3) * dy. Reducing it changes one
+	structure function "make check" point (F3Z(NNLO), x=1.0000E-04,
+	Q=100; near a zero of F3Z, so extra delicate) by about 1e-6
+	relative; other choices seem stable at the level of 2e-8;
+
+	    -3.8985528E-04:  1e-5 (i.e. original code @f199aac48)
+		-3.8985487E-04:  3e-6_dp
+        -3.8985485E-04:  3e-6_dp * dy (NEW CODE)
+        -3.8985486E-04:  quad precision for interp operations, no expansion
+        -3.8985487E-04"  third order, 1e-4*dy     
+
+	Ultimately, we will go with 3e-6_dp * dy and second order. This
+	change also seems to bring us back in agreement with 1.2.x series
+	for the PDF evolution results (at least for the 7 digits printed in
+	the above test). 
+
+	* src/types.f90:
+	added commented out qp definition
+
+	* src/integrator.f90:
+	switched transition point as indicated above
+
+	* example_f90/structure_functions_example.default_output:
+	changed D3Z point (cf above) from -3.8986E-04 to -3.8985E-04
+
 2024-02-05  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/hoppet_v1.h: Forgot to propagate change in StartStrFct and
