@@ -13,6 +13,7 @@
 module types
   implicit none
   integer, parameter  :: dp = kind(1.0d0), sp = kind(1.0)
+  !integer, parameter  :: qp = selected_real_kind(30)
 end module types
 !----------------------------------------------------------------------
 module consts_dp

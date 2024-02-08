@@ -33,17 +33,24 @@ FFLAGS = -O
 
 # -lgfortran not needed for the gfortran compilations, but it is needed
 # for C++ compilations.
-F90LIB4GCC=   -lgfortran
+#F90LIB4GCC=  -L/opt/homebrew/Cellar/gcc/13.2.0/lib/gcc/13/ -lgfortran
+F90LIB4GCC= -lgfortran
 
 
 LIBS = -L../src -lhoppet_v1 $(F90LIB)
 LHAPDFLIBS = `lhapdf-config --ldflags`
+
+cpp_tabulation_example_qed: cpp_tabulation_example_qed.o
+	$(CXX) -o cpp_tabulation_example_qed $<  $(LIBS) -lm $(F90LIB4GCC)
 
 tabulation_example: tabulation_example.o
 	$(FC) -o tabulation_example $<  $(LIBS) 
 
 cpp_tabulation_example: cpp_tabulation_example.o
 	$(CXX) -o cpp_tabulation_example $<  $(LIBS) -lm $(F90LIB4GCC)
+
+cpp_structure_functions_example: cpp_structure_functions_example.o
+	$(CXX) -o cpp_structure_functions_example $<  $(LIBS) -lm $(F90LIB4GCC)
 
 compare_lhapdf_hoppet: compare_lhapdf_hoppet.o
 	$(FC) -o compare_lhapdf_hoppet $< $(LHAPDFLIBS)  $(LIBS)
@@ -63,5 +70,6 @@ clean:
 	rm *.o
 
 realclean: clean
-	rm convolution_example conveg  tabulation_example
+	rm convolution_example conveg  tabulation_example  cpp_tabulation_example_qed
+
 

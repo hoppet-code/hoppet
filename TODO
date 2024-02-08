@@ -1,3 +1,62 @@
+
+Generic TODO
+============
+- [ ] change mZ from 91.2 to 91.1876±0.0021? (Any impact on results checks? Not used?)
+- [x] similarly, check EM coupling at 0 and mZ
+- [ ] fix welcome message, version numbers and author list (in manual and welcome)
+- [ ] run ordercite (or use equivalent latex package)
+
+QED merging notes (2023-09)
+===========================
+
+- [ ] understand 'CHECK 111 case' warning in qcd_qed_coupling.f90
+- [x] see if any changes were made in lepton structure function work
+      NB: addition of with_Plp_nnloqed in qed_evolution, included 
+      but is the interface right?
+
+- [x] create benchmark / "make check" files?
+      (start from tests/test_qed_lepton_evol.f90? See gen_qed_grid.f90 in photon project)
+
+- [ ] Interface improvements
+  * [ ] create some kind of streamlined interface?      
+  * [x] introduce AllocPdfTableWithLeptons?
+- [ ] documentation
+  * [x] InitQEDSplitMat (and its structure)
+  * [x] AllocPDFWithLeptons
+  * [x] QEDQCDEvolvePDF
+  * [x] EvolvePdfTableQED (+ how to create the correctly-sized table in the first place)
+  * [ ] NB: what do we do with QCDQEDCoupling, which is not currently used?
+  * [x] mention that cached evolution not yet available
+
+- [x] question of global option versus arguments to functions
+  * with_Plq_nnloqed, nqcdloop_qed
+
+- Streamlined interface
+  * [ ] resolve any QED-TBD comments
+  * [ ] make sure table-index handling is back in
+  * [x] introduce hoppetSetQED()
+  * [x] decide muR_Q with QED -> do not support it
+  * [ ] one day, allow for tables with QED convolutions
+    * 1-5 = QCD
+    * 6 = alpha
+    * 7 = alpha * alphas
+    * 8 = alpha^2
+    * 9 = alpha * alphas^2
+- merge from master
+
+Boolean problem when interfacing c++ to fortran
+==============================================
+Passing booleans by reference between c++ and fortran
+does not work; we passed them as integers.
+
+2023-09 Structure function branch merging notes
+===============================================
+- [x] add conditional compilation of hplog5 and exact coefficient functions
+- [ ] add mention of coefficient function to welcome_message
+
+Old notes
+=========
+
 - more explicit error message when coupling is used (un?)initialised
   [and clean up of whole alphas code?]
 
@@ -5,4 +64,6 @@
   operators should become additive rather than multiplicative)
 
 - for version 2: replace evop%cross_mass_threshold with evop%apply_mass_threshold
+
+
 

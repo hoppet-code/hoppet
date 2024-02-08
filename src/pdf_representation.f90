@@ -236,13 +236,14 @@ contains
   !! in the Evln representation they will not accidentally give
   !! something in the human representation.
   subroutine LabelPdfAsRep(q,irep)
-    use random
+    use hoppetrandom
     real(dp), intent(inout) :: q(0:,ncompmin:)
     integer,  intent(in)    :: irep
-    
-    if (ubound(q,dim=2) /= ncompmax) call wae_error('LabelPdfAsRep',&
-         &'upper bound of q does not correspond to ncompmax; it is:',&
-         &intval=ubound(q,dim=2))
+
+    !PN&GZ: need to comment this out for streamlined interface with QED evolution     
+    !if (ubound(q,dim=2) /= ncompmax) call wae_error('LabelPdfAsRep',&
+    !     &'upper bound of q does not correspond to ncompmax; it is:',&
+    !     &intval=ubound(q,dim=2))
 
     if (ubound(q,dim=1) < 4) call wae_error('LabelPdfAsRep',&
          &'grid is too small to hold pdf flavour representation info; size is:',&
@@ -258,7 +259,7 @@ contains
        !q(1,iflv_info)  = one+ran()
        !q(2:,iflv_info) = zero
        q(0,iflv_info)   = pi*1e-1_dp
-       q(1,iflv_info)   = one+ran()
+       q(1,iflv_info)   = one+ran_one()
        q(2:3,iflv_info) = irep*q(0:1,iflv_info)
        q(4:,iflv_info) = zero
     case default
@@ -286,9 +287,10 @@ contains
     real(dp)             :: drep
     real(dp), parameter  :: rep_tolerance = 1e-7_dp
 
-    if (ubound(q,dim=2) /= ncompmax) call wae_error('GetPdfRep',&
-         &'upper bound of q does not correspond to ncompmax; it is:',&
-         &intval=ubound(q,dim=2))
+    !PN&GZ: need to comment this out for streamlined interface with QED evolution         
+    !if (ubound(q,dim=2) /= ncompmax) call wae_error('GetPdfRep',&
+    !     &'upper bound of q does not correspond to ncompmax; it is:',&
+    !     &intval=ubound(q,dim=2))
 
     !if (q(0,iflv_info) == zero .neqv. q(1,iflv_info) == zero) then
     !   call wae_error('GetPdfRep', 'Inconsistent behaviour in iflv_info')

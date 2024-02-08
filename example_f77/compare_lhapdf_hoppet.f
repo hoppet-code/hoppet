@@ -22,7 +22,9 @@ C----------------------------------------------------------------------
 
       ! initialise an LHAPDF set
       !call InitPDFsetByName("cteq61.LHgrid")
-      call InitPDFsetByName("CT10nlo.LHgrid")
+      !call InitPDFsetByName("CT10nlo.LHgrid")
+      !call InitPDFsetByName("PDF4LHC15_nnlo_30")
+      call InitPDFsetByName("CT18NLO")
       call InitPDF(0)
 
       ! start the dglap evolution/convolution package 
@@ -32,7 +34,7 @@ C----------------------------------------------------------------------
       Qmin  = 1.0d0     ! smallest Q value in tabulation
       Qmax  = 1d4       ! largest Q value in tabulation
       dlnlnQ = dy/4.0d0 ! tabulation spacing in dlnlnQ (dy/4 recommended)
-      nloop = 2         ! the number of loops to initialise (max=3!)
+      nloop = 3         ! the number of loops to initialise (max=3!)
       order = -6        ! numerical interpolation order (-6 is a good choice)
       scheme = 1        ! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
 

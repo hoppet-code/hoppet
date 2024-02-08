@@ -1,0 +1,200 @@
+\documentclass[preprint,1p,a4paper,11pt]{elsarticle}
+\biboptions{sort&compress}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs,cellspace}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{xspace}
+\usepackage{adjustbox}
+% for \sout
+\usepackage[normalem]{ulem}
+%\usepackage{fullpage}
+\usepackage{geometry}
+\usepackage{fancyhdr}       % headers and footers
+\usepackage{listings}
+
+\geometry{margin=25mm,
+    headheight=110pt,
+    footskip=30pt
+}
+%\geometry{margin=2.5cm}
+
+\newcommand{\myparagraph}{\paragraph}
+
+\newcommand{\as}{\ensuremath{\alpha_s}\xspace}
+
+\newcommand{\mb}{\ensuremath{\,\mathrm{mb}}\xspace}
+\newcommand{\fb}{\ensuremath{\,\mathrm{fb}}\xspace}
+\newcommand{\pb}{\ensuremath{\,\mathrm{pb}}\xspace}
+\newcommand{\nb}{\ensuremath{\,\mathrm{nb}}\xspace}
+\newcommand{\GeV}{\ensuremath{\,\mathrm{GeV}}\xspace}
+\newcommand{\TeV}{\ensuremath{\,\mathrm{TeV}}\xspace}
+\newcommand{\mur}{\ensuremath{{\mu_{\mathrm{R}}}}\xspace}
+\newcommand{\muf}{\ensuremath{{\mu_{\mathrm{F}}}}\xspace}
+\newcommand{\muR}{\ensuremath{{\mu_{\mathrm{R}}}}\xspace}
+\newcommand{\muF}{\ensuremath{{\mu_{\mathrm{F}}}}\xspace}
+\newcommand{\nnlo}{\text{NNLO}\xspace}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\NC}{\mathrm{NC}}
+\newcommand{\CC}{\mathrm{CC}}
+\newcommand{\hoppet}{\textsc{hoppet}\xspace}
+\newcommand{\apfel}{APFEL++}
+\newcommand{\ttt}[1]{\texttt{#1}}
+\newcommand{\MSbar}{\overline{\mathrm{MS}}}
+\newcommand{\repolink}[2]{\href{https://github.com/hoppet-code/hoppet/blob/master/#1}{\ttt{#2}}}
+\newcommand{\masterlink}[1]{\repolink{#1}{#1}}
+
+\newcommand{\order}[1]{\mathcal{O}\left(#1\right)}
+\newcommand\sss{\mathchoice%
+{\displaystyle}%
+{\scriptstyle}%
+{\scriptscriptstyle}%
+{\scriptscriptstyle}%
+}
+\newcommand{\ydis}{y}
+\newcommand{\xdis}{x}
+
+%---------- author comments -------------------
+\definecolor{darkgreen}{rgb}{0,0.4,0}
+\definecolor{grey}{rgb}{0.5,0.5,0.5}
+\definecolor{orange}{rgb}{0.9,0.5,0.0}
+\definecolor{lightblue}{rgb}{0.0,0.5,1.0}
+\usepackage[dvipsnames]{xcolor}
+% \newcommand{\comment}[1]{\textcolor{red}{{\bf [#1]}}}
+% \newcommand{\ak}[1]{\textcolor{violet}{{\bf [#1]$_{\text{AK}}$}}}
+% \newcommand{\gps}[1]{{\textcolor{red}{\comment{#1}$_\text{GPS}$}}}
+% \newcommand{\commentgz}[1]{{\color{red} [\it GZ:  #1}]}
+% \newcommand{\commentpn}[1]{{\color{darkgreen} [\bf #1]$_\text{PN}$}}
+
+\definecolor{comment}{rgb}{0,0.3,0}
+\definecolor{identifier}{rgb}{0.0,0,0.3}
+
+\lstset{language=Fortran}
+\lstset{
+  columns=flexible,
+  basicstyle=\tt\footnotesize,
+  keywordstyle=,
+  identifierstyle=\color{black},
+  commentstyle=\tt\color{comment},
+  mathescape=true,
+  escapebegin=\color{comment},
+  showstringspaces=false,
+  keepspaces=true
+}
+
+% We need slightly different text in the manual and in the release note.
+\newif\ifreleasenote
+\releasenotetrue % comment out to hide answers
+
+\journal{European Physical Journal C}
+
+\begin{document}
+\begin{frontmatter}
+\begin{flushright}
+CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
+\end{flushright}
+\title{\hoppet{} {\tt v1.3.0} release note}
+
+%\preprint{CERN-TH-2023-???}
+
+\author[1]{Alexander Karlberg}\ead{alexander.karlberg@cern.ch}
+\author[2]{Paolo Nason}\ead{paolo.nason@mib.infn.it}
+\author[3,4]{Gavin Salam}\ead{gavin.salam@physics.ox.ac.uk}
+\author[5,6]{Giulia Zanderighi}\ead{zanderi@mpp.mpg.de}
+\author[3]{Fr\'ed\'eric Dreyer}\ead{frederic.dreyer@gmail.com}
+
+\affiliation[1]{organization={CERN, Theoretical Physics Department}, postcode={CH-1211} ,city={Geneva 23}, country={Switzerland}}
+\affiliation[2]{organization={INFN, Sezione di Milano-Bicocca, and Universita di Milano-Bicocca, \mbox{Piazza della Scienza 3}}, postcode={20126} ,city={Milano}, country={Italy}}
+\affiliation[3]{organization={Rudolf Peierls Centre for Theoretical Physics, Clarendon Laboratory, Parks Road}, postcode={OX1 3PU} ,city={Oxford}, country={UK}}
+\affiliation[4]{organization={All Souls College}, postcode={OX1 4AL,} ,city={Oxford}, country={UK}}
+\affiliation[5]{organization={Max-Planck-Institut fur Physik, Boltzmannstr. 8}, postcode={85748} ,city={Garching}, country={Germany}}
+\affiliation[6]{organization={Physik-Department, Technische Universitat Munchen, James-Franck-Strasse 1}, postcode={85748} ,city={Garching}, country={Germany}}
+
+\begin{abstract}
+  We document the two main new features in release 1.3.0 of the
+  \hoppet parton distribution function evolution code, specifically
+  support for QED evolution to an accuracy phenomenologically equivalent to NNLO QCD, 
+  and for the determination of hadronic
+  structure functions for massless quarks up to N$^3$LO. 
+\end{abstract}
+
+\begin{keyword}
+  Perturbative QCD \sep DIS \sep DGLAP \sep QED
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+
+\hoppet is a parton distribution function (PDF) evolution code written
+in Fortran~95, with interfaces also for C/C++ and earlier dialects of
+Fortran.
+%
+It offers both a high-level PDF evolution interface and user-access to
+lower-level functionality for operations such as convolutions of
+coefficient functions and PDFs, and is designed to provide flexible and
+fast evolution.
+
+This release note documents two major additions to \hoppet, made
+available as part of release~1.3.0: (1) support for QED evolution,
+originally developed as part of the LuxQED project for the evaluation
+of the photon density inside a proton and its extension to lepton
+distributions in the
+proton~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf};
+%
+and (2) support for the
+determination of hadronic structure functions, as initially developed
+for calculations of vector-boson fusion cross
+sections~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
+
+This release also includes a range of other smaller additions relative
+to the original 1.1.0 release documented in
+\cite{Salam:2008qg}.
+%
+Unified documentation of the whole \hoppet package is part of the
+distribution at \url{https://github.com/hoppet-code/hoppet} in the
+\masterlink{doc/} directory.
+%
+Details of the other changes since release 1.1.0 can be found in the
+\masterlink{NEWS} and \masterlink{ChangeLog} files from the
+repository.
+
+
+
+\input{qed-and-structure-functions.tex}
+
+%======================================================================
+\section{Conclusion}
+
+The \hoppet additions described here provide fast access to QED
+evolution and to structure-function calculations, which we hope may be
+of benefit beyond the projects where they have already been used.
+
+
+\section*{Acknowledgments}
+
+GPS wishes to acknowledge funding from a Royal Society Research
+Professorship (grant RP$\backslash$R$\backslash$231001) and from the Science and
+Technology Facilities Council (STFC) under grant ST/X000761/1.
+%
+PN thanks the Humboldt Foundation for support. 
+%
+We gratefully acknowledge the work of Luca Buonocore
+for the implementation of the $P_{lq}$ splitting function in the QED code.
+% 
+We also wish to thank Juan Rojo for useful discussions. 
+
+\bibliographystyle{elsarticle-num}
+\bibliography{hoppet.bib}
+%\input{bibliography.tex}
+
+\end{document}
+

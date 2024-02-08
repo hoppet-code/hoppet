@@ -4,6 +4,7 @@
 
 installationdir=@prefix@
 moddir=@modprefix@
+version=@VERSION@
 
 # print a usage message and exit
 # exit code passed as argument:
@@ -18,6 +19,7 @@ Usage:
   --cxxflags   returns the compilation flags to be used with C++ programs
   --fflags     returns the compilation flags to be used with a fortran(90) compiler
   --libs       returns the flags to pass to the linker
+  --version    returns the version number
 
 NOTE: --libs does not currently provide access to the system f90 libraries, 
       which may be needed if you link a program with a c++ compiler
@@ -53,6 +55,9 @@ for arg do
 	  ;;
 	--libs|--ldflags)
 	  echo -L$installationdir/lib -lhoppet_v1
+	  ;;
+	--version)
+	  echo $version
 	  ;;
 	*)
 	    write_error "$arg is not a valid argument"

@@ -9,5 +9,13 @@ module hoppet_v1
   use qcd_coupling
   use qcd
   use pdf_tabulate
+
+  ! extra QED things
+  use qed_evolution
+  use qed_objects
+  use qed_coupling_module
+
+  use structure_functions
+  use coefficient_functions_holder_exact
   implicit none
 end module hoppet_v1

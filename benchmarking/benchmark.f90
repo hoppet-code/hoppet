@@ -110,7 +110,7 @@ end module parton_distributions
 program main_tablevogt
   ! local things
   use parton_distributions
-  use NameSelect; use sub_defs_io
+  use NameSelect; use sub_defs_io, int_value => value
   ! hoppet
   use hoppet_v1
   implicit none

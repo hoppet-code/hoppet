@@ -1,0 +1,11 @@
+#+TITLE: README for inclusion of QED corrections in hoppet
+
+* Steps [1/2]
+
+  - [X] get a QED coupling and test it [2/2]
+    - [X] test threshold determination
+    - [X] test values that come out at Z scale
+
+  - [ ] decide whether to have separate array for QED part of common
+    one 
+

@@ -823,7 +823,7 @@ contains
     case(nnlo_nfthreshold_param)
        call InitGridConv(grid, MTM%PSHg, sf_A2PShg_vogt)
        call wae_warn(warn_param,'InitMTMNNLO:&
-            & using parametrisation  (less accuracte) for A2PShg')
+            & using parametrisation  (less accurate) for A2PShg')
     case(nnlo_nfthreshold_exact)
        call InitGridConv(grid, MTM%PSHg, sf_A2PShg)
     case default
@@ -945,6 +945,7 @@ contains
     type(mass_threshold_mat), intent(inout) :: MTM
     call Delete(MTM%PSHq)
     call Delete(MTM%PSHg)
+    call Delete(MTM%PShg_MSbar)
     call Delete(MTM%NSqq_H)
     call Delete(MTM%Sgg_H)
     call Delete(MTM%Sgq_H)

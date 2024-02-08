@@ -1,6 +1,6 @@
 
 !!
-!! Module generated automatically by NameSelect.pl
+!! Module generated automatically by ../scripts/NameSelect.pl ../src/dglap_choices.f90
 !! Provides conversion from string codes to integer codes
 !!
 module NameSelect
@@ -13,10 +13,8 @@ module NameSelect
   public :: NameOfCode
   public :: code_val_opt
 
-  integer, parameter :: maxlen_name = 40
-  integer, parameter :: maxlen_longname = 120
+  integer, parameter :: maxlen_name = 180
   integer, parameter, public :: NameSelect_maxlen_name = maxlen_name
-  integer, parameter, public :: NameSelect_maxlen_longname = maxlen_longname
 
 contains
 
@@ -54,6 +52,8 @@ contains
       code = factscheme_DIS
     case('factscheme_PolMSbar')
       code = factscheme_PolMSbar
+    case('factscheme_FragMSbar')
+      code = factscheme_FragMSbar
     case default
       if (present(status)) then
         status = -1
@@ -151,6 +151,10 @@ contains
 
     if (PrefixMatches('factscheme_PolMSbar',prefix) .and. code == factscheme_PolMSbar) then
        nocc = nocc + 1; name = 'factscheme_PolMSbar'
+    end if
+
+    if (PrefixMatches('factscheme_FragMSbar',prefix) .and. code == factscheme_FragMSbar) then
+       nocc = nocc + 1; name = 'factscheme_FragMSbar'
     end if
 
     ! common-code resumes

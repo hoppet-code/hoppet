@@ -4,7 +4,11 @@ module streamlined_interface
   use convolution; use pdf_general; use dglap_objects
   use dglap_holders; use pdf_general; use dglap_choices
   use qcd_coupling
+  use qed_evolution
+  use qed_objects
+  use qed_coupling_module
   use qcd, only: quark_masses_def
+  use warnings_and_errors
   implicit none
 
   !! holds information about the grid
@@ -21,7 +25,7 @@ module streamlined_interface
   !!
   !! The array gets initialised in hoppetStartExtended
   integer, save :: table_index_from_iloop(1:111) = -1
-  integer, parameter :: max_table_index = 7
+  integer, parameter :: max_table_index = 15
 
   !!
   !! NB (2012-12-24): 
@@ -39,9 +43,17 @@ module streamlined_interface
   integer,  save :: ffn_nf = -1
   logical,  save :: quark_masses_are_MSbar = .false.
   real(dp), save :: masses(4:6) = quark_masses_def(4:6)
+  !! Additional things for QED
+  !integer,  save            :: nqcdloop_qed
+  type(qed_coupling),  save :: coupling_qed
+  type(qed_split_mat),  save :: qed_split
+  logical,  save :: with_qed = .false.
+  real(dp), save :: effective_light_quark_masses = 0.109_dp
+  integer,  save :: with_nqcdloop_qed = 0
+  logical,  save :: with_Plq_nnloqed = .false.
 
 contains
-
+  
   !----------------------------------------------------------------------
   ! returns the value of the table index for the given iloop and
   ! ensures that the table is actually set up (working down recursively
@@ -107,6 +119,30 @@ contains
   
 end module streamlined_interface
 
+!======================================================================
+!! This routine should be called before hoppetStart if one wants
+!! to include QED evolution. Note that it affects expected upper
+!! bounds for all routines that set and access the PDFs
+!!
+!! - use_qed: if true, QED evolution will be included
+!! - use_qcd_qed: if true, the mixed alpha_s*alpha splitting functions will be included
+!! - use_Plq_nnlo: if true, the NNLO Plq splitting functions will be included
+subroutine hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
+  use streamlined_interface
+  use qed_evolution
+  implicit none
+  logical, intent(in)  :: use_qed
+  logical, intent(in)  :: use_qcd_qed, use_Plq_nnlo
+  write(*,*) 'hoppetSetQED: use_qed, use_qcd_qed, use_Plq_nnlo=', &
+       & use_qed, use_qcd_qed, use_Plq_nnlo
+  with_qed = use_qed
+  if (use_qcd_qed) then 
+    with_nqcdloop_qed = 1
+  else
+    with_nqcdloop_qed = 0
+  end if
+  with_Plq_nnloqed = use_Plq_nnlo
+end subroutine hoppetSetQED
 
 !======================================================================
 !! initialise the underlying grid, splitting functions and pdf-table
@@ -152,22 +188,27 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   ! accuracy is slightly reduced)
   !order = -5 
   ! Now create a nested grid
-  call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
-  call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
-  call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
-  call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
-  call InitGridDef(grid,gdarray(1:4),locked=.true.)
+  !call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
+  !call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp, order=order)
+  !call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp, order=order)
+  !call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
+  !call InitGridDef(grid,gdarray(1:4),locked=.true.)
 
-  ! Fill the array that will be used for table index lookup (e.g. 21 is PNLO*PLO).
-  ! For now do it by hand; one day we might automate this;
-  ! entries that aren't filled are automatically -1
-  do iloop = 1, nloop
-     table_index_from_iloop(iloop) = iloop
-  end do
-  table_index_from_iloop(11)  = 4
-  table_index_from_iloop(111) = 5
-  if (nloop >= 2) table_index_from_iloop(12)  = 6
-  if (nloop >= 2) table_index_from_iloop(21)  = 7
+  ! as of 2016-05-26, better to use the "central" facility for
+  ! producing a nested grid (which has the same nested grid structure
+  ! as above)
+  call InitGridDefDefault(grid, dy, ymax, order)
+  
+  ! ! Fill the array that will be used for table index lookup (e.g. 21 is PNLO*PLO).
+  ! ! For now do it by hand; one day we might automate this;
+  ! ! entries that aren't filled are automatically -1
+  ! do iloop = 1, nloop
+  !    table_index_from_iloop(iloop) = iloop
+  ! end do
+  ! table_index_from_iloop(11)  = 4
+  ! table_index_from_iloop(111) = 5
+  ! if (nloop >= 2) table_index_from_iloop(12)  = 6
+  ! if (nloop >= 2) table_index_from_iloop(21)  = 7
 
   ! if the allocation has already been done previously, delete
   ! the existing tables and dglap holder to avoid a memory leak
@@ -179,12 +220,23 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
-  call AllocPdfTable(grid, tables(:), Qmin, Qmax, & 
-       & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
+
+  if(with_qed) then
+     call AllocPdfTableWithLeptons(grid, tables(:), Qmin, Qmax, & 
+          & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
+  else
+     call AllocPdfTable(grid, tables(:), Qmin, Qmax, & 
+          & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
+  endif
 
   ! initialise splitting-function holder
   call InitDglapHolder(grid,dh,factscheme=factscheme,&
        &                      nloop=nloop,nflo=3,nfhi=6)
+
+  if(with_qed) then
+     call InitQEDSplitMat(grid, qed_split)
+  endif
+  
   ! choose a sensible default number of flavours.
   call SetNfDglapHolder(dh,nflcl=5)
 
@@ -205,7 +257,11 @@ subroutine hoppetAssign(pdf_subroutine)
   use streamlined_interface ! this module which provides access to the array of tables
   implicit none
   interface ! indicate what "interface" pdf_subroutine is expected to have
-     subroutine pdf_subroutine(x,Q,res)
+    !! It expects pdf_subroutine to set components -6:6 with plain QCD evolution,
+	  !! but the full size of the flavour dimension if the upper limit
+	  !! is anything other than ncompax=7 (e.g. for QED evolution 
+	  !! it should go from -6 to ncompmaxLeptons=11).
+    subroutine pdf_subroutine(x,Q,res)
        use types; implicit none
        real(dp), intent(in)  :: x,Q
        real(dp), intent(out) :: res(*)
@@ -229,13 +285,18 @@ end subroutine hoppetAssign
 !! Given a pdf_subroutine with the interface shown below, fill the 
 !! table by evolving the PDF from scale Q0pdf, with alphas provided 
 !! at scale Q0alphas
-subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
-  use streamlined_interface ! this module which provides access to the array of tables implicit none
+subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
+  use streamlined_interface ! this module which provides access to the array of tables
+  use pdf_representation
   implicit none
   real(dp), intent(in) :: asQ0, Q0alphas, muR_Q, Q0pdf
   integer,  intent(in) :: nloop
   interface ! indicate what "interface" pdf_subroutine is expected to have
-     subroutine pdf_subroutine(x,Q,res)
+    !! It expects pdf_subroutine to set components -6:6 with plain QCD evolution,
+	  !! but the full size of the flavour dimension if the upper limit
+	  !! is anything other than ncompax=7 (e.g. for QED evolution 
+	  !! it should go from -6 to ncompmaxLeptons=11).
+    subroutine pdf_subroutine(x,Q,res)
        use types; implicit none
        real(dp), intent(in)  :: x,Q
        real(dp), intent(out) :: res(*)
@@ -243,9 +304,15 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
   end interface
   !! hold the initial pdf
   real(dp), pointer :: pdf0(:,:)
-
   ! create our internal pdf object for the initial condition
-  call AllocPDF(grid, pdf0)
+  if(with_qed) then
+     !write(*,*)'***********HoppetEvolve, before AllocPDFWithLeptons'
+     call AllocPDFWithLeptons(grid, pdf0)
+  else
+     call AllocPDF(grid, pdf0)
+  endif
+
+  !write(*,*)'***********HoppetEvolve, before InitPDF_LHAPDF'
   call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0pdf)
 
   ! get a running coupling with the desired scale
@@ -258,12 +325,24 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
           &                   quark_masses=masses, &
           &                   masses_are_MSbar = quark_masses_are_MSbar)
   end if
+  if(with_qed) then
+     call InitQEDCoupling(coupling_qed, effective_light_quark_masses, masses(4:6))
+  endif
   call AddNfInfoToPdfTable(tables,coupling)
   coupling_initialised = .true.
 
   ! create the tabulation
-  call EvolvePdfTable(tables(0), Q0pdf, pdf0, dh, muR_Q=muR_Q, &
-       &              coupling=coupling, nloop=nloop)
+  if(with_qed) then
+     if(muR_Q /= 1) then
+        call wae_error("hoppetEvolve", "muR_Q /= 1 not allowed if qed is included")
+     endif
+     !write(*,*)'***********HoppetEvolve, before EvolvePdfTableQED'
+     call EvolvePdfTableQED(tables(0), Q0pdf, pdf0, dh, qed_split, &
+          coupling, coupling_qed, nloop, with_nqcdloop_qed, with_Plq_nnloqed)
+  else
+     call EvolvePdfTable(tables(0), Q0pdf, pdf0, dh, muR_Q=muR_Q, &
+          &              coupling=coupling, nloop=nloop)
+  endif
 
   ! indicate that table(0) has been set up
   setup_done(0)  = .true.
@@ -273,7 +352,8 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine, Q0pdf)
   setup_done(1:) = .false.
 
   ! clean up
-  call Delete(pdf0)
+  call Delete(pdf0) 
+  
 end subroutine hoppetEvolve
 
 
@@ -284,6 +364,8 @@ subroutine hoppetPreEvolve(asQ0, Q0alphas, nloop, muR_Q, Q0pdf)
   implicit none
   real(dp), intent(in) :: asQ0, Q0alphas, muR_Q, Q0pdf
   integer,  intent(in) :: nloop
+
+  if (with_qed) call wae_error("hoppetPreEvolve","Does not support QED evolution")
 
   ! get a running coupling with the desired scale
   if (coupling_initialised) call Delete(coupling) 
@@ -319,6 +401,8 @@ subroutine hoppetCachedEvolve(pdf_subroutine)
   end interface
   !! hold the initial pdf
   real(dp), pointer :: pdf0(:,:)
+
+  if (with_qed) call wae_error("hoppetCachedEvolve","Does not support QED evolution")
 
   ! create our internal pdf object for the initial condition
   call AllocPDF(grid, pdf0)
@@ -411,17 +495,43 @@ subroutine hoppetSetMSbarMassVFN(mc,mb,mt)
   quark_masses_are_MSbar = .true.
 end subroutine hoppetSetMSbarMassVFN
 
+!======================================================================
+!! Arrange for the use of exact NNLO splitting and mass-threshold
+!! functions.
+subroutine hoppetSetExactDGLAP(exact_nfthreshold, exact_splitting)
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  logical :: exact_nfthreshold, exact_splitting
+
+  if(exact_nfthreshold) call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
+  if(exact_splitting) call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
+
+end subroutine hoppetSetExactDGLAP
+
 
 !======================================================================
-!! Return in f(-6:6) the value of the internally stored pdf at the
+!! Assuming this is called with an array starting at index -6, return in f(-6:6) 
+!! the value of the internally stored pdf at the
 !! given x,Q, with the usual LHApdf meanings for the indices -6:6.
+!!
+!! If QED has been enabled, the indices that will be set are 
+!! f(-6:ncompmaxLeptons), where ncompmaxLeptons=11.
+!! NB: f(7) is a dummy entry, f(8) is the photon and f(9:11) are 
+!! of (e+ + e-), (mu+ + mu-) and (tau+ + tau-)
 subroutine hoppetEval(x,Q,f)
-  use streamlined_interface
+  use streamlined_interface; use pdf_representation
   implicit none
   real(dp), intent(in)  :: x, Q
-  real(dp), intent(out) :: f(-6:6)
-  
-  call EvalPdfTable_xQ(tables(0),x,Q,f)
+  ! the interface does pass the size of the array, but the functions we
+  ! call have interfaces that do need the size; so here give it a dummy
+  ! value that is the largest that could ever be used. The functions
+  ! that we call will fill -6:6 with normal QCD evolution set and
+  ! -6:ncompmaxLeptons with QED evolution set.
+  !real(dp), intent(out) :: f(-6:ncompmaxLeptons) ! QED-TBD [check it still works without QED]
+  !call EvalPdfTable_xQ(tables(0),x,Q,f)
+
+  real(dp), intent(out) :: f(*) ! QED-TBD [check it still works without QED]
+  call EvalPdfTable_xQ(tables(0),x,Q,f(1:tables(0)%tab_iflv_max-ncompmin+1))
 end subroutine hoppetEval
 
 
@@ -462,9 +572,10 @@ subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
   real(dp), intent(out) :: f(-6:6)
   integer :: iQ, tabindex
 
+  if (with_qed) call wae_error("hoppetEvalSplit","Does not support QED evolution")
+
   tabindex = tableIndexValue(iloop, nf)
   call EvalPdfTable_xQ(tables(tabindex),x,Q,f)
 
 end subroutine hoppetEvalSplit
-
 

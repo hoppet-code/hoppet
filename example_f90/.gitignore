@@ -4,8 +4,12 @@
 /.makef95.prefix
 /Makefile
 /Makefile.bak
+/coefficient_functions_test
+/hplog5_tests
+/structure_functions_example
 /sumrules
 /tabulation_example
 /tabulation_example_2
+/tabulation_example_qed
 /tabulation_example_streamlined
 tabulation_example_diehl_crosschecks

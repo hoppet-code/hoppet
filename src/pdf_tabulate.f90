@@ -66,6 +66,12 @@ module pdf_tabulate
      type(evln_operator), pointer :: evops(:)
      integer                      :: StartScale_iQlo
      real(dp)                     :: StartScale
+
+     ! for some purposes (e.g. structure function work), it is useful
+     ! for the table to have a user-tuned maximum iflv value (this
+     ! affects the range used for interpolation rather than for
+     ! allocation of the table itself)
+     integer :: tab_iflv_max = iflv_max
   end type pdf_table
   public :: pdf_table
 
@@ -83,6 +89,17 @@ module pdf_tabulate
      module procedure pdftab_AllocTab_, pdftab_AllocTab_fromorig,&
           & pdftab_AllocTab_1d, pdftab_AllocTab_fromorig_1d
   end interface
+
+  interface AllocPdfTableWithPhoton
+     module procedure pdftab_AllocTabWithPhoton_, pdftab_AllocTabWithPhoton_1d
+  end interface
+  public :: AllocPdfTableWithPhoton
+
+  interface AllocPdfTableWithLeptons
+     module procedure pdftab_AllocTabWithLeptons_, pdftab_AllocTabWithLeptons_1d
+  end interface
+  public :: AllocPdfTableWithLeptons  
+
 
   interface AddNfInfoToPdfTable
      module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
@@ -104,7 +121,7 @@ module pdf_tabulate
 
   public :: AllocPdfTable, FillPdfTable_f90sub
   public :: AddNfInfoToPdfTable
-  public :: EvolvePdfTable, PreEvolvePdfTable
+  public :: EvolvePdfTable, PreEvolvePdfTable, EvolvePdfTableQED
   public :: EvolvePdfTableGen
   public :: EvalPdfTable_yQ, EvalPdfTable_xQ, EvalPdfTable_Q
   public :: Delete
@@ -125,13 +142,15 @@ contains
   !!
   !! If the pdf_table had previously been allocated, then delete its
   !! contents before the new allocations
-  subroutine pdftab_AllocTab_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+  !!
+  subroutine pdftab_AllocTab_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table)
     type(grid_def),    intent(in)    :: grid
     type(pdf_table),   intent(inout) :: tab
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
     integer,  intent(in), optional :: lnlnQ_order
     logical,  intent(in), optional :: freeze_at_Qmin
+    integer,  intent(in), optional :: iflv_max_table
     !----------------------------------------------
     integer :: iQ
 
@@ -156,7 +175,12 @@ contains
     nullify(tab%evops)
 
     !write(0,*) 'pdf_table info: Number of Q bins is ',tab%nQ
-    call AllocPDF(grid,tab%tab,0,tab%nQ)
+    if (present(iflv_max_table)) then
+       call AllocGridQuant(grid, tab%tab, iflv_min, iflv_max_table, 0, tab%nQ)
+       if (iflv_max_table /= ncompmax) tab%tab_iflv_max = iflv_max_table
+    else
+       call AllocPDF(grid,tab%tab,0,tab%nQ)
+    end if
     allocate(tab%lnlnQ_vals(0:tab%nQ))
     allocate(tab%Q_vals(0:tab%nQ))
     do iQ = 0, tab%nQ
@@ -172,19 +196,66 @@ contains
   
   !---------------------------------------------------------
   !! 1d overloaded version of AllocPdfTable
-  subroutine pdftab_AllocTab_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+  subroutine pdftab_AllocTab_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table)
     type(grid_def),    intent(in)     :: grid
     type(pdf_table),   intent(inout)  :: tab(:)
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
     integer,  intent(in), optional :: lnlnQ_order
     logical,  intent(in), optional :: freeze_at_Qmin
+    integer,  intent(in), optional :: iflv_max_table
     integer :: i
 
     do i = 1, size(tab)
-       call pdftab_AllocTab_(grid, tab(i), Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+       call pdftab_AllocTab_(grid, tab(i), Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table)
     end do
   end subroutine pdftab_AllocTab_1d
+
+
+ subroutine pdftab_AllocTabWithPhoton_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+   use qed_objects
+   type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab
+    real(dp), intent(in)           :: Qmin, Qmax
+    real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
+    call AllocPdfTable(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table=ncompmaxPhoton)
+  end subroutine pdftab_AllocTabWithPhoton_
+  
+  subroutine pdftab_AllocTabWithPhoton_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+    use qed_objects
+    type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab(:)
+    real(dp), intent(in)           :: Qmin, Qmax
+    real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
+    call AllocPdfTable(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table=ncompmaxPhoton)
+  end subroutine pdftab_AllocTabWithPhoton_1d
+  
+
+  subroutine pdftab_AllocTabWithLeptons_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+   use qed_objects
+   type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab
+    real(dp), intent(in)           :: Qmin, Qmax
+    real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
+    call AllocPdfTable(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table=ncompmaxLeptons)
+  end subroutine pdftab_AllocTabWithLeptons_
+  
+  subroutine pdftab_AllocTabWithLeptons_1d(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+    use qed_objects
+    type(grid_def),    intent(in)    :: grid
+    type(pdf_table),   intent(inout) :: tab(:)
+    real(dp), intent(in)           :: Qmin, Qmax
+    real(dp), intent(in), optional :: dlnlnQ
+    integer,  intent(in), optional :: lnlnQ_order
+    logical,  intent(in), optional :: freeze_at_Qmin
+    call AllocPdfTable(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table=ncompmaxLeptons)
+  end subroutine pdftab_AllocTabWithLeptons_1d
 
 
   !---------------------------------------------------------------
@@ -210,7 +281,7 @@ contains
     type(pdf_table), intent(inout) :: tab
     type(running_coupling), intent(in) :: coupling
     !-----------------------------------
-    integer  :: nflcl, iQ_prev, iQ
+    integer  :: nflcl, iQ_prev, iQ, iflv_max_table
     real(dp) :: Qlo, Qhi, Qhi_test
     type(pdfseginfo), pointer :: seginfo
 
@@ -219,6 +290,7 @@ contains
     !     &'nf info already associated: delete it first')
 
     ! We will be reallocating everything here, so first clean up
+    iflv_max_table = ubound(tab%tab,dim=2)
     call Delete(tab)
     tab%dlnlnQ = zero ! will no longer be useful...
 
@@ -277,9 +349,10 @@ contains
          & 'Could be due to coupling having more restricted range?')
 
 
-    ! now reallocate things?
+    ! now reallocate things. 
     tab%nQ = tab%seginfo(tab%nfhi)%ilnlnQ_hi
-    call AllocPDF(tab%grid,tab%tab,0,tab%nQ)
+    ! copy across the iflv_max used in the original version of the table
+    call AllocGridQuant(tab%grid, tab%tab, iflv_min, iflv_max_table, 0, tab%nQ)
     allocate(tab%lnlnQ_vals(0:tab%nQ))
     allocate(tab%Q_vals(0:tab%nQ))
     allocate(tab%nf_int(0:tab%nQ))
@@ -300,7 +373,6 @@ contains
     
     ! REMEMBER TO COMPLETE FROM ORIG...
     tab%nf_info_associated = .true.
-    !write(0,*) 'pdf_table info: Number of Q bins changed to ',tab%nQ
   end subroutine AddNfInfoToPdfTable
 
 
@@ -327,12 +399,15 @@ contains
   !! tab are not however copied.
   !! 
   subroutine pdftab_AllocTab_fromorig(tab, origtab)
-    type(pdf_table), intent(inout) :: tab
-    type(pdf_table), intent(in)    :: origtab
-
+    type(pdf_table), intent(out) :: tab
+    type(pdf_table), intent(in)  :: origtab
+    integer                      :: iflv_max_table
+    
     tab = origtab
-    !-- this is the only thing that is not taken care of...
-    call AllocPDF(tab%grid,tab%tab,0,tab%nQ)
+    !-- the next things are those not taken care of automatically by the assignment;
+    !   we allow for arbitrary numbers of flavours
+    iflv_max_table = ubound(tab%tab,dim=2)
+    call AllocGridQuant(tab%grid, tab%tab, iflv_min, iflv_max_table, 0, tab%nQ)
     allocate(tab%lnlnQ_vals(0:tab%nQ))
     tab%lnlnQ_vals = origtab%lnlnQ_vals
     allocate(tab%Q_vals(0:tab%nQ))
@@ -428,7 +503,7 @@ contains
     integer :: iQ
     real(dp) :: Q
     do iQ = 0, tab%nQ
-       Q = invlnln(tab,tab%lnlnQ_min + iQ*tab%dlnlnQ)
+       Q = tab%Q_vals(iQ)
        call InitPDF_LHAPDF(tab%grid, tab%tab(:,:,iQ), LHAsub, Q)
     end do
   end subroutine FillPdfTable_LHAPDF
@@ -612,9 +687,78 @@ contains
   end subroutine EvolvePdfTableGen
 
 
+  !---------------------------------------------------------------------
+  !! Routine for creating a QED evolution table. It assumes the tabulation
+  !! has been set up with the correct size, etc.
+  !!
+  subroutine EvolvePdfTableQED(tab, StartScale, StartDist, dh, qed_sm, &
+       & coupling_qcd, coupling_qed, &
+       & nloop_qcd, nqcdloop_qed_arg, with_Plq_nnloqed)
+    use qed_evolution; use qed_coupling_module; use qed_objects
+    type(pdf_table),           intent(inout) :: tab
+    real(dp),               intent(in)    :: StartScale
+    type(dglap_holder),     intent(in)    :: dh
+    type(qed_split_mat),    intent(in)    :: qed_sm
+    type(running_coupling), intent(in)    :: coupling_qcd
+    type(qed_coupling),     intent(in)    :: coupling_qed
+    real(dp),               intent(in)    :: StartDist(:,:)
+    integer,                intent(in)    :: nloop_qcd, nqcdloop_qed_arg
+    logical,  optional,     intent(in)    :: with_Plq_nnloqed
+    !logical,      optional, intent(in)    :: untie_nf
+    !-----------------------------------------------------
+    real(dp), allocatable :: dist(:,:)
+    real(dp) :: lnlnQ_norm, lnlnQ, Q_init, Q_end, last_Q
+    integer :: i, iQ_lo, iQ_hi
+
+    lnlnQ = lnln(tab,StartScale)
+    call request_iQrange(tab, lnlnQ, 1, iQ_lo, iQ_hi, lnlnQ_norm)
+    tab%StartScale = StartScale
+    tab%StartScale_iQlo = iQ_lo
+    ! force this...
+    iQ_hi = iQ_lo + 1
+
+    allocate(dist(size(StartDist,1),size(StartDist,2)))
+    dist = StartDist
+    
+    last_Q = StartScale
+    !do i = floor(lnlnQ_norm_start), 0, -1
+    do i = iQ_lo, 0, -1
+       Q_init = last_Q
+       Q_end = invlnln(tab,tab%lnlnQ_vals(i))
+
+       call QEDQCDEvolvePDF(dh, qed_sm, dist, coupling_qcd, coupling_qed,&
+                   &        Q_init, Q_end, nloop_qcd, nqcdloop_qed_arg, with_Plq_nnloqed)
+       tab%tab(:,:,i) = dist
+       
+       last_Q = Q_end
+    end do
+
+    dist = StartDist
+    last_Q = StartScale
+    do i = iQ_hi, tab%nQ
+       Q_init = last_Q
+       Q_end = invlnln(tab,tab%lnlnQ_vals(i))
+       call QEDQCDEvolvePDF(dh, qed_sm, dist, coupling_qcd, coupling_qed,&
+                   &        Q_init, Q_end, nloop_qcd, nqcdloop_qed_arg, with_Plq_nnloqed)
+       tab%tab(:,:,i) = dist
+       
+       last_Q = Q_end
+    end do
+    
+    deallocate(dist)
+  end subroutine EvolvePdfTableQED
+
+  
   !--------------------------------------------------------------------
-  !! Sets the vector val(iflv_min:iflv_max) for the PDF at this
+  !! Sets the vector val(iflv_min:) for the PDF at this
   !! y=ln1/x,Q.
+  !!
+  !! If this is a standard QCD table then entries val(iflv_min:iflv_max)
+  !! get set.
+  !!
+  !! If this is a generalised table, then val(:) should be as big as
+  !! the number of flavours in the table and all will get set
+  !! (including the "representation" flavour).
   subroutine EvalPdfTable_yQ(tab,y,Q,val)
     type(pdf_table), intent(in) :: tab
     real(dp),     intent(in) :: y, Q
@@ -623,10 +767,10 @@ contains
     real(dp) :: lnlnQ_wgts(0:tab%lnlnQ_order)
     real(dp), pointer :: y_wgts(:)
     real(dp), allocatable :: wgts(:,:)
-    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv
+    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv, iflv_max_table
     integer, save :: warn_id = warn_id_INIT
 
-    if (ubound(val,dim=1) < iflv_max) call wae_error('pdftab_ValTab',&
+    if (ubound(val,dim=1) < tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
          &'upper bound of val is too low', intval=ubound(val,dim=1))
 
     !-- y weights taken care of elsewhere....
@@ -655,7 +799,7 @@ contains
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts?
-    do iflv = iflv_min, iflv_max
+    do iflv = iflv_min, tab%tab_iflv_max
        val(iflv) = sum(wgts*tab%tab(iylo:iylo+size(y_wgts)-1,&
             & iflv,ilnlnQ_lo:ilnlnQ_hi))
     end do
@@ -689,7 +833,7 @@ contains
 
     ! safety checks
     if (tab%grid%ny /= ubound(pdf,dim=1) .or.&
-         & ubound(pdf,dim=2) /= ncompmax) call wae_error("EvalPdfTable_Q",&
+         & ubound(pdf,dim=2) /= ubound(tab%tab,dim=2)) call wae_error("EvalPdfTable_Q",&
          & "pdf argument was not of size consistent with the table")
 
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the

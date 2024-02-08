@@ -1,3 +1,401 @@
+2024-02-06 Tue  <gavin.salam@physics.ox.ac.uk>
+
+	Investigation of small differences in PDF outputs (at fairly large x
+	values) between this version of hoppet and 1.2.x series, which are
+	typically of the kind [-5.436262e-05-] v. {+5.436261e-05+},
+	i.e. at the level of 2e-7. Some differences are up to 6e-7 (possibly
+	rounding-amplified), and mostly at larger x values. 
+
+	The differences turn out to be due to the replacement, in
+	convolution.f90, of a call to ig_PolyWeight with one to
+	ig_PolyWeight_expand. The latter uses a second order expansion of the
+	interpolation when close to y=0, which was originally introduced in
+	order to work around issues with coefficient functions (which have
+	[log^n(1-x)]_+ structures that are delicate near x=1). 
+
+	However the transition, at 1e-5, seems to be a bit too early, and
+	should instead be at epsilon**(1/3) * dy. Reducing it changes one
+	structure function "make check" point (F3Z(NNLO), x=1.0000E-04,
+	Q=100; near a zero of F3Z, so extra delicate) by about 1e-6
+	relative; other choices seem stable at the level of 2e-8;
+
+	    -3.8985528E-04:  1e-5 (i.e. original code @f199aac48)
+		-3.8985487E-04:  3e-6_dp
+        -3.8985485E-04:  3e-6_dp * dy (NEW CODE)
+        -3.8985486E-04:  quad precision for interp operations, no expansion
+        -3.8985487E-04"  third order, 1e-4*dy     
+
+	Ultimately, we will go with 3e-6_dp * dy and second order. This
+	change also seems to bring us back in agreement with 1.2.x series
+	for the PDF evolution results (at least for the 7 digits printed in
+	the above test). 
+
+	* src/types.f90:
+	added commented out qp definition
+
+	* src/integrator.f90:
+	switched transition point as indicated above
+
+	* example_f90/structure_functions_example.default_output:
+	changed D3Z point (cf above) from -3.8986E-04 to -3.8985E-04
+
+2024-02-05  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/hoppet_v1.h: Forgot to propagate change in StartStrFct and
+	InitStrFct to the C++ interface.
+
+2024-01-31  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/structure_function.f90:
+	Moved the setting of muF and muR to InitStrFcts so that one only
+	has to start once to run with different scales. At the same time
+	streamlined how the scales are passed around and put in some
+	checks that the structure functions are actually called with the
+	scales that they initialised with. Propagated changes to the
+	examples.
+
+2024-01-04 Thu  <gavin.salam@physics.ox.ac.uk>
+
+	* src/NameSelect.pl:
+	* benchmarking/NameSelect.f90:
+	changed generation script to incorporate longer name length as 
+	included in PR #5
+
+	* [various]:
+	merged changes from Andrii Verbytskii (PR #5) to CI, renaming of
+	random -> hoppetrandom (to avoid conflicts), addressing some
+	implicit variable typing but not all. 
+
+2024-01-03 Wed  <gavin.salam@physics.ox.ac.uk>
+
+	* src/qed_splitting_functions.f90: moved calculation of ln1mx inside
+	case(cc_REAL,cc_REALVIRT), as in QCD splitting functions, so that
+	it's not called when all that's being done is evaluation of the
+	DELTA piece. This should resolve an FPE issue reported by Andrii
+	Verbytskyi, which came about because the cc_DELTA piece is always
+	called with y=0, x=1.
+
+	* src/streamlined_interface.f90:
+	trying another solution for the variables bounds issue in hoppetEval.
+
+2023-12-22 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* src/pdf_representation.f90:
+	* src/random.f90:
+	replaced ran() -> ran_one() to avoid conflict with intrinsic fortran
+	function.
+
+	* src/welcome_message.f90:
+	* CMakeLists.txt:
+	updated version numbers to reflect 1.3.0-devel
+
+2023-12-04 Mon  <gavin.salam@physics.ox.ac.uk> + Alexander
+
+	* src/hoppet_v1.h:
+	- alignment of interfaces with changes below, including a StrFctNoMu
+	  for evaluations with muR and muF as they are constrained by the
+	  scale choice.
+	- also put structure function and scale-choice indices (new in C++
+	  interface) into a new hoppet namespace
+
+	* src/structure_functions.f90:
+	added checks on muR and muF in StrFct calls (consistency and/or presence
+	as appropriate depending on the scale choice)
+
+	* src/structure_functions.f90:
+	* example_f90/structure_functions_example.f90:
+	* example_f90/structure_functions_example.default_output:
+	- removed redundant Qmin_PDF argument from StartStrFct 
+	  (and associated usage in example)
+	- updated default mW and mZ values to 2022 PDG and 
+	  regenerated default validation output (checking
+	  that things passed prior to the change).
+
+
+2023-11-12 Sun  <gavin.salam@physics.ox.ac.uk>
+
+	* LICENSE: *** ADDED ***
+	added a license file to reflect GPLv3 status
+
+2023-10-27  Gavin Salam  <gavin.salam@physics.ox.ac.uk> + Paolo + Alexander
+
+	* scripts/check:
+	* example_f90/tabulation_example_qed_streamlined.default_output: (*** ADDED ***, symlink)
+	* example_f90/tabulation_example_qed_streamlined.f90:
+	arranged for tabulation_example_qed_streamlined to be added to make check
+
+    * src/hoppet-config.in:
+	added --version output flag
+
+	* many files:
+
+	merged the QED and struct-func-devel-exact-coefficient-functions
+	branches into a new 2023-10-pre1.3.0 branch, which is what we
+	should use going forward.
+
+2023-10-27 NOTE That preceding months involve two streams of change (QED and structure functions) which have been kept separate
+
+2023-10-23 Mon  <gavin.salam@physics.ox.ac.uk> + Giulia + Paolo + Alexander
+
+	* example_f90/tabulation_example_qed.f90:
+	* src/pdf_tabulate.f90:
+	* src/qed_evolution.f90:
+	* src/streamlined_interface.f90:
+	added with_Plq_nnloqed argument to EvolvePdfTableQED and
+	QEDQCDEvolvePDF and removed the global variable that 
+	was being used previously.
+	Also added check:
+	* with_Plq_nnloqed==.true. is not being used with with_nqcdloop_qed==0 
+	* mismatches of quark masses between QCD and QED couplings
+    * that nqcdloop_qed <= 1
+	
+2023-10-03 Tue  <gavin.salam@physics.ox.ac.uk> with Giulia and Paolo
+
+	* src/pdf_general.f90:
+	InitPDF_LHAPDF() used to expect the LHAsub to set -6:6; 
+	now it expects -6:6 with plain QCD evolution, but
+	the full size of the flavour dimension if the upper limit
+	is anything other than ncompax=7 (e.g. for QED evolution 
+	it should go up to ncompmaxLeptons=11).
+
+	* src/streamlined_interface.f90:
+	switched this over the version prepared by Giulia and Paolo
+
+	* example_f90/tabulation_example_qed.default_output:
+	* example_f90/tabulation_example_qed.f90:
+
+	reworked the QED initial condition that had been put in a few
+	commits ago (no ChangeLog entry) so that it conserves momentum sum
+	rule and updated the default output so that make check works...
+
+2023-09-21 Thu  <gavin.salam@physics.ox.ac.uk> + Giulia
+
+	* example_f90/tabulation_example.f90:
+	* example_f90/tabulation_example_qed.f90:
+	switched these over to use InitGridDefDefault
+
+	* src/qed_objects.f90:
+	added Delete for the QED splitting matrices
+
+	* src/qed_evolution.f90:
+	fixed serious memory leak in QEDQCDEvolvePDF where internal
+	coupling_qcd_zero was not being deleted at the end of the function.
+
+	* src/dglap_objects.f90:
+	fixed minor memory leak, where Delete(MassThresholdMat) was leaving
+	out one piece of the deletion
+
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* example_f90/tabulation_example_qed.f90:  *** ADDED ***
+	* example_f90/tabulation_example_qed.default_output:  *** ADDED ***
+	added this example to show how to use basic QED + QCD evolution
+	to obtain a tabulated QED PDF and included default output
+
+	* src/qed_coupling.f90:
+	updated alpha(0) and lepton masses to 2022 PDG value_at_scale_0.
+
+	Also updated interface to InitQEDCoupling so that the user can
+	make their own choice for the effective light quark masses,
+	which they can tune so that alpha(0) and alpha(mZ) are both
+	reasonably sensible.
+
+	* src/hoppet_v1.f90:
+	included the QED modules
+
+	* src/pdf_tabulate.f90:
+	fixed an issue where tab%tab_iflv_max was not being sets
+	correctly, causing returned PDF to be unset beyond iflv=6
+
+	* scripts/check:
+	added a loop over tests to run and make sure failure causes exit 1
+
+2023-09-13  Giulia Zanderighi  <zanderi@mpp.mpg.de>
+
+	* src/qed_evolution.f90:
+	* src/qed_objects.f90:
+	* src/qed_splitting_functions.f90:
+	incorporated NNLO QED Plq splitting function, as used in Lepton PDF project.
+
+2023-10-26  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* benchmarking/structure_functions_benchmark_checks.f90
+	* doc/HOPPET-v1-doc.tex
+	* example_f77/cpp_structure_functions_example.cc
+	* example_f90/structure_functions_example.f90
+	* src/hoppet_v1.h
+	* src/structure_functions.f90:
+	Created sf_tables that now hold the structure functions such that
+	the stream lined tables can still be used independently. Also
+	removed unused 'rts' from structure functions. This needs to
+	propagate to proVBFH and disorder. Examples modified and checked.
+
+
+2023-10-16  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/structure_functions.f90:
+	Added Doxygen style comments. Relabelled all structure function indices. 
+
+2023-10-14 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/structure_functions.f90:
+	some work on comments
+2023-10-13  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/structure_functions.f90:
+	Changed the two public functions muR, muF to sf_muR, sf_muF due to
+	conflicts in other programs that depend on hoppet (reported by
+	Andrea Banfi for H1jet and HELAC+OpenLoops)
+2023-09-22  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/xc*p.f:
+	Rewrote all NNLO and N3LO parametrised coefficient functions to
+	use proper doubles rather than just float. Moved some divisions by
+	constants into parameters and multiplications.
+
+2023-09-18  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90 (hoppetSetExactDGLAP)
+	* src/hoppet_v1.h:
+	added a function to the streamlined_interface that allows the user
+	to swap to the exact DGLAP objects
+
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* .github/workflows/CI.yml:
+	added gfortran-13 to matrix of compilers to test
+
+2023-09-16 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/CMakeLists.txt:
+	reworked this to enable conditional compilation of exact
+	coefficient functions, and to allow for installation
+	of library + include files (but not yet .mod files)
+
+	* src/{ => unused}/xclns3p-orig.f:
+	moved this out of the way to avoid confusing build system without
+	two identical copies
+
+	* src/integrator.f90:
+	* src/xclns3p.f:
+	removed some DO with line label termination (which is a deleted
+	feature in F2018 and so was causing warnings)
+
+2023-09-15 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* benchmarking/structure_functions_benchmark_checks.f90:
+	added options -exact-coefs (to turn on exact coefficient functions,
+	instead of parametrised) and -outdir to select the output directory.
+
+	* src/coefficient_functions_holder.f90:
+	* src/exact-coeffs/coefficient_functions_holder_exact.f90:
+	moved exact NNLO and N3LO coefficient functions into a separate
+	file, with a view to facilitating conditional compilation
+
+	* src/no-exact-coefs/coefficient_functions_holder_exact.f90:
+	the alternative file to use when exact coefficient functions 
+	are not being compiled in 
+
+	* configure:
+	added --enable-exact-coefs option to turn on compilation
+	of exact coefficient special_functions (looks for anything in an
+	exact-coefs sub-directory; without the option looks for anything in
+	a no-exact-coefs sub-directory)
+
+	* src/xc*e.f -> src/exact-coefs/:
+	moved all the exact coefficient function files into a separate
+	directory, which is only included if the --enable-exact-coefs option
+	is passed to configure
+
+	* example_f90/{ => exact-coefs}/coefficient_functions_test.f90:
+	moved this into a sub-directory so that it is compiled
+	only when exact coefficient functions are included
+
+	* .github/workflows/CI.yml:
+	added a check that the exact coefficient functions compile
+
+2023-09-15  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90:
+	* src/structure_functions.f90:
+	* src/hoppet_v1.h:
+	changed the argument that StrFct() etc takes from y = -log(x) to x
+	to conform with the rest of the code. Moved the call to
+	hoppetStartExtended outside the structure functions so a user can
+	more easily decide on the grids to use.
+
+2023-09-14  Alexander Karlberg  <alexander.karlberg@cern.ch>
+
+	* src/streamlined_interface.f90
+	* src/hoppet_v1.h:
+	added functions to call the structure functions in the
+	streamlined interface
+
+	* example_f77/cpp_structure_functions_example.cc:
+	added a C++ example for structure functions use
+
+	* example_f90/structure_functions_example.f90:
+	added an F90 example for structure functions use
+
+	* src/coefficient_functions_holder.f90
+	* src/structure_functions.f90
+	* src/hplog5.f
+	* src/xc2gl3e.f
+	* src/xc2ns3e.f
+	* src/xc2ps3e.f
+	* src/xc3ns3e.f
+	* src/xclgl3e.f
+	* src/xclns3e.f
+	* src/xclps3e.f:
+	added the exact 3-loop DIS coefficient functions. Currently they
+	do not work due to a numerical issue in hplog5. Removed factor 2
+	in structure functions introduced for VBF but which should not be
+	there in the DIS definition. Swapped Wp/Wm to align with DIS
+	convention. Fixed a number of bugs in the fl11 term of the NC N3LO
+	structure functions as reported by Valerio Bertone. Fixed
+	couplings for the EM and Zgamma structure functions which were
+	never used in VBF and therefore not tested.
+
+	* benchmarking/structure_functions_benchmark_checks.f90:
+	added file for structure function benchmarks. Should reproduce the
+	results that will be published with Valerio Bertone.
+
+	* scripts/check:
+	added a check for the structure functions
+
+2023-03-12 Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* .github/workflows/CI.yml:
+	added an attempt at continuous integration using github actions
+
+2023-03-12  Alexander Puck Neuwirth + small mods by Gavin Salam  <gavin.salam@physics.ox.ac.uk> 
+
+	* src/warnings_and_errors.f90:
+	wae_error(...): replaced "stop" with "call exit(-1)", which
+	should return a failure exit code. Note, this is non-standard, but
+	seems to be supported in both intel and gfortran.
+
+	* src/convolution.f90:
+	replaced several "stop" instructions with calls to wae_error(...)
+
+2023-02-01  Alexander Karlberg  <alexander.karlberg@cern.ch> 
+
+	* src/structure_functions.f90:
+	Fixed wrong couplings used in the FgZ structure functions. Now
+	initialising non-standard iflv_max and fixed bug where F3gZ was
+	set equal to F3Z
+
+2023-02-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk> (with Alexander Karlberg)
+
+	* src/pdf_tabulate.f90:
+	started to add support for table interpolation to use a
+	non-standard iflv_max
+
+2023-01-29  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/welcome_message.f90:
+	updated date in welcome message
+
 2022-07-20  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/dglap_holders.f90 (InitDglapHolder): 
@@ -59,7 +457,30 @@
 	relied on and caused issues with the -fno-automatic option
 	that is used in POWHEG.
 
+2020-04-14  Gavin Salam  <gavin.salam@cern.ch>
+
+	* benchmarking/benchmark.f90:
+	changed sub_defs_io "use" to avoid conflicts with 
+	Value(...) from hoppet (as reported by Federico Buccioni)
+
+
 2018-12-27  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/qed_evolution.f90:
+	this now handles evolution below the QCD scale, using a zero QCD
+	coupling to signal to the evolution.f90 routine that it should not
+	do any QCD evolution there.
+
+	* src/evolution.f90:
+	some small changes to aid communibation with the QED evolution
+	code, including skipping certain bits of code when alphas = 0, and
+	changing ev_force_old_dt to be a variable (rather than a
+	parameter), so that one can play with it.
+
+	* src/qed_coupling.f90 (qed_coupling_module):
+	switched the scale for the turn-on of 3 light flavours
+	to be 1 GeV, to avoid issues with QCD couplings that aren't
+	defined below that scale. 
 
 	* src/qcd_coupling.f90: 
 	* src/new_as.f90:
@@ -71,7 +492,6 @@
 	* tests/coupling-fixed.f90: *** ADDED ***
 	for running a quick test that the new fixed-coupling functionality
 	works.
-
 
 2017-10-31  Gavin Salam  <gavin.salam@cern.ch>
 
@@ -113,6 +533,210 @@
 	evop%cross_mass_threshold not being properly initialised to
 	.false. in that situation. Also removed some redundant code
 	lines.
+
+2016-07-XX NOTE That preceding months involve two streams of change (QED and structure functions) which have been kept separate
+
+2016-07-06  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/qed_objects.f90 (qed_objects):
+	added routine (Copy) for copying qed_split_mat objects (and
+	sub-object)
+
+	* src/sort.f90 (sort):
+	added sort_array() routine which acts as if an in-place sort is
+	carried out (relying on idx); made it public (and also swap)
+
+	* src/pdf_tabulate.f90 (FillPdfTable_LHAPDF):
+	fixed serious issue for tabulations where nf info is associated,
+	where Q was being recalculated wrongly for each iQ rather than
+	read in from the table%Q_vals array.
+
+2016-06-26  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/couplings.f90:         *** ADDED ***
+	* src/qcd_qed_coupling.f90:  *** ADDED ***
+	* src/qed_coupling.f90:
+	* tests/test_qed.f90
+	copied couplings.f90 over from hopper (aborted OO v2 of
+	hoppet). It has the small adaptation that any segment should
+	always have at least n_interp+1 nodes.
+
+	Then used it to build the QCDQEDCoupling type in
+	qcd_qed_coupling. Interface may yet evolve.
+
+	Small mods also to qed_coupling.f90 to make useful pieces public.
+
+	Conclusion from tests/test_qed.f90 is that effect of mixed QCD/QED
+	effects in the running coupling are ~0.2% on the QED coupling,
+	which, given that we don't have a proper treatment of hadronic
+	thresholds, is irrelevant.
+
+           mu      1/alpha    1/al(new)         diff       alphas  alphas(new)         diff
+     0.000255  137.0359991  137.2400777   -0.2040786  0.000000000  0.476340982 -0.476340982
+     0.010000  136.4049024  136.6089810   -0.2040786  0.000000000  0.476340982 -0.476340982
+     0.100000  135.9162787  136.1203573   -0.2040786  0.000000000  0.476340982 -0.476340982
+     1.000000  134.6565304  134.8606091   -0.2040786  0.476606222  0.476340982  0.000265241
+     1.680000  134.2144754  134.3909726   -0.1764972  0.328186836  0.328080169  0.000106667
+    10.000000  131.7767815  131.8555300   -0.0787485  0.178150999  0.178134081  0.000016918
+    91.200000  128.6496065  128.6496065   -0.0000000  0.118000000  0.118000000 -0.000000000
+   100.000000  128.5192900  128.5166165    0.0026735  0.116380683  0.116380983 -0.000000300
+  1000.000000  124.7657300  124.6901403    0.0755898  0.088496149  0.088501936 -0.000005787
+
+	where diff is the difference between running without and with the
+	mixed terms. (If running with pure QCD and QED evolutions the
+	differences are zero).
+
+
+2016-06-23  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/pdf_general.f90:
+	started introducing support for PDFs with non-standard number of
+	flavours. WORK HERE IS INCOMPLETE
+
+	* src/pdf_tabulate.f90
+	added support for non-standard number of flavours and for a
+	tabulation that uses QED evolution. Currently untested.
+
+	* example_f77/compare_lhapdf_hoppet.f:
+	changed the default pdf
+
+
+2016-06-07  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/qed_objects.f90 (qed_objects):
+	tried to get rid of Fortran-2003 constructs
+
+2016-06-07  Gavin Salam  <gsalam@lxplus0031.cern.ch>
+
+	* scripts/makef95makefile: 
+	this now handles gfortran compiler names such as gfortran-61, etc.
+
+2016-05-27  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/qed_objects.f90 (AllocPDFWithLeptons):
+	fixed wrong upper bound for flavour dimension
+
+	* src/qed_coupling.f90 (qed_coupling_module):
+	added an option to pass value_at_scale_0 when initialising
+	the coupling (e.g. to test sensitivity to higher orders, etc.)
+
+	Also changed the "light quarks" mass to 0.5GeV.
+
+	* src/qed_evolution.f90 (QEDQCDEvolvePDF):
+	fixed a bug with the initial nf values
+
+2016-05-26  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/welcome_message.f90 (HoppetWelcomeMessage):
+	updated date!
+
+	* src/qed_coupling.f90:
+	added info on n_thresholds inside the qed_coupling type and
+	extended the bounds of some of the arrays to make it easier to
+	access threshold information without worrying about out-of-bounds
+	accesses. 
+
+	* src/qed_evolution.f90:  *** ADDED ***
+	added this routine for QED evolution, including thresholds;
+	comprehensive testing still remains to be performed.
+
+	For now alphas and alpha_QED still have separate evolutions
+	(whereas with O(alpha alpha_s) splitting kernels they should have
+	coupled evolution).
+
+	* src/evolution.f90:
+	factored out some part of the machinery into a new module,
+	evolution_helper, so that it can be used by the QED
+	evolution. Nothing should change in the public interface.
+
+	* scripts/makef95makefile:
+	added a "-g" option to gfortran by default, to aid with debugging
+
+	* src/qed_objects.f90: *** ADDED ***
+	started work on a module for holding QED splitting matrices,
+	performing the flavour convolutions, etc. Currently the LO
+	QED splitting matrix appears to be working. The NLO is also mostly
+	tested. 
+
+	* src/streamlined_interface.f90 (hoppetStartExtended):
+	this now uses InitGridDefDefault for creating its grid
+
+	* src/convolution.f90:
+	added InitGridDefDefault(grid, dy, ymax, order) to make it
+	a bit easier to create good grids
+
+	added 2d version of TruncatedMoment
+
+2016-05-15  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tests/test_qed.f90:
+	added tests of moments of the QED splitting functions.
+
+	* src/splitting_functions.f90:
+	made sf_S2(x) public, for us in the qed_splitting_functions
+
+	* src/qed_splitting_functions.f90: *** ADDED ***
+	added the QED splitting functions from 1512.00612
+
+2016-05-10  Gavin Salam  <gavin.salam@cern.ch>
+
+	* src/qed_coupling.f90:
+	put in correct values for lepton masses and fine structure
+	constant + removed diagnostic printouts.
+
+2016-04-24  Gavin Salam  <gavin.salam@cern.ch>
+
+	* tests/test_qed.f90: *** ADDED ***
+	file for first tests of QED coupling
+
+	* src/qed_coupling.f90: *** ADDED ***
+	got a first basic version of a 1-loop QED coupling -- interface
+	may evolve
+2016-07-08  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/structure_functions.f90:
+	added a third implementation of the structure functions, where we add up
+	all orders before the convolution of the coefficient functions with the
+	PDF; this is possible only for scale_choice=0,1.
+
+	* example_f90/structure_functions_example.f90 :
+	added an example program showing sample usage of structure functions module;
+	moved the handling of the pdf outside of structure_functions.f90, and into
+	the actual program.
+
+2016-06-26  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/structure_functions.f90:
+	- added optional variable flavour-number scheme for the structure functions.
+	- added the gamma-Z structure function.
+	these features still need to be cross-checked against other codes.
+
+2016-06-09  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/integrator.f90 (ig_PolyWeight_expand):
+	* src/convolution.f90 (conv_GCAf_Helper):
+	added an additional integrator ig_PolyWeight_expand which expands terms
+	around zero. This avoids numerical issues close to zero for real pieces.
+
+	* src/streamlined_interface.f90:
+	changed size of tables for integration of structure functions in
+	existing framework
+
+	* src/structure_functions.f90:
+	* src/coefficient_functions_holder.f90:
+	* src/xc*.f:
+	fixed numerical convergence issues at large x by taking a series
+	expansion close to x=1.
+
+2016-06-07  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* src/coefficient_functions_holder.f90:
+	* src/xc*.f:
+	added all the coefficient functions, implemented up to N3LO, with
+	both the parametrised and the exact NNLO implementation.
+
+	* src/structure_functions.f90:
+	added the implementation of the structure functions, as used in proVBFH.
 
 2016-04-04  Gavin Salam  <gavin.salam@cern.ch>
 

@@ -24,10 +24,27 @@ module sort
   interface swap
      module procedure swap_int, swap_dp
   end interface
+  public :: swap
   
-
+  interface sort_array
+     module procedure sort_array_dp
+  end interface sort_array
+  public :: sort_array
+  
 contains
 
+  subroutine sort_array_dp(array)
+    real(dp), intent(inout) :: array(:)
+    !--------------------------------
+    integer :: idx(size(array))
+    real(dp) :: tmp(size(array))
+    integer :: i
+    call indexx(array, idx)
+    tmp = array
+    array = tmp(idx)
+  end subroutine sort_array_dp
+  
+  
   !-------------------------------------------------------------------------
   !! A non-recursive version of the quick sort algorithm. It returns
   !! an array idx such that array(idx) is sorted.
@@ -240,8 +257,8 @@ contains
 
 
   subroutine swap_dp(a,b)
-    real, intent(inout) :: a,b
-    real                :: dummy
+    real(dp), intent(inout) :: a,b
+    real(dp)                :: dummy
     dummy=a
     a=b
     b=dummy

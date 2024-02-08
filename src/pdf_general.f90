@@ -74,10 +74,11 @@ contains
 
 
   !----------------------------------------------------------------------
-  ! All of these routine just redirect to the official routine, 
-  ! with the added features that they redirect only the components 
-  ! iflv_min:iflv_max, and that they label the result as being in the
-  ! "Human" representation
+  ! All of these routine just redirect to the official routine, with
+  ! the added features that if it's a standard QCD PDF, then they
+  ! redirect only the components iflv_min:iflv_max.
+  !
+  ! They also label the result as being in the "Human" representation
   recursive subroutine pdfgen_InitPDF_(grid, gq, func)
     real(dp),         intent(inout) :: gq(0:,ncompmin:)
     type(grid_def),   intent(in)    :: grid
@@ -90,8 +91,15 @@ contains
        end function func
     end interface
     !-----------------------------------------
-    call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func)
-    call LabelPdfAsRep(gq,pdfr_Human)
+    if (ubound(gq,dim=2) == ncompmax) then
+       ! if it's a standard QCD-only PDF, then pass just -6:6 to the subroutine
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func)
+    else
+       ! otherwise pass the whole thing; the subroutine must be aware that
+       ! index 7 is a special ("representation") index
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func)
+    end if
+    call LabelPdfAsRep(gq(:,ncompmin:ncompmax),pdfr_Human)
   end subroutine pdfgen_InitPDF_
 
   !----------------------------------------------------------------------
@@ -112,8 +120,15 @@ contains
        end function func
     end interface
     !-----------------------------------------
-    call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra)
-    call LabelPdfAsRep(gq,pdfr_Human)
+    if (ubound(gq,dim=2) == ncompmax) then
+       ! if it's a standard QCD-only PDF, then pass just -6:6 to the subroutine
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra)
+    else
+       ! otherwise pass the whole thing; the subroutine must be aware that
+       ! index 7 is a special ("representation") index
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra)
+    end if
+    call LabelPdfAsRep(gq(:,ncompmin:ncompmax),pdfr_Human)
   end subroutine pdfgen_InitPDF_a
 
   !----------------------------------------------------------------------
@@ -135,8 +150,15 @@ contains
        end function func
     end interface
     !-----------------------------------------
-    call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra, ixtra)
-    call LabelPdfAsRep(gq,pdfr_Human)
+    if (ubound(gq,dim=2) == ncompmax) then
+       ! if it's a standard QCD-only PDF, then pass just -6:6 to the subroutine
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra, ixtra)
+    else
+       ! otherwise pass the whole thing; the subroutine must be aware that
+       ! index 7 is a special ("representation") index
+       call InitGridQuant(grid, gq(:,iflv_min:iflv_max), func, axtra, ixtra)
+    end if
+    call LabelPdfAsRep(gq(:,ncompmin:ncompmax),pdfr_Human)
   end subroutine pdfgen_InitPDF_ai
 
 
@@ -195,6 +217,11 @@ contains
 
   !======================================================================
   !! Initialise the subroutine using an LHAPDF style subroutine
+  !!
+  !! It expects LHAsub to set components -6:6 with plain QCD evolution,
+	!! but the full size of the flavour dimension if the upper limit
+	!! is anything other than ncompax=7 (e.g. for QED evolution 
+	!! it should go from -6 to ncompmaxLeptons=11).  
   subroutine InitPDF_LHAPDF(grid, gq, LHAsub, Q)
     real(dp),         intent(inout) :: gq(0:,ncompmin:)
     type(grid_def),   intent(in)    :: grid
@@ -207,7 +234,17 @@ contains
        end subroutine LHAsub
     end interface
     !-------------------------------------------
-    call InitGridQuantLHAPDF(grid, gq(:,iflv_min:iflv_max), LHAsub, Q)
+    integer :: ncompmax_lcl
+
+    ! if the upper bound of gq(:,:) is the usual ncompmax
+    ! then assume the user's routine will fill -6:6.
+    ! Otherwise the user should fill -6:ubound(gq,dim=2)
+    ncompmax_lcl = ubound(gq,dim=2)
+    if (ncompmax_lcl == ncompmax) ncompmax_lcl = iflv_max
+
+    !call InitGridQuantLHAPDF(grid, gq(:,iflv_min:iflv_max), LHAsub, Q)
+    ! PN & GZ: the following modification is needed for the streamlined interface with QED evolution
+    call InitGridQuantLHAPDF(grid, gq(:,iflv_min:ncompmax_lcl), LHAsub, Q)        
     call LabelPdfAsRep(gq,pdfr_Human)
   end subroutine InitPDF_LHAPDF
   

@@ -18,6 +18,8 @@
 \usepackage{color}
 \usepackage{listings}
 \usepackage{hyperref}
+%\usepackage[style=numeric,citestyle=numeric-comp,sorting=ynt,defernumbers=true,backend=biber]{biblatex}
+\usepackage[sort&compress,numbers]{natbib}
 
 % \textwidth 21cm
 % \linewidth 21cm
@@ -60,7 +62,16 @@
 \newcommand{\GeV}{\;\mathrm{GeV}}
 \newcommand{\TeV}{\;\mathrm{TeV}}
 \newcommand{\as}{\alpha_s}
-\newcommand{\comment}[1]{\textbf{[#1]}}
+
+% author comments
+\definecolor{darkgreen}{rgb}{0,0.6,0}
+\newcommand{\comment}[1]{{\color{red}\textbf{[#1]}}}
+\newcommand{\commentgz}[1]{{\color{red} [\it GZ:  #1}]}
+\newcommand{\commentpn}[1]{{\color{magenta} [\it PN:  #1}]}
+\newcommand{\gps}[1]{{\textcolor{darkgreen}{\comment{#1}$_\text{GPS}$}}}
+\newcommand{\ak}[1]{{\textcolor{blue}{\comment{#1}$_\text{AK}$}}}
+
+
 \newcommand{\eg}{e.g.\ }
 \newcommand{\ie}{i.e.\ }
 \newcommand{\cf}{cf.\ }
@@ -69,8 +80,16 @@
 \newcommand{\ttt}[1]{\texttt{#1}}
 \newcommand{\order}[1]{{\cal O}\left(#1\right)}
 \newcommand{\fn}{\scriptsize}
+\newcommand{\masterlink}[1]{\ttt{#1}}
+\newcommand{\repolink}[2]{\ttt{#2}}
 
-\newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,coriano,GuzziThesis,nnpdf,Kosower:1997hg,Ratcliffe:2000kp}
+\newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,GuzziThesis,nnpdf,Kosower:1997hg,Ratcliffe:2000kp}
+
+\newcommand{\myparagraph}[1]{\paragraph{#1.}}
+
+% We need slightly different text in the manual and in the release note.
+\newif\ifreleasenote
+%\releasenotetrue % comment out to hide answers
 
 % Define special colors
 \definecolor{comment}{rgb}{0,0.3,0}
@@ -103,12 +122,17 @@
 %-----------------------------------------
 \title{A Higher Order Perturbative Parton Evolution Toolkit \\
 (\hoppet)\\
-version 1.2.0-devel
+
+version 1.3.0
 %  a.k.a.\ HOPPETv1
 }
-\author{G.~P. Salam and J.~Rojo\\
-  with contributions from Fr\'d\'eric Dreyer and Alexander Karlberg as
-  of v1.2
+\author{%
+  Frederic Dreyer,
+  Alexander Karlberg,
+  Paolo Nason,
+  Juan Rojo,\\
+  Gavin P.\ Salam and
+  Giulia Zanderighi
 }
 
 \date{}
@@ -138,58 +162,58 @@ version 1.2.0-devel
   evolution part of the code from F77 and C/C++.  \smallskip
 \end{abstract}
 
-\newpage
+% \newpage
 
 
-\noindent {\Large \textbf{Program Summary}}\\
-
-\noindent {\em Title of program\/}: \hoppet \\[2mm]
-{\em Version\/}: 1.1.5%
-%  (including documentation of some updates upto 2011-02-21)
-\\[2mm]
-{\em Catalogue identifier\/}: \\[2mm]
-{\em Program obtainable from\/}:
-\url{http://projects.hepforge.org/hoppet/}
-\\[2mm]
-{\em Distribution format\/}: compressed tar file \\[2mm]
-{\em E-mail\/}: {\tt salam@lpthe.jussieu.fr}, 
-{\tt rojo@lpthe.jussieu.fr} \\[2mm]
-{\em License\/}: GNU Public License \\[2mm]
-{\em Computers\/}: all \\[2mm]
-{\em Operating systems\/}: all \\[2mm]
-{\em Program language\/}: Fortran~95 \\[2mm]
-{\em Memory required to execute\/}:  $\lesssim$ 10 MB \\[2mm]
-{\em Other programs called\/}: none \\[2mm]
-{\em External files needed\/}: none \\[2mm]
-{\em Number of bytes in distributed program, including test data
-  etc.\/}: $\sim 350$~kB\\[2mm]
-{\em Keywords\/}: unpolarised and longitudinally polarised parton
-space-like distribution functions (PDFs), DGLAP evolution equations,
-$x$--space solutions.
-\\[2mm]
-{\em Nature of the physical problem\/}: Solution of the DGLAP
-evolution equations up to NNLO (NLO) for unpolarised (longitudinally
-polarised) PDFs, and provision of tools to facilitate manipulation
-(convolutions, etc.) of PDFs with user-defined coefficient and
-splitting functions.
-\\[2mm]
-%
-{\em Method of solution\/}:
-representation of PDFs on a grid in $x$, adaptive integration of
-splitting functions to reduce them to a discretised
-form, obtaining fast
-convolutions that are equivalent to integration with an interpolated
-form of the PDFs; Runge Kutta solution of the $Q$ evolution, and
-its caching so as to speed up repeated evolution with different
-initial conditions.
-\\[2mm]
-{\em Restrictions on complexity of the problem\/}: PDFs should be
-smooth on the scale of the discretisation in $x$.
-\\[2mm]
-{\em Typical running time\/}: a few seconds for initialisation, then
-$\sim 10$~ms for creating a tabulation with a relative accuracy of
-$10^{-4}$ from a new initial condition (on a 3.4~GHz Pentium~IV
-processor). Further details in section~\ref{sec:Timing}.
+% \noindent {\Large \textbf{Program Summary}}\\
+% 
+% \noindent {\em Title of program\/}: \hoppet \\[2mm]
+% {\em Version\/}: 1.1.5%
+% %  (including documentation of some updates upto 2011-02-21)
+% \\[2mm]
+% {\em Catalogue identifier\/}: \\[2mm]
+% {\em Program obtainable from\/}:
+% \url{http://projects.hepforge.org/hoppet/}
+% \\[2mm]
+% {\em Distribution format\/}: compressed tar file \\[2mm]
+% {\em E-mail\/}: {\tt salam@lpthe.jussieu.fr}, 
+% {\tt rojo@lpthe.jussieu.fr} \\[2mm]
+% {\em License\/}: GNU Public License \\[2mm]
+% {\em Computers\/}: all \\[2mm]
+% {\em Operating systems\/}: all \\[2mm]
+% {\em Program language\/}: Fortran~95 \\[2mm]
+% {\em Memory required to execute\/}:  $\lesssim$ 10 MB \\[2mm]
+% {\em Other programs called\/}: none \\[2mm]
+% {\em External files needed\/}: none \\[2mm]
+% {\em Number of bytes in distributed program, including test data
+%   etc.\/}: $\sim 350$~kB\\[2mm]
+% {\em Keywords\/}: unpolarised and longitudinally polarised parton
+% space-like distribution functions (PDFs), DGLAP evolution equations,
+% $x$--space solutions.
+% \\[2mm]
+% {\em Nature of the physical problem\/}: Solution of the DGLAP
+% evolution equations up to NNLO (NLO) for unpolarised (longitudinally
+% polarised) PDFs, and provision of tools to facilitate manipulation
+% (convolutions, etc.) of PDFs with user-defined coefficient and
+% splitting functions.
+% \\[2mm]
+% %
+% {\em Method of solution\/}:
+% representation of PDFs on a grid in $x$, adaptive integration of
+% splitting functions to reduce them to a discretised
+% form, obtaining fast
+% convolutions that are equivalent to integration with an interpolated
+% form of the PDFs; Runge Kutta solution of the $Q$ evolution, and
+% its caching so as to speed up repeated evolution with different
+% initial conditions.
+% \\[2mm]
+% {\em Restrictions on complexity of the problem\/}: PDFs should be
+% smooth on the scale of the discretisation in $x$.
+% \\[2mm]
+% {\em Typical running time\/}: a few seconds for initialisation, then
+% $\sim 10$~ms for creating a tabulation with a relative accuracy of
+% $10^{-4}$ from a new initial condition (on a 3.4~GHz Pentium~IV
+% processor). Further details in section~\ref{sec:Timing}.
 
 \newpage
 \tableofcontents
@@ -203,13 +227,13 @@ processor). Further details in section~\ref{sec:Timing}.
 There has been considerable discussion over the past years
 (\eg~\cite{\AllDGLAP}) of numerical solutions of the 
 Dokshitzer-Gribov-Lipatov-Altarelli-Parisi (DGLAP)
- equation~\cite{DGLAP} for the Quantum Chromodynamics
+ equation~\cite{Gribov:1972ri,Altarelli:1977zs,Dokshitzer:1977sg} for the Quantum Chromodynamics
 (QCD)
 evolution  of parton distribution functions (PDFs).
 
 
 The DGLAP equation
-\cite{DGLAP} is a renormalisation group equation for the quantity
+\cite{Gribov:1972ri,Altarelli:1977zs,Dokshitzer:1977sg} is a renormalisation group equation for the quantity
 $q_i(x,Q^2)$, the density of partons of type (or flavour) $i$ carrying
 a fraction $x$ of the longitudinal momentum of a hadron, when resolved
 at a scale $Q$. It is one of the fundamental equations of perturbative
@@ -308,7 +332,7 @@ serving as the basis of the well-known  QCDNUM program \cite{Botje},
 and  used also by the CTEQ~\cite{CTEQ} and MRST/MSTW~\cite{MRST}
 global fitting
 collaborations. Higher-order methods in $x$--space have been developed
-in \cite{Schoeffel:1998tz,Pascaud:2001bi,coriano,GuzziThesis,DisResum}, and
+in \cite{Schoeffel:1998tz,Pascaud:2001bi,Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,GuzziThesis,Dasgupta:2001eq,Dasgupta:2002dc}, and
 more recently have been incorporated also in QCDNUM.
 
 \hoppet, the program presented here, uses higher-order methods both for
@@ -330,13 +354,13 @@ request), but had
 never been documented. 
 Those predecessors have  been used in a number of different
 contexts, like resummation of event shapes
-in DIS \cite{DisResum}, automated resummation
+in DIS \cite{Dasgupta:2001eq,Dasgupta:2002dc}, automated resummation
 of event shapes \cite{caesar}, studies of
 resummation in the small-$x$ limit \cite{Ciafaloni:2003rd}, 
 and in a posteriori inclusion
-of PDFs in NLO final-state calculations \cite{APPL,Banfi:2007gu}, as well
+of PDFs in NLO final-state calculations \cite{Carli:2005ji,Carli:2010rw,Banfi:2007gu}, as well
 as  used for benchmark
-comparisons with Pegasus~\cite{Pegasus} in \cite{Benchmarks}.
+comparisons with Pegasus~\cite{Pegasus} in \cite{Giele:2002hx,Dittmar:2005ed}.
 Since the code had
 not hitherto been released in a documented form, 
 it is the authors' hope that availability of
@@ -406,7 +430,7 @@ The related variable $t\equiv \ln Q^2$ is also used
 in various places in \hoppet.
 The splitting functions in eq.~(\ref{eq:dglap-ns})
 are known up to NNLO in the 
-unpolarised case \cite{CFP,NNLO-NS,NNLO-singlet}:
+unpolarised case \cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}:
 \begin{equation}
   \label{eq:dpdf}
    P(z,\aq)=P^{(0)}(z)+\frac{\aq}{2\pi}P^{(1)}(z)+
@@ -419,7 +443,7 @@ is
 to the case of time-like evolution\footnote{
 The general structure of the relation between space-like
 and time-like evolution and splitting functions
- has been investigated in \cite{CFP,Stratmann:1996hn,Dokshitzer:2005bf,Mitov:2006ic,Basso:2006nk,Dokshitzer:2006nm,Beccaria:2007bb}.}, 
+ has been investigated in \cite{Furmanski:1980cm,Curci:1980uw,Stratmann:1996hn,Dokshitzer:2005bf,Mitov:2006ic,Basso:2006nk,Dokshitzer:2006nm,Beccaria:2007bb}.}, 
 relevant for example for fragmentation function analysis,
 where partial NNLO results
 are also available \cite{Mitov:2006ic}.
@@ -433,7 +457,8 @@ coupling equation:
   \label{eq:as-ev}
   \frac{d\as}{d\ln Q^2} = \beta\lp \aq\rp = -\as (\beta_0\as +
   \beta_1\as^2 + 
-  \beta_2\as^3) \ .
+  \beta_2\as^3 + 
+  \beta_3\as^4) \ .
 \end{equation}
 
 The evolution of the strong coupling and the parton distributions can
@@ -674,7 +699,7 @@ n \delta y$), so that $P_{\alpha\beta}$ just depends
 on $\alpha - \beta$, and can be rewritten $\mathcal{P}_{\alpha - \beta}$. A
 slight subtlety arises at large $x$, where if one writes $w_\alpha(y) =
 w(y - y_\alpha)$ one is effectively assuming an interpolation that uses
-identically zero interpolation points for $x\ge 1$~\cite{coriano,
+identically zero interpolation points for $x\ge 1$~\cite{Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,
 Ratcliffe:2000kp},
 even though $xq(x)$ is not formally defined for $x > 1$. In practice
 this is often not too important (because PDFs drop rapidly towards
@@ -2005,7 +2030,7 @@ The running coupling object is initialised so that at scale \ttt{Q}
 the coupling is equal to \ttt{alfas}. The running is carried out with
 the \ttt{nloop} $\beta$-function. 
 %
-The highest value current supported is 4 loops.
+The highest value currently supported is 4 loops.
 %
 If the \ttt{fixnf} argument is
 present, then the number of flavours is kept fixed at that
@@ -2016,7 +2041,7 @@ value. Otherwise flavour thresholds are implemented at scales
 By default the quark masses are taken to be \emph{pole} masses.
 %
 This choice (and the particular default values) was inspired by the
-PDF evolution benchmark comparison~\cite{Benchmarks} in which \hoppet
+PDF evolution benchmark comparison~\cite{Giele:2002hx,Dittmar:2005ed} in which \hoppet
 results were compared to those of Vogt's moment-space code
 QCD-Pegasus~\cite{Pegasus}. 
 %
@@ -2411,13 +2436,15 @@ appropriate structure at some point, \eg via
   call AllocPdfTable(table_deriv_LO, table)
 \end{lstlisting}
 The above mechanism has found use in the a-posteriori PDF
-library~\cite{APPL,Banfi:2007gu} 
+library~\cite{Carli:2005ji,Carli:2010rw,Banfi:2007gu} 
 and in work matching event shapes with fixed-order
-calculations~\cite{caesar,DisResum}.
+calculations~\cite{caesar,Dasgupta:2001eq,Dasgupta:2002dc}.
 %
 One could also imagine using it to obtain tables of
 (flavour-separated) structure functions, if one were to convolute with
-coefficient functions rather than splitting functions.
+coefficient functions rather than splitting functions. As of version
+1.3.0 this is possible and we provide some details in
+section~\ref{sec:structure-funcs}.
 
 There are instances in which it is useful to extract the PDF at all
 $x$ values for a given $Q$. This is the case, for efficiency reasons,
@@ -2536,7 +2563,7 @@ renormalisation to factorisation scales \ttt{muR\_Q},\footnote{Note
   the evolution needs the coupling for a given number of flavours
   outside the standard range for that number of flavours (precisely
   because $\ttt{muR\_Q}\ne 1$) and this is done automatically in the
-  evolution. In contrast in the benchmark studies~\cite{Benchmarks},
+  evolution. In contrast in the benchmark studies~\cite{Giele:2002hx,Dittmar:2005ed},
   the flavour thresholds for the coupling were placed at $\ttt{muR\_Q}
   \times m_Q$.  This is a perfectly valid alternative, but can
   complicate the specification of the $\as$ value --- for example with
@@ -2589,6 +2616,13 @@ evolution (some information is lost when caching), and the user
 may wish to check on a case-by-case basis that such differences
 don't matter in practice.
 
+If one wishes to use the exact rather than the default parametrised
+expressions for the NNLO splitting functions and mass thresholds, this
+can be done through a call to
+\begin{lstlisting}
+  call hoppetSetExactDGLAP(exact_nfthreshold, exact_splitting)
+\end{lstlisting}
+
 The tabulation can also be filled with the contents of an external PDF
 package, by calling
 \begin{lstlisting}
@@ -2635,16 +2669,15 @@ are to be
 found in \ttt{src/streamlined\_interface.f90} and may provide inspiration
 for the user wishing to write their own F95 code for \hoppet.
 
+\input{qed-and-structure-functions.tex}
 
-%======================================================================
-%======================================================================
 \section{Benchmarks}
 \label{sec:benchmarks}
 
 Key questions in assessing the usefulness of a PDF evolution code include
 that of its correctness, its accuracy and its speed. \hoppet's
 correctness has been established with a reasonable degree of
-confidence in the benchmark tests~\cite{Benchmarks} where it was
+confidence in the benchmark tests~\cite{Giele:2002hx,Dittmar:2005ed} where it was
 compared with the Mellin space based
 evolution code QCD-Pegasus \cite{Pegasus}. 
 The program used to carry out those tests
@@ -2652,7 +2685,7 @@ is available as \ttt{benchmarks/benchmarks.f90}. The user should
 carefully read the detailed
 comments at the beginning for usage instructions.
 
-The results used in \cite{Benchmarks} were obtained with very finely
+The results used in \cite{Giele:2002hx,Dittmar:2005ed} were obtained with very finely
 spaced grids, in order to guarantee small numerical errors ($\lesssim
 10^{-7}$).  Such accuracies are useful when comparing and testing two
 independent codes, because differences or bugs in the
@@ -2677,7 +2710,7 @@ with the question of the accuracy.
 \label{sec:Accuracy}
 To measure the accuracy, 
 we use the same initial condition and evolution parameters as
-in~\cite{Benchmarks}:
+in~\cite{Giele:2002hx,Dittmar:2005ed}:
 \begin{subequations}
   \label{eq:init}
   \begin{align}
@@ -2717,7 +2750,7 @@ $\zeta = \ln 1/x + 9(1-x)$ so as to obtain fine coverage at small and
 large $x$. The $Q$ values are chosen more closely spaced at low $Q$
 where the $Q$-dependence is strongest and they are taken slightly correlated
 with $\zeta$ so as to cover a nearly continuous range of
-$Q$.\footnote{This procedure differs from that in \cite{Benchmarks}
+$Q$.\footnote{This procedure differs from that in \cite{Giele:2002hx,Dittmar:2005ed}
   where fewer (500) points were used and one compared not individual
   flavours, but combinations intended to be more directly revealing of
   any deficiencies in the evolution. This reflects the difference in
@@ -2969,7 +3002,7 @@ evaluated is $\order{10^3}$. For much smaller numbers of points
 Pegasus becomes superior (because of the significantly smaller ratio
 $t_c/t_{xQ}$), while for much larger numbers of points \hoppet becomes
 better. Other NNLO evolution codes published in recent years 
-\cite{Weinzierl:2002mv,coriano,Botje}
+\cite{Weinzierl:2002mv,Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,Botje}
  are generally less competitive
 either in terms of accuracy or speed.
 
@@ -3020,7 +3053,7 @@ Features that might be envisaged for future releases include DIS
 coefficient functions, full support for the DIS factorisation scheme,
 and the addition of time-like evolution, relevant
 for phenomenological fits to fragmentation functions
-as in \cite{de Florian:2007hc}.  
+as in \cite{deFlorian:2007hc}.  
 In principle, the
 information presented here is sufficient to allow a user to implement
 the coefficient functions themselves, while the DIS scheme and
@@ -3078,14 +3111,24 @@ and polarised evolution.
 \section*{Acknowledgements}
 
 This work was initiated in the context of DIS event shape resummation
-and matching studies \cite{DisResum} with Mrinal Dasgupta. Its
-subsequent development into a fully-featured NNLO evolution code owes
-much to Andreas Vogt's regular encouragement, and his suggestions
+and matching studies \cite{Dasgupta:2001eq,Dasgupta:2002dc} with Mrinal Dasgupta.
+%
+Its subsequent development into a fully-featured NNLO evolution code
+owes much to Andreas Vogt's regular encouragement, and his suggestions
 about features that would be useful to include for benchmark tests.
 We are grateful also to Wu-Ki Tung for comments on the documentation.
 %
+We are also grateful to Luca Buonocore for his contribution of the
+implementation of the $P_{\ell q}$ term in the QED evolution.
+
 This work was supported in part by grant ANR-05-JCJC-0046-01 from the
-French Agence Nationale de la Recherche. 
+French Agence Nationale de la Recherche,
+%
+by a Royal Society Research Professorship
+(RP$\backslash$R1$\backslash$180112 and RSRP$\backslash$R$\backslash$231001),
+%
+and by the Science and Technology Facilities Council (STFC) under grants
+ST/T000864/1 and ST/X000761/1 (GPS).
 
 %======================================================================
 \appendix
@@ -3099,7 +3142,7 @@ French Agence Nationale de la Recherche.
 \label{sec:example_gen}
 
 The program below generates a subset of table~15 of the NNLO benchmark
-evolution in the second reference of~\cite{Benchmarks}. It is to be
+evolution in the second reference of~\cite{Giele:2002hx,Dittmar:2005ed}. It is to be
 found (in a slightly more commented form) in
 \ttt{example\_f90/tabulation\_example.f90}. Compilation instructions
 are to be found in the \ttt{README} file in the main directory of the
@@ -3243,7 +3286,7 @@ and the parametrised versions of the NNLO splitting functions and mass
 threshold terms.
 %
 The reader may verify that they correspond to those given in the top
-panel of table~15 of the second reference of \cite{Benchmarks} ($\mu_F
+panel of table~15 of the second reference of \cite{Giele:2002hx,Dittmar:2005ed} ($\mu_F
 = \mu_R$).
 
 \subsection{Streamlined interface}
@@ -3342,6 +3385,208 @@ contains
 end program tabulation_example_streamlined
 \end{lstlisting}
 
+\subsection{Interface example with QED included}
+  The following is an example program using the QED extension of \hoppet{}.
+  It can be found in \ttt{example\_f90/tabulation\_example\_qed.f90}.
+  
+\begin{lstlisting}
+!! An example program using a tabulation. It should yield an output identical
+!! to the content of the file tabulation_example_qed.default_output
+!!
+!!
+program tabulation_example_qed
+  use hoppet_v1
+  
+  !! if using LHAPDF, rename the hoppet functions EvolvePDF and InitPDF, which
+  !! would otherwise conflict with LHAPDF, by replacing the use
+  !! statement above with:
+  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+
+  implicit none
+  real(dp) :: dy, ymax
+  integer  :: order, nloop_qcd
+  !! holds information about the grid in y=log(1/x)
+  type(grid_def) :: grid
+  !! holds the splitting functions
+  type(dglap_holder) :: dh
+  !! holds the PDF tabulation
+  type(pdf_table)       :: table
+  !! holds the coupling
+  real(dp)               :: effective_light_quark_masses, quark_masses(4:6)
+  type(running_coupling) :: coupling
+  !! holds the initial pdf
+  real(dp), pointer :: pdf0(:,:)
+  real(dp) :: Q0
+  !! holds results at some x, Q
+  real(dp) :: Q, pdf_at_xQ(ncompmin:ncompmaxLeptons)
+  real(dp), parameter :: heralhc_xvals(9) = &
+       & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
+  integer  :: ix
+  !! Additional things for QED
+  type(qed_coupling)  :: coupling_qed
+  type(qed_split_mat) :: qed_split
+
+
+  !! define the interfaces for LHA pdf (by default not used)
+  !! (NB: unfortunately this conflicts with an internal hoppet name,
+  !! so make sure that you "redefine" the internal hoppet name, 
+  !! as illustrated in the commented "use" line above:
+  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
+  ! interface
+  !    subroutine EvolvePDF(x,Q,res)
+  !      use types; implicit none
+  !      real(dp), intent(in)  :: x,Q
+  !      real(dp), intent(out) :: res(*)
+  !    end subroutine EvolvePDF
+  ! end interface
+
+  ! set up parameters for grid
+  order = -6
+  ymax  = 12.0_dp
+  dy    = 0.1_dp
+
+  ! set up the grid itself (this call sets up a nested grid composed of 4 subgrids)
+  call InitGridDefDefault(grid, dy, ymax, order=order)
+
+  ! initialise the splitting-function holder
+  nloop_qcd = 3
+  nqcdloop_qed = 1
+  with_Plp_nnloqed=.false.
+  
+  call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
+       &                      nloop=nloop_qcd,nflo=3,nfhi=6)
+
+  ! and the QED splitting matrices
+  call InitQEDSplitMat(grid, qed_split)
+
+  write(6,'(a)') "Splitting functions initialised!"
+
+  ! allocate a pdf0 array including leptons
+  call AllocPDFWithLeptons(grid, pdf0)
+
+  ! initialise a PDF from the function below (must be contained,
+  ! in a "used" module, or with an explicitly defined interface)
+  ! pdf0(:,-6:6) are the standard pdf for quarks and gluons,
+  ! pdf0(:,8) is the photon density,
+  ! pdf0(:,9:11) are the sum of lepton-antilepton densities
+  ! for the electron, the muon and the tau.
+  pdf0(:,:) = unpolarized_dummy_pdf(xValues(grid))  
+
+  Q0 = sqrt(2.0_dp)  ! the initial scale
+
+  ! allocate and initialise the running coupling with a given
+  ! set of quark masses (NB: charm mass just above Q0).
+  quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
+  call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop_qcd,&
+       &                   quark_masses = quark_masses)
+
+  ! Initialises coupling_qed object, including thresholds. All
+  ! light quarks turn on simultaneously at some specified effective scale;
+  ! the choice of 0.109 GeV results in a fairly accurate value of alpha(mZ)
+  !  and alpha(m_tau).
+  effective_light_quark_masses = 0.109_dp
+  call InitQEDCoupling(coupling_qed, effective_light_quark_masses, quark_masses(4:6))
+
+  ! create the table object that will contain the values of the parton
+  ! densities in a grid of x and Q interpolation points.
+  call AllocPdfTableWithLeptons(grid, table, Qmin=1.0_dp, Qmax=28000.0_dp, & 
+       & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
+  ! add information about the nf transitions to the table (improves
+  ! interpolation quality)
+  call AddNfInfoToPdfTable(table,coupling)
+
+  ! create the tabulation based on the evolution of pdf0 from scale Q0
+  ! up to qmax and down to qmin
+  call EvolvePdfTableQED(table, Q0, pdf0, dh, qed_split, &
+                         coupling, coupling_qed, nloop_qcd, nqcdloop_qed)
+
+  write(6,'(a)') "Evolution done!"
+
+  ! get the value of the tabulation at some point
+  Q = 91.1876_dp;
+  write(6,'(a)')
+  write(6,'(a,f9.4,a,f8.5)') " At Q = ",Q," GeV, QCD coupling is alpha_s     = ", value(coupling, Q)
+  write(6,'(a,f9.4,a,f8.3)') " At Q = ",Q," GeV, QED coupling is 1/alpha_qed = ", one/value(coupling_qed, Q)
+  write(6,'(a,f6.4,a,f8.3)') " At mtau = ",m_tau," GeV, QED coupling is 1/alpha_qed = ", one/value(coupling_qed, m_tau/1.0000001_dp)
+  write(6,'(a)')
+
+  ! Get values at some points and print them 
+  Q = 100.0_dp
+  write(6,'(a,f9.4,a)') "           Evaluating PDFs at Q = ",Q," GeV"
+  write(6,'(a5,2a12,a14,a10,a11,4a13)') "x",&
+       & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon",&
+       & "photon","e+ + e-","mu+ + mu-","tau+ + tau-"
+  do ix = 1, size(heralhc_xvals)
+     call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
+     write(6,'(es7.1,9es12.4)') heralhc_xvals(ix), &
+          &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+          &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+          &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+          &  pdf_at_xQ(0), &
+          &  pdf_at_xQ(iflv_photon), &
+          &  pdf_at_xQ(iflv_electron), &
+          &  pdf_at_xQ(iflv_muon),&
+          &  pdf_at_xQ(iflv_tau)          
+  end do
+  
+  ! some cleaning up (not strictly speaking needed, but illustrates
+  ! how it's done)
+  call Delete(table)
+  call Delete(pdf0)
+  call Delete(dh)
+  call Delete(coupling)
+  call Delete(grid)
+  call Delete(qed_split)
+  call Delete(coupling_qed)
+
+contains 
+  !======================================================================
+  !! The dummy PDF suggested by Vogt as the initial condition for the 
+  !! unpolarized evolution (as used in hep-ph/0511119).
+  function unpolarized_dummy_pdf(xvals) result(pdf)
+    real(dp), intent(in) :: xvals(:)
+    real(dp)             :: pdf(size(xvals),ncompmin:ncompmaxLeptons)
+    real(dp) :: gluon(size(xvals)), uv(size(xvals)), dv(size(xvals))
+    real(dp) :: ubar(size(xvals)), dbar(size(xvals))
+    !---------------------
+    real(dp), parameter :: N_g = 1.7_dp, N_ls = 0.387975_dp
+    real(dp), parameter :: N_uv=5.107200_dp, N_dv = 3.064320_dp
+    real(dp), parameter :: N_db = half*N_ls
+  
+    pdf = zero
+    ! clean method for labelling as PDF as being in the human representation
+    ! (not actually needed after setting pdf=0
+    call LabelPdfAsHuman(pdf)
+
+    !-- remember that these are all xvals*q(xvals)
+    gluon = N_g * xvals**(-0.1_dp) * (1-xvals)**5
+    uv = N_uv * xvals**0.8_dp * (1-xvals)**3
+    dv = N_dv * xvals**0.8_dp * (1-xvals)**4
+    dbar = N_db * xvals**(-0.1_dp) * (1-xvals)**6
+    ubar = dbar * (1-xvals)
+
+    ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
+    ! from the main program
+    pdf(:, iflv_g) = 0.99_dp * gluon
+    pdf(:,-iflv_s) = 0.2_dp*(dbar + ubar)
+    pdf(:, iflv_s) = pdf(:,-iflv_s)
+    pdf(:, iflv_u) = uv + 0.9_dp * ubar
+    pdf(:,-iflv_u) = 0.9_dp * ubar
+    pdf(:, iflv_d) = dv + 0.9_dp * dbar
+    pdf(:,-iflv_d) = 0.9_dp * dbar
+    pdf(:,iflv_photon) = gluon/100._dp + ubar/10._dp 
+    pdf(:,iflv_electron) = dbar/10._dp
+    pdf(:,iflv_muon) = ubar/10._dp
+    pdf(:,iflv_tau) = dbar/10._dp         
+
+  end function unpolarized_dummy_pdf
+
+end program tabulation_example_qed
+
+
+
+\end{lstlisting}
 
 \subsection{Other general-interface examples}
 
@@ -3357,7 +3602,7 @@ evolution without tabulation.
 %
 The programs in the \ttt{benchmarking/} directory are the ones that
 have been used in benchmark PDF evolution
-comparisons~\cite{Benchmarks} and in determining the accuracies and
+comparisons~\cite{Giele:2002hx,Dittmar:2005ed} and in determining the accuracies and
 speeds shown in section~\ref{sec:benchmarks}.
 
 One particular usage question that has arisen, relative to the example
@@ -3832,7 +4077,7 @@ parametrised NNLO splitting functions also provided in
 guaranteed to be accurate to within $0.1\%$ --- in practice since they
 come in relatively suppressed by two powers of $\as$, the impact on
 the evolution tends to be of the order of a  $10^{-5}$ relative effect
-\cite{Benchmarks}.
+\cite{Giele:2002hx,Dittmar:2005ed}.
 
 The user can choose whether to obtain the exact or parametrised NNLO
 splitting functions using the following calls (to be made before
@@ -4143,424 +4388,9 @@ will do the same thing.
 
 %=============================================================
 
-\begin{thebibliography}{99}
-
-\bibitem{Botje}
-  M.~Botje, QCDNUM, \url{http://www.nikhef.nl/~h24/qcdnum/}~.
-
-% Uses decomposition on Laguerre polynomials -- about
-% 30 of them, remains Y^2 * T method. Initialisation
-% (transform of splitting functions takes 15s on thalie)
-% (didn't try evolution; didn't check accuracy; evolution
-% times and accuracy are not mentioned; seemed fixed nf)
-\bibitem{Schoeffel:1998tz}
-L.~Schoeffel,
-%``An elegant and fast method to solve QCD evolution equations,  application to
-%the determination of the gluon content of the pomeron,''
-Nucl.\ Instrum.\ Meth.\ A {\bf 423} (1999) 439.
-%%CITATION = NUIMA,A423,439;%%
-See also \url{http://www.desy.de/~schoffel/L_qcd98.html},
-\url{http://www-spht.cea.fr/pisp/gelis/Soft/DGLAP/index.html}
-
-\bibitem{Pegasus}
-  A.~Vogt,
-  %``Efficient evolution of unpolarized and polarized parton distributions  with
-  %QCD-PEGASUS,''
-  Comput.\ Phys.\ Commun.\  {\bf 170} (2005) 65
-  [arXiv:hep-ph/0408244].
-  %%CITATION = HEP-PH 0408244;%%
-
-\bibitem{Pascaud:2001bi}
-C.~Pascaud and F.~Zomer,
-%``A fast and precise method to solve the Altarelli-Parisi equations in x
-%space,''
-arXiv:hep-ph/0104013.
-%%CITATION = HEP-PH 0104013;%%
-
-
-\bibitem{Weinzierl:2002mv}
-S.~Weinzierl,
-%``Fast evolution of parton distributions,''
-Comput.\ Phys.\ Commun.\  {\bf 148} (2002) 314
-[arXiv:hep-ph/0203112];
-%%CITATION = HEP-PH 0203112;%%
-%\bibitem{Roth:2004ti}
-M.~Roth and S.~Weinzierl,
-%``QED corrections to the evolution of parton distributions,''
-Phys.\ Lett.\ B {\bf 590} (2004) 190
-[arXiv:hep-ph/0403200].
-%%CITATION = HEP-PH 0403200;%%
-
-% about 1 minute at NLO.
-\bibitem{coriano} A.~Cafarella and C.~Coriano,
-%``Direct solution of renormalization group equations of QCD in x-space: NLO
-%implementations at leading twist,''
-Comput.\ Phys.\ Commun.\  {\bf 160} (2004) 213
-[arXiv:hep-ph/0311313];
-%%CITATION = HEP-PH 0311313;%%
-%\bibitem{Cafarella:2005zj}
-  A.~Cafarella, C.~Coriano' and M.~Guzzi,
-  %``NNLO logarithmic expansions and exact solutions of the DGLAP equations from
-  %x-space: New algorithms for precision studies at the LHC,''
-  Nucl.\ Phys.\  B {\bf 748} (2006) 253
-  [arXiv:hep-ph/0512358];
-  %%CITATION = NUPHA,B748,253;%%
-  A.~Cafarella, C.~Coriano and M.~Guzzi,
-  %``Precision Studies of the NNLO DGLAP Evolution at the LHC with CANDIA,''
-  arXiv:0803.0462 [hep-ph].
-
-\bibitem{GuzziThesis}
-  M.~Guzzi, Ph.D. Thesis, Lecce University, 2006 [hep-ph/0612355].
-
-\bibitem{nnpdf}
-  L.~Del Debbio, S.~Forte, J.~I.~Latorre, A.~Piccione and J.~Rojo  [NNPDF
-                  Collaboration],
-  %``Neural network determination of parton distributions: The nonsinglet
-  %case,''
-  JHEP {\bf 0703} (2007) 039
-  [arXiv:hep-ph/0701127].
-
-\bibitem{Kosower:1997hg}
-  D.~A.~Kosower,
-  %``Evolution of parton distributions,''
-  Nucl.\ Phys.\  B {\bf 506} (1997) 439
-  [arXiv:hep-ph/9706213].
-
-\bibitem{Ratcliffe:2000kp}
-  P.~G.~Ratcliffe,
-  %``A matrix approach to numerical solution of the DGLAP evolution
-  %equations,''
-  Phys.\ Rev.\  D {\bf 63}, 116004 (2001)
-  [arXiv:hep-ph/0012376].
-  %%CITATION = PHRVA,D63,116004;%%
-
-\bibitem{DGLAP}
-V.N.~Gribov and L.N.~Lipatov, 
-%\sjnp{15}{1972}{438};
-Sov.\ J.\ Nucl.\ Phys. {\bf 15} (1972) 438;
-%``Deep Inelastic E P Scattering In Perturbation Theory,''
-%[Sov.\ J.\ Nucl.\ Phys.\  {\bf 15} (1972) 438].
-%%CITATION = YAFIA,15,781;%%
-G.~Altarelli and G.~Parisi, 
-%\npb{126}{1977}{298};
-Nucl.\ Phys.\ B {\bf 126} (1977) 298;
-%``Asymptotic Freedom In Parton Language,''
-%%CITATION = NUPHA,B126,298;%%
-Yu.L.~Dokshitzer, 
-%\jetp{46}{1977}{641}.
-Sov.\ Phys.\ JETP {\bf 46} (1977) 641.
-%``Calculation Of The Structure Functions For Deep Inelastic Scattering And E+ E- Annihilation By Perturbation Theory In Quantum Chromodynamics.
-%[Zh.\ Eksp.\ Teor.\ Fiz.\  {\bf 73} (1977) 1216].
-%%CITATION = SPHJA,46,641;%%
-
-\bibitem{CTEQ}
-  J.~Pumplin, D.~R.~Stump, J.~Huston, H.~L.~Lai, P.~Nadolsky and W.~K.~Tung,
-  %``New generation of parton distributions with uncertainties from global  QCD
-  %analysis,''
-  JHEP {\bf 0207}, 012 (2002)
-  [arXiv:hep-ph/0201195].
-
-%\cite{Martin:2002dr}
-\bibitem{MRST}
-  A.~D.~Martin, R.~G.~Roberts, W.~J.~Stirling and R.~S.~Thorne,
-  %``NNLO global parton analysis,''
-  Phys.\ Lett.\  B {\bf 531} (2002) 216
-  [arXiv:hep-ph/0201127].
-  %%CITATION = PHLTA,B531,216;%%
-
-\bibitem{DisResum}
-  M.~Dasgupta and G.~P.~Salam,
-  %``Resummation of the jet broadening in DIS,''
-  Eur.\ Phys.\ J.\  C {\bf 24} (2002) 213
-  [arXiv:hep-ph/0110213];
-  %%CITATION = EPHJA,C24,213;%%
-%\bibitem{Dasgupta:2002dc}
-  %M.~Dasgupta and G.~P.~Salam,
-  %``Resummed event-shape variables in DIS,''
-  JHEP {\bf 0208} (2002) 032
-  [arXiv:hep-ph/0208073].
-  %%CITATION = JHEPA,0208,032;%%
-
-
-
-\bibitem{caesar}
-  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
-  %``Principles of general final-state resummation and automated
-  %implementation,''
-  JHEP {\bf 0503}, 073 (2005)
-  [arXiv:hep-ph/0407286];
-  %%CITATION = JHEPA,0503,073;%%
-%
-%\cite{Banfi:2004nk}
-%\bibitem{Banfi:2004nk}
-%  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
-  %``Resummed event shapes at hadron hadron colliders,''
-  JHEP {\bf 0408}, 062 (2004)
-  [arXiv:hep-ph/0407287].
-  %%CITATION = JHEPA,0408,062;%%
-
-\bibitem{Ciafaloni:2003rd}
-  M.~Ciafaloni, D.~Colferai, G.~P.~Salam and A.~M.~Stasto,
-  %``Renormalisation group improved small-x Green's function,''
-  Phys.\ Rev.\  D {\bf 68}, 114003 (2003)
-  [arXiv:hep-ph/0307188].
-
-
-\bibitem{APPL}
-  T.~Carli, G.~P.~Salam and F.~Siegert,
-  %``A posteriori inclusion of PDFs in NLO QCD final-state calculations,''
-  :hep-ph/0510324;
-  %%CITATION = HEP-PH/0510324;%%
-  T.~Carli, D.~Clements, {\it et al.}, in preparation.
-
-\bibitem{Banfi:2007gu}
-  A.~Banfi, G.~P.~Salam and G.~Zanderighi,
-  %``Accurate QCD predictions for heavy-quark jets at the Tevatron and LHC,''
-  JHEP {\bf 0707} (2007) 026
-  [arXiv:0704.2999 [hep-ph]].
-
-
-\bibitem{Benchmarks} 
-  W.~Giele {\it et al.},
-  ``Les Houches 2001, the QCD/SM working group: Summary report,''
-  hep-ph/0204316, section 1.3;\\
-  %%CITATION = HEP-PH 0204316;%%
-  M.~Dittmar {\it et al.},
-  ``Parton distributions: Summary report for the HERA-LHC workshop,''
-  hep-ph/0511119, section 4.4.
-  %%CITATION = HEP-PH 0511119;%%
-
-\bibitem{LHAPDF} W.~Giele and M.~R.~Whalley,
-\url{http://hepforge.cedar.ac.uk/lhapdf/}
-
-
-\bibitem{CFP}
-  W.~Furmanski and R.~Petronzio,
-  %``Singlet Parton Densities Beyond Leading Order,''
-  Phys.\ Lett.\  B {\bf 97} (1980) 437;
-  %%CITATION = PHLTA,B97,437;%%
-  G.~Curci, W.~Furmanski and R.~Petronzio,
-  %``Evolution Of Parton Densities Beyond Leading Order: The Nonsinglet Case,''
-  Nucl.\ Phys.\  B {\bf 175} (1980) 27.
-  %%CITATION = NUPHA,B175,27;%%
-
-
-%\cite{Moch:2004pa}
-\bibitem{NNLO-NS}
-  S.~Moch, J.~A.~M.~Vermaseren and A.~Vogt,
-  %``The three-loop splitting functions in QCD: The non-singlet case,''
-  Nucl.\ Phys.\ B {\bf 688} (2004) 101
-  [arXiv:hep-ph/0403192].
-  %%CITATION = HEP-PH 0403192;%%
-
-%\cite{Vogt:2004mw}
-\bibitem{NNLO-singlet}
-  A.~Vogt, S.~Moch and J.~A.~M.~Vermaseren,
-  %``The three-loop splitting functions in QCD: The singlet case,''
-  Nucl.\ Phys.\ B {\bf 691} (2004) 129
-  [arXiv:hep-ph/0404111].
-  %%CITATION = HEP-PH 0404111;%%
-
-\bibitem{Mertig:1995ny}
-  R.~Mertig and W.~L.~van Neerven,
-  %``The Calculation Of The Two Loop Spin Splitting Functions P(Ij)(1)(X),''
-  Z.\ Phys.\  C {\bf 70} (1996) 637
-  [arXiv:hep-ph/9506451].
-  %%CITATION = ZEPYA,C70,637;%%
-
-\bibitem{Vogelsang:1996im}
-  W.~Vogelsang,
-  %``The spin-dependent two-loop splitting functions,''
-  Nucl.\ Phys.\  B {\bf 475} (1996) 47
-  [arXiv:hep-ph/9603366].
-  %%CITATION = NUPHA,B475,47;%%
-
-
-\bibitem{Stratmann:1996hn}
-  M.~Stratmann and W.~Vogelsang,
-  %``Next-to-leading order evolution of polarized and unpolarized  fragmentation
-  %functions,''
-  Nucl.\ Phys.\  B {\bf 496} (1997) 41
-  [arXiv:hep-ph/9612250].
-  %%CITATION = NUPHA,B496,41;%%
-
-%\cite{Dokshitzer:2005bf}
-\bibitem{Dokshitzer:2005bf}
-  Yu.~L.~Dokshitzer, G.~Marchesini and G.~P.~Salam,
-  %``Revisiting parton evolution and the large-x limit,''
-  Phys.\ Lett.\  B {\bf 634}, 504 (2006)
-  [arXiv:hep-ph/0511302].
-  %%CITATION = PHLTA,B634,504;%%
-
-
-\bibitem{Mitov:2006ic}
-  A.~Mitov, S.~Moch and A.~Vogt,
-  %``Next-to-next-to-leading order evolution of non-singlet fragmentation
-  %functions,''
-  Phys.\ Lett.\  B {\bf 638} (2006) 61
-  [arXiv:hep-ph/0604053].
-
-\bibitem{Basso:2006nk}
-  B.~Basso and G.~P.~Korchemsky,
-  %``Anomalous dimensions of high-spin operators beyond the leading order,''
-  Nucl.\ Phys.\  B {\bf 775} (2007) 1
-  [arXiv:hep-th/0612247].
-  %%CITATION = NUPHA,B775,1;%%
-
-\bibitem{Dokshitzer:2006nm}
-  Yu.~L.~Dokshitzer and G.~Marchesini,
-  %``N = 4 SUSY Yang-Mills: Three loops made simple(r),''
-  Phys.\ Lett.\  B {\bf 646} (2007) 189
-  [arXiv:hep-th/0612248].
-
-\bibitem{Beccaria:2007bb}
-  M.~Beccaria, Yu.~L.~Dokshitzer and G.~Marchesini,
-  %``Twist 3 of the sl(2) sector of N=4 SYM and reciprocity respecting
-  %evolution,''
-  Phys.\ Lett.\  B {\bf 652} (2007) 194
-  [arXiv:0705.2639 [hep-th]].
-
-
-
-\bibitem{NNLO-MTM}
-  M.~Buza, Y.~Matiounine, J.~Smith, R.~Migneron and W.~L.~van Neerven,
-  %``Heavy quark coefficient functions at asymptotic values $Q~2 \gg m~2$,''
-  Nucl.\ Phys.\ B {\bf 472}, 611 (1996)
-  [arXiv:hep-ph/9601302];\\
-  %%CITATION = HEP-PH 9601302;%%
-%
-  M.~Buza, Y.~Matiounine, J.~Smith and W.~L.~van Neerven,
-  %``Charm electroproduction viewed in the variable-flavour number scheme
-  %versus fixed-order perturbation theory,''
-  Eur.\ Phys.\ J.\ C {\bf 1}, 301 (1998)
-  [arXiv:hep-ph/9612398].
-  %%CITATION = HEP-PH 9612398;%%
-
-\bibitem{Chetyrkin:1997sg}
-  K.~G.~Chetyrkin, B.~A.~Kniehl and M.~Steinhauser,
-  %``Strong coupling constant with flavour thresholds at four loops in the
-  %MS-bar scheme,''
-  Phys.\ Rev.\ Lett.\  {\bf 79}, 2184 (1997)
-  [arXiv:hep-ph/9706430].
-
-%\cite{Sherstnev:2008dm}
-\bibitem{Sherstnev:2008dm}
-  A.~Sherstnev and R.~S.~Thorne,
-  %``Different PDF approximations useful for LO Monte Carlo generators,''
-  arXiv:0807.2132 [hep-ph].
-  %%CITATION = ARXIV:0807.2132;%%
-
-\bibitem{vanNeerven:1999ca}
-  W.~L.~van Neerven and A.~Vogt,
-  %``NNLO evolution of deep-inelastic structure functions: The non-singlet
-  %case,''
-  Nucl.\ Phys.\ B {\bf 568} (2000) 263
-  [arXiv:hep-ph/9907472].
-  %%CITATION = HEP-PH 9907472;%%
-
-\bibitem{vanNeerven:2000uj}
-  W.~L.~van Neerven and A.~Vogt,
-  %``NNLO evolution of deep-inelastic structure functions: The singlet case,''
-  Nucl.\ Phys.\ B {\bf 588} (2000) 345
-  [arXiv:hep-ph/0006154].
-  %%CITATION = HEP-PH 0006154;%%
-
-\bibitem{NRf90}
-  Press {\it et al.}, \emph{Numerical Recipes in Fortran~90},
-  Cambridge University Press, 1996.
-  
-\bibitem{VogtMTMParam} A.~Vogt, private communication.
-
-
-\bibitem{White:2005wm}
-  C.~D.~White and R.~S.~Thorne,
-  %``Comparison of NNLO DIS scheme splitting functions with results from exact
-  %gluon kinematics at small x,''
-  Eur.\ Phys.\ J.\ C {\bf 45} (2006) 179
-  [arXiv:hep-ph/0507244].
-  %%CITATION = HEP-PH 0507244;%%
-
-%\cite{Bethke:2006ac}
-\bibitem{Bethke:2006ac}
-  S.~Bethke,
-  %``Experimental tests of asymptotic freedom,''
-  Prog.\ Part.\ Nucl.\ Phys.\  {\bf 58}, 351 (2007)
-  [arXiv:hep-ex/0606035].
-  %%CITATION = PPNPD,58,351;%%
-
-%\cite{de Florian:2007hc}
-\bibitem{de Florian:2007hc}
-  D.~de Florian, R.~Sassot and M.~Stratmann,
-  %``Global Analysis of Fragmentation Functions for Protons and Charged
-  %Hadrons,''
-  Phys.\ Rev.\  D {\bf 76}, 074033 (2007)
-  [arXiv:0707.1506 [hep-ph]].
-  %%CITATION = PHRVA,D76,074033;%%
-
-
-\bibitem{Corcella:2005us}
-  G.~Corcella and L.~Magnea,
-  %``Soft-gluon resummation effects on parton distributions,''
-  Phys.\ Rev.\  D {\bf 72} (2005) 074017
-  [arXiv:hep-ph/0506278].
-
-\bibitem{Martin:2007bv}
-  A.~D.~Martin, W.~J.~Stirling, R.~S.~Thorne and G.~Watt,
-  %``Update of Parton Distributions at NNLO,''
-  Phys.\ Lett.\  B {\bf 652}, 292 (2007)
-  [arXiv:0706.0459 [hep-ph]].
-
-%\cite{Tung:2006tb}
-\bibitem{Tung:2006tb}
-  W.~K.~Tung, H.~L.~Lai, A.~Belyaev, J.~Pumplin, D.~Stump and C.~P.~Yuan,
-  %``Heavy quark mass effects in deep inelastic scattering and global QCD
-  %analysis,''
-  JHEP {\bf 0702}, 053 (2007)
-  [arXiv:hep-ph/0611254].
-  %%CITATION = JHEPA,0702,053;%%
-
-\bibitem{Martin:2004dh}
-  A.~D.~Martin, R.~G.~Roberts, W.~J.~Stirling and R.~S.~Thorne,
-  %``Parton distributions incorporating QED contributions,''
-  Eur.\ Phys.\ J.\  C {\bf 39}, 155 (2005)
-  [arXiv:hep-ph/0411040].
-
-\bibitem{Ciafaloni:2000df}
-  M.~Ciafaloni, P.~Ciafaloni and D.~Comelli,
-  %``Bloch-Nordsieck violating electroweak corrections to inclusive TeV  scale
-  %hard processes,''
-  Phys.\ Rev.\ Lett.\  {\bf 84}, 4810 (2000)
-  [arXiv:hep-ph/0001142].
-
-
-\bibitem{Ciafaloni:2005fm}
-  P.~Ciafaloni and D.~Comelli,
-  %``Electroweak evolution equations,''
-  JHEP {\bf 0511}, 022 (2005)
-  [arXiv:hep-ph/0505047].
-  %%CITATION = JHEPA,0511,022;%%
-
-
-\bibitem{FortranPolyLog}
-  T.~Gehrmann and E.~Remiddi,
-  %``Numerical evaluation of two-dimensional harmonic polylogarithms,''
-  Comput.\ Phys.\ Commun.\  {\bf 144} (2002) 200.
-  %[hep-ph/0111255].
-  %%CITATION = HEP-PH 0111255;%%
-
-\bibitem{F95Explained}
-  M. Metcalf and J. Reid, \emph{Fortran 90/95 Explained}, Oxford
-  University Press, 1996.
-
-\bibitem{F95WebResources} Many introductions and tutorials about
-  fortran~90 may be found at
-  \url{http://dmoz.org/Computers/Programming/Languages/Fortran/Tutorials/Fortran_90_and_95/}
-
-
-\end{thebibliography}
-
-
-
+%\input{bibliography}
+\bibliographystyle{elsarticle-num}
+\bibliography{hoppet.bib}
 
 %=====================================================================
 

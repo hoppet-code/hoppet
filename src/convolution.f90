@@ -67,10 +67,11 @@ module convolution
   !-- public routines --
   interface InitGridDef
      module procedure conv_InitGridDef_single, conv_InitGridDef_multi
-  end interface
+  end interface InitGridDef
   public :: conv_InitGridDef_single, conv_InitGridDef_multi
   public :: InitGridDef, ValidateGD, GetGridInfoString
   public :: SetDefaultConvolutionEps, DefaultConvolutionEps
+  public :: InitGridDefDefault
   interface operator(==)
      module procedure conv_CmpGridDef
   end interface
@@ -127,7 +128,7 @@ module convolution
   type(grid_def) :: conv_moment_gd
   real(dp), allocatable :: conv_moment_gq(:)
   interface TruncatedMoment
-    module procedure conv_TruncatedMoment_1d
+    module procedure conv_TruncatedMoment_1d, conv_TruncatedMoment_2d
   end interface
   public :: TruncatedMoment
 
@@ -256,8 +257,8 @@ contains
     integer,        intent(in), optional :: order
     real(dp),       intent(in), optional :: eps
     logical, save :: first_call = .true.
-    character(len=80) :: string1, string2
-    integer, save     :: warn_dy = 4
+    character(len=200) :: err_string1, err_string2
+    integer, save     :: nwarn_dy = 4
 
     if (first_call) then
        first_call = .false.
@@ -274,16 +275,16 @@ contains
     grid%ny   = nint(ymax / dy)
     if (grid%ny < 2) then
        
-       write(string1,*) 'InitGridDef: requested too small a number of bins'
-       write(string2,*) '                 dy and ymax were',dy,ymax
-       call wae_error(trim(string1),trim(string2))
+       write(err_string1,*) 'InitGridDef: requested too small a number of bins'
+       write(err_string2,*) '                 dy and ymax were',dy,ymax
+       call wae_error(trim(err_string1),trim(err_string2))
     end if
     
     grid%dy   = ymax / grid%ny
     if (abs(grid%dy/dy - one) > 0.001_dp) then
-       write(string1,*) 'InitGridDef: requested dy of ', dy
-       write(string2,*) '                         provided  dy of ', grid%dy
-       call wae_warn(warn_dy,trim(string1),trim(string2))
+       write(err_string1,*) 'InitGridDef: requested dy of ', dy
+       write(err_string2,*) '                         provided  dy of ', grid%dy
+       call wae_warn(nwarn_dy,trim(err_string1),trim(err_string2))
     end if
 
     if (present(order)) then
@@ -316,8 +317,8 @@ contains
     type(grid_def), pointer :: subgd(:) ! shorthand
     ! temp needed for workaround on ifort 8.0.039
     real(dp) :: gdarraydy(size(gdarray))
-    character(len=80) :: string1, string2
-    integer, save     :: warn_locking = 4
+    character(len=200) :: err_string1, err_string2
+    integer, save      :: nwarn_locking = 4
 
     !-- enforce one layer only
     if (any(gdarray(:)%nsub /= 0)) then
@@ -346,11 +347,11 @@ contains
           subgd(i) = gdarray(indx(i))
           if (i > 1) then 
              if (subgd(i)%ymax <  subgd(i-1)%ymax) then
-                write(string1,*) &
+                write(err_string1,*) &
                      &'ERROR in conv_InitGridDef_multi: for locking,'
-                write(string2,*) 'gdarray with smaller dy should&
+                write(err_string2,*) 'gdarray with smaller dy should&
                      & also have smaller gdarray%ymax'
-                call wae_error(trim(string1), trim(string2))
+                call wae_error(trim(err_string1), trim(err_string2))
                 ! for testing ifort_8_0_039...
                 !write(0,*) 'dy   values (i-1,i)', subgd(i-1:i)%dy
                 !write(0,*) 'ymax values (i-1,i)', subgd(i-1:i)%ymax
@@ -369,26 +370,26 @@ contains
           dyratio = subgd(i+1)%dy / subgd(i)%dy
           subgd(i)%dy = subgd(i+1)%dy / nint(dyratio)
           if (abs(dyratio-nint(dyratio)) > warn_tolerance*dyratio) then
-             write(string1,'(a,i2,a,f18.14)') ' InitGridDef (locking):&
+             write(err_string1,'(a,i2,a,f18.14)') ' InitGridDef (locking):&
                   & redefined dy(', i,') to be ', subgd(i)%dy
-             call wae_warn(warn_locking, trim(string1))
+             call wae_warn(nwarn_locking, trim(err_string1))
           end if
           ! after fixing dy one must still have an integer number of bins
           approx_ny = subgd(i)%ymax/subgd(i)%dy
           subgd(i)%ny = ceiling(approx_ny - warn_tolerance)
           new_ymax = subgd(i)%ny * subgd(i)%dy
           if (abs(new_ymax-subgd(i)%ymax) > warn_tolerance*new_ymax) then
-             write(string1,'(a,i2,a,f18.14)') ' InitGridDef (locking):&
+             write(err_string1,'(a,i2,a,f18.14)') ' InitGridDef (locking):&
                   & redefined ymax(', i,') to be ', new_ymax
-             call wae_warn(warn_locking, trim(string1))
+             call wae_warn(nwarn_locking, trim(err_string1))
           end if
           subgd(i)%ymax = new_ymax
           subgd(i)%ny   = nint(subgd(i)%ymax / subgd(i)%dy)
           ! condition on order must still hold
           if (abs(subgd(i)%order)+1 > subgd(i)%ny) then
-             write(string1,'(a)') 'Error in InitGridDef (locking):'
-             write(string2,'(a,i2,a)') '       For grid def ',i,' |order|+1 > ny'
-             call wae_error(trim(string1),trim(string2))
+             write(err_string1,'(a)') 'Error in InitGridDef (locking):'
+             write(err_string2,'(a,i2,a)') '       For grid def ',i,' |order|+1 > ny'
+             call wae_error(trim(err_string1),trim(err_string2))
           end if
        end do
     else
@@ -409,8 +410,29 @@ contains
     end do
     
   end subroutine conv_InitGridDef_multi
-  
 
+  !======================================================================
+  ! create a grid covering ymax and dy, using our default nested grid
+  ! setup (as created originally for the streamlined interface)
+  subroutine InitGridDefDefault(grid, dy, ymax, order)
+    type(grid_def), intent(out) :: grid
+    real(dp),       intent(in)  :: ymax, dy
+    integer, optional, intent(in) :: order
+    !---------------------------------
+    type(grid_def) :: gdarray(4)
+    integer        :: lcl_order
+
+    lcl_order = default_or_opt(-6, order)
+
+    call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=lcl_order)
+    call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp,  order=lcl_order)
+    call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp,  order=lcl_order)
+    call InitGridDef(gdarray(1),dy,       ymax  ,  order=lcl_order)
+    call InitGridDef(grid,gdarray(1:4),locked=.true.)
+
+  end subroutine InitGridDefDefault
+  
+  
   !======================================================================
   !! Set a string with a compact summary about the grid
   !!
@@ -537,8 +559,10 @@ contains
     type(grid_def), intent(in) :: gd1, gd2
     character(len=*), intent(in) :: source
     if (.not. (gd1 == gd2)) then
-       write(0,*) 'Problem validating two grid defs in ',source
-       stop
+
+       call wae_error('Problem validating two grid defs in ',source)
+       !write(0,*) 'Problem validating two grid defs in ',source
+       !stop
     end if
   end subroutine ValidateGD
 
@@ -1057,14 +1081,19 @@ contains
     integer :: i, ny, npnt, isub
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
+    character(len=200) :: err_string1, err_string2
 
     !write(0,*) y,grid%ny, ubound(gq,dim=1)
     ny = assert_eq(grid%ny,ubound(gq,dim=1),"EvalGridQuant")
     if (y > grid%ymax*(one+warn_tolerance)) then
-       write(0,*) 'EvalGridQuant: &
+       write(err_string1,*) 'EvalGridQuant: &
             &requested function value beyond maximum'
-       write(0,*) 'y = ', y, 'ymax=',grid%ymax
-       stop
+       write(err_string2,*) 'y = ', y, 'ymax=',grid%ymax
+       call wae_error(trim(err_string1), trim(err_string2))
+       !write(0,*) 'EvalGridQuant: &
+       !     &requested function value beyond maximum'
+       !write(0,*) 'y = ', y, 'ymax=',grid%ymax
+       !stop
     end if
     if (grid%nsub /= 0) then
        isub = conv_BestIsub(grid,y)
@@ -1103,14 +1132,19 @@ contains
     !real(dp) :: ey, df
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
+    character(len=200) :: err_string1, err_string2
 
     !write(0,*) y,grid%ny, ubound(gq,dim=1)
     ny = assert_eq(grid%ny,ubound(gq,dim=1),"EvalGridQuant")
     if (y > grid%ymax*(one+warn_tolerance)) then
-       write(0,*) 'EvalGridQuant: &
+       write(err_string1,*) 'EvalGridQuant: &
             &requested function value beyond maximum'
-       write(0,*) 'y = ', y, 'ymax=',grid%ymax
-       stop
+       write(err_string2,*) 'y = ', y, 'ymax=',grid%ymax
+       call wae_error(trim(err_string1), trim(err_string2))
+       !write(0,*) 'EvalGridQuant: &
+       !     &requested function value beyond maximum'
+       !write(0,*) 'y = ', y, 'ymax=',grid%ymax
+       !stop
     end if
     if (grid%nsub /= 0) then
        isub = conv_BestIsub(grid,y)
@@ -1166,6 +1200,7 @@ contains
     !-----------------------------------------
     integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: ny, npnt, isub
+    character(len=200) :: err_string1, err_string2
 
     ny = grid%ny
     if (grid%nsub /= 0) then
@@ -1176,10 +1211,14 @@ contains
        ! nan fails all comparison tests; arrange the tests so that
        ! if we have a nan, then we will get something out of range.
        if (.not.(y <= grid%ymax*(one+warn_tolerance) .and. y >= -warn_tolerance)) then
-          write(0,*) 'WgtGridQuant: &
+          write(err_string1,*) 'WgtGridQuant: &
                &requested function value outside y range'
-          write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
-          stop
+          write(err_string2,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
+          call wae_error(trim(err_string1), trim(err_string2))
+          !write(0,*) 'WgtGridQuant: &
+          !     &requested function value outside y range'
+          !write(0,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
+          !stop
        end if
        
        npnt = min(npnt_max, max(npnt_min, abs(grid%order)))
@@ -1442,6 +1481,20 @@ contains
 
   end function conv_TruncatedMoment_1d
 
+  !----------------------------------------------------------------------
+  ! a 2d version of TruncatedMoment
+  function conv_TruncatedMoment_2d(gd, gq, moment_index, y) result(res)
+    type(grid_def), intent(in) :: gd
+    real(dp),       intent(in) :: gq(0:,:), moment_index
+    real(dp), intent(in), optional :: y
+    real(dp) :: res(size(gq,dim=2))
+    !---------------------------------
+    integer :: i
+    do i = 1, size(gq,dim=2)
+       res(i) = conv_TruncatedMoment_1d(gd, gq(:,i), moment_index, y)
+    end do
+  end function conv_TruncatedMoment_2d
+  
   
   !------------------------------------------------
   ! Auxiliary function for conv_TruncatedMoment_1d
@@ -1753,9 +1806,11 @@ contains
     end if
 
     if (istat /= 0) then
-       write(0,*) 'ERROR: problems with deallocation in conv_DelGridConv_0d'
+
+       call wae_error('conv_DelGridConv_0d: problems with deallocation')
+       !write(0,*) 'ERROR: problems with deallocation in conv_DelGridConv_0d'
        !write(0,*) one/sqrt(sin(zero))
-       stop
+       !stop
     end if
     
   end subroutine conv_DelGridConv_0d
@@ -2022,7 +2077,7 @@ contains
        cc_piece = cc_REALVIRT
        res = res + ig_LinWeight(func, yl, yh, one, one, eps)
        cc_piece = cc_REAL
-       res = res + ig_PolyWeight(func, yl, yh, nodes, inode, eps,wgtadd=-one)
+       res = res + ig_PolyWeight_expand(func, yl, yh, nodes, inode, eps,wgtadd=-one)
     else
        cc_piece = cc_REAL
        res = ig_PolyWeight(func, yl, yh, nodes, inode, eps)

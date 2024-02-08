@@ -7,16 +7,18 @@
 # GPS created 2009-09-05
 #----------------------------------------------------------------------
 use Cwd;
+use strict;
 
-$usage="
+my $usage="
 Usage: 
   ./configure [--prefix=...] [FC='...'] [FFLAGS='...'] [LDFLAGS='...']
 
-  --prefix='...'      sets the location for installation
-  --mod-prefix='...'  sets the location for installation of modules (by default prefix/include/hoppet)
-  FC='...'            sets the fortran (and f90) compiler
-  FFLAGS='...'        sets the fortran (and f90) compiler options
-  LDLAGS='...'        sets the link options
+  --prefix='...'        sets the location for installation
+  --mod-prefix='...'    sets the location for installation of modules (by default prefix/include/hoppet)
+  --enable-exact-coefs  enables compilation of exact coefficient functions (default is off; NB even when on, they still need to be explicitly requested in the calling code)
+  FC='...'              sets the fortran (and f90) compiler
+  FFLAGS='...'          sets the fortran (and f90) compiler options
+  LDLAGS='...'          sets the link options
 ";
 
 
@@ -26,41 +28,54 @@ if ($#ARGV >=0 && ($ARGV[0] eq "-h" || $ARGV[0] eq "--help")) {
   exit;
 }
 
-$configline=$0." ".join(" ",@ARGV);
-$prefix="/usr/local";
-$modPrefix="";
+my $configline=$0." ".join(" ",@ARGV);
+my $prefix="/usr/local";
+my $modPrefix="";
+my $enableExactCoefs=0;
 
-foreach $arg (@ARGV) {
+my @args;
+foreach my $arg (@ARGV) {
   if    ($arg =~ /^--prefix=(.*)/) { $prefix= $1;}
   elsif ($arg =~ /^--mod-prefix=(.*)/) { $modPrefix= $1;}
-  else {push @args, "\"".$arg."\"";}
+  elsif ($arg =~ /^--enable-exact-coefs/) { $enableExactCoefs=1;}
+  else {
+    if ($arg =~ /^--/) {die "Unknown option $arg\n";}
+    push @args, "\"".$arg."\"";
+  }
 }
 push @args, "--prefix=$prefix";
 if (!$modPrefix) {$modPrefix = "$prefix/include/hoppet";}
 push @args, "--mod-prefix=$modPrefix";
 
+if ($enableExactCoefs) {print "Enabling compilation of exact coefficient functions\n";}
 
 # NB: src comes last, because from src onwards we will include an option to install modules
-@dirs=split(" ","example_f90 benchmarking benchmarking/test_acc src");
+my @dirs=split(" ","example_f90 benchmarking benchmarking/test_acc src");
 
-$topdir = getcwd;
+my $topdir = getcwd;
 
 
 #chdir "src";
 
 # now generate the makefiles
-foreach $dir (@dirs) {
+foreach my $dir (@dirs) {
   # when we reach src, ensure that modules get installed
   if ($dir eq "src") {push @args, "--install-modules";}
   chdir $dir;
   
   print "Creating makefile in ".getcwd."\n";
   # find out what we're already up to
-  $mkmk=`grep -v '^#' mkmk | grep makef95makefile`;
+  my $mkmk=`grep -v '^#' mkmk | grep makef95makefile`;
   chomp($mkmk);
   $mkmk =~ s/\$[^ ]+//g;
   $mkmk =~ s/-remake.*//;
   $mkmk .= " ".join(" ",@args);
+
+  # this code enables alternative sets of files to be used in compilation
+  # depending on whether the user wants exact coefficient functions; the
+  # alternatives should live in sub-directories exact-coefs/ and no-exact-coefs/
+  if ($enableExactCoefs && -d "exact-coefs") {$mkmk .= " -srcdir exact-coefs";}
+  elsif (!$enableExactCoefs && -d "no-exact-coefs") {$mkmk .= " -srcdir no-exact-coefs";}
   #print $mkmk."\n";
   print $dir, $mkmk,"\n";
   system($mkmk);
@@ -68,12 +83,12 @@ foreach $dir (@dirs) {
 }
 
 # get things ready for the hoppet-config script
-$version=`grep 'Welcome to' src/welcome_message.f90 | sed -e 's/.*v\. //' -e 's/ .*//'`;
+my $version=`grep 'Welcome to' src/welcome_message.f90 | sed -e 's/.*v\. //' -e 's/ .*//'`;
 chomp $version;
 $prefix=`cat src/.makef95.prefix`;
 chomp $prefix;
-($escprefix    = $prefix)    =~ s/\//\\\//g;
-($escmodprefix = $modPrefix) =~ s/\//\\\//g;
+(my $escprefix    = $prefix)    =~ s/\//\\\//g;
+(my $escmodprefix = $modPrefix) =~ s/\//\\\//g;
 system("sed -e 's/\@prefix\@/$escprefix/' -e 's/\@modprefix\@/$escmodprefix/' -e 's/\@VERSION\@/$version/'  hoppet-config.in > hoppet-config");
 system("chmod +x hoppet-config");
 
