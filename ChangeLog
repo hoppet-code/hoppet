@@ -8,7 +8,8 @@
 	split the integration regions so as to handle non-smooth or
 	discontinuous convolution function (with an optional "split" array
 	argument). Handling is still preliminary (e.g. ig_PolyWeight_expand
-	does not yet have this functionality).
+	does not yet have this functionality, which impose a limit that the 
+	first split point needs to be beyond dy).
 
 2024-02-06 Tue  <gavin.salam@physics.ox.ac.uk>
 
