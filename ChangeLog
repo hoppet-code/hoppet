@@ -1,3 +1,16 @@
+2024-02-09 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* src/convolution.f90:
+	* src/integrator.f90:
+	* tests/test_split_integration.f90:
+
+	added functionality in InitGridConv and underlying integrators to
+	split the integration regions so as to handle non-smooth or
+	discontinuous convolution function (with an optional "split" array
+	argument). Handling is still preliminary (e.g. ig_PolyWeight_expand
+	does not yet have this functionality, which impose a limit that the 
+	first split point needs to be beyond dy).
+
 2024-02-06 Tue  <gavin.salam@physics.ox.ac.uk>
 
 	Investigation of small differences in PDF outputs (at fairly large x
@@ -37,7 +50,7 @@
 	switched transition point as indicated above
 
 	* example_f90/structure_functions_example.default_output:
-	changed D3Z point (cf above) from -3.8986E-04 to -3.8985E-04
+	changed F3Z point (cf above) from -3.8986E-04 to -3.8985E-04
 
 2024-02-05  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
