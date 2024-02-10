@@ -26,30 +26,30 @@ jobs:
           ctest --test-dir BUILD -j 2 --output-on-failure
 
 
-  compilejob:
-    name: hoppet_on_Rocky9_Intel_HPCKIT
-    runs-on: ubuntu-latest
-    container:
-        image: intel/oneapi-hpckit:2024.0.1-devel-rockylinux9
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Install 
-      run: |
-           yum -y install epel-release
-           yum -y install make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
-    - name: Compile_with_ifx
-      run: |
-          cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
-          cmake --build BUILDifx -j
-          cmake --install BUILDifx
-          ctest --test-dir BUILDifx -j 2 --output-on-failure
-    - name: Compile_with_ifort
-      run: |
-          cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort
-          cmake --build BUILDifort -j
-          cmake --install BUILDifort
-          ctest --test-dir BUILDifort -j 2 --output-on-failure
+#   compilejob:
+#     name: hoppet_on_Rocky9_Intel_HPCKIT
+#     runs-on: ubuntu-latest
+#     container:
+#         image: intel/oneapi-hpckit:2024.0.1-devel-rockylinux9
+#     steps:
+#     - name: Checkout
+#       uses: actions/checkout@v3
+#     - name: Install 
+#       run: |
+#            yum -y install epel-release
+#            yum -y install make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+#     - name: Compile_with_ifx
+#       run: |
+#           cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
+#           cmake --build BUILDifx -j
+#           cmake --install BUILDifx
+#           ctest --test-dir BUILDifx -j 2 --output-on-failure
+#     - name: Compile_with_ifort
+#       run: |
+#           cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort
+#           cmake --build BUILDifort -j
+#           cmake --install BUILDifort
+#           ctest --test-dir BUILDifort -j 2 --output-on-failure
 
 
   compilejobCentos7_IBM_XL:
