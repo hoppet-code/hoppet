@@ -83,6 +83,7 @@ module pdf_tabulate
   ! sufficiently small that it can be ignored...
   real(dp), parameter :: min_dlnlnQ_singleQ = 1e-10_dp
   integer, parameter :: def_lnlnQ_order = 4
+  integer, parameter :: max_lnlnQ_order = 6
   !integer, parameter :: lnlnQ_order = 2
 
   interface AllocPdfTable
@@ -124,6 +125,7 @@ module pdf_tabulate
   public :: EvolvePdfTable, PreEvolvePdfTable, EvolvePdfTableQED
   public :: EvolvePdfTableGen
   public :: EvalPdfTable_yQ, EvalPdfTable_xQ, EvalPdfTable_Q
+  public :: EvalPdfTable_yQf, EvalPdfTable_xQf
   public :: Delete
 
 contains
@@ -167,6 +169,8 @@ contains
     tab%dlnlnQ = (tab%lnlnQ_max - tab%lnlnQ_min)/tab%nQ
     tab%freeze_at_Qmin = default_or_opt(.false.,freeze_at_Qmin)
     tab%lnlnQ_order = default_or_opt(def_lnlnQ_order,lnlnQ_order)
+    if (tab%lnlnQ_order > max_lnlnQ_order) call wae_error('pdftab_AllocTab_',&
+         &'too large a value of lnlnQ_order =',intval=tab%lnlnQ_order)
 
     !-- by default, no extra info is given
     tab%nf_info_associated = .false.
@@ -764,50 +768,80 @@ contains
     real(dp),     intent(in) :: y, Q
     real(dp),    intent(out) :: val(iflv_min:)
     !----------------------------------------
-    real(dp) :: lnlnQ_wgts(0:tab%lnlnQ_order)
-    real(dp), pointer :: y_wgts(:)
-    real(dp), allocatable :: wgts(:,:)
-    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv, iflv_max_table
+    real(dp) :: lnlnQ_wgts(0:max_lnlnQ_order)
+    real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
+    real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
+    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv, iflv_max_table, npnt_y
     integer, save :: warn_id = warn_id_INIT
 
     if (ubound(val,dim=1) < tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
          &'upper bound of val is too low', intval=ubound(val,dim=1))
 
     !-- y weights taken care of elsewhere....
-    call WgtGridQuant(tab%grid, y, iylo, y_wgts)
+    call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y)
 
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
     !   signal for Q being out of range
-    call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
-    ! GPS 2015-04-07: the following if statement was wrong, because
-    ! (ilnlnQ_lo > ilnlnQ_lo) will never be satisfied.
-    ! 
-    ! But things are OK all the same since get_lnlnQ_wgts sets
-    ! ilnlnQ_lo=ilnlnQ_hi=0 and lnlnQ_wgts=0 so that we simply get
-    ! zero in the final evaluation.
-    !
-    !if (ilnlnQ_lo > ilnlnQ_lo) then
-    !  val = zero
-    !  return
-    !end if
+    call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
     nQ = ilnlnQ_hi - ilnlnQ_lo
 
-    allocate(wgts(lbound(y_wgts,dim=1):ubound(y_wgts,dim=1),0:nQ))
     do iQ = 0, nQ
-       wgts(:,iQ) = y_wgts(:) * lnlnQ_wgts(iQ)
+       wgts(:npnt_y-1,iQ) = y_wgts(0:npnt_y-1) * lnlnQ_wgts(iQ)
     end do
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts?
     do iflv = iflv_min, tab%tab_iflv_max
-       val(iflv) = sum(wgts*tab%tab(iylo:iylo+size(y_wgts)-1,&
-            & iflv,ilnlnQ_lo:ilnlnQ_hi))
+       val(iflv) = sum(wgts(0:npnt_y-1,0:nQ) &
+                       * tab%tab(iylo:iylo+npnt_y-1, iflv,ilnlnQ_lo:ilnlnQ_hi))
     end do
     !write(0,*) ilnlnQ_lo, ilnlnQ_hi, real(lnlnQ_wgts), val(1)
     
-    deallocate(y_wgts, wgts)
   end subroutine EvalPdfTable_yQ
 
+  !--------------------------------------------------------------------
+  !! Sets the vector val(iflv_min:) for the PDF at this
+  !! y=ln1/x,Q.
+  !!
+  !! If this is a standard QCD table then entries val(iflv_min:iflv_max)
+  !! get set.
+  !!
+  !! If this is a generalised table, then val(:) should be as big as
+  !! the number of flavours in the table and all will get set
+  !! (including the "representation" flavour).
+  function EvalPdfTable_yQf(tab,y,Q,iflv) result(val)
+   type(pdf_table), intent(in) :: tab
+   real(dp),     intent(in) :: y, Q
+   integer,      intent(in) :: iflv
+   real(dp)                 :: val
+   !----------------------------------------
+   !real(dp), allocatable :: wgts(:,:)
+   !real(dp) :: lnlnQ_wgts(0:tab%lnlnQ_order)
+   real(dp) :: lnlnQ_wgts(0:max_lnlnQ_order)
+   real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
+   integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, npnt_y
+   integer, save :: warn_id = warn_id_INIT
+
+   if (iflv > tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
+        &'iflv is too high', intval=iflv)
+   if (iflv < iflv_min) call wae_error('pdftab_ValTab',&
+        &'iflv is too low', intval=iflv)
+
+   !-- y weights taken care of elsewhere....
+   call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y)
+
+   !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
+   !   signal for Q being out of range
+   call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
+   nQ = ilnlnQ_hi - ilnlnQ_lo
+
+   val = zero
+   do iQ = 0, nQ
+      val = val + lnlnQ_wgts(iQ) * sum(y_wgts(0:npnt_y-1) * &
+          & tab%tab(iylo:iylo+npnt_y-1, iflv,ilnlnQ_lo+iQ))
+   end do
+   
+  end function EvalPdfTable_yQf
 
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
@@ -818,6 +852,15 @@ contains
     call EvalPdfTable_yQ(tab,-log(x),Q,val)
   end subroutine EvalPdfTable_xQ
 
+  !----------------------------------------------------------------
+  !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
+  function EvalPdfTable_xQf(tab,x,Q,iflv) result(val)
+    type(pdf_table), intent(in) :: tab
+    real(dp),     intent(in) :: x, Q
+    integer,      intent(in) :: iflv
+    real(dp) :: val
+    val = EvalPdfTable_yQf(tab,-log(x),Q,iflv)
+  end function EvalPdfTable_xQf
 
   !--------------------------------------------------------------------
   !! Sets the pdf(0:iflv_min:) for the PDF at this value of Q.

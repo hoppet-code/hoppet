@@ -15,8 +15,9 @@ Authorship update:
 Other changes:
 * various small bug fixes (see ChangeLog for details)
 * ability to declare points where the integration of convolution
-  functions should be split up.
-
+  functions should be split up (split optional arg to InitGridConv, etc.)
+* access to a single flavour x,Q point of a pdf_table, with EvalPdfTable_yQf
+  (and _xQf variant) and speed-up of EvalPdfTable_yQ
 ======================================================================
 Release 1.2.0, 30 October 2020
 ======================================================================

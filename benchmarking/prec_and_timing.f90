@@ -240,7 +240,7 @@ program prec_and_timing
   call Delete(dh)
   call Delete(coupling)
   call Delete(grid)
-  !call Delete(gridarray)
+  call Delete(gridarray)
 
 contains
 
