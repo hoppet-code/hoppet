@@ -12,8 +12,8 @@
       x = 0.99999d0
       nf = 5
 
-      call getarg(1,x_char)
-      call getarg(2,nf_char)
+      call GET_COMMAND_ARGUMENT(1,x_char)
+      call GET_COMMAND_ARGUMENT(2,nf_char)
 
       if(x_char.eq.'') then
          print*, 'Using default value of x            = ', x
