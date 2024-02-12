@@ -27,7 +27,9 @@ contains
     integer,  parameter :: nmax = 9
     !                                           order=n
     real(dp), save      :: normalisation(0:nmax,0:nmax) = zero
-    real(dp)            :: dists(0:size(weights,dim=1)-1), prod
+!    real(dp)            :: dists(0:size(weights,dim=1)-1), prod
+    real(dp)            :: dists(0:nmax)
+    real(dp)            :: prod
     integer             :: n, i
     
     n = ubound(weights,dim=1)
@@ -48,6 +50,7 @@ contains
        normalisation(:n,n) = one / normalisation(:n,n)
     end if
     
+    prod = one
     do i = 0, n
        dists(i) = x - i
        if (dists(i) == zero) then
@@ -55,8 +58,9 @@ contains
           weights(i) = one
           return
        end if
+       prod = prod * dists(i)
     end do
-    prod = product(dists)
+    !prod = product(dists)
     do i = 0, n
        weights(i) = prod * normalisation(i,n) / dists(i)
     end do

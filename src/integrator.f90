@@ -4,10 +4,12 @@
 ! $Id: integrator.f90,v 1.2 2001/07/17 13:51:01 gsalam Exp $
 module integrator
   use types; use consts_dp
+  use warnings_and_errors
   implicit none
   private
 
   public :: ig_LinWeight, ig_LinWeightSing, ig_PolyWeight, ig_PolyWeight_expand
+
 contains
 
   !======================================================================
@@ -23,8 +25,12 @@ contains
   ! allow the easy generalisation to the case with more complex weight
   ! functions.
   ! 
-  Recursive FUNCTION ig_LinWeight(F,A,B,AMult,BMult,EPS) result(cgauss64)
+  Recursive FUNCTION ig_LinWeight(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
     real(dp), intent(in) :: A,B,AMult,BMult,EPS
+    real(dp), intent(in), optional :: split(:)
+    real(dp), allocatable :: edges(:)
+    integer               :: i, n
+    real(dp) :: lmult, rmult
     REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
     real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
     real(dp) :: X(12), W(12)
@@ -35,7 +41,6 @@ contains
          real(dp)             :: f
        end function f
     end interface
-    integer :: i
     CHARACTER(len=*), parameter ::  NAME = 'cgauss64'
     
     DATA X( 1) /9.6028985649753623D-1/, W( 1) /1.0122853629037626D-1/ 
@@ -50,7 +55,23 @@ contains
     DATA X(10) /4.5801677765722739D-1/, W(10) /1.6915651939500254D-1/ 
     DATA X(11) /2.8160355077925891D-1/, W(11) /1.8260341504492359D-1/ 
     DATA X(12) /9.5012509837637440D-2/, W(12) /1.8945061045506850D-1/ 
-                                                                        
+
+    if (present(split)) then
+      ! allocation cost is about 10ns, to be compared to integration
+      ! time for a single simple function of c. 31ns. But without 
+      ! splitting, integration time would be much higher (900ns versus
+      ! a total of 73 ns with splitting), as well as less reliable.
+      allocate(edges(size(split)+1))
+      call split_limits(A,B,split,edges, n)
+      cgauss64 = zero
+      do i = 1, n
+         lmult = ((edges(i  ) - A)/(B-A) * (BMult -AMult) + AMult)
+         rmult = ((edges(i+1) - A)/(B-A) * (BMult -AMult) + AMult)
+         cgauss64 = cgauss64 + ig_LinWeight(F,edges(i),edges(i+1),lmult,rmult,EPS)
+      end do
+      return
+    end if
+
     H=0 
     IF(B .EQ. A) GO TO 99 
     CONST=CST/ABS(B-A) 
@@ -179,12 +200,14 @@ contains
   ! nodes except that indicated by the index inode_one
   ! 
   ! If const is present then it is added to the weight function
-  Recursive FUNCTION ig_PolyWeight(F,A,B,nodes,inode_one,EPS,wgtadd) result(cgauss64)
+  Recursive FUNCTION ig_PolyWeight(F,A,B,nodes,inode_one,EPS,wgtadd, split) result(cgauss64)
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd
+    real(dp), intent(in), optional :: split(:)
+    real(dp), allocatable :: edges(:)
     real(dp) :: zero_nodes(size(nodes)-1), norm_nodes, lcl_wgtadd
-    integer  :: i, j
+    integer  :: i, j, n
     REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
     real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
     real(dp) :: X(12), W(12)
@@ -209,6 +232,7 @@ contains
     DATA X(10) /4.5801677765722739D-1/, W(10) /1.6915651939500254D-1/ 
     DATA X(11) /2.8160355077925891D-1/, W(11) /1.8260341504492359D-1/ 
     DATA X(12) /9.5012509837637440D-2/, W(12) /1.8945061045506850D-1/ 
+
 
     !-- first set up the structure for the polynomial interpolation--
     j = 0
@@ -270,17 +294,26 @@ contains
   ! 
   ! If const is present then it is added to the weight function
   !
-  ! This version expands around the series x~0 for small x to avoid
-  ! numerical issues with convolution of real pieces
+  ! This version expands around the series in powers of
+  ! v=(x-nodes(inode_one))~0 when v is small, to avoid numerical issues
+  ! with convolution of real pieces
   Recursive FUNCTION ig_PolyWeight_expand(F,A,B,nodes,inode_one,EPS,wgtadd) result(cgauss64)
+    use warnings_and_errors
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd
     real(dp) :: zero_nodes(size(nodes)-1), norm_nodes, lcl_wgtadd, expand1, expand2
-    integer  :: i, j, k
+    integer  :: i, j, k, l
     REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
     real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
     real(dp) :: X(12), W(12)
+    ! the expansion threshold determines how close to inode we get
+    ! before we switch to the expansion around inode. The
+    ! switch location is about epsilon**(1/3)*dy, corresponding
+    ! to the fact that we include terms up to (x-inode)**2
+    ! (we assume nodes have relatively uniform spacing). 
+    real(dp), parameter :: expansion_threshold_fraction = 3e-6_dp
+    real(dp) :: expansion_threshold
     interface
        function f(x)
          use types; implicit none
@@ -313,12 +346,19 @@ contains
     end do
     norm_nodes = 1.0_dp / product(nodes(inode_one) - zero_nodes)
     
+    ! use the spacing between the first two nodes to decide the actual
+    ! expansion threshold
+    expansion_threshold = expansion_threshold_fraction * abs(nodes(2) - nodes(1))
     expand1 = zero
     expand2 = zero
-    do i=1, size(zero_nodes)
+    ! GPS 2024-02-06: I think that the code is only correct when nodes(inode_one) is zero
+    ! -- otherwise one should replace -1/zero_nodes(i) with 1/(nodes(inode_one) - zero_nodes(i))
+    if (nodes(inode_one) /= zero) call wae_error("ig_PolyWeight_expand: nodes(inode_one) /= zero but is instead", &
+                               &   dbleval = nodes(inode_one))
+    do i = 1, size(zero_nodes)
        expand1 = expand1 - 1.0_dp / zero_nodes(i)
        do k=i+1, size(zero_nodes)
-          expand2 = expand2 + one/(zero_nodes(i)*zero_nodes(k))
+         expand2 = expand2 + one/(zero_nodes(i)*zero_nodes(k))
        end do
     end do
 
@@ -339,13 +379,17 @@ contains
     S8=0 
     DO I = 1,4 
        U=C2*X(I)
-       if (abs(c1+u).lt.1d-5) then
-          pmult = one + lcl_wgtadd + (c1+u)*expand1 + ((c1+u)**2)*expand2
+       if (abs(c1+u) < expansion_threshold) then
+          ! NB: in situations where lcl_wgtadd is exactly -one, (one +
+          ! lcl_wgtadd) should be evaluated before anything else, giving
+          ! exactly zero, and ensuring that we have high accuracy for
+          ! the remaining terms.
+          pmult = (one + lcl_wgtadd) + (c1+u)*expand1 + ((c1+u)**2)*expand2
        else
           pmult = product(c1+u - zero_nodes) * norm_nodes + lcl_wgtadd
        endif
-       if (abs(c1-u).lt.1d-5) then
-          mmult = one + lcl_wgtadd + (c1-u)*expand1 + ((c1-u)**2)*expand2
+       if (abs(c1-u) < expansion_threshold) then
+          mmult = (one + lcl_wgtadd) + (c1-u)*expand1 + ((c1-u)**2)*expand2
        else
           mmult = product(c1-u - zero_nodes) * norm_nodes + lcl_wgtadd
        endif
@@ -356,13 +400,13 @@ contains
     S16=0 
     DO I = 5,12 
        U=C2*X(I) 
-       if (abs(c1+u).lt.1e-5_dp) then
-          pmult = one + lcl_wgtadd + (c1+u)*expand1 + ((c1+u)**2)*expand2
+       if (abs(c1+u) < expansion_threshold) then
+          pmult = (one + lcl_wgtadd) + (c1+u)*expand1 + ((c1+u)**2)*expand2
        else
           pmult = product(c1+u - zero_nodes) * norm_nodes + lcl_wgtadd
        endif
-       if (abs(c1-u).lt.1e-5_dp) then
-          mmult = one + lcl_wgtadd + (c1-u)*expand1 + ((c1-u)**2)*expand2
+       if (abs(c1-u) < expansion_threshold) then
+          mmult = (one + lcl_wgtadd) + (c1-u)*expand1 + ((c1-u)**2)*expand2
        else
           mmult = product(c1-u - zero_nodes) * norm_nodes + lcl_wgtadd
        endif
@@ -385,4 +429,30 @@ contains
 99  cgauss64=H 
   end function ig_PolyWeight_expand
   
+
+  !! given limits a,b and points at which to split the integration
+  !! (split), set edges to the limits of the subintervals over which to integrate 
+  !! and n to the number of non-zero sub-intervals. 
+  !!
+  !! Requirements are that a <= b and split(:) points should be ordered.
+  !!
+  !! The edges array should be at least of size size(split)+1
+  subroutine split_limits(a, b, split, edges, n)
+     real(dp), intent(in) :: a, b, split(:)
+     real(dp), intent(out) :: edges(:)
+     integer,  intent(out) :: n
+     integer :: i
+     if (a > b) call wae_error("integrator::split_limits, a > b, which is not allowed")
+     if (size(edges) < size(split)+1) call wae_error("integrator::split_limits, edges array too small")
+     edges(1) = a
+     n = 0
+     do i = 1, size(split)
+        if (split(i) > a .and. split(i) < b) then
+           n = n + 1
+           edges(n+1) = split(i)
+        end if
+     end do
+     n = n + 1
+     edges(n+1) = b
+  end subroutine split_limits 
 end module integrator

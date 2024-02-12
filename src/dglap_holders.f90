@@ -352,8 +352,8 @@ contains
     logical, optional, intent(in) :: quark_masses_are_MSbar
 
     if (nflcl < lbound(dh%allP,dim=2) .or. nflcl > ubound(dh%allP,dim=2)) then
-       call wae_Error('SetNfDglapHolder: tried to set unsupported nf; request val was',intval=nflcl)
-    end if
+      call wae_Error('SetNfDglapHolder: tried to set unsupported nf; requested nf was',intval=nflcl)
+    end if 
     
     !-- want general nf to be consistent. Not really all that nice a 
     !   way of doing things, but cannot think of a better solution 

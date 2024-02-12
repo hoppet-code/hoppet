@@ -1,3 +1,118 @@
+2024-02-11 Sun  <gavin.salam@physics.ox.ac.uk>
+
+	Work on speeding up evaluation of single and full-flavour PDFs.
+	Prior to this commit, the main native option for evaluating 
+	a pdf_table was the EvalPdfTable_yQ (and related) call which
+	filled all flavours. 
+
+    Using `./benchmarking/prec_and_timing -dy 0.1 -output -outputgrid -nrep 10 -nrep-eval 10000000 -order -6`
+	timing for one call of EvalPdfTable_yQ on a Mac M2 Pro (gfortran 13.2.0) was
+	about 315 ns, and is now 243 ns.
+
+	- EvalPdfTable_yQ
+	  * various improvements, including that of uniform_interpolation_weights
+	    (315 ns -> 286 ns)
+	  * fixed max_lnlnQ_order (286 ns -> 266 ns)
+	  * fixed y_wgts(0:WeightGridQuand_npnt_max-1) (266 ns -> 251 ns)
+      * removing dynamic wgts(:,:) array (251 ns -> 243 ns)
+	    (193 ns for order = -4)
+
+    - uniform_interpolation_weights(...), uses a fixed-size rather than
+	  dynamic-sized temporary dists array, and one loop is avoided
+	  (prod=product(dists) is merged into the previous loop).
+
+	- addition of EvalPdfTable_yQf(...) and _xQf(...) version to
+	  evaluate a single flavour. _yQf takes 71ns.
+
+	* src/pdf_tabulate.f90:
+
+	- Added max_lnlnQ_order, currently set to 6, to avoid the need for dynamic allocation. 
+    - added EvalPdfTable_yQf(...) and _xQf(...) functions, which take O(70ns)
+	  to give a single flavour rather than O(250ns) for all flavours.
+    - EvalPdfTable_yQ(...) now uses sub-parts of various fixed-sized arrays
+	  rather than allocating things
+	
+	* src/convolution.f90:
+	- public parameter WeightGridQuand_npnt_max, which is the maximum number of
+	  points in a WeightGridQuant interpolation
+	- new WgtGridQuant_noalloc, which gives the weight for a grid quantity
+	  without any dynamic allocations
+
+	* src/interpolation.f90:
+	- uniform_interpolation_weights(...), uses a fixed-size rather than
+	  dynamic-sized temporary dists array, and one loop is avoided
+	  (prod=product(dists)) to avoid allocations and two loops merged
+	  into each other.
+
+2024-02-09 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* src/convolution.f90:
+	* src/integrator.f90:
+	* tests/test_split_integration.f90:
+
+	added functionality in InitGridConv and underlying integrators to
+	split the integration regions so as to handle non-smooth or
+	discontinuous convolution function (with an optional "split" array
+	argument). Handling is still preliminary (e.g. ig_PolyWeight_expand
+	does not yet have this functionality, which impose a limit that the 
+	first split point needs to be beyond dy).
+
+2024-02-06 Tue  <gavin.salam@physics.ox.ac.uk>
+
+	Investigation of small differences in PDF outputs (at fairly large x
+	values) between this version of hoppet and 1.2.x series, which are
+	typically of the kind [-5.436262e-05-] v. {+5.436261e-05+},
+	i.e. at the level of 2e-7. Some differences are up to 6e-7 (possibly
+	rounding-amplified), and mostly at larger x values. 
+
+	The differences turn out to be due to the replacement, in
+	convolution.f90, of a call to ig_PolyWeight with one to
+	ig_PolyWeight_expand. The latter uses a second order expansion of the
+	interpolation when close to y=0, which was originally introduced in
+	order to work around issues with coefficient functions (which have
+	[log^n(1-x)]_+ structures that are delicate near x=1). 
+
+	However the transition, at 1e-5, seems to be a bit too early, and
+	should instead be at epsilon**(1/3) * dy. Reducing it changes one
+	structure function "make check" point (F3Z(NNLO), x=1.0000E-04,
+	Q=100; near a zero of F3Z, so extra delicate) by about 1e-6
+	relative; other choices seem stable at the level of 2e-8;
+
+	    -3.8985528E-04:  1e-5 (i.e. original code @f199aac48)
+		-3.8985487E-04:  3e-6_dp
+        -3.8985485E-04:  3e-6_dp * dy (NEW CODE)
+        -3.8985486E-04:  quad precision for interp operations, no expansion
+        -3.8985487E-04"  third order, 1e-4*dy     
+
+	Ultimately, we will go with 3e-6_dp * dy and second order. This
+	change also seems to bring us back in agreement with 1.2.x series
+	for the PDF evolution results (at least for the 7 digits printed in
+	the above test). 
+
+	* src/types.f90:
+	added commented out qp definition
+
+	* src/integrator.f90:
+	switched transition point as indicated above
+
+	* example_f90/structure_functions_example.default_output:
+	changed F3Z point (cf above) from -3.8986E-04 to -3.8985E-04
+
+2024-02-05  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/hoppet_v1.h: Forgot to propagate change in StartStrFct and
+	InitStrFct to the C++ interface.
+
+2024-01-31  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/structure_function.f90:
+	Moved the setting of muF and muR to InitStrFcts so that one only
+	has to start once to run with different scales. At the same time
+	streamlined how the scales are passed around and put in some
+	checks that the structure functions are actually called with the
+	scales that they initialised with. Propagated changes to the
+	examples.
+
 2024-01-04 Thu  <gavin.salam@physics.ox.ac.uk>
 
 	* src/NameSelect.pl:

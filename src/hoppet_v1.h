@@ -190,8 +190,6 @@ extern "C" {
   /// Setup of constants and parameters needed for structure functions
   void hoppetStartStrFctExtended(const int & order_max,
 				 const int & nflav,
-				 const double & xR,
-				 const double & xF,
 				 const int & scale_choice,
 				 const double & constant_mu,
 				 const int & param_coefs,
@@ -201,7 +199,9 @@ extern "C" {
   /// Initialize the structure functions up to specified order
   /// this requires the PDF to have been set up beforehand, and filled in tables(0)
   void hoppetInitStrFct(const int & order_max,
-			const int & separate_orders);
+			const int & separate_orders,
+			const double & xR,
+			const double & xF);
 
 
   /// calculate the structure function at x, Q, muR, muF.

@@ -109,6 +109,7 @@ program prec_and_timing
   type(dglap_holder) :: dh
   type(running_coupling)    :: coupling
   integer            :: order, order1, order2, nloop, i, nrep, nxQ,olnlnQ
+  integer            :: nrep_eval
   integer            :: hires
   real(dp)           :: dy, Qinit, Qmax, du, dlnlnQ
   real(dp)           :: ymax
@@ -190,6 +191,7 @@ program prec_and_timing
 
   ! decide 
   nrep  = int_val_opt('-nrep',1)
+  nrep_eval = int_val_opt('-nrep-eval',1000)
   nxQ = int_val_opt('-nxQ',0)
   output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
   outputgrid  = log_val_opt('-outputgrid')
@@ -224,11 +226,13 @@ program prec_and_timing
   call time_stamp(6)
   call EXECUTE_COMMAND_LINE("echo '# host:' `hostname`")
   ! record info about the cpu
-  call EXECUTE_COMMAND_LINE("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
+  !call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
   if (output) write(6,'(a,4f10.5)') "# Timings (init, preevln, evln) = ", &
        &   time_init_done-time_start, &
        &   time_ev_done-time_init_done, &
        &   (time_end-time_ev_done)/nrep
+
+  call get_evaluation_times()
 
   ! clean up
   call Delete(table)
@@ -363,4 +367,26 @@ contains
 
   end function y_of_zeta
   
+  subroutine get_evaluation_times()
+    real(dp) :: pdf_g, pdf_g_sum, pdf_all(-6:6), pdf_sum(-6:6)
+    real(dp) :: y = 0.5d0, Q = 10.0d0
+    call cpu_time(time_start)
+    pdf_sum = zero
+    do i = 1, nrep_eval
+      call EvalPdfTable_yQ(table,y,Q,pdf_all)
+      pdf_sum = pdf_sum + pdf_all
+    end do  
+    call cpu_time(time_end)
+    write(6,*) "Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+
+    call cpu_time(time_start)
+    pdf_g_sum = zero
+    do i = 1, nrep_eval
+      pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf(table,y,Q,0)
+    end do  
+    call cpu_time(time_end)
+    write(6,*) "Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+
+   end subroutine get_evaluation_times
+
 end program prec_and_timing

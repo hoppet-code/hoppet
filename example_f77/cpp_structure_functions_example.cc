@@ -45,7 +45,7 @@ int main () {
   double wmass = 80.377;
   bool param_coefs = true;
 
-  hoppetStartStrFctExtended(order_max, nflav, xmuR,xmuF,sc_choice,zmass,param_coefs,wmass,zmass);
+  hoppetStartStrFctExtended(order_max, nflav,sc_choice,zmass,param_coefs,wmass,zmass);
     
   double asQ      = 0.35;
   double Q0       = sqrt(2.0);
@@ -53,7 +53,7 @@ int main () {
   
   hoppetEvolve(asQ, Q0, nloop, muR_Q, lha_unpolarized_dummy_pdf, Q0);
 
-  hoppetInitStrFct(order_max,param_coefs);
+  hoppetInitStrFct(order_max,param_coefs, xmuR,xmuF);
     
   // output the results
   double pdf[13];
