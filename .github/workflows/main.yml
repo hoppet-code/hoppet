@@ -79,17 +79,23 @@ jobs:
 
 
   compilejob:
-    name: Rocky9x86_64_Intel_HPCKIT
+    name: Ubuntu22x86_64_Intel_HPCKIT
     runs-on: ubuntu-latest
-    container:
-        image: intel/oneapi-hpckit:2024.0.1-devel-rockylinux9
     steps:
+    - name: Check space
+      run: | 
+            df -h 
+            rm -rf /opt/hostedtoolcache
+            df -h 
     - name: Checkout
       uses: actions/checkout@v3
     - name: Install 
       run: |
-           yum -y install epel-release
-           yum -y install make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+           apt-get -y  install wget
+           wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+           echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+           apt-get -y install  cmake intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-compiler-fortran
+           
     - name: Compile_with_ifx
       run: |
           cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
