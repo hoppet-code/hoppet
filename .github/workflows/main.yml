@@ -84,7 +84,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install
       run: |
-             dnf -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+             dnf -y install findutils procps gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
              tee > /tmp/oneAPI.repo << EOF
              [oneAPI]
              name=Intel(R) oneAPI repository
