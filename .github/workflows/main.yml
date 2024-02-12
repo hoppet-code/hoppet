@@ -59,7 +59,7 @@ jobs:
 
 
 
-  compilejobFedora:
+  compilejobFedorax86_64_GNU:
     name: Fedorax86_64_GNU
     runs-on: ubuntu-latest
     container:
@@ -77,41 +77,45 @@ jobs:
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
 
-
-  compilejob:
-    name: Ubuntu22x86_64_Intel_HPCKIT
+  compilejobFedorax86_64_Intel_HPCKIT:
+    name: Fedorax86_64_Intel_HPCKIT
     runs-on: ubuntu-latest
+    container: fedora:latest
+    defaults:
+      run:
+        shell: bash
     steps:
-    - name: Check space
-      run: | 
-            df -h 
-            rm -rf /opt/hostedtoolcache
-            df -h 
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Install 
+    - uses: actions/checkout@v3
+    - name: Install
       run: |
-           sudo apt-get -y  install wget
-           wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
-           echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-           sudo  apt -y update
-           sudo  apt-get -y install  cmake intel-hpckit
-           source /opt/intel/oneapi/setvars.sh
-           
+             dnf -y install git make gcc g++ findutils procps cmake lhapdf-devel wget
+             tee > /tmp/oneAPI.repo << EOF
+             [oneAPI]
+             name=Intel(R) oneAPI repository
+             baseurl=https://yum.repos.intel.com/oneapi
+             enabled=1
+             gpgcheck=1
+             repo_gpgcheck=1
+             gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+             EOF
+             sudo mv /tmp/oneAPI.repo /etc/yum.repos.d/
+             yum -y cleanall
+             yum -y install  intel-oneapi-compiler-dpcpp-cpp intel-oneapi-compiler-fortran
+             source /opt/intel/oneapi/compiler/2024.0.0/env/vars.sh
     - name: Compile_with_ifx
       run: |
-          source /opt/intel/oneapi/setvars.sh
-          cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx -DHOPPET_BUILD_EXAMPLES=OFF
+          source /opt/intel/oneapi/compiler/2024.0.0/env/vars.sh
+          cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
           cmake --build BUILDifx -j
           cmake --install BUILDifx
           ctest --test-dir BUILDifx -j 2 --output-on-failure
     - name: Compile_with_ifort
       run: |
-          cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort -DHOPPET_BUILD_EXAMPLES=OFF
+          source /opt/intel/oneapi/compiler/2024.0.0/env/vars.sh
+          cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort
           cmake --build BUILDifort -j
           cmake --install BUILDifort
           ctest --test-dir BUILDifort -j 2 --output-on-failure
-
 
   compilejobCentos7_IBM_XL:
     name: Centos7ppc64le_IBM_XL
