@@ -58,7 +58,6 @@ jobs:
         make -j4 check
 
 
-
   compilejobFedorax86_64_GNU:
     name: Fedorax86_64_GNU
     runs-on: ubuntu-latest
@@ -81,21 +80,11 @@ jobs:
     name: Fedorax86_64_Intel_HPCKIT
     runs-on: ubuntu-latest
     container: fedora:latest
-    defaults:
-      run:
-        shell: bash
     steps:
-    - name: Restore cache
-      id: cache-rpms
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          dnfcache
-        key: dnfrpms    
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
     - name: Install
       run: |
-             dnf -y install git make gcc g++ findutils procps cmake lhapdf-devel wget
+             dnf -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
              tee > /tmp/oneAPI.repo << EOF
              [oneAPI]
              name=Intel(R) oneAPI repository
@@ -107,17 +96,8 @@ jobs:
              EOF
              sudo mv /tmp/oneAPI.repo /etc/yum.repos.d/
              dnf -y clean all
-             dnf -y install --setopt cachedir=dnfcache intel-oneapi-compiler-dpcpp-cpp intel-oneapi-compiler-fortran
-             ls /opt/intel/oneapi/compiler/
-             ls /opt/intel/oneapi/compiler/*/env/vars.sh
+             dnf -y install  intel-oneapi-compiler-dpcpp-cpp intel-oneapi-compiler-fortran
              source /opt/intel/oneapi/compiler/latest/env/vars.sh
-    - name: Save cache
-      id: cache-primes-save
-      uses: actions/cache/save@v4
-      with:
-        path: |
-              dnfcache
-        key: ${{ steps.cache-rpms.outputs.cache-primary-key }}
     - name: Compile_with_ifx
       run: |
           source /opt/intel/oneapi/compiler/latest/env/vars.sh
