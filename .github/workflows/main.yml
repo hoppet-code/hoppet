@@ -85,7 +85,14 @@ jobs:
       run:
         shell: bash
     steps:
-    - uses: actions/checkout@v3
+    - name: Restore cache
+      id: cache-rpms
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          dnfcache
+        key: dnfrpms    
+      - uses: actions/checkout@v3
     - name: Install
       run: |
              dnf -y install git make gcc g++ findutils procps cmake lhapdf-devel wget
@@ -100,10 +107,17 @@ jobs:
              EOF
              sudo mv /tmp/oneAPI.repo /etc/yum.repos.d/
              dnf -y clean all
-             dnf -y install  intel-oneapi-compiler-dpcpp-cpp intel-oneapi-compiler-fortran
+             dnf -y install --setopt cachedir=dnfcache intel-oneapi-compiler-dpcpp-cpp intel-oneapi-compiler-fortran
              ls /opt/intel/oneapi/compiler/
              ls /opt/intel/oneapi/compiler/*/env/vars.sh
              source /opt/intel/oneapi/compiler/latest/env/vars.sh
+    - name: Save cache
+      id: cache-primes-save
+      uses: actions/cache/save@v4
+      with:
+        path: |
+              dnfcache
+        key: ${{ steps.cache-rpms.outputs.cache-primary-key }}
     - name: Compile_with_ifx
       run: |
           source /opt/intel/oneapi/compiler/latest/env/vars.sh
