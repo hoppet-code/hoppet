@@ -101,13 +101,13 @@ jobs:
     - name: Compile_with_ifx
       run: |
           source /opt/intel/oneapi/setvars.sh
-          cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
+          cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx -DHOPPET_BUILD_EXAMPLES=OFF
           cmake --build BUILDifx -j
           cmake --install BUILDifx
           ctest --test-dir BUILDifx -j 2 --output-on-failure
     - name: Compile_with_ifort
       run: |
-          cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort
+          cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort -DHOPPET_BUILD_EXAMPLES=OFF
           cmake --build BUILDifort -j
           cmake --install BUILDifort
           ctest --test-dir BUILDifort -j 2 --output-on-failure
