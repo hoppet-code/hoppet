@@ -58,6 +58,7 @@ jobs:
         make -j4 check
 
 
+
   compilejobFedorax86_64_GNU:
     name: Fedorax86_64_GNU
     runs-on: ubuntu-latest
