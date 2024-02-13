@@ -224,7 +224,7 @@ program prec_and_timing
        &   (time_end-time_ev_done)/nrep
   write(6,'(a)',advance='no') "# "
   call time_stamp(6)
-  call system("echo '# host:' `hostname`")
+  call EXECUTE_COMMAND_LINE("echo '# host:' `hostname`")
   ! record info about the cpu
   !call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
   if (output) write(6,'(a,4f10.5)') "# Timings (init, preevln, evln) = ", &
