@@ -27,7 +27,7 @@
       real * 8, parameter ::  logxmax=0.0d0
       integer i1,i2,i3,i4,i5
 
-      x = 0.00001d0
+      x = 0.9d0
 
       CALL HPLOG5 (X, NW, HC1,HC2,HC3,HC4,HC5, HR1,HR2,HR3,HR4,HR5,
      ,     HI1,HI2,HI3,HI4,HI5, N1, N2)
