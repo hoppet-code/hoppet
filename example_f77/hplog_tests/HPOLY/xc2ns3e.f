@@ -173,9 +173,9 @@
 *
 * ...Harmonic polylogs (HPLs) up to weight 5 by Gehrmann and Remiddi
 *
-!       CALL HPLOG5 (X, NW, HC1,HC2,HC3,HC4,HC5, HR1,HR2,HR3,HR4,HR5,
-!     ,             HI1,HI2,HI3,HI4,HI5, N1, N2)
-       CALL HPOLY5 (X, NW, HR1,HR2,HR3,HR4,HR5, N1, N2)
+       CALL HPLOG5 (X, NW, HC1,HC2,HC3,HC4,HC5, HR1,HR2,HR3,HR4,HR5,
+     ,             HI1,HI2,HI3,HI4,HI5, N1, N2)
+!       CALL HPOLY5 (X, NW, HR1,HR2,HR3,HR4,HR5, N1, N2)
 *
 * ...The coefficient function in terms of the harmonic polylogs
 *    (without the delta(1-x) part, but with the soft contribution)

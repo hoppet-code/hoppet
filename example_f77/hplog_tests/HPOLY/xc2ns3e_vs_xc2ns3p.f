@@ -31,13 +31,8 @@
 
       CALL HPLOG5 (X, NW, HC1,HC2,HC3,HC4,HC5, HR1,HR2,HR3,HR4,HR5,
      ,     HI1,HI2,HI3,HI4,HI5, N1, N2)
-      !print*, 'HPLOG 1', Hr1
-      !print*, 'HPLOG 2', Hr2
-      !print*, 'HPLOG 3', Hr3
       CALL HPOLY5 (X, NW, HRP1,HRP2,HRP3,HRP4,HRP5, N1, N2)
-      !print*, 'HPOLY 1', Hr1
-      !print*, 'HPOLY 2', Hr2
-      !print*, 'HPOLY 3', Hr3
+
       do i1 = -1,1
          write(*,'(a3,i2,a1,E17.7,E17.7,F17.7)') 'H1(',i1,')', Hr1(i1),
      $        Hrp1(i1), Hrp1(i1)/Hr1(i1)
@@ -86,12 +81,12 @@
             enddo
          enddo
       enddo
-      stop
+!      stop
 
 ! Set reasonable default values. The exact and parametrised versions of
 ! the F2 and Fl coefficient functions differ at large x.
 
-      cc = 1                    ! Do NC coefficient function
+      cc = 0                    ! Do NC coefficient function
       delx = (logxmax - logxmin) / dble(nbins)
       nf = 5
 
