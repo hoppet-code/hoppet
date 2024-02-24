@@ -1,3 +1,8 @@
+2024-02-24  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/integrator.f90:
+	fixed bug in array sizes for integral splitting.
+
 2024-02-11 Sun  <gavin.salam@physics.ox.ac.uk>
 
 	Work on speeding up evaluation of single and full-flavour PDFs.
