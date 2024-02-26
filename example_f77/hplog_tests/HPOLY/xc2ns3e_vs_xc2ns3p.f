@@ -73,7 +73,7 @@
                do i4 = -1,1
                   do i5 = -1,1
                      write(*,'(a3,i2,i3,i3,i3,i3,a1,E17.7,E17.7,F17.7)')
-     $                    'H4(',i1,i2,i3,i4,i5,')',Hr5(i1,i2,i3,i4,i5)
+     $                    'H5(',i1,i2,i3,i4,i5,')',Hr5(i1,i2,i3,i4,i5)
      $                    ,Hrp5(i1,i2,i3,i4,i5), Hrp5(i1,i2,i3,i4,i5)
      $                    /Hr5(i1 ,i2,i3,i4,i5)
                   enddo
@@ -86,7 +86,7 @@
 ! Set reasonable default values. The exact and parametrised versions of
 ! the F2 and Fl coefficient functions differ at large x.
 
-      cc = 0                    ! Do NC coefficient function
+      cc = 1                   ! Do NC coefficient function
       delx = (logxmax - logxmin) / dble(nbins)
       nf = 5
 
