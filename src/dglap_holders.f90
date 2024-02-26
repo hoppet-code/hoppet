@@ -139,17 +139,14 @@ contains
           if (dh%nloop >= 3) then
              call InitSplitMatNNLO(grid, dh%P_NNLO, dh%factscheme)
              if (need_MTM) then
-               if (nflcl >= lbound(dh%allP,dim=2)+1) then
-                 call InitMTMNNLO(grid,dh%MTM_NNLO)
+               if (nflcl == lbound(dh%allP,dim=2)+1) then
+                  call InitMTMNNLO(grid,dh%MTM_NNLO)
+               else if (nflcl >= lbound(dh%allP,dim=2) + 1) then
+                  ! try to be efficient by recycling MTMs from lower nf
+                  ! since all that changes is nf_int variable inside MTM_NNLO
+                  call InitMTM(dh%MTM_NNLO, dh%allMTM(3, lbound(dh%allP,dim=2) + 1))
+                  call SetNfMTM(dh%MTM_NNLO, nflcl)
                end if
-               !if (nflcl == lbound(dh%allP,dim=2)+1) then
-               !   call InitMTMNNLO(grid,dh%MTM_NNLO)
-               !else if (nflcl >= lbound(dh%allP,dim=2) + 1) then
-               !   ! try to be efficient by recycling MTMs from lower nf
-               !   ! since all that changes is nf_int variable inside MTM_NNLO
-               !   dh%MTM_NNLO = dh%allMTM(3, lbound(dh%allP,dim=2) + 1)
-               !   call SetNfMTM(dh%MTM_NNLO, nflcl)
-               !end if
              end if
           end if
           if (dh%nloop >= 4) then

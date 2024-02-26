@@ -101,7 +101,10 @@ module dglap_objects
   !public :: AddWithCoeff_sm, Multiply_sm
   !public :: cobj_PConv, cobj_PConv_1d
 
-  public :: InitMTMNNLO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
+  interface InitMTM
+    module procedure InitMTM_from_MTM
+  end interface
+  public :: InitMTM, InitMTMNNLO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
   public :: SetMassSchemeMTM
   
   !-------- things for splitting functions --------------------
@@ -908,7 +911,6 @@ contains
     call Multiply(MTM%PShg_MSbar, -8.0_dp*CF)
     call AddWithCoeff(MTM%PShg_MSbar, MTM%PSHg)
 
-
     ! just store info that it is NNLO. For now it is obvious, but
     ! one day when we have NNNLO it may be useful, to indicate
     ! which structures exist and which do not. 
@@ -919,6 +921,22 @@ contains
     !-- by default 
     MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
+
+  subroutine InitMTM_from_MTM(MTM, MTM_in)
+    type(mass_threshold_mat), intent(inout) :: MTM
+    type(mass_threshold_mat), intent(in)    :: MTM_in
+
+    call InitGridConv(MTM%PSHq, MTM_in%PSHq)
+    call InitGridConv(MTM%PSHg, MTM_in%PSHg)
+    call InitGridConv(MTM%NSqq_H, MTM_in%NSqq_H)
+    call InitGridConv(MTM%Sgg_H, MTM_in%Sgg_H)
+    call InitGridConv(MTM%Sgq_H, MTM_in%Sgq_H)
+    call InitGridConv(MTM%PShg_MSbar, MTM_in%PShg_MSbar)
+    MTM%Sgg_H_extra_MSbar_delta = MTM_in%Sgg_H_extra_MSbar_delta
+    MTM%loops = MTM_in%loops
+    MTM%nf_int = MTM_in%nf_int
+    MTM%masses_are_MSbar = MTM_in%masses_are_MSbar
+  end subroutine InitMTM_from_MTM
 
   !---------------------------------------------------------------------
   ! want to be able to set nf, defined as number of flavours
