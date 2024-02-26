@@ -48,8 +48,8 @@ module dglap_holders
      !type(pdf_rep), pointer :: all_prep(:)
      !type(pdf_rep), pointer :: prep
      integer                :: nf
-  contains
-     procedure :: SetNf => SetNfDglapHolder
+  !contains
+  !   procedure :: SetNf => SetNfDglapHolder
   end type dglap_holder
   
   !-- this is potentially makeshift?
@@ -372,7 +372,8 @@ contains
   ! scheme is also set for the mass-threshold-matrix
   subroutine SetNfDglapHolder(dh, nflcl, quark_masses_are_MSbar)
     use qcd
-    class(dglap_holder), intent(inout) :: dh
+    !class(dglap_holder), intent(inout) :: dh
+    type(dglap_holder), intent(inout) :: dh
     integer, intent(in) :: nflcl
     logical, optional, intent(in) :: quark_masses_are_MSbar
 

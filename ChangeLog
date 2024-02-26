@@ -13,8 +13,10 @@
 	MTM2 object and MTM2_exists variable is now deprecated.
 
 	Also added dh%SetNf(...) as start of experimentation of the
-	potential of a more object-oriented approach.
-	
+	potential of a more object-oriented approach. And then
+	turned it off, because it causes failures with IBMM compiler
+	on CI.
+
 2024-02-24  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/integrator.f90:
