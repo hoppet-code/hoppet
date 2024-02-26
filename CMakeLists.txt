@@ -20,6 +20,7 @@ option(HOPPET_BUILD_EXAMPLES  "Build examples" ON)
 option(HOPPET_ENABLE_TESTING  "Enable testing. Requires building the examples." ON)
 option(HOPPET_BUILD_BENCHMARK "Build benchmark." ON)
 option(HOPPET_ENABLE_FPES     "Enable trapping for the floating point exceptions." OFF)
+option(HOPPET_BUILD_TESTDIR   "Enable build of the code in the test directory." OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
@@ -105,10 +106,12 @@ message(STATUS "HOPPET: HOPPET_USE_EXACT_COEF=${HOPPET_USE_EXACT_COEF}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
 message(STATUS "HOPPET: HOPPET_ENABLE_TESTING=${HOPPET_ENABLE_TESTING}")
 message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
+message(STATUS "HOPPET: HOPPET_BUILD_TESTDIR=${HOPPET_BUILD_TESTDIR}")
 message(STATUS "HOPPET: HOPPET_ENABLE_FPES=${HOPPET_ENABLE_FPES}")
-find_package(LHAPDF) 
-message(STATUS "HOPPET: LHAPDF_VERSION=${LHAPDF_VERSION} LHAPDF_LIBRARIES=${LHAPDF_LIBRARIES} LHAPDF_INCLUDE_DIRS=${LHAPDF_INCLUDE_DIRS}")
-
+if (HOPPET_BUILD_EXAMPLES)
+  find_package(LHAPDF REQUIRED) 
+  message(STATUS "HOPPET: LHAPDF_VERSION=${LHAPDF_VERSION} LHAPDF_LIBRARIES=${LHAPDF_LIBRARIES} LHAPDF_INCLUDE_DIRS=${LHAPDF_INCLUDE_DIRS}")
+endif()
 
 # hoppet-config script =================================================
 set(prefix ${CMAKE_INSTALL_PREFIX})
@@ -258,6 +261,7 @@ if (HOPPET_BUILD_EXAMPLES)
     endforeach()    
   endif()
 endif()
+
 if (HOPPET_BUILD_BENCHMARK)
   set( bms benchmark prec_and_timing structure_functions_benchmark_checks) 
   foreach ( b ${bms})
@@ -269,7 +273,21 @@ if (HOPPET_BUILD_BENCHMARK)
       POSITION_INDEPENDENT_CODE TRUE
      )
   endforeach()
+endif()
 
+if (HOPPET_BUILD_TESTDIR)
+  set( testcode bidirectional_mass_thresholds coupling-fixed coupling determine_accuracies intrinsic_charm
+  lumi_tests msbar_tests split_mat_ops streamlined_multisplit test_qed test_qed_lepton_evol test_qed_obj
+  timelike_NLOevol_tests timelike_tests test_split_integration) 
+  foreach ( b ${testcode})
+    add_executable( ${b} tests/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
+    target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
+    set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
+      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/${b}_modules
+      POSITION_INDEPENDENT_CODE TRUE
+     )
+  endforeach()
 endif()
 
 # Cmake config files   #################################################

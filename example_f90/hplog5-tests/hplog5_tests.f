@@ -21,7 +21,7 @@
 
       x = 0.00001d0
 
-      call getarg(1,x_char)
+      call GET_COMMAND_ARGUMENT(1,x_char)
 
       if(x_char.eq.'') then
          print*, 'Using default value of x            = ', x

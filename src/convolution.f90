@@ -33,16 +33,19 @@ module convolution
   private
 
   integer, parameter :: conv_UndefinedInt = 1000000004
+  ! minimum and maximum number of points for interpolation
+  integer, parameter :: npnt_min = 4, npnt_max = 10
+  integer, parameter, public :: WeightGridQuand_npnt_max = npnt_max
 
   !-------------------------------
   ! definition of a grid
   ! Includes possibility of one layer of subsiduary definitions
   type grid_def
      real(dp) :: dy, ymax, eps
-     integer  :: ny, order, nsub
+     integer  :: ny, order, nsub = 0
      logical  :: locked
-     integer,        pointer :: subiy(:) ! starting points of subsiduary grid
-     type(grid_def), pointer :: subgd(:) ! subsiduary grid defs
+     integer,        pointer :: subiy(:) => null() ! starting points of subsiduary grid
+     type(grid_def), pointer :: subgd(:) => null() ! subsiduary grid defs
   end type grid_def
 
   !--------------------------------------------------
@@ -115,7 +118,7 @@ module convolution
   interface EvalGridQuant
      module procedure conv_EvalGridQuant_0d, conv_EvalGridQuant_1d
   end interface
-  public :: MomGridQuant, EvalGridQuant, WgtGridQuant
+  public :: MomGridQuant, EvalGridQuant, WgtGridQuant, WgtGridQuant_noalloc
   interface Delete
      module procedure conv_DelGridQuant_1d, conv_DelGridQuant_2d
      module procedure conv_DelGridQuant_3d
@@ -504,6 +507,7 @@ contains
        !end do
        deallocate(grid%subiy)
        deallocate(grid%subgd)
+       grid%nsub = 0
     end if
     
   end subroutine Delete_grid_def_0d
@@ -1077,7 +1081,6 @@ contains
     real(dp), intent(in) :: y
     real(dp) :: f
     !-----------------------------------------
-    integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: i, ny, npnt, isub
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
     real(dp) :: wgts(npnt_max)
@@ -1198,7 +1201,6 @@ contains
     integer,  intent(out) :: iylo
     real(dp), pointer     :: wgts(:)
     !-----------------------------------------
-    integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: ny, npnt, isub
     character(len=200) :: err_string1, err_string2
 
@@ -1230,6 +1232,45 @@ contains
   end subroutine WgtGridQuant
   
 
+  !--------------------------------------------------------------------
+  ! Returns starting iymin point and a set of weights in order to calculate
+  ! the value of the function at y -- one day we might introduce some
+  ! option of setting the number of points; but not for now...
+  !
+  ! Qu: is the relation between number of points and order correct? It seems
+  !     like we ought to have abs(grid%order)+1...
+  recursive subroutine WgtGridQuant_noalloc(grid, y, iylo, wgts, npnt)
+    use interpolation
+    type(grid_def), intent(in) :: grid
+    real(dp), intent(in)  :: y
+    integer,  intent(out) :: iylo
+    real(dp), intent(out) :: wgts(0:)
+    integer , intent(out) :: npnt
+    !-----------------------------------------
+    integer :: ny, isub
+    character(len=200) :: err_string1, err_string2
+
+    ny = grid%ny
+    if (grid%nsub /= 0) then
+       isub = conv_BestIsub(grid,y)
+       call WgtGridQuant_noalloc(grid%subgd(isub), y, iylo, wgts, npnt)
+       iylo = iylo + grid%subiy(isub)
+    else
+       ! nan fails all comparison tests; arrange the tests so that
+       ! if we have a nan, then we will get something out of range.
+       if (.not.(y <= grid%ymax*(one+warn_tolerance) .and. y >= -warn_tolerance)) then
+          write(err_string1,*) 'WgtGridQuant_noalloc: &
+               &requested function value outside y range'
+          write(err_string2,*) 'y = ', y, ' but should be 0 < y < ymax=',grid%ymax
+          call wae_error(trim(err_string1), trim(err_string2))
+       end if
+       
+       npnt = min(npnt_max, max(npnt_min, abs(grid%order)))
+       
+       iylo = min(max(floor(y / grid%dy)-(npnt-1)/2,0),ny-npnt+1)
+       call uniform_interpolation_weights(y/grid%dy-iylo, wgts(0:npnt-1))
+    end if
+  end subroutine WgtGridQuant_noalloc
   
 
   !-- for internal use only
@@ -1712,7 +1753,7 @@ contains
   !----------------------------------------------------------------------
   ! Initialise a convoluter with the function to use in the 
   ! convolution. 
-  subroutine conv_InitGridConv_func(grid,gc,func,alloc)
+  subroutine conv_InitGridConv_func(grid,gc,func,alloc, split)
     type(grid_def),  intent(in)    :: grid
     type(grid_conv), intent(inout) :: gc
     interface
@@ -1723,12 +1764,13 @@ contains
        end function func
     end interface
     logical,         intent(in), optional :: alloc
+    real(dp),        intent(in), optional :: split(:)
     !-------------------------------------------
 
     !if (default_or_opt(.not.GridConvAllocated(gc),alloc)) call conv_InitGridConv_zero(grid,gc)
     call conv_InitGridConv_zero(grid,gc)
     
-    call AddWithCoeff(gc,func)
+    call AddWithCoeff(gc,func, split=split)
   end subroutine conv_InitGridConv_func
 
 
@@ -1880,9 +1922,10 @@ contains
 
   !-------------------------------------------------------------
   ! To gc add a function for convolution
-  recursive subroutine conv_AddGridConv_func(gc,func)
+  recursive subroutine conv_AddGridConv_func(gc,func, split)
     use integrator; use convolution_communicator
     type(grid_conv), intent(inout), target :: gc
+    real(dp), intent(in), optional :: split(:)
     interface
        function func(x)
          use types; implicit none
@@ -1905,7 +1948,7 @@ contains
 
     if (gc%grid%nsub /= 0) then
        do isub = 1, gc%grid%nsub
-          call conv_AddGridConv_func(gc%subgc(isub),func)
+          call conv_AddGridConv_func(gc%subgc(isub),func,split)
        end do
        return
     end if
@@ -1922,6 +1965,7 @@ contains
 
     cc_piece = cc_REAL
     if (gc%grid%order == LIN_ORDER) then
+       if (present(split)) call wae_error("conv_AddGridConv_func: split not supported for LIN_ORDER")
        do i = 1, ny
           ym = i*dy
           yl = ym - dy
@@ -1961,13 +2005,15 @@ contains
           ih = il + order
           nodes = (/ (j,j=il,ih) /) * dy
           do iy = il, min(ih,ny)
-             res = conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps)
+             res = conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps, split=split)
              gc%conv(iy,1) = gc%conv(iy,1) + res
           end do
        end do
        !write(0,*) 'conv_AddGridConv_func: Negative orders not yet supported'
        !stop
     else
+      if (present(split)) call wae_error("conv_AddGridConv_func: split not supported for order>0")
+
        !-- CCN19 p.4 -------------
        ! index 0:          central points
        ! index 1..order+1: for dealing with last order+1 points
@@ -2054,7 +2100,7 @@ contains
   !   of the function func(y) mutiplied by a polynomial which is zero at 
   !   all the nodes (which start from il) except that indicated by iy.
   !
-  function conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps) result(res)
+  function conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps, split) result(res)
     use integrator; use convolution_communicator
     interface
        function func(x)
@@ -2065,22 +2111,30 @@ contains
     end interface
     real(dp), intent(in) :: yl, yh, nodes(:), eps
     integer,  intent(in) :: il, iy
+    real(dp), intent(in), optional :: split(:)
     real(dp)             :: res
     integer :: inode
     inode = iy - il + 1
     res = zero
     if (yl == zero .and. iy == 0) then
        cc_piece = cc_VIRT
-       res = res + ig_LinWeight(func, yh,-two*log(eps), one,one, eps)
+       res = res + ig_LinWeight(func, yh,-two*log(eps), one,one, eps, split=split)
        cc_piece = cc_DELTA
        res = res + func(zero)
        cc_piece = cc_REALVIRT
-       res = res + ig_LinWeight(func, yl, yh, one, one, eps)
+       res = res + ig_LinWeight(func, yl, yh, one, one, eps, split=split)
        cc_piece = cc_REAL
+       if (present(split)) then
+         if (size(split) > 0) Then
+            if (split(1) < yh) Then
+               call wae_error("conv_GCAf_Helper: split(1) < yh not supported, with yh = ", dbleval=yh)
+            end if
+         end if 
+       end if
        res = res + ig_PolyWeight_expand(func, yl, yh, nodes, inode, eps,wgtadd=-one)
     else
        cc_piece = cc_REAL
-       res = ig_PolyWeight(func, yl, yh, nodes, inode, eps)
+       res = ig_PolyWeight(func, yl, yh, nodes, inode, eps, split=split)
     end if
   end function conv_GCAf_Helper
   

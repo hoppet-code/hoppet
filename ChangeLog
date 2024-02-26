@@ -14,6 +14,70 @@
 
 	Also added dh%SetNf(...) as start of experimentation of the
 	potential of a more object-oriented approach.
+	
+2024-02-24  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* src/integrator.f90:
+	fixed bug in array sizes for integral splitting.
+
+2024-02-11 Sun  <gavin.salam@physics.ox.ac.uk>
+
+	Work on speeding up evaluation of single and full-flavour PDFs.
+	Prior to this commit, the main native option for evaluating 
+	a pdf_table was the EvalPdfTable_yQ (and related) call which
+	filled all flavours. 
+
+    Using `./benchmarking/prec_and_timing -dy 0.1 -output -outputgrid -nrep 10 -nrep-eval 10000000 -order -6`
+	timing for one call of EvalPdfTable_yQ on a Mac M2 Pro (gfortran 13.2.0) was
+	about 315 ns, and is now 243 ns.
+
+	- EvalPdfTable_yQ
+	  * various improvements, including that of uniform_interpolation_weights
+	    (315 ns -> 286 ns)
+	  * fixed max_lnlnQ_order (286 ns -> 266 ns)
+	  * fixed y_wgts(0:WeightGridQuand_npnt_max-1) (266 ns -> 251 ns)
+      * removing dynamic wgts(:,:) array (251 ns -> 243 ns)
+	    (193 ns for order = -4)
+
+    - uniform_interpolation_weights(...), uses a fixed-size rather than
+	  dynamic-sized temporary dists array, and one loop is avoided
+	  (prod=product(dists) is merged into the previous loop).
+
+	- addition of EvalPdfTable_yQf(...) and _xQf(...) version to
+	  evaluate a single flavour. _yQf takes 71ns.
+
+	* src/pdf_tabulate.f90:
+
+	- Added max_lnlnQ_order, currently set to 6, to avoid the need for dynamic allocation. 
+    - added EvalPdfTable_yQf(...) and _xQf(...) functions, which take O(70ns)
+	  to give a single flavour rather than O(250ns) for all flavours.
+    - EvalPdfTable_yQ(...) now uses sub-parts of various fixed-sized arrays
+	  rather than allocating things
+	
+	* src/convolution.f90:
+	- public parameter WeightGridQuand_npnt_max, which is the maximum number of
+	  points in a WeightGridQuant interpolation
+	- new WgtGridQuant_noalloc, which gives the weight for a grid quantity
+	  without any dynamic allocations
+
+	* src/interpolation.f90:
+	- uniform_interpolation_weights(...), uses a fixed-size rather than
+	  dynamic-sized temporary dists array, and one loop is avoided
+	  (prod=product(dists)) to avoid allocations and two loops merged
+	  into each other.
+
+2024-02-09 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* src/convolution.f90:
+	* src/integrator.f90:
+	* tests/test_split_integration.f90:
+
+	added functionality in InitGridConv and underlying integrators to
+	split the integration regions so as to handle non-smooth or
+	discontinuous convolution function (with an optional "split" array
+	argument). Handling is still preliminary (e.g. ig_PolyWeight_expand
+	does not yet have this functionality, which impose a limit that the 
+	first split point needs to be beyond dy).
 
 2024-02-06 Tue  <gavin.salam@physics.ox.ac.uk>
 

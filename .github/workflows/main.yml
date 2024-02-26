@@ -7,8 +7,60 @@ on:
     - cron:  "0 0 1/600 * *"
 
 jobs:
-  compilejobFedora:
-    name: hoppet_on_Fedora
+  Build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        #gcc_v: [10] # Version of GFortran we want to use.
+        #gcc_v: [7,8,9,10] # Version of GFortran we want to use.
+        gcc_v: [10,13] # Version of GFortran we want to use.
+        #python-version: [3.9]
+    env:
+      FC: gfortran-${{matrix.gcc_v}}
+      GCC_V: ${{matrix.gcc_v}}
+
+    steps:
+
+    - name: Set vars
+      id: vars
+      #run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      run: echo name=tag::${GITHUB_REF#refs/*/} >> $GITHUB_OUTPUT
+
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install GFortran Linux
+      if: contains( matrix.os, 'ubuntu')
+      run: |
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V}
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
+        --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
+        --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V}        
+
+    - name: configure_build_check
+      if: contains( matrix.os, 'ubuntu')
+      run: |
+        #FC=gfortran-${{matrix.gcc_v}}
+        #GCOV=gcov-${{matrix.gcc_v}}
+        # build and run unit tests
+        gfortran-${{matrix.gcc_v}} --version
+        ./configure FC=gfortran-${{matrix.gcc_v}}
+        make -j4 check
+        # then make sure we can build also with the exact coefficient functions
+        make clean
+        ./configure FC=gfortran-${{matrix.gcc_v}} --enable-exact-coefs
+        make -j4 check
+
+
+
+  compilejobFedorax86_64_GNU:
+    name: Fedorax86_64_GNU
     runs-on: ubuntu-latest
     container:
         image: fedora:latest
@@ -25,35 +77,45 @@ jobs:
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
 
-
-  compilejob:
-    name: hoppet_on_Rocky9_Intel_HPCKIT
+  compilejobFedorax86_64_Intel_HPCKIT:
+    name: Fedorax86_64_Intel_HPCKIT
     runs-on: ubuntu-latest
-    container:
-        image: intel/oneapi-hpckit:2024.0.1-devel-rockylinux9
+    container: fedora:latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Install 
+    - uses: actions/checkout@v3
+    - name: Install
       run: |
-           yum -y install epel-release
-           yum -y install make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+             dnf -y install findutils procps gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+             tee > /tmp/oneAPI.repo << EOF
+             [oneAPI]
+             name=Intel(R) oneAPI repository
+             baseurl=https://yum.repos.intel.com/oneapi
+             enabled=1
+             gpgcheck=1
+             repo_gpgcheck=1
+             gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+             EOF
+             sudo mv /tmp/oneAPI.repo /etc/yum.repos.d/
+             dnf -y clean all
+             dnf -y install  intel-oneapi-compiler-dpcpp-cpp intel-oneapi-compiler-fortran
+             source /opt/intel/oneapi/compiler/latest/env/vars.sh
     - name: Compile_with_ifx
       run: |
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
           cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
           cmake --build BUILDifx -j
           cmake --install BUILDifx
           ctest --test-dir BUILDifx -j 2 --output-on-failure
     - name: Compile_with_ifort
       run: |
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
           cmake -S . -B BUILDifort -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifort
           cmake --build BUILDifort -j
           cmake --install BUILDifort
           ctest --test-dir BUILDifort -j 2 --output-on-failure
 
-
   compilejobCentos7_IBM_XL:
-    name: hoppet_on_Centos7ppc64le_IBM_XL
+    name: Centos7ppc64le_IBM_XL
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -88,7 +150,7 @@ jobs:
 
   compilejobOSX:
     runs-on: macos-latest
-    name: hoppet_on_OSX
+    name: OSXx86_64_GNU
     steps:
     - name: Checkout
       uses: actions/checkout@v3
