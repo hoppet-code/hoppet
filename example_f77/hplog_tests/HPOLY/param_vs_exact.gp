@@ -29,9 +29,9 @@ set title 'N3LO'
 set ylabel '|C_2^{NS}|'
 set xlabel '1-x'
 
-plot 'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:(abs($2)) lw 2 title 'XC2NS3PA',\
-     'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:(abs($3)) lw 2 title 'XC2NS3PE - HPLOG5',\
-     'xc2ns3e_vs_xc2ns3p_hpoly.dat' u 1:(abs($3)) lw 2 title 'XC2NS3PE - HPOLY'
+plot 'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:(abs($2))  w l lw 4 title 'XC2NS3PA',\
+     'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:(abs($3))  w l lw 4 title 'XC2NS3PE - HPLOG5',\
+     'xc2ns3e_vs_xc2ns3p_hpoly.dat' u 1:(abs($3))  w l lw 4 title 'XC2NS3PE - HPOLY'
 
 reset
 set mxtics
@@ -50,7 +50,7 @@ set ylabel 'C_2^{NS} param/exact'
 set xlabel '1-x'
 
 plot 1 lw 2 lc rgb 'black' not,\
-     'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:4 lw 2 title 'XC2NS3PA / XC2NS3PE - HPLOG5',\
-     'xc2ns3e_vs_xc2ns3p_hpoly.dat' u 1:4 lw 2 title 'XC2NS3PA / XC2NS3PE - HPOLY'
+     'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:4  w l lw 4 title 'XC2NS3PA / XC2NS3PE - HPLOG5',\
+     'xc2ns3e_vs_xc2ns3p_hpoly.dat' u 1:4  w l lw 4 title 'XC2NS3PA / XC2NS3PE - HPOLY'
 
 set output
