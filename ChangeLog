@@ -1,3 +1,20 @@
+2024-02-26 Gavin + Alexander
+
+	* ../src/dglap_holders.f90:
+	* ../src/dglap_objects.f90:
+	* ../src/evolution.f90:
+	Started work on support for mass-threshold matrices beyond NNLO. 
+	dglap_holder now has an allMTM(3:nloop,nflo+1:nfhi) array, and
+	setting nf sets up pointers from MTM_NNLO and MTM_N3LO to the
+	right parts of allMTM.
+	
+	This replaces the previous MTM2 array, whose structure was
+	nf-independent other than for internal nf_int variable. Use of the
+	MTM2 object and MTM2_exists variable is now deprecated.
+
+	Also added dh%SetNf(...) as start of experimentation of the
+	potential of a more object-oriented approach.
+
 2024-02-06 Tue  <gavin.salam@physics.ox.ac.uk>
 
 	Investigation of small differences in PDF outputs (at fairly large x

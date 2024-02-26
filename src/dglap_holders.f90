@@ -34,17 +34,22 @@ module dglap_holders
      !-----------------------  nloop, nf  --------------
      type(split_mat), pointer :: allP(:,   :)  
      
-     type(split_mat), pointer :: P_LO, P_NLO, P_NNLO, P_N3LO
+     type(split_mat), pointer :: P_LO, P_NLO, P_NNLO, P_N3LO ! pointers to allP(:,nf)
      type(coeff_mat), pointer :: allC(:,:)
      type(coeff_mat), pointer :: C2, C2_1, CL_1
-     !-- indep of nf for the time being ----------------
-     type(mass_threshold_mat) :: MTM2
+
+     !----------------------------------  nloop,nf
+     type(mass_threshold_mat), pointer :: allMTM(:,:) => null()
+     type(mass_threshold_mat), pointer :: MTM2 ! legacy, deprecated, pointer to MTM(3,nf)
+     type(mass_threshold_mat), pointer :: MTM_NNLO, MTM_N3LO ! will be pointers to MTM(3,nf) and MTM(4,nf)
      logical    :: MTM2_exists=.false.
      integer    :: factscheme, nloop
      !--------------------------------  nf  ------------
      !type(pdf_rep), pointer :: all_prep(:)
      !type(pdf_rep), pointer :: prep
      integer                :: nf
+  contains
+     procedure :: SetNf => SetNfDglapHolder
   end type dglap_holder
   
   !-- this is potentially makeshift?
@@ -92,6 +97,7 @@ contains
     !logical :: newDIS = .false.
     integer :: nfstore, nflcl
     integer, save :: nfragwarn = 5
+    logical :: need_MTM
 
     dh%factscheme = default_or_opt(factscheme_default, factscheme)
     dh%nloop     = default_or_opt(2, nloop)
@@ -99,6 +105,7 @@ contains
        call wae_error('InitDglapHolder: nloop must be between 1 and 4')
     end if
     dh%grid = grid
+
 
     if (present(nflo) .and. present(nfhi)) then
        allocate(dh%allP(dh%nloop,nflo:nfhi))
@@ -110,7 +117,12 @@ contains
        !allocate(dh%all_prep(nf_int:nf_int))
        allocate(dh%allC(nC,nf_int:nf_int))
     end if
-    
+
+    ! mass steps not always supported. Work out if they are
+    need_MTM = dh%nloop >= 3 .and. dh%factscheme == factscheme_MSbar .and. mass_steps_on &
+            &.and. lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2)
+    if (need_MTM) allocate(dh%allMTM(3:nloop,nflo:nfhi))
+
     !-- want to reset it at end
     nfstore = nf_int
     
@@ -126,12 +138,18 @@ contains
           if (dh%nloop >= 2) call InitSplitMatNLO(grid, dh%P_NLO, dh%factscheme)
           if (dh%nloop >= 3) then
              call InitSplitMatNNLO(grid, dh%P_NNLO, dh%factscheme)
-             !-- do this once, and only if really needed
-             if (lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2) &
-                  &.and. mass_steps_on &
-                  &.and. nflcl == lbound(dh%allP,dim=2)) then
-                call InitMTMNNLO(grid,dh%MTM2)
-                dh%MTM2_exists = .true.
+             if (need_MTM) then
+               if (nflcl >= lbound(dh%allP,dim=2)+1) then
+                 call InitMTMNNLO(grid,dh%MTM_NNLO)
+               end if
+               !if (nflcl == lbound(dh%allP,dim=2)+1) then
+               !   call InitMTMNNLO(grid,dh%MTM_NNLO)
+               !else if (nflcl >= lbound(dh%allP,dim=2) + 1) then
+               !   ! try to be efficient by recycling MTMs from lower nf
+               !   ! since all that changes is nf_int variable inside MTM_NNLO
+               !   dh%MTM_NNLO = dh%allMTM(3, lbound(dh%allP,dim=2) + 1)
+               !   call SetNfMTM(dh%MTM_NNLO, nflcl)
+               !end if
              end if
           end if
           if (dh%nloop >= 4) then
@@ -357,7 +375,7 @@ contains
   ! scheme is also set for the mass-threshold-matrix
   subroutine SetNfDglapHolder(dh, nflcl, quark_masses_are_MSbar)
     use qcd
-    type(dglap_holder), intent(inout) :: dh
+    class(dglap_holder), intent(inout) :: dh
     integer, intent(in) :: nflcl
     logical, optional, intent(in) :: quark_masses_are_MSbar
 
@@ -369,10 +387,6 @@ contains
     !   way of doing things, but cannot think of a better solution 
     !   given the current structure...
     call qcd_SetNf(nflcl)
-    if (dh%mtm2_exists) call SetNfMTM(dh%MTM2, nflcl)
-    if (present(quark_masses_are_MSbar)) then
-      call SetMassSchemeMTM(dh%MTM2, quark_masses_are_MSbar)
-    end if
 
     !-- set up links so that the remainder of the routine
     !   can stay unchanged
@@ -385,14 +399,34 @@ contains
     
     if (dh%nloop >= 3) then
        dh%P_NNLO => dh%allP(3,nflcl)
+       if (associated(dh%allMTM) .and. nflcl >= lbound(dh%allMTM,2)) then
+         dh%MTM_NNLO => dh%allMTM(3,nflcl)
+         dh%MTM2     => dh%allMTM(3,nflcl)
+         if (present(quark_masses_are_MSbar)) call SetMassSchemeMTM(dh%MTM_NNLO, quark_masses_are_MSbar)
+         dh%MTM2_exists = .true.
+       else
+         nullify(dh%MTM_NNLO)
+         nullify(dh%MTM2    )
+         dh%MTM2_exists = .false.
+       end if
     else
-       nullify(dh%P_NNLO)
-    end if
+      nullify(dh%P_NNLO)
+      nullify(dh%MTM_NNLO)
+      nullify(dh%MTM2)
+      dh%MTM2_exists = .false.
+   end if
     
     if (dh%nloop >= 4) then
        dh%P_N3LO => dh%allP(4,nflcl)
+       if (associated(dh%allMTM) .and. nflcl >= lbound(dh%allMTM,2)) then
+         dh%MTM_N3LO => dh%allMTM(4,nflcl)
+         if (present(quark_masses_are_MSbar)) call SetMassSchemeMTM(dh%MTM_N3LO, quark_masses_are_MSbar)
+       else
+         nullify(dh%MTM_N3LO)
+       end if
     else
        nullify(dh%P_N3LO)
+       nullify(dh%MTM_N3LO)
     end if
     
     dh%C2 => dh%allC(1,nflcl)
@@ -418,8 +452,15 @@ contains
        end do
     end do
     
-    if (dh%MTM2_exists) call Delete(dh%MTM2)
-    
+    if (associated(dh%allMTM)) then
+      do nflcl = lbound(dh%allMTM,2), ubound(dh%allMTM,2)
+         do iloop = lbound(dh%allMTM,1), ubound(dh%allMTM,1)
+            call Delete(dh%allMTM(iloop,nflcl))
+         end do
+      end do
+      deallocate(dh%allMTM)
+    end if 
+
     deallocate(dh%allP)
     deallocate(dh%allC)
     !deallocate(dh%all_prep)

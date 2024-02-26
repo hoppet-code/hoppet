@@ -369,10 +369,10 @@ contains
     !   to the desired nf value, despite proximity to threshold.
     as2pi = Value(coupling, muR, fixnf=nf_int) / twopi
     if (present(pdf)) pdf = pdf + &
-         &                   (direction*as2pi**2) * (dh%MTM2 .conv. pdf)
+         &                   (direction*as2pi**2) * (dh%MTM_NNLO .conv. pdf)
     if (present(evop)) then
        evop%cross_mass_threshold = .true.
-       evop%MTM = dh%MTM2  ! stores current nf value and quark-mass treatment
+       evop%MTM = dh%MTM_NNLO  ! stores current nf value and quark-mass treatment
        evop%MTM_coeff = (direction*as2pi**2)
     end if
     

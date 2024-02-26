@@ -915,7 +915,7 @@ contains
     ! (Mind you inexistent structures have yet to be implemented here...)
     MTM%loops = 3
     !-- no default value
-    MTM%nf_int = 0
+    MTM%nf_int = nf_int
     !-- by default 
     MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
@@ -947,6 +947,7 @@ contains
   !
   ! PDFs are assumed to be in "HUMAN" REPRESENTATION.
   function cobj_ConvMTM(MTM,q) result(Pxq)
+    use qcd
     type(mass_threshold_mat), intent(in) :: MTM
     real(dp),   intent(in) :: q(0:,ncompmin:)
     real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ncompmax)
@@ -954,6 +955,11 @@ contains
     integer :: i, nf_light, nf_heavy
 
     !-- general sanity checks
+    if (MTM%nf_int /= nf_int) then 
+      write(6,*) "nf_int(global) = ", nf_int, ", and MTM%nf_int = ", MTM%nf_int
+      call wae_error('cobj_ConvMTM:',&
+         &'nf_int in MTM does not match current nf_int')
+    end if
     if (MTM%loops <=0 .or. MTM%nf_int <=0) call wae_error('cobj_ConvMTM:',&
          &'Mass threshold matrix is undefined')
 
