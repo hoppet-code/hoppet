@@ -53,7 +53,7 @@ program tabulation_example
   ! set up parameters for grid
   order = -6
   ymax  = 12.0_dp
-  dy    = 0.1_dp
+  dy    = 0.05_dp
 
   ! set up the grid itself (this call sets up a nested grid composed of 4 subgrids)
   call InitGridDefDefault(grid, dy, ymax, order=order)
