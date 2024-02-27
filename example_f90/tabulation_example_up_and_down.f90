@@ -99,8 +99,9 @@ program tabulation_example
   !call EvolvePdfTable(table,pdf0)
   write(6,'(a)') "Evolution done!"
 
-  ! get the value of the tabulation at some point
-  Q = 100.0_dp
+  ! get the value of the tabulation at some high scale above all mass
+  ! thresholds
+  Q = 1000.0_dp
   write(6,'(a)')
   write(6,'(a,f8.3,a)') "           Initial PDFs at Q = ",Q0," GeV"
   write(6,'(a5,2a12,a14,a10,a12)') "x",&
@@ -137,13 +138,15 @@ program tabulation_example
   ! interpolation quality)
   call AddNfInfoToPdfTable(table2,coupling)
 
-  ! The PDF at 100 GeV
-  pdf0 = unpolarized_dummy_pdf_at_100GeV(xValues(grid))
-  ! create the tabulation based on the evolution of pdf0 from scale Q0
+  ! The PDF at high scale Q
+  call EvalPdfTable_Q(table, Q, pdf0)
+  ! create the tabulation based on the evolution of pdf0 from scale Q
   call EvolvePdfTable(table2, Q, pdf0, dh, coupling, nloop=nloop)
   
   write(6,'(a)')
-  write(6,'(a,f8.3,a)') "           Evolving PDFs from Q = 100 GeV to Q = ",Q0," GeV"
+  write(6,'(a,f8.3,a,f6.3)') "Evolving PDFs from Q = ",Q," GeV and writing results at Q = ",Q0," GeV"
+  write(6,'(a)') "NB: these results will not be identical to the original PDFs at Q0, "
+  write(6,'(a)') "as the mass threshold up and down differs by terms beyond the perturbative order controlled"
   write(6,'(a5,2a12,a14,a10,a12)') "x",&
        & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
   do ix = 1, size(heralhc_xvals)
@@ -202,25 +205,6 @@ contains
     pdf(:,-iflv_d) = dbar
   end function unpolarized_dummy_pdf
 
-  !======================================================================
-  !! The dummy PDF suggested by Vogt as the initial condition for the 
-  !! unpolarized evolution (as used in hep-ph/0511119).
-  function unpolarized_dummy_pdf_at_100GeV(xvals) result(pdf)
-    real(dp), intent(in) :: xvals(:)
-    real(dp)             :: pdf(size(xvals),ncompmin:ncompmax)
-    integer :: ix
-    real(dp) :: Q
-    pdf = zero
-    ! clean method for labelling as PDF as being in the human representation
-    ! (not actually needed after setting pdf=0
-    call LabelPdfAsHuman(pdf)
-
-    Q = 100.0_dp
-    
-    do ix = 1, size(xvals)
-       call EvalPdfTable_xQ(table,xvals(ix),Q,pdf(ix,:))
-    enddo
-  end function unpolarized_dummy_pdf_at_100GeV
 end program tabulation_example
 
 
