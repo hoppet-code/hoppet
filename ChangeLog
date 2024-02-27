@@ -1,3 +1,13 @@
+2024-02-27 Alexander + Gavin
+
+	* example_f90/tabulation_example_up_and_down.default_output:
+	* example_f90/tabulation_example_up_and_down.f90:
+	* CMakeLists.txt:
+	* scripts/check:
+	added example of evolution up and down, to ensure that CI
+	includes a verification of evolution and mass thresholds
+	in both directions.
+
 2024-02-26 Gavin + Alexander
 
 	* ../src/dglap_holders.f90:
