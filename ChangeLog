@@ -4,9 +4,13 @@
 	* example_f90/tabulation_example_up_and_down.f90:
 	* CMakeLists.txt:
 	* scripts/check:
-	added example of evolution up and down, to ensure that CI
-	includes a verification of evolution and mass thresholds
-	in both directions.
+
+	added example of evolution up and down, to verify evolution and mass
+	thresholds in both directions. Left out of make check and CI,
+	because of amplification of (system-dependent) rounding errors in
+	the downwards evolution. Current default_output is for gfortran-13 on
+	a Mac M2.
+
 
  2024-02-24  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
