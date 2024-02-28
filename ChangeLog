@@ -1,3 +1,14 @@
+2024-02-28 Alexander + Gavin
+
+	* ../src/assertions.f90:
+	* ../src/evolution.f90:
+	* ../src/sort.f90:
+	* ../src/splitting_functions.f90:
+	* ../src/structure_functions.f90:
+	* ../src/warnings_and_errors.f90:
+	replaced stop with error stop (or call to wae_error) to facilitate
+	debugging (e.g. backtrace in debuggers)
+
 2024-02-27 Alexander + Gavin
 
 	* example_f90/tabulation_example_up_and_down.default_output:

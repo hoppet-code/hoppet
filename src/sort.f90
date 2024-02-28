@@ -138,7 +138,7 @@ contains
           idx(j)   = medidx
 
           ! now put things onto the stack
-          if (ixstack+2 > stack_size) stop 'stack too small'
+          if (ixstack+2 > stack_size) error stop 'stack too small'
           stack(ixstack+1) = lrpair(l,j-1)
           stack(ixstack+2) = lrpair(j,r)
           ixstack = ixstack + 2
@@ -244,7 +244,7 @@ contains
           idx(j)   = medidx
 
           ! now put things onto the stack
-          if (ixstack+2 > stack_size) stop 'stack too small'
+          if (ixstack+2 > stack_size) error stop 'stack too small'
           stack(ixstack+1) = lrpair(l,j-1)
           stack(ixstack+2) = lrpair(j,r)
           ixstack = ixstack + 2
