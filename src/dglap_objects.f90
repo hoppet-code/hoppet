@@ -49,11 +49,21 @@ module dglap_objects
   !---------------------------------------------------------------
   ! for going from nf to nf+1. Currently contains pieces
   ! required for O(as^2), but not the full general structure.
+  !
+  ! The full (flavor-symmetric) structure is given in Eqs.(32-35)
+  ! of 1403.6456.
   type mass_threshold_mat
-     type(grid_conv) :: PShq, PShg
-     type(grid_conv) :: NSqq_H, Sgg_H, Sgq_H
+     ! pieces that start at NNLO
+     type(grid_conv) :: PShq   !!< A^PS_Qq
+     type(grid_conv) :: PShg   !!< A^PS_Qg
+     type(grid_conv) :: NSqq_H !!< A^NS_qq,Q
+     type(grid_conv) :: Sgg_H  !!< A^S_gg,Q
+     type(grid_conv) :: Sgq_H  !!< A^S_gq,Q
+     ! pieces that start at N3LO
+     type(grid_conv) :: PSqq_H !!< A^PS_qq,Q
+     type(grid_conv) :: Sqg_H ! !< A^S_qg,Q
      ! pieces related to the case of thresholds at MSbar masses
-     type(grid_conv) :: PShg_MSbar
+     type(grid_conv) :: PShg_MSbar !!< replaces PShg when masses are MSbar
      real(dp)        :: Sgg_H_extra_MSbar_delta
      ! LOOPS == 1+POWER OF AS2PI, NF_INT = nf including heavy quark.
      ! This is potentially adaptable.
@@ -911,6 +921,10 @@ contains
     call Multiply(MTM%PShg_MSbar, -8.0_dp*CF)
     call AddWithCoeff(MTM%PShg_MSbar, MTM%PSHg)
 
+    ! pieces that are zero at NNLO
+    call InitGridConv(grid, MTM%PSqq_H)
+    call InitGridConv(grid, MTM%Sqg_H)
+
     ! just store info that it is NNLO. For now it is obvious, but
     ! one day when we have NNNLO it may be useful, to indicate
     ! which structures exist and which do not. 
@@ -931,6 +945,9 @@ contains
     call InitGridConv(MTM%NSqq_H, MTM_in%NSqq_H)
     call InitGridConv(MTM%Sgg_H, MTM_in%Sgg_H)
     call InitGridConv(MTM%Sgq_H, MTM_in%Sgq_H)
+    call InitGridConv(MTM%PSqq_H, MTM_in%PSqq_H)
+    call InitGridConv(MTM%Sqg_H, MTM_in%Sqg_H)
+    
     call InitGridConv(MTM%PShg_MSbar, MTM_in%PShg_MSbar)
     MTM%Sgg_H_extra_MSbar_delta = MTM_in%Sgg_H_extra_MSbar_delta
     MTM%loops = MTM_in%loops
@@ -970,6 +987,7 @@ contains
     real(dp),   intent(in) :: q(0:,ncompmin:)
     real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ncompmax)
     real(dp) :: singlet(0:ubound(q,dim=1))
+    real(dp) :: dq_from_singlet(0:ubound(q,dim=1)) !!< addition to each flavour from singlet
     integer :: i, nf_light, nf_heavy
 
     !-- general sanity checks
@@ -1000,6 +1018,8 @@ contains
     singlet = sum(q(:,-nf_light:-1),dim=2) + sum(q(:,1:nf_light),dim=2)
 
     if (MTM%masses_are_MSbar) then
+      if (MTM%loops /= 3) call wae_error('cobj_ConvMTM:',&
+            &'masses_are_MSbar but MTM is not NNLO')
       Pxq(:,nf_heavy) = half*(&
            &(MTM%PShq .conv. singlet) + (MTM%PShg_MSbar .conv. q(:,iflv_g)) )
     else 
@@ -1015,14 +1035,18 @@ contains
       Pxq(:,iflv_g) = Pxq(:,iflv_g) + MTM%Sgg_H_extra_MSbar_delta*q(:,iflv_g)
     end if
     
-    
+    ! the singlet contributions to the individual light-quark flavours,
+    ! which we compute once and for all here
+    dq_from_singlet = half * ((MTM%PSqq_H * singlet) + (MTM%Sqg_H * q(:,iflv_g)))
+
+    ! finally do all individual light-quark flavours
     do i = -ncomponents, ncomponents
        if (abs(i) > nf_heavy) then
           Pxq(:,i) = zero
        else if (i == iflv_g .or. abs(i) == nf_heavy) then
           cycle
        else
-          Pxq(:,i) = MTM%NSqq_H .conv. q(:,i)
+          Pxq(:,i) = MTM%NSqq_H .conv. q(:,i) + dq_from_singlet
        end if
     end do
 

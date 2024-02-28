@@ -77,6 +77,7 @@ contains
     else
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
+       write(0,*) 'n1=',n1,' n2=',n2
        ERROR STOP 'program terminated by assert_eq2'
     end if
   END FUNCTION assert_eq2
