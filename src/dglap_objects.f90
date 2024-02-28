@@ -65,9 +65,14 @@ module dglap_objects
      ! pieces related to the case of thresholds at MSbar masses
      type(grid_conv) :: PShg_MSbar !!< replaces PShg when masses are MSbar
      real(dp)        :: Sgg_H_extra_MSbar_delta
-     ! LOOPS == 1+POWER OF AS2PI, NF_INT = nf including heavy quark.
-     ! This is potentially adaptable.
-     integer         :: loops, nf_int
+     !! LOOPS == 1+POWER OF AS2PI,
+     !! NB: if adding two pieces with different numbers of loops
+     !!     this contains the maximum among the two pieces
+     integer         :: loops
+     !! nf_int = nf including heavy quark.
+     integer         :: nf_int
+     !! a flag to indicate that this MTM is to be used for a transition
+     !! at an MSbar mass
      logical         :: masses_are_MSbar
   end type mass_threshold_mat
   public :: mass_threshold_mat
@@ -150,7 +155,7 @@ module dglap_objects
   public :: Multiply
 
   interface AddWithCoeff
-     module procedure AddWithCoeff_sm
+     module procedure AddWithCoeff_sm, AddWithCoeff_MTM
   end interface
   public :: AddWithCoeff
 
@@ -947,13 +952,39 @@ contains
     call InitGridConv(MTM%Sgq_H, MTM_in%Sgq_H)
     call InitGridConv(MTM%PSqq_H, MTM_in%PSqq_H)
     call InitGridConv(MTM%Sqg_H, MTM_in%Sqg_H)
-    
+
     call InitGridConv(MTM%PShg_MSbar, MTM_in%PShg_MSbar)
     MTM%Sgg_H_extra_MSbar_delta = MTM_in%Sgg_H_extra_MSbar_delta
     MTM%loops = MTM_in%loops
     MTM%nf_int = MTM_in%nf_int
     MTM%masses_are_MSbar = MTM_in%masses_are_MSbar
   end subroutine InitMTM_from_MTM
+
+
+  subroutine AddWithCoeff_MTM(MTM, MTM_to_add, factor)
+    use assertions
+    type(mass_threshold_mat), intent(inout) :: MTM
+    type(mass_threshold_mat), intent(in)    :: MTM_to_add
+    real(dp),                 intent(in), optional :: factor
+
+    if (MTM%nf_int /= MTM_to_add%nf_int) call wae_error('AddWithCoeff_MTM, nf values are inconsistent')
+    if (MTM%masses_are_MSbar .neqv. MTM_to_add%masses_are_MSbar) &
+                           call wae_error('AddWithCoeff_MTM, masses_are_MSbar values are inconsistent')
+    MTM%loops = max(MTM%loops, MTM_to_add%loops)
+
+    call AddWithCoeff(MTM%PSHq, MTM_to_add%PSHq, factor)
+    call AddWithCoeff(MTM%PSHg, MTM_to_add%PSHg, factor)
+    call AddWithCoeff(MTM%NSqq_H, MTM_to_add%NSqq_H, factor)
+    call AddWithCoeff(MTM%Sgg_H, MTM_to_add%Sgg_H, factor)
+    call AddWithCoeff(MTM%Sgq_H, MTM_to_add%Sgq_H, factor)
+    call AddWithCoeff(MTM%PSqq_H, MTM_to_add%PSqq_H, factor)
+    call AddWithCoeff(MTM%Sqg_H, MTM_to_add%Sqg_H, factor)
+    call AddWithCoeff(MTM%PShg_MSbar, MTM_to_add%PShg_MSbar, factor)
+    MTM%Sgg_H_extra_MSbar_delta = MTM%Sgg_H_extra_MSbar_delta + &
+         & default_or_opt(one, factor)*MTM_to_add%Sgg_H_extra_MSbar_delta
+
+  end subroutine AddWithCoeff_MTM
+
 
   !---------------------------------------------------------------------
   ! want to be able to set nf, defined as number of flavours
