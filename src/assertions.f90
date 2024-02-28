@@ -77,7 +77,7 @@ contains
     else
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
-       STOP 'program terminated by assert_eq2'
+       ERROR STOP 'program terminated by assert_eq2'
     end if
   END FUNCTION assert_eq2
   !BL
@@ -90,7 +90,7 @@ contains
     else
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
-       STOP 'program terminated by assert_eq3'
+       ERROR STOP 'program terminated by assert_eq3'
     end if
   END FUNCTION assert_eq3
   !BL
@@ -103,7 +103,7 @@ contains
     else
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
-       STOP 'program terminated by assert_eq4'
+       ERROR STOP 'program terminated by assert_eq4'
     end if
   END FUNCTION assert_eq4
   FUNCTION assert_eq5(n1,n2,n3,n4,n5,string)
@@ -115,7 +115,7 @@ contains
     else
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
-       STOP 'program terminated by assert_eq4'
+       ERROR STOP 'program terminated by assert_eq4'
     end if
   END FUNCTION assert_eq5
   !BL
@@ -128,7 +128,7 @@ contains
     else
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
-       STOP 'program terminated by assert_eqn'
+       ERROR STOP 'program terminated by assert_eqn'
     end if
   END FUNCTION assert_eqn
   !BL

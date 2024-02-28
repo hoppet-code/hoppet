@@ -245,7 +245,7 @@ contains
        ! *** SetCurrentP
        !
        ! dpdf = jacobian * (dhcopy%currentP .conv. pdf)
-       stop ! not yet programmed !!!
+       error stop ! not yet programmed !!!
     case default
        call wae_error('ev_conv','unrecognised value for ev_nloop',&
             &         intval=ev_nloop)
