@@ -1,7 +1,7 @@
 set terminal pdf enhanced font "Latin Modern Roman,26" size 29cm,23cm
 set datafile fortran
 
-set output 'param_vs_exact.pdf'
+set output 'param_vs_exact_structure_functions.pdf'
 set macros
 
 #linetype 1,  linecolor rgb "dark-violet"  linewidth 1.000 dashtype solid pointtype 1 pointsize default
