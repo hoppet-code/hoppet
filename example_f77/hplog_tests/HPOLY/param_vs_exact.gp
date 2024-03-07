@@ -1,7 +1,7 @@
 set terminal pdf enhanced font "Latin Modern Roman,26" size 29cm,23cm
 set datafile fortran
 
-set output 'param_vs_exact.pdf'
+set output 'param_vs_exact_C2NS3.pdf'
 set macros
 
 #linetype 1,  linecolor rgb "dark-violet"  linewidth 1.000 dashtype solid pointtype 1 pointsize default
@@ -29,9 +29,9 @@ set title 'N3LO'
 set ylabel '|C_2^{NS}|'
 set xlabel '1-x'
 
-plot 'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:(abs($2))  w l lw 4 title 'XC2NS3PA',\
-     'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:(abs($3))  w l lw 4 title 'XC2NS3PE - HPLOG5',\
-     'xc2ns3e_vs_xc2ns3p_hpoly.dat' u 1:(abs($3))  w l lw 4 title 'XC2NS3PE - HPOLY'
+plot 'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:(abs($2))  w l lw 4 title 'XC2NS3A_{param}',\
+     'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:(abs($3))  w l lw 4 title 'XC2NS3A_{exact} - HPLOG5',\
+     'xc2ns3e_vs_xc2ns3p_hpoly.dat' u 1:(abs($3))  w l lw 4 title 'XC2NS3A_{exact} - HPOLY'
 
 reset
 set mxtics
@@ -46,11 +46,11 @@ ii=1
 set key top right
 
 set title 'N3LO'
-set ylabel 'C_2^{NS} param/exact'
+set ylabel 'C_2^{NS} {param}/{exact}'
 set xlabel '1-x'
 
 plot 1 lw 2 lc rgb 'black' not,\
-     'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:4  w l lw 4 title 'XC2NS3PA / XC2NS3PE - HPLOG5',\
-     'xc2ns3e_vs_xc2ns3p_hpoly.dat' u 1:4  w l lw 4 title 'XC2NS3PA / XC2NS3PE - HPOLY'
+     'xc2ns3e_vs_xc2ns3p_hplog.dat' u 1:4  w l lw 4 title 'XC2NS3A_{param} / XC2NS3A_{exact} - HPLOG5',\
+     'xc2ns3e_vs_xc2ns3p_hpoly.dat' u 1:4  w l lw 4 title 'XC2NS3A_{param} / XC2NS3A_{exact} - HPOLY'
 
 set output
