@@ -216,7 +216,7 @@ contains
   function electron_dummy_pdf(xvals) result(pdf)
     implicit none
     real(dp), intent(in) :: xvals(0:)
-    real(dp)             :: pdf(0:ubound(xvals,1))
+    real(dp)             :: pdf(0:size(xvals,1)-1)
     pdf = xvals**2 * (one-xvals)**4 * 100.0_dp
   end function electron_dummy_pdf
   
