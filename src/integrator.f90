@@ -61,7 +61,7 @@ contains
       ! time for a single simple function of c. 31ns. But without 
       ! splitting, integration time would be much higher (900ns versus
       ! a total of 73 ns with splitting), as well as less reliable.
-      allocate(edges(size(split)+1))
+      allocate(edges(size(split)+2))
       call split_limits(A,B,split,edges, n)
       cgauss64 = zero
       do i = 1, n
@@ -436,14 +436,14 @@ contains
   !!
   !! Requirements are that a <= b and split(:) points should be ordered.
   !!
-  !! The edges array should be at least of size size(split)+1
+  !! The edges array should be at least of size size(split)+2
   subroutine split_limits(a, b, split, edges, n)
      real(dp), intent(in) :: a, b, split(:)
      real(dp), intent(out) :: edges(:)
      integer,  intent(out) :: n
      integer :: i
      if (a > b) call wae_error("integrator::split_limits, a > b, which is not allowed")
-     if (size(edges) < size(split)+1) call wae_error("integrator::split_limits, edges array too small")
+     if (size(edges) < size(split)+2) call wae_error("integrator::split_limits, edges array too small")
      edges(1) = a
      n = 0
      do i = 1, size(split)

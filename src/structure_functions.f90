@@ -1342,7 +1342,8 @@ contains
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
-    if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
+    if(.not.use_sep_orders) call wae_error('F_NLO', &
+               'You did not initialise the Structure Functions with separate orders. Exiting.')
     
     if (order_setup < 2) then
       res = zero
@@ -1389,7 +1390,8 @@ contains
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
-    if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
+    if(.not.use_sep_orders) call wae_error('F_NNLO',&
+            'You did not initialise the Structure Functions with separate orders. Exiting.')
         
     if (order_setup < 3) then
       res = zero
@@ -1449,7 +1451,8 @@ contains
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
     
-    if(.not.use_sep_orders) stop 'You did not initialise the Structure Functions with separate orders. Exiting.'
+    if(.not.use_sep_orders) call wae_error('F_N3LO',&
+          'You did not initialise the Structure Functions with separate orders. Exiting.')
     
     if (order_setup < 4) then
       res = zero
@@ -1592,7 +1595,8 @@ contains
     real(dp), intent(inout) :: f(0:grid%ny,ncompmin:ncompmax)
     integer :: inf, current_nf, dummy!, nfhi
 
-    if(ch%nflo.lt.3) stop 'Do you really want to run with fewer than 3 light flavours??'
+    if(ch%nflo.lt.3) call wae_error('use_vfns',&
+      'Do you really want to run with fewer than 3 light flavours?? ch%nflo=', intval=ch%nflo)
 
     ! First set current nf equal to the smallest value it can take
     current_nf = ch%nflo

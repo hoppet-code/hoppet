@@ -15,6 +15,7 @@ tests=(example_f90/tabulation_example \
        example_f90/tabulation_example_qed_streamlined \
        example_f90/structure_functions_example \
        )
+       #example_f90/tabulation_example_up_and_down
 
 for test in ${tests[@]}; do
   echo

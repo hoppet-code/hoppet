@@ -134,7 +134,7 @@ contains
     if (present(dbleval)) write(stddev,*) dbleval
 
     write(stddev,*)
-    stop 1
+    error stop 1
   end subroutine wae_error
   
   !!
