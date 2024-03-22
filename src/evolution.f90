@@ -330,6 +330,7 @@ contains
     !----------------------------------------------
     integer, save      :: warn_DIS = 2, warn_Direction = 2
     real(dp) :: as2pi, muR
+    real(dp) :: fourpibeta0_lnmuR_Q 
     integer  :: nfstore
     
     !-- CHANGE THIS IF HAVE MATCHING AT MUF/=MH
@@ -380,8 +381,13 @@ contains
           evop%MTM_coeff = (direction*as2pi**2)
        end if
     else if (ev_nloop == 4) then
+      fourpibeta0_lnmuR_Q = four*pi*beta0*log(ev_muR_Q)
+      ! if (present(pdf)) pdf = pdf + &
+      ! &           (direction*as2pi**2) * (dh%MTM_NNLO * pdf + as2pi*(dh%MTM_N3LO * pdf))
+      !write(6,*) "fourpibeta0_lnmuR_Q =", fourpibeta0_lnmuR_Q
       if (present(pdf)) pdf = pdf + &
-      &           (direction*as2pi**2) * (dh%MTM_NNLO * pdf + as2pi*(dh%MTM_N3LO * pdf))
+      &           (direction*(as2pi**2 * (one + two*fourpibeta0_lnmuR_Q * as2pi))) * (dh%MTM_NNLO * pdf) &
+                  + (direction * as2pi**3) * (dh%MTM_N3LO * pdf)
       if (present(evop)) then
         evop%cross_mass_threshold = .true.
         ! we will be creating a new MTM object, so the evop will have ownership
