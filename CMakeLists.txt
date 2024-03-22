@@ -196,6 +196,7 @@ if (HOPPET_BUILD_EXAMPLES)
                    tabulation_example_diehl_crosschecks  
                    tabulation_example_qed  
                    tabulation_example_streamlined
+                   structure_functions_example_n3lo_tests
        )
   set( f90programs_f )
   foreach ( p ${f90programs_f90})
