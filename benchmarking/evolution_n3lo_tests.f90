@@ -14,25 +14,31 @@ program structure_functions_example
   real(dp) :: xmur_evolv_vals(3) = (/1.0_dp, 0.5_dp, 2.0_dp/)
   integer  :: ixmur_evolv
   integer  :: idev
+  logical  :: vfn = .false.
 
   idev = idev_open_opt("-o")
   write(idev,'(a,a)') "# ", trim(command_line())
   nloop_max = int_val_opt("-nloop", 4); write(idev,'(a,i4)') "# nloop = ", nloop_max
   Q  = dble_val_opt("-Q", 100.0_dp); write(idev,'(a,f10.4)') "# Q = ", Q
-  Q0 = dble_val_opt("-Q0", 2.0_dp) ; write(idev,'(a,f10.4)') "# Q0 = ", Q0
+  Q0 = dble_val_opt("-Q0", sqrt(two)) ; write(idev,'(a,f22.16)') "# Q0 = ", Q0
   Qmax = Q
   Qmin = Q0
   asQ0 =dble_val_opt("-asQ0", 0.30_dp); write(idev,'(a,f10.4)') "# asQ0 = ", asQ0
+
+  vfn = log_val_opt("-vfn", .false.); write(idev,'(a,l1)') "# vfn = ", vfn
 
   if (.not. CheckAllArgsUsed(0)) stop "Unused arguments"
 
 
   ! Set heavy flavour scheme
-  !mc = 1.414213563_dp   ! sqrt(2.0_dp) + epsilon
-  !mb = 4.5_dp
-  !mt = 175.0_dp
-  !call hoppetSetPoleMassVFN(mc, mb, mt)
-  call hoppetSetFFN(5)
+  if (vfn) then
+    mc = 1.414213563_dp   ! sqrt(2.0_dp) + epsilon
+    mb = 4.5_dp
+    mt = 175.0_dp
+    call hoppetSetPoleMassVFN(mc, mb, mt)
+  else
+    call hoppetSetFFN(5)
+  end if
   
   ! Streamlined initialization
   ! including  parameters for x-grid

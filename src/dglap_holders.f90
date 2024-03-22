@@ -141,7 +141,7 @@ contains
              if (need_MTM) then
                if (nflcl == lbound(dh%allP,dim=2)+1) then
                   call InitMTMNNLO(grid,dh%MTM_NNLO)
-               else if (nflcl >= lbound(dh%allP,dim=2) + 1) then
+               else if (nflcl > lbound(dh%allP,dim=2) + 1) then
                   ! try to be efficient by recycling MTMs from lower nf
                   ! since all that changes is nf_int variable inside MTM_NNLO
                   call InitMTM(dh%MTM_NNLO, dh%allMTM(3, lbound(dh%allP,dim=2) + 1))
@@ -151,11 +151,11 @@ contains
           end if
           if (dh%nloop >= 4) then
              call InitSplitMatN3LO(grid, dh%P_N3LO, dh%factscheme)
+             call InitMTMN3LO(grid,dh%MTM_N3LO)
              !-- do this once, and only if really needed
 !             if (lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2) &
 !                  &.and. mass_steps_on &
 !                  &.and. nflcl == lbound(dh%allP,dim=2)) then
-!                call InitMTMNNLO(grid,dh%MTM2)
 !                dh%MTM2_exists = .true.
 !             end if
           end if

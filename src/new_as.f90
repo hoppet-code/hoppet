@@ -377,7 +377,7 @@ contains
     else
        call wae_warn(max_warn,warn_id,'na_Value: will evolve &
             &fixed-nf alpha_s beyond precalculated range.',&
-            &'This procedure may be very slow')
+            &'This procedure may be very slow, Q=', dbleval=Q)
        !write(0,*) Qoft(seg%tlo),Qoft(seg%thi),Q
        n = ceiling(abs(delta_t/seg%dt))
        delta_t = delta_t/n

@@ -53,6 +53,7 @@ module evolution_helper
      type(mass_threshold_mat)  :: MTM ! assume we have just one of these...
      real(dp)                :: MTM_coeff, Q_init, Q_end
      logical                 :: cross_mass_threshold ! better name: apply_mass_threshold
+     logical                 :: owns_MTM = .false.
      type(evln_operator), pointer :: next
   end type evln_operator
 
@@ -368,14 +369,34 @@ contains
     !-- fix nf so as to be sure of getting alpha value corresponding
     !   to the desired nf value, despite proximity to threshold.
     as2pi = Value(coupling, muR, fixnf=nf_int) / twopi
-    if (present(pdf)) pdf = pdf + &
-         &                   (direction*as2pi**2) * (dh%MTM_NNLO .conv. pdf)
-    if (present(evop)) then
-       evop%cross_mass_threshold = .true.
-       evop%MTM = dh%MTM_NNLO  ! stores current nf value and quark-mass treatment
-       evop%MTM_coeff = (direction*as2pi**2)
+    if (ev_nloop == 3) then
+       if (present(pdf)) pdf = pdf + &
+            &                   (direction*as2pi**2) * (dh%MTM_NNLO .conv. pdf)
+       if (present(evop)) then
+          evop%cross_mass_threshold = .true.
+          ! in this case, evop%MTM just copies pointers to the contents of
+          ! the underlying grid_conv objects, so we do not have ownership
+          evop%MTM = dh%MTM_NNLO  ! stores current nf value and quark-mass treatment
+          evop%MTM_coeff = (direction*as2pi**2)
+       end if
+    else if (ev_nloop == 4) then
+      if (present(pdf)) pdf = pdf + &
+      &           (direction*as2pi**2) * (dh%MTM_NNLO * pdf + as2pi*(dh%MTM_N3LO * pdf))
+      if (present(evop)) then
+        evop%cross_mass_threshold = .true.
+        ! we will be creating a new MTM object, so the evop will have ownership
+        ! and so we set a flag so as to know to delete it when the evop is deleted
+        evop%owns_MTM             = .true.
+        call InitMTM(evop%MTM, dh%MTM_NNLO)
+        call AddWithCoeff(evop%MTM, dh%MTM_N3LO, as2pi)
+        evop%MTM_coeff = (direction*as2pi**2)
+      end if
+
+    else
+       call wae_error('ev_CrossMassThreshold',&
+            &  'ev_nloop had unsupported value of',intval=ev_nloop)
     end if
-    
+       
     if (nf_int /= nfstore) call SetNfDglapHolder(dh, nfstore, QuarkMassesAreMSbar(coupling))
 
   end subroutine ev_CrossMassThreshold
@@ -869,6 +890,7 @@ contains
     !if (evop%cross_mass_threshold) then ! do nothing
 
     call Delete(evop%P)
+    if (evop%owns_MTM) call Delete(evop%MTM)
     return
   end subroutine Delete_evln_operator
   

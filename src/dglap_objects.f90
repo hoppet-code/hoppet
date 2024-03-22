@@ -119,7 +119,7 @@ module dglap_objects
   interface InitMTM
     module procedure InitMTM_from_MTM
   end interface
-  public :: InitMTM, InitMTMNNLO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
+  public :: InitMTM, InitMTMNNLO, InitMTMN3LO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
   public :: SetMassSchemeMTM
   
   !-------- things for splitting functions --------------------
@@ -150,7 +150,7 @@ module dglap_objects
   public :: SetToZero
 
   interface Multiply
-     module procedure Multiply_sm
+     module procedure Multiply_sm, Multiply_MTM
   end interface
   public :: Multiply
 
@@ -382,7 +382,7 @@ contains
       call wae_warn(nwarn_nf_hi, "InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was", intval = nf_store)
     end if
     !nf_int = min(max(nf_int,3),5)
-    P%nf_int = nf_int
+    P%nf_int = nf_store
 
     ! NO LONGER NECESSARY
 !!$    !-- dummy to initialize Vogt routines (needed in exact cases 
@@ -941,6 +941,14 @@ contains
     MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
 
+  subroutine InitMTMN3LO(grid,MTM)
+    type(grid_def),           intent(in)  :: grid
+    type(mass_threshold_mat), intent(out) :: MTM
+    call InitMTMNNLO(grid,MTM) !! dummy initialisation to NNLO, just to get started
+    MTM%loops = 4
+    call Multiply(MTM, zero)
+  end subroutine InitMTMN3LO
+
   subroutine InitMTM_from_MTM(MTM, MTM_in)
     type(mass_threshold_mat), intent(inout) :: MTM
     type(mass_threshold_mat), intent(in)    :: MTM_in
@@ -961,7 +969,23 @@ contains
   end subroutine InitMTM_from_MTM
 
 
-  subroutine AddWithCoeff_MTM(MTM, MTM_to_add, factor)
+  subroutine Multiply_MTM(MTM, factor)
+   use assertions
+   type(mass_threshold_mat), intent(inout) :: MTM
+   real(dp),                 intent(in)    :: factor
+
+   call Multiply(MTM%PSHq,  factor)
+   call Multiply(MTM%PSHg,  factor)
+   call Multiply(MTM%NSqq_H, factor)
+   call Multiply(MTM%Sgg_H,  factor)
+   call Multiply(MTM%Sgq_H,  factor)
+   call Multiply(MTM%PSqq_H, factor)
+   call Multiply(MTM%Sqg_H,  factor)
+   call Multiply(MTM%PShg_MSbar, factor)
+   MTM%Sgg_H_extra_MSbar_delta = MTM%Sgg_H_extra_MSbar_delta * factor 
+ end subroutine Multiply_MTM
+
+ subroutine AddWithCoeff_MTM(MTM, MTM_to_add, factor)
     use assertions
     type(mass_threshold_mat), intent(inout) :: MTM
     type(mass_threshold_mat), intent(in)    :: MTM_to_add
