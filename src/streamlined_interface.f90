@@ -199,17 +199,17 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   ! as above)
   call InitGridDefDefault(grid, dy, ymax, order)
   
-  ! ! Fill the array that will be used for table index lookup (e.g. 21 is PNLO*PLO).
-  ! ! For now do it by hand; one day we might automate this;
-  ! ! entries that aren't filled are automatically -1
-  ! do iloop = 1, nloop
-  !    table_index_from_iloop(iloop) = iloop
-  ! end do
-  ! table_index_from_iloop(11)  = 4
-  ! table_index_from_iloop(111) = 5
-  ! if (nloop >= 2) table_index_from_iloop(12)  = 6
-  ! if (nloop >= 2) table_index_from_iloop(21)  = 7
-
+  ! Fill the array that will be used for table index lookup (e.g. 21 is PNLO*PLO).
+  ! For now do it by hand; one day we might automate this;
+  ! entries that aren't filled are automatically -1
+  do iloop = 1, nloop
+     table_index_from_iloop(iloop) = iloop
+  end do
+  table_index_from_iloop(11)  = 4
+  table_index_from_iloop(111) = 5
+  if (nloop >= 2) table_index_from_iloop(12)  = 6
+  if (nloop >= 2) table_index_from_iloop(21)  = 7
+  
   ! if the allocation has already been done previously, delete
   ! the existing tables and dglap holder to avoid a memory leak
   if (alloc_already_done) then
