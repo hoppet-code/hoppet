@@ -1,3 +1,10 @@
+2024-03-26 Gavin + Alexander
+
+	* src/dglap_objects.f90:
+	fixed nf factors in normalisation of PSqq_H and Sqg_H contributions to the 
+	mass threshold.
+
+	* meeting:
 2024-03-22  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/streamlined_interface.f90:
