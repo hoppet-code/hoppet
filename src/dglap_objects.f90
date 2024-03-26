@@ -54,15 +54,16 @@ module dglap_objects
   ! of 1403.6456.
   type mass_threshold_mat
      ! pieces that start at NNLO
-     type(grid_conv) :: PShq   !!< A^PS_Qq
-     type(grid_conv) :: PShg   !!< A^PS_Qg
-     type(grid_conv) :: NSqq_H !!< A^NS_qq,Q
-     type(grid_conv) :: Sgg_H  !!< A^S_gg,Q
-     type(grid_conv) :: Sgq_H  !!< A^S_gq,Q
+     type(grid_conv) :: PShq   !!< A^PS_Qq    Q+Qbar from singlet(nflight)
+     type(grid_conv) :: PShg   !!< A^PS_Qg    Q+Qbar from gluon  (nflight)
+     type(grid_conv) :: NSqq_H !!< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
+     type(grid_conv) :: Sgg_H  !!< A^S_gg,Q   Δg(nfheavy) from g(nflight)
+     type(grid_conv) :: Sgq_H  !!< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
      ! pieces that start at N3LO
-     type(grid_conv) :: PSqq_H !!< A^PS_qq,Q
-     type(grid_conv) :: Sqg_H ! !< A^S_qg,Q
+     type(grid_conv) :: PSqq_H !!< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
+     type(grid_conv) :: Sqg_H ! !< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
      ! pieces related to the case of thresholds at MSbar masses
+     ! NB: not supported yet at N3LO
      type(grid_conv) :: PShg_MSbar !!< replaces PShg when masses are MSbar
      real(dp)        :: Sgg_H_extra_MSbar_delta
      !! LOOPS == 1+POWER OF AS2PI,
