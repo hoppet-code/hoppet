@@ -2,7 +2,7 @@
 
 	* src/dglap_objects.f90:
 	fixed nf factors in normalisation of PSqq_H and Sqg_H contributions to the 
-	mass threshold.
+	mass threshold. Relevant only for N3LO evolution.
 
 	* meeting:
 2024-03-22  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
