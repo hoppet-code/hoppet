@@ -23,7 +23,7 @@
       character(100) :: x_char, nf_char, filename
       real * 8 :: logx, delx, x, dl, param, exact
       integer, parameter :: nbins=200
-      real * 8, parameter :: logxmin = -20.0d0
+      real * 8, parameter :: logxmin = log(1d-12)!-30.0d0
       real * 8, parameter ::  logxmax=0.0d0
       integer i1,i2,i3,i4,i5
 
@@ -93,7 +93,7 @@
       CALL SET_C2SOFT_N3LO(nf)  ! Needed to set some common pieces
 
       logx = 0.0d0
-      filename = 'xc2ns3e_vs_xc2ns3p.dat'
+      filename = 'xc2ns3e_vs_xc2ns3p_hplog.dat'
       open(unit = 99, file = trim(filename))
       write(99,*)
      $     '# 1-x,                          param                      e
