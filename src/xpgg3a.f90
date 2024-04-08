@@ -135,6 +135,9 @@ contains
        INTEGER nf
        COMMON / P3GSOFT / A4gluon
        !
+       nf2 = nf*nf
+       nf3 = nf*nf2
+       !
        ! AK Added A4gluon here in case the A piece is not beign
        ! called. Should check later if this is ever the case.
        A4gluon =  40880.330D0     - 11714.246D0*nf &
