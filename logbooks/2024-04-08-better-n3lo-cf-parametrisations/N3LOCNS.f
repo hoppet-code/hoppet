@@ -15,6 +15,7 @@
        FUNCTION C2NP3A_large_x (Y, DL, NF)
        IMPLICIT REAL*8 (A - Z)
        INTEGER NF
+       DOUBLE PRECISION Y, DL, DL1
 
        DL1 = DL1VAL(Y, DL)
 
