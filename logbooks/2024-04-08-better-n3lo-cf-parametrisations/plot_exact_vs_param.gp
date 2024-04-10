@@ -15,7 +15,7 @@ set macros
 
 datafile='coefficient_functions_for_fit.dat'
 
-NF=1 # THis is just a dummy to get the coefficient
+NF=1 # This is just a dummy to get the coefficient
 # The logarithmic large-x coefficients extracted from Large-c-expansion-from-MVV.nb
 # C2 coefficients
 C2L1x5=-18.962962962962962
@@ -741,14 +741,16 @@ plot datafile i ii u (1.-$1):(abs($4-$2))  w l lw 6 title ' hep-ph/0411112 param
 
 set fit quiet
 
-transition=0.999
+transition=0.9
 a=(transition/(1-transition))**2
 
 damp(x)=a*(1.-x)**2/(a*(1.-x)**2 + x**2)
-
-fit damp(x) datafile i 0 u 1:($4-$2*damp($1)-$3*(1.-damp($1))):(($4-$2)**2) yerrors via a
+dummy(x1,x2,x)=x2*damp(x1)+x*(1.-damp(x1))
 
 reset
+set dummy x1, x2, x3
+fit dummy(x1,x2,x3) datafile i 0 u 1:2:3:4:(($4/$2)**2) zerrors via a
+
 set mxtics
 set mytics
 set grid
@@ -766,15 +768,37 @@ set title 'C2 N3LO nf independent piece'
 set ylabel '|Ratio to C_{2,NS,reg}|'
 set xlabel '1-x'
 
-plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
-     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
+plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'old parametrisation',\
+     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'new parametrisation',\
      1 lw 4 lc rgb 'black' not
+
+reset
+set mxtics
+set mytics
+set grid
+set log x
+set log y
+set format x "10^{%T}"
+set format y "10^{%T}"
+
+#set yrange [0.9:1.1]
+ii=0
+
+set key at 1e-3,0.65
+
+set title 'C2 N3LO nf independent piece'
+set ylabel '|1- ratio to C_{2,NS,reg}|'
+set xlabel '1-x'
+
+plot datafile i ii u (1.-$1):(abs(1.-$2/$4))  w l lw 6 title 'old parametrisation',\
+     datafile i ii u (1.-$1):(abs(1.-($2*damp($1)+$3*(1.-damp($1)))/$4))  w l lw 6 title 'new parametrisation'
 
 print 'C2 nf indepent: a**2 = ', a, ' equivalent t = ', sqrt(a)/(1.+sqrt(a))
 
-fit damp(x) datafile i 1 u 1:($4-$2*damp($1)-$3*(1.-damp($1))):(($4-$2)**2) yerrors via a
-
 reset
+set dummy x1,x2,x3
+fit dummy(x1,x2,x3) datafile i 1 u 1:2:3:4:(($4/$2)**2) zerrors via a
+
 set mxtics
 set mytics
 set grid
@@ -792,15 +816,37 @@ set title 'C2 N3LO nf piece'
 set ylabel '|Ratio to C_{2,NS,reg}|'
 set xlabel '1-x'
 
-plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
-     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
+plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'old parametrisation',\
+     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'new parametrisation',\
      1 lw 4 lc rgb 'black' not
+
+reset
+set mxtics
+set mytics
+set grid
+set log x
+set log y
+set format x "10^{%T}"
+set format y "10^{%T}"
+
+#set yrange [0.9:1.1]
+ii=1
+
+set key at 1e-3,0.65
+
+set title 'C2 N3LO nf piece'
+set ylabel '|1- ratio to C_{2,NS,reg}|'
+set xlabel '1-x'
+
+plot datafile i ii u (1.-$1):(abs(1.-$2/$4))  w l lw 6 title 'old parametrisation',\
+     datafile i ii u (1.-$1):(abs(1.-($2*damp($1)+$3*(1.-damp($1)))/$4))  w l lw 6 title 'new parametrisation'
 
 print 'C2 nf piece: a**2 = ', a, ' equivalent t = ', sqrt(a)/(1.+sqrt(a))
 
-fit damp(x) datafile i 2 u 1:($4-$2*damp($1)-($3+8149.1250000000000-8070.2796638309956)*(1.-damp($1))):(($4-$2)**2) yerrors via a
-
 reset
+set dummy x1, x2, x3
+fit dummy(x1,x2,x3) datafile i 2 u 1:2:($3+8149.1250000000000-8070.2796638309956):4:(($4/$2)**2) zerrors via a
+
 set mxtics
 set mytics
 set grid
@@ -818,15 +864,15 @@ set title 'C2 N3LO nf^2 piece'
 set ylabel '|Ratio to C_{2,NS,reg}|'
 set xlabel '1-x'
 
-plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
-     datafile i ii u (1.-$1):(($2*damp($1)+($3+8149.1250000000000-8070.2796638309956)*(1.-damp($1)))/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
+plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'old parametrisation',\
+     datafile i ii u (1.-$1):(($2*damp($1)+($3+8149.1250000000000-8070.2796638309956)*(1.-damp($1)))/$4)  w l lw 6 title 'new parametrisation',\
      1 lw 4 lc rgb 'black' not
 
 print 'C2 nf**2 piece: a**2 = ', a, ' equivalent t = ', sqrt(a)/(1.+sqrt(a))
 
-fit damp(x) datafile i 3 u 1:($4-$2*damp($1)-$3*(1.-damp($1))):(($4-$2)**2) yerrors via a
-
 reset
+set dummy x1, x2, x3
+fit dummy(x1,x2,x3) datafile i 3 u 1:2:3:4:(($4/$2)**2) zerrors via a
 set mxtics
 set mytics
 set grid
@@ -844,15 +890,15 @@ set title 'C3 N3LO nf independent piece'
 set ylabel '|Ratio to C_{3,NS,reg}|'
 set xlabel '1-x'
 
-plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
-     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
+plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'old parametrisation',\
+     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'new parametrisation',\
      1 lw 4 lc rgb 'black' not
 
 print 'C3 nf indepent: a**2 = ', a, ' equivalent t = ', sqrt(a)/(1.+sqrt(a))
 
-fit damp(x) datafile i 4 u 1:($4-$2*damp($1)-$3*(1.-damp($1))):(($4-$2)**2) yerrors via a
-
 reset
+set dummy x1, x2, x3
+fit dummy(x1,x2,x3) datafile i 4 u 1:2:3:4:(($4/$2)**2) zerrors via a
 set mxtics
 set mytics
 set grid
@@ -870,15 +916,16 @@ set title 'C3 N3LO nf piece'
 set ylabel '|Ratio to C_{3,NS,reg}|'
 set xlabel '1-x'
 
-plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
-     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
+plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'old parametrisation',\
+     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'new parametrisation',\
      1 lw 4 lc rgb 'black' not
 
 print 'C3 nf piece: a**2 = ', a, ' equivalent t = ', sqrt(a)/(1.+sqrt(a))
 
-fit damp(x) datafile i 5 u 1:($4-$2*damp($1)-$3*(1.-damp($1))):(($4-$2)**2) yerrors via a
 
 reset
+set dummy x1, x2, x3
+fit dummy(x1,x2,x3) datafile i 0 u 1:2:3:4:(($4/$2)**2) zerrors via a
 set mxtics
 set mytics
 set grid
@@ -896,35 +943,10 @@ set title 'C3 N3LO nf^2 piece'
 set ylabel '|Ratio to C_{3,NS,reg}|'
 set xlabel '1-x'
 
-plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
-     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
+plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'old parametrisation',\
+     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'new parametrisation',\
      1 lw 4 lc rgb 'black' not
 
 print 'C3 nf**2 piece: a**2 = ', a, ' equivalent t = ', sqrt(a)/(1.+sqrt(a))
-a=1e6
-fit damp(x) datafile i 6 u 1:($4-$2*damp($1)-$3*(1.-damp($1))):(($4-$2)**2) yerrors via a
 
-reset
-set mxtics
-set mytics
-set grid
-set log x
-#set log y
-set format x "10^{%T}"
-#set format y "10^{%T}"
-
-set yrange [0.9:1.1]
-ii=6
-
-set key at 1e-3,0.65
-
-set title 'CL N3LO nf independent piece'
-set ylabel '|Ratio to C_{L,NS,reg}|'
-set xlabel '1-x'
-
-plot datafile i ii u (1.-$1):($2/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
-     datafile i ii u (1.-$1):(($2*damp($1)+$3*(1.-damp($1)))/$4)  w l lw 6 title 'hep-ph/0504242 parametrisation',\
-     1 lw 4 lc rgb 'black' not
-
-print 'CL nf indepent: a**2 = ', a, ' equivalent t = ', sqrt(a)/(1.+sqrt(a))
 set output
