@@ -609,7 +609,8 @@ contains
       case(cc_VIRT)
          res = - C3NS3B(x, -y, nf_int)
       case(cc_DELTA)
-         res = C3NM3C(zero, nf_int) 
+         res = X3NS3C(zero, -y, nf_int) 
+!         res = C3NM3C(zero, nf_int) 
       end select
    endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -652,7 +653,8 @@ contains
       case(cc_VIRT)
          res = - C3NS3B(x, -y, nf_int)
       case(cc_DELTA)
-         res = C3NM3C(zero, nf_int) 
+         res = X3NS3C(zero, -y, nf_int) 
+!         res = C3NM3C(zero, nf_int) 
       end select
    endif
     
@@ -697,7 +699,8 @@ contains
       case(cc_VIRT)
          res = - C3NS3B(x, -y, nf_int)
       case(cc_DELTA)
-         res = C3NM3C(zero, nf_int) + c3q3dfPC (x, nf_int)
+         res = X3NS3C(zero, -y, nf_int) + c3q3dfPC (zero, nf_int)
+!         res = C3NM3C(zero, nf_int) + c3q3dfPC (x, nf_int)
       end select
    endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -744,7 +747,8 @@ contains
       case(cc_VIRT)
          res = - C2NS3B(x, -y, nf_int)
       case(cc_DELTA)
-         res = C2NP3C(zero, nf_int, 1)        
+         res = X2NP3C(zero, nf_int, 1)        
+!         res = C2NP3C(zero, nf_int, 1)        
       end select
     endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
@@ -822,7 +826,8 @@ contains
          ! GPS WARNING: when cc_DELTA, this parametrised version is
          !      always being used, which is probably not the intended
          !      thing. 
-         res = C2NP3C(zero, nf_int, 1) - c2q3dfPC (zero, nf_int)! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+         res = X2NP3C(zero, nf_int, 1) - c2q3dfPC (zero, nf_int) ! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
+!         res = C2NP3C(zero, nf_int, 1) - c2q3dfPC (zero, nf_int)! FD: Why is this C2NP3C instead of C2NS3C as in the NNLO case ???
       end select
    endif
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
