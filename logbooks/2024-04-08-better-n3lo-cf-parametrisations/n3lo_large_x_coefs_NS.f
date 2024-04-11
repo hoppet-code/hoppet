@@ -8,7 +8,8 @@
 !
 ! Expressions are exact for QCD colour factors but everything is
 ! truncated at double precision.
-! Arguments are x, DL = log(x), NF = number of active flavours    
+! Arguments are x, DL = log(x), NF = number of active flavours
+! DL1 is computed and is log(1-x)    
       FUNCTION C2NP3A_large_x (X, DL, NF)
       IMPLICIT REAL*8 (A - Z)
       INTEGER NF
