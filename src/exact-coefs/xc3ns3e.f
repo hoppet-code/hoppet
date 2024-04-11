@@ -1,5 +1,6 @@
        MODULE xc3ns3e
        USE XC2NS3P
+       USE XC3NS3P
        CONTAINS
 *
 * ..File: xc3ns3e.f    F3 NU+NU(BAR) ETC  
@@ -161,19 +162,23 @@
        ! In the paper it is stated that the fl02 term in the parametrised 
        ! version has to be turned off to make it a minus. It is also 
        ! stated that the fl02 term arrives due to the dabc strucutre.
-       if(V.eq.1) then
-              DABC2N = 5.D0/18.D0 * NF
-       else
-              DABC2N = 0d0
-       endif
+       DABC2N = 5.D0/18.D0 * NF
+
 *
 * ...Some abbreviations
 *
        DX = 1.D0/X
-       DM = 1.D0/(1.D0-X)
+       DM = DMVAL(X, DL) !1.D0/(1.D0-X)
        DP = 1.D0/(1.D0+X)
        !DL  = LOG (X)
-       DL1 = LOG (1.D0-X)
+       DL1 = DL1VAL(X, DL) !LOG (1.D0-X)
+
+!     Use large x expansion when close to x=1
+      if(((1.0d0-x).lt.1d-6)) then
+         X3NM3A =  X3NM3A_large_x(X, DL, NF)
+      return
+      endif
+
 *
 * ...Harmonic polylogs (HPLs) up to weight 5 by Gehrmann and Remiddi
 *
@@ -183,6 +188,7 @@
 * ...The coefficient function in terms of the harmonic polylogs
 *    (without the delta(1-x) part, but with the soft contribution)
 *
+       if(V.eq.1) then
       c3qq3 =
      &  + dabc2n * (  - 70016.D0/27.D0 + 70016.D0/27.D0*x - 3584.D0/
      &    3.D0*z5 - 640.D0*z5*x - 1552.D0/3.D0*z4 - 1072.D0/3.D0*z4*x
@@ -310,7 +316,11 @@
      &    x + 256.D0/3.D0*Hr5(0,1,0,0,0) + 256.D0/3.D0*Hr5(0,1,0,0,0)*x
      &     + 64.D0*Hr5(0,1,0,0,1) + 64.D0*Hr5(0,1,0,0,1)*x + 64.D0/3.D0
      &    *Hr5(0,1,0,1,0) + 64.D0/3.D0*Hr5(0,1,0,1,0)*x - 192.D0*Hr5(0,
-     &    1,1,0,0) - 192.D0*Hr5(0,1,1,0,0)*x )
+     &     1,1,0,0) - 192.D0*Hr5(0,1,1,0,0)*x )
+      else
+         c3qq3 = 0d0
+      endif
+
       c3qq3 = c3qq3 + cf*ca**2 * ( 593903.D0/1458.D0 + 1498007.D0/1458.D
      &    0*x + 112.D0/3.D0*z5 - 88.D0/3.D0*z5*x - 466.D0/3.D0*z4 + 62.D
      &    0*z4*x - 216.D0*z4*x**2 - 472.D0/3.D0*dp*z5 - 205.D0/3.D0*dp*
@@ -1533,6 +1543,23 @@ c    ,                         -223./4800.d0)
 *
        RETURN
        END
+
+      FUNCTION X3NM3A_large_x (Y, DL, NF)
+      IMPLICIT REAL*8 (A - Z)
+      INTEGER NF
+      
+      Y1 = Y1VAL(Y, DL)
+      DL1 = DL1VAL(Y, DL)
+      
+      X3NM3A_large_x = 6889.89378009207d0*DL1 + 1581.208087862925d0*DL1
+     $     **2 -1609.6420585153533d0*DL1**3 + 329.48148148148147d0*DL1
+     $     **4 -18.962962962962962d0*DL1**5 +(859.380948706157d0*DL1 -
+     $     675.1899801124716d0*DL1**2 +134.0576131687243d0*DL1**3 -
+     $     7.901234567901234d0*DL1**4)*NF +(-50.144180884735974d0*DL1 +
+     $     12.246913580246913d0*DL1**2 -0.7901234567901234d0*DL1**3)*NF
+     $     **2
+      
+      END FUNCTION
 *
 * ---------------------------------------------------------------------
 *
@@ -1546,8 +1573,8 @@ c    ,                         -223./4800.d0)
 *
        COMMON / C3SOFT / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5
 *
-       DL1 = LOG (1.D0-Y)
-       DM  = 1.D0/(1.D0-Y)
+       DL1 = DL1VAL(Y, DL) !LOG (1.D0-Y)
+       DM  = DMVAL(Y, DL) !1.D0/(1.D0-Y)
 *
        X3NS3B = DM * ( DL1**5 * C3A5 + DL1**4 * C3A4 + DL1**3 * C3A3
      ,               + DL1**2 * C3A2 + DL1    * C3A1 + C3A0 )

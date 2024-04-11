@@ -21,21 +21,30 @@ contains
     type(grid_def), intent(in) :: grid
     type(coef_holder), intent(inout), target :: ch
     !------------------------------
+    write(6,*) 'Initialising exact coefficient functions for nf =', nf_int
 
     if (ch%nloop.ge.3) then
-      call InitC2NNLO_e(grid, ch%C2NNLO)
-      call InitCLNNLO_e(grid, ch%CLNNLO)
-      call InitC3NNLO_e(grid, ch%C3NNLO)
+       write(6,*) 'Initialising C2NNLO'
+       call InitC2NNLO_e(grid, ch%C2NNLO)
+       write(6,*) 'Initialising CLNNLO'
+       call InitCLNNLO_e(grid, ch%CLNNLO)
+       write(6,*) 'Initialising C3NNLO'
+       call InitC3NNLO_e(grid, ch%C3NNLO)
     end if 
         
     if (ch%nloop.ge.4) then
-      call InitC2N3LO_e(grid, ch%C2N3LO)
-      call InitCLN3LO_e(grid, ch%CLN3LO)
-      call InitC3N3LO_e(grid, ch%C3N3LO)
-      ! including the fl11 terms for Z/photon exchanges
-      call InitC2N3LO_fl11_e(grid, ch%C2N3LO_fl11)
-      call InitCLN3LO_fl11_e(grid, ch%CLN3LO_fl11)
-    end if 
+       write(6,*) 'Initialising C2N3LO'
+       call InitC2N3LO_e(grid, ch%C2N3LO)
+       write(6,*) 'Initialising CLN3LO'
+       call InitCLN3LO_e(grid, ch%CLN3LO)
+       write(6,*) 'Initialising C3N3LO'
+       call InitC3N3LO_e(grid, ch%C3N3LO)
+       ! including the fl11 terms for Z/photon exchanges
+       write(6,*) 'Initialising C2N3LO_fl11'
+       call InitC2N3LO_fl11_e(grid, ch%C2N3LO_fl11)
+       write(6,*) 'Initialising CLN3LO_fl11'
+       call InitCLN3LO_fl11_e(grid, ch%CLN3LO_fl11)
+    end if
     
   end subroutine InitCoefHolderExact_impl
 
@@ -586,33 +595,18 @@ contains
     x = exp(-y)
     res = zero
     CALL SET_C3SOFT_N3LO(nf_int)
-    if(x.lt.(one - tiny)) then ! AK: The exact expressions seem unstable close to x=1. 
-                              ! So we switch to the parametrised versions in this case. 
-                              ! I have checked explicitly that changing tiny by a factor 10 
-                              ! up or down has no visible effect on the resulting structure function.                        
-      select case(cc_piece)
-      case(cc_REAL)
-         res = X3NM3A(x, -y, nf_int, 1) + X3NS3B(x, -y, nf_int)
-      case(cc_REALVIRT)
-         res = X3NM3A(x, -y, nf_int, 1)
-      case(cc_VIRT)
-         res = - X3NS3B(x, -y, nf_int)
-      case(cc_DELTA)
-         res = X3NS3C(zero, -y, nf_int) 
-      end select
-   else
-      select case(cc_piece)
-      case(cc_REAL)
-         res = C3NM3A(x, -y, nf_int, 1) + C3NS3B(x, -y, nf_int)
-      case(cc_REALVIRT)
-         res = C3NM3A(x, -y, nf_int, 1)
-      case(cc_VIRT)
-         res = - C3NS3B(x, -y, nf_int)
-      case(cc_DELTA)
-         res = X3NS3C(zero, -y, nf_int) 
-!         res = C3NM3C(zero, nf_int) 
-      end select
-   endif
+
+    select case(cc_piece)
+    case(cc_REAL)
+       res = X3NM3A(x, -y, nf_int, 1) + X3NS3B(x, -y, nf_int)
+    case(cc_REALVIRT)
+       res = X3NM3A(x, -y, nf_int, 1)
+    case(cc_VIRT)
+       res = - X3NS3B(x, -y, nf_int)
+    case(cc_DELTA)
+       res = X3NS3C(zero, -y, nf_int) 
+    end select
+
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
   end function cfN3LO_F3NS_val_e
@@ -630,33 +624,17 @@ contains
     x = exp(-y)
     res = zero
     CALL SET_C3SOFT_N3LO(nf_int)
-   if(x.lt.(one - tiny)) then ! AK: The exact expressions seem unstable close to x=1. 
-                              ! So we switch to the parametrised versions in this case. 
-                              ! I have checked explicitly that changing tiny by a factor 10 
-                              ! up or down has no visible effect on the resulting structure function.                        
-      select case(cc_piece)
-      case(cc_REAL)
-         res = X3NM3A(x, -y, nf_int, 0) + X3NS3B(x, -y, nf_int)
-      case(cc_REALVIRT)
-         res = X3NM3A(x, -y, nf_int, 0)
-      case(cc_VIRT)
-         res = - X3NS3B(x, -y, nf_int)
-      case(cc_DELTA)
-         res = X3NS3C(zero, -y, nf_int) 
-      end select
-   else
-      select case(cc_piece)
-      case(cc_REAL)
-         res = C3NM3A(x, -y, nf_int, 0) + C3NS3B(x, -y, nf_int)
-      case(cc_REALVIRT)
-         res = C3NM3A(x, -y, nf_int, 0)
-      case(cc_VIRT)
-         res = - C3NS3B(x, -y, nf_int)
-      case(cc_DELTA)
-         res = X3NS3C(zero, -y, nf_int) 
-!         res = C3NM3C(zero, nf_int) 
-      end select
-   endif
+
+    select case(cc_piece)
+    case(cc_REAL)
+       res = X3NM3A(x, -y, nf_int, 0) + X3NS3B(x, -y, nf_int)
+    case(cc_REALVIRT)
+       res = X3NM3A(x, -y, nf_int, 0)
+    case(cc_VIRT)
+       res = - X3NS3B(x, -y, nf_int)
+    case(cc_DELTA)
+       res = X3NS3C(zero, -y, nf_int) 
+    end select
     
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
@@ -676,33 +654,18 @@ contains
     x = exp(-y)
     res = zero
     CALL SET_C3SOFT_N3LO(nf_int)
-    if(x.lt.(one - tiny)) then ! AK: The exact expressions seem unstable close to x=1. 
-                              ! So we switch to the parametrised versions in this case. 
-                              ! I have checked explicitly that changing tiny by a factor 10 
-                              ! up or down has no visible effect on the resulting structure function.                        
-      select case(cc_piece)
-      case(cc_REAL)
-         res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + X3NS3B(x, -y, nf_int)
-      case(cc_REALVIRT)
-         res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
-      case(cc_VIRT)
-         res = - X3NS3B(x, -y, nf_int)
-      case(cc_DELTA)
-         res = X3NS3C(zero, -y, nf_int) + c3q3dfPC (zero, nf_int)
-      end select
-   else
-      select case(cc_piece)
-      case(cc_REAL)
-         res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + C3NS3B(x, -y, nf_int)
-      case(cc_REALVIRT)
-         res = C3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
-      case(cc_VIRT)
-         res = - C3NS3B(x, -y, nf_int)
-      case(cc_DELTA)
-         res = X3NS3C(zero, -y, nf_int) + c3q3dfPC (zero, nf_int)
-!         res = C3NM3C(zero, nf_int) + c3q3dfPC (x, nf_int)
-      end select
-   endif
+
+    select case(cc_piece)
+    case(cc_REAL)
+       res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + X3NS3B(x, -y, nf_int)
+    case(cc_REALVIRT)
+       res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
+    case(cc_VIRT)
+       res = - X3NS3B(x, -y, nf_int)
+    case(cc_DELTA)
+       res = X3NS3C(zero, -y, nf_int) + c3q3dfPC (zero, nf_int)
+    end select
+
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
   end function cfN3LO_F3NS_plus_e

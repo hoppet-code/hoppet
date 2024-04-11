@@ -172,8 +172,9 @@
        DP = 1.D0/(1.D0+X)
        !DL  = LOG (X)
        DL1 = LOG (1.D0-X)
+       
 !     Use large x expansion when close to x=1
-       if((1.0d0-x.lt.1d-10).and.(CC.eq.1)) then
+       if((1.0d0-x.lt.1d-6).and.(CC.eq.1)) then
           X2NP3A =  X2NP3A_large_x(X, DL, NF)
           return
        endif
