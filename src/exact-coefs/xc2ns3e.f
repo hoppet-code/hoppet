@@ -1,4 +1,5 @@
       MODULE XC2NS3E
+      USE XC2NS3P
       CONTAINS
 *     
 * ..File: xc2ns3e.f    F2_NS
@@ -128,7 +129,7 @@
        END SUBROUTINE
 
 * ..The regular piece 
-       FUNCTION X2NP3A (X, NF, CC)
+       FUNCTION X2NP3A (X, DL, NF, CC)
 *
        IMPLICIT REAL*8 (A - Z)
        COMPLEX*16 HC1, HC2, HC3, HC4, HC5 
@@ -153,7 +154,8 @@
 * ..The soft-gluon coefficients for use in X3NS3B and X3NS3C
 *
        COMMON / C3SOFT / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5 
-*
+
+*       
 * ...Colour factors
 *
        CF  = 4./3.D0
@@ -166,11 +168,16 @@
 * ...Some abbreviations
 *
        DX = 1.D0/X
-       DM = 1.D0/(1.D0-X)
+       DM = DMVAL(X,DL) !1.D0/(1.D0-X)
        DP = 1.D0/(1.D0+X)
-       DL  = LOG (X)
+       !DL  = LOG (X)
        DL1 = LOG (1.D0-X)
-*
+!     Use large x expansion when close to x=1
+       if((1.0d0-x.lt.1d-10).and.(CC.eq.1)) then
+          X2NP3A =  X2NP3A_large_x(X, DL, NF)
+          return
+       endif
+*     
 * ...Harmonic polylogs (HPLs) up to weight 5 by Gehrmann and Remiddi
 *
        CALL HPLOG5 (X, NW, HC1,HC2,HC3,HC4,HC5, HR1,HR2,HR3,HR4,HR5,
@@ -269,6 +276,7 @@
        X2NP3A = C2QQ3 
        return
        endif
+
        if(CC.eq.1) then
        c2qq3 =  cf*ca**2 * (  - 13824157.D0/36450.D0 + 117537107.D
      &    0/36450.D0*x - 13216.D0/25.D0*x**2 - 88.D0/3.D0*z5 - 560.D0/3.
@@ -1636,6 +1644,7 @@ c    ,                         -1103./4800.d0)
 *
        C2QQ3L = DM * ( DL1**5 * C3A5 + DL1**4 * C3A4 + DL1**3 * C3A3
      ,               + DL1**2 * C3A2 + DL1    * C3A1 + C3A0 )
+
 *
 * ...The regular piece of the coefficient function
        X2NP3A = C2QQ3 + CF*(CA-2.*CF)**2 * (8.*SP1 - SP2/3.D0) - C2QQ3L
@@ -1644,20 +1653,38 @@ c    ,                         -1103./4800.d0)
 *
        RETURN
        END
+
+      FUNCTION X2NP3A_large_x (Y, DL, NF)
+      IMPLICIT REAL*8 (A - Z)
+      INTEGER NF
+      DOUBLE PRECISION Y, DL, DL1
+      
+      DL1 = DL1VAL(Y, DL)
+      
+      X2NP3A_large_x = 5894.634952596363d0*DL1 + 2319.655820717043d0
+     $     *DL1**2 -1787.0418273217867d0*DL1**3 + 348.44444444444446d0
+     $     *DL1**4 -18.962962962962962d0*DL1**5 +(1199.690656381538d0
+     $     *DL1 -787.5420539087113d0*DL1**2 +146.69958847736626d0*DL1
+     $     **3 -7.901234567901234d0*DL1**4) *NF +(-65.15652656374832d0
+     $     *DL1 +14.617283950617283d0*DL1 **2 -0.7901234567901234d0*DL1
+     $     **3)*NF**2
+      
+      RETURN
+      END FUNCTION
 *
 * ---------------------------------------------------------------------
 *
 *
 * ..The singular (soft) piece. It receives no d_abc d_abc contribution.
 *
-       FUNCTION X2NS3B (Y, NF)
+       FUNCTION X2NS3B (Y, DL, NF)
        IMPLICIT REAL*8 (A - Z)
        INTEGER NF
 *
        COMMON / C3SOFT / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5
 *
-       DL1 = LOG (1.D0-Y)
-       DM  = 1.D0/(1.D0-Y)
+       DL1 = DL1VAL(Y, DL) !LOG (1.D0-Y)
+       DM  = DMVAL(Y, DL) !1.D0/(1.D0-Y)
 *
        X2NS3B = DM * ( DL1**5 * C3A5 + DL1**4 * C3A4 + DL1**3 * C3A3
      ,               + DL1**2 * C3A2 + DL1    * C3A1 + C3A0 )
