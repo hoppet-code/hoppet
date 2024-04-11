@@ -179,7 +179,7 @@ contains
 
        param = C2NP3A(x, -y, nf_lc, 1) + C2NP3A(x, -y, nf_lc, 0)
 
-       exact = X2NP3A(x,nf_lc,1) + X2NP3A(x,nf_lc,0)
+       exact = X2NP3A(x,-y,nf_lc,1) + X2NP3A(x,-y,nf_lc,0)
 
        write(99,*) 1-x, param, exact, one - exact/param
     enddo
@@ -195,7 +195,7 @@ contains
 
        param = C2NS3B(x, -y, nf_lc)
 
-       exact = X2NS3B(x,nf_lc) 
+       exact = X2NS3B(x,-y, nf_lc) 
 
        write(99,*) logx, param, exact, one - exact/param
     enddo
