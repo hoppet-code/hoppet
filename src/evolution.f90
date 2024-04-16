@@ -729,6 +729,7 @@ contains
           ! set iflv_info back to the original -- it cannot handle being
           ! multiplied by x-dependent quantities
           modpdf(:,iflv_info) = pdf(:,iflv_info) 
+          !!! GPS + JH: should there not be an extra factor of two?
           dpdf = dpdf + (jacobian * as2pi**2 * twopi * beta0) * (ev_PLO .conv. modpdf)
        end if
 
