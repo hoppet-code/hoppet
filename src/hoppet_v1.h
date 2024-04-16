@@ -32,7 +32,7 @@
 #define hoppetStrFctNNLO               hoppetstrfctnnlo_
 #define hoppetStrFctN3LO               hoppetstrfctn3lo_
 
-namespace hoppet {
+namespace hoppetv1 {
   /// indices for the different structure functions
   const int iF1Wp = 1+6; //< F1 W+ : D + Ubar                                                       
   const int iF2Wp = 2+6; //< F2 W+ : D + Ubar                                                      
