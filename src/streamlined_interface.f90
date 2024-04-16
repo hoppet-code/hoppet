@@ -511,6 +511,20 @@ subroutine hoppetSetExactDGLAP(exact_nfthreshold, exact_splitting)
 
 end subroutine hoppetSetExactDGLAP
 
+!======================================================================
+!! Arrange for the use of various approximate N3LO splitting functions.
+subroutine hoppetSetApproximateDGLAPN3LO(splitting_variant)
+  ! splitting_variant can be one of
+  ! n3lo_splitting_approximation_up_to_2310_05744
+  ! n3lo_splitting_approximation_up_to_2404_09701 (default)
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  integer :: splitting_variant
+
+  call dglap_Set_n3lo_splitting_approximation(splitting_variant)
+
+end subroutine hoppetSetApproximateDGLAPN3LO
+
 
 !======================================================================
 !! Assuming this is called with an array starting at index -6, return in f(-6:6) 

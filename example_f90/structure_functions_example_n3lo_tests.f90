@@ -20,6 +20,8 @@ program structure_functions_example
   !mt = 175.0_dp
   !call hoppetSetPoleMassVFN(mc, mb, mt)
   call hoppetSetFFN(5)
+!  call hoppetSetApproximateDGLAPN3LO(n3lo_splitting_approximation_up_to_2310_05744)
+  call hoppetSetApproximateDGLAPN3LO(n3lo_splitting_approximation_up_to_2404_09701)
   
   ! Streamlined initialization
   ! including  parameters for x-grid
