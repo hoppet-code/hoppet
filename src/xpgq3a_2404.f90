@@ -146,11 +146,11 @@ contains
 ! We return (for now) one of the two error-band representatives
 ! or the present best estimate, their average
        IF ( IMOD .EQ. 1 ) THEN
-         P3GQA = P3gqApp1
+         P3GQA_2404 = P3gqApp1
        ELSE IF ( IMOD .EQ. 2 ) THEN
-         P3GQA = P3gqApp2
+         P3GQA_2404 = P3gqApp2
        ELSE
-         P3GQA = 0.5* ( P3gqApp1 + P3gqApp2 )
+         P3GQA_2404 = 0.5* ( P3gqApp1 + P3gqApp2 )
        END IF
 !
        RETURN
