@@ -103,8 +103,8 @@
          x = 1.0d0 - exp(logx)
          dl = log(x)
 
-         param = c2np3a(x,dl,nf,cc)
-         exact = x2np3a(x,nf,cc)
+         param = c2np3a(x,dl,nf,1) + c2np3a(x,dl,nf,0) 
+         exact = x2np3a(x,nf,1) + x2np3a(x,nf,0)
          
        write(99,*) 1-x, param, exact, param/exact
       enddo

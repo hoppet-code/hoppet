@@ -263,7 +263,7 @@
 * ...The coefficient function in terms of the harmonic polylogs
 *    (without the delta(1-x) part, but with the soft contribution)
 *
-       c2qq3 = zero
+       c2qq3 = 0d0
        if(CC.eq.0) then
           c2qq3 =
      &  + fl11*dabc2n * (  - 192.D0/5.D0 - 1728.D0/5.D0*x + 1152.D0/5.D0
