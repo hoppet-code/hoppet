@@ -16,6 +16,7 @@
 #define hoppetSetPoleMassVFN           hoppetsetpolemassvfn_       
 #define hoppetSetMSbarMassVFN          hoppetsetmsbarmassvfn_       
 #define hoppetSetExactDGLAP            hoppetsetexactdglap_
+#define hoppetSetApproximateDGLAPN3LO  hoppetsetapproximatedglapn3lo_
 #define hoppetEval                     hoppeteval_          
 #define hoppetEvalSplit                hoppetevalsplit_
 #define hoppetSetQED                   hoppetsetqed_
@@ -31,7 +32,7 @@
 #define hoppetStrFctNNLO               hoppetstrfctnnlo_
 #define hoppetStrFctN3LO               hoppetstrfctn3lo_
 
-namespace hoppet {
+namespace hoppetv1 {
   /// indices for the different structure functions
   const int iF1Wp = 1+6; //< F1 W+ : D + Ubar                                                       
   const int iF2Wp = 2+6; //< F2 W+ : D + Ubar                                                      
@@ -110,6 +111,9 @@ extern "C" {
   /// Arrange for the use of exact NNLO splitting and mass-threshold
   /// functions.
   void hoppetSetExactDGLAP(const int & exact_nfthreshold, const int & exact_splitting);
+
+  /// Arrange for the use of various approximate N3LO splitting functions.
+  void hoppetSetApproximateDGLAPN3LO(const int & splitting_variant);
 
   /// Given a pdf_subroutine with the interface shown below, initialise
   /// our internal pdf table.

@@ -240,19 +240,6 @@ contains
 end module splitting_functions_n3lo_e
 
 
-!======================================================================
-! interface to approx 3-loop splitting functions, as parameterised by Vogt
-! (see xpij2p.f and xpns2p.f for details).
-!
-! There are several things to remember: 
-!    . Vogt y == my x
-!    . Vogt is normalised to powers of (as/4pi)^3 
-!    . colour-factor dependence is not available
-!    . systematic separation in A,B,C functions needs to be
-!      taken into account; C function needs to be called with x=0?x
-!    . check inclusion of 2nf in qg piece
-! 
-!----------------------------------------------------------------------
 module splitting_functions_n3lo_p
   use types; use consts_dp; use convolution_communicator
   use qcd; use warnings_and_errors
@@ -472,12 +459,12 @@ end module splitting_functions_n3lo_p
 
 
 !======================================================================
-! interface to guessed 3-loop splitting functions, as parameterised by Vogt
-! (see xpij2n.f and xpns2n.f for details).
+! interface to guessed 4-loop splitting functions, as parameterised by Vogt
+! (see xpgg3a.f90 xpgq3a.f90 xpps3a.f90 xpqg3a.f90 for details).
 !
 ! There are several things to remember: 
 !    . Vogt y == my x
-!    . Vogt is normalised to powers of (as/4pi)^3 
+!    . Vogt is normalised to powers of (as/4pi)^4 
 !    . colour-factor dependence is not available
 !    . systematic separation in A,B,C functions needs to be
 !      taken into account; C function needs to be called with x=0?x
@@ -487,7 +474,7 @@ end module splitting_functions_n3lo_p
 module splitting_functions_n3lo_n
   use types; use consts_dp; use convolution_communicator
   use qcd; use dglap_choices; use warnings_and_errors
-  use xpgg3a; use xpgq3a;use xpqg3a; use xpps3a; use xpns3s; use xpns3p; use xpns3m
+  use xpgg3a; use xpgq3a; use xpgq3a_2404; use xpqg3a; use xpps3a; use xpns3s; use xpns3p; use xpns3m
   implicit none
   private
 
@@ -587,7 +574,11 @@ contains
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
-       res = P3GQA(x, nf_int, n3lo_splitting_variant)
+       if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2310_05744) then
+          res = P3GQA(x, nf_int, n3lo_splitting_variant)
+       elseif(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2404_09701) then
+          res = P3GQA_2404(x, nf_int, n3lo_splitting_variant)
+       endif
     end select
     select case(cc_piece)
     case(cc_VIRT,cc_REALVIRT)

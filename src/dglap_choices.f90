@@ -27,6 +27,15 @@ module dglap_choices
   integer, parameter, public :: n3lo_splitting_Nfiterr1 =  1
   integer, parameter, public :: n3lo_splitting_Nfiterr2 =  2
   integer, public :: n3lo_splitting_variant = n3lo_splitting_Nfitav
+  ! As of 2024-04-16 there are several approximations available of the
+  ! n3lo splitting functions. To maintain some backwards compatibility
+  ! we have a switch below that allows the user to pick which set of
+  ! approximations to use. The have progressively more an more moments.
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2310_05744 = 0 !< Uses non-singlet of 1707.08315,
+                                                                                  !< pure-singlet (qq) of 2302.07593,
+                                                                                  !< qg of 2307.04158 and gq and gg of 2310.05744
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2404_09701 = 1 !< Replaces gq with that of 2404.09701
+  integer, public :: n3lo_splitting_approximation =  n3lo_splitting_approximation_up_to_2404_09701
 
   integer, parameter, public :: nnlo_nfthreshold_exact = -12
   integer, parameter, public :: nnlo_nfthreshold_param = -11
@@ -45,6 +54,7 @@ module dglap_choices
 
   public :: dglap_Set_nnlo_splitting
   public :: dglap_Set_n3lo_splitting
+  public :: dglap_Set_n3lo_splitting_approximation
   public :: dglap_Set_nnlo_nfthreshold
 contains
 
@@ -59,6 +69,12 @@ contains
     integer, intent(in) :: variant
     n3lo_splitting_variant = variant
   end subroutine dglap_Set_n3lo_splitting
+
+  !-------- overkill ----------------------------------------
+  subroutine dglap_Set_n3lo_splitting_approximation(variant)
+    integer, intent(in) :: variant
+    n3lo_splitting_approximation = variant
+  end subroutine dglap_Set_n3lo_splitting_approximation
 
   !-------- overkill ----------------------------------------
   subroutine dglap_Set_nnlo_nfthreshold(variant)
