@@ -1547,8 +1547,7 @@ c    ,                         -223./4800.d0)
       FUNCTION X3NM3A_large_x (Y, DL, NF)
       IMPLICIT REAL*8 (A - Z)
       INTEGER NF
-      
-      Y1 = Y1VAL(Y, DL)
+
       DL1 = DL1VAL(Y, DL)
       
       X3NM3A_large_x = 6889.89378009207d0*DL1 + 1581.208087862925d0*DL1
