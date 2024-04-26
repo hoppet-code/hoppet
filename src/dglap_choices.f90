@@ -31,7 +31,7 @@ module dglap_choices
   ! n3lo splitting functions. To maintain some backwards compatibility
   ! we have a switch below that allows the user to pick which set of
   ! approximations to use. The have progressively more an more moments.
-  integer, parameter, public :: n3lo_splitting_approximation_up_to_2310_05744 = 0 !< Uses non-singlet of 1707.08315,
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2310_05744 = 0 !< Uses non-singlet of 1610.07477+1707.08315,
                                                                                   !< pure-singlet (qq) of 2302.07593,
                                                                                   !< qg of 2307.04158 and gq and gg of 2310.05744
   integer, parameter, public :: n3lo_splitting_approximation_up_to_2404_09701 = 1 !< Replaces gq with that of 2404.09701
