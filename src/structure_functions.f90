@@ -273,6 +273,35 @@ contains
             & intval = scale_choice_save)
        call set_structure_functions_upto(order)
     endif
+    ! Now for flavour decomposed SFs
+    if (use_sep_orders) then
+       ! First we treat the case where we want to separate out each order in
+       ! the final structure functions.
+       ! This is slower, but is needed e.g. for VBFH
+       if (scale_choice_save == scale_choice_Q .or. scale_choice_save == scale_choice_fixed) then
+          ! if scale_choice = 0,1 use fast implementation
+          ! tables is saved as an array in Q, and only tables(0),
+          ! sf_tables(1), sf_tables(2), sf_tables(4), sf_tables(8) are non zero
+          if (order.ge.1) call set_LO_structure_functions_flav()
+!          if (order.ge.2) call set_NLO_structure_functions_flav()
+       else if(scale_choice_save == scale_choice_arbitrary) then
+          ! if scale_choice >= 2 use slower implementation with full
+          ! scale choices, such as sqrt(Q1*Q2)
+          ! tables is saved as an array in muF now, and all components
+          ! of sf_tables are non zero.
+          if (order.ge.1) call set_LO_structure_functions_anyscale_flav()
+!          if (order.ge.2) call set_NLO_structure_functions_anyscale_flav()
+       else
+          call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice_save)
+       endif
+    else
+       ! Now set up the default case where we sum up everything right away.
+       if (scale_choice_save >= scale_choice_arbitrary) & ! only allow for scale_choice = 0,1
+            & call wae_error('InitStrFct', &
+            & 'with scale_choice_arbitrary (or higher), separate_orders must be true, but was false; scale_choice=', &
+            & intval = scale_choice_save)
+       call set_structure_functions_upto_flav(order)
+    endif
 
     ! To rescale PDF by the N3LO F2 structure function (evaluated at 8 GeV)
     ! as a check of the size of missing N3LO PDFs, uncomment following line:
@@ -560,6 +589,72 @@ contains
        endif
     end do
   end subroutine set_structure_functions_upto
+
+
+  !----------------------------------------------------------------------
+  ! set up structure functions for scale_choice = 0, 1, adding up each order
+  subroutine set_structure_functions_upto_flav (order)
+    integer, intent(in) :: order
+    integer :: iQ
+    real(dp) :: Q, as2pi
+    real(dp) :: f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f3(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO_f (0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNNLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLONLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNLOLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
+    
+    do iQ = 0, tables(0)%nQ
+       
+       Q = tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       call set_scale_logs(Q)
+       
+       as2pi = alphasLocal(sf_muR(Q)) / (twopi)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, Q)
+       endif
+   
+       ! start with LO
+       if (order.ge.1) then
+          sf_tables_flav(1)%tab(:,:,iQ) = ch%CLLO*f
+          sf_tables_flav(2)%tab(:,:,iQ) = ch%C2LO*f
+          sf_tables_flav(3)%tab(:,:,iQ) = ch%C3LO*f
+       endif
+       
+!       ! now add NLO terms
+!       if (order.ge.2) then
+!          if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+!             ! For central scale with scale_choice=1, we don't need to do all
+!             ! the convolutions of the splitting functions
+!             f2 = ch%C2NLO * f
+!             fL = ch%CLNLO * f
+!             f3 = ch%C3NLO * f
+!          else
+!             ! do the convolution with the coefficient functions and also the
+!             ! corresponding splitting-function contributions when scales
+!             ! are not equal to Q
+!             PLO_f = dh%P_LO * f
+!             f2 = CxNLO_with_logs(ch%C2LO, ch%C2NLO, f, PLO_f)
+!             fL = CxNLO_with_logs(ch%CLLO, ch%CLNLO, f, PLO_f)
+!             f3 = CxNLO_with_logs(ch%C3LO, ch%C3NLO, f, PLO_f)
+!          endif
+!
+!          sf_tables(1)%tab(:,:,iQ) = sf_tables(1)%tab(:,:,iQ) + &
+!               & as2pi * structure_function_general(f2, fL, f3)
+!       endif
+
+       if(order.ge.3) call wae_error("Flavour decomposed SFs only implemented up to NLO.")
+    end do
+  end subroutine set_structure_functions_upto_flav
 
   
   !----------------------------------------------------------------------
@@ -1386,7 +1481,6 @@ contains
     endif
     
   end function StrFct_Flav
-
 
   !> @brief calculate the leading order structure function at x, Q, muR, muF 
   !!
