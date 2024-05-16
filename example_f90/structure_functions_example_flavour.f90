@@ -58,8 +58,8 @@ program structure_functions_example
 
   x = 0.01_dp
   Q = 50.0_dp
-  muR = 91.1876_dp
-  muF = 91.1876_dp
+  muR = Q
+  muF = Q
   do i =-6,6
      FLOflav(i,:) = F_LO_flav(x,Q,muR,muF,i)
      FNLOflav(i,:) = F_NLO_flav(x,Q,muR,muF,i)
@@ -69,67 +69,158 @@ program structure_functions_example
   FLO  = F_LO(x,Q,muR,muF)
   FNLO = F_NLO(x,Q,muR,muF)
   F    = StrFct(x,Q,muR,muF)
-  print*, 'OLD'
-  print*, 'FLOW  = ', FLO(iF2Wm) - 2.0_dp * x *FLO(iF1Wm), FLO(iF2Wm), FLO(iF3Wm)
-  print*, 'FNLOW = ', FNLO(iF2Wm) - 2.0_dp * x *FNLO(iF1Wm), FNLO(iF2Wm), FNLO(iF3Wm)
-  print*, 'FOW   = ', F(iF2Wm) - 2.0_dp * x *F(iF1Wm), F(iF2Wm), F(iF3Wm)
-  Print*, 'NEW'
-  print*, 'FLOW  = ', FLOflav(-3,1) + FLOflav(-1,1) + FLOflav(2,1) +&
-       & FLOflav(4,1), FLOflav(-3,2) + FLOflav(-1,2) + FLOflav(2,2) +&
-       & FLOflav(4,2), (-FLOflav(-3,3) - FLOflav(-1,3) + FLOflav(2,3)&
-       & + FLOflav(4,3))/x
-  print*, 'FNLOW = ', FNLOflav(-3,1) + FNLOflav(-1,1) + FNLOflav(2,1) +&
-       & FNLOflav(4,1), FNLOflav(-3,2) + FNLOflav(-1,2) + FNLOflav(2&
-       &,2) + FNLOflav(4,2), (-FNLOflav(-3,3) - FNLOflav(-1,3) +&
-       & FNLOflav(2,3) + FNLOflav(4,3))/x
-  print*, 'FW    = ', Fflav(-3,1) + Fflav(-1,1) + Fflav(2,1) + Fflav(4&
-       &,1), Fflav(-3,2) + Fflav(-1,2) + Fflav(2,2) + Fflav(4,2), (&
-       &-Fflav(-3,3) - Fflav(-1,3) + Fflav(2,3) + Fflav(4,3))/x
-  !  ! write out the structure functions
-!  ymax = log(1e5) !ymax=20
-!  Q = 100.0_dp
-!  call write_f1(6, Q, ymax, 10)
-!  call write_f2(6, Q, ymax, 10)
-!  call write_f3(6, Q, ymax, 10)
+  print*, 'Standard structure functions at NLO for Q=50 GeV and x=0.01'
+  write(*,'(14es12.4)') F
+
+  call fill_structure_functions(x,Fflav(:,1),Fflav(:,2),Fflav(:,3),F)
+  print*, 'Struture functions obtained from the flavour decomposed ones'
+  write(*,'(14es12.4)') F
 
 end program structure_functions_example
 
-subroutine fill_structure_functions(FL,F2,F3,SF)
+subroutine fill_structure_functions(x,FL,F2,F3,SF)
   use hoppet_v1
   use streamlined_interface
   use structure_functions
+  use coefficient_functions_holder
   implicit none
-  real(dp) :: FL(-6:6),F2(-6:6),F3(-6:6),SF(6:-7)
+  real(dp) :: FL(-6:6),F2(-6:6),F3(-6:6),SF(-6:7),x
+  real(dp), parameter :: viW = 1/sqrt(two), aiW = viW
+  real(dp), save      :: vi2_ai2_avg_W, two_vi_ai_avg_W
+  real(dp), save      :: vi2_ai2_Z_down, vi2_ai2_Z_up
+  real(dp), save      :: two_vi_ai_Z_down, two_vi_ai_Z_up
+  real(dp), save      :: two_vi_Z_down, two_vi_Z_up
+  real(dp), save      :: two_ai_Z_down, two_ai_Z_up
+  real(dp), parameter :: e_up = 2.0_dp/3.0_dp, e_down = - 1.0_dp/3.0_dp
+  real(dp), parameter :: e2_up = 4.0_dp/9.0_dp, e2_down = 1.0_dp/9.0_dp
+  real(dp) :: sin_thw_sq, mw, mz , two_xvals
+  real(dp) :: ulike, dlike, ubarlike, dbarlike
+  integer :: nf_lcl
   
+  mw                = 80.377_dp
+  mz                = 91.1876_dp
+
+  two_xvals = 2.0_dp * x
+
+  ! compute sin(\theta_w) from W/Z mass
+  sin_thw_sq = 1.0_dp - (mw/mz)**2
+
+  ! evaluate parameters needed for the structure functions
+  ! cf. Eqs. (3.10+11) of 1109.3717
+  vi2_ai2_Z_up     = one/four + (half - (four/three) * sin_thw_sq)**2
+  vi2_ai2_Z_down   = one/four + (half - (two/three)  * sin_thw_sq)**2
+  two_vi_ai_Z_up   = half - (four/three) * sin_thw_sq
+  two_vi_ai_Z_down = half - (two/three)  * sin_thw_sq
+
+  ! cf. Eq.3.20 + 3.17 & 3.18
+  ! 1/nf \sum_j=1^nf (vj^2 + aj^2)
+  vi2_ai2_avg_W = viW**2 + aiW**2
+  ! 1/nf \sum_j=1^nf 2*vj*aj
+  two_vi_ai_avg_W = two * viW * aiW
+
+  ! these parameters are needed explicitly for the gamma-Z structure function
+  two_vi_Z_up = one - (8.0_dp/three) * sin_thw_sq
+  two_vi_Z_down   = -one + (four/three) * sin_thw_sq
+  two_ai_Z_up = one
+  two_ai_Z_down   = -one
+
+  SF = zero
+  nf_lcl = 5
+  !--- deal with Z case -----------------------------------------
+  SF(iF2Z) = (dlike(F2,nf_lcl) + dbarlike(F2,nf_lcl))*vi2_ai2_Z_down + &
+       &       (ulike(F2,nf_lcl) + ubarlike(F2,nf_lcl))*vi2_ai2_Z_up
+
+  ! temporarily put FL into F1;
+  SF(iF1Z) = (dlike(FL,nf_lcl) + dbarlike(FL,nf_lcl))*vi2_ai2_Z_down +&
+       & (ulike(FL,nf_lcl) + ubarlike(FL,nf_lcl))*vi2_ai2_Z_up
+  ! then convert to F1
+  SF(iF1Z) = (SF(iF2Z) - SF(iF1Z)) / two_xvals
+
+  SF(iF3Z) = (dlike(F3,nf_lcl) - dbarlike(F3,nf_lcl))*two_vi_ai_Z_down + (ulike(F3,nf_lcl)&
+       & - ubarlike(F3,nf_lcl))*two_vi_ai_Z_up
+  SF(iF3Z) = SF(iF3Z)/x
+
+  !--- deal with EM case -----------------------------------------
+  SF(iF2EM) = (dlike(F2,nf_lcl) + dbarlike(F2,nf_lcl))*e2_down + (ulike(F2,nf_lcl) +&
+       & ubarlike(F2,nf_lcl))*e2_up
+
+  ! temporarily put FL into F1;
+  SF(iF1EM) = (dlike(FL,nf_lcl) + dbarlike(FL,nf_lcl))*e2_down +&
+       & (ulike(FL,nf_lcl) + ubarlike(FL,nf_lcl))*e2_up
+  ! then convert to F1
+  SF(iF1EM) = (SF(iF2EM) - SF(iF1EM)) / two_xvals
+
+  !--- deal with gamma-Z case
+  !-----------------------------------------
+  ! equations taken from section 19 of PDG (19.18)
+  SF(iF2gZ) = (dlike(F2,nf_lcl) + dbarlike(F2,nf_lcl))*e_down*two_vi_Z_down +&
+       & (ulike(F2,nf_lcl) + ubarlike(F2,nf_lcl))*e_up * two_vi_Z_up
+
+  ! temporarily put FL into F1;
+  SF(iF1gZ) = (dlike(FL,nf_lcl) + dbarlike(FL,nf_lcl))*e_down*two_vi_Z_down +&
+       & (ulike(FL,nf_lcl) + ubarlike(FL,nf_lcl))*e_up * two_vi_Z_up
+  ! then convert to F1
+  SF(iF1gZ) = (SF(iF2gZ) - SF(iF1gZ)) / two_xvals
+
+  SF(iF3gZ) = (dlike(F3,nf_lcl) - dbarlike(F3,nf_lcl))*e_down*two_ai_Z_down + &
+       &        (ulike(F3,nf_lcl) - ubarlike(F3,nf_lcl))*e_up * two_ai_Z_up
+  SF(iF3gZ) = SF(iF3gZ)/x
+
+  ! for the W cases, it only makes sense to sum over an even number
+  ! of light flavours; so save the actual number of flavours, switch
+  ! the module-local nf_lcl variable to the nearest (lower) event
+  ! number
+  ! for our W calculations; switch back later
+  nf_lcl = 4
+
+  ! --- deal with Wm case
+  !-----------------------------------------
+  SF(iF2Wm) = (ulike(F2,nf_lcl) + dbarlike(F2,nf_lcl))*vi2_ai2_avg_W
+  ! temporarily put FL into F1;
+  SF(iF1Wm) = (ulike(FL,nf_lcl) + dbarlike(FL,nf_lcl))*vi2_ai2_avg_W
+  ! then convert to F1
+  SF(iF1Wm) = (SF(iF2Wm) - SF(iF1Wm)) / two_xvals
+  SF(iF3Wm) = (ulike(F3,nf_lcl) - dbarlike(F3,nf_lcl))*two_vi_ai_avg_W
+  SF(iF3Wm) = SF(iF3Wm)/x
+
+  !--- deal with Wp case -----------------------------------------
+  SF(iF2Wp) = (dlike(F2,nf_lcl) + ubarlike(F2,nf_lcl))*vi2_ai2_avg_W
+  ! temporarily put FL into F1;
+  SF(iF1Wp) = (dlike(FL,nf_lcl) + ubarlike(FL,nf_lcl))*vi2_ai2_avg_W
+  ! then convert to F1
+  SF(iF1Wp) = (SF(iF2Wp) - SF(iF1Wp)) / two_xvals
+  SF(iF3Wp) = (dlike(F3,nf_lcl) - ubarlike(F3,nf_lcl))*two_vi_ai_avg_W
+  SF(iF3Wp) = SF(iF3Wp)/x
+
 end subroutine fill_structure_functions
 
 !----------------------------------------------------------------------
-function ulike(f) result(res)
-  use hoppet_v1
-  real(dp), intent(in) :: f(0:,ncompmin:)
-  real(dp)             :: res(0:ubound(f,dim=1))
-  res = sum(f(:, 2: nf_lcl: 2), dim=2)
+function ulike(f,nf) result(res)
+  double precision, intent(in) :: f(-6:6)
+  integer, intent(in)  :: nf
+  double precision             :: res
+  res = sum(f(2: nf: 2))
 end function ulike
 !----------------------------------------------------------------------
-function dlike(f) result(res)
-  use hoppet_v1
-  real(dp), intent(in) :: f(0:,ncompmin:)
-  real(dp)             :: res(0:ubound(f,dim=1))
-  res = sum(f(:, 1: nf_lcl: 2), dim=2)
+function dlike(f,nf) result(res)
+  double precision, intent(in) :: f(-6:6)
+  integer, intent(in)  :: nf
+  double precision             :: res
+  res = sum(f(1: nf: 2))
 end function dlike
 !----------------------------------------------------------------------
-function ubarlike(f) result(res)
-  use hoppet_v1
-  real(dp), intent(in) :: f(0:,ncompmin:)
-  real(dp)             :: res(0:ubound(f,dim=1))
-  res = sum(f(:,-2:-nf_lcl:-2), dim=2)
+function ubarlike(f,nf) result(res)
+  double precision, intent(in) :: f(-6:6)
+  integer, intent(in)  :: nf
+  double precision             :: res
+  res = sum(f(-2:-nf:-2))
 end function ubarlike
 !----------------------------------------------------------------------
-function dbarlike(f) result(res)
-  use hoppet_v1
-  real(dp), intent(in) :: f(0:,ncompmin:)
-  real(dp)             :: res(0:ubound(f,dim=1))
-  res = sum(f(:,-1:-nf_lcl:-2), dim=2)
+function dbarlike(f,nf) result(res)
+  double precision, intent(in) :: f(-6:6)
+  integer, intent(in)  :: nf
+  double precision             :: res
+  res = sum(f(-1:-nf:-2))
 end function dbarlike
 
   
