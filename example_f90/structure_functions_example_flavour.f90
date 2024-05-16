@@ -17,8 +17,6 @@ program structure_functions_example
   xmur = one
   xmuf = one
   sc_choice = scale_choice_Q ! Uses Q as the central scale choice
-  sc_choice = scale_choice_fixed ! Uses Q as the central scale choice
-!  sc_choice = scale_choice_arbitrary ! Uses Q as the central scale choice
   Qmin = one
 
   ! Set heavy flavour scheme
@@ -96,4 +94,42 @@ program structure_functions_example
 
 end program structure_functions_example
 
+subroutine fill_structure_functions(FL,F2,F3,SF)
+  use hoppet_v1
+  use streamlined_interface
+  use structure_functions
+  implicit none
+  real(dp) :: FL(-6:6),F2(-6:6),F3(-6:6),SF(6:-7)
+  
+end subroutine fill_structure_functions
 
+!----------------------------------------------------------------------
+function ulike(f) result(res)
+  use hoppet_v1
+  real(dp), intent(in) :: f(0:,ncompmin:)
+  real(dp)             :: res(0:ubound(f,dim=1))
+  res = sum(f(:, 2: nf_lcl: 2), dim=2)
+end function ulike
+!----------------------------------------------------------------------
+function dlike(f) result(res)
+  use hoppet_v1
+  real(dp), intent(in) :: f(0:,ncompmin:)
+  real(dp)             :: res(0:ubound(f,dim=1))
+  res = sum(f(:, 1: nf_lcl: 2), dim=2)
+end function dlike
+!----------------------------------------------------------------------
+function ubarlike(f) result(res)
+  use hoppet_v1
+  real(dp), intent(in) :: f(0:,ncompmin:)
+  real(dp)             :: res(0:ubound(f,dim=1))
+  res = sum(f(:,-2:-nf_lcl:-2), dim=2)
+end function ubarlike
+!----------------------------------------------------------------------
+function dbarlike(f) result(res)
+  use hoppet_v1
+  real(dp), intent(in) :: f(0:,ncompmin:)
+  real(dp)             :: res(0:ubound(f,dim=1))
+  res = sum(f(:,-1:-nf_lcl:-2), dim=2)
+end function dbarlike
+
+  

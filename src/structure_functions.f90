@@ -2143,9 +2143,35 @@ subroutine hoppetInitStrFct(order, separate_orders, xR, xF)
   logical, intent(in) :: separate_orders
   real(dp), intent(in) :: xR, xF
   
-  call InitStrFct(order, separate_orders, xR, xF)
+  call InitStrFct(order, separate_orders, xR, xF, .false.)
 
 end subroutine hoppetInitStrFct
+
+!> @brief Initialize the structure functions up to specified order
+!!
+!! Initialize the structure functions up to specified order
+!! this requires the tabulated PDF to have been set up beforehand in the
+!! the streamlined interface. 
+!!
+!! By default, separate_orders = .false., which means that one
+!! can only access the sum over all orders. If separate_orders = .true.
+!! then one can access each order separately, but this is slower.
+!!
+!! @param[in]      order              order at which we initialise the structure functions
+!! @param[opt]     separate_orders    if .true. separate into individual orders rather than summing
+!! @param[opt]     xR             factor to multiply renormalisation scale
+!! @param[opt]     xF             factor to multiply factorisation scale
+!!
+subroutine hoppetInitStrFctFlav(order, separate_orders, xR, xF, flavour_decomposition)
+  use streamlined_interface; use structure_functions
+  implicit none
+  integer, intent(in) :: order
+  logical, intent(in) :: separate_orders, flavour_decomposition
+  real(dp), intent(in) :: xR, xF
+  
+  call InitStrFct(order, separate_orders, xR, xF, flavour_decomposition)
+
+end subroutine hoppetInitStrFctFlav
 
 !> @brief calculate the structure function at x, Q, muR, muF summed over all orders
 !!
@@ -2170,7 +2196,32 @@ subroutine hoppetStrFct(x, Q, muR_in, muF_in, res)
   res = StrFct(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFct
 
-!> @brief calculate the structure function at x, Q, ummed over all orders
+!> @brief calculate the structure function at x, Q, muR, muF summed over all orders
+!!
+!! Calculate the structure function at x, Q, muR, muF summed over
+!! all orders. If using a scale choice other than scale_choice_arbitrary,
+!! muR and muF must be consistent with the scale choice made in the 
+!! hoppetStartStrFct call. See also hoppetStrFctNoMu for a variant
+!! that does not take muR and muF arguments.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
+!! @param[in]       iflav      parton flavour
+!! @return          an array of all structure functions summed over orders decomposed in flavour
+!!
+subroutine hoppetStrFctFlav(x, Q, muR_in, muF_in, iflav, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  integer  :: iflav
+  real(dp) :: res(1:3)
+
+  res = StrFct_flav(x, Q, muR_in, muF_in, iflav)
+end subroutine hoppetStrFctFlav
+
+!> @brief calculate the structure function at x, Q, summed over all orders
 !!
 !! Calculate the structure function at x, Q, for the scale choice as indicated
 !! in hoppetStartStrFct. This can only be used with scale_choice_Q and scale_choice_fixed. 
@@ -2181,13 +2232,32 @@ end subroutine hoppetStrFct
 !! @return          an array of all structure functions summed over orders
 !!
 subroutine hoppetStrFctNoMu(x, Q, res) 
-   use streamlined_interface; use structure_functions
-   real(dp) :: x, Q
-   real(dp) :: res(-6:7)
- 
-   res = StrFct(x, Q)
- end subroutine hoppetStrFctNoMu
- 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: res(-6:7)
+  
+  res = StrFct(x, Q)
+end subroutine hoppetStrFctNoMu
+
+!> @brief calculate the structure function at x, Q, summed over all orders
+!!
+!! Calculate the structure function at x, Q, for the scale choice as indicated
+!! in hoppetStartStrFct. This can only be used with scale_choice_Q and scale_choice_fixed. 
+!! See also hoppetStrFct for a variant with muR and muF choice. 
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in]       iflav      parton flavour
+!! @return          an array of all structure functions summed over orders decomposed in flavour
+!!
+subroutine hoppetStrFctNoMuFlav(x, Q, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: res(1:3)
+  
+  res = StrFct_flav(x, Q, iflav = iflav)
+end subroutine hoppetStrFctNoMuFlav
+
 
 !> @brief calculate the leading order structure function at x, Q, muR, muF 
 !!
@@ -2211,6 +2281,30 @@ subroutine hoppetStrFctLO(x, Q, muR_in, muF_in, res)
   res = F_LO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctLO
 
+!> @brief calculate the leading order structure function at x, Q, muR, muF 
+!!
+!! Calculate the leading order structure function at x, Q, muR,
+!! muF. muR and muF are only needed if we are using the
+!! scale_choice_arbitrary, as otherwise they are already included in
+!! the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
+!! @param[in]       iflav      partonflavour
+!! @return          an array of all the leading order structure functions summed over orders
+!!
+subroutine hoppetStrFctLOFlav(x, Q, muR_in, muF_in, iflav, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  integer  :: iflav
+  real(dp) :: res(1:3)
+
+  res = F_LO_flav(x, Q, muR_in, muF_in, iflav)
+end subroutine hoppetStrFctLOFlav
+
 !> @brief calculate the NLO structure function at x, Q, muR, muF 
 !!
 !! Calculate the NLO structure function at x, Q, muR, muF. muR and
@@ -2231,6 +2325,28 @@ subroutine hoppetStrFctNLO(x, Q, muR_in, muF_in, res)
 
   res = F_NLO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctNLO
+
+!> @brief calculate the NLO structure function at x, Q, muR, muF 
+!!
+!! Calculate the NLO structure function at x, Q, muR, muF. muR and
+!! muF are only needed if we are using the scale_choice_arbitrary,
+!! as otherwise they are already included in the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
+!! @return          an array of all the NLO structure functions
+!!
+subroutine hoppetStrFctNLOFlav(x, Q, muR_in, muF_in, iflav, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  integer  :: iflav
+  real(dp) :: res(1:3)
+
+  res = F_NLO_flav(x, Q, muR_in, muF_in, iflav)
+end subroutine hoppetStrFctNLOFlav
 
 !> @brief calculate the NNLO structure function at x, Q, muR, muF 
 !!
