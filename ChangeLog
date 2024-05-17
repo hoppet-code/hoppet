@@ -1,3 +1,21 @@
+2024-05-17  Gavin Salam  
+
+	* src/welcome_message.f90:
+	updated copyright date range.
+
+	* src/hoppet_v1.h:
+	* src/streamlined_interface.f90:
+	added hoppetDeleteAll() to free all memory associated with the main
+	streamlined interface. NB: does not do anything to the structure
+	function interface objects.
+
+	* example_f90/tabulation_example_qed.f90:
+	* example_f90/tabulation_example_qed_streamlined.f90:
+	* example_f77/cpp_tabulation_example_qed.cc:
+	* example_f77/cpp_tabulation_example.cc:
+	* example_f77/tabulation_example.f:
+	added calls to hoppetDeleteAll()
+
 2024-03-22  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/streamlined_interface.f90:

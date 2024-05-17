@@ -180,6 +180,11 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   integer,  intent(in) :: factscheme !! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
   !-------------------------------------
   integer :: iloop
+
+  ! if the allocation has already been done previously, delete
+  ! the existing tables and dglap holder, etc. to avoid a memory leak
+  if (alloc_already_done) call hoppetDeleteAll()  
+  
   ! initialise our grids
 
   ! the internal interpolation order (with a minus sign allows
@@ -210,10 +215,6 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   if (nloop >= 2) table_index_from_iloop(12)  = 6
   if (nloop >= 2) table_index_from_iloop(21)  = 7
   
-  ! if the allocation has already been done previously, delete
-  ! the existing tables and dglap holder to avoid a memory leak
-  if (alloc_already_done) call hoppetDeleteAll()  
-
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
 
@@ -246,6 +247,11 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
 end subroutine hoppetStartExtended
 
 
+!! Delete all hoppet objects associated with the streamlined interface,
+!! including grid definitions, PDF tables, couplings, etc.
+!!
+!! NB: this does not delete anything associated with the structure function
+!! part of the interface
 subroutine hoppetDeleteAll()
   use streamlined_interface
   implicit none

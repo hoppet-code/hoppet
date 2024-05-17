@@ -19,6 +19,8 @@
 #define hoppetEval                     hoppeteval_          
 #define hoppetEvalSplit                hoppetevalsplit_
 #define hoppetSetQED                   hoppetsetqed_
+#define hoppetDeleteAll                hoppetdeleteall_
+
 /// The fortran subroutines pertaining to the below structure function 
 /// interfaces can be found at the end of structure_functions.f90
 #define hoppetStartStrFct              hoppetstartstrfct_
@@ -185,6 +187,14 @@ extern "C" {
                        const int    & iloop,
                        const int    & nf,
                        double * f);
+
+  //---------------------------------------------------------------------
+  /// Delete all hoppet objects associated with the streamlined interface,
+  /// including grid definitions, PDF tables, couplings, etc.
+  ///
+  /// NB: this does not delete anything associated with the structure function
+  /// part of the interface
+  void hoppetDeleteAll();
   
   ///----------------------------------------------------------------------
   /// Setup of constants and parameters needed for structure functions
