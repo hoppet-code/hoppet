@@ -46,7 +46,7 @@ module streamlined_interface
   !! Additional things for QED
   !integer,  save            :: nqcdloop_qed
   type(qed_coupling),  save :: coupling_qed
-  type(qed_split_mat),  save :: qed_split
+  type(qed_split_mat), save :: qed_split
   logical,  save :: with_qed = .false.
   real(dp), save :: effective_light_quark_masses = 0.109_dp
   integer,  save :: with_nqcdloop_qed = 0
@@ -212,11 +212,7 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   
   ! if the allocation has already been done previously, delete
   ! the existing tables and dglap holder to avoid a memory leak
-  if (alloc_already_done) then
-     call Delete(tables)
-     call Delete(dh)
-  end if
-  
+  if (alloc_already_done) call hoppetDeleteAll()  
 
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
@@ -249,6 +245,22 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   setup_done = .false.
 end subroutine hoppetStartExtended
 
+
+subroutine hoppetDeleteAll()
+  use streamlined_interface
+  implicit none
+  if (alloc_already_done) then
+    call Delete(tables)
+    call Delete(dh)
+    if (with_qed) call Delete(qed_split)
+    if (coupling_initialised) then
+      call Delete(coupling) 
+      if (with_qed) call Delete(coupling_qed)
+      coupling_initialised = .false.
+    end if
+    alloc_already_done = .false.
+  end if
+end subroutine hoppetDeleteAll
 
 !======================================================================
 !! Given a pdf_subroutine with the interface shown below, initialise
@@ -316,7 +328,10 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
   call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0pdf)
 
   ! get a running coupling with the desired scale
-  if (coupling_initialised) call Delete(coupling) 
+  if (coupling_initialised) then
+    call Delete(coupling) 
+    if (with_qed) call Delete(coupling_qed)
+  end if
   if (ffn_nf > 0) then
      call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
           &                   fixnf=ffn_nf)
