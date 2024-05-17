@@ -253,6 +253,7 @@ subroutine hoppetDeleteAll()
     call Delete(tables)
     call Delete(dh)
     if (with_qed) call Delete(qed_split)
+    call Delete(grid)
     if (coupling_initialised) then
       call Delete(coupling) 
       if (with_qed) call Delete(coupling_qed)
