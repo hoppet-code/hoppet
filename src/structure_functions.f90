@@ -654,11 +654,11 @@ contains
              f3 = CxNLO_with_logs(ch%C3LO, ch%C3NLO, f, PLO_f)
           endif
 
-          sf_tables_flav(1)%tab(:,:,iQ) = sf_tables(1)%tab(:,:,iQ) + &
+          sf_tables_flav(1)%tab(:,:,iQ) = sf_tables_flav(1)%tab(:,:,iQ) + &
                & as2pi * fl
-          sf_tables_flav(2)%tab(:,:,iQ) = sf_tables(2)%tab(:,:,iQ) + &
+          sf_tables_flav(2)%tab(:,:,iQ) = sf_tables_flav(2)%tab(:,:,iQ) + &
                & as2pi * f2
-          sf_tables_flav(3)%tab(:,:,iQ) = sf_tables(3)%tab(:,:,iQ) + &
+          sf_tables_flav(3)%tab(:,:,iQ) = sf_tables_flav(3)%tab(:,:,iQ) + &
                & as2pi * f3
        endif
 
