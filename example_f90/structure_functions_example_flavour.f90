@@ -1,4 +1,4 @@
-!! An example program using structure functions up to N3LO. !!
+!! An example program using structure functions up to NLO with flavour decomposition. !!
 !!
 program structure_functions_example
   use hoppet_v1
@@ -7,8 +7,8 @@ program structure_functions_example
   use structure_functions
   implicit none
   real(dp) :: Qmax, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0,&
-       & muR_Q, dy, dlnlnQ, minQval, maxQval, muR, muF, x
-  integer  :: nloop_coefs, sc_choice,nloop, order, i
+       & muR_Q, dy, dlnlnQ, minQval, maxQval, muR, muF, x, ytest
+  integer  :: nloop_coefs, sc_choice,nloop, order, i, ny, iy 
   real(dp) :: F(-6:7), FLO(-6:7), FNLO(-6:7)
   real(dp) :: Fflav(-6:6,3), FLOflav(-6:6,3), FNLOflav(-6:6,3)
   
@@ -54,30 +54,48 @@ program structure_functions_example
   ! Initialise the structure functions using separate orders 
   ! NB: this uses the PDFs that were set up in the streamlined interface
   ! with the hoppetEvolve routine
-  call InitStrFct(nloop_coefs, .true., xR = xmur, xF = xmuf, flavour_decomposition = .true.)
+  call InitStrFct(nloop_coefs, .true., xR = xmur, xF = xmuf, flavour_decomposition = .true.) ! Ask
+                                                                                             ! for
+                                                                                             ! flavour
+                                                                                             ! decomposed
+                                                                                             ! structure
+                                                                                             ! functions
+                                                                                             ! here
 
-  x = 0.01_dp
-  Q = 50.0_dp
+  Q = 100.0_dp
   muR = Q
   muF = Q
-  do i =-6,6
-     FLOflav(i,:) = F_LO_flav(x,Q,muR,muF,i)
-     FNLOflav(i,:) = F_NLO_flav(x,Q,muR,muF,i)
-     Fflav(i,:)   = StrFct_flav(x,Q,muR,muF,i)
+
+  ymax = log(1e5)
+  ny = 10
+  print*, 'Standard structure functions at NLO for Q=100 GeV and x=0.01'
+  do iy = ny, 1, -1
+     ytest = iy * ymax / ny
+     x = exp(-ytest)
+     FLO  = F_LO(x,Q,muR,muF)
+     FNLO = F_NLO(x,Q,muR,muF)
+     F    = StrFct(x,Q,muR,muF)
+     write(*,'(15es12.4)') x, F
   enddo
-
-  FLO  = F_LO(x,Q,muR,muF)
-  FNLO = F_NLO(x,Q,muR,muF)
-  F    = StrFct(x,Q,muR,muF)
-  print*, 'Standard structure functions at NLO for Q=50 GeV and x=0.01'
-  write(*,'(14es12.4)') F
-
-  call fill_structure_functions(x,Fflav(:,1),Fflav(:,2),Fflav(:,3),F)
+  print*, ''
   print*, 'Struture functions obtained from the flavour decomposed ones'
-  write(*,'(14es12.4)') F
+  do iy = ny, 1, -1
+     ytest = iy * ymax / ny
+     x = exp(-ytest)
+     do i =-6,6
+        FLOflav(i,:) = F_LO_flav(x,Q,muR,muF,i)
+        FNLOflav(i,:) = F_NLO_flav(x,Q,muR,muF,i)
+        Fflav(i,:)   = StrFct_flav(x,Q,muR,muF,i)
+     enddo
+     call fill_structure_functions(x,Fflav(:,1),Fflav(:,2),Fflav(:,3),F)
+     write(*,'(15es12.4)') x, F
+  enddo
 
 end program structure_functions_example
 
+! Below a routine that fills all the NC and CC structure functions
+! from the flavour decomposed ones. These routines are essentially
+! adapted from those that can be found in structure_functions.f90
 subroutine fill_structure_functions(x,FL,F2,F3,SF)
   use hoppet_v1
   use streamlined_interface

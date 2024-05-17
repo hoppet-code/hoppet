@@ -215,17 +215,20 @@ contains
     xmuR              = default_or_opt(one, xR)
     xmuF              = default_or_opt(one, xF)
 
+    inc_flavour_decomposition = .false.
+    inc_flavour_decomposition = default_or_opt(inc_flavour_decomposition, flavour_decomposition)
+
     if(sf_alloc_already_done) then
        call Delete(sf_tables)
-       call Delete(sf_tables_flav)
+       if(inc_flavour_decomposition) call Delete(sf_tables_flav)
     endif
 
     ! Now we set up the tables. HoppetStart already called, so we can copy over the structure
     call AllocPdfTable(sf_tables, tables(0))
-    call AllocPdfTable(sf_tables_flav, tables(0))
+    if(inc_flavour_decomposition) call AllocPdfTable(sf_tables_flav, tables(0))
     ! Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
     sf_tables(1:)%tab_iflv_max = 7
-    sf_tables_flav(1:)%tab_iflv_max = 6
+    if(inc_flavour_decomposition) sf_tables_flav(1:)%tab_iflv_max = 6
     sf_alloc_already_done = .true. ! Signals that the tables have been set up.
 
     ! To turn off b quarks completely (only for testing and comparison)
@@ -240,7 +243,6 @@ contains
        use_sep_orders = .false.
     endif
     use_sep_orders = default_or_opt(use_sep_orders, separate_orders)
-    inc_flavour_decomposition = default_or_opt(inc_flavour_decomposition, flavour_decomposition)
 
     if (use_sep_orders) then
        ! First we treat the case where we want to separate out each order in
