@@ -226,7 +226,9 @@ contains
     ! Now we set up the tables. HoppetStart already called, so we can copy over the structure
     call AllocPdfTable(sf_tables, tables(0))
     if(inc_flavour_decomposition) call AllocPdfTable(sf_tables_flav, tables(0))
-    ! Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
+    ! Finally we need to set tab_iflv_max = 7. We don't change sf_tables(0) as it contains the PDF
+    sf_tables(0) = tables(0)
+    sf_tables_flav(0) = tables(0)
     sf_tables(1:)%tab_iflv_max = 7
     if(inc_flavour_decomposition) sf_tables_flav(1:)%tab_iflv_max = 6
     sf_alloc_already_done = .true. ! Signals that the tables have been set up.
@@ -495,10 +497,10 @@ contains
     real(dp) :: PNLOLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
        
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        as2pi = alphasLocal(sf_muR(Q)) / (twopi)
@@ -617,10 +619,10 @@ contains
     real(dp) :: PNLOLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables_flav(0)%nQ
        
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables_flav(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables_flav(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        as2pi = alphasLocal(sf_muR(Q)) / (twopi)
@@ -676,10 +678,10 @@ contains
 
     ! all coefficient functions at LO are delta functions (F2, FL and F3),
     ! so simply pass table(0) for each of the pieces
-    do iQ = 0, tables(0)%nQ
-       Q = tables(0)%Q_vals(iQ)
+    do iQ = 0, sf_tables(0)%nQ
+       Q = sf_tables(0)%Q_vals(iQ)
        ! explicitly evaluate the PDF at scale sf_muF(Q)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        if (use_mass_thresholds) then
           call use_vfns(f, Q)
        endif
@@ -697,10 +699,10 @@ contains
 
     ! all coefficient functions at LO are delta functions (F2, FL and F3),
     ! so simply pass table(0) for each of the pieces
-    do iQ = 0, tables(0)%nQ
-       Q = tables(0)%Q_vals(iQ)
+    do iQ = 0, sf_tables_flav(0)%nQ
+       Q = sf_tables_flav(0)%Q_vals(iQ)
        ! explicitly evaluate the PDF at scale sf_muF(Q)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       call EvalPdfTable_Q(sf_tables_flav(0),sf_muF(Q),f)
        if (use_mass_thresholds) then
           call use_vfns(f, Q)
        endif
@@ -719,11 +721,11 @@ contains
 
     ! all coefficient functions at LO are delta functions (F2, FL and F3),
     ! so simply pass table(0) for each of the pieces
-    do iQ = 0, tables(0)%nQ
-       f = tables(0)%tab(:,:,iQ)
+    do iQ = 0, sf_tables(0)%nQ
+       f = sf_tables(0)%tab(:,:,iQ)
        
        if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
+          call use_vfns(f, sf_tables(0)%Q_vals(iQ))
        endif
        
        sf_tables(1)%tab(:,:,iQ) = structure_function_general(&
@@ -741,11 +743,11 @@ contains
 
     ! all coefficient functions at LO are delta functions (F2, FL and F3),
     ! so simply pass table(0) for each of the pieces
-    do iQ = 0, tables(0)%nQ
-       f = tables(0)%tab(:,:,iQ)
+    do iQ = 0, sf_tables_flav(0)%nQ
+       f = sf_tables_flav(0)%tab(:,:,iQ)
        
        if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
+          call use_vfns(f, sf_tables_flav(0)%Q_vals(iQ))
        endif
        
        sf_tables_flav(1)%tab(:,:,iQ) = ch%CLLO*f
@@ -766,10 +768,10 @@ contains
     real(dp) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
        
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -809,10 +811,10 @@ contains
     real(dp) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables_flav(0)%nQ
        
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables_flav(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables_flav(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -854,10 +856,10 @@ contains
     real(dp) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
        ! Internal Q value effectively corresponds to sf_muF(Q1,Q2)
-       Q = tables(0)%Q_vals(iQ)
-       f = tables(0)%tab(:,:,iQ)
+       Q = sf_tables(0)%Q_vals(iQ)
+       f = sf_tables(0)%tab(:,:,iQ)
 
        ! Save the NLO pieces in sf_tables(2) and sf_tables(3)
       
@@ -888,10 +890,10 @@ contains
     real(dp) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables_flav(0)%nQ
        ! Internal Q value effectively corresponds to sf_muF(Q1,Q2)
-       Q = tables(0)%Q_vals(iQ)
-       f = tables(0)%tab(:,:,iQ)
+       Q = sf_tables_flav(0)%Q_vals(iQ)
+       f = sf_tables_flav(0)%tab(:,:,iQ)
 
        ! Save the NLO pieces in sf_tables(2) and sf_tables(3)
       
@@ -945,10 +947,10 @@ contains
     real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
 
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -1025,10 +1027,10 @@ contains
     real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
 
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
 
-       Q = tables(0)%Q_vals(iQ)
-       f = tables(0)%tab(:,:,iQ)
+       Q = sf_tables(0)%Q_vals(iQ)
+       f = sf_tables(0)%tab(:,:,iQ)
        
        ! save the NNLO pieces in sf_tables(4:7)
        
@@ -1084,10 +1086,10 @@ contains
     real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
 
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -1201,10 +1203,10 @@ contains
     real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
 
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
 
-       Q = tables(0)%Q_vals(iQ)
-       f = tables(0)%tab(:,:,iQ)
+       Q = sf_tables(0)%Q_vals(iQ)
+       f = sf_tables(0)%tab(:,:,iQ)
        
        ! save the N3LO pieces in sf_tables(8:15)
        
@@ -2020,7 +2022,7 @@ contains
        factor = 1.0_dp
        if (f2n3lo.gt.0.0_dp) factor = f2nnlo/f2n3lo
        do ii = ncompmin, ncompmax
-          tables(0)%tab(iy,ii,:) = tables(0)%tab(iy,ii,:) * factor
+          sf_tables(0)%tab(iy,ii,:) = sf_tables(0)%tab(iy,ii,:) * factor
        enddo
        
     enddo
@@ -2061,7 +2063,7 @@ contains
        factor = 1.0_dp
        if (f2nnlo.gt.0.0_dp) factor = f2nlo/f2nnlo
        do ii = ncompmin, ncompmax
-          tables(0)%tab(iy,ii,:) = tables(0)%tab(iy,ii,:) * factor
+          sf_tables(0)%tab(iy,ii,:) = sf_tables(0)%tab(iy,ii,:) * factor
        enddo
     enddo
     
