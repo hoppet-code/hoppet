@@ -70,7 +70,7 @@ end module lhasub4streamlinedqed
 
 
 
-program tabulation_example_streamlined
+program tabulation_example_qed_streamlined
   use hoppet_v1; use lhasub4streamlinedqed
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
@@ -159,30 +159,11 @@ program tabulation_example_streamlined
           &  xpdf_at_xQ(iflv_muon),&
           &  xpdf_at_xQ(iflv_tau)
   end do
+
+  ! NB: there is no cached evolution option available
+  ! with QED turned on
   
- 
-! ! Now perform cached evolution
-!  call hoppetPreEvolve(asQ, Q0alphas, nloop,muR_Q,Q0pdf)
-!  write(6,'(a)') "Pre-evolution prepared!"
-!
-!  call hoppetCachedEvolve(LHAsub)
-!  write(6,'(a)') "Cached evolution performed!"
-!
-!  ! Same output as before
-!  Q = 100.0_dp
-!  write(6,'(a)')
-!  write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
-!  write(6,'(a5,2a12,a14,a10,a12)') "x",&
-!       & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
-!  do ix = 1, size(heralhc_xvals)
-!     call hoppetEval(heralhc_xvals(ix),Q,xpdf_at_xQ)
-!     write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
-!          &  xpdf_at_xQ(2)-xpdf_at_xQ(-2), &
-!          &  xpdf_at_xQ(1)-xpdf_at_xQ(-1), &
-!          &  2*(xpdf_at_xQ(-1)+xpdf_at_xQ(-2)), &
-!          &  (xpdf_at_xQ(-4)+xpdf_at_xQ(4)), &
-!          &  xpdf_at_xQ(0)
-!  end do
-  
-end program tabulation_example_streamlined
+  ! perform cleanup (not strictly required)
+  call hoppetDeleteAll()
+end program tabulation_example_qed_streamlined
 

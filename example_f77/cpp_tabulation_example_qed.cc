@@ -47,6 +47,10 @@ int main () {
            pdf[6+0], pdf[6+8], pdf[6+9], pdf[6+10], pdf[6+11]
       );
   }
+
+  // free all memory that was allocated by hoppet
+  hoppetDeleteAll();
+  
 }
 
 

@@ -93,7 +93,6 @@ program tabulation_example_streamlined
   !    end subroutine EvolvePDF
   ! end interface
 
-
   ! Streamlined initialization
   ! including  parameters for x-grid
   order = -6
@@ -165,6 +164,9 @@ program tabulation_example_streamlined
 !          &  (xpdf_at_xQ(-4)+xpdf_at_xQ(4)), &
 !          &  xpdf_at_xQ(0)
 !  end do
+
+  ! perform cleanup (not strictly required)
+  call hoppetDeleteAll()
   
 end program tabulation_example_streamlined
 

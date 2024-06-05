@@ -83,6 +83,9 @@ C----------------------------------------------------------------------
      $        ourpdf(0)
       end do
 
+      ! free all memory that was allocated by hoppet
+      call hoppetDeleteAll()
+      
       end
 
 

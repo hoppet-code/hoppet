@@ -1,11 +1,35 @@
+2024-05-17  Gavin Salam  
+
+	* src/welcome_message.f90:
+	updated copyright date range.
+
+	* src/hoppet_v1.h:
+	* src/streamlined_interface.f90:
+	added hoppetDeleteAll() to free all memory associated with the main
+	streamlined interface. NB: does not do anything to the structure
+	function interface objects.
+
+	* example_f90/tabulation_example_qed.f90:
+	* example_f90/tabulation_example_qed_streamlined.f90:
+	* example_f77/cpp_tabulation_example_qed.cc:
+	* example_f77/cpp_tabulation_example.cc:
+	* example_f77/tabulation_example.f:
+	added calls to hoppetDeleteAll()
+
+2024-03-22  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/streamlined_interface.f90:
+	un-commented a block of code that prevented table_loop_from_index
+	from being set correctly (reported by Melissa van Beekveld)
+
 2024-02-28 Alexander + Gavin
 
-	* ../src/assertions.f90:
-	* ../src/evolution.f90:
-	* ../src/sort.f90:
-	* ../src/splitting_functions.f90:
-	* ../src/structure_functions.f90:
-	* ../src/warnings_and_errors.f90:
+	* src/assertions.f90:
+	* src/evolution.f90:
+	* src/sort.f90:
+	* src/splitting_functions.f90:
+	* src/structure_functions.f90:
+	* src/warnings_and_errors.f90:
 	replaced stop with error stop (or call to wae_error) to facilitate
 	debugging (e.g. backtrace in debuggers)
 
