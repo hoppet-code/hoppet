@@ -68,7 +68,7 @@ module structure_functions
   !! These contain the SF summed over flavour, and dressed with
   !! quark couplings according to the indices above (iF1Wp etc)
   type(pdf_table), save :: sf_tables(0:max_table_index) 
-  !! These contained the SF decomposed in flavour flavour WITHOUT
+  !! These contained the SF decomposed by flavour, WITHOUT
   !! couplings. For now functionality for these are somewhat
   !! limited. They are only available at LO/NLO.
   type(pdf_table), save :: sf_tables_flav(0:max_table_index)
@@ -220,7 +220,7 @@ contains
 
     if(sf_alloc_already_done) then
        call Delete(sf_tables)
-       if(inc_flavour_decomposition) call Delete(sf_tables_flav)
+       if (inc_flavour_decomposition) call Delete(sf_tables_flav)
     endif
 
     ! Now we set up the tables. HoppetStart already called, so we can copy over the structure
