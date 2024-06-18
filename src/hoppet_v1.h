@@ -20,15 +20,22 @@
 #define hoppetEval                     hoppeteval_          
 #define hoppetEvalSplit                hoppetevalsplit_
 #define hoppetSetQED                   hoppetsetqed_
+#define hoppetDeleteAll                hoppetdeleteall_
+
 /// The fortran subroutines pertaining to the below structure function 
 /// interfaces can be found at the end of structure_functions.f90
 #define hoppetStartStrFct              hoppetstartstrfct_
 #define hoppetStartStrFctExtended      hoppetstartstrfctextended_
 #define hoppetInitStrFct               hoppetinitstrfct_
+#define hoppetInitStrFctFlav           hoppetinitstrfctflav_
 #define hoppetStrFct                   hoppetstrfct_
 #define hoppetStrFctNoMu               hoppetstrfctnomu_
 #define hoppetStrFctLO                 hoppetstrfctlo_
 #define hoppetStrFctNLO                hoppetstrfctnlo_
+#define hoppetStrFctFlav               hoppetstrfctflav_
+#define hoppetStrFctNoMuFlav           hoppetstrfctnomuflav_
+#define hoppetStrFctLOFlav             hoppetstrfctloflav_
+#define hoppetStrFctNLOFlav            hoppetstrfctnloflav_
 #define hoppetStrFctNNLO               hoppetstrfctnnlo_
 #define hoppetStrFctN3LO               hoppetstrfctn3lo_
 
@@ -184,6 +191,14 @@ extern "C" {
                        const int    & iloop,
                        const int    & nf,
                        double * f);
+
+  //---------------------------------------------------------------------
+  /// Delete all hoppet objects associated with the streamlined interface,
+  /// including grid definitions, PDF tables, couplings, etc.
+  ///
+  /// NB: this does not delete anything associated with the structure function
+  /// part of the interface
+  void hoppetDeleteAll();
   
   ///----------------------------------------------------------------------
   /// Setup of constants and parameters needed for structure functions
@@ -206,6 +221,14 @@ extern "C" {
 			const int & separate_orders,
 			const double & xR,
 			const double & xF);
+
+  /// Initialize the structure functions up to specified order
+  /// this requires the PDF to have been set up beforehand, and filled in tables(0)
+  void hoppetInitStrFctFlav(const int & order_max,
+			    const int & separate_orders,
+			    const double & xR,
+			    const double & xF,
+			    const int & flavour_decomposition);
 
 
   /// calculate the structure function at x, Q, muR, muF.
@@ -240,22 +263,58 @@ extern "C" {
 			const double & muR_in,
 			const double & muF_in,
 			double * F);
+  /// calculate the structure function at x, Q, muR, muF.
+  /// This is the sum over all orders. 
+  /// The result is placed in F, which must be an array of size at least 14
+  /// with the indices as defined above (iF1Wp, etc.)
+  void hoppetStrFctFlav(const double & x,
+			const double & Q,
+			const double & muR_in,
+			const double & muF_in,
+			const double & iflav,
+			double * F);
+
+  /// calculate the structure function at x, Q, with muR and muF as
+  /// requested in hoppetStartStrFct. This is the sum over all orders
+  void hoppetStrFctNoMuFlav(const double & x,
+			    const double & Q,
+			    const double & iflav,
+			    double * F);
+
+  /// F_LO
+  /// calculate the leading order structure function at x, muF
+  ///
+  void hoppetStrFctLOFlav(const double & x,
+			  const double & Q,
+			  const double & muR_in,
+			  const double & muF_in,
+			  const double & iflav,
+			  double * F);
+  /// F_NLO
+  /// calculate the next-to-leading order structure function at x, muF
+  ///
+  void hoppetStrFctNLOFlav(const double & x,
+			   const double & Q,
+			   const double & muR_in,
+			   const double & muF_in,
+			   const double & iflav,
+			   double * F);
   /// F_NNLO
   /// calculate the next-to-next-to-leading order structure function at x, muF
   ///
   void hoppetStrFctNNLO(const double & x,
-			 const double & Q,
-			 const double & muR_in,
-			 const double & muF_in,
-			 double * F);
+			const double & Q,
+			const double & muR_in,
+			const double & muF_in,
+			double * F);
   /// F_N3LO
   /// calculate the next-to-next-to-next-to-leading order structure function at x, muF
   ///
   void hoppetStrFctN3LO(const double & x,
-			 const double & Q,
-			 const double & muR_in,
-			 const double & muF_in,
-			 double * F);
+			const double & Q,
+			const double & muR_in,
+			const double & muF_in,
+			double * F);
   
 }
 #endif // __HOPPET_V1__

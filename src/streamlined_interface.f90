@@ -46,7 +46,7 @@ module streamlined_interface
   !! Additional things for QED
   !integer,  save            :: nqcdloop_qed
   type(qed_coupling),  save :: coupling_qed
-  type(qed_split_mat),  save :: qed_split
+  type(qed_split_mat), save :: qed_split
   logical,  save :: with_qed = .false.
   real(dp), save :: effective_light_quark_masses = 0.109_dp
   integer,  save :: with_nqcdloop_qed = 0
@@ -183,6 +183,11 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   integer,  intent(in) :: factscheme !! 1=unpol-MSbar, 2=unpol-DIS, 3=Pol-MSbar
   !-------------------------------------
   integer :: iloop
+
+  ! if the allocation has already been done previously, delete
+  ! the existing tables and dglap holder, etc. to avoid a memory leak
+  if (alloc_already_done) call hoppetDeleteAll()  
+  
   ! initialise our grids
 
   ! the internal interpolation order (with a minus sign allows
@@ -213,14 +218,6 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   if (nloop >= 2) table_index_from_iloop(12)  = 6
   if (nloop >= 2) table_index_from_iloop(21)  = 7
   
-  ! if the allocation has already been done previously, delete
-  ! the existing tables and dglap holder to avoid a memory leak
-  if (alloc_already_done) then
-     call Delete(tables)
-     call Delete(dh)
-  end if
-  
-
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
 
@@ -252,6 +249,28 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   setup_done = .false.
 end subroutine hoppetStartExtended
 
+
+!! Delete all hoppet objects associated with the streamlined interface,
+!! including grid definitions, PDF tables, couplings, etc.
+!!
+!! NB: this does not delete anything associated with the structure function
+!! part of the interface
+subroutine hoppetDeleteAll()
+  use streamlined_interface
+  implicit none
+  if (alloc_already_done) then
+    call Delete(tables)
+    call Delete(dh)
+    if (with_qed) call Delete(qed_split)
+    call Delete(grid)
+    if (coupling_initialised) then
+      call Delete(coupling) 
+      if (with_qed) call Delete(coupling_qed)
+      coupling_initialised = .false.
+    end if
+    alloc_already_done = .false.
+  end if
+end subroutine hoppetDeleteAll
 
 !======================================================================
 !! Given a pdf_subroutine with the interface shown below, initialise
@@ -319,7 +338,10 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
   call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0pdf)
 
   ! get a running coupling with the desired scale
-  if (coupling_initialised) call Delete(coupling) 
+  if (coupling_initialised) then
+    call Delete(coupling) 
+    if (with_qed) call Delete(coupling_qed)
+  end if
   if (ffn_nf > 0) then
      call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
           &                   fixnf=ffn_nf)

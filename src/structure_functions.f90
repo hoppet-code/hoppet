@@ -21,6 +21,7 @@ module structure_functions
   !! those for evaluating the structure functions
   !!
   public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct
+  public :: F_LO_flav, F_NLO_flav, StrFct_flav
   !!
   !! those for querying the scale choices being used
   !!
@@ -39,7 +40,7 @@ module structure_functions
   integer, parameter :: iF3Wm=-3   !< F3 W- : Dbar + U 
   integer, parameter :: iF1Z = 4   !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
   integer, parameter :: iF2Z = 5   !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
-  integer, parameter :: iF3Z = 6   !< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up
+  integer, parameter :: iF3Z = 6   !< F3 Z  : (D + Dbar) * 2v_i_a_i_down + (U + Ubar) * 2v_i_a_i_up
   integer, parameter :: iF1EM = -4 !< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
   integer, parameter :: iF2EM = -5 !< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
   integer, parameter :: iF1gZ = 0  !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
@@ -61,10 +62,16 @@ module structure_functions
 
   !!
   !! Holds the structure functions. The tables are identical to the
-  !! streamlined tables, but separete such that one can use the
+  !! streamlined tables, but separate such that one can use the
   !! streamlined tables at the same time as the structure functions.
   !!
-  type(pdf_table), save :: sf_tables(0:max_table_index)
+  !! These contain the SF summed over flavour, and dressed with
+  !! quark couplings according to the indices above (iF1Wp etc)
+  type(pdf_table), save :: sf_tables(0:max_table_index) 
+  !! These contained the SF decomposed by flavour, WITHOUT
+  !! couplings. For now functionality for these are somewhat
+  !! limited. They are only available at LO/NLO.
+  type(pdf_table), save :: sf_tables_flav(0:max_table_index)
   logical,         save :: sf_alloc_already_done = .false.
 
   !!
@@ -94,7 +101,7 @@ module structure_functions
   real(dp), save :: cst_mu, xmuR, xmuF
   integer, save  :: scale_choice_save
   
-  logical, save  :: use_sep_orders
+  logical, save  :: use_sep_orders, inc_flavour_decomposition
   logical, save  :: exact_coefs
   integer :: nf_lcl, order_setup
 
@@ -196,10 +203,10 @@ contains
   !! @param[opt]     xR             factor to multiply renormalisation scale
   !! @param[opt]     xF             factor to multiply factorisation scale
   !!
-  subroutine InitStrFct(order, separate_orders, xR, xF)
+  subroutine InitStrFct(order, separate_orders, xR, xF, flavour_decomposition)
     integer, intent(in) :: order
     real(dp), optional   :: xR, xF
-    logical, optional :: separate_orders
+    logical, optional :: separate_orders, flavour_decomposition
 
     if(.not.setup_done(0)) then
        call wae_error('InitStrFct', 'hoppetEvolve not called!')
@@ -208,18 +215,28 @@ contains
     xmuR              = default_or_opt(one, xR)
     xmuF              = default_or_opt(one, xF)
 
-    if(sf_alloc_already_done) call Delete(sf_tables)
+    inc_flavour_decomposition = .false.
+    inc_flavour_decomposition = default_or_opt(inc_flavour_decomposition, flavour_decomposition)
+
+    if(sf_alloc_already_done) then
+       call Delete(sf_tables)
+       if (inc_flavour_decomposition) call Delete(sf_tables_flav)
+    endif
 
     ! Now we set up the tables. HoppetStart already called, so we can copy over the structure
     call AllocPdfTable(sf_tables, tables(0))
-    ! Finally we need to set tab_iflv_max = 7. We don't change tables(0) as it contains the PDF
+    if(inc_flavour_decomposition) call AllocPdfTable(sf_tables_flav, tables(0))
+    ! Finally we need to set tab_iflv_max = 7. We don't change sf_tables(0) as it contains the PDF
+    sf_tables(0) = tables(0)
+    sf_tables_flav(0) = tables(0)
     sf_tables(1:)%tab_iflv_max = 7
+    if(inc_flavour_decomposition) sf_tables_flav(1:)%tab_iflv_max = 6
     sf_alloc_already_done = .true. ! Signals that the tables have been set up.
 
     ! To turn off b quarks completely (only for testing and comparison)
     ! uncomment following two lines:
-    ! tables(0)%tab(:,-5,:) = zero
-    ! tables(0)%tab(:,+5,:) = zero
+    ! sf_tables(0)%tab(:,-5,:) = zero
+    ! sf_tables(0)%tab(:,+5,:) = zero
 
     ! default is to sum each order before convolutions (it's faster)
     if (scale_choice_save == scale_choice_arbitrary) then
@@ -260,6 +277,38 @@ contains
             & 'with scale_choice_arbitrary (or higher), separate_orders must be true, but was false; scale_choice=', &
             & intval = scale_choice_save)
        call set_structure_functions_upto(order)
+    endif
+    
+    ! Now for flavour decomposed SFs
+    if(inc_flavour_decomposition) then
+       if (use_sep_orders) then
+          ! First we treat the case where we want to separate out each order in
+          ! the final structure functions.
+          ! This is slower, but is needed e.g. for VBFH
+          if (scale_choice_save == scale_choice_Q .or. scale_choice_save == scale_choice_fixed) then
+             ! if scale_choice = 0,1 use fast implementation
+             ! tables is saved as an array in Q, and only tables(0),
+             ! sf_tables(1), sf_tables(2), sf_tables(4), sf_tables(8) are non zero
+             if (order.ge.1) call set_LO_structure_functions_flav()
+             if (order.ge.2) call set_NLO_structure_functions_flav()
+          else if(scale_choice_save == scale_choice_arbitrary) then
+             ! if scale_choice >= 2 use slower implementation with full
+             ! scale choices, such as sqrt(Q1*Q2)
+             ! tables is saved as an array in muF now, and all components
+             ! of sf_tables are non zero.
+             if (order.ge.1) call set_LO_structure_functions_anyscale_flav()
+             if (order.ge.2) call set_NLO_structure_functions_anyscale_flav()
+          else
+             call wae_error('InitStrFct', 'illegal value for scale_choice', intval = scale_choice_save)
+          endif
+       else
+          ! Now set up the default case where we sum up everything right away.
+          if (scale_choice_save >= scale_choice_arbitrary) & ! only allow for scale_choice = 0,1
+               & call wae_error('InitStrFct', &
+               & 'with scale_choice_arbitrary (or higher), separate_orders must be true, but was false; scale_choice=', &
+               & intval = scale_choice_save)
+          call set_structure_functions_upto_flav(order)
+       endif
     endif
 
     ! To rescale PDF by the N3LO F2 structure function (evaluated at 8 GeV)
@@ -448,10 +497,10 @@ contains
     real(dp) :: PNLOLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
        
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        as2pi = alphasLocal(sf_muR(Q)) / (twopi)
@@ -549,6 +598,76 @@ contains
     end do
   end subroutine set_structure_functions_upto
 
+
+  !----------------------------------------------------------------------
+  ! set up structure functions for scale_choice = 0, 1, adding up each order
+  subroutine set_structure_functions_upto_flav (order)
+    integer, intent(in) :: order
+    integer :: iQ
+    real(dp) :: Q, as2pi
+    real(dp) :: f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f3(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO_f (0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNNLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLONLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PNLOLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
+    
+    do iQ = 0, sf_tables_flav(0)%nQ
+       
+       Q = sf_tables_flav(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables_flav(0),sf_muF(Q),f)
+       call set_scale_logs(Q)
+       
+       as2pi = alphasLocal(sf_muR(Q)) / (twopi)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, Q)
+       endif
+   
+       ! start with LO
+       if (order.ge.1) then
+          sf_tables_flav(1)%tab(:,:,iQ) = ch%CLLO*f
+          sf_tables_flav(2)%tab(:,:,iQ) = ch%C2LO*f
+          sf_tables_flav(3)%tab(:,:,iQ) = ch%C3LO*f
+       endif
+       
+       ! now add NLO terms
+       if (order.ge.2) then
+          if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+             ! For central scale with scale_choice=1, we don't need to do all
+             ! the convolutions of the splitting functions
+             f2 = ch%C2NLO * f
+             fL = ch%CLNLO * f
+             f3 = ch%C3NLO * f
+          else
+             ! do the convolution with the coefficient functions and also the
+             ! corresponding splitting-function contributions when scales
+             ! are not equal to Q
+             PLO_f = dh%P_LO * f
+             f2 = CxNLO_with_logs(ch%C2LO, ch%C2NLO, f, PLO_f)
+             fL = CxNLO_with_logs(ch%CLLO, ch%CLNLO, f, PLO_f)
+             f3 = CxNLO_with_logs(ch%C3LO, ch%C3NLO, f, PLO_f)
+          endif
+
+          sf_tables_flav(1)%tab(:,:,iQ) = sf_tables_flav(1)%tab(:,:,iQ) + &
+               & as2pi * fl
+          sf_tables_flav(2)%tab(:,:,iQ) = sf_tables_flav(2)%tab(:,:,iQ) + &
+               & as2pi * f2
+          sf_tables_flav(3)%tab(:,:,iQ) = sf_tables_flav(3)%tab(:,:,iQ) + &
+               & as2pi * f3
+       endif
+
+       if(order.ge.3) call wae_error("Flavour decomposed SFs only implemented up to NLO.")
+    end do
+  end subroutine set_structure_functions_upto_flav
+
   
   !----------------------------------------------------------------------
   ! set up LO structure functions for scale_choice = 0, 1
@@ -559,10 +678,10 @@ contains
 
     ! all coefficient functions at LO are delta functions (F2, FL and F3),
     ! so simply pass table(0) for each of the pieces
-    do iQ = 0, tables(0)%nQ
-       Q = tables(0)%Q_vals(iQ)
+    do iQ = 0, sf_tables(0)%nQ
+       Q = sf_tables(0)%Q_vals(iQ)
        ! explicitly evaluate the PDF at scale sf_muF(Q)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        if (use_mass_thresholds) then
           call use_vfns(f, Q)
        endif
@@ -572,6 +691,29 @@ contains
   end subroutine set_LO_structure_functions
   
   !----------------------------------------------------------------------
+  ! set up LO structure functions for scale_choice = 0, 1 decomposed in flavour
+  subroutine set_LO_structure_functions_flav()
+    integer :: iQ
+    real(dp) :: f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: Q
+
+    ! all coefficient functions at LO are delta functions (F2, FL and F3),
+    ! so simply pass table(0) for each of the pieces
+    do iQ = 0, sf_tables_flav(0)%nQ
+       Q = sf_tables_flav(0)%Q_vals(iQ)
+       ! explicitly evaluate the PDF at scale sf_muF(Q)
+       call EvalPdfTable_Q(sf_tables_flav(0),sf_muF(Q),f)
+       if (use_mass_thresholds) then
+          call use_vfns(f, Q)
+       endif
+       sf_tables_flav(1)%tab(:,:,iQ) = ch%CLLO*f
+       sf_tables_flav(2)%tab(:,:,iQ) = ch%C2LO*f
+       sf_tables_flav(3)%tab(:,:,iQ) = ch%C3LO*f
+    end do
+    
+  end subroutine set_LO_structure_functions_flav
+  
+  !----------------------------------------------------------------------
   ! Set up the LO structure functions for any scale choice
   subroutine set_LO_structure_functions_anyscale()
     integer :: iQ
@@ -579,11 +721,11 @@ contains
 
     ! all coefficient functions at LO are delta functions (F2, FL and F3),
     ! so simply pass table(0) for each of the pieces
-    do iQ = 0, tables(0)%nQ
-       f = tables(0)%tab(:,:,iQ)
+    do iQ = 0, sf_tables(0)%nQ
+       f = sf_tables(0)%tab(:,:,iQ)
        
        if (use_mass_thresholds) then
-          call use_vfns(f, tables(0)%Q_vals(iQ))
+          call use_vfns(f, sf_tables(0)%Q_vals(iQ))
        endif
        
        sf_tables(1)%tab(:,:,iQ) = structure_function_general(&
@@ -593,6 +735,27 @@ contains
     end do
     
   end subroutine set_LO_structure_functions_anyscale
+  !----------------------------------------------------------------------
+  ! Set up the LO structure functions for any scale choice flavour decomposed
+  subroutine set_LO_structure_functions_anyscale_flav()
+    integer :: iQ
+    real(dp) :: f (0:grid%ny,ncompmin:ncompmax)
+
+    ! all coefficient functions at LO are delta functions (F2, FL and F3),
+    ! so simply pass table(0) for each of the pieces
+    do iQ = 0, sf_tables_flav(0)%nQ
+       f = sf_tables_flav(0)%tab(:,:,iQ)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, sf_tables_flav(0)%Q_vals(iQ))
+       endif
+       
+       sf_tables_flav(1)%tab(:,:,iQ) = ch%CLLO*f
+       sf_tables_flav(2)%tab(:,:,iQ) = ch%C2LO*f
+       sf_tables_flav(3)%tab(:,:,iQ) = ch%C3LO*f
+    end do
+    
+  end subroutine set_LO_structure_functions_anyscale_flav
   
   !----------------------------------------------------------------------
   ! set up NLO structure functions for scale_choice = 0, 1
@@ -605,10 +768,10 @@ contains
     real(dp) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
        
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -638,22 +801,50 @@ contains
   end subroutine set_NLO_structure_functions
 
   !----------------------------------------------------------------------
-  ! returns the convolution of coefficient and splitting functions
-  ! for NLO, with scale dependence; leading factor of as2pi left out.
-  !
-  ! This routine assumes that set_scale_logs(Q) has been called
-  ! beforehand.
-  function CxNLO_with_logs(CxLO, CxNLO, f, PLO_f) result(res)
-    real(dp),        intent(in) :: CxLO
-    type(split_mat), intent(in) :: CxNLO
-    real(dp),        intent(in) :: f    (0:grid%ny,ncompmin:ncompmax)
-    real(dp),        intent(in) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
-    real(dp)                    :: res  (0:grid%ny,ncompmin:ncompmax)
-    !----------------------------------------------------------------
+  ! set up NLO structure functions for scale_choice = 0, 1 with flavour decomposition
+  subroutine set_NLO_structure_functions_flav()
+    integer :: iQ
+    real(dp) :: f (0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f3(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: Q
+    
+    do iQ = 0, sf_tables_flav(0)%nQ
+       
+       Q = sf_tables_flav(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables_flav(0),sf_muF(Q),f)
+       call set_scale_logs(Q)
+       
+       if (use_mass_thresholds) then
+          call use_vfns(f, Q)
+       endif
 
-    res = CxNLO * f - (CxLO * log_muF2_over_Q2) * PLO_f
-  end function CxNLO_with_logs
-  
+       if ((scale_choice_save.eq.scale_choice_Q).and.(xmuR.eq.one).and.(xmuF.eq.one)) then
+       ! For central scale with scale_choice=1, we don't need to do all
+       ! the convolutions of the splitting functions
+          f2 = ch%C2NLO * f
+          fL = ch%CLNLO * f
+          f3 = ch%C3NLO * f
+       else
+       ! do the convolution with the coefficient functions and also the
+       ! corresponding splitting-function contributions when scales
+       ! are not equal to Q
+          PLO_f = dh%P_LO * f
+          f2 = CxNLO_with_logs(ch%C2LO, ch%C2NLO, f, PLO_f)
+          fL = CxNLO_with_logs(ch%CLLO, ch%CLNLO, f, PLO_f)
+          f3 = CxNLO_with_logs(ch%C3LO, ch%C3NLO, f, PLO_f)
+       endif
+          
+       sf_tables_flav(4)%tab(:,:,iQ) = fL
+       sf_tables_flav(5)%tab(:,:,iQ) = f2
+       sf_tables_flav(6)%tab(:,:,iQ) = f3
+
+    end do
+
+  end subroutine set_NLO_structure_functions_flav
+
   !----------------------------------------------------------------------
   ! Set up the NLO structure functions for any scale choice
   subroutine set_NLO_structure_functions_anyscale()
@@ -665,10 +856,10 @@ contains
     real(dp) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
        ! Internal Q value effectively corresponds to sf_muF(Q1,Q2)
-       Q = tables(0)%Q_vals(iQ)
-       f = tables(0)%tab(:,:,iQ)
+       Q = sf_tables(0)%Q_vals(iQ)
+       f = sf_tables(0)%tab(:,:,iQ)
 
        ! Save the NLO pieces in sf_tables(2) and sf_tables(3)
       
@@ -689,6 +880,61 @@ contains
   end subroutine set_NLO_structure_functions_anyscale
   
   !----------------------------------------------------------------------
+  ! Set up the NLO structure functions for any scale choice
+  subroutine set_NLO_structure_functions_anyscale_flav()
+    integer :: iQ
+    real(dp) :: f (0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f3(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: Q
+    
+    do iQ = 0, sf_tables_flav(0)%nQ
+       ! Internal Q value effectively corresponds to sf_muF(Q1,Q2)
+       Q = sf_tables_flav(0)%Q_vals(iQ)
+       f = sf_tables_flav(0)%tab(:,:,iQ)
+
+       ! Save the NLO pieces in sf_tables(2) and sf_tables(3)
+      
+       ! Get the NLO coefficient function, (C_NLO x f) 
+       f2 = (ch%C2NLO * f)
+       fL = (ch%CLNLO * f)
+       f3 = (ch%C3NLO * f)
+       sf_tables_flav(4)%tab(:,:,iQ) = fL
+       sf_tables_flav(5)%tab(:,:,iQ) = f2
+       sf_tables_flav(6)%tab(:,:,iQ) = f3
+
+       ! Now compute the (C_LO x P_LO x f) term
+       PLO_f = dh%P_LO * f
+       f2 = (ch%C2LO * PLO_f)
+       fL = (ch%CLLO * PLO_f)
+       f3 = (ch%C3LO * PLO_f)
+       sf_tables_flav(7)%tab(:,:,iQ) = fL
+       sf_tables_flav(8)%tab(:,:,iQ) = f2
+       sf_tables_flav(9)%tab(:,:,iQ) = f3
+    end do
+
+  end subroutine set_NLO_structure_functions_anyscale_flav
+  
+  !----------------------------------------------------------------------
+  ! returns the convolution of coefficient and splitting functions
+  ! for NLO, with scale dependence; leading factor of as2pi left out.
+  !
+  ! This routine assumes that set_scale_logs(Q) has been called
+  ! beforehand.
+  function CxNLO_with_logs(CxLO, CxNLO, f, PLO_f) result(res)
+    real(dp),        intent(in) :: CxLO
+    type(split_mat), intent(in) :: CxNLO
+    real(dp),        intent(in) :: f    (0:grid%ny,ncompmin:ncompmax)
+    real(dp),        intent(in) :: PLO_f(0:grid%ny,ncompmin:ncompmax)
+    real(dp)                    :: res  (0:grid%ny,ncompmin:ncompmax)
+    !----------------------------------------------------------------
+
+    res = CxNLO * f - (CxLO * log_muF2_over_Q2) * PLO_f
+  end function CxNLO_with_logs
+  
+  !----------------------------------------------------------------------
   ! set up the NNLO structure functions for scale_choice = 0, 1
   subroutine set_NNLO_structure_functions()
     integer :: iQ
@@ -701,10 +947,10 @@ contains
     real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
 
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -781,10 +1027,10 @@ contains
     real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
 
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
 
-       Q = tables(0)%Q_vals(iQ)
-       f = tables(0)%tab(:,:,iQ)
+       Q = sf_tables(0)%Q_vals(iQ)
+       f = sf_tables(0)%tab(:,:,iQ)
        
        ! save the NNLO pieces in sf_tables(4:7)
        
@@ -840,10 +1086,10 @@ contains
     real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
     
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
 
-       Q = tables(0)%Q_vals(iQ)
-       call EvalPdfTable_Q(tables(0),sf_muF(Q),f)
+       Q = sf_tables(0)%Q_vals(iQ)
+       call EvalPdfTable_Q(sf_tables(0),sf_muF(Q),f)
        call set_scale_logs(Q)
        
        if (use_mass_thresholds) then
@@ -957,10 +1203,10 @@ contains
     real(dp) :: PLO3_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: Q
 
-    do iQ = 0, tables(0)%nQ
+    do iQ = 0, sf_tables(0)%nQ
 
-       Q = tables(0)%Q_vals(iQ)
-       f = tables(0)%tab(:,:,iQ)
+       Q = sf_tables(0)%Q_vals(iQ)
+       f = sf_tables(0)%tab(:,:,iQ)
        
        ! save the N3LO pieces in sf_tables(8:15)
        
@@ -1268,8 +1514,8 @@ contains
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
-  !! @param[in,opt]   muR        renormalisation scale 
-  !! @param[in,opt]   muF        factorisation scale
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
   !! @return          an array of all structure functions summed over orders
   !!
   function StrFct (x, Q, muR, muF) result(res)
@@ -1293,6 +1539,46 @@ contains
     
   end function StrFct
 
+  !---------------------------------------------------------------------
+  !> @brief calculate the structure function at x, Q, muR, muF summed over all orders
+  !!
+  !! Calculate the structure function at x, Q, muR, muF summed over
+  !! all orders. muR and muF are only needed if we are using the
+  !! scale_choice_arbitrary, as otherwise they are already included in
+  !! the sf_tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in,opt]   muR        renormalisation scale 
+  !! @param[in,opt]   muF        factorisation scale
+  !! @param[in]       iflav      parton-flavour
+  !! @return          an array of FL, F2, F3 for the given flavour without couplings to the parton
+  !!
+  function StrFct_flav (x, Q, muR, muF, iflav) result(res)
+    real(dp), intent(in) :: x, Q
+    real(dp), intent(in), optional :: muR, muF
+    integer, intent(in) :: iflav
+    real(dp) :: res(1:3)
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    if(.not.inc_flavour_decomposition) call wae_error('StrFct_flav', &
+               'You did not initialise the Structure Functions with flavour decomposition. Exiting.')
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
+
+    if (use_sep_orders) then
+      ! if we kept each order separate, then add up all the fixed order terms one by one
+      if (order_setup.ge.1) res =       F_LO_flav  (x, Q, muR_lcl, muF_lcl, iflav)
+      if (order_setup.ge.2) res = res + F_NLO_flav (x, Q, muR_lcl, muF_lcl, iflav)
+      if (order_setup.ge.3) call wae_error('StrFct_flav: Flavour decomposed structure functions only implemneted up to NLO.')
+    else
+      ! if we haven't kept each order separate, then everything is in sf_tables(1:3)
+      res(1) = EvalPdfTable_xQf(sf_tables_flav(1), x, mu_table, iflav)
+      res(2) = EvalPdfTable_xQf(sf_tables_flav(2), x, mu_table, iflav)
+      res(3) = EvalPdfTable_xQf(sf_tables_flav(3), x, mu_table, iflav)
+    endif
+    
+  end function StrFct_Flav
 
   !> @brief calculate the leading order structure function at x, Q, muR, muF 
   !!
@@ -1303,8 +1589,8 @@ contains
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
-  !! @param[in,opt]   muR        renormalisation scale 
-  !! @param[in,opt]   muF        factorisation scale
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
   !! @return          an array of all the leading order structure functions
   !!
   function F_LO (x, Q, muR, muF) result(res)
@@ -1322,6 +1608,42 @@ contains
     
   end function F_LO
 
+  !> @brief calculate the leading order structure function at x, Q, muR, muF 
+  !!
+  !! Calculate the leading order structure function at x, Q, muR,
+  !! muF. muR and muF are only needed if we are using the
+  !! scale_choice_arbitrary, as otherwise they are already included in
+  !! the sf_tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
+  !! @param[in]       iflav      parton-flavour
+  !! @return          an array of FL, F2, F3 for the given flavour without couplings to the parton
+  !!
+  function F_LO_flav (x, Q, muR, muF, iflav) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
+    integer, intent(in) :: iflav
+    real(dp) :: res(1:3)
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
+
+    if(.not.use_sep_orders) call wae_error('F_LO_flav: you did not   &
+         &       initialise the Structure Functions with separate&
+         & orders.                   Exiting.')
+    
+    if(.not.inc_flavour_decomposition) call wae_error('F_LO_flav',&
+         & 'You          did not initialise the Structure Functions&
+         & with flavour          decomposition. Exiting.')
+
+    res(1) = EvalPdfTable_xQf(sf_tables_flav(1), x, mu_table, iflav)
+    res(2) = EvalPdfTable_xQf(sf_tables_flav(2), x, mu_table, iflav)
+    res(3) = EvalPdfTable_xQf(sf_tables_flav(3), x, mu_table, iflav)
+    
+  end function F_LO_FLAV
+
   !> @brief calculate the NLO structure function at x, Q, muR, muF 
   !!
   !! Calculate the NLO structure function at x, Q, muR, muF. muR and
@@ -1330,8 +1652,8 @@ contains
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
-  !! @param[in,opt]   muR        renormalisation scale 
-  !! @param[in,opt]   muF        factorisation scale
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
   !! @return          an array of all the NLO structure functions
   !!
   function F_NLO (x, Q, muR, muF) result(res)
@@ -1368,6 +1690,62 @@ contains
     
   end function F_NLO
 
+  !> @brief calculate the NLO structure function at x, Q, muR, muF 
+  !!
+  !! Calculate the NLO structure function at x, Q, muR, muF. muR and
+  !! muF are only needed if we are using the scale_choice_arbitrary,
+  !! as otherwise they are already included in the sf_tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
+  !! @param[in]       iflav      parton-flavour
+  !! @return          an array of FL, F2, F3 for the given flavour without couplings to the parton
+  !!
+  function F_NLO_flav (x, Q, muR, muF, iflav) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
+    integer, intent(in) :: iflav
+    real(dp) :: res(1:3), as2pi, LFQ2
+    real(dp) :: C1f(1:3), C0P0f(1:3)
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
+
+    if(.not.use_sep_orders) call wae_error('F_NLO_flav', 'You did not&
+         & initialise the Structure Functions with separate orders.&
+         & Exiting.')
+    
+    if(.not.inc_flavour_decomposition) call wae_error('F_NLO_flav',&
+         & 'You did not initialise the Structure Functions with&
+         & flavour decomposition. Exiting.')
+    
+    if (order_setup < 2) then
+      res = zero
+      return
+    end if
+
+    as2pi = alphasLocal(muR) / (twopi)
+    
+    ! C_NLO x f (x) in C1f(:)
+    res(1) = EvalPdfTable_xQf(sf_tables_flav(4), x, mu_table, iflav)
+    res(2) = EvalPdfTable_xQf(sf_tables_flav(5), x, mu_table, iflav)
+    res(3) = EvalPdfTable_xQf(sf_tables_flav(6), x, mu_table, iflav)
+    
+    ! if scale_choice = 0,1 then this term is already taken care of
+    if (scale_choice_save.ge.scale_choice_arbitrary) then
+       LFQ2 = two*log(muF/Q)
+       ! C_LO x P_LO x f (x) in C0P0f(:)
+       C0P0f(1) = EvalPdfTable_xQf(sf_tables_flav(7), x, mu_table, iflav)
+       C0P0f(2) = EvalPdfTable_xQf(sf_tables_flav(8), x, mu_table, iflav)
+       C0P0f(3) = EvalPdfTable_xQf(sf_tables_flav(9), x, mu_table, iflav)
+       res = res - C0P0f * LFQ2
+    endif
+    
+    res = res * as2pi
+    
+  end function F_NLO_flav
+
 
   !> @brief calculate the NNLO structure function at x, Q, muR, muF 
   !!
@@ -1377,8 +1755,8 @@ contains
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
-  !! @param[in,opt]   muR        renormalisation scale 
-  !! @param[in,opt]   muF        factorisation scale
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
   !! @return          an array of all the NNLO structure functions
   !!
   function F_NNLO (x, Q, muR, muF) result(res)
@@ -1437,8 +1815,8 @@ contains
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
-  !! @param[in,opt]   muR        renormalisation scale 
-  !! @param[in,opt]   muF        factorisation scale
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
   !! @return          an array of all the N3LO structure functions
   !!
   function F_N3LO (x, Q, muR, muF) result(res)
@@ -1644,7 +2022,7 @@ contains
        factor = 1.0_dp
        if (f2n3lo.gt.0.0_dp) factor = f2nnlo/f2n3lo
        do ii = ncompmin, ncompmax
-          tables(0)%tab(iy,ii,:) = tables(0)%tab(iy,ii,:) * factor
+          sf_tables(0)%tab(iy,ii,:) = sf_tables(0)%tab(iy,ii,:) * factor
        enddo
        
     enddo
@@ -1685,7 +2063,7 @@ contains
        factor = 1.0_dp
        if (f2nnlo.gt.0.0_dp) factor = f2nlo/f2nnlo
        do ii = ncompmin, ncompmax
-          tables(0)%tab(iy,ii,:) = tables(0)%tab(iy,ii,:) * factor
+          sf_tables(0)%tab(iy,ii,:) = sf_tables(0)%tab(iy,ii,:) * factor
        enddo
     enddo
     
@@ -1769,9 +2147,35 @@ subroutine hoppetInitStrFct(order, separate_orders, xR, xF)
   logical, intent(in) :: separate_orders
   real(dp), intent(in) :: xR, xF
   
-  call InitStrFct(order, separate_orders, xR, xF)
+  call InitStrFct(order, separate_orders, xR, xF, .false.)
 
 end subroutine hoppetInitStrFct
+
+!> @brief Initialize the structure functions up to specified order
+!!
+!! Initialize the structure functions up to specified order
+!! this requires the tabulated PDF to have been set up beforehand in the
+!! the streamlined interface. 
+!!
+!! By default, separate_orders = .false., which means that one
+!! can only access the sum over all orders. If separate_orders = .true.
+!! then one can access each order separately, but this is slower.
+!!
+!! @param[in]      order              order at which we initialise the structure functions
+!! @param[opt]     separate_orders    if .true. separate into individual orders rather than summing
+!! @param[opt]     xR             factor to multiply renormalisation scale
+!! @param[opt]     xF             factor to multiply factorisation scale
+!!
+subroutine hoppetInitStrFctFlav(order, separate_orders, xR, xF, flavour_decomposition)
+  use streamlined_interface; use structure_functions
+  implicit none
+  integer, intent(in) :: order
+  logical, intent(in) :: separate_orders, flavour_decomposition
+  real(dp), intent(in) :: xR, xF
+  
+  call InitStrFct(order, separate_orders, xR, xF, flavour_decomposition)
+
+end subroutine hoppetInitStrFctFlav
 
 !> @brief calculate the structure function at x, Q, muR, muF summed over all orders
 !!
@@ -1796,7 +2200,32 @@ subroutine hoppetStrFct(x, Q, muR_in, muF_in, res)
   res = StrFct(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFct
 
-!> @brief calculate the structure function at x, Q, ummed over all orders
+!> @brief calculate the structure function at x, Q, muR, muF summed over all orders
+!!
+!! Calculate the structure function at x, Q, muR, muF summed over
+!! all orders. If using a scale choice other than scale_choice_arbitrary,
+!! muR and muF must be consistent with the scale choice made in the 
+!! hoppetStartStrFct call. See also hoppetStrFctNoMu for a variant
+!! that does not take muR and muF arguments.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
+!! @param[in]       iflav      parton flavour
+!! @return          an array of all structure functions summed over orders decomposed in flavour
+!!
+subroutine hoppetStrFctFlav(x, Q, muR_in, muF_in, iflav, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  integer  :: iflav
+  real(dp) :: res(1:3)
+
+  res = StrFct_flav(x, Q, muR_in, muF_in, iflav)
+end subroutine hoppetStrFctFlav
+
+!> @brief calculate the structure function at x, Q, summed over all orders
 !!
 !! Calculate the structure function at x, Q, for the scale choice as indicated
 !! in hoppetStartStrFct. This can only be used with scale_choice_Q and scale_choice_fixed. 
@@ -1807,13 +2236,32 @@ end subroutine hoppetStrFct
 !! @return          an array of all structure functions summed over orders
 !!
 subroutine hoppetStrFctNoMu(x, Q, res) 
-   use streamlined_interface; use structure_functions
-   real(dp) :: x, Q
-   real(dp) :: res(-6:7)
- 
-   res = StrFct(x, Q)
- end subroutine hoppetStrFctNoMu
- 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: res(-6:7)
+  
+  res = StrFct(x, Q)
+end subroutine hoppetStrFctNoMu
+
+!> @brief calculate the structure function at x, Q, summed over all orders
+!!
+!! Calculate the structure function at x, Q, for the scale choice as indicated
+!! in hoppetStartStrFct. This can only be used with scale_choice_Q and scale_choice_fixed. 
+!! See also hoppetStrFct for a variant with muR and muF choice. 
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in]       iflav      parton flavour
+!! @return          an array of all structure functions summed over orders decomposed in flavour
+!!
+subroutine hoppetStrFctNoMuFlav(x, Q, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: res(1:3)
+  
+  res = StrFct_flav(x, Q, iflav = iflav)
+end subroutine hoppetStrFctNoMuFlav
+
 
 !> @brief calculate the leading order structure function at x, Q, muR, muF 
 !!
@@ -1824,8 +2272,8 @@ subroutine hoppetStrFctNoMu(x, Q, res)
 !!
 !! @param[in]       x          x value
 !! @param[in]       Q          Q value
-!! @param[in,opt]   muR        renormalisation scale 
-!! @param[in,opt]   muF        factorisation scale
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
 !! @return          an array of all the leading order structure functions
 !!
 subroutine hoppetStrFctLO(x, Q, muR_in, muF_in, res) 
@@ -1837,6 +2285,30 @@ subroutine hoppetStrFctLO(x, Q, muR_in, muF_in, res)
   res = F_LO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctLO
 
+!> @brief calculate the leading order structure function at x, Q, muR, muF 
+!!
+!! Calculate the leading order structure function at x, Q, muR,
+!! muF. muR and muF are only needed if we are using the
+!! scale_choice_arbitrary, as otherwise they are already included in
+!! the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
+!! @param[in]       iflav      partonflavour
+!! @return          an array of all the leading order structure functions summed over orders
+!!
+subroutine hoppetStrFctLOFlav(x, Q, muR_in, muF_in, iflav, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  integer  :: iflav
+  real(dp) :: res(1:3)
+
+  res = F_LO_flav(x, Q, muR_in, muF_in, iflav)
+end subroutine hoppetStrFctLOFlav
+
 !> @brief calculate the NLO structure function at x, Q, muR, muF 
 !!
 !! Calculate the NLO structure function at x, Q, muR, muF. muR and
@@ -1845,8 +2317,8 @@ end subroutine hoppetStrFctLO
 !!
 !! @param[in]       x          x value
 !! @param[in]       Q          Q value
-!! @param[in,opt]   muR        renormalisation scale 
-!! @param[in,opt]   muF        factorisation scale
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
 !! @return          an array of all the NLO structure functions
 !!
 subroutine hoppetStrFctNLO(x, Q, muR_in, muF_in, res) 
@@ -1858,6 +2330,28 @@ subroutine hoppetStrFctNLO(x, Q, muR_in, muF_in, res)
   res = F_NLO(x, Q, muR_in, muF_in)
 end subroutine hoppetStrFctNLO
 
+!> @brief calculate the NLO structure function at x, Q, muR, muF 
+!!
+!! Calculate the NLO structure function at x, Q, muR, muF. muR and
+!! muF are only needed if we are using the scale_choice_arbitrary,
+!! as otherwise they are already included in the sf_tables.
+!!
+!! @param[in]       x          x value
+!! @param[in]       Q          Q value
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
+!! @return          an array of all the NLO structure functions
+!!
+subroutine hoppetStrFctNLOFlav(x, Q, muR_in, muF_in, iflav, res) 
+  use streamlined_interface; use structure_functions
+  real(dp) :: x, Q
+  real(dp) :: muR_in, muF_in
+  integer  :: iflav
+  real(dp) :: res(1:3)
+
+  res = F_NLO_flav(x, Q, muR_in, muF_in, iflav)
+end subroutine hoppetStrFctNLOFlav
+
 !> @brief calculate the NNLO structure function at x, Q, muR, muF 
 !!
 !! Calculate the NNLO structure function at x, Q, muR, muF. muR and
@@ -1866,8 +2360,8 @@ end subroutine hoppetStrFctNLO
 !!
 !! @param[in]       x          x value
 !! @param[in]       Q          Q value
-!! @param[in,opt]   muR        renormalisation scale 
-!! @param[in,opt]   muF        factorisation scale
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
 !! @return          an array of all the NNLO structure functions
 !!
 subroutine hoppetStrFctNNLO(x, Q, muR_in, muF_in, res) 
@@ -1887,8 +2381,8 @@ end subroutine hoppetStrFctNNLO
 !!
 !! @param[in]       x          x value
 !! @param[in]       Q          Q value
-!! @param[in,opt]   muR        renormalisation scale 
-!! @param[in,opt]   muF        factorisation scale
+!! @param[in]       muR        renormalisation scale 
+!! @param[in]       muF        factorisation scale
 !! @return          an array of all the N3LO structure functions
 !!
 subroutine hoppetStrFctN3LO(x, Q, muR_in, muF_in, res) 
