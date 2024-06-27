@@ -1,4 +1,5 @@
 # Usage instructions:
+#
 ## mkdir build
 ## cmake -S . -B build [-DCMAKE_INSTALL_PREFIX=/opt/myproject] [-DHOPPET_USE_EXACT_COEF=ON] ..
 ## cmake --build  build -j 
