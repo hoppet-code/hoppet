@@ -1,9 +1,9 @@
-
+# Usage instructions:
 ## mkdir build
 ## cmake -S . -B build [-DCMAKE_INSTALL_PREFIX=/opt/myproject] [-DHOPPET_USE_EXACT_COEF=ON] ..
 ## cmake --build  build -j 
 ## cmake --install build
-## ctest --test-dir build
+## ctest --test-dir build [-j8]
 
 cmake_minimum_required(VERSION 3.15)
 # set the project name
