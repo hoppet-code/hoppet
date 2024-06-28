@@ -637,7 +637,7 @@ contains
   function cobj_PConv(P,q_in) result(Pxq)
     type(split_mat), intent(in)         :: P
     real(dp),        intent(in), target :: q_in(0:,ncompmin:)
-    real(dp)                     :: Pxq(0:ubound(q_in,dim=1),ncompmin:ncompmax)
+    real(dp)                     :: Pxq(0:size(q_in,dim=1)-1,ncompmin:ncompmax)
     !-- for when we have to change rep
     integer                       :: pdfr
     !type(pdf_rep)                :: prep
@@ -703,7 +703,7 @@ contains
     type(split_mat), intent(in)         :: P
     real(dp),        intent(in), target :: q_in(0:,ncompmin:,:)
     real(dp)                            :: &
-         &Pxq(0:ubound(q_in,dim=1),ncompmin:ncompmax,size(q_in,dim=3))
+         &Pxq(0:size(q_in,dim=1)-1,ncompmin:ncompmax,size(q_in,dim=3))
     integer :: i
     do i = 1, size(q_in,dim=3)
        Pxq(:,:,i) = cobj_PConv(P,q_in(:,:,i))
@@ -883,8 +883,8 @@ contains
   function cobj_ConvMTM(MTM,q) result(Pxq)
     type(mass_threshold_mat), intent(in) :: MTM
     real(dp),   intent(in) :: q(0:,ncompmin:)
-    real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ncompmax)
-    real(dp) :: singlet(0:ubound(q,dim=1))
+    real(dp)               :: Pxq(0:size(q,dim=1)-1,ncompmin:ncompmax)
+    real(dp) :: singlet(0:size(q,dim=1)-1)
     integer :: i, nf_light, nf_heavy
 
     !-- general sanity checks
@@ -1074,9 +1074,9 @@ contains
   function cobj_CConv(C,q) result(Cxq)
     type(coeff_mat), intent(in) :: C
     real(dp),   intent(in) :: q(0:,0:)
-    real(dp)               :: Cxq(0:ubound(q,dim=1))
+    real(dp)               :: Cxq(0:size(q,dim=1)-1)
     !--------------------------------------------------
-    real(dp) :: ud(0:ubound(q,dim=1))
+    real(dp) :: ud(0:size(q,dim=1)-1)
     real(dp), parameter :: uq2 = (4.0_dp/9.0_dp)
     real(dp), parameter :: dq2 = (1.0_dp/9.0_dp)
 

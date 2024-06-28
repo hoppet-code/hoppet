@@ -260,7 +260,7 @@ contains
     real(dp),         intent(in) :: pdf(0:,ncompmin:)
     character(len=*), intent(in) :: label
     !-----------------
-    real(dp) :: moments(ncompmin:ubound(pdf,dim=2))
+    real(dp) :: moments(ncompmin:ncompmin+size(pdf,dim=2)-1)
     
     write(iunit,"(a)", advance="no"), "# total momentum "//trim(label)//" (& components)"
     moments = TruncatedMoment(grid, pdf, one)
