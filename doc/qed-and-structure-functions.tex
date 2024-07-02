@@ -465,7 +465,7 @@ In recent years significant progress in determining the perturbative
 components needed for unpolarised QCD evolution at N$^3$LO has been
 made.
 %
-This is now to the extent that two PDF groups have released fits at
+This has now reached the stage that two PDF groups have released fits at
 approximate N$^3$LO (aN$^3$LO)
 accuracy~\cite{McGowan:2022nag,NNPDF:2024nan}.
 %
@@ -494,7 +494,8 @@ determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Fal
 %
 We have therefore implemented the aforementioned pieces, with the
 intention of updating the splitting functions as they become more
-precisely known.
+precisely known.\gps{implemented $\to$ incorporated? (And mention we
+  used their code?)}
 
 For the specific implementation in \hoppet version 1.3.0 we rely on
 the approximations computed in
@@ -517,9 +518,10 @@ e.g. \ttt{InitDglapHolder}, \ttt{InitRunningCoupling}, and
 The user also has a few choices they can make in terms of the
 splitting functions used.
 %
-The approximate splitting functions can either return three different
-values corresponding to an upper and a lower band and their
-average.
+The approximate splitting functions can return
+three different
+choices corresponding to upper and lower edges of an uncertainty band and their
+average. \gps{rephrased a little}
 %
 The user can control which use through the
 \ttt{n3lo\_splitting\_variant} which takes the values
@@ -527,7 +529,7 @@ The user can control which use through the
 \ttt{n3lo\_splitting\_Nfiterr1}, or
 \ttt{n3lo\_splitting\_Nfiterr2}.
 %
-Should the exact splitting functions become available they will
+Should\gps{$\to$ When?} the exact splitting functions become available they will
 correspond to \ttt{n3lo\_splitting\_exact}.
 %
 Similarly if a set of parametrisations of the exact splitting
