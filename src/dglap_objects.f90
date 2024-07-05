@@ -1102,7 +1102,7 @@ contains
        else if (i == iflv_g .or. abs(i) == nf_heavy) then
           cycle
        else
-          Pxq(:,i) = MTM%NSqq_H .conv. q(:,i) + dq_from_singlet
+          Pxq(:,i) = (MTM%NSqq_H .conv. q(:,i)) + dq_from_singlet
        end if
     end do
 
