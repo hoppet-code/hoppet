@@ -1,3 +1,11 @@
+2024-08-05  Gavin Salam  <gavin.salam@physics.ox.ac.uk> + Alexander
+
+	* src/pdf_tabulate.f90:
+	fixed issue where get_lnlnQ_weights was giving an error when
+	trying to get the lnlnQ weight for a nf interval with a very
+	narrow range of Q values (below some threshold, the table
+	gets just a single entry).
+
 2024-05-17  Gavin Salam  
 
 	* src/welcome_message.f90:

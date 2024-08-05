@@ -882,7 +882,7 @@ contains
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
     !   signal for Q being out of range
     call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
-    if (ilnlnQ_lo > ilnlnQ_lo) then
+    if (ilnlnQ_lo > ilnlnQ_hi) then
       pdf = zero
       return
     end if
@@ -966,8 +966,16 @@ contains
          &               ilnlnQ_lo, ilnlnQ_hi, lnlnQ_norm)
 
     nQ = ilnlnQ_hi - ilnlnQ_lo
-    if (nQ < ubound(lnlnQ_wgts,1)) call wae_error('get_lnlnQ_wgts',&
-         & 'lnlnQ_wgts too small for requested Q interpolation')
+    if (nQ < ubound(lnlnQ_wgts,1)) then 
+      ! nQ can be zero if the table had a very narrow range of Q values (< O(min_dlnlnQ_singleQ))
+      if (nQ == 0 .and. abs(lnlnQ - tab%lnlnQ_vals(ilnlnQ_lo)) < two * min_dlnlnQ_singleQ) then
+         lnlnQ_wgts(0) = 1
+      else
+         !write(6,*) "Q=", Q, 'nQ = ',nQ, 'lnlnQ_wgts = ',ubound(lnlnQ_wgts,1), tab%nf_int
+         call wae_error('get_lnlnQ_wgts',&
+            & 'lnlnQ_wgts too small for requested Q interpolation')
+      end if
+    end if
     call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
 
   end subroutine get_lnlnQ_wgts
