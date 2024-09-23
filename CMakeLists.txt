@@ -24,7 +24,8 @@ option(HOPPET_BUILD_TESTDIR   "Enable build of the code in the test directory." 
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
-  message(STATUS "HOPPET: Build type not specified, use: ${CMAKE_BUILD_TYPE}")
+  #set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+message(STATUS "HOPPET: Build type not specified, use: ${CMAKE_BUILD_TYPE}")
 endif()
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
