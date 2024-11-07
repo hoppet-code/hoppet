@@ -538,8 +538,8 @@ end subroutine hoppetSetExactDGLAP
 subroutine hoppetSetApproximateDGLAPN3LO(splitting_variant)
   ! splitting_variant can be one of
   ! n3lo_splitting_approximation_up_to_2310_05744
-  ! n3lo_splitting_approximation_up_to_2410_09701 
-  ! n3lo_splitting_approximation_up_to_2404_08089 (default)
+  ! n3lo_splitting_approximation_up_to_2404_09701 
+  ! n3lo_splitting_approximation_up_to_2410_08089 (default)
   use streamlined_interface ! this module which provides access to the array of tables
   implicit none
   integer :: splitting_variant

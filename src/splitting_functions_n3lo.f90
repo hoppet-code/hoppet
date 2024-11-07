@@ -589,7 +589,7 @@ contains
     case(cc_REAL,cc_REALVIRT)
        if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2310_05744) then
           res = P3GQA(x, nf_int, n3lo_splitting_variant)
-       elseif(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2404_09701) then
+       else
           res = P3GQA_2404(x, nf_int, n3lo_splitting_variant)
        endif
     end select
