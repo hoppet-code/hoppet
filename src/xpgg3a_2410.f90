@@ -174,6 +174,8 @@ contains
        INTEGER nf
        COMMON / P3GSOFT / A4gluon
 !
+       A4gluon =  40880.330D0     - 11714.246D0*nf &
+            &          + 440.04876D0*nf2 + 7.3627750D0*nf3
        P3GGB_2410  = A4gluon/(1.D0-Y)
 !
        RETURN
