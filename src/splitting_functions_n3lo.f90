@@ -474,7 +474,8 @@ end module splitting_functions_n3lo_p
 module splitting_functions_n3lo_n
   use types; use consts_dp; use convolution_communicator
   use qcd; use dglap_choices; use warnings_and_errors
-  use xpgg3a; use xpgq3a; use xpgq3a_2404; use xpqg3a; use xpps3a; use xpns3s; use xpns3p; use xpns3m
+  use xpgg3a; use xpgg3a_2410; use xpgq3a; use xpgq3a_2404; use&
+       & xpqg3a; use xpps3a; use xpns3s; use xpns3p; use xpns3m
   implicit none
   private
 
@@ -495,17 +496,29 @@ contains
     x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = P3GGA(x, nf_int, n3lo_splitting_variant) + P3GGB(x, nf_int)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - P3GGB(x, nf_int)
-    case(cc_DELTA)
-       res = P3GGC(zero, nf_int)
-    end select
-
+    if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2410_08089) then
+       select case(cc_piece)
+       case(cc_REAL,cc_REALVIRT)
+          res = P3GGA_2410(x, nf_int, n3lo_splitting_variant) + P3GGB_2410(x, nf_int)
+       end select
+       select case(cc_piece)
+       case(cc_VIRT,cc_REALVIRT)
+          res = res - P3GGB_2410(x, nf_int)
+       case(cc_DELTA)
+          res = P3GGC_2410(zero, nf_int, n3lo_splitting_variant)
+       end select
+    else
+       select case(cc_piece)
+       case(cc_REAL,cc_REALVIRT)
+          res = P3GGA(x, nf_int, n3lo_splitting_variant) + P3GGB(x, nf_int)
+       end select
+       select case(cc_piece)
+       case(cc_VIRT,cc_REALVIRT)
+          res = res - P3GGB(x, nf_int)
+       case(cc_DELTA)
+          res = P3GGC(zero, nf_int)
+       end select
+    endif
     res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
     if (cc_piece /= cc_DELTA) res = res * x
   end function sf_P3gg
