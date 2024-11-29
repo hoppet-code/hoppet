@@ -1,5 +1,18 @@
 2024-11-29 Fri  <gavin.salam@physics.ox.ac.uk>
 
+	* ../src/pdf_tabulate.f90:
+	added PDFTableSetYInterpOrder(order), which sets a global
+	order for the interpolation of the y values in the PDF table.
+	Intended to allow investigation of speed an accuracy of 
+	interpolations that use fewer x points than the intrinsic
+	grid order (typically in conjunction with fewer lnlnQ points).
+	Some timing explicitly included in the code, in the EvalPdfTable_yQ 
+	function. Interface may evolve.
+
+	* ../benchmarking/prec_and_timing.f90:
+	added -yinterp I for controlling the y interpolation order
+	in PDF tables.
+
 	* CMakeLists.txt:
 	* benchmarking/test_acc/compare2files_v2.f90:
 	added CMake compilation of compare2files_v2.f90, and 

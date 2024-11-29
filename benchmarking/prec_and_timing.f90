@@ -117,7 +117,7 @@ program prec_and_timing
   real(dp), pointer  :: vogt_init(:,:)
   type(pdf_table)       :: table
   logical            :: output, outputgrid, preev
-  integer :: idev
+  integer :: idev, y_interp_order
   character(len=300) :: hostname
 
   ! set the details of the y=ln1/x grid
@@ -162,7 +162,7 @@ program prec_and_timing
        &   call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
   if (log_val_opt('-exactsp')) &
        &   call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
-
+ 
   call cpu_time(time_start)
   call InitDglapHolder(grid, dh, factscheme=factscheme_MSbar, &
        &                              nloop=nloop, nflo=3, nfhi=6)
@@ -192,6 +192,9 @@ program prec_and_timing
   call AddNfInfoToPdfTable(table,coupling)
   if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
   call cpu_time(time_ev_done)
+
+  y_interp_order = int_val_opt('-yinterp',-1)
+  call PDFTableSetYInterpOrder(y_interp_order)
 
   ! decide 
   nrep  = int_val_opt('-nrep',1)
