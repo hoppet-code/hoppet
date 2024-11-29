@@ -5,6 +5,9 @@
 	added CMake compilation of compare2files_v2.f90, and 
 	added a bit more documentation as part of the output.
 
+	* .github/workflows/main.yml:
+	turned off ifort because it's failing in CI
+
 2024-08-05  Gavin Salam  <gavin.salam@physics.ox.ac.uk> + Alexander
 
 	* src/pdf_tabulate.f90:
