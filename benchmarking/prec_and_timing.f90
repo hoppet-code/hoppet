@@ -117,6 +117,8 @@ program prec_and_timing
   real(dp), pointer  :: vogt_init(:,:)
   type(pdf_table)       :: table
   logical            :: output, outputgrid, preev
+  integer :: idev
+  character(len=300) :: hostname
 
   ! set the details of the y=ln1/x grid
   dy    = dble_val_opt('-dy',0.25_dp)
@@ -124,6 +126,8 @@ program prec_and_timing
   order = int_val_opt('-order',-6)
   order2 = int_val_opt('-order2',order)
   order1 = int_val_opt('-order1',order)
+
+  idev = idev_open_opt("-o","/dev/stdout")
 
   preev = log_val_opt('-preev',.true.)
 
@@ -201,6 +205,14 @@ program prec_and_timing
   if (.not. CheckAllArgsUsed(0)) stop
   !----------------------------------
 
+  write(idev,'(a)',advance='no') "# "
+  call time_stamp(idev)
+  call get_hostname(hostname)  
+  write(idev,'(a)') "# host: "//trim(hostname)
+  !call EXECUTE_COMMAND_LINE("echo '# host:' `hostname`")
+  ! record info about the cpu
+  !call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
+
   ! evolution & output
   do i = 1, nrep
      if (preev) then
@@ -222,12 +234,7 @@ program prec_and_timing
        &   time_init_done-time_start, &
        &   time_ev_done-time_init_done, &
        &   (time_end-time_ev_done)/nrep
-  write(6,'(a)',advance='no') "# "
-  call time_stamp(6)
-  call EXECUTE_COMMAND_LINE("echo '# host:' `hostname`")
-  ! record info about the cpu
-  !call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
-  if (output) write(6,'(a,4f10.5)') "# Timings (init, preevln, evln) = ", &
+  if (output) write(idev,'(a,4f10.5)') "# Timings (init, preevln, evln) = ", &
        &   time_init_done-time_start, &
        &   time_ev_done-time_init_done, &
        &   (time_end-time_ev_done)/nrep
@@ -247,16 +254,16 @@ contains
   !---------------------------------------------------------------
   !! some basic commentary
   subroutine output_info
-    write(6,'(a)') '# '//trim(command_line())
-    write(6,'(a)') '# Grid properties:'
-    write(6,'(a,4f10.6)')  '# dymax = ', maxval(grid%subgd(:)%dy)
-    write(6,'(a,4i10)')    '# dnsty = ', nint(maxval(grid%subgd(:)%dy)/grid%subgd(:)%dy)
-    write(6,'(a,4f10.6)')  '# ymax  = ', grid%subgd(:)%ymax
-    write(6,'(a,4i10)'  )  '# order = ', grid%subgd(:)%order
-    write(6,'(a,4es10.2)') '# eps   = ', grid%subgd(:)%eps
+    write(idev,'(a)') '# '//trim(command_line())
+    write(idev,'(a)') '# Grid properties:'
+    write(idev,'(a,4f10.6)')  '# dymax = ', maxval(grid%subgd(:)%dy)
+    write(idev,'(a,4i10)')    '# dnsty = ', nint(maxval(grid%subgd(:)%dy)/grid%subgd(:)%dy)
+    write(idev,'(a,4f10.6)')  '# ymax  = ', grid%subgd(:)%ymax
+    write(idev,'(a,4i10)'  )  '# order = ', grid%subgd(:)%order
+    write(idev,'(a,4es10.2)') '# eps   = ', grid%subgd(:)%eps
     
-    write(6,'(a,f10.5,a,f10.5)') '# Evolution: du = ',du, ",   coupling dt = ", DefaultCouplingDt()
-    write(6,'(a,f10.5,a,i5)') '# Tabulation: dlnlnQ = ',dlnlnQ, ', olnlnQ = ',olnlnQ
+    write(idev,'(a,f10.5,a,f10.5)') '# Evolution: du = ',du, ",   coupling dt = ", DefaultCouplingDt()
+    write(idev,'(a,f10.5,a,i5)') '# Tabulation: dlnlnQ = ',dlnlnQ, ', olnlnQ = ',olnlnQ
   end subroutine output_info
 
 
@@ -270,35 +277,35 @@ contains
        y = j*ymax/nn
        Q = Qmax - j*(Qmax-Qinit)/nn
        call EvalPdfTable_yQ(table,y,Q,pdfval)
-       if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
-       !if (output .and. i==1) write(6,'(20es20.8)') y,Q,vogt_init(:,0:3).atx.(grid.with.exp(-y))
+       if (output .and. i==1) write(idev,'(20es20.10)') y,Q,pdfval(0:4)
+       !if (output .and. i==1) write(idev,'(20es20.8)') y,Q,vogt_init(:,0:3).atx.(grid.with.exp(-y))
     end do
 
-    if (output .and. i==1) write(6,*)
-    if (output .and. i==1) write(6,*)
+    if (output .and. i==1) write(idev,*)
+    if (output .and. i==1) write(idev,*)
     do j = nn,1,-1
        y = j*ymax/nn
        Q = 4.0_dp + j*5.0_dp/nn
        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-       if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
+       if (output .and. i==1) write(idev,'(20es20.10)') y,Q,pdfval(0:4)
     end do
 
-    if (output .and. i==1) write(6,*)
-    if (output .and. i==1) write(6,*)
+    if (output .and. i==1) write(idev,*)
+    if (output .and. i==1) write(idev,*)
     do j = nn,1,-1
        y = j*ymax/nn
        Q = Qmax*(1-j*0.2_dp/nn)
        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-       if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
+       if (output .and. i==1) write(idev,'(20es20.10)') y,Q,pdfval(0:4)
     end do
 
-    if (output .and. i==1) write(6,*)
-    if (output .and. i==1) write(6,*)
+    if (output .and. i==1) write(idev,*)
+    if (output .and. i==1) write(idev,*)
     do j = nn,1,-1
        y = j*ymax/nn
        Q = sqrt(Qinit*Qmax)*(1+j*0.2_dp/nn)
        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-       if (output .and. i==1) write(6,'(20es20.10)') y,Q,pdfval(0:4)
+       if (output .and. i==1) write(idev,'(20es20.10)') y,Q,pdfval(0:4)
     end do
   end subroutine eval_output_lines
 
@@ -323,9 +330,9 @@ contains
           zQ = (iQ+zeta/zmax) * zQmax / nQ
           Q = max(Qinit,min(Qmax,Qinit * exp(y_of_zeta(zQ, gridQ_a))))
           call EvalPdfTable_yQ(table,y,Q,pdfval) 
-          if (output .and. i == 1) write(6,'(20es20.10)') y,Q,pdfval(-5:5)
+          if (output .and. i == 1) write(idev,'(20es20.10)') y,Q,pdfval(-5:5)
        end do
-          if (output .and. i == 1) write(6,'(a)') 
+          if (output .and. i == 1) write(idev,'(a)') 
     end do
     
   end subroutine eval_output_grid
@@ -377,7 +384,8 @@ contains
       pdf_sum = pdf_sum + pdf_all
     end do  
     call cpu_time(time_end)
-    write(6,*) "Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(idev,*) "Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(0   ,*) "Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
 
     call cpu_time(time_start)
     pdf_g_sum = zero
@@ -385,7 +393,8 @@ contains
       pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf(table,y,Q,0)
     end do  
     call cpu_time(time_end)
-    write(6,*) "Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(idev,*) "Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(0   ,*) "Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
 
    end subroutine get_evaluation_times
 

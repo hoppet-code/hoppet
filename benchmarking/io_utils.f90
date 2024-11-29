@@ -247,6 +247,47 @@ module sub_defs_io
      end function CheckAllOptsUsed
   end interface
   
+contains
+  !! sets hostname to the name of the machine (up to a max of 255 or the length
+  !! of the string, whichever is smaller)
+  !!
+  !! Based in part on code at https://rosettacode.org/wiki/Hostname#Fortran
+  subroutine get_hostname(hostname)
+    use, intrinsic  :: iso_c_binding
+    implicit none
+    character(len=*), intent(out) :: hostname
+    !------------
+    interface !to function: int gethostname(char *name, size_t namelen);
+    integer(c_int) function gethostname(name, namelen) bind(c)
+       use, intrinsic  :: iso_c_binding, only: c_char, c_int, c_size_t
+       integer(c_size_t), value, intent(in) :: namelen
+       character(len=1,kind=c_char), dimension(namelen),  intent(inout) ::  name
+    end function gethostname
+    end interface    
+    integer(c_int) :: status
+    integer,parameter :: HOST_NAME_MAX=255
+    character(kind=c_char,len=1),dimension(HOST_NAME_MAX) :: cstr_hostname
+    integer(c_size_t) :: lenstr
+    integer :: i
+
+    lenstr = HOST_NAME_MAX
+    status = gethostname(cstr_hostname, lenstr)
+    
+    if (status /= 0) then
+       write(0,*) 'Error in get_hostname: gethostname returned ',status
+       hostname = "hostname_error"
+       return
+    end if
+
+    do i = 1, len(hostname)
+       hostname(i:i) = " "
+    end do
+    do i = 1, HOST_NAME_MAX
+       if (i > lenstr .or. cstr_hostname(i) == c_null_char) exit
+       hostname(i:i) = cstr_hostname(i)
+    end do
+
+  end subroutine get_hostname
 end module sub_defs_io
 
 

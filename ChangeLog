@@ -14,6 +14,11 @@
 	small attempts at optimisation of the BestIsub routing 
 	(not clear if they have any impact; some parts still commented); 	
 
+	* benchmarking/io_utils.f90:
+	added get_hostname(hostname), using gethostname() from C, so 
+	that we can include the hostname in the output of Fortran
+	test programs.
+
 2024-08-05  Gavin Salam  <gavin.salam@physics.ox.ac.uk> + Alexander
 
 	* src/pdf_tabulate.f90:
