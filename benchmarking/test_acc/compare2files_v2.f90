@@ -1,7 +1,20 @@
-! program for comparing format produced by "small_fast_tab -outputgrid" 
-!
-! Usage:
-!   progname file1 file2 {-summary | -channel ic [-minerr val] [-maxerr val]}
+!! program for comparing format produced by "small_fast_tab -outputgrid" 
+!!
+!! Usage:
+!!   progname file1 file2 {-summary | -channel ic [-minerr val] [-maxerr val]} [-protect]
+!!
+!! Arguments:
+!!
+!! -summary: print a single-line summary of the relative differences between files
+!!
+!! -channel ic: the flavour channel to consider (ic = 11 for all flavours)
+!!
+!! -protect: apply a protection mask to eliminate points close to a sign change
+!!           (hard-coded to be within 0.4 in y and within one grid point in Q)
+!!
+!! -minerr val: only print errors greater than val
+!! -maxerr val: only print errors less than val
+!!
 program compare2file_v2
   use sub_defs_io
   use types; use consts_dp
@@ -21,9 +34,13 @@ program compare2file_v2
   logical  :: mask09(maxn,maxn,-5:5)=.false.
   real(dp) :: y,Q, minerr, maxerr, this_err, true_err
   integer  :: iy, iQ, ny, nQ, ic, idy, ml(3)
+  real(dp) :: yval2, Qval2
 
   idev1 = idev_open_arg(1,status='old')
   idev2 = idev_open_arg(2,status='old')
+
+  write(6,"(a)") "# " // trim(command_line())
+  write(6,"(a)") "# Comparing files " // trim(string_val_arg(1)) // " and " // trim(string_val_arg(2))
 
   iy = 1; iQ = 1
   do
@@ -41,10 +58,19 @@ program compare2file_v2
 
      read(line1,*,iostat=iostat) yval(iy),Qval(iy,iQ),res1(iy,iQ,:)
      if (iostat /= 0) cycle
-     read(line2,*) yval(iy),Qval(iy,iQ),res2(iy,iQ,:)
+     read(line2,*) yval2,Qval2,res2(iy,iQ,:)
+     if (yval(iy) /= yval2 .or. Qval(iy,iQ) /= Qval2) then
+        write(6,"(a)") "Mismatch in y or Q values in input files"
+        write(6,"(a)") line1
+        write(6,"(a)") line2
+        stop
+     end if
      iy = iy + 1
   end do
   nQ = iQ - 1
+
+  write(6,"(a,f10.4,a,f20.4)") "# yrange ", minval(yval(1:ny)), "-", maxval(yval(1:ny))
+  write(6,"(a,f10.4,a,f20.4)") "# Qrange ", minval(Qval(1:ny,1:nQ)), "-", maxval(Qval(1:ny,1:nQ))
 
   ! establish a general protection mask -- if there is a sign change
   ! in the neighbourhood of the point then it should be eliminated.
@@ -95,7 +121,10 @@ program compare2file_v2
   !write(0,*) yval(ml(1)), Qval(ml(1),ml(2)), ml(3)-1
 
   if (log_val_opt("-summary")) then
-     write(6,"(4es20.10)") max07_guds, max07_all, max09_guds, max09_all
+   write(6,"(a)") "# Summary of relative errors"
+   
+   write(6,"(a)") "# max rel error across: guds(x< 0.7), all(x< 0.7), guds(x< 0.9), all(x< 0.9)"
+   write(6,"(4es20.10)") max07_guds, max07_all, max09_guds, max09_all
   end if
   
   if (log_val_opt("-channel")) then

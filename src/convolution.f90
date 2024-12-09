@@ -1234,18 +1234,32 @@ contains
 
   !--------------------------------------------------------------------
   ! Returns starting iymin point and a set of weights in order to calculate
-  ! the value of the function at y -- one day we might introduce some
-  ! option of setting the number of points; but not for now...
+  ! the value of the function at y
+  !
+  ! Inputs:
+  !   - grid  : the grid structure
+  !   - y     : the value at which to evaluate the function
+  !
+  ! Outputs:
+  !   - iylo: the lowest grid point for the interpolation
+  !   - wgts(0:npnt-1): the weights for the interpolation
+  !   - npnt: the number of points to be used in the interpolation
+  !
+  ! Optional inputs:
+  !   If npnt_in is present and positive then it is used to set the number of points
+  !   to use in the interpolation; otherwise the number of points is set based on the grid
+  !   and the npnt_min and npnt_max parameters at the top of this file.
   !
   ! Qu: is the relation between number of points and order correct? It seems
   !     like we ought to have abs(grid%order)+1...
-  recursive subroutine WgtGridQuant_noalloc(grid, y, iylo, wgts, npnt)
+  recursive subroutine WgtGridQuant_noalloc(grid, y, iylo, wgts, npnt, npnt_in)
     use interpolation
     type(grid_def), intent(in) :: grid
     real(dp), intent(in)  :: y
     integer,  intent(out) :: iylo
     real(dp), intent(out) :: wgts(0:)
     integer , intent(out) :: npnt
+    integer , intent(in), optional :: npnt_in
     !-----------------------------------------
     integer :: ny, isub
     character(len=200) :: err_string1, err_string2
@@ -1253,7 +1267,7 @@ contains
     ny = grid%ny
     if (grid%nsub /= 0) then
        isub = conv_BestIsub(grid,y)
-       call WgtGridQuant_noalloc(grid%subgd(isub), y, iylo, wgts, npnt)
+       call WgtGridQuant_noalloc(grid%subgd(isub), y, iylo, wgts, npnt, npnt_in)
        iylo = iylo + grid%subiy(isub)
     else
        ! nan fails all comparison tests; arrange the tests so that
@@ -1265,7 +1279,8 @@ contains
           call wae_error(trim(err_string1), trim(err_string2))
        end if
        
-       npnt = min(npnt_max, max(npnt_min, abs(grid%order)))
+       npnt = default_or_opt(-1,npnt_in)
+       if (npnt <= 0) npnt = min(npnt_max, max(npnt_min, abs(grid%order)))
        
        iylo = min(max(floor(y / grid%dy)-(npnt-1)/2,0),ny-npnt+1)
        call uniform_interpolation_weights(y/grid%dy-iylo, wgts(0:npnt-1))
@@ -1278,14 +1293,31 @@ contains
     type(grid_def), intent(in) :: grid
     real(dp),       intent(in) :: y
     integer                    :: isub
-       !-- this will probably slow things down, but
-       !   for the time being accept this penalty
-       ! find the grid with the smallest ymax > y
-       if (y>grid%ymax) then
-          isub = sum(maxloc(grid%subgd%ymax))
-       else
-          isub = sum(minloc(grid%subgd%ymax,mask=(grid%subgd%ymax>=y)))
-       end if
+    !-----------------------------------------
+    ! real(dp) :: smallest_ymax
+    ! integer  :: i
+
+    !-- this will probably slow things down, but
+    !   for the time being accept this penalty
+    ! find the grid with the smallest ymax > y
+    if (y>grid%ymax) then
+       !isub = sum(maxloc(grid%subgd%ymax))
+       isub = maxloc(grid%subgd%ymax,dim=1)
+    else
+      !! there is a danger this route might need more loops, unless well optimised
+      !! by the compiler
+      isub = minloc(grid%subgd%ymax,dim=1,mask=(grid%subgd%ymax>=y))
+
+      !! the following avoids two loops, but timing test on 2024-11-29 (Mac M2, -O2)
+      !! showed no significant difference in timing
+      ! smallest_ymax = 1e200_dp
+      ! do i = 1, grid%nsub
+      !    if (grid%subgd(i)%ymax > y .and. grid%subgd(i)%ymax < smallest_ymax) then
+      !       isub = i
+      !       smallest_ymax = grid%subgd(i)%ymax
+      !    end if
+      ! end do
+    end if
   end function conv_BestIsub
   
   !----------------------------------------------------------------------

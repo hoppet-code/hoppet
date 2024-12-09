@@ -30,6 +30,7 @@ module pdf_tabulate
   implicit none
   private
 
+  integer :: override_npnt_y = -1
   
   type pdfseginfo
      real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ
@@ -128,7 +129,18 @@ module pdf_tabulate
   public :: EvalPdfTable_yQf, EvalPdfTable_xQf
   public :: Delete
 
+  public :: PDFTableSetYInterpOrder
+
 contains
+
+  subroutine PDFTableSetYInterpOrder(interp_order)
+    integer, intent(in) :: interp_order
+    if (interp_order < 0) then
+      override_npnt_y = -1
+    else
+      override_npnt_y = interp_order + 1
+    end if
+  end subroutine PDFTableSetYInterpOrder
 
   !---------------------------------------------------------
   !! Allocate a pdf_table, which covers a range Qmin to Qmax, using
@@ -778,7 +790,7 @@ contains
          &'upper bound of val is too low', intval=ubound(val,dim=1))
 
     !-- y weights taken care of elsewhere....
-    call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y)
+    call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y, override_npnt_y)
 
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
     !   signal for Q being out of range
@@ -790,12 +802,38 @@ contains
     end do
 
     !-- is this order more efficient, or should we not bother to
-    !   calculate wgts?
-    do iflv = iflv_min, tab%tab_iflv_max
-       val(iflv) = sum(wgts(0:npnt_y-1,0:nQ) &
-                       * tab%tab(iylo:iylo+npnt_y-1, iflv,ilnlnQ_lo:ilnlnQ_hi))
-    end do
-    !write(0,*) ilnlnQ_lo, ilnlnQ_hi, real(lnlnQ_wgts), val(1)
+    !   calculate wgts? Not calculating it would imply significantly
+    !   more operations, so probably good to stay as is
+    !
+    ! we specialise certain specific cases, because this appears to
+    ! help the compiler with its optimisation.
+    ! 
+    ! timings below done 2024-11-29, on MacM2 gfortran-14.2 -O3 with 
+    ! prec_and_timing -nrep 1 -nxQ 5000 -outputgrid -dy 0.05 -order -6 -nopreev -4grids -dlnlnQ 0.01 -du 0.01 -olnlnQ 2 -yinterp 2 -nrep-eval 10000000
+    !
+    ! (NB: nQ == olnlnQ ; npnt_y == y interpolation order + 1; so cubic -olnlnQ 3 -yinterp 3  gives npnt_y == 4, nQ==3, which means 4 actual points for each...)
+    if (npnt_y == 4 .and. nQ == 3) then
+      ! 110ns/call with this specialisation     -> 186ns/call with -O2 -g (RelWithDebInfo)
+      ! 165ns/call without this specialisation
+      do iflv = iflv_min, tab%tab_iflv_max
+         val(iflv) = sum(wgts(0:3,0:3) &
+                         * tab%tab(iylo:iylo+3, iflv,ilnlnQ_lo:ilnlnQ_lo+3))
+      end do
+    else if (npnt_y == 3 .and. nQ == 2) then
+      !  85ns/call with this specialisation    -> 150ns/call with -O2 -g (RelWithDebInfo)
+      ! 123ns/call without this specialisation -> 160ns/call with -O2 -g (RelWithDebInfo)
+      do iflv = iflv_min, tab%tab_iflv_max
+            val(iflv) = sum(wgts(0:2,0:2) &
+                            * tab%tab(iylo:iylo+2, iflv,ilnlnQ_lo:ilnlnQ_lo+2))
+      end do
+    else
+      ! 250ns/call with olnlnQ==4 and yinterp==6 -> 290ns/call with -O2 -g (RelWithDebInfo)
+      do iflv = iflv_min, tab%tab_iflv_max
+          val(iflv) = sum(wgts(0:npnt_y-1,0:nQ) &
+                          * tab%tab(iylo:iylo+npnt_y-1, iflv,ilnlnQ_lo:ilnlnQ_hi))
+      end do
+       !write(0,*) ilnlnQ_lo, ilnlnQ_hi, real(lnlnQ_wgts), val(1)
+   end if
     
   end subroutine EvalPdfTable_yQ
 
@@ -821,6 +859,7 @@ contains
    real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, npnt_y
    integer, save :: warn_id = warn_id_INIT
+   real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
 
    if (iflv > tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
         &'iflv is too high', intval=iflv)
@@ -828,19 +867,25 @@ contains
         &'iflv is too low', intval=iflv)
 
    !-- y weights taken care of elsewhere....
-   call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y)
+   call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y, override_npnt_y)
 
    !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
    !   signal for Q being out of range
    call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
    nQ = ilnlnQ_hi - ilnlnQ_lo
 
+   ! 2024-11-29 (Mac M2, gfortran 14.2) explored various options here,
+   ! including going via a 2D wgts vector, and having an if statement to
+   ! choose between versions with hard-coded limits for specific npnt_y
+   ! and nQ values (as in EvalPdfTable_yQ). The conclusion is that
+   ! within measurement error, the simple code below remains about as
+   ! efficient as anything else (if not more so, by O(5-10%)).
    val = zero
    do iQ = 0, nQ
-      val = val + lnlnQ_wgts(iQ) * sum(y_wgts(0:npnt_y-1) * &
-          & tab%tab(iylo:iylo+npnt_y-1, iflv,ilnlnQ_lo+iQ))
+         val = val + lnlnQ_wgts(iQ) * sum(y_wgts(0:npnt_y-1) * &
+             & tab%tab(iylo:iylo+npnt_y-1, iflv,ilnlnQ_lo+iQ))
    end do
-   
+ 
   end function EvalPdfTable_yQf
 
   !----------------------------------------------------------------
@@ -882,7 +927,7 @@ contains
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
     !   signal for Q being out of range
     call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
-    if (ilnlnQ_lo > ilnlnQ_lo) then
+    if (ilnlnQ_lo > ilnlnQ_hi) then
       pdf = zero
       return
     end if
@@ -966,8 +1011,16 @@ contains
          &               ilnlnQ_lo, ilnlnQ_hi, lnlnQ_norm)
 
     nQ = ilnlnQ_hi - ilnlnQ_lo
-    if (nQ < ubound(lnlnQ_wgts,1)) call wae_error('get_lnlnQ_wgts',&
-         & 'lnlnQ_wgts too small for requested Q interpolation')
+    if (nQ < ubound(lnlnQ_wgts,1)) then 
+      ! nQ can be zero if the table had a very narrow range of Q values (< O(min_dlnlnQ_singleQ))
+      if (nQ == 0 .and. abs(lnlnQ - tab%lnlnQ_vals(ilnlnQ_lo)) < two * min_dlnlnQ_singleQ) then
+         lnlnQ_wgts(0) = 1
+      else
+         !write(6,*) "Q=", Q, 'nQ = ',nQ, 'lnlnQ_wgts = ',ubound(lnlnQ_wgts,1), tab%nf_int
+         call wae_error('get_lnlnQ_wgts',&
+            & 'lnlnQ_wgts too small for requested Q interpolation')
+      end if
+    end if
     call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
 
   end subroutine get_lnlnQ_wgts

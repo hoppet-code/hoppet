@@ -25,7 +25,8 @@ option(HOPPET_BUILD_TESTDIR   "Enable build of the code in the test directory." 
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
-  message(STATUS "HOPPET: Build type not specified, use: ${CMAKE_BUILD_TYPE}")
+  #set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+message(STATUS "HOPPET: Build type not specified, use: ${CMAKE_BUILD_TYPE}")
 endif()
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
@@ -275,8 +276,19 @@ if (HOPPET_BUILD_BENCHMARK)
   foreach ( b ${bms})
     add_executable( ${b} benchmarking/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
     target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
+    #target_link_libraries(${b} PUBLIC LHAPDF::LHAPDF)
     set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/${b}_modules
+      POSITION_INDEPENDENT_CODE TRUE
+     )
+  endforeach()
+  set( bms compare2files_v2) 
+  foreach ( b ${bms})
+    add_executable( ${b} benchmarking/test_acc/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
+    target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
+    set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
+      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/test_acc
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/${b}_modules
       POSITION_INDEPENDENT_CODE TRUE
      )
