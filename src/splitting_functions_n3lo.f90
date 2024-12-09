@@ -27,6 +27,7 @@ module splitting_functions_n3lo_e
   use types; use consts_dp; use convolution_communicator
   use qcd; use warnings_and_errors
   use xpij2e; use xpns2e
+  use dglap_choices
   implicit none
   private
 

@@ -1,3 +1,9 @@
+2024-12-09 Mon  <gavin.salam@physics.ox.ac.uk>
+
+	* src/splitting_functions_n3lo.f90:
+	added use of dglap_choices, to get access to n3lo_splitting_variant,
+	needed for initialisation of approx N3LO splitting functions.
+
 2024-05-17  Gavin Salam  
 
 	* src/welcome_message.f90:
