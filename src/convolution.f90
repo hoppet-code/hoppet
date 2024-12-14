@@ -2229,7 +2229,7 @@ contains
   recursive function conv_ConvGridQuant_scalar(gc,gq) result(gqout)
     type(grid_conv),  intent(in)    :: gc
     real(dp),         intent(in)    :: gq(0:)
-    real(dp)                        :: gqout(0:ubound(gq,dim=1))
+    real(dp)                        :: gqout(0:size(gq,dim=1)-1)
     !---------------------------------------------
     integer :: i, ny !, j
     integer :: order
@@ -2543,7 +2543,7 @@ contains
   function conv_ConvGridQuant_mat(gc,gq) result(gqout)
     type(grid_conv),  intent(in)    :: gc(:,:)
     real(dp),         intent(in)    :: gq(0:,:)
-    real(dp)                        :: gqout(0:ubound(gq,dim=1),size(gc,dim=1))
+    real(dp)                        :: gqout(0:size(gq,dim=1)-1,size(gc,dim=1))
     !---------------------------------------------
     integer :: ny, ic, ir, ncol, nrow
 
@@ -2612,7 +2612,7 @@ contains
   function conv_Luminosity_multi(grid, gq1, gq2) result(lumi)
     type(grid_def), intent(in) :: grid
     real(dp), intent(in) :: gq1(0:), gq2(0:)
-    real(dp)             :: lumi(0:ubound(gq1,1))
+    real(dp)             :: lumi(0:size(gq1,1)-1)
     !-----------------------
     type(grid_def), pointer :: fine, coarse
     integer  :: isub, iy, step
@@ -2662,8 +2662,8 @@ contains
     real(dp), intent(inout) :: lumi_coarse(0:)
     !--------------------------------------
     integer  :: ny_fine, ny_coarse, max_ny_coarse
-    real(dp) :: gq1_tmp(0:2*ubound(gq1_fine,1))
-    real(dp) :: gq2_tmp(0:2*ubound(gq2_fine,1))
+    real(dp) :: gq1_tmp(0:2*(size(gq1_fine,1)-1))
+    real(dp) :: gq2_tmp(0:2*(size(gq2_fine,1)-1))
     integer  :: order, range_up, range_down, range_down_last
     integer, parameter :: nmax = 9 ! max order, as uniform_interpolation_weights
     real(dp) :: weights(0:nmax,nint(grid_coarse%dy / grid_fine%dy)-1)

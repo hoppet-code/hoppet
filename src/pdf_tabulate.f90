@@ -580,7 +580,7 @@ contains
     type(pdf_table),    intent(inout) :: tab
     real(dp),           intent(in) :: StartDist(0:,iflv_min:)
     !-----------------------------------------------------
-    real(dp) :: dist(0:ubound(StartDist,1),iflv_min:ubound(StartDist,2))
+    real(dp) :: dist(0:size(StartDist,1)-1,iflv_min:iflv_min+size(StartDist,2)-1)
     integer :: iQ
     
     if (.not. associated(tab%evops)) call wae_error(&

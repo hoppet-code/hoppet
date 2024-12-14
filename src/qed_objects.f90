@@ -163,9 +163,9 @@ contains
   function conv_qed_lo(qed_lo, gq) result(gout)
     type(qed_split_mat_lo), intent(in) :: qed_lo
     real(dp),               intent(in) :: gq(0:, ncompmin:)
-    real(dp)                           :: gout(0:ubound(gq,dim=1), ncompmin:ubound(gq,dim=2))
+    real(dp)                           :: gout(0:size(gq,dim=1)-1, ncompmin:ncompmin+size(gq,dim=2)-1)
     !---------------------------------------
-    real(dp) :: flvsum(0:ubound(gq,dim=1)), flvout(0:ubound(gq,dim=1))
+    real(dp) :: flvsum(0:size(gq,dim=1)-1), flvout(0:size(gq,dim=1)-1)
     integer  :: i
     ! the charge, colour, etc. factor when branching from a flavour;
     ! we allow for the leptons here, even if not using them, to
@@ -253,9 +253,9 @@ contains
   function conv_qed_nlo(qed_nlo, gq) result(gout)
     type(qed_split_mat_nlo), intent(in) :: qed_nlo
     real(dp),                intent(in) :: gq(0:, ncompmin:)
-    real(dp)                            :: gout(0:ubound(gq,dim=1), ncompmin:ubound(gq,dim=2))
+    real(dp)                            :: gout(0:size(gq,dim=1)-1, ncompmin:ncompmin+size(gq,dim=2)-1)
     !---------------------------------------
-    real(dp) :: flvsum(0:ubound(gq,dim=1)), flvout(0:ubound(gq,dim=1))
+    real(dp) :: flvsum(0:size(gq,dim=1)-1), flvout(0:size(gq,dim=1)-1)
     integer  :: i
     ! the charge, colour, etc. factor when branching from a flavour;
     ! we allow for the leptons here, even if not using them, to
@@ -323,9 +323,9 @@ contains
   function conv_qed_nnlo(qed_nnlo, gq) result(gout)
     type(qed_split_mat_nnlo), intent(in) :: qed_nnlo
     real(dp),                intent(in) :: gq(0:, ncompmin:)
-    real(dp)                            :: gout(0:ubound(gq,dim=1), ncompmin:ubound(gq,dim=2))
+    real(dp)                            :: gout(0:size(gq,dim=1)-1, ncompmin:ncompmin+size(gq,dim=2)-1)
     !---------------------------------------
-    real(dp) :: flvsum(0:ubound(gq,dim=1)), flvout(0:ubound(gq,dim=1))
+    real(dp) :: flvsum(0:size(gq,dim=1)-1), flvout(0:size(gq,dim=1)-1)
     integer  :: i
     ! the charge, colour, etc. factor when branching from a flavour;
     ! we allow for the leptons here, even if not using them, to
