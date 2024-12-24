@@ -148,17 +148,19 @@ jobs:
           cmake3 --install BUILDxlf
           ctest3 --test-dir BUILDxlf -j 2 --output-on-failure
 
-  compilejobOSX:
+  compilejobMacOS:
     runs-on: macos-latest
-    name: OSXx86_64_GNU
+    name: MacOS-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Install 
       run: |
+          uname -a
           brew install wget coreutils gcc
           brew tap davidchall/hep
           brew install lhapdf
+          gfortran --version
     - name: Compile
       run: |
           cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-13  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug

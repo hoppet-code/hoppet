@@ -4,7 +4,10 @@
 	updated section on examples and Fortran compilers.
 
 	* .github/workflows/main.yml:
-	added gfortran 14 to the CI matrix
+	- added gfortran 14 to the CI matrix
+	- updated name of MacOS test to reflect fact that it is no 
+	  longer running on intel + added output from unamea
+
 
 2024-11-29 Fri  <gavin.salam@physics.ox.ac.uk>
 
