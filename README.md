@@ -4,8 +4,8 @@ Status](https://img.shields.io/github/actions/workflow/status/hoppet-code/hoppet
 HOPPET: Higher Order Perturbative Parton Evolution Toolkit
 ==========================================================
 
-HOPPET is a Fortran 95 package for carrying out DGLAP evolution and
-other common manipulations of parton distribution functions (PDFs).
+HOPPET is a Fortran package for carrying out DGLAP evolution and
+other common manipulations of parton distribution functions (PDFs). 
 
 Within HOPPET, PDFs are represented on a grid in x-space so as to
 avoid limitations on the functional form of input
@@ -29,19 +29,12 @@ summaries of changes between releases are in ReleaseNotes.
 
 
 ----------------------------------------------------------------------
-Note on F95 compilers
+Note on Fortran compilers
 -------------
 
-You will need a Fortran 95 compiler to compile this package. 
-
-The gfortran compiler is widespread. Versions upwards of 4.3 are
-OK. Older versions (which might be present on legacy systems) generate
-incorrect code for HOPPET and should be avoided. The code is
-acceptably fast, though in tests some years ago was not quite as fast
-as with commercial compilers.
-
-The code has also been tested with the intel (ifort, versions 8.1.033
-upwards) and lahey (lf95) compilers.
+Hoppet is developed and tested with recent versions of the gfortran
+compiler. It should also work with the Intel (ifx) and IBM (xlf)
+compilers. 
 
 Build with `configure` script
 -----------------------------
@@ -60,11 +53,13 @@ autotools scripts, you'll be disappointed here...
 Build with `CMake`
 ------------------
 
-   mkdir build
-   cmake -S . -B build <extra flags>
-   cmake --build  build -j 
-   cmake --install build
-   ctest --test-dir build
+```bash
+mkdir build
+cmake -S . -B build <extra flags>
+cmake --build  build -j 
+cmake --install build
+ctest --test-dir build
+```
 
 The extra flags might be:
 - generic `CMake` flags, e.g. `-DCMAKE_INSTALL_PREFIX=/my/home/dir`, `-DCMAKE_Fortran_COMPILER=ifort`, `-DCMAKE_Fortran_FLAGS="-O2 -g"`, etc.
@@ -96,30 +91,48 @@ could be configured with
 Example programs
 ----------------
 
-The main example program is
-[example_f90/tabulation_example.f90](example_f90/tabulation_example.f90)
+### Streamlined interface
 
+The simplest way to use HOPPET is through its streamlined interface.
+There are examples for basic QCD evolution in 
+- modern Fortran:
+[example_f90/tabulation_example_streamlined.f90](example_f90/tabulation_example_streamlined.f90)
+- Fortran 77: [example_f77/tabulation_example.f](example_f77/tabulation_example.f) 
+- C++: [example_f77/cpp_tabulation_example.cc](example_f77/cpp_tabulation_example.cc)
+
+Other features illustrated in the examples include
+
+- accessing convolutions with splitting functions ([Fortran](example_f77/convolution_example.f9))
+- QCD+QED evolution ([Fortran](example_f90/tabulation_example_qed_streamlined.f90), [C++](example_f77/cpp_tabulation_example_qed.cc))
+- massless structure functions ([Fortran](example_f90/structure_functions_example.f90), [C++](example_f77/cpp_structure_functions_example.cc))
+- comparisons with LHAPDF ([Fortran](example_f77/compare_lhapdf_hoppet.f))
+
+
+### Full interface  
+The Fortran examples also illustrate usage of the full lower-level interface,
+allowing fine-grained access to the underlying objects, which provide a
+powerful and flexible framework for convolution and evolution.
+See for example
+[example_f90/tabulation_example.f90](example_f90/tabulation_example.f90).
 An equivalent program with the startup, pdf initialisation and
 evolution spread across different subroutines is given as
-tabulation_example_2.
+[example_f90/tabulation_example_2.f90](example_f90/tabulation_example_2.f90).
 
-An equivalent program based on the streamlined interface is given as
-[tabulation_example_streamlined](example_f90/tabulation_example_streamlined.f90).
-
-Some users may prefer a pure f77 interface. Corresponding examples are
-to be found in the [example_f77/](example_f77) directory. 
+### Building the examples
 
 For the `CMake` based build the examples are compiled  if 
 `-DHOPPET_BUILD_EXAMPLES=ON` flag is set. To build the examples with 
 `configure` look inside the suppplied Makefile and if need be edit it manually.
 
-     cd ../example_f77
-     # <edit the Makefile directly>
-     # compile
-     make tabulation_example
-     # run the program. Should give output identical to that from
-     # example_f90/tabulation_example
-     ./tabulation_example
+```bash
+cd ../example_f77
+# <edit the Makefile directly>
+# compile
+make tabulation_example
+# run the program. Should give output identical to that from
+# example_f90/tabulation_example
+./tabulation_example
+```
 
 In the same directory there is a C++ [example](example_f77/cpp_tabulation_example.cc)
 
@@ -128,18 +141,6 @@ In the same directory there is a C++ [example](example_f77/cpp_tabulation_exampl
 
 which again does the same things (though in this case it uses the
 simpler of the two streamlined initialization calls).
-
-Other programs provided in the [example_f77/](example_f77) directory
-illustrate the use of the streamlined interface in conjunction with
-LHAPDF ([compare_lhapdf_hoppet.f](example_f77/compare_lhapdf_hoppet.f)),
-and show how to use the feature of getting convolutions with splitting
-functions (convolution_example.f).
-
-There is also an example program illustrating the QED evolution
-feature of hoppet in
-[tabulation_example_qed_streamlined.f90](example_f90/tabulation_example_qed_streamlined.f90)
-and one that uses the structure functions
-[structure_functions_example.f90.](example_f90/structure_functions_example.f90).
 
 ----------------------------------------------------------------------
 Documentation
