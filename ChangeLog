@@ -5,7 +5,7 @@
 
 	* .github/workflows/main.yml:
 	added gfortran 14 to the CI matrix
-	
+
 2024-11-29 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* ../src/pdf_tabulate.f90:
@@ -97,7 +97,7 @@
 	a Mac M2.
 
 
- 2024-02-24  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+2024-02-24  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/integrator.f90:
 	fixed bug in array sizes for integral splitting.
