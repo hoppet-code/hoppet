@@ -1,4 +1,4 @@
-program aocc_run_test
+program array_bound_test
   implicit none
   real :: arr_in1(0:10, 2:5), arr1(0:10,2:5)
   integer  i, j
@@ -42,4 +42,4 @@ contains
     
     arr_out1 = X
   end subroutine evaluate  
-end program aocc_run_test
+end program array_bound_test
