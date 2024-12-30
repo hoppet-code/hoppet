@@ -1,13 +1,12 @@
 2024-12-30 Mon  <gavin.salam@physics.ox.ac.uk>
 
 	* CMakeLists.txt:
-	defined a variable with a common warning message for compilers with
-	the , cf. ev_conv in evolution.f90:139 + added link
-	to one current bug report. Also removed the warning for the xlf
-	compiler, since that seems to work.
+	* cmake/Tests/array_bound_bug.f90: *** ADDED ***
 
-	also add a try_run(...) to check for the presence of the compiler
-	bug
+	defined a variable with a common warning message for compilers with
+	the array bounds bug, including a link to the nvidia fortran bug
+	report and added an explicit test for the bug, which compiles and
+	runs array_bound_bug when cmake is invoked.
 
 2024-12-24 Tue  <gavin.salam@physics.ox.ac.uk>
 
