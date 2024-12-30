@@ -1,3 +1,6 @@
+!! Test of array bounds bug that is present in a family of compilers that, as of 2024-12
+!! includes AOCC (5.0) nvfortran (24.11). See the bug report at:
+!! https://forums.developer.nvidia.com/t/bugreport-for-nvfortran-treatment-of-array-bounds-in-the-specification-part/278324
 program array_bound_test
   implicit none
   real :: arr_in1(0:10, 2:5), arr1(0:10,2:5)
