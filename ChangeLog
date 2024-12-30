@@ -6,9 +6,12 @@
 	defined a variable with a common warning message for compilers with
 	the array bounds bug, including a link to the nvidia fortran bug
 	report and added an explicit test for the bug, which compiles and
-	runs array_bound_bug when cmake is invoked.
+	runs array_bound_bug when cmake is invoked. Removed the manual
+	warning message for each compiler in light of Andrii's 
+	observation that ARM 24.10.1 is now OK.
+	(https://community.arm.com/support-forums/f/compilers-and-libraries-forum/56737/bugreport-for-the-fortran-compiler-treatment-of-array-bounds-in-the-specification-part)
 
-	NB: this is left out for XLF, where it sometimes hangs and other
+	NB: this test is left out for XLF, where it sometimes hangs and other
 	times seg faults in the CI. But this may be as much to 
 	do with the allocatable assignment as other things, because
 	ctest passes for XLF.

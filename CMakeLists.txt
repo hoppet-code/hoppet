@@ -50,15 +50,13 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -check")
 endif()
 
-# set a common message about compiler issues shared across a multitude of compilers
-set (COMPILER_BUG_MSG "Compiler might contain bugs that prevent HOPPET from working correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details and one of the bug reports at https://forums.developer.nvidia.com/t/bugreport-for-nvfortran-treatment-of-array-bounds-in-the-specification-part/278324")
 
 # NVidia
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn;>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Mnofpapprox>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-target=multicore;-stdpar=multicore>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
+  #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -Mbounds -Mchkptr")
 endif()
 
@@ -80,13 +78,13 @@ endif()
 # AMD Flang
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Flang>:-Wall>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Flang")
-message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
+  #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g")
 endif()
 
 # ARM 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "ARM")
-message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
+  #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g")
 endif()
 
@@ -116,6 +114,7 @@ else()
     message(WARNING "HOPPET: Failed to compile ${ARRAY_BOUND_TEST}")
     message(WARNING "Output was ${COMPILE_OUTPUT}")
   elseif(NOT ARRAY_BOUND_BUG_RUN EQUAL 0)
+    set (COMPILER_BUG_MSG "Compiler appears to contain bugs that prevent HOPPET from working correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details and one of the bug reports at https://forums.developer.nvidia.com/t/bugreport-for-nvfortran-treatment-of-array-bounds-in-the-specification-part/278324")
     message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compilation & run of ${ARRAY_BOUND_TEST} gave incorrect results")
     message(WARNING "Output was ${RUN_OUTPUT}")
     message(WARNING "for more info: ${COMPILER_BUG_MSG}")
