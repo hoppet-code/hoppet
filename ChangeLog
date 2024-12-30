@@ -8,6 +8,11 @@
 	report and added an explicit test for the bug, which compiles and
 	runs array_bound_bug when cmake is invoked.
 
+	NB: this is left out for XLF, where it sometimes hangs and other
+	times seg faults in the CI. But this may be as much to 
+	do with the allocatable assignment as other things, because
+	ctest passes for XLF.
+
 2024-12-24 Tue  <gavin.salam@physics.ox.ac.uk>
 
 	* README.md:

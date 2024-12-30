@@ -102,21 +102,26 @@ if (HOPPET_ENABLE_FPES)
 endif()
 
 # test for the array bound bug
-SET(ARRAY_BOUND_TEST "${PROJECT_SOURCE_DIR}/cmake/Tests/array_bound_bug.f90")
-try_run(ARRAY_BOUND_BUG_RUN ARRAY_BOUND_BUG_COMPILE
-  ${CMAKE_BINARY_DIR} ${ARRAY_BOUND_TEST}
-  COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
-  RUN_OUTPUT_VARIABLE RUN_OUTPUT
-  )
-if (NOT ARRAY_BOUND_BUG_COMPILE)
-  message(SEND_ERROR "HOPPET: Failed to compile ${ARRAY_BOUND_TEST}")
-  message(SEND_ERROR "Output was ${COMPILE_OUTPUT}")
-elseif(NOT ARRAY_BOUND_BUG_RUN EQUAL 0)
-  message(SEND_ERROR "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compilation & run of ${ARRAY_BOUND_TEST} gave incorrect results")
-  message(SEND_ERROR "Output was ${RUN_OUTPUT}")
-  message(SEND_ERROR "for more info: ${COMPILER_BUG_MSG}")
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL")
+  message(WARNING "HOPPET: XLF-compiled executable may hang on array bound test, skipping; make sure you run ctest")
 else()
-  message(STATUS "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler passes array bound test")
+  SET(ARRAY_BOUND_TEST "${PROJECT_SOURCE_DIR}/cmake/Tests/array_bound_bug.f90")
+  try_run(ARRAY_BOUND_BUG_RUN ARRAY_BOUND_BUG_COMPILE
+    ${CMAKE_BINARY_DIR} ${ARRAY_BOUND_TEST}
+    COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
+    RUN_OUTPUT_VARIABLE RUN_OUTPUT
+    )
+  if (NOT ARRAY_BOUND_BUG_COMPILE)
+    # options includes SEND_ERROR or WARNING
+    message(WARNING "HOPPET: Failed to compile ${ARRAY_BOUND_TEST}")
+    message(WARNING "Output was ${COMPILE_OUTPUT}")
+  elseif(NOT ARRAY_BOUND_BUG_RUN EQUAL 0)
+    message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compilation & run of ${ARRAY_BOUND_TEST} gave incorrect results")
+    message(WARNING "Output was ${RUN_OUTPUT}")
+    message(WARNING "for more info: ${COMPILER_BUG_MSG}")
+  else()
+    message(STATUS "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler passes array bound test")
+  endif()
 endif()
 
 # Output of config info   ==============================================

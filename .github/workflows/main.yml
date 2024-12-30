@@ -115,6 +115,8 @@ jobs:
     #       ctest --test-dir BUILDifort -j 2 --output-on-failure
 
   compilejobCentos7_IBM_XL:
+    # to try this locally, run:
+    # docker run --rm -ti --platform=linux/ppc64le ppc64le/centos
     name: Centos7ppc64le_IBM_XL
     runs-on: ubuntu-latest
     steps:
