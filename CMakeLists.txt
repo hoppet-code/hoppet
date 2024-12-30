@@ -50,12 +50,15 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -check")
 endif()
 
+# set a common message about compiler issues shared across a multitude of compilers
+set (COMPILER_BUG_MSG "Compiler might contain bugs that will prevent HOPPET from working correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details and one of the bug reports at https://forums.developer.nvidia.com/t/bugreport-for-nvfortran-treatment-of-array-bounds-in-the-specification-part/278324")
+
 # NVidia
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn;>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Mnofpapprox>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-target=multicore;-stdpar=multicore>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler might contain bugs that will prevent HOPPET from working  correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details")
+  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -Mbounds -Mchkptr")
 endif()
 
@@ -69,20 +72,21 @@ endif()
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qfree;-qextname;-qhalt=s>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qstackprotect=all>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler might contain bugs that will prevent HOPPET from working  correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details")
+  # xlf seems to be working OK in CI, so comment out the COMPILER_BUG_MSG
+  #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -qcheck -qsigtrap")
 endif()
 
 # AMD Flang
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Flang>:-Wall>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Flang")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler might contain bugs that will prevent HOPPET from working  correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details")
+message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g")
 endif()
 
 # ARM 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "ARM")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler might contain bugs that will prevent HOPPET from working  correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details")
+message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g")
 endif()
 

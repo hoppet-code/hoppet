@@ -1,3 +1,12 @@
+2024-12-30 Mon  <gavin.salam@physics.ox.ac.uk>
+
+	* CMakeLists.txt:
+	defined a variable with a common warning message for compilers with
+	the old "ABSOFT" bug, cf. ev_conv in evolution.f90:139 + added link
+	to one current bug report. Also removed the warning for the xlf
+	compiler, since that seems to work.
+
+
 2024-12-24 Tue  <gavin.salam@physics.ox.ac.uk>
 
 	* README.md:

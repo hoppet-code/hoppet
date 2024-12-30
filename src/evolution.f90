@@ -135,12 +135,18 @@ contains
   !! 
   subroutine ev_conv(u, pdf, dpdf)
     use pdf_representation
-    ! The following fails with absoft compiler: see ABSOFT_BUG.txt
+    ! The following failed with the absoft compiler in 2003: see ABSOFT_BUG.txt
+    ! For possibly related issues in compilers as of 2024, see
+    ! https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131
+    ! and
+    ! https://forums.developer.nvidia.com/t/bugreport-for-nvfortran-treatment-of-array-bounds-in-the-specification-part/278324")
+    !
     real(dp), intent(in)  :: u, pdf(:,:)
     real(dp), intent(out) :: dpdf(:,:)
-    ! The following fails with the intel compiler! See INTEL_BUG.txt
-    !real(dp), intent(in)  :: t, pdf(0:,-ncomponents:)
-    !real(dp), intent(out) :: dpdf(0:,-ncomponents:)
+    ! The following failed with the intel compiler in 2003! See INTEL_BUG.txt
+    ! (As of 2024 is now fixed)
+    ! real(dp), intent(in)  :: u, pdf(0:,-ncomponents:)
+    ! real(dp), intent(out) :: dpdf(0:,-ncomponents:)
     !--------------------------------------
     real(dp) :: as2pi, Q, t, jacobian
     type(split_mat) :: Pfull
