@@ -1,3 +1,31 @@
+2024-12-30 Mon  <gavin.salam@physics.ox.ac.uk>
+
+	* CMakeLists.txt:
+	* cmake/Tests/array_bound_bug.f90: *** ADDED ***
+
+	defined a variable with a common warning message for compilers with
+	the array bounds bug, including a link to the nvidia fortran bug
+	report and added an explicit test for the bug, which compiles and
+	runs array_bound_bug when cmake is invoked. Removed the manual
+	warning message for each compiler in light of Andrii's 
+	observation that ARM 24.10.1 is now OK.
+	(https://community.arm.com/support-forums/f/compilers-and-libraries-forum/56737/bugreport-for-the-fortran-compiler-treatment-of-array-bounds-in-the-specification-part)
+
+	NB: this test is left out for XLF, where it sometimes hangs and other
+	times seg faults in the CI. But this may be as much to 
+	do with the allocatable assignment as other things, because
+	ctest passes for XLF.
+
+2024-12-24 Tue  <gavin.salam@physics.ox.ac.uk>
+
+	* README.md:
+	updated section on examples and Fortran compilers.
+
+	* .github/workflows/main.yml:
+	- added gfortran 14 to the CI matrix
+	- updated name of MacOS test to reflect fact that it is no 
+	  longer running on intel + added output from unamea
+
 2024-12-09 Mon  <gavin.salam@physics.ox.ac.uk>
 
 	* src/splitting_functions_n3lo.f90:
@@ -105,6 +133,7 @@
 	a Mac M2.
 
 
+<<<<<<< HEAD
 2024-02-26 Gavin + Alexander
 
 	* ../src/dglap_holders.f90:
@@ -124,6 +153,8 @@
 	turned it off, because it causes failures with IBMM compiler
 	on CI.
 
+=======
+>>>>>>> origin/master
 2024-02-24  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/integrator.f90:

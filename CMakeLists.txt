@@ -51,12 +51,13 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -check")
 endif()
 
+
 # NVidia
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn;>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Mnofpapprox>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-target=multicore;-stdpar=multicore>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler might contain bugs that will prevent HOPPET from working  correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details")
+  #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -Mbounds -Mchkptr")
 endif()
 
@@ -70,20 +71,21 @@ endif()
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qfree;-qextname;-qhalt=s>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qstackprotect=all>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler might contain bugs that will prevent HOPPET from working  correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details")
+  # xlf seems to be working OK in CI, so comment out the COMPILER_BUG_MSG
+  #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -qcheck -qsigtrap")
 endif()
 
 # AMD Flang
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Flang>:-Wall>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Flang")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler might contain bugs that will prevent HOPPET from working  correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details")
+  #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g")
 endif()
 
 # ARM 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "ARM")
-  message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler might contain bugs that will prevent HOPPET from working  correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details")
+  #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g")
 endif()
 
@@ -98,6 +100,29 @@ if (HOPPET_ENABLE_FPES)
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,ARM>:-ffp-contract=on>")
 endif()
 
+# test for the array bound bug
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL")
+  message(WARNING "HOPPET: XLF-compiled executable may hang on array bound test, skipping; make sure you run ctest")
+else()
+  SET(ARRAY_BOUND_TEST "${PROJECT_SOURCE_DIR}/cmake/Tests/array_bound_bug.f90")
+  try_run(ARRAY_BOUND_BUG_RUN ARRAY_BOUND_BUG_COMPILE
+    ${CMAKE_BINARY_DIR} ${ARRAY_BOUND_TEST}
+    COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
+    RUN_OUTPUT_VARIABLE RUN_OUTPUT
+    )
+  if (NOT ARRAY_BOUND_BUG_COMPILE)
+    # options includes SEND_ERROR or WARNING
+    message(WARNING "HOPPET: Failed to compile ${ARRAY_BOUND_TEST}")
+    message(WARNING "Output was ${COMPILE_OUTPUT}")
+  elseif(NOT ARRAY_BOUND_BUG_RUN EQUAL 0)
+    set (COMPILER_BUG_MSG "Compiler appears to contain bugs that prevent HOPPET from working correctly. Please see https://fortran-lang.discourse.group/t/an-interesting-difference-between-compilers/7131 for details and one of the bug reports at https://forums.developer.nvidia.com/t/bugreport-for-nvfortran-treatment-of-array-bounds-in-the-specification-part/278324")
+    message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compilation & run of ${ARRAY_BOUND_TEST} gave incorrect results")
+    message(WARNING "Output was ${RUN_OUTPUT}")
+    message(WARNING "for more info: ${COMPILER_BUG_MSG}")
+  else()
+    message(STATUS "HOPPET: ${CMAKE_Fortran_COMPILER_ID} compiler passes array bound test")
+  endif()
+endif()
 
 # Output of config info   ==============================================
 message(STATUS "HOPPET: CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
@@ -110,6 +135,9 @@ message(STATUS "HOPPET: HOPPET_ENABLE_TESTING=${HOPPET_ENABLE_TESTING}")
 message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
 message(STATUS "HOPPET: HOPPET_BUILD_TESTDIR=${HOPPET_BUILD_TESTDIR}")
 message(STATUS "HOPPET: HOPPET_ENABLE_FPES=${HOPPET_ENABLE_FPES}")
+
+
+
 if (HOPPET_BUILD_EXAMPLES)
   find_package(LHAPDF REQUIRED) 
   message(STATUS "HOPPET: LHAPDF_VERSION=${LHAPDF_VERSION} LHAPDF_LIBRARIES=${LHAPDF_LIBRARIES} LHAPDF_INCLUDE_DIRS=${LHAPDF_INCLUDE_DIRS}")

@@ -1,7 +1,7 @@
 NEWS for HOPPET
 
 ======================================================================
-Release 1.3.0, XX June 2024
+Release 1.3.0, XX January 2025
 ======================================================================
 
 Major new features:
@@ -21,6 +21,8 @@ Other changes:
   (and _xQf variant) and speed-up of EvalPdfTable_yQ by about 20% for order=-6.
 * streamlined interface now has hoppetDeleteAll() function for cleaning up
   all memory it allocated.
+* Users have a choice between traditional makefiles and the CMake build
+  system. CMake is now the preferred option
 
 ======================================================================
 Release 1.2.0, 30 October 2020
