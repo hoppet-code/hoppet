@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(pyinterface LANGUAGES C CXX)
 
-include(FortranCInterface)
+#include(FortranCInterface)
+# these are useful for more advanced work?
 #FortranCInterface_VERIFY()
 #FortranCInterface_HEADER(${CMAKE_BINARY_DIR}/FortranCInterface.h)
 
