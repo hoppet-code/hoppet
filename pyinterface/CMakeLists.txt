@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.15)
 project(pyinterface LANGUAGES C CXX)
 
 include(FortranCInterface)
-FortranCInterface_VERIFY()
-FortranCInterface_HEADER(${CMAKE_BINARY_DIR}/FortranCInterface.h)
+#FortranCInterface_VERIFY()
+#FortranCInterface_HEADER(${CMAKE_BINARY_DIR}/FortranCInterface.h)
 
 
 # Find Python and SWIG
@@ -38,6 +38,7 @@ include_directories(${Python3_INCLUDE_DIRS} ${HOPPET_INCLUDE_DIR} ../src)
 
 # SWIG interface
 set(SWIG_INPUT_FILE hoppet_v1.i)
+set(CMAKE_SWIG_FLAGS -doxygen)
 
 set_source_files_properties(${SWIG_INPUT_FILE} PROPERTIES CPLUSPLUS ON)
 
