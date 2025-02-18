@@ -19,20 +19,21 @@ def hera_lhc(x, Q):
 
     pdf = [0.0] * 13 # Initialise the array with zeros
 
-    pdf[0 + 6] = N_g * pow(x, -0.1) * pow(1 - x, 5)
-    pdf[-3 + 6] = 0.2 * (dbar + ubar)
-    pdf[3 + 6] = pdf[-3 + 6]
-    pdf[2 + 6] = uv + ubar
-    pdf[-2 + 6] = ubar
-    pdf[1 + 6] = dv + dbar
-    pdf[-1 + 6] = dbar
-
-    pdf[4 + 6] = 0
-    pdf[5 + 6] = 0
-    pdf[6 + 6] = 0
-    pdf[-4 + 6] = 0
-    pdf[-5 + 6] = 0
-    pdf[-6 + 6] = 0
+    pdf[ 0+6] = N_g * pow(x, -0.1) * pow(1 - x, 5)
+    pdf[-3+6] = 0.2 * (dbar + ubar)
+    pdf[ 3+6] = pdf[-3 + 6]
+    pdf[ 2+6] = uv + ubar
+    pdf[-2+6] = ubar
+    pdf[ 1+6] = dv + dbar
+    pdf[-1+6] = dbar
+    
+# Overkill
+    pdf[ 4+6] = 0.0
+    pdf[ 5+6] = 0.0
+    pdf[ 6+6] = 0.0
+    pdf[-4+6] = 0.0
+    pdf[-5+6] = 0.0
+    pdf[-6+6] = 0.0
 
     return pdf
 
