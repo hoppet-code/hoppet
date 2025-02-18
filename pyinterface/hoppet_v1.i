@@ -18,6 +18,9 @@ extern void hoppetEvolve(const double &,
                                                  const double &, double *),
                          const double &);
 
+extern void hoppetCachedEvolve(void (* pdf_subroutine)(const double &, 
+                                                       const double &, double *));                         
+
 extern void hoppetEval(const double &,
                        const double &,
                        double *);
@@ -45,15 +48,6 @@ static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res
     PyGILState_Release(gstate);  // Release GIL
 }
 
-// Wrapper function to convert the pdf array to a Python list
-static PyObject* pdf_wrapper(double *pdf) {
-    PyObject *py_list = PyList_New(13);
-    for (int i = 0; i < 13; i++) {
-        PyList_SetItem(py_list, i, PyFloat_FromDouble(pdf[i]));
-    }
-    return py_list;
-}
-
 static void hoppetAssign_wrapper(PyObject *callback) {
     if (!PyCallable_Check(callback)) {
         PyErr_SetString(PyExc_TypeError, "Expected a callable object");
@@ -73,13 +67,27 @@ static void hoppetEvolve_wrapper(const double & asQ0, const double & Q0alphas, c
     hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine_wrapper, Q0pdf);
 }
 
-static PyObject* hoppetEval_wrapper(const double &x, const double &Q, double *pdf) {
-    hoppetEval(x, Q, pdf);
-    return pdf_wrapper(pdf);
+static void hoppetCachedEvolve_wrapper(PyObject *callback) {
+    if (!PyCallable_Check(callback)) {
+        PyErr_SetString(PyExc_TypeError, "Expected a callable object");
+        return;
+    }
+    PyObject_SetAttrString(PyImport_AddModule("__main__"), "pdf_callback", callback);
+    hoppetCachedEvolve(pdf_subroutine_wrapper);
 }
 
+// This function simply creates a pointer to a new array of doubles as neede by hoppetEval etc.
 double *new_pdf(){
     return new double[13];
+}
+
+// Wrapper function to convert the pdf array to a Python list
+static PyObject* pdf_to_array(double *pdf) {
+    PyObject *py_list = PyList_New(13);
+    for (int i = 0; i < 13; i++) {
+        PyList_SetItem(py_list, i, PyFloat_FromDouble(pdf[i]));
+    }
+    return py_list;
 }
 
 %}
@@ -122,6 +130,7 @@ double *new_pdf(){
     void hoppetAssign_wrapper(PyObject *callback);
     void hoppetEvolve_wrapper(const double & asQ0, const double & Q0alphas, const int & nloop, 
                               const double & muR_Q, PyObject *callback, const double & Q0pdf);
-    PyObject* hoppetEval_wrapper(const double &x, const double &Q, double *pdf);
+    void hoppetCachedEvolve_wrapper(PyObject *callback);
     double *new_pdf();
+    PyObject* pdf_to_array(double *pdf);
 %}

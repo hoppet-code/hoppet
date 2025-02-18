@@ -57,7 +57,8 @@ def main():
     print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon")
 
     for ix in range(9):
-        pdf_array = hoppet.hoppetEval_wrapper(xvals[ix], Q, pdf)
+        hoppet.hoppetEval(xvals[ix], Q, pdf)
+        pdf_array = hoppet.pdf_to_array(pdf) # Convert the pdf to a python list
         print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
             xvals[ix],
             pdf_array[6 + 2] - pdf_array[6 - 2], 
@@ -66,6 +67,8 @@ def main():
             pdf_array[6 - 4] + pdf_array[6 + 4],
             pdf_array[6 + 0]
         ))
+
+    hoppet.hoppetDeleteAll()
 
 if __name__ == "__main__":
     main()
