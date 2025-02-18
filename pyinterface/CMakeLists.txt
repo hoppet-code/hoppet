@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 project(pyinterface LANGUAGES C CXX)
 
+include(FortranCInterface)
+FortranCInterface_VERIFY()
+FortranCInterface_HEADER(${CMAKE_BINARY_DIR}/FortranCInterface.h)
+
+
 # Find Python and SWIG
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(SWIG REQUIRED)
@@ -51,7 +56,7 @@ set_target_properties(${SWIG_MODULE_hoppet_v1_REAL_NAME} PROPERTIES CXX_STANDARD
 
 # Link libraries
 target_link_libraries(${SWIG_MODULE_hoppet_v1_REAL_NAME}
-  PRIVATE ${HOPPET_LIBRARY} gfortran ${Python3_LIBRARIES}
+  PRIVATE ${HOPPET_LIBRARY} ${Fortran_LIBRARIES} ${Python3_LIBRARIES}
 )
 
 # Install the Python module
