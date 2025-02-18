@@ -42,7 +42,7 @@ def main():
     dy = 0.1    
     nloop = 3
     # Start hoppet
-    hp.hoppetStart(dy, nloop)
+    hp.Start(dy, nloop)
     
     asQ0 = 0.35
     Q0 = np.sqrt(2.0)
@@ -52,14 +52,14 @@ def main():
     Q = 100.0
 
     # Do the evolution. Notice the _wrapper in the name
-    hp.hoppetEvolve_wrapper(asQ0, Q0, nloop, 1.0, hera_lhc, Q0)
+    hp.Evolve(asQ0, Q0, nloop, 1.0, hera_lhc, Q0)
 
     print("")
     print("           Evaluating PDFs at Q =",Q, " GeV")
     print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon")
 
     for ix in range(9):
-        hp.hoppetEval(xvals[ix], Q, pdf)
+        hp.Eval(xvals[ix], Q, pdf)
         pdf_array = hp.pdf_to_array(pdf) # Convert the pdf to a python list
         print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
             xvals[ix],
@@ -70,7 +70,7 @@ def main():
             pdf_array[6 + 0]
         ))
 
-    hp.hoppetDeleteAll()
+    hp.DeleteAll()
 
 if __name__ == "__main__":
     main()

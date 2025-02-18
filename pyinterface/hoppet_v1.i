@@ -7,10 +7,10 @@
 #include <iostream>
 #include <Python.h>
 
-extern void hoppetAssign(void (* pdf_subroutine)(const double &, 
+extern void Assign(void (* pdf_subroutine)(const double &, 
                                                  const double &, double *));
 
-extern void hoppetEvolve(const double &,
+extern void Evolve(const double &,
                          const double &,
                          const int    &,
                          const double &,
@@ -18,13 +18,9 @@ extern void hoppetEvolve(const double &,
                                                  const double &, double *),
                          const double &);
 
-extern void hoppetCachedEvolve(void (* pdf_subroutine)(const double &, 
+extern void CachedEvolve(void (* pdf_subroutine)(const double &, 
                                                        const double &, double *));                         
 
-extern void hoppetEval(const double &,
-                       const double &,
-                       double *);
-                         
 // Wrapper function to bridge Python and C callback
 static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res) {
     PyGILState_STATE gstate = PyGILState_Ensure();  // Ensure GIL for Python calls
@@ -48,7 +44,7 @@ static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res
     PyGILState_Release(gstate);  // Release GIL
 }
 
-static void hoppetAssign_wrapper(PyObject *callback) {
+static void Assign(PyObject *callback) {
     if (!PyCallable_Check(callback)) {
         PyErr_SetString(PyExc_TypeError, "Expected a callable object");
         return;
@@ -57,7 +53,7 @@ static void hoppetAssign_wrapper(PyObject *callback) {
     hoppetAssign(pdf_subroutine_wrapper);
 }
 
-static void hoppetEvolve_wrapper(const double & asQ0, const double & Q0alphas, const int & nloop, 
+static void Evolve(const double & asQ0, const double & Q0alphas, const int & nloop, 
                                  const double & muR_Q, PyObject *callback, const double & Q0pdf) {
     if (!PyCallable_Check(callback)) {
         PyErr_SetString(PyExc_TypeError, "Expected a callable object");
@@ -67,7 +63,7 @@ static void hoppetEvolve_wrapper(const double & asQ0, const double & Q0alphas, c
     hoppetEvolve(asQ0, Q0alphas, nloop, muR_Q, pdf_subroutine_wrapper, Q0pdf);
 }
 
-static void hoppetCachedEvolve_wrapper(PyObject *callback) {
+static void CachedEvolve(PyObject *callback) {
     if (!PyCallable_Check(callback)) {
         PyErr_SetString(PyExc_TypeError, "Expected a callable object");
         return;
@@ -92,45 +88,45 @@ static PyObject* pdf_to_array(double *pdf) {
 
 %}
 
-%rename(hoppetStart          )          hoppetstart_;
-%rename(hoppetStartExtended  )          hoppetstartextended_;
-%rename(hoppetAssign         )          hoppetassign_;
-%rename(hoppetEvolve         )          hoppetevolve_;
-%rename(hoppetPreEvolve      )          hoppetpreevolve_;     
-%rename(hoppetCachedEvolve   )          hoppetcachedevolve_;
-%rename(hoppetAlphaS         )          hoppetalphas_; 
-%rename(hoppetSetFFN         )          hoppetsetffn_;       
-%rename(hoppetSetVFN         )          hoppetsetvfn_;       
-%rename(hoppetSetPoleMassVFN )          hoppetsetpolemassvfn_;       
-%rename(hoppetSetMSbarMassVFN)          hoppetsetmsbarmassvfn_;       
-%rename(hoppetSetExactDGLAP  )          hoppetsetexactdglap_;
-%rename(hoppetEval           )          hoppeteval_;          
-%rename(hoppetEvalSplit      )          hoppetevalsplit_;
-%rename(hoppetSetQED         )          hoppetsetqed_;
-%rename(hoppetDeleteAll      )          hoppetdeleteall_;
+%rename(Start          )          hoppetstart_;
+%rename(StartExtended  )          hoppetstartextended_;
+%rename(hoppetAssign         )          hoppetassign_; // The callback function is Assign
+%rename(hoppetEvolve         )          hoppetevolve_; // The callback function is Evolve
+%rename(PreEvolve      )          hoppetpreevolve_;     
+%rename(hoppetCachedEvolve   )          hoppetcachedevolve_; // The callback function is CachedEvolve
+%rename(AlphaS         )          hoppetalphas_; 
+%rename(SetFFN         )          hoppetsetffn_;       
+%rename(SetVFN         )          hoppetsetvfn_;       
+%rename(SetPoleMassVFN )          hoppetsetpolemassvfn_;       
+%rename(SetMSbarMassVFN)          hoppetsetmsbarmassvfn_;       
+%rename(SetExactDGLAP  )          hoppetsetexactdglap_;
+%rename(Eval           )          hoppeteval_;          
+%rename(EvalSplit      )          hoppetevalsplit_;
+%rename(SetQED         )          hoppetsetqed_;
+%rename(DeleteAll      )          hoppetdeleteall_;
 
-%rename(hoppetStartStrFct        )      hoppetstartstrfct_;
-%rename(hoppetStartStrFctExtended)      hoppetstartstrfctextended_;
-%rename(hoppetInitStrFct         )      hoppetinitstrfct_;
-%rename(hoppetInitStrFctFlav     )      hoppetinitstrfctflav_;
-%rename(hoppetStrFct             )      hoppetstrfct_;
-%rename(hoppetStrFctNoMu         )      hoppetstrfctnomu_;
-%rename(hoppetStrFctLO           )      hoppetstrfctlo_;
-%rename(hoppetStrFctNLO          )      hoppetstrfctnlo_;
-%rename(hoppetStrFctFlav         )      hoppetstrfctflav_;
-%rename(hoppetStrFctNoMuFlav     )      hoppetstrfctnomuflav_;
-%rename(hoppetStrFctLOFlav       )      hoppetstrfctloflav_;
-%rename(hoppetStrFctNLOFlav      )      hoppetstrfctnloflav_;
-%rename(hoppetStrFctNNLO         )      hoppetstrfctnnlo_;
-%rename(hoppetStrFctN3LO         )      hoppetstrfctn3lo_;
+%rename(StartStrFct        )      hoppetstartstrfct_;
+%rename(StartStrFctExtended)      hoppetstartstrfctextended_;
+%rename(InitStrFct         )      hoppetinitstrfct_;
+%rename(InitStrFctFlav     )      hoppetinitstrfctflav_;
+%rename(StrFct             )      hoppetstrfct_;
+%rename(StrFctNoMu         )      hoppetstrfctnomu_;
+%rename(StrFctLO           )      hoppetstrfctlo_;
+%rename(StrFctNLO          )      hoppetstrfctnlo_;
+%rename(StrFctFlav         )      hoppetstrfctflav_;
+%rename(StrFctNoMuFlav     )      hoppetstrfctnomuflav_;
+%rename(StrFctLOFlav       )      hoppetstrfctloflav_;
+%rename(StrFctNLOFlav      )      hoppetstrfctnloflav_;
+%rename(StrFctNNLO         )      hoppetstrfctnnlo_;
+%rename(StrFctN3LO         )      hoppetstrfctn3lo_;
 
 %include "hoppet_v1.h"
 
 %inline %{
-    void hoppetAssign_wrapper(PyObject *callback);
-    void hoppetEvolve_wrapper(const double & asQ0, const double & Q0alphas, const int & nloop, 
+    void Assign(PyObject *callback);
+    void Evolve(const double & asQ0, const double & Q0alphas, const int & nloop, 
                               const double & muR_Q, PyObject *callback, const double & Q0pdf);
-    void hoppetCachedEvolve_wrapper(PyObject *callback);
+    void CachedEvolve(PyObject *callback);
     double *new_pdf();
     PyObject* pdf_to_array(double *pdf);
 %}
