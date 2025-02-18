@@ -9,7 +9,7 @@ from distutils.core import setup, Extension
 
 hoppet_v1_module = Extension('_hoppet_v1',
                            sources=['hoppet_v1_wrap.cxx'],
-                           include_dirs = ['../src'],
+                           include_dirs = ['../src','.'],
                            swig_opts=['-c++'],
                            libraries=['hoppet_v1', 'gfortran'])
 
