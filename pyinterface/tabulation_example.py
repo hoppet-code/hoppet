@@ -46,17 +46,16 @@ def main():
     
     asQ0 = 0.35
     Q0 = np.sqrt(2.0)
-
-    xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
-    Q = 100.0
-
     # Do the evolution. 
     hp.Evolve(asQ0, Q0, nloop, 1.0, hera_lhc, Q0)
+
+    # Evaluate the PDFs at some x values and print them
+    xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
+    Q = 100.0
 
     print("")
     print("           Evaluating PDFs at Q =",Q, " GeV")
     print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon")
-
     for ix in range(9):
         pdf_array = hp.Eval(xvals[ix], Q)
         print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
