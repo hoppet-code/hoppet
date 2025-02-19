@@ -47,11 +47,10 @@ def main():
     asQ0 = 0.35
     Q0 = np.sqrt(2.0)
 
-    pdf = hp.new_pdf()
     xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
     Q = 100.0
 
-    # Do the evolution. Notice the _wrapper in the name
+    # Do the evolution. 
     hp.Evolve(asQ0, Q0, nloop, 1.0, hera_lhc, Q0)
 
     print("")
@@ -59,8 +58,7 @@ def main():
     print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon")
 
     for ix in range(9):
-        hp.Eval(xvals[ix], Q, pdf)
-        pdf_array = hp.pdf_to_array(pdf) # Convert the pdf to a python list
+        pdf_array = hp.Eval(xvals[ix], Q)
         print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
             xvals[ix],
             pdf_array[6 + 2] - pdf_array[6 - 2], 

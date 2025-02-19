@@ -6,10 +6,11 @@
 #include "hoppet_v1.h"
 #include <Python.h>
 
-// Check if the callback is a callable object and set it as a global variable. 
-// This routine is used in the Assign, Evolve and CachedEvolve functions, to 
-// handle the fact that the pdf_subrpoutine is expected to be a pointer. 
-// Defined as a macro to avoid boilerplate code.
+// Check if the callback is a callable object and set it as a global
+// variable. This routine is used in the Assign, Evolve and
+// CachedEvolve functions, to handle the fact that the pdf_subrpoutine
+// is expected to be a pointer. Defined as a macro to avoid
+// boilerplate code.
 #define CHECK_AND_SET_CALLBACK(callback) \
     if (!PyCallable_Check(callback)) { \
         PyErr_SetString(PyExc_TypeError, "Expected a callable object"); \
@@ -17,7 +18,18 @@
     } \
     PyObject_SetAttrString(PyImport_AddModule("__main__"), "pdf_callback", callback);
 
+// Check if the global pdf array is initialized. This routine is used
+// in the Eval etc. functions to ensure that the global pdf array is
+// initialized before calling the hoppetEval function. Defined as a
+// macro to avoid boilerplate code.
+# define CHECK_GLOBAL_PDF_INITIALIZED \
+    if (global_pdf == nullptr) { \
+        PyErr_SetString(PyExc_RuntimeError, "Global pdf array is not initialized"); \
+        return nullptr; \
+    }
+
 const unsigned int pdf_len = 13;
+double *global_pdf = nullptr;
 
 // Wrapper function to bridge Python and C callback
 static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res) {
@@ -42,6 +54,55 @@ static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res
     PyGILState_Release(gstate);  // Release GIL
 }
 
+// Initialize the global pdf array
+void init_global_pdf() {
+    if (global_pdf == nullptr) {
+        global_pdf = new double[pdf_len];
+    }
+}
+
+// Free the global pdf array
+void free_global_pdf() {
+    if (global_pdf != nullptr) {
+        delete[] global_pdf;
+        global_pdf = nullptr;
+    }
+}
+
+// Wrapper function to convert the pdf array to a Python list
+static PyObject* pdf_to_array(double *pdf) {
+    PyObject *py_list = PyList_New(pdf_len);
+    for (unsigned int i = 0; i < pdf_len; i++) {
+        PyList_SetItem(py_list, i, PyFloat_FromDouble(pdf[i]));
+    }
+    return py_list;
+}
+
+// To correctly initialize the global pdf array we need to modify the
+// hoppetStart and StarExtended. We also modify hoppetDeleteAll so
+// that it frees the pdf.
+static void Start(const double & dy, const int & nloop){
+    init_global_pdf();
+    hoppetStart(dy, nloop);
+}
+
+static void StartExtended(const double & ymax,   //< highest value of ln1/x user wants to access
+                          const double & dy,     //< internal ln1/x grid spacing: 0.1-0.25 is a sensible range
+                          const double & Qmin,   //< lower limit of Q range
+                          const double & Qmax,   //< upper limit of Q range
+                          const double & dlnlnQ, //< internal table spacing in lnlnQ (e.g. dy/4)
+                          const int & nloop,     //< the maximum number of loops we'll want (<=3)
+                          const int & order,     //< order of numerical interpolation (e.g. -6)
+                          const int & factscheme){
+    init_global_pdf();
+    hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, factscheme);
+}
+
+static void DeleteAll() {
+    free_global_pdf();
+    hoppetDeleteAll();
+}
+
 static void Assign(PyObject *callback) {
     CHECK_AND_SET_CALLBACK(callback)
     hoppetAssign(pdf_subroutine_wrapper);
@@ -58,61 +119,136 @@ static void CachedEvolve(PyObject *callback) {
     hoppetCachedEvolve(pdf_subroutine_wrapper);
 }
 
-// This function simply creates a pointer to a new array of doubles as needed by hoppetEval etc.
-double *new_pdf(){
-    return new double[pdf_len];
+static PyObject* Eval(const double & x, const double & Q) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetEval(x, Q, global_pdf);
+    return pdf_to_array(global_pdf);
 }
 
-// Wrapper function to convert the pdf array to a Python list
-static PyObject* pdf_to_array(double *pdf) {
-    PyObject *py_list = PyList_New(pdf_len);
-    for (unsigned int i = 0; i < pdf_len; i++) {
-        PyList_SetItem(py_list, i, PyFloat_FromDouble(pdf[i]));
-    }
-    return py_list;
+static PyObject* EvalSplit(const double & x, const double & Q, const int & iloop, const int & nf) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetEvalSplit(x, Q, iloop, nf, global_pdf);
+    return pdf_to_array(global_pdf);
 }
 
+static PyObject* StrFct(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFct(x, Q, muR_in, muF_in, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctNoMu(const double & x, const double & Q) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctNoMu(x, Q, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctLO(x, Q, muR_in, muF_in, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctNLO(x, Q, muR_in, muF_in, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctFlav(x, Q, muR_in, muF_in, flav, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctNoMuFlav(const double & x, const double & Q, const int & flav) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctNoMuFlav(x, Q, flav, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctLOFlav(x, Q, muR_in, muF_in, flav, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctNLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctNLOFlav(x, Q, muR_in, muF_in, flav, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctNNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctNNLO(x, Q, muR_in, muF_in, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
+static PyObject* StrFctN3LO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetStrFctN3LO(x, Q, muR_in, muF_in, global_pdf);
+    return pdf_to_array(global_pdf);
+}
 %}
 
-%rename(Start              )      hoppetstart_;
-%rename(StartExtended      )      hoppetstartextended_;
-%rename(hoppetAssign       )      hoppetassign_; // The callback function is Assign
-%rename(hoppetEvolve       )      hoppetevolve_; // The callback function is Evolve
-%rename(PreEvolve          )      hoppetpreevolve_;     
-%rename(hoppetCachedEvolve )      hoppetcachedevolve_; // The callback function is CachedEvolve
-%rename(AlphaS             )      hoppetalphas_; 
-%rename(SetFFN             )      hoppetsetffn_;       
-%rename(SetVFN             )      hoppetsetvfn_;       
-%rename(SetPoleMassVFN     )      hoppetsetpolemassvfn_;       
-%rename(SetMSbarMassVFN    )      hoppetsetmsbarmassvfn_;       
-%rename(SetExactDGLAP      )      hoppetsetexactdglap_;
-%rename(Eval               )      hoppeteval_;          
-%rename(EvalSplit          )      hoppetevalsplit_;
-%rename(SetQED             )      hoppetsetqed_;
-%rename(DeleteAll          )      hoppetdeleteall_;
+%rename(hoppetStart         )      hoppetstart_;
+%rename(hoppetStartExtended )      hoppetstartextended_;
+%rename(hoppetAssign        )      hoppetassign_; // The callback function is Assign
+%rename(hoppetEvolve        )      hoppetevolve_; // The callback function is Evolve
+%rename(PreEvolve           )      hoppetpreevolve_;     
+%rename(hoppetCachedEvolve  )      hoppetcachedevolve_; // The callback function is CachedEvolve
+%rename(AlphaS              )      hoppetalphas_; 
+%rename(SetFFN              )      hoppetsetffn_;       
+%rename(SetVFN              )      hoppetsetvfn_;       
+%rename(SetPoleMassVFN      )      hoppetsetpolemassvfn_;       
+%rename(SetMSbarMassVFN     )      hoppetsetmsbarmassvfn_;       
+%rename(SetExactDGLAP       )      hoppetsetexactdglap_;
+%rename(hoppetEval          )      hoppeteval_;          
+%rename(hoppetEvalSplit     )      hoppetevalsplit_;
+%rename(SetQED              )      hoppetsetqed_;
+%rename(hoppetDeleteAll     )      hoppetdeleteall_;
 
-%rename(StartStrFct        )      hoppetstartstrfct_;
-%rename(StartStrFctExtended)      hoppetstartstrfctextended_;
-%rename(InitStrFct         )      hoppetinitstrfct_;
-%rename(InitStrFctFlav     )      hoppetinitstrfctflav_;
-%rename(StrFct             )      hoppetstrfct_;
-%rename(StrFctNoMu         )      hoppetstrfctnomu_;
-%rename(StrFctLO           )      hoppetstrfctlo_;
-%rename(StrFctNLO          )      hoppetstrfctnlo_;
-%rename(StrFctFlav         )      hoppetstrfctflav_;
-%rename(StrFctNoMuFlav     )      hoppetstrfctnomuflav_;
-%rename(StrFctLOFlav       )      hoppetstrfctloflav_;
-%rename(StrFctNLOFlav      )      hoppetstrfctnloflav_;
-%rename(StrFctNNLO         )      hoppetstrfctnnlo_;
-%rename(StrFctN3LO         )      hoppetstrfctn3lo_;
+%rename(StartStrFct         )      hoppetstartstrfct_;
+%rename(StartStrFctExtended )      hoppetstartstrfctextended_;
+%rename(InitStrFct          )      hoppetinitstrfct_;
+%rename(InitStrFctFlav      )      hoppetinitstrfctflav_;
+%rename(hoppetStrFct        )      hoppetstrfct_;
+%rename(hoppetStrFctNoMu    )      hoppetstrfctnomu_;
+%rename(hoppetStrFctLO      )      hoppetstrfctlo_;
+%rename(hoppetStrFctNLO     )      hoppetstrfctnlo_;
+%rename(hoppetStrFctFlav    )      hoppetstrfctflav_;
+%rename(hoppetStrFctNoMuFlav)      hoppetstrfctnomuflav_;
+%rename(hoppetStrFctLOFlav  )      hoppetstrfctloflav_;
+%rename(hoppetStrFctNLOFlav )      hoppetstrfctnloflav_;
+%rename(hoppetStrFctNNLO    )      hoppetstrfctnnlo_;
+%rename(hoppetStrFctN3LO    )      hoppetstrfctn3lo_;
 
 %include "hoppet_v1.h"
 
 %inline %{
+    void init_global_pdf();
+    void free_global_pdf();
+    PyObject* pdf_to_array(double *pdf);
+    void Start(const double & dy, const int & nloop);
+    void StartExtended(const double & ymax, const double & dy, const double & Qmin, 
+                        const double & Qmax, const double & dlnlnQ, const int & nloop, 
+                        const int & order, const int & factscheme);
+    void DeleteAll();
     void Assign(PyObject *callback);
     void Evolve(const double & asQ0, const double & Q0alphas, const int & nloop, 
                               const double & muR_Q, PyObject *callback, const double & Q0pdf);
     void CachedEvolve(PyObject *callback);
-    double *new_pdf();
-    PyObject* pdf_to_array(double *pdf);
+    PyObject* Eval(const double & x, const double & Q);
+    PyObject* EvalSplit(const double & x, const double & Q, const int & iloop, const int & nf);
+    PyObject* StrFct(const double & x, const double & Q, const double & muR_in, const double & muF_in);
+    PyObject* StrFctNoMu(const double & x, const double & Q);
+    PyObject* StrFctLO(const double & x, const double & Q, const double & muR_in, const double & muF_in);
+    PyObject* StrFctNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in);
+    PyObject* StrFctFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav);
+    PyObject* StrFctNoMuFlav(const double & x, const double & Q, const int & flav);
+    PyObject* StrFctLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav);
+    PyObject* StrFctNLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav);
+    PyObject* StrFctNNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in);
+    PyObject* StrFctN3LO(const double & x, const double & Q, const double & muR_in, const double & muF_in);
 %}
