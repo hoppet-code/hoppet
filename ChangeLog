@@ -1,3 +1,43 @@
+2025-02-24  Gavin Salam & Alexander Karlberg
+
+	This update includes the alphas^3 mass thresholds. Note that an
+	F2003 compiler is now required.
+
+	* src/VFNSmod.f:   *** ADDED ***
+	* src/AQg3mod.f90: *** ADDED ***
+
+	added code for alphas^3 mass thresholds from Johannes Blumlein and
+	Kay Schonwald corresponding to J. Ablinger, A. Behring,
+	J. Blumlein, A. De Freitas, A. von Manteuffel, C. Schneider,
+	K. Schonwald, The Variable Flavor Number Scheme at
+	Next-to-Next-to-Leading Order (DESY 24-037).
+
+	* src/daind_fake.f90: *** ADDED ***
+	additional file needed with some of the VFNSmod.f tests
+
+	* src/dglap_choices.f90:
+	* src/dglap_objects.f90:
+	* src/mass_thresholds_n3lo.f90:
+	* example_f90/tabulation_example_n3lo.f90
+	updated to finalise support for N3LO mass thresholds
+
+	* src/exact-coefs/hplog5.f -> src/hplog5.f:
+	needed for VFNSmod.f to placed in main compilation run
+
+	* tests/test-n3lo-mtm.f90:
+	run basic tests of the mass threshold terms
+
+	* tests/with-lhapdf/tabulation_n3lo_v130_paper.f90
+	for examining the impact of different parts of the n3lo terms
+
+	* .github/workflows/main.yml:
+	turned off IBM XL support in CI because it runs very slowly and is
+	also difficult to test locally. The commented version includes
+	flags needed for F2003.
+
+	* NEWS:
+	updated to reflect mass thresholds
+
 2024-12-30 Mon  <gavin.salam@physics.ox.ac.uk>
 
 	* CMakeLists.txt:

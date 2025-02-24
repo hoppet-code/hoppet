@@ -490,7 +490,7 @@ However, enough Mellin-moments have now been computed that together
 with the exact pieces just mentioned and known small- and large-$x$
 behaviours, approximate splitting functions suitable for phenomenology
 can be reliably
-determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt}.
+determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd}.
 %
 We have therefore implemented the aforementioned pieces, with the
 intention of updating the splitting functions as they become more
@@ -499,7 +499,7 @@ precisely known.\gps{implemented $\to$ incorporated? (And mention we
 
 For the specific implementation in \hoppet version 1.3.0 we rely on
 the approximations computed in
-Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt} (FHMPRUVV),
+Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd} (FHMPRUVV),
 the implementation of the three-loop (single-mass) VFNS as found in
 Ref.~\cite{BlumleinCode} which contains code found in
 Refs.~\cite{Ablinger:2024xtt,Fael:2022miw} and our own implementation
@@ -541,13 +541,16 @@ available in the future we have also implemented a flag,
 \ttt{n3lo\_splitting\_approximation}, in
 \masterlink{src/dglap\_choices.f90} that controls which approximations
 to use. By default it uses the most recent set of approximations by
-the FHMPRUVV group. At the time of writing it takes two values: the
-slightly older implementation
+the FHMPRUVV group. At the time of writing it takes three values: the
+older implementation
 \ttt{n3lo\_splitting\_approximation\_up\_to\_2310\_05744} meaning the
 approximations in papers up to and including Ref.~\cite{Moch:2023tdj};
-and \ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701} meaning
-the approximations in papers up to and including
-Ref.~\cite{Falcioni:2024xyt}.
+\ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701} meaning the
+approximations in papers up to and including
+Ref.~\cite{Falcioni:2024xyt} and the default value of
+\ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089} meaning the
+approximations in papers up to and including
+Ref.~\cite{Falcioni:2024qpd}.
 
 
 %\ak{Started collecting some references here as there are many and they are not that easy to find...}
@@ -575,8 +578,11 @@ agreement with those that can be obtained with
 APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds} (at the level of
 $10^{-5}$ relative precision).
 %
-The benchmarks with APFEL++ and the code used to carry
-them out are described in detail in Ref.~\cite{Bertone:2024dpm}. A simplified version of that benchmark can be found in
+The benchmarks with APFEL++ and the code used to carry them out are
+described in detail in Ref.~\cite{Bertone:2024dpm} and at
+\url{https://github.com/alexanderkarlberg/n3lo-structure-function-benchmarks}. A
+simplified version of that benchmark is also included in the \hoppet{}
+repository and can be found in
 \masterlink{benchmarking/structure\_functions\_benchmark\_checks.f90}.
 %
 Technical details on the implementation of the structure functions in
@@ -691,7 +697,7 @@ argument can take several values:
 % This makes for a slightly slower evaluation compared to the two other
 % scale choices.
 
-If \ttt{param\_coefs} is set to \ttt{.true.} (its default) then the
+If \ttt{param\_coefs} is set to \ttt{.true.} (its defalt) then the
 structure functions are computed using the NNLO and N$^3$LO
 parametrisations found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},

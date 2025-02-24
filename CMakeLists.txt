@@ -68,11 +68,13 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "NAG")
 endif()
 
 # IBM XL
-add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qfree;-qextname;-qhalt=s>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qfree;-qextname;-qhalt=s;-qxlf2003=polymorphic>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qstackprotect=all>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL")
   # xlf seems to be working OK in CI, so comment out the COMPILER_BUG_MSG
   #message(WARNING "HOPPET: ${CMAKE_Fortran_COMPILER_ID} ${COMPILER_BUG_MSG}")
+  # GPS 2025-02-22: added -qxlf2003=polymorphic to be able to use F2003 features needed in mass_thresholds_n3lo.f90
+  # but this does not seem to solve the problem
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -qcheck -qsigtrap")
 endif()
 
@@ -221,6 +223,7 @@ if (HOPPET_BUILD_EXAMPLES)
                    structure_functions_example_flavour  
                    tabulation_example_2                  
                    tabulation_example      
+                   tabulation_example_n3lo
                    tabulation_example_qed_streamlined
                    tabulation_example_up_and_down
                    sumrules                     

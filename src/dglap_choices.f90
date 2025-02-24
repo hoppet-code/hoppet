@@ -42,6 +42,10 @@ module dglap_choices
   integer, parameter, public :: nnlo_nfthreshold_param = -11
   integer, public :: nnlo_nfthreshold_variant = nnlo_nfthreshold_param
 
+  integer, parameter, public :: n3lo_nfthreshold_on  = 1
+  integer, parameter, public :: n3lo_nfthreshold_off = 0
+  integer, public :: n3lo_nfthreshold = n3lo_nfthreshold_on
+
   integer, parameter, public :: factscheme_MSbar    = 1
   integer, parameter, public :: factscheme_DIS      = 2
   integer, parameter, public :: factscheme_PolMSbar = 3
@@ -57,6 +61,7 @@ module dglap_choices
   public :: dglap_Set_n3lo_splitting
   public :: dglap_Set_n3lo_splitting_approximation
   public :: dglap_Set_nnlo_nfthreshold
+  public :: dglap_Set_n3lo_nfthreshold
 contains
 
   !-------- overkill ----------------------------------------
@@ -82,4 +87,10 @@ contains
     integer, intent(in) :: variant
     nnlo_nfthreshold_variant = variant
   end subroutine dglap_Set_nnlo_nfthreshold
+
+  !-------- overkill ----------------------------------------
+  subroutine dglap_Set_n3lo_nfthreshold(variant)
+    integer, intent(in) :: variant
+    n3lo_nfthreshold = variant
+  end subroutine dglap_Set_n3lo_nfthreshold
 end module dglap_choices

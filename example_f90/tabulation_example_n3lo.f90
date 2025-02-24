@@ -35,7 +35,8 @@ program tabulation_example
   real(dp) :: Q, pdf_at_xQ(-6:6)
   real(dp), parameter :: heralhc_xvals(11) = &
        & (/1e-7_dp, 1e-6_dp, 1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
-  integer  :: ix
+  integer  :: i, ix
+  real(dp) :: x
 
   !! define the interfaces for LHA pdf (by default not used)
   !! (NB: unfortunately this conflicts with an internal hoppet name,
@@ -59,10 +60,12 @@ program tabulation_example
   call InitGridDefDefault(grid, dy, ymax, order=order)
 
   ! initialise the splitting-function holder
-  nloop = 4
-  n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2310_05744
+  nloop = 4 ! 1; LO, 2; NLO, 3; NNLO; 4; N3LO
+  !n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2310_05744 ! Controls the approximation that we use the in n3lo splitting functions
+  call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
+  call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_on) ! To turn on/off the n3lo mass thresholds
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
-       &                      nloop=nloop,nflo=3,nfhi=6)
+       &                      nloop=nloop,nflo=3,nfhi=5)
   write(6,'(a)') "Splitting functions initialised!"
 
   !! set up LHAPDF with cteq
@@ -81,7 +84,7 @@ program tabulation_example
 
   ! allocate and initialise the running coupling with a given
   ! set of quark masses (NB: charm mass just above Q0).
-  quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 175.0_dp/)
+  quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 1e100_dp/)
   call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
        &                   quark_masses = quark_masses)
 
@@ -118,6 +121,25 @@ program tabulation_example
           &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
           &  pdf_at_xQ(0)
   end do
+  ! Write to a fil
+  
+  write(12,'(a5,3a12,a14,3a11,a12)') "x",&
+       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
+  do i = 1, 200
+     x     = 0.0001_dp ** (i/200.0_dp)
+     call EvalPdfTable_xQ(table,x,Q,pdf_at_xQ)
+     write(12,'(es7.1,8es12.4)') x, &
+          &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+          &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+          &  (pdf_at_xQ(-1)-pdf_at_xQ(-2)), &
+          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+          &  (pdf_at_xQ(-3)+pdf_at_xQ(3)), &
+          &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+          &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
+          &  pdf_at_xQ(0)
+   end do
+   write(12,*) ''
+   write(12,*) ''
   
   ! some cleaning up (not strictly speaking needed, but illustrates
   ! how it's done)

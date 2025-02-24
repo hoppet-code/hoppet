@@ -20,7 +20,7 @@
 !!
 !======================================================================
 module dglap_objects
-  use types; use consts_dp; use splitting_functions
+  use types; use consts_dp; use splitting_functions; use mass_thresholds_n3lo
   !use qcd
   use dglap_choices
   use warnings_and_errors
@@ -942,12 +942,55 @@ contains
     MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
 
-  subroutine InitMTMN3LO(grid,MTM)
+  subroutine InitMTMN3LO(grid,MTM_N3LO)
     type(grid_def),           intent(in)  :: grid
-    type(mass_threshold_mat), intent(out) :: MTM
-    call InitMTMNNLO(grid,MTM) !! dummy initialisation to NNLO, just to get started
-    MTM%loops = 4
-    call Multiply(MTM, zero)
+    type(mass_threshold_mat), intent(out) :: MTM_N3LO
+    logical, save :: first_time = .true.
+    
+   if(n3lo_nfthreshold .eq. n3lo_nfthreshold_on) then
+      
+      if (first_time) then
+         write(6,'(a)') 'Initialisation of Mass Threshold Matrices at N3LO. The paper'
+         write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
+         write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
+         write(6,'(a)') '*     "The Variable Flavor Number Scheme at  Next-to-Next-to-Leading Order",'
+         write(6,'(a)') '*     DESY 24-037   '
+         write(6,'(a)') '* shall be cited at any use. Corresponding code from J. Bluemlein, March 19 2024 and '
+         write(6,'(a)') '* K. Schönwald, March 15 2024, including results from arXiv:2207.00027, arXiv:2403.00513'
+         write(6,'(a)') '*'
+         write(6,'(a)') "The initialisation could take up to a minute, depending on the machine."
+         first_time = .false.
+      end if
+      
+      write(6,'(a,i3)') 'Initialising N3LO mass threshold matrices for nf = ', nf_int
+      call InitGridConv(grid, MTM_N3LO%PShq  , JB( PS, null(), null(), order=103))
+      call AddWithCoeff(      MTM_N3LO%PShq  , JB(APS, null(), null(), order=  3))
+      
+      call InitGridConv(grid, MTM_N3LO%PShg  , JB( QG, null(), null(), order=103))
+      call AddWithCoeff(      MTM_N3LO%PShg  , JB(AQGtotal, null(), null(), order=  3)) ! The full thing
+      !
+      call InitGridConv(grid, MTM_N3LO%PSqq_H, JB(PSL, null(), null(), order=103))
+      !! there is no APSL, all is included in PSL
+      !
+      call InitGridConv(grid, MTM_N3LO%NSqq_H, JB( NSREG,  NSPLU,  NSDEL, order=103))
+      call AddWithCoeff(      MTM_N3LO%NSqq_H, JB(ANSREG, ANSPLU, ANSDEL, order=  3))
+      !
+      call InitGridConv(grid, MTM_N3LO%Sgg_H, JB( GGREG,  GGPLU,  GGDEL, order=103))
+      call AddWithCoeff(      MTM_N3LO%Sgg_H, JB(AGGREG, AGGPLU, AGGDEL, order=  3))
+      !
+      call InitGridConv(grid, MTM_N3LO%Sgq_H  , JB( GQ, null(), null(), order=103))
+      call AddWithCoeff(      MTM_N3LO%Sgq_H  , JB(AGQ, null(), null(), order=  3))
+      !
+      call InitGridConv(grid, MTM_N3LO%Sqg_H  , JB(QGL, null(), null(), order=103))
+      ! there is no AQGL, all is included in QGL
+      
+      MTM_N3LO%loops = 4
+      MTM_N3LO%nf_int = nf_int
+   else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
+      call InitMTMNNLO(grid,MTM_N3LO) !! dummy initialisation to NNLO, just to get started
+      MTM_N3LO%loops = 4
+      call Multiply(MTM_N3LO, zero)
+   endif
   end subroutine InitMTMN3LO
 
   subroutine InitMTM_from_MTM(MTM, MTM_in)

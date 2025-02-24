@@ -1,19 +1,27 @@
 NEWS for HOPPET
 
 ======================================================================
-Release 1.3.0, XX January 2025
+Release 1.3.0, XX March 2025
 ======================================================================
 
 Major new features:
 * inclusion of QED evolution
-* inclusion of structure function calculations
-* inclusion of approximate N3LO splitting functions
+* inclusion of structure function calculations, including code from (D)MVV group, 
+  (arXiv:1606.08907 and refs therein)
+* inclusion of approximate N3LO splitting functions, including code from 
+  FHMPRUVV group (arXiv:2410.08089 and refs therein)
+* inclusion of mass threshold matrices for VFNS N3LO evolution, including
+  code from ABBFMSS group (DESY 24-037 and refs therein)
+
+We are grateful to the authors of the N3LO coefficient functions,
+splitting functions and mass threshold terms for providing their code. 
 
 Authorship update: 
 * Frederic Dreyer, Alexander Karlberg, Paolo Nason and Giulia Zanderighi
   are now authors
 
 Other changes:
+* A compiler with support for Fortran 2003 is now required
 * various small bug fixes (see ChangeLog for details)
 * ability to declare points where the integration of convolution
   functions should be split up (split optional arg to InitGridConv, etc.)
