@@ -550,6 +550,21 @@ end subroutine hoppetSetApproximateDGLAPN3LO
 
 
 !======================================================================
+!! Arrange for the use of N3LO mass thresholds or not.
+subroutine hoppetSetN3LOnfthresholds(variant)
+  ! variant can be one of
+  ! integer, parameter, public :: n3lo_nfthreshold_on  = 1
+  ! integer, parameter, public :: n3lo_nfthreshold_off = 0
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  integer :: variant
+
+  call dglap_Set_n3lo_nfthreshold(variant)
+
+end subroutine hoppetSetN3LOnfthresholds
+
+
+!======================================================================
 !! Assuming this is called with an array starting at index -6, return in f(-6:6) 
 !! the value of the internally stored pdf at the
 !! given x,Q, with the usual LHApdf meanings for the indices -6:6.
