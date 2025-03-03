@@ -7,21 +7,25 @@ compilation of hoppet rather than the new CMake build. Just run
 
 * Incorporation of N3LO mass threshold matrices <2025-02-22 Sat>
 
-  Addition of the test-n3lo-mtm.f90 program, which, runs various tests
-  on the N3LO mass-threshold contributions from Blumlein et al. In
-  particular:
-    
-  - it prints out the moments as calculated by the internal
-    integration in VFNSmod.f and from the derived form in our
-    mass threshold matrices
+** testing the ingredients
+   Addition of the test-n3lo-mtm.f90 program, which, runs various tests
+   on the N3LO mass-threshold contributions from Blumlein et al. In
+   particular:
+     
+   - it prints out the moments as calculated by the internal
+     integration in VFNSmod.f and from the derived form in our
+     mass threshold matrices
+   
+   - it also runs Johannes Blumlein's original test code (with
+     hard-coded nf, as4pi and LL) for comparing known moments
+     to the integration in VFNSmod.f
+   
+   Reference output is in results/2025-02-22-n3lo-mlm.dat
 
-  - it also runs Johannes Blumlein's original test code (with
-    hard-coded nf, as4pi and LL) for comparing known moments
-    to the integration in VFNSmod.f
+** exploring the output
+   - code is [[file:with-lhapdf/tabulation_n3lo_v130_paper.f90]]
+   - results of tests are in [[file:2025-02-n3lo-checks-v130/][2025-02-n3lo-checks-v130]]/
 
-  Reference output is in results/2025-02-22-n3lo-mlm.dat
-
-    
 * time-like NLO splitting function tests <2022-07-20 Wed>
 
   - for the coding of the splitting functions themselves, compared
