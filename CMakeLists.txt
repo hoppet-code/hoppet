@@ -15,12 +15,13 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 include("GNUInstallDirs")
 
 # Add options ==========================================================
-option(HOPPET_USE_EXACT_COEF  "Use exact coefficient functions"  OFF)
-option(HOPPET_BUILD_EXAMPLES  "Build examples" ON)
-option(HOPPET_ENABLE_TESTING  "Enable testing. Requires building the examples." ON)
-option(HOPPET_BUILD_BENCHMARK "Build benchmark." ON)
-option(HOPPET_ENABLE_FPES     "Enable trapping for the floating point exceptions." OFF)
-option(HOPPET_BUILD_TESTDIR   "Enable build of the code in the test directory." OFF)
+option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
+option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
+option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
+option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
+option(HOPPET_BUILD_PYINTERFACE "Build python interface." ON)
+option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
+option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
@@ -130,16 +131,19 @@ message(STATUS "HOPPET: CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
 message(STATUS "HOPPET: CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "HOPPET: HOPPET_USE_EXACT_COEF=${HOPPET_USE_EXACT_COEF}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
+message(STATUS "HOPPET: HOPPET_BUILD_PYINTERFACE=${HOPPET_BUILD_PYINTERFACE}")
 message(STATUS "HOPPET: HOPPET_ENABLE_TESTING=${HOPPET_ENABLE_TESTING}")
 message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
 message(STATUS "HOPPET: HOPPET_BUILD_TESTDIR=${HOPPET_BUILD_TESTDIR}")
 message(STATUS "HOPPET: HOPPET_ENABLE_FPES=${HOPPET_ENABLE_FPES}")
 
-add_subdirectory(pyinterface)
-
 if (HOPPET_BUILD_EXAMPLES)
   find_package(LHAPDF REQUIRED) 
   message(STATUS "HOPPET: LHAPDF_VERSION=${LHAPDF_VERSION} LHAPDF_LIBRARIES=${LHAPDF_LIBRARIES} LHAPDF_INCLUDE_DIRS=${LHAPDF_INCLUDE_DIRS}")
+endif()
+if (HOPPET_BUILD_PYINTERFACE)
+  find_package(SWIG REQUIRED) 
+  message(STATUS "HOPPET: SWIG_VERSION=${SWIG_VERSION} SWIG_LIBRARIES=${SWIG_LIBRARIES} SWIG_INCLUDE_DIRS=${SWIG_INCLUDE_DIRS}")
 endif()
 
 # hoppet-config script =================================================
@@ -335,6 +339,9 @@ if (HOPPET_BUILD_TESTDIR)
      )
   endforeach()
 endif()
+
+add_subdirectory(pyinterface)
+
 
 # Cmake config files   #################################################
 include(CMakePackageConfigHelpers)

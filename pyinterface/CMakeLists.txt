@@ -68,7 +68,7 @@ endif()
 
 # find the include dirs for the config.hh file
 find_path( HOPPET_BUILD_DIR
-  NAMES CTestTestfile.cmake
+  NAMES bin
   HINTS ${PARENT_DIR}/build
 )
 if (HOPPET_BUILD_DIR)
