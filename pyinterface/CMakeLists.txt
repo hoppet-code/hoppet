@@ -1,81 +1,97 @@
 cmake_minimum_required(VERSION 3.15)
-project(pyinterface LANGUAGES C CXX)
+project(HoppetPython)
 
-#include(FortranCInterface)
-# these are useful for more advanced work?
-#FortranCInterface_VERIFY()
-#FortranCInterface_HEADER(${CMAKE_BINARY_DIR}/FortranCInterface.h)
+#------------------------------------------------------------------------
+# basic requirements
+SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_FLAGS "-O2 -g -Wall")
 
 
-# Find Python and SWIG
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-find_package(SWIG REQUIRED)
-include(${SWIG_USE_FILE})
+# specify that we're using fortran
+enable_language(Fortran)
+set(CMAKE_Fortran_FLAGS "-O3")
 
-# # Find Hoppet
-# find_file(HOPPET_CONFIG hoppet-config)
-# if(NOT HOPPET_CONFIG)
-#     message(FATAL_ERROR "Could not find hoppet-config")
-# endif()
-# 
-# execute_process(
-#   COMMAND bash -c "${HOPPET_CONFIG} --prefix"
-#   OUTPUT_VARIABLE HOPPET_PREFIX
-#   OUTPUT_STRIP_TRAILING_WHITESPACE
-# )
-# 
-# execute_process(
-#   COMMAND bash -c "${HOPPET_CONFIG} --libs"
-#   OUTPUT_VARIABLE HOPPET_LIBRARY
-#   OUTPUT_STRIP_TRAILING_WHITESPACE
-# )
-# 
-# set(HOPPET_INCLUDE_DIR "${HOPPET_PREFIX}/include/hoppet")
-# set(HOPPET_LIB_DIR "${HOPPET_PREFIX}/lib")
-# set(HOPPET_LIBRARY "${HOPPET_LIBRARY} -Wl,-rpath,${HOPPET_LIB_DIR}")
 
-# Include directories
-include_directories(${Python3_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/src)
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
-# SWIG interface
-set(SWIG_INPUT_FILE hoppet_v1.i)
-set(CMAKE_SWIG_FLAGS -doxygen)
+#------------------------------------------------------------------------
+# find Swig
+#
+# The following lines get rid of warnings
+# on some systems (Gavin's and Gregory's swig 4)
+if(POLICY CMP0078)
+  cmake_policy(SET CMP0078 NEW)
+endif()
+if(POLICY CMP0086)
+  cmake_policy(SET CMP0086 NEW)
+endif()
 
-set_source_files_properties(${SWIG_INPUT_FILE} PROPERTIES CPLUSPLUS ON)
+FIND_PACKAGE(SWIG REQUIRED)
+INCLUDE(${SWIG_USE_FILE})
 
-# Generate the SWIG wrapper
-swig_add_library(hoppet_v1
-  TYPE MODULE
-  LANGUAGE python
-  SOURCES ${SWIG_INPUT_FILE}
+#------------------------------------------------------------------------
+# Find Python3
+#
+# the more modern way (as of 2021) of finding Python3 components
+# (for Gavin this worked out of the box, whereas the previous
+# solution needed manual specification of non-standard lib and
+# include paths)
+find_package (Python3 COMPONENTS Interpreter Development)
+message("Python3 lib: " ${Python3_LIBRARIES})
+message("Python3 include: " ${Python3_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Python3_INCLUDE_DIRS})
+
+# Note: relative paths are all given wrt to the sourcedir
+set(PARENT_DIR .. CACHE PATH "Path to the main (hoppet) directory")
+message ("-- Looking for dependences in parent directory ${PARENT_DIR}")
+
+
+#----------------------------------------------------------------------
+# find the Hoppet directories
+#
+#   HOPPET_SOURCE_DIR  where most includes will be found [${PARENT_DIR}/src]
+#   HOPPET_BUILD_DIR   where the library is found [${PARENT_DIR}/build/lib]
+
+# find the source dir
+find_path( HOPPET_SOURCE_DIR 
+  NAMES hoppet_v1.h
+  HINTS ${PARENT_DIR}/src
 )
+if (HOPPET_SOURCE_DIR)
+  message ("-- Hoppet sources (includes) in ${HOPPET_SOURCE_DIR}")
+else()
+  message(FATAL_ERROR "Hoppet sources not found")
+endif()
 
-# Ensure the SWIG-generated wrapper file is compiled as C++
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/hoppet_v1PYTHON_wrap.cxx PROPERTIES LANGUAGE CXX)
-
-# Set C++ standard
-set_target_properties(${SWIG_MODULE_hoppet_v1_REAL_NAME} PROPERTIES CXX_STANDARD 11)
-
-# Link libraries
-target_link_libraries(${SWIG_MODULE_hoppet_v1_REAL_NAME}
-#PRIVATE ${HOPPET_LIBRARY} ${Fortran_LIBRARIES} ${Python3_LIBRARIES}
-  PUBLIC hoppet::hoppet ${Fortran_LIBRARIES} ${Python3_LIBRARIES}
-#PUBLIC hoppet_v1 ${Fortran_LIBRARIES} ${Python3_LIBRARIES}
+# find the include dirs for the config.hh file
+find_path( HOPPET_BUILD_DIR
+  NAMES CTestTestfile.cmake
+  HINTS ${PARENT_DIR}/build
 )
+if (HOPPET_BUILD_DIR)
+  message ("-- Hoppet build in ${HOPPET_BUILD_DIR}")
+else()
+  message(FATAL_ERROR "Hoppet build not found")
+endif()
 
-# Install the Python module
-#message("******* ${SWIG_MODULE_hoppet_v1_REAL_NAME}")
-install(TARGETS ${SWIG_MODULE_hoppet_v1_REAL_NAME}
-  LIBRARY DESTINATION ${Python3_SITEARCH}
+# find the Hoppet library
+find_library( HOPPET_LIBRARIES 
+  NAMES hoppet_v1
+  HINTS ${PARENT_BUILD_DIR}
 )
-# manually install hoppet_v1.py -- not sure why this is needed
+if (HOPPET_LIBRARIES)
+  message("-- Hoppet library ${HOPPET_LIBRARIES}")
+else()
+  message(FATAL_ERROR "Hoppet library not found")
+endif()
+
+#------------------------------------------------------------------------
+INCLUDE_DIRECTORIES(${HOPPET_SOURCE_DIR} ${HOPPET_BUILD_DIR})
+SET_SOURCE_FILES_PROPERTIES(hoppet_v1.i PROPERTIES CPLUSPLUS ON)
+SWIG_ADD_LIBRARY(hoppet_v1 LANGUAGE python SOURCES hoppet_v1.i)
+SWIG_LINK_LIBRARIES(hoppet_v1 ${Python3_LIBRARIES} ${HOPPET_LIBRARIES})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hoppet_v1.py
   DESTINATION ${Python3_SITEARCH}
 )
-
-# Add the tabulation example
-#add_custom_target(tabulation_example ALL
-#  COMMAND ${Python3_EXECUTABLE} setup.py build_ext --inplace
-#  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#  DEPENDS ${SWIG_MODULE_hoppet_v1_REAL_NAME}
-#)
