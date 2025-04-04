@@ -38,9 +38,10 @@ INCLUDE(${SWIG_USE_FILE})
 # (for Gavin this worked out of the box, whereas the previous
 # solution needed manual specification of non-standard lib and
 # include paths)
-find_package (Python3 COMPONENTS Interpreter Development)
+find_package (Python3 COMPONENTS Interpreter Development REQUIRED)
 message("Python3 lib: " ${Python3_LIBRARIES})
 message("Python3 include: " ${Python3_INCLUDE_DIRS})
+message("Python3 site lib: " ${Python3_SITELIB})
 INCLUDE_DIRECTORIES(${Python3_INCLUDE_DIRS})
 
 # Note: relative paths are all given wrt to the sourcedir
@@ -92,6 +93,12 @@ INCLUDE_DIRECTORIES(${HOPPET_SOURCE_DIR} ${HOPPET_BUILD_DIR})
 SET_SOURCE_FILES_PROPERTIES(hoppet_v1.i PROPERTIES CPLUSPLUS ON)
 SWIG_ADD_LIBRARY(hoppet_v1 LANGUAGE python SOURCES hoppet_v1.i)
 SWIG_LINK_LIBRARIES(hoppet_v1 ${Python3_LIBRARIES} ${HOPPET_LIBRARIES})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hoppet_v1.py
-  DESTINATION ${Python3_SITEARCH}
-)
+
+message("-- SWIG module name ${SWIG_MODULE_hoppet_v1_REAL_NAME}")
+
+install(TARGETS ${SWIG_MODULE_hoppet_v1_REAL_NAME}
+  LIBRARY DESTINATION ${Python3_SITEARCH}
+  )
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hoppet_v1.py 
+          DESTINATION ${Python3_SITELIB})
