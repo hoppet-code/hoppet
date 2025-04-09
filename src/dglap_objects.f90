@@ -1136,7 +1136,11 @@ contains
     
     ! the singlet contributions to the individual light-quark flavours,
     ! which we compute once and for all here, per flavour
-    dq_from_singlet = (half/nf_light) * ((MTM%PSqq_H * singlet) + (MTM%Sqg_H * q(:,iflv_g)))
+    !    dq_from_singlet = (half/nf_light) * ((MTM%PSqq_H * singlet) + (MTM%Sqg_H * q(:,iflv_g)))
+    !
+    ! AK Should come with a factor NF after summing over NF, as per
+    ! Eq. (35) of https://arxiv.org/pdf/1403.6356
+    dq_from_singlet = (half) * ((MTM%PSqq_H * singlet) + (MTM%Sqg_H * q(:,iflv_g)))
 
     ! finally do all individual light-quark flavours
     do i = -ncomponents, ncomponents
