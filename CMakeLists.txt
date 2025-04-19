@@ -32,6 +32,10 @@ endif()
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 message(STATUS "HOPPET: CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
+set(HOPPET_PYTHON_PACKAGE_NAME "hoppet_v1" CACHE STRING "The name of the installed hoppet python package.")
+set(HOPPET_USE_PYTHON_SITEARCH OFF CACHE BOOL "Force the usage of ${Python_SITEARCH} if CMAKE_INSTALL_PREFIX was defined.")
+set(HOPPET_CUSTOM_PYTHON_INSTALL "" CACHE STRING "Specify a custom python install path, can be absolute or relative to lib.")
+
 # Flags for compilers ==============================================
 # GNU
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wall>")

@@ -1,104 +1,67 @@
-cmake_minimum_required(VERSION 3.15)
-project(HoppetPython)
+cmake_minimum_required(VERSION 3.16...3.31)
 
-#------------------------------------------------------------------------
-# basic requirements
-SET(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-O2 -g -Wall")
+set(UseSWIG_MODULE_VERSION 2)
+include(UseSWIG)
 
-
-# specify that we're using fortran
-enable_language(Fortran)
-set(CMAKE_Fortran_FLAGS "-O3")
-
-
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
-#------------------------------------------------------------------------
-# find Swig
-#
-# The following lines get rid of warnings
-# on some systems (Gavin's and Gregory's swig 4)
-if(POLICY CMP0078)
-  cmake_policy(SET CMP0078 NEW)
-endif()
-if(POLICY CMP0086)
-  cmake_policy(SET CMP0086 NEW)
-endif()
-
-FIND_PACKAGE(SWIG REQUIRED)
-INCLUDE(${SWIG_USE_FILE})
-
-#------------------------------------------------------------------------
-# Find Python3
-#
-# the more modern way (as of 2021) of finding Python3 components
-# (for Gavin this worked out of the box, whereas the previous
-# solution needed manual specification of non-standard lib and
-# include paths)
-find_package (Python3 COMPONENTS Interpreter Development REQUIRED)
-message("Python3 lib: " ${Python3_LIBRARIES})
-message("Python3 include: " ${Python3_INCLUDE_DIRS})
-message("Python3 site lib: " ${Python3_SITELIB})
-INCLUDE_DIRECTORIES(${Python3_INCLUDE_DIRS})
-
-# Note: relative paths are all given wrt to the sourcedir
-set(PARENT_DIR .. CACHE PATH "Path to the main (hoppet) directory")
-message ("-- Looking for dependences in parent directory ${PARENT_DIR}")
-
-
-#----------------------------------------------------------------------
-# find the Hoppet directories
-#
-#   HOPPET_SOURCE_DIR  where most includes will be found [${PARENT_DIR}/src]
-#   HOPPET_BUILD_DIR   where the library is found [${PARENT_DIR}/build/lib]
-
-# find the source dir
-find_path( HOPPET_SOURCE_DIR 
-  NAMES hoppet_v1.h
-  HINTS ${PARENT_DIR}/src
-)
-if (HOPPET_SOURCE_DIR)
-  message ("-- Hoppet sources (includes) in ${HOPPET_SOURCE_DIR}")
+if (CMAKE_VERSION VERSION_LESS 3.18)
+  set(DEV_MODULE Development)
 else()
-  message(FATAL_ERROR "Hoppet sources not found")
+  set(DEV_MODULE Development.Module)
 endif()
 
-# find the include dirs for the config.hh file
-find_path( HOPPET_BUILD_DIR
-  NAMES bin
-  HINTS ${PARENT_DIR}/build
-)
-if (HOPPET_BUILD_DIR)
-  message ("-- Hoppet build in ${HOPPET_BUILD_DIR}")
+find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+
+set_property(SOURCE hoppet_v1.i PROPERTY CPLUSPLUS ON)
+set_property(SOURCE hoppet_v1.i PROPERTY SWIG_MODULE_NAME __init__)
+
+swig_add_library(hoppet_swig LANGUAGE python SOURCES hoppet_v1.i OUTPUT_DIR hoppet_swig)
+set_property(TARGET hoppet_swig PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
+# set hoppet_swig to use the same include directories as the main hoppet library
+target_include_directories(hoppet_swig PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
+#set_property(TARGET hoppet_swig PROPERTY INSTALL_RPATH lib)
+#set_property(TARGET hoppet_swig PROPERTY INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# NB this is specifically for building scikit-hep/hoppet wheels
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "@loader_path/../lib;@loader_path/../../../../lib")
 else()
-  message(FATAL_ERROR "Hoppet build not found")
+  set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/../../../../lib:$ORIGIN/../../../../lib64")
 endif()
 
-# find the Hoppet library
-find_library( HOPPET_LIBRARIES 
-  NAMES hoppet_v1
-  HINTS ${PARENT_BUILD_DIR}
-)
-if (HOPPET_LIBRARIES)
-  message("-- Hoppet library ${HOPPET_LIBRARIES}")
+# Unix only, Windows is different
+set_property(TARGET hoppet_swig PROPERTY SUFFIX ".${Python_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
+
+target_link_libraries(hoppet_swig PUBLIC hoppet)
+target_link_libraries(hoppet_swig PUBLIC Python::Module)
+
+#set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "$ORIGIN/../../../../lib")
+#set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+if ("${SWIG_VERSION}" VERSION_LESS "4.2.0")
+  target_compile_definitions(hoppet_swig PUBLIC -DSWIG)
+  target_compile_definitions(hoppet_swig PUBLIC -DSWIG_TYPE_TABLE=hoppet_swig)
+endif()
+
+target_include_directories(hoppet_swig 
+                           PUBLIC 
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+                            $<INSTALL_INTERFACE:include>
+                           )
+add_library(hoppet::hoppet_swig ALIAS hoppet_swig)
+
+# Really should go to ${Python_SITEARCH} or into the wheel dir of scikit-build-core
+if (HOPPET_USE_PYTHON_SITEARCH)
+  set(HOPPET_PYTHON_INSTALL_DIR "${Python_SITEARCH}")
+elseif(NOT "${HOPPET_CUSTOM_PYTHON_INSTALL}" STREQUAL "")
+  set(HOPPET_PYTHON_INSTALL_DIR "${HOPPET_CUSTOM_PYTHON_INSTALL}")
 else()
-  message(FATAL_ERROR "Hoppet library not found")
+  set(HOPPET_PYTHON_INSTALL_DIR "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages")
+  #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+  #set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  #message(STATUS "CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 endif()
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/hoppet_swig/__init__.py" DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
+install(TARGETS hoppet_swig EXPORT HoppetTargets DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
+set(HOPPET_PYTHON_INSTALL_DIR ${HOPPET_PYTHON_INSTALL_DIR} PARENT_SCOPE) 
 
-#------------------------------------------------------------------------
-INCLUDE_DIRECTORIES(${HOPPET_SOURCE_DIR} ${HOPPET_BUILD_DIR})
-SET_SOURCE_FILES_PROPERTIES(hoppet_v1.i PROPERTIES CPLUSPLUS ON)
-SWIG_ADD_LIBRARY(hoppet_v1 LANGUAGE python SOURCES hoppet_v1.i)
-SWIG_LINK_LIBRARIES(hoppet_v1 ${Python3_LIBRARIES} ${HOPPET_LIBRARIES})
-
-message("-- SWIG module name ${SWIG_MODULE_hoppet_v1_REAL_NAME}")
-
-install(TARGETS ${SWIG_MODULE_hoppet_v1_REAL_NAME}
-  LIBRARY DESTINATION ${Python3_SITEARCH}
-  )
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hoppet_v1.py 
-          DESTINATION ${Python3_SITELIB})
