@@ -344,8 +344,9 @@ if (HOPPET_BUILD_TESTDIR)
   endforeach()
 endif()
 
-add_subdirectory(pyinterface)
-
+if (HOPPET_BUILD_PYINTERFACE)
+  add_subdirectory(pyinterface)
+endif()
 
 # Cmake config files   #################################################
 include(CMakePackageConfigHelpers)
