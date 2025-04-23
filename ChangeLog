@@ -1,3 +1,17 @@
+2025-04-23  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* pyinterface *** ADDED ***
+	Added a python interface which gives access to the same
+	functionality as the streamlined_interface. A user should have a
+	look at pyinterface/tabulation_example.py for how to use it. The
+	interface is compiled by the cmake flow.
+
+2025-04-19 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* CMakeLists.txt:
+	LHAPDF is now optional. If it's missing, examples that would need it
+	are simply not built.
+
 2025-02-24  Gavin Salam & Alexander Karlberg
 
 	This update includes the alphas^3 mass thresholds. Note that an
@@ -173,12 +187,11 @@
 	a Mac M2.
 
 
-<<<<<<< HEAD
 2024-02-26 Gavin + Alexander
 
-	* ../src/dglap_holders.f90:
-	* ../src/dglap_objects.f90:
-	* ../src/evolution.f90:
+	* src/dglap_holders.f90:
+	* src/dglap_objects.f90:
+	* src/evolution.f90:
 	Started work on support for mass-threshold matrices beyond NNLO. 
 	dglap_holder now has an allMTM(3:nloop,nflo+1:nfhi) array, and
 	setting nf sets up pointers from MTM_NNLO and MTM_N3LO to the
@@ -193,8 +206,6 @@
 	turned it off, because it causes failures with IBMM compiler
 	on CI.
 
-=======
->>>>>>> origin/master
 2024-02-24  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* src/integrator.f90:

@@ -70,12 +70,16 @@ jobs:
     - name: Install 
       run: |
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+           yum -y install swig python3-devel python3-numpy
     - name: Compile
       run: |
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug
+          #cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake -S . -B BUILD  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build BUILD -j
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
+          # now try running the python example
+          python3 pyinterface/tabulation_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT
@@ -86,6 +90,7 @@ jobs:
     - name: Install
       run: |
              dnf -y install findutils procps gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+              dnf -y install swig python3-devel python3-numpy
              tee > /tmp/oneAPI.repo << EOF
              [oneAPI]
              name=Intel(R) oneAPI repository
@@ -151,7 +156,7 @@ jobs:
 #           export PATH=/opt/ibm/xlf/16.1.1/bin/:$PATH
 #           export LICENSE=accept 
 #           xlf_configure <<< 1 >/dev/null
-#           cmake3 -S . -B BUILDxlf -DCMAKE_Fortran_COMPILER=xlf -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLxlf
+#           cmake3 -S . -B BUILDxlf -DCMAKE_Fortran_COMPILER=xlf -DHOPPET_BUILD_PYINTERFACE=OFF -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLxlf
 #           cmake3 --build BUILDxlf -j
 #           cmake3 --install BUILDxlf
 #           ctest3 --test-dir BUILDxlf -j 2 --output-on-failure
@@ -165,7 +170,7 @@ jobs:
     - name: Install 
       run: |
           uname -a
-          brew install wget coreutils gcc
+          brew install wget coreutils gcc python3 swig
           brew tap davidchall/hep
           brew install lhapdf
           ls /opt/homebrew/bin/gfortran*
