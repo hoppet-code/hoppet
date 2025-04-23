@@ -41,7 +41,8 @@ program sumrules
   ymax  = 20.0_dp  ! you may see significant violations with too small a ymax
   dy    = 0.1_dp
 
-  call SetDefaultEvolutionDu(dy/3.0_dp)  ! generally a good choice
+
+  call SetDefaultEvolutionDu(dy/4.0_dp)  ! generally a good choice
 
   ! set up the grid itself -- we use 4 nested subgrids
   call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
@@ -51,10 +52,17 @@ program sumrules
   call InitGridDef(grid,gdarray(1:4),locked=.true.)
 
   ! initialise the splitting-function holder
-  nloop = 3
+  nloop = 3  
+  !call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_off)
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
        &                      nloop=nloop,nflo=3,nfhi=6)
   write(6,'(a)') "Splitting functions initialised!"
+  write(6,*) "ymax = ", ymax, " dy = ", dy
+  write(6,*) "nloop = ", nloop
+  if (nloop >=4) then 
+    write(6,*) "n3lo_splitting_approximation = ", n3lo_splitting_approximation
+    write(6,*) "n3lo_nfthreshold = " , n3lo_nfthreshold
+  endif
 
   ! initialise a PDF from the function below (must be contained,
   ! in a "used" module, or with an explicitly defined interface)
@@ -65,8 +73,8 @@ program sumrules
 
   ! Compute sum rules of the initial PDF set
   write(6,'(a)') "  "
-  write(6,'(a,1x,f3.1,1x,a)') "Sum rules at Q02 =  ",&
-       & Q0**2," GeV"
+  write(6,'(a,1x,f11.5,1x,a)') "Sum rules at Q02 =  ",&
+       & Q0**2," GeV^2"
   write(6,'(a)') "  "
 
   ! Allocate a grid quantity for the pdf combination
@@ -82,10 +90,10 @@ program sumrules
   ! scale Q0, they will also be satisfied for any Q > Q0
   ! 
 
-  Q=100_dp
+  Q=1.42_dp
   write(6,'(a)') "  "
-  write(6,'(a,1x,f7.1,1x,a)') "Sum rules at Q2 =  ",&
-       & Q**2," GeV"
+  write(6,'(a,1x,f11.5,1x,a)') "Sum rules at Q2 =  ",&
+       & Q**2," GeV^2"
   write(6,'(a)') "  "
   
 
@@ -126,6 +134,10 @@ contains
     ! clean method for labelling as PDF as being in the human representation
     ! (not actually needed after setting pdf=0
     call LabelPdfAsHuman(pdf)
+
+    !pdf(:,iflv_g) = 6.0_dp * (1-xvals)**5
+    !pdf(:,iflv_u) = 20.0_dp * xvals * (1-xvals)**3
+    !return
 
     !-- remember that these are all xvals*q(xvals)
     uv = N_uv * xvals**0.8_dp * (1-xvals)**3
