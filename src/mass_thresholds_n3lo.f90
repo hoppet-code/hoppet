@@ -38,6 +38,7 @@ module blumlein_interfaces
   end interface
 
 contains
+  !! a_Qq^(3,PS)
   double precision function APS(z,nf,as,LL)
     double precision :: z,nf,as,LL
 
