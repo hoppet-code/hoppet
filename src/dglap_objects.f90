@@ -946,8 +946,11 @@ contains
     type(grid_def),           intent(in)  :: grid
     type(mass_threshold_mat), intent(out) :: MTM_N3LO
     logical, save :: first_time = .true.
+    !! 103 uses two alphas points to separate out aalphas**3 from alphas**2, 
+    !! 203 uses just one extreme one and is faster while giving consistent results
+    integer, parameter :: ord3 = 203 
     
-   if(n3lo_nfthreshold .eq. n3lo_nfthreshold_on) then
+    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_on) then
       
       if (first_time) then
          write(6,'(a)') 'Initialisation of Mass Threshold Matrices at N3LO. The paper'
@@ -963,34 +966,34 @@ contains
       end if
       
       write(6,'(a,i3)') 'Initialising N3LO mass threshold matrices for nf = ', nf_int
-      call InitGridConv(grid, MTM_N3LO%PShq  , JB( PS, null(), null(), order=103))
+      call InitGridConv(grid, MTM_N3LO%PShq  , JB( PS, null(), null(), order=ord3))
       call AddWithCoeff(      MTM_N3LO%PShq  , JB(APS, null(), null(), order=  3))
       
-      call InitGridConv(grid, MTM_N3LO%PShg  , JB( QG, null(), null(), order=103))
+      call InitGridConv(grid, MTM_N3LO%PShg  , JB( QG, null(), null(), order=ord3))
       call AddWithCoeff(      MTM_N3LO%PShg  , JB(AQGtotal, null(), null(), order=  3)) ! The full thing
       !
-      call InitGridConv(grid, MTM_N3LO%PSqq_H, JB(PSL, null(), null(), order=103))
+      call InitGridConv(grid, MTM_N3LO%PSqq_H, JB(PSL, null(), null(), order=ord3))
       !! there is no APSL, all is included in PSL
       !
-      call InitGridConv(grid, MTM_N3LO%NSqq_H, JB( NSREG,  NSPLU,  NSDEL, order=103))
+      call InitGridConv(grid, MTM_N3LO%NSqq_H, JB( NSREG,  NSPLU,  NSDEL, order=ord3))
       call AddWithCoeff(      MTM_N3LO%NSqq_H, JB(ANSREG, ANSPLU, ANSDEL, order=  3))
       !
-      call InitGridConv(grid, MTM_N3LO%Sgg_H, JB( GGREG,  GGPLU,  GGDEL, order=103))
+      call InitGridConv(grid, MTM_N3LO%Sgg_H, JB( GGREG,  GGPLU,  GGDEL, order=ord3))
       call AddWithCoeff(      MTM_N3LO%Sgg_H, JB(AGGREG, AGGPLU, AGGDEL, order=  3))
       !
-      call InitGridConv(grid, MTM_N3LO%Sgq_H  , JB( GQ, null(), null(), order=103))
+      call InitGridConv(grid, MTM_N3LO%Sgq_H  , JB( GQ, null(), null(), order=ord3))
       call AddWithCoeff(      MTM_N3LO%Sgq_H  , JB(AGQ, null(), null(), order=  3))
       !
-      call InitGridConv(grid, MTM_N3LO%Sqg_H  , JB(QGL, null(), null(), order=103))
+      call InitGridConv(grid, MTM_N3LO%Sqg_H  , JB(QGL, null(), null(), order=ord3))
       ! there is no AQGL, all is included in QGL
       
       MTM_N3LO%loops = 4
       MTM_N3LO%nf_int = nf_int
-   else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
+    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
       call InitMTMNNLO(grid,MTM_N3LO) !! dummy initialisation to NNLO, just to get started
       MTM_N3LO%loops = 4
       call Multiply(MTM_N3LO, zero)
-   endif
+    endif
   end subroutine InitMTMN3LO
 
   subroutine InitMTM_from_MTM(MTM, MTM_in)

@@ -1,3 +1,16 @@
+2025-04-23 Wed  <gavin.salam@physics.ox.ac.uk>
+
+	* src/dglap_objects.f90:
+	* src/mass_thresholds_n3lo.f90:
+	class JB now accepts order=20n (e.g. 202, 203) to extract
+	the pure alphas^2 or alpha^3 term from the Blumlein code, 
+	using either a very small or very large alphas value so that
+	the relative contribution from the other term is negligible.
+
+	In dglap_objects.f90, the default order has been encoded as
+	"ord3" and is now 203 by default rather than 103, reducing
+	the initialisation time from about 16s to 11.6s on M2Pro.
+
 2025-04-23  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* pyinterface *** ADDED ***

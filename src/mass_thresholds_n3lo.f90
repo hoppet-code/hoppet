@@ -107,6 +107,9 @@ module mass_thresholds_n3lo
     procedure(JBfunc), nopass, pointer :: delta  => null()
     !! - if order is 10n (n=2,3) then  JB_fn will return the coefficient
     !!   of (as/4pi)^n by evaluating the function at multiple alphas values
+    !! - if order is 20n (n=2,3) then  JB_fn will return the coefficient
+    !!   of (as/4pi)^n by evaluating the function at a single very small 
+    !!   or large alphas value, such that the other order is relatively negligible
     !! - if order is n (n=2,3) then JB_fn will return the coefficient of
     !!   of (as/4pi)^n by evaluating the function at a single alphas value
     !! - care will be taken also with a 1*delta(1-x) component
@@ -201,13 +204,14 @@ contains
   !! working out the coefficient of as4pi**this%order
   !! Implements JB%fn(...)
   real(dp) function JB_fn(this, fn, z) result(res)
+    use warnings_and_errors
     class(JB), intent(in) :: this
     procedure(JBfunc), pointer :: fn
     real(dp)                   :: z
     !-------------------------------
     integer  :: nf_light_int
     real(dp) :: orders(2:3), nf_light_dp
-    real(dp) :: a4pi(0:2) =  (/ 0.0_dp, 0.10_dp, 1.0_dp /)
+    real(dp) :: a4pi(0:2) =  (/ 0.0_dp, 0.10_dp, 1.0_dp /), this_a4pi
     real(dp) :: res_a4pi(0:2)
     logical  :: delta_one
     integer  :: i, imin, imax
@@ -236,11 +240,37 @@ contains
     ! the case where we are using the delta-function 
     ! component, which needs special treatment
     delta_one = associated(fn, this%delta)
+    mod_order = mod(this%order, 100)
+
+    ! if order > 200 and we're not dealing with the delta function piece
+    ! then we make use of the fact that if we choose a very small or very 
+    ! large value of alphas, we will be dominated by either a4pi^2 or a4pi^3
+    ! term
+    if (this%order > 200 .and. (.not. delta_one)) then
+      if (mod_order == 2) then
+        ! very small a4pi, so the relative contribution of a4pi^3 is
+        ! negligible
+        this_a4pi = 1e-80_dp
+      else if (mod_order == 3) then
+        ! very large a4pi, so the relative contribution of a4pi^2 is
+        ! negligible
+        this_a4pi = 1e80_dp
+      else
+        call wae_error('JB_fn', 'order > 200 and not mod_order 2 or 3; order = ', intval=this%order)
+      end if
+      res = fn(z, nf_light_dp, this_a4pi, zero)
+      res = res / this_a4pi**mod_order
+      return
+    end if
+
+
+    ! otherwise we will use up to two (or even three) finite a4pi values 
+    ! solve the linear relation to extract the coefficients of a4pi^2 or a4pi^3
+
     ! fortran ternary, equivalent to C's delta_one ? 0 : 1
     imin = merge(0, 1, delta_one)
     ! special treatment that order > 100 means mixed orders
     imax = merge(2, 1, this%order > 100)
-    mod_order = mod(this%order, 100)
 
     ! for some reason the separate_orders function did not
     ! correctly receive the function pointer, so do things
