@@ -1,3 +1,11 @@
+2025-04-23  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* pyinterface *** ADDED ***
+	Added a python interface which gives access to the same
+	functionality as the streamlined_interface. A user should have a
+	look at pyinterface/tabulation_example.py for how to use it. The
+	interface is compiled by the cmake flow.
+
 2025-04-19 Sat  <gavin.salam@physics.ox.ac.uk>
 
 	* CMakeLists.txt:
