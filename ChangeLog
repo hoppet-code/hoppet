@@ -13,6 +13,11 @@
 	made ymax a command-line option and increased its default value to 
 	22.0 to help with the N=1 (number) moment.
 
+	* src/VFNSmod.f:
+	clarified comments about meaning of APS1 and APS1, following 
+	feedback from Johannes Blumlein. Does not affect our use of 
+	them. 
+
 2025-04-24 Thu  <gavin.salam@physics.ox.ac.uk>
 
 	* src/dglap_objects.f90:

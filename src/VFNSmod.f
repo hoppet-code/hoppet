@@ -155,8 +155,8 @@ c     For accessing moments
 *
 *      AGQ(z,nf,as,LL)     : a_gq,Q^(3) 
 *      AQG(z,nf,as,LL)     : a_Qg^(3)
-*      APS1(z,nf,as,LL)    : a_Qq^(3,PS)  :  z \in [0,1/2]
-*      APS2(z,nf,as,LL)    : a_Qq^(3,PS)  :  z \in [1/2,1]
+*      APS1(z,nf,as,LL)    : a_Qq^(3,PS)  :  first piece  [formerly read "z \in [0,1/2]", GPS+AK verified with JB that was incorrect]
+*      APS2(z,nf,as,LL)    : a_Qq^(3,PS)  :  second piece [formerly read "z \in [1/2,1]", GPS+AK verified with JB that was incorrect]
 *      AGGDEL(z,nf,as,LL)  : a_gg,Q^(3,NS):  delta-part 
 *      AGGPLU(z,nf,as,LL)  : a_gg,Q^(3,NS):  plus-part
 *      AGGREG0(z,nf,as,LL) : a_gg,Q^(3,NS):  regular part z \in [0,1/2]
