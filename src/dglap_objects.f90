@@ -38,10 +38,11 @@ module dglap_objects
      !   qg is defined including a 2nf factor
      type(grid_conv)           :: singlet(iflv_g:iflv_sigma,iflv_g:iflv_sigma)
      type(grid_conv), pointer  :: gg, qq, gq, qg
-     !-- These are the non-singlet pieces
-     type(grid_conv)    :: NS_plus, NS_minus, NS_V
-     !-- LO -> loops=1, etc...
-     !integer            :: loops  ! [not needed anymore?]
+     !-- These are the non-singlet pieces     ! 
+     type(grid_conv) :: NS_plus   ! multiplies [(q_i + qbar_i) - (q_j + qbar_j)]
+     type(grid_conv) :: NS_minus  ! multiplies [(q_i - qbar_i) - (q_j - qbar_j)]
+     type(grid_conv) :: NS_V      ! multiplies [\sum_i (q_i - qbar_i)]
+     ! the nf value for which this splitting matrix is defined
      integer            :: nf_int
   end type split_mat
   public             :: split_mat
