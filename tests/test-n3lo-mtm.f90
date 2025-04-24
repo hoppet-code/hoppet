@@ -158,6 +158,12 @@ program test_blumlein
     write(6,*) x, AQGtotal(x, nf_light_dp, a4pi(1), zero), "AQGtotal"
   end do
 
+  ! do non-singlet moment with N=1 (other moments are infinite)
+  write(6,*) "------------------------------------------------"
+  momN = 1
+  write(6,*) "momN = ", momN
+  call compare_mom("NSqq_H", momN, dh%MTM_NNLO%NSqq_H, dh%MTM_N3LO%NSqq_H, MOMNS , .true.)
+
   do momN = 2, 6, 2
 
     write(6,*) "------------------------------------------------"
