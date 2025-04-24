@@ -1,3 +1,18 @@
+2025-04-24 Thu  <gavin.salam@physics.ox.ac.uk> + Alexander
+
+	* src/dglap_objects.f90:
+	fixed issue with nf factor in cobj_ConvMTM singlet contributions, 
+	which are only relevant for N3LO thresholds. The ambiguity
+	related to the fact that 1406.4654 includes a 1/nf in its Eq.(7.1)
+	while 1403.6356 (Eq.(32)) does not. We have checked now have
+	the right intepretation both using sum rules directly from 
+	the momN=2 moments in test-n3lo-mtm.f90 and by checking the 
+	momentum sum rule in an actual evolution with sumrules.f90.
+
+	* tests/test-n3lo-mtm.f90:
+	made ymax a command-line option and increased its default value to 
+	22.0 to help with the N=1 (number) moment.
+
 2025-04-24 Thu  <gavin.salam@physics.ox.ac.uk>
 
 	* src/dglap_objects.f90:

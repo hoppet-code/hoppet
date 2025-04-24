@@ -37,7 +37,7 @@ program test_blumlein
   integer  :: idev
   dy = 0.05_dp
   nloop = 4
-  ymax = 18.0d0 ! go to quite high y, to avoid finite-y effects in moments
+  ymax = dble_val_opt("-ymax",22.0d0) ! go to quite high y, to avoid finite-y effects in moments
   Qmin = 1.0d0
   Qmax = 28000d0 ! twice LHC c.o.m.
   dlnlnQ = dy/4.0_dp  ! min(0.5_dp*dy,0.07_dp)
