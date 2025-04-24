@@ -965,7 +965,7 @@ contains
          first_time = .false.
       end if
       
-      write(6,'(a,i3)') 'Initialising N3LO mass threshold matrices for nf = ', nf_int
+      write(6,'(a,i1,a,i1)') 'Initialising N3LO mass threshold matrices for nf = ', nf_int-1,' -> ', nf_int
       call InitGridConv(grid, MTM_N3LO%PShq  , JB( PS, null(), null(), order=ord3))
       call AddWithCoeff(      MTM_N3LO%PShq  , JB(APS, null(), null(), order=  3))
       

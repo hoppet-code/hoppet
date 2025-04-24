@@ -1,3 +1,15 @@
+2025-04-24 Thu  <gavin.salam@physics.ox.ac.uk>
+
+	* src/dglap_objects.f90:
+	clearer output of meaning of nf in initialisation of
+	MTM_N3LO objects.
+
+	* src/dglap_holders.f90:
+	switched off initialisation of MTM_N3LO objections
+	for inactive lowest nf (i.e. no nf=2->3). Brings
+	timging for example_f90/tabulation_example_n3lo down 
+	from 11.5s to 7.9s.
+
 2025-04-23 Wed  <gavin.salam@physics.ox.ac.uk>
 
 	* src/dglap_objects.f90:
@@ -7,9 +19,9 @@
 	using either a very small or very large alphas value so that
 	the relative contribution from the other term is negligible.
 
-	In dglap_objects.f90, the default order has been encoded as
-	"ord3" and is now 203 by default rather than 103, reducing
-	the initialisation time from about 16s to 11.6s on M2Pro.
+	In dglap_objects.f90, the default order has been encoded as "ord3"
+	and is now 203 by rather than 103, reducing the initialisation time
+	for example_f90/tabulation_example_n3lo from about 16s to 11.6s on M2Pro.
 
 2025-04-23  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 

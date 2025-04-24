@@ -151,7 +151,9 @@ contains
           end if
           if (dh%nloop >= 4) then
              call InitSplitMatN3LO(grid, dh%P_N3LO, dh%factscheme)
-             call InitMTMN3LO(grid,dh%MTM_N3LO)
+             ! we do not need this for the lower nf, because it takes
+             ! us from nf-1->nf
+             if (nflcl /= lbound(dh%allP,dim=2)) call InitMTMN3LO(grid,dh%MTM_N3LO)
              !-- do this once, and only if really needed
 !             if (lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2) &
 !                  &.and. mass_steps_on &
