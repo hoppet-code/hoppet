@@ -5,7 +5,7 @@
 	MTM_N3LO objects.
 
 	* src/dglap_holders.f90:
-	switched off initialisation of MTM_N3LO objections
+	switched off initialisation of MTM_N3LO objects
 	for inactive lowest nf (i.e. no nf=2->3). Brings
 	timging for example_f90/tabulation_example_n3lo down 
 	from 11.5s to 7.9s.
