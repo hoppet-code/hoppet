@@ -52,7 +52,7 @@ module dglap_objects
   ! required for O(as^2), but not the full general structure.
   !
   ! The full (flavor-symmetric) structure is given in Eqs.(32-35)
-  ! of 1403.6456.
+  ! of 1403.6356.
   type mass_threshold_mat
      ! pieces that start at NNLO
      type(grid_conv) :: PShq   !!< A^PS_Qq    Q+Qbar from singlet(nflight)
