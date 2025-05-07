@@ -1646,9 +1646,11 @@ contains
 
   !> @brief calculate the NLO structure function at x, Q, muR, muF 
   !!
-  !! Calculate the NLO structure function at x, Q, muR, muF. muR and
+  !! Calculate the pure NLO contribution to the structure function at x, Q, muR, muF. muR and
   !! muF are only needed if we are using the scale_choice_arbitrary,
   !! as otherwise they are already included in the sf_tables.
+  !!
+  !! The result includes a factor of (as/2pi)
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
@@ -1692,9 +1694,11 @@ contains
 
   !> @brief calculate the NLO structure function at x, Q, muR, muF 
   !!
-  !! Calculate the NLO structure function at x, Q, muR, muF. muR and
+  !! Calculate the pure NLO contribution to the structure function at x, Q, muR, muF. muR and
   !! muF are only needed if we are using the scale_choice_arbitrary,
   !! as otherwise they are already included in the sf_tables.
+  !!
+  !! The result includes a factor of (as/2pi)
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
@@ -1749,9 +1753,11 @@ contains
 
   !> @brief calculate the NNLO structure function at x, Q, muR, muF 
   !!
-  !! Calculate the NNLO structure function at x, Q, muR, muF. muR and
+  !! Calculate the pure NNLO contribution to the structure function at x, Q, muR, muF. muR and
   !! muF are only needed if we are using the scale_choice_arbitrary,
   !! as otherwise they are already included in the sf_tables.
+  !!
+  !! The result includes a factor of (as/2pi)**2
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
@@ -1807,11 +1813,13 @@ contains
   end function F_NNLO
 
   
-  !> @brief calculate the N3LO structure function at x, Q, muR, muF 
+  !> @brief calculate the pure N3LO contribution to the structure function at x, Q, muR, muF 
   !!
-  !! Calculate the N3LO structure function at x, Q, muR, muF. muR and
-  !! muF are only needed if we are using the scale_choice_arbitrary,
+  !! Calculate the pure N3LO contribution to the structure function at x, Q, muR, muF. 
+  !! muR and muF are only needed if we are using the scale_choice_arbitrary,
   !! as otherwise they are already included in the sf_tables.
+  !!
+  !! The result includes a factor of (as/2pi)**3
   !!
   !! @param[in]       x          x value
   !! @param[in]       Q          Q value
