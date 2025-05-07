@@ -1,3 +1,15 @@
+2025-05-07 Wed  Alexander + Gavin
+
+	* CMakeLists.txt:
+	
+	by default turned off the static build and made all examples link
+	against the shared library rather than the static one. Static
+	compilation can be turned back on with the
+	-DHOPPET_BUILD_STATIC_LIB=ON cmake option
+
+	if LHAPDF is found and -DHOPPET_BUILD_TESTDIR=ON, enabled
+	cmake building of tests that rely on LHAPDF.
+
 2025-04-24 Thu  <gavin.salam@physics.ox.ac.uk> + Alexander
 
 	* src/dglap_objects.f90:
