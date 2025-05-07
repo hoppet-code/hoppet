@@ -1171,6 +1171,8 @@ contains
     call Delete(MTM%NSqq_H)
     call Delete(MTM%Sgg_H)
     call Delete(MTM%Sgq_H)
+    call Delete(MTM%PSqq_H)
+    call Delete(MTM%Sqg_H)
     MTM%loops = -1
     MTM%nf_int = -1
   end subroutine cobj_DelMTM
