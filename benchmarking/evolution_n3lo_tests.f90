@@ -25,7 +25,7 @@ program structure_functions_example
   Qmin = Q0
   asQ0 =dble_val_opt("-asQ0", 0.30_dp); write(idev,'(a,f10.4)') "# asQ0 = ", asQ0
 
-  vfn = log_val_opt("-vfn", .false.); write(idev,'(a,l1)') "# vfn = ", vfn
+  vfn = log_val_opt("-vfn", .true.); write(idev,'(a,l1)') "# vfn = ", vfn
 
   if (.not. CheckAllArgsUsed(0)) stop "Unused arguments"
 

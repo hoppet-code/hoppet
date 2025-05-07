@@ -1,4 +1,19 @@
+2025-05-07 Wed  Gavin
+
+	* src/dglap_objects.f90:
+	added missing deletions in cobj_DelMTM	
+
 2025-05-07 Wed  Alexander + Gavin
+
+	* src/structure_functions.f90:
+	clarified some comments
+
+	* benchmarking/evolution_n3lo_tests.f90:
+	turned on VFN by Default
+
+	* tests/with-lhapdf/tabulation_n3lo_v130_paper.f90:
+	increased output precision for Q and changed order of output to make it a
+	bit easier to compare LHAPDF and Hoppet outputs.
 
 	* CMakeLists.txt:
 	

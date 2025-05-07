@@ -103,26 +103,7 @@ program tabulation_n3lo
   ! get the value of the tabulation at some point
   Q = Q0
   write(6,'(a)')
-  write(6,'(a,f8.3,a)') "                                   Evaluating PDFs at Q = ",Q," GeV"
-  write(6,'(a5,3a12,a14,3a11,a12)') "x",&
-       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
-  do ix = 1, size(heralhc_xvals)
-     call EvalPdfTable_xQ(tables(0),heralhc_xvals(ix),Q,pdf_at_xQ)
-     write(6,'(es7.1,8es12.4)') heralhc_xvals(ix), &
-          &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
-          &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
-          &  (pdf_at_xQ(-1)-pdf_at_xQ(-2)), &
-          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
-          &  (pdf_at_xQ(-3)+pdf_at_xQ(3)), &
-          &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
-          &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
-          &  pdf_at_xQ(0)
-  end do
-
-  ! get the value of the tabulation at some point
-  Q = Qevolve
-  write(6,'(a)')
-  write(6,'(a,f8.3,a)') "                                   Evaluating PDFs at Q = ",Q," GeV"
+  write(6,'(a,f10.5,a)') "                                   Evaluating PDFs at Q = ",Q," GeV"
   write(6,'(a5,3a12,a14,3a11,a12)') "x",&
        & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
   do ix = 1, size(heralhc_xvals)
@@ -142,7 +123,7 @@ program tabulation_n3lo
      ! get the value of the tabulation at some point
      Q = Q0
      write(6,'(a)')
-     write(6,'(a,f8.3,a)') "                                   LHAPDF evolution at Q = ",Q," GeV"
+     write(6,'(a,f10.5,a)') "                                   LHAPDF interpolation at Q = ",Q," GeV"
      write(6,'(a5,3a12,a14,3a11,a12)') "x",&
           & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
      do ix = 1, size(heralhc_xvals)
@@ -157,10 +138,32 @@ program tabulation_n3lo
              &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
              &  pdf_at_xQ(0)
      end do
+  end if
+
+  ! get the value of the tabulation at some point
+  Q = Qevolve
+  write(6,'(a)')
+  write(6,'(a,f10.5,a)') "                                   Evaluating PDFs at Q = ",Q," GeV"
+  write(6,'(a5,3a12,a14,3a11,a12)') "x",&
+       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
+  do ix = 1, size(heralhc_xvals)
+     call EvalPdfTable_xQ(tables(0),heralhc_xvals(ix),Q,pdf_at_xQ)
+     write(6,'(es7.1,8es12.4)') heralhc_xvals(ix), &
+          &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+          &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+          &  (pdf_at_xQ(-1)-pdf_at_xQ(-2)), &
+          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+          &  (pdf_at_xQ(-3)+pdf_at_xQ(3)), &
+          &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+          &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
+          &  pdf_at_xQ(0)
+  end do
+
+  if(trim(pdfname).ne."toyHERA") then
      ! get the value of the tabulation at some point
      Q = Qevolve
      write(6,'(a)')
-     write(6,'(a,f8.3,a)') "                                   LHAPDF evolution at Q = ",Q," GeV"
+     write(6,'(a,f10.5,a)') "                                   LHAPDF interpolation at Q = ",Q," GeV"
      write(6,'(a5,3a12,a14,3a11,a12)') "x",&
           & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
      do ix = 1, size(heralhc_xvals)
@@ -179,7 +182,7 @@ program tabulation_n3lo
 
   ! Write to a file
   Q = Qevolve
-  write(idev,'(a, f7.3)') "# Q  = ", Q
+  write(idev,'(a, f10.5)') "# Q  = ", Q
   write(idev,'(a8,3a15,a17,3a14,a15)') "x",&
        & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
   do i = 1, 200
