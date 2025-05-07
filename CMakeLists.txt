@@ -340,8 +340,8 @@ endif()
 
 if (HOPPET_BUILD_TESTDIR)
   set( testcode bidirectional_mass_thresholds coupling-fixed coupling determine_accuracies intrinsic_charm
-  lumi_tests msbar_tests split_mat_ops streamlined_multisplit test_qed test_qed_lepton_evol test_qed_obj
-  timelike_NLOevol_tests timelike_tests test_split_integration test-n3lo-mtm) 
+    lumi_tests msbar_tests split_mat_ops streamlined_multisplit test_qed test_qed_lepton_evol test_qed_obj
+    timelike_NLOevol_tests timelike_tests test_split_integration test-n3lo-mtm) 
   foreach ( b ${testcode})
     add_executable( ${b} tests/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
     target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
@@ -349,8 +349,21 @@ if (HOPPET_BUILD_TESTDIR)
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/${b}_modules
       POSITION_INDEPENDENT_CODE TRUE
-     )
+      )
   endforeach()
+  if(LHAPDF_FOUND)
+    set( testcode_lhapdf tabulation_n3lo_v130_paper  test_qed_evol_lhapdf  test_qed_lhapdf)
+    foreach ( b ${testcode_lhapdf})
+      add_executable( ${b} tests/with-lhapdf/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
+      target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
+      target_link_libraries(${b} PUBLIC LHAPDF::LHAPDF)
+      set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
+	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
+	Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/${b}_modules
+	POSITION_INDEPENDENT_CODE TRUE
+	)
+    endforeach()
+  endif()
 endif()
 
 if (HOPPET_BUILD_PYINTERFACE)
