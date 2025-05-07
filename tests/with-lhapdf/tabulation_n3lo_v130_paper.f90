@@ -67,7 +67,7 @@ program tabulation_n3lo
      call InitPDFsetByName(pdfname)
      call InitPDF(0)
 
-     ! Retreive starting scale and coupling from LHAPDF, and also the
+     ! Retrieve starting scale and coupling from LHAPDF, and also the
      ! quark masses
      call getQ2min(0,lhapdf_qmin)
      lhapdf_qmin = sqrt(lhapdf_qmin)
