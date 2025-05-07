@@ -23,7 +23,6 @@ option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
 option(HOPPET_BUILD_PYINTERFACE "Build python interface." ON)
 option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
 option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
-option(HOPPET_BUILD_STATIC_LIB  "Enable static library build." OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
@@ -144,7 +143,6 @@ message(STATUS "HOPPET: HOPPET_ENABLE_TESTING=${HOPPET_ENABLE_TESTING}")
 message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
 message(STATUS "HOPPET: HOPPET_BUILD_TESTDIR=${HOPPET_BUILD_TESTDIR}")
 message(STATUS "HOPPET: HOPPET_ENABLE_FPES=${HOPPET_ENABLE_FPES}")
-message(STATUS "HOPPET: HOPPET_BUILD_STATIC_LIB=${HOPPET_BUILD_STATIC_LIB}")
 
 if (HOPPET_BUILD_EXAMPLES)
   find_package(LHAPDF) 
@@ -212,28 +210,34 @@ set_target_properties(hoppet PROPERTIES OUTPUT_NAME hoppet_v1
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
-    Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet
+    Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet_shared
     SOVERSION 0.0.0
     EXPORT_NAME hoppet::hoppet
     )
 add_library(hoppet::hoppet ALIAS hoppet)
 
 
-if (HOPPET_BUILD_STATIC_LIB)
-  set_target_properties(hoppet PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-  add_library(hoppet_static STATIC ${SOURCESf90} ${SOURCESf})
-  target_include_directories(hoppet_static PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet_static> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet_static> )
-  set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet_v1
-      ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
-      LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet_static
-      EXPORT_NAME hoppet::hoppet_static
-      )
-  add_library(hoppet::hoppet_static ALIAS hoppet_static)
-endif()
+add_library(hoppet_static STATIC ${SOURCESf90} ${SOURCESf})
+target_include_directories(hoppet_static PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
+set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet_v1
+    ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
+    Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet
+    EXPORT_NAME hoppet::hoppet_static
+    )
+add_library(hoppet::hoppet_static ALIAS hoppet_static)
 
 # Examples =============================================================
+#
+# Note that below, all examples link against the static library.
+# On Linux this avoids the risk of accidentally loading an installed
+# version of the library when the user has an LD_LIBRARY_PATH set, 
+# because LD_LIBRARY_PATH always takes precedence over the RUNPATH
+# that CMake sets in the executable.
+#
+# Building the static library does not seem to add much time to the
+# build (a few percent)
 if (HOPPET_BUILD_EXAMPLES)
   set( f90programs_f90 
                    structure_functions_example  
@@ -252,7 +256,7 @@ if (HOPPET_BUILD_EXAMPLES)
   set( f90programs_f )
   foreach ( p ${f90programs_f90})
     add_executable( ${p}_f90 example_f90/${p}.f90)
-    target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet)
+    target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
@@ -261,7 +265,7 @@ if (HOPPET_BUILD_EXAMPLES)
   endforeach()
   foreach ( p ${f90programs_f})
     add_executable( ${p}_f90 example_f90/${p}.f)
-    target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet)
+    target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
@@ -280,7 +284,7 @@ if (HOPPET_BUILD_EXAMPLES)
  set( f77programs_c cpp_structure_functions_example  cpp_tabulation_example_qed cpp_tabulation_example )
   foreach ( p ${f77programs_f})
     add_executable( ${p}_f77 example_f77/${p}.f)
-    target_link_libraries(${p}_f77 PUBLIC hoppet::hoppet)
+    target_link_libraries(${p}_f77 PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_f77 PROPERTIES  OUTPUT_NAME ${p} 
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
@@ -296,7 +300,7 @@ if (HOPPET_BUILD_EXAMPLES)
   endif()
   foreach ( p ${f77programs_c})
     add_executable( ${p}_f77c example_f77/${p}.cc)
-    target_link_libraries(${p}_f77c PUBLIC hoppet::hoppet)
+    target_link_libraries(${p}_f77c PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_f77c PROPERTIES  OUTPUT_NAME ${p}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
@@ -323,7 +327,7 @@ if (HOPPET_BUILD_BENCHMARK)
   set( bms benchmark prec_and_timing structure_functions_benchmark_checks evolution_n3lo_tests) 
   foreach ( b ${bms})
     add_executable( ${b} benchmarking/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
-    target_link_libraries(${b} PUBLIC hoppet::hoppet)
+    target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
     #target_link_libraries(${b} PUBLIC LHAPDF::LHAPDF)
     set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/
@@ -334,7 +338,7 @@ if (HOPPET_BUILD_BENCHMARK)
   set( bms compare2files_v2) 
   foreach ( b ${bms})
     add_executable( ${b} benchmarking/test_acc/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
-    target_link_libraries(${b} PUBLIC hoppet::hoppet)
+    target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
     set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/test_acc
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/${b}_modules
@@ -349,7 +353,7 @@ if (HOPPET_BUILD_TESTDIR)
     timelike_NLOevol_tests timelike_tests test_split_integration test-n3lo-mtm) 
   foreach ( b ${testcode})
     add_executable( ${b} tests/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
-    target_link_libraries(${b} PUBLIC hoppet::hoppet)
+    target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
     set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/${b}_modules
@@ -360,7 +364,7 @@ if (HOPPET_BUILD_TESTDIR)
     set( testcode_lhapdf tabulation_n3lo_v130_paper  test_qed_evol_lhapdf  test_qed_lhapdf)
     foreach ( b ${testcode_lhapdf})
       add_executable( ${b} tests/with-lhapdf/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
-      target_link_libraries(${b} PUBLIC hoppet::hoppet)
+      target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
       target_link_libraries(${b} PUBLIC LHAPDF::LHAPDF)
       set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
 	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
@@ -392,12 +396,8 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/hoppet/cmake/hoppetConfig.cmake
               DESTINATION ${CONFIG_INSTALL_DIR} COMPONENT devel)
 
 # Install  #############################################################
-install(TARGETS hoppet EXPORT hoppetTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS hoppet hoppet_static  EXPORT hoppetTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )
-if (HOPPET_BUILD_STATIC_LIB)
-  install(TARGETS hoppet_static EXPORT hoppetTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet_static DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )
-endif()
 install(FILES ${PROJECT_SOURCE_DIR}/src/hoppet_v1.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )
 install(FILES ${PROJECT_BINARY_DIR}/bin/hoppet-config 
                                 DESTINATION ${CMAKE_INSTALL_BINDIR} 
