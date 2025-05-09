@@ -14,11 +14,12 @@
 !     >>>>> compilation:  gfortran VFNS.f
 !     >>>>> f90 part of code: K. Sch\"onwald, March 15, 2024
 !
-! Accompanying files include AQg3mod.f90.
+! Accompanying files include AQg3mod.f90 and momnsmod.f
 ! 
 ! The code as distributed here with HOPPET has been adapted as follows
 !
-! - the main program has been turned into a subroutine VFNS3sub
+! - the main program has been turned into a subroutine VFNS3sub.
+! - so has the program ODDNS (ODDNSsub)
 ! - the code has been placed in a module VFNSmod, to avoid filling the
 !   the global namespace with short function names that may conflict with
 !   user functions
