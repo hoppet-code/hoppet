@@ -4,7 +4,7 @@
       private
       public ODDNSsub
 
-      public ODEL, OPLUS2, OREG, MOMREG, MOMPLUS
+      public ODEL, OPLUS1, OPLUS2, OREG, MOMREG, MOMPLUS
 
       contains
 
@@ -17,7 +17,8 @@
 *     
 *     z-space massive OMEs to 3-loops for nonsinglet minus [odd moments]
 *
-*     ODEL      delta part (a constant)*     OPLUS1    1/(1-x) plus part
+*     ODEL      delta part (a constant)
+*     OPLUS1    1/(1-x) plus part
 *     OPLUS2    1/(1-x)^2 plus part
 *     OREG      regular part
 *     compile:  gfortran -- moment checks are provided: N=1,3,...11
