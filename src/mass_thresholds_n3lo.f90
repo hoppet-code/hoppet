@@ -61,11 +61,11 @@ contains
   end function
 
   ! This is the plus part of the NS plus piece
-  !double precision function OPLU(z,nf,as,LL)
-  !  double precision :: z,nf,as,LL
-  !
-  !  OPLU = ANSPLU1(z,nf,as,LL) + ANSPLU2(z,nf,as,LL)
-  !end function
+  double precision function OPLU(z,nf,as,LL)  
+    double precision :: z,nf,as,LL
+  
+    OPLU = OPLUS1(z,nf,as,LL) + OPLUS2(z,nf,as,LL)
+  end function
 
   !! 2024-03-22: an aproximation to AQG that gets the sum rule to within
   !! O(1) * (as/2pi)^3
