@@ -1,11 +1,12 @@
 ! This file copyright the Hoppet authors, released under GPLv3
 
 !======================================================================
-! What follows is mainly interfaces for VFNS at order(as^3). The actual
-! code is contained in VFNSmod.f and AQg3mod.f90, which is based on
-! code from Blumlein and collaborators. 
+! What follows is mainly interfaces for VFNS at order(as^3). The
+! actual code is contained in VFNSmod.f, momnsmod.f, and AQg3mod.f90,
+! which is based on code from Blumlein and collaborators.
 module blumlein_interfaces
-  use types; use consts_dp; use assertions; use vfnsmod; use aqg3mod
+  use types; use consts_dp; use assertions; use vfnsmod; use aqg3mod;&
+       & use momnsmod
   implicit none
 
   ! generic interface corresponding to functions of z in code from
@@ -52,11 +53,19 @@ contains
     IF(z.GE.0.5D0) AGGREG=AGGREG1(z,nf,as,LL)
   end function 
 
+  ! This is the plus part of the NS plus piece
   double precision function ANSPLU(z,nf,as,LL)
     double precision :: z,nf,as,LL
 
     ANSPLU = ANSPLU1(z,nf,as,LL) + ANSPLU2(z,nf,as,LL)
   end function
+
+  ! This is the plus part of the NS plus piece
+  !double precision function OPLU(z,nf,as,LL)
+  !  double precision :: z,nf,as,LL
+  !
+  !  OPLU = ANSPLU1(z,nf,as,LL) + ANSPLU2(z,nf,as,LL)
+  !end function
 
   !! 2024-03-22: an aproximation to AQG that gets the sum rule to within
   !! O(1) * (as/2pi)^3

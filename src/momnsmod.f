@@ -2,6 +2,7 @@
       use daind_fake
 
       private
+      
       public ODDNSsub
 
       public ODEL, OPLUS1, OPLUS2, OREG, MOMREG, MOMPLUS
@@ -27,9 +28,11 @@
 ********************************************************************
 *
       IMPLICIT NONE
-      REAL*8 TT(6),UU(6),RR(6),LL,as,NF,ODDMOMNS,T
-      REAL*8 ODEL,OPLUS1,OPLUS2,OREG,z
-      REAL*8 OMOM1,MOMREG,MOMPLUS
+      REAL*8 TT(6),UU(6),RR(6),LL,as,NF,T!ODDMOMNS,T
+!      REAL*8 ODEL,OPLUS1,OPLUS2,OREG,z
+!      REAL*8 OMOM1,MOMREG,MOMPLUS
+      REAL*8 z
+!      REAL*8 OMOM1
       INTEGER N,K
 *
       LL =10.0D0
@@ -220,7 +223,7 @@
 *     -------------------------------
 * 
       IMPLICIT NONE
-      REAL*8 as,LL,NF,ODEL,MOMREG
+      REAL*8 as,LL,NF!,ODEL,MOMREG
       INTEGER N
       N=1
 *
@@ -231,7 +234,7 @@
 *     -------------------------------
 * 
       IMPLICIT NONE
-      REAL*8 as,LL,NF,ODEL,MOMREG,MOMPLUS
+      REAL*8 as,LL,NF!,ODEL,MOMREG,MOMPLUS
       INTEGER N
       N=3
 *
@@ -243,7 +246,7 @@
 *     -------------------------------
 * 
       IMPLICIT NONE
-      REAL*8 as,LL,NF,ODEL,MOMREG,MOMPLUS
+      REAL*8 as,LL,NF!,ODEL,MOMREG,MOMPLUS
       INTEGER N
       N=5
 *
@@ -255,7 +258,7 @@
 *     -------------------------------
 * 
       IMPLICIT NONE
-      REAL*8 as,LL,NF,ODEL,MOMREG,MOMPLUS
+      REAL*8 as,LL,NF!,ODEL,MOMREG,MOMPLUS
       INTEGER N
       N=7
 *
@@ -267,7 +270,7 @@
 *     -------------------------------
 * 
       IMPLICIT NONE
-      REAL*8 as,LL,NF,ODEL,MOMREG,MOMPLUS
+      REAL*8 as,LL,NF!,ODEL,MOMREG,MOMPLUS
       INTEGER N
       N=9
 *
@@ -279,7 +282,7 @@
 *     --------------------------------
 * 
       IMPLICIT NONE
-      REAL*8 as,LL,NF,ODEL,MOMREG,MOMPLUS
+      REAL*8 as,LL,NF!,ODEL,MOMREG,MOMPLUS
       INTEGER N
       N=3
 *
@@ -1112,10 +1115,10 @@
 *     ----------------------------------
 *
       IMPLICIT NONE
-      REAL*8 A,B,EPS,EST,as,LL,MOREG,DAIND
+      REAL*8 A,B,EPS,EST,as,LL!,MOREG!,DAIND
       REAL*8 AAS,LLL,NNF,NF
       INTEGER N,KEY,MAX,KOU,NN
-      EXTERNAL MOREG
+!      EXTERNAL MOREG
       COMMON/PAR/ aas, LLL, NNF, NN
 *
       aas=as
@@ -1136,10 +1139,10 @@
 *     -----------------------------------
 *
       IMPLICIT NONE
-      REAL*8 A,B,EPS,EST,as,LL,MOPLUS,DAIND
+      REAL*8 A,B,EPS,EST,as,LL!,MOPLUS!,DAIND
       REAL*8 AAS,LLL,NNF,NF
       INTEGER N,KEY,MAX,KOU,NN
-      EXTERNAL MOPLUS
+!      EXTERNAL MOPLUS
       COMMON/PAR/ aas, LLL, NNF, NN
 *
       aas=as
@@ -1161,7 +1164,7 @@
 *
       IMPLICIT NONE
 *
-      REAL*8 as,LL,NF,Y,aas,LLL,NNF,OREG
+      REAL*8 as,LL,NF,Y,aas,LLL,NNF!,OREG
       INTEGER N,NN
       COMMON/PAR/ aas, LLL, NNF, NN
       N=NN
@@ -1178,7 +1181,7 @@
 *
       IMPLICIT NONE
 *
-      REAL*8 as,LL,NF,Y,aas,LLL,NNF,OPLUS1,OPLUS2
+      REAL*8 as,LL,NF,Y,aas,LLL,NNF!,OPLUS1,OPLUS2
       INTEGER N,NN
       COMMON/PAR/ aas, LLL, NNF, NN
       N=NN
