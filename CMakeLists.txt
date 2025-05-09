@@ -276,8 +276,7 @@ if (HOPPET_BUILD_EXAMPLES)
     endif()     
   endforeach()
   set( f77programs_f
-       tabulation_example
-       xc2ns3e_vs_xc2ns3p)
+       tabulation_example)
  if (LHAPDF_FOUND)
    list(APPEND f77programs_f compare_lhapdf_hoppet convolution_example)  
  endif()
@@ -350,7 +349,7 @@ endif()
 if (HOPPET_BUILD_TESTDIR)
   set( testcode bidirectional_mass_thresholds coupling-fixed coupling determine_accuracies intrinsic_charm
     lumi_tests msbar_tests split_mat_ops streamlined_multisplit test_qed test_qed_lepton_evol test_qed_obj
-    timelike_NLOevol_tests timelike_tests test_split_integration test-n3lo-mtm) 
+    timelike_NLOevol_tests timelike_tests test_split_integration test-n3lo-mtm xc2ns3e_vs_xc2ns3p) 
   foreach ( b ${testcode})
     add_executable( ${b} tests/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
     target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
