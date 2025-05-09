@@ -64,7 +64,8 @@ contains
   double precision function OPLUS(z,nf,as,LL)  
     double precision :: z,nf,as,LL
   
-    OPLUS = OPLUS1(z,nf,as,LL) + OPLUS2(z,nf,as,LL)
+    OPLUS = OPLUS1(as, LL, NF, z) + OPLUS2(as, LL, NF, z)
+    !OPLUS = OPLUS1(z,nf,as,LL) + OPLUS2(z,nf,as,LL)
   end function
 
   !! 2024-03-22: an aproximation to AQG that gets the sum rule to within
