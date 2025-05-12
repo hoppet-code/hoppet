@@ -26,7 +26,8 @@ program test_blumlein
   type(comparator) :: comparators(11)
   type(JB) :: A2Sgg_H
   type(JB) :: A3Sgg_H
-  type(grid_conv) :: gc_A2Sgg_H_JB, gc_A2Sgg_H_HP, gc_A3Sgg_H
+  type(JB) :: A3NSm_H
+  type(grid_conv) :: gc_A2Sgg_H_JB, gc_A2Sgg_H_HP, gc_A3Sgg_H, gc_A3NSm_H
   real(dp), pointer :: powx(:), conv_res(:)
   !--------------------------
   real(dp) :: dy
@@ -131,7 +132,7 @@ program test_blumlein
   res2 = sf_A2Sgg_H(log(1/x))
   write(6,*) "A2Sgg_H: ", res1, res2, res1-res2
 
-
+  
   !call InitGridConv(grid, gc_A2Sgg_H_JB, A2Sgg_H)
   !call InitGridConv(grid, gc_A2Sgg_H_HP, sf_A2Sgg_H)
   !call InitGridConv(grid, gc_A2Sgg_H_JB, JB(GGREG,  GGPLU,  GGDEL,  order=2))
@@ -178,7 +179,36 @@ program test_blumlein
     call compare_mom("Sqg_H ", momN, dh%MTM_NNLO%Sqg_H , dh%MTM_N3LO%Sqg_H , MOMQGL, .false.)
   end do
 
+  ! set up a non-singlet object
+  A3NSm_H = JB(OREG_znfasLL, OPLUS_znfasLL, ODEL_znfasLL, 203)
+  call InitGridConv(grid, gc_A3NSm_H, A3NSm_H)
+  do momN = 1, 7, 2
+    write(6,*) "Odd moment momN = ", momN
+    !                                this is dummy=0
+    if (momN/=1) call compare_mom("NSm_H(hard-coded)", momN, dh%MTM_NNLO%NSqq_h, gc_A3NSm_H, ODDMOMNS_NxnfasLL , .true.)
+    call compare_mom("NSm_H(integrated)", momN, dh%MTM_NNLO%NSqq_h, gc_A3NSm_H, ODDMOMNSint_NxnfasLL , .true.)
+  end do
+
+
 contains
+
+  function ODDMOMNS_NxnfasLL(momN, x, nf_light_dp, a4pi, LL) result(res)
+    integer   :: momN
+    real(dp)  :: x, nf_light_dp, a4pi, LL
+    !------------------------------
+    real(dp) :: res
+    res = ODDMOMNS(momN,a4pi,LL,nf_light_dp)
+  end function ODDMOMNS_NxnfasLL
+
+  function ODDMOMNSint_NxnfasLL(momN, x, nf_light_dp, a4pi, LL) result(res)
+    integer   :: momN
+    real(dp)  :: x, nf_light_dp, a4pi, LL
+    !------------------------------
+    real(dp) :: res
+    res = MOMREG(a4pi,LL,nf_light_dp,momN) + ODEL(a4pi,LL,nf_light_dp)
+    if (momN /= 1) res = res + MOMPLUS(a4pi,LL,nf_light_dp,momN)
+  end function ODDMOMNSint_NxnfasLL
+
 
   subroutine compare_mom(name, momN, MTM2, MTM3, momfn, delta_one, momfn2)
     character(len=*), intent(in) :: name
@@ -188,14 +218,15 @@ contains
     logical,          intent(in) :: delta_one
     procedure(JBmom), optional   :: momfn2
     !------------------------------
-    real(dp) :: res2,res3,HPsum, JBsums(1:2),JBcoeffs_a2pi(2:3)
+    real(dp) :: res2,res3,HPsum, JBsums(1:2),JBcoeffs_a2pi(2:3), LL
     integer  :: i
-    character(len=1) :: bad
+    character(len=5) :: bad
     real(dp), parameter :: tolerance = 1e-4
 
+    LL = zero
     do i = 1,2
-      JBsums(i) = momfn(momN, x, nf_light_dp, a4pi(i), zero)
-      if (present(momfn2)) JBsums(i) = JBsums(i) + momfn2(momN, x, nf_light_dp, a4pi(i), zero)
+      JBsums(i) = momfn(momN, x, nf_light_dp, a4pi(i), LL)
+      if (present(momfn2)) JBsums(i) = JBsums(i) + momfn2(momN, x, nf_light_dp, a4pi(i), LL)
     end do
     JBcoeffs_a2pi = separate23(a4pi, JBsums, delta_one) / two**[2,3]
 
@@ -203,8 +234,8 @@ contains
     res3 = gc_moment(MTM3, one * momN)
     HPsum = merge(1,0,delta_one) + a2pi**2*res2 + a2pi**3 * res3
     bad = ""
-    if (any(abs(JBcoeffs_a2pi - (/res2,res3/)) > tolerance)) bad = "*"
-    if (abs(HPsum - JBsums(1))                 > tolerance)  bad = "*"
+    if (any(abs(JBcoeffs_a2pi - (/res2,res3/)) > tolerance)) bad = "*BAD*"
+    if (abs(HPsum - JBsums(1))                 > tolerance)  bad = "*BAD*"
 
     write(6,*) name, " JB : res2,3,sum:", JBcoeffs_a2pi, JBsums(1)
     write(6,*) name, " MTM: res2,3,sum:", res2, res3, HPsum, bad

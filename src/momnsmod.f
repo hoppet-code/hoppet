@@ -6,6 +6,7 @@
       public ODDNSsub
 
       public ODEL, OPLUS1, OPLUS2, OREG, MOMREG, MOMPLUS
+      public ODDMOMNS
 
       contains
 
@@ -1127,7 +1128,7 @@
       NN=N
       A=0.0D0
       B=1.0D0
-      EPS=1.0D-12
+      EPS=1d-8 ! AK+GPS mod from original 1.0D-12
       KEY=2
       MAX=10000
 *
@@ -1151,7 +1152,7 @@
       NN=N
       A=0.0D0
       B=1.0D0
-      EPS=1.0D-12
+      EPS=1d-8 ! AK+GPS mod from original 1.0D-12
       KEY=2
       MAX=10000
 *
