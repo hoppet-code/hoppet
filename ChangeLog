@@ -1,3 +1,13 @@
+2025-05-12 Alexander + Gavin
+
+	* momnsmod.f: *** ADDED ***
+	added code from Johannes Blumlein with the light-quark NS-minus
+	function including x-space terms (OPLUS[12],OREG,ODEL) and some moments. 
+
+	* mass_thresholds_n3lo.f90: 
+	added adapter functions OPLUS_znfasLL, OREG_znfasLL, ODEL_znfasNLL
+	to have access to these pieces with the standard order of arguments
+
 2025-05-07 Wed  Gavin
 
 	* src/dglap_objects.f90:

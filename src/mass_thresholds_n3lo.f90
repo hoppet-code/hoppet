@@ -60,12 +60,25 @@ contains
     ANSPLU = ANSPLU1(z,nf,as,LL) + ANSPLU2(z,nf,as,LL)
   end function
 
-  ! This is the plus part of the NS plus piece
-  double precision function OPLUS(z,nf,as,LL)  
-    double precision :: z,nf,as,LL
-  
-    OPLUS = OPLUS1(as, LL, NF, z) + OPLUS2(as, LL, NF, z)
-    !OPLUS = OPLUS1(z,nf,as,LL) + OPLUS2(z,nf,as,LL)
+  ! This is the plus part of the light-flavour NS minus piece
+  ! with arguments in our standard order
+  double precision function OPLUS_znfasLL(z,nf,as,LL)  
+    double precision :: z,nf,as,LL  
+    OPLUS_znfasLL = OPLUS1(as, LL, NF, z) + OPLUS2(as, LL, NF, z)
+  end function
+
+  ! This is the regular part of the light-flavour NS minus piece
+  ! with arguments in our standard order
+  double precision function OREG_znfasLL(z,nf,as,LL)  
+    double precision :: z,nf,as,LL  
+    OREG_znfasLL = OREG(as, LL, NF, z)
+  end function
+
+  ! This is the delta-function part of the light-flavour NS minus piece
+  ! with arguments in our standard order
+  double precision function ODEL_znfasLL(z,nf,as,LL)  
+    double precision :: z,nf,as,LL  
+    ODEL_znfasLL = ODEL(as, LL, NF)
   end function
 
   !! 2024-03-22: an aproximation to AQG that gets the sum rule to within
