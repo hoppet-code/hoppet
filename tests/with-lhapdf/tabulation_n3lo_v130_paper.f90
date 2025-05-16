@@ -183,18 +183,20 @@ program tabulation_n3lo
   ! Write to a file
   Q = Qevolve
   write(idev,'(a, f10.5)') "# Q  = ", Q
-  write(idev,'(a8,3a15,a17,3a14,a15)') "x",&
-       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
+  write(idev,'(a8,3a15,a17,5a14,a15)') "x",&
+       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","s-sbar","c+cbar","c-cbar","b+bbar","gluon"
   do i = 1, 200
      x     = 0.00001_dp ** (i/200.0_dp)
      call EvalPdfTable_xQ(tables(0),x,Q,pdf_at_xQ)
-     write(idev,'(es10.4,8es15.7)') x, &
+     write(idev,'(es10.4,10es15.7)') x, &
           &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
           &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
           &  (pdf_at_xQ(-1)-pdf_at_xQ(-2)), &
           &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
           &  (pdf_at_xQ(-3)+pdf_at_xQ(3)), &
+          &  (pdf_at_xQ(-3)-pdf_at_xQ(3)), &
           &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+          &  (pdf_at_xQ(-4)-pdf_at_xQ(4)), &
           &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
           &  pdf_at_xQ(0)
    end do
@@ -202,6 +204,8 @@ program tabulation_n3lo
    write(idev,*) ''
   
 contains 
+
+
   !======================================================================
   !! The dummy PDF suggested by Vogt as the initial condition for the 
   !! unpolarized evolution (as used in hep-ph/0511119).
