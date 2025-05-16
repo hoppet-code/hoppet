@@ -42,7 +42,7 @@ program sumrules
   dy    = 0.1_dp
 
 
-  call SetDefaultEvolutionDu(dy/4.0_dp)  ! generally a good choice
+  call SetDefaultEvolutionDu(dy/6.0_dp)  ! generally a good choice
 
   ! set up the grid itself -- we use 4 nested subgrids
   call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=order)
@@ -90,7 +90,8 @@ program sumrules
   ! scale Q0, they will also be satisfied for any Q > Q0
   ! 
 
-  Q=1.42_dp
+  !Q=1.42_dp
+  Q = 100.0_dp
   write(6,'(a)') "  "
   write(6,'(a,1x,f11.5,1x,a)') "Sum rules at Q2 =  ",&
        & Q**2," GeV^2"
