@@ -1,5 +1,10 @@
 2025-05-28 Wed  Gavin
 
+	* src/dglap_objects.f90:
+	added new NSmqq_H member to mass_threshold_mat type. 
+	Now the NSqq_H acts non-singlet plus, and NSmqq_H acts on
+	on non-singlet minus.
+
 	* src/pdf_representation.f90:
 	removed some old commented lines in functions that convert
 	between Human and Evln

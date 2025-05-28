@@ -47,6 +47,14 @@ module dglap_objects
   end type split_mat
   public             :: split_mat
 
+
+  ! !-----------------------------------------------------------------
+  ! type, extends(split_mat) :: new_mass_threshold_mat
+  !   type(grid_conv) :: PShq !!< (h+hbar) from singlet(nflight)
+  !   type(grid_conv) :: PShg !!< (h+hbar) from gluon  (nflight)
+  !   type(grid_conv) :: NShV !!< (h-hbar) from valence(nflight) i.e. sum_i (q_i-qbar_i)
+  ! end type new_mass_threshold_mat
+
   !---------------------------------------------------------------
   ! for going from nf to nf+1. Currently contains pieces
   ! required for O(as^2), but not the full general structure.
@@ -61,8 +69,9 @@ module dglap_objects
      type(grid_conv) :: Sgg_H  !!< A^S_gg,Q   Δg(nfheavy) from g(nflight)
      type(grid_conv) :: Sgq_H  !!< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
      ! pieces that start at N3LO
-     type(grid_conv) :: PSqq_H !!< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
-     type(grid_conv) :: Sqg_H ! !< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
+     type(grid_conv) :: PSqq_H  !!< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
+     type(grid_conv) :: Sqg_H   !!< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
+     type(grid_conv) :: NSmqq_H !!< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
      ! pieces related to the case of thresholds at MSbar masses
      ! NB: not supported yet at N3LO
      type(grid_conv) :: PShg_MSbar !!< replaces PShg when masses are MSbar
@@ -918,6 +927,7 @@ contains
     end select
    
     call InitGridConv(grid, MTM%NSqq_H, sf_A2NSqq_H)
+    call InitGridConv(MTM%NSmqq_H, MTM%NSqq_H) ! the plus and minus non-singlet pieces are the same
     call InitGridConv(grid, MTM%Sgg_H, sf_A2Sgg_H)
     call InitGridConv(grid, MTM%Sgq_H, sf_A2Sgq_H)
 
@@ -975,9 +985,14 @@ contains
       !
       call InitGridConv(grid, MTM_N3LO%PSqq_H, JB(PSL, null(), null(), order=ord3))
       !! there is no APSL, all is included in PSL
+
       !
       call InitGridConv(grid, MTM_N3LO%NSqq_H, JB( NSREG,  NSPLU,  NSDEL, order=ord3))
       call AddWithCoeff(      MTM_N3LO%NSqq_H, JB(ANSREG, ANSPLU, ANSDEL, order=  3))
+
+      
+      call InitGridConv(grid, MTM_N3LO%NSmqq_H, JB(OREG_znfasLL, OPLUS_znfasLL, ODEL_znfasLL, ord3))
+
       !
       call InitGridConv(grid, MTM_N3LO%Sgg_H, JB( GGREG,  GGPLU,  GGDEL, order=ord3))
       call AddWithCoeff(      MTM_N3LO%Sgg_H, JB(AGGREG, AGGPLU, AGGDEL, order=  3))
@@ -1004,6 +1019,7 @@ contains
     call InitGridConv(MTM%PSHq, MTM_in%PSHq)
     call InitGridConv(MTM%PSHg, MTM_in%PSHg)
     call InitGridConv(MTM%NSqq_H, MTM_in%NSqq_H)
+    call InitGridConv(MTM%NSmqq_H, MTM_in%NSmqq_H)
     call InitGridConv(MTM%Sgg_H, MTM_in%Sgg_H)
     call InitGridConv(MTM%Sgq_H, MTM_in%Sgq_H)
     call InitGridConv(MTM%PSqq_H, MTM_in%PSqq_H)
@@ -1025,6 +1041,7 @@ contains
    call Multiply(MTM%PSHq,  factor)
    call Multiply(MTM%PSHg,  factor)
    call Multiply(MTM%NSqq_H, factor)
+   call Multiply(MTM%NSmqq_H, factor)
    call Multiply(MTM%Sgg_H,  factor)
    call Multiply(MTM%Sgq_H,  factor)
    call Multiply(MTM%PSqq_H, factor)
@@ -1047,6 +1064,7 @@ contains
     call AddWithCoeff(MTM%PSHq, MTM_to_add%PSHq, factor)
     call AddWithCoeff(MTM%PSHg, MTM_to_add%PSHg, factor)
     call AddWithCoeff(MTM%NSqq_H, MTM_to_add%NSqq_H, factor)
+    call AddWithCoeff(MTM%NSmqq_H, MTM_to_add%NSmqq_H, factor)
     call AddWithCoeff(MTM%Sgg_H, MTM_to_add%Sgg_H, factor)
     call AddWithCoeff(MTM%Sgq_H, MTM_to_add%Sgq_H, factor)
     call AddWithCoeff(MTM%PSqq_H, MTM_to_add%PSqq_H, factor)
@@ -1089,8 +1107,9 @@ contains
     type(mass_threshold_mat), intent(in) :: MTM
     real(dp),   intent(in) :: q(0:,ncompmin:)
     real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ncompmax)
-    real(dp) :: singlet(0:ubound(q,dim=1))
+    real(dp) :: singlet(0:ubound(q,dim=1))    
     real(dp) :: dq_from_singlet(0:ubound(q,dim=1)) !!< addition to each flavour from singlet
+    real(dp) :: plus(0:ubound(q,dim=1)), minus(0:ubound(q,dim=1))
     integer :: i, nf_light, nf_heavy
 
     !-- general sanity checks
@@ -1158,6 +1177,32 @@ contains
        end if
     end do
 
+    !! finally do all individual light-quark flavours
+    !do i = -ncomponents, ncomponents
+    !   if (abs(i) > nf_heavy) then
+    !      Pxq(:,i) = zero
+    !   else if (i == iflv_g .or. abs(i) == nf_heavy) then
+    !      cycle
+    !   else
+    !      Pxq(:,i) = (MTM%NSqq_H .conv. q(:,i)) + dq_from_singlet
+    !   end if
+    !end do
+
+    ! finally do all individual light-quark flavours
+    do i = 1, ncomponents
+       if (i > nf_heavy) then
+          Pxq(:, i) = zero
+          Pxq(:,-i) = zero
+       else if (i == iflv_g .or. abs(i) == nf_heavy) then
+          cycle
+       else
+          plus  = MTM%NSqq_H  * (q(:,i)+q(:,-i))
+          minus = MTM%NSmqq_H * (q(:,i)-q(:,-i))
+          Pxq(:, i) = half*(plus+minus) + dq_from_singlet
+          Pxq(:,-i) = half*(plus-minus) + dq_from_singlet
+       end if
+    end do
+
     call LabelPdfAsRep(Pxq,pdfr_Human)
   end function cobj_ConvMTM
   
@@ -1169,6 +1214,7 @@ contains
     call Delete(MTM%PSHg)
     call Delete(MTM%PShg_MSbar)
     call Delete(MTM%NSqq_H)
+    call Delete(MTM%NSmqq_H)
     call Delete(MTM%Sgg_H)
     call Delete(MTM%Sgq_H)
     call Delete(MTM%PSqq_H)
