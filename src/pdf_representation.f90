@@ -170,8 +170,6 @@ contains
     
     !-- make sure the rest is zero
     do i = prep%nf+1, iflv_max
-       !qh( i) = zero
-       !qh(-i) = zero
        qh( i) = qe(i)
        qh(-i) = qe(-i)
     end do
