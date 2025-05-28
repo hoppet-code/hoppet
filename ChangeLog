@@ -1,3 +1,9 @@
+2025-05-28 Wed  Gavin
+
+	* src/pdf_representation.f90:
+	removed some old commented lines in functions that convert
+	between Human and Evln
+
 2025-05-12 Alexander + Gavin
 
 	* momnsmod.f: *** ADDED ***

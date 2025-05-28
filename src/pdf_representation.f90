@@ -109,8 +109,6 @@ contains
     end do
     !-- keep the rest clean...
     do i = prep%nf+1, ncomponents
-       !qe(i) = zero
-       !qe(-i) = zero
        qe(i) = qh(i)
        qe(-i) = qh(-i)
     end do
