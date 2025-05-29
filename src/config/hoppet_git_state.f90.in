@@ -21,8 +21,9 @@ contains
     if (present(prefix)) then
         write(idev,'(a)',advance='no') trim(prefix)//" "
     end if
-    write(idev,'(a)') "hoppet compiled git info: "//trim(HOPPET_GIT_HEAD_SHA1)//" , "//HOPPET_GIT_COMMIT_DATE_ISO8601//", status: "// &
-       &   trim(HOPPET_GIT_STATUS_UNO)
+    write(idev,'(a)') "hoppet compiled git info: "//trim(HOPPET_GIT_HEAD_SHA1)&
+       &              // " , " // HOPPET_GIT_COMMIT_DATE_ISO8601 // ", status: " &
+       &              // trim(HOPPET_GIT_STATUS_UNO)
   end subroutine hoppet_print_git_state
 
 end module hoppet_git_state
