@@ -84,7 +84,7 @@ CHECK_OPTIONAL_VARIABLE_NOPATH(GIT_FAIL_IF_NONZERO_EXIT TRUE)
 # Check the optional git variable.
 # If it's not set, we'll try to find it using the CMake packaging system.
 if(NOT DEFINED GIT_EXECUTABLE)
-    find_package(Git QUIET REQUIRED)
+    find_package(Git QUIET)
 endif()
 
 # if git executable is not found, then fail unless the user has set
