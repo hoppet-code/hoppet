@@ -247,7 +247,6 @@ if (HOPPET_BUILD_EXAMPLES)
                    tabulation_example_n3lo
                    tabulation_example_qed_streamlined
                    tabulation_example_up_and_down
-                   sumrules                     
                    tabulation_example_diehl_crosschecks  
                    tabulation_example_qed  
                    tabulation_example_streamlined
@@ -323,7 +322,7 @@ if (HOPPET_BUILD_EXAMPLES)
 endif()
 
 if (HOPPET_BUILD_BENCHMARK)
-  set( bms benchmark prec_and_timing structure_functions_benchmark_checks evolution_n3lo_tests) 
+  set( bms benchmark prec_and_timing structure_functions_benchmark_checks evolution_n3lo_tests sumrules) 
   foreach ( b ${bms})
     add_executable( ${b} benchmarking/${b}.f90 benchmarking/io_utils.f90 benchmarking/lcl_dec.f90 benchmarking/NameSelect.f90)
     target_link_libraries(${b} PUBLIC hoppet::hoppet_static)

@@ -13,6 +13,7 @@
 program sumrules
 
   use hoppet_v1
+  use sub_defs_io
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
   !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
@@ -38,8 +39,8 @@ program sumrules
 
   ! set up parameters for grid
   order = -6
-  ymax  = 20.0_dp  ! you may see significant violations with too small a ymax
-  dy    = 0.1_dp
+  ymax  = dble_val_opt("-ymax",20.0_dp)  ! you may see significant violations with too small a ymax
+  dy    = dble_val_opt("-dy",  0.1_dp )
 
 
   call SetDefaultEvolutionDu(dy/6.0_dp)  ! generally a good choice
@@ -51,9 +52,15 @@ program sumrules
   call InitGridDef(gdarray(1),dy,       ymax  ,order=order)
   call InitGridDef(grid,gdarray(1:4),locked=.true.)
 
+  Q0 = dble_val_opt("-Q0",sqrt(2.0_dp))  ! the initial scale
+  Q  = dble_val_opt("-Q", 100.0_dp)
+
+
   ! initialise the splitting-function holder
-  nloop = 3  
+  nloop = int_val_opt("-nloop",3)
   !call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_off)
+
+
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
        &                      nloop=nloop,nflo=3,nfhi=6)
   write(6,'(a)') "Splitting functions initialised!"
@@ -68,7 +75,6 @@ program sumrules
   ! in a "used" module, or with an explicitly defined interface)
   call AllocPDF(grid, pdf0)
   pdf0 = unpolarized_dummy_pdf(xValues(grid))
-  Q0 = sqrt(2.0_dp)  ! the initial scale
 
 
   ! Compute sum rules of the initial PDF set
@@ -91,7 +97,6 @@ program sumrules
   ! 
 
   !Q=1.42_dp
-  Q = 100.0_dp
   write(6,'(a)') "  "
   write(6,'(a,1x,f11.5,1x,a)') "Sum rules at Q2 =  ",&
        & Q**2," GeV^2"
@@ -209,7 +214,8 @@ contains
     moment_index = 1.0_dp ! See definition of truncated moments above
     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
   
-    write(6,*) "Momentum sum rule = ",sum_rule, ", expected 1"
+    write(6,*) "Momentum sum rule = ",sum_rule, ", expected 1, difference = ", &
+         & sum_rule - 1.0_dp
 
     ! Compute the (truncated) valence sum rules
 
@@ -230,7 +236,8 @@ contains
     moment_index = 0.0_dp
     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
     
-    write(6,*) "uv + dv sum rule = ",sum_rule, ", expected 3"
+    write(6,*) "uv + dv sum rule = ",sum_rule, ", expected 3, difference = ", &
+         & sum_rule - 3.0_dp
 
     ! uv - dv sum rule
     if(nf_rep == pdfr_Human) then
@@ -245,7 +252,8 @@ contains
     moment_index = 0.0_dp
     sum_rule = TruncatedMoment(gd,pdf_flav,moment_index)
     
-    write(6,*) "uv - dv sum rule = ",sum_rule, ", expected 1"
+    write(6,*) "uv - dv sum rule = ",sum_rule, ", expected 1, difference = ", &
+         & sum_rule - 1.0_dp
     write(6,*) " "
 
 

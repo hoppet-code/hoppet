@@ -1,4 +1,16 @@
+2025-05-29 Thu  Alexander + Gavin
+
+	* example_f90/sumrules.f90 -> benchmarking/sumrules.f90:
+	* CMakeLists.txt:
+	renamed example_f90/sumrules.f90 to benchmarking/sumrules.f90, 
+	so that it gets access to command-line otions. Added 
+	various command-line option (-ymax,-dy,-Q0,-Q,-nloop) to
+	facilitate testing at higher accuracy than by default.
+
 2025-05-28 Wed  Gavin
+
+	* development:
+	* meeting:
 
 	* src/pdf_representation.f90:
 	removed some old commented lines in functions that convert
