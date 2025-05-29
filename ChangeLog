@@ -7,10 +7,25 @@
 	various command-line option (-ymax,-dy,-Q0,-Q,-nloop) to
 	facilitate testing at higher accuracy than by default.
 
-2025-05-28 Wed  Gavin
+2025-05-29 Thu Gavin & Alexander
 
-	* development:
-	* meeting:
+	* CMakeLists.txt:
+	* Makefile:
+	* benchmarking/prec_and_timing.f90:
+	* configure:
+	* git_watcher.cmake:                    *** ADDED ***
+	* src/config/hoppet_git_state.f90.in:   *** ADDED ***
+
+	Added functionality to print git state if things are built with cmake
+	and git is available. This is done by the git_watcher.cmake file.
+	A number of variables are set in the hoppet_git_state module, 
+	which also has a hoppet_print_git_state(idev,[prefix]) function
+	to print the basic info.
+
+	With the ./configure build route, the git state info is 
+	just a set of placeholders.
+
+2025-05-28 Wed  Gavin
 
 	* src/pdf_representation.f90:
 	removed some old commented lines in functions that convert
@@ -95,7 +110,7 @@
 
 2025-04-23  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
-	* pyinterface *** ADDED ***
+	* pyinterface: *** ADDED ***
 	Added a python interface which gives access to the same
 	functionality as the streamlined_interface. A user should have a
 	look at pyinterface/tabulation_example.py for how to use it. The
