@@ -84,9 +84,24 @@ CHECK_OPTIONAL_VARIABLE_NOPATH(GIT_FAIL_IF_NONZERO_EXIT TRUE)
 # Check the optional git variable.
 # If it's not set, we'll try to find it using the CMake packaging system.
 if(NOT DEFINED GIT_EXECUTABLE)
-    find_package(Git QUIET REQUIRED)
+    find_package(Git QUIET)
+endif()
+
+# if git executable is not found, then fail unless the user has set
+# GIT_FAIL_IF_NONZERO_EXIT to FALSE, in which case we just copy the 
+# pre to the post configure file.
+if (NOT GIT_EXECUTABLE)
+    if(GIT_FAIL_IF_NONZERO_EXIT)
+        message(FATAL_ERROR "The git executable was not found. Please set the GIT_EXECUTABLE variable to the path of the git executable.")
+    else()
+        message(STATUS "The git executable was not found. Continuing without git support.")
+        configure_file(${PRE_CONFIGURE_FILE} ${POST_CONFIGURE_FILE} COPYONLY)
+        return()
+    endif()
 endif()
 CHECK_REQUIRED_VARIABLE(GIT_EXECUTABLE)
+
+
 
 
 set(_state_variable_names
