@@ -13,6 +13,7 @@
 program sumrules
 
   use hoppet_v1
+  use hoppet_git_state
   use sub_defs_io
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
@@ -37,6 +38,9 @@ program sumrules
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
 
+
+  write(6,'(a)') trim(command_line())
+  call hoppet_print_git_state(6) 
   ! set up parameters for grid
   order = -6
   ymax  = dble_val_opt("-ymax",20.0_dp)  ! you may see significant violations with too small a ymax
@@ -60,6 +64,8 @@ program sumrules
   nloop = int_val_opt("-nloop",3)
   !call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_off)
 
+
+  if (.not. CheckAllArgsUsed(0)) stop
 
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
        &                      nloop=nloop,nflo=3,nfhi=6)

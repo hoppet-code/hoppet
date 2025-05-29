@@ -54,8 +54,9 @@ my @dirs=split(" ","example_f90 benchmarking benchmarking/test_acc src");
 
 my $topdir = getcwd;
 
-
-#chdir "src";
+# copy a dummy git state file (git state is currently only supported with cmake)
+system("cp src/config/hoppet_git_state.f90.in src/config/hoppet_git_state.f90") == 0
+  or die "Could not copy git state file: $!";
 
 # now generate the makefiles
 foreach my $dir (@dirs) {
@@ -76,6 +77,7 @@ foreach my $dir (@dirs) {
   # alternatives should live in sub-directories exact-coefs/ and no-exact-coefs/
   if ($enableExactCoefs && -d "exact-coefs") {$mkmk .= " -srcdir exact-coefs";}
   elsif (!$enableExactCoefs && -d "no-exact-coefs") {$mkmk .= " -srcdir no-exact-coefs";}
+  if (-d "config") {$mkmk .= " -srcdir config";}
   #print $mkmk."\n";
   print $dir, $mkmk,"\n";
   system($mkmk);

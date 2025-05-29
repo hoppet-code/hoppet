@@ -168,6 +168,23 @@ configure_file("${PROJECT_SOURCE_DIR}/hoppet-config.in" "${PROJECT_BINARY_DIR}/b
 file(GLOB SOURCESf90 src/*.f90)
 file(GLOB SOURCESf src/*.f)
 
+#------------------------------------------------------------------------- 
+# Define the two required variables before including
+# the source code for watching a git repository.
+option(GIT_WATCHER "Add source code which allows runs for watching the status of the git repository" ON)
+set(PRE_CONFIGURE_FILE "src/config/hoppet_git_state.f90.in")
+set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/hoppet_git_state.f90")
+if (GIT_WATCHER)
+  message("-- Enabling the git watcher support")
+  set(GIT_FAIL_IF_NONZERO_EXIT FALSE)
+  include(git_watcher.cmake)  
+else()
+  message("-- Disabling the git watcher support")  
+  # just copy PRE_CONFIGURE_FILE to POST_CONFIGURE_FILE
+  configure_file(${PRE_CONFIGURE_FILE} ${POST_CONFIGURE_FILE} COPYONLY)
+endif()
+list(APPEND SOURCESf90 ${POST_CONFIGURE_FILE})
+
 
 # alternative is a manual list (NB: this specific list is not complete)
 # set(SOURCES

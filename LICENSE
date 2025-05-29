@@ -12,8 +12,18 @@ allowed us to distribute with HOPPET under the same GPLv3 terms:
 - the src/hplog.f and (hep-ph/0107173) by Gehrmann and Remiddi the
   weight 5 extension, src/exact-coefs/hplog5.f by Gehrmann.
 
-- code for the the NNLO splitting functions and NNLO/N3LO coefficient
-  functions by Moch, Vermaseren and Vogt
+- code for the NNLO splitting functions and NNLO/N3LO coefficient
+  functions by Moch, Vermaseren and Vogt.
+
+- code for the N3LO splitting functions by Davies, Falcioni, Herzog,
+  Moch, Pelloni, Ruijl, Ueda, Vermaseren and Vogt.  
+
+- code for the N3LO mass thresholds by J. Blümlein and K. Schönwald
+  DESY 24-037.
+
+It also contains 
+
+- git_watcher.cmake by Andrew Hardin (MIT License)
 
 --------------------------------------------------------------------------
 

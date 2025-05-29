@@ -36,6 +36,7 @@ realclean: force_look
 distclean: force_look
 	-for d in $(DIRS); do (cd $$d; $(MAKE) $(MFLAGS) distclean ); done
 	rm -f config.log
+	rm -f src/config/hoppet_git_state.f90
 
 
 config.log:
