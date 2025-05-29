@@ -7,6 +7,9 @@
 	various command-line option (-ymax,-dy,-Q0,-Q,-nloop) to
 	facilitate testing at higher accuracy than by default.
 
+	* LICENSE:
+	updated to reflect various N3LO contributions.
+
 2025-05-29 Thu Gavin & Alexander
 
 	* CMakeLists.txt:
