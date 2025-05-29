@@ -1,0 +1,39 @@
+./benchmarking/sumrules -Q 1.42 -ymax 24 -dy 0.05 -nloop 4
+hoppet compiled git info: 5e860227d77e36cf2dc6d25259d7a4ab8344c6b1 , 2025-05-29 10:59:37 +0100, status: 
+Initialisation of Mass Threshold Matrices at N3LO. The paper
+*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,
+*     A. von Manteuffel, C. Schneider, and K. Schönwald,
+*     "The Variable Flavor Number Scheme at  Next-to-Next-to-Leading Order",
+*     DESY 24-037   
+* shall be cited at any use. Corresponding code from J. Bluemlein, March 19 2024 and 
+* K. Schönwald, March 15 2024, including results from arXiv:2207.00027, arXiv:2403.00513
+*
+The initialisation could take up to a minute, depending on the machine.
+Initialising N3LO mass threshold matrices for nf = 3 -> 4
+Initialising N3LO mass threshold matrices for nf = 4 -> 5
+Initialising N3LO mass threshold matrices for nf = 5 -> 6
+Splitting functions initialised!
+ ymax =    24.000000000000000       dy =    5.0000000000000003E-002
+ nloop =            4
+ n3lo_splitting_approximation =            2
+ n3lo_nfthreshold =            1
+  
+Sum rules at Q02 =       2.00000  GeV^2
+  
+        ---       
+ Computation of (truncated) sum rules
+               
+ Momentum sum rule =   0.99999997681082808      , expected 1, difference =   -2.3189171916015994E-008
+ uv + dv sum rule =    2.9999999532020292      , expected 3, difference =   -4.6797970831846669E-008
+ uv - dv sum rule =   0.99999998822679337      , expected 1, difference =   -1.1773206631815469E-008
+  
+  
+Sum rules at Q2 =       2.01640  GeV^2
+  
+        ---       
+ Computation of (truncated) sum rules
+               
+ Momentum sum rule =    1.0000000789329637      , expected 1, difference =    7.8932963720745875E-008
+ uv + dv sum rule =    2.9999999580394734      , expected 3, difference =   -4.1960526608875170E-008
+ uv - dv sum rule =   0.99999998693845016      , expected 1, difference =   -1.3061549841708597E-008
+  
