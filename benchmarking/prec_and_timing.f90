@@ -101,6 +101,7 @@ end module pdf_initial_condition
 !======================================================================
 program prec_and_timing
   use hoppet_v1
+  use hoppet_git_state
   use pdf_initial_condition
   use sub_defs_io
   implicit none
@@ -212,7 +213,7 @@ program prec_and_timing
   call time_stamp(idev)
   call get_hostname(hostname)  
   write(idev,'(a)') "# host: "//trim(hostname)
-  !call EXECUTE_COMMAND_LINE("echo '# host:' `hostname`")
+  call hoppet_print_git_state(idev,prefix="#")
   ! record info about the cpu
   !call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
 
