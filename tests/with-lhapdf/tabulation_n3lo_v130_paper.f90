@@ -6,6 +6,7 @@ program tabulation_n3lo
   !! would otherwise conflict with LHAPDF 
   use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   use streamlined_interface, HoppetInitPDF => initPDF
+  use hoppet_git_state
   implicit none
   real(dp) :: dy, ymax, dlnlnQ
   integer  :: order, nloop
@@ -29,6 +30,7 @@ program tabulation_n3lo
   idev = idev_open_opt("-o","")
   pdfname = string_val_opt("-pdf","toyHERA")
   write(idev,'(a,a)') "# ", trim(command_line())
+  call hoppet_print_git_state(idev,prefix="# ")
     
   ! set up parameters for grid
   Qmin  = dble_val_opt("-Qmin",1.0_dp)  ! smallest Q value in tabulation
@@ -182,7 +184,7 @@ program tabulation_n3lo
 
   ! Write to a file
   Q = Qevolve
-  write(idev,'(a, f10.5)') "# Q  = ", Q
+  write(idev,'(a, f10.5)') "# hoppet at Q  = ", Q
   write(idev,'(a8,3a15,a17,5a14,a15)') "x",&
        & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","s-sbar","c+cbar","c-cbar","b+bbar","gluon"
   do i = 1, 200
@@ -202,7 +204,29 @@ program tabulation_n3lo
    end do
    write(idev,*) ''
    write(idev,*) ''
-  
+
+  write(idev,'(a, f10.5)') "# LHAPDF at Q  = ", Q
+  write(idev,'(a8,3a15,a17,5a14,a15)') "x",&
+       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","s-sbar","c+cbar","c-cbar","b+bbar","gluon"
+  do i = 1, 200
+     x     = 0.00001_dp ** (i/200.0_dp)
+     call evolvePDF(x,Q,pdf_at_xQ)
+     write(idev,'(es10.4,10es15.7)') x, &
+          &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+          &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+          &  (pdf_at_xQ(-1)-pdf_at_xQ(-2)), &
+          &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+          &  (pdf_at_xQ(-3)+pdf_at_xQ(3)), &
+          &  (pdf_at_xQ(-3)-pdf_at_xQ(3)), &
+          &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+          &  (pdf_at_xQ(-4)-pdf_at_xQ(4)), &
+          &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
+          &  pdf_at_xQ(0)
+   end do
+   write(idev,*) ''
+   write(idev,*) ''
+   
+
 contains 
 
 
