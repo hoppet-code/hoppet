@@ -553,9 +553,21 @@ Ref.~\cite{Falcioni:2024xyt} and the default value of
 approximations in papers up to and including
 Ref.~\cite{Falcioni:2024qpd}.
 
+In Table~\ref{tab:n3lo-evolve} we show the impact of the full N$^3$LO
+evolution in the VFNS, using the most up-to-date perturbative input at
+the time of writing this release note. To assess the evolution we take
+the initial condition of Ref.~\cite{Dittmar:2005ed} at an initial
+scale $\sqrt{2}~\text{GeV}$ and $n_f=3$. We evolve to
+$Q=100~\text{GeV}$. The table can be reproduced by running
+\repolink{example_f90/tabulation_example_n3lo.f90}{example\_f90/tabulation\_example\_n3lo.f90}. The
+numbers are obtained using parametrised NNLO splitting functions, but
+exact mass thresholds at this order.
+
 \begin{table}[ht!]
-  \footnotesize \centering
-  \begin{tabular}{l|cccccccc}
+  %  \footnotesize \centering
+  \label{tab:n3lo-evolve}
+  \small \centering
+  \begin{tabular}{c|cccccccc}
     $x$ &  $u-\bar u$ &$d-\bar d$ &$\bar d-\bar u$ &  $ 2(\bar u+\bar d)$  &$s+\bar s$&$c+\bar c$ &$b+\bar b$  &   $g$\\
     \toprule
 $10^{-7}$ &  $1.0589^{-4}$ &  $4.8664^{-5}$ &  $8.1967^{-6}$ &  $1.6234^{+2}$ &  $8.0100^{+1}$ &  $7.7207^{+1}$ &  $6.5254^{+1}$ &  $1.1238^{+3}$ \\
@@ -570,7 +582,11 @@ $0.5$    &  $1.1790^{-1}$ &  $3.0597^{-2}$ &  $3.6526^{-4}$ &  $2.3206^{-3}$ &  
 $0.7$    &  $1.9329^{-2}$ &  $2.9648^{-3}$ &  $1.2848^{-5}$ &  $5.2429^{-5}$ &  $1.2662^{-5}$ &  $3.4020^{-6}$ &  $2.4956^{-6}$ &  $3.7094^{-4}$ \\
 $0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  $6.6432^{-9}$ &  $7.6153^{-10}$ &  $1.4323^{-9}$ &  $1.1716^{-6}$ 
   \end{tabular}
-  \caption{N$^3$LO evolution}
+  \caption{N$^3$LO evolution of the initial condition given in Section
+    4.4 of Ref.~\cite{Dittmar:2005ed}, using the same notation where
+    $a\cdot10^{b} = a^b$. The evolution is performed taking the
+    initial condition at $\sqrt{2}~\text{GeV}$ (just below the charm
+    mass) and evolving in the VFNS up to $Q=100~\text{GeV}$.}
 \end{table}
 
 
