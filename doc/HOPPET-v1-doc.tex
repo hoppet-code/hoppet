@@ -31,7 +31,7 @@
 %\oddsidemargin 0.0cm \evensidemargin 0.0cm
 %\topmargin -2.3cm  % for nikhef
 %\topmargin -0.5cm  % for hep-ph
-
+\def\CPP{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}}
 \newcommand{\be}{\begin{equation}}
 \newcommand{\ee}{\end{equation}}
 \newcommand{\bea}{\begin{eqnarray}}
@@ -159,7 +159,7 @@ version 2.0.0
   user to extend the facilities already provided.
 %
   A streamlined interface is also available, facilitating use of the
-  evolution part of the code from F77 and C/C++.  \smallskip
+  evolution part of the code from F77 and C/\CPP{}.  \smallskip
 \end{abstract}
 
 % \newpage
@@ -377,7 +377,7 @@ can be adapted by a user to tailor it to their own needs.
 section~\ref{sec:vanilla} describes a streamlined interface
 to \hoppet which embodies its essential capabilities in
 a simple interface available in a variety of programming languages: 
-F77 and C/C++.
+F77 and C/\CPP{}.
 Finally, section~\ref{sec:benchmarks} presents a detailed 
 quantitative study of
 the performance of \hoppet, and in the final section we conclude.
@@ -396,7 +396,7 @@ sections~\ref{sec:singleflav} to \ref{sec:tabulated-pdfs}
 and move directly to
  section~\ref{sec:vanilla}, which describes the 
 user-friendlier streamlined interface,
-accessible from F95, F77 and C/C++, and which contains the essential
+accessible from F95, F77 and C/\CPP{}, and which contains the essential
 functionalities of \hoppet. He/she is also encouraged to go through the
 various example programs which contain detailed 
 descriptions and explanations. 
@@ -2501,7 +2501,7 @@ F95.  It hides all the object-oriented nature of the program, and
 provides access to one \ttt{pdf\_table}, based on a single grid
 definition. The description will be given as if one is calling from
 F77. An include file \ttt{src/hoppet\_v1.h} is provided for calling
-from {\tt C++} --- the interface is essentially identical to the Fortran
+from {\tt \CPP{}} --- the interface is essentially identical to the Fortran
 one, with the caveat that names are case sensitive (the cases are as
 given below), and that PDF components referred to below as
 \ttt{pdf(-6:6)} become \ttt{pdf[0..12]}. A summary of the
@@ -4112,7 +4112,7 @@ for the colour factors.
 \label{sec:f95appendix}
 
 As Fortran~95's use in high-energy physics is not as widespread as
-that of other languages such as Fortran~77 and C++, it is useful to
+that of other languages such as Fortran~77 and \CPP{}, it is useful to
 summarise some key novelties compared to Fortran~77, as well as some
 points that might otherwise cause confusion. For further information
 the reader is referred both to books about the language such as
@@ -4241,9 +4241,9 @@ can allocate a dummy pointer array with bounds that are passed back to
 the calling subroutine (we need this for the flavour dimension of
 PDFs, whose lower bound is most naturally $-6$). 
 
-Note that in contrast to \ttt{C}/\ttt{C++} pointers, F95 pointers do
+Note that in contrast to \ttt{C}/\ttt{\CPP{}} pointers, F95 pointers do
 not explicitly need to be dereferenced --- in this respect they are
-more like \ttt{C++} \emph{references}. To associate a pointer with an
+more like \ttt{\CPP{}} \emph{references}. To associate a pointer with an
 object, one uses the \ttt{=>} syntax:
 \begin{lstlisting}
   integer, target  :: target_object(10)

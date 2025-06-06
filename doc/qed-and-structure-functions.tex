@@ -855,7 +855,7 @@ interface is to be found in
 \subsection{Streamlined interface}
 \label{sec:structure-functions-streamlined}
 The structure functions can also be accessed through the streamlined
-interface, so that they may be called for instance from C/C++. The
+interface, so that they may be called for instance from C/\CPP{}. The
 functions to be called are very similar to those described above. In
 particular a user should call either
 \begin{lstlisting}
@@ -883,7 +883,7 @@ can then be accessed through the subroutines
   call hoppetStrFctNNLO(x, Q, muR, muF, fnnlo) ! NNLO term
   call hoppetStrFctN3LO(x, Q, muR, muF, fn3lo) ! N3LO term
 \end{lstlisting}
-The C++ header contains indices for the structure functions and scale
+The \CPP{} header contains indices for the structure functions and scale
 choices, which are all in the \ttt{hoppetv1} namespace.
 %
 \begin{lstlisting}
@@ -906,11 +906,11 @@ choices, which are all in the \ttt{hoppetv1} namespace.
   const int scale_choice_Q         = 1;
   const int scale_choice_arbitrary = 2;
 \end{lstlisting}
-Note that in C++ the structure function indices start from 0 and that the C++
+Note that in \CPP{} the structure function indices start from 0 and that the \CPP{}
 array that is to be passed to functions such as \ttt{hoppetStrFct}
 would be defined as \ttt{double ff[14]}.
 
-An example of structure function evaluations using the C++ version of
+An example of structure function evaluations using the \CPP{} version of
 the streamlined interface is to be found in
 \repolink{example_f77/cpp_structure_functions_example.cc}{example\_f77/cpp\_structure\_functions\_example.cc}.
 %
