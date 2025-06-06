@@ -2501,7 +2501,7 @@ F95.  It hides all the object-oriented nature of the program, and
 provides access to one \ttt{pdf\_table}, based on a single grid
 definition. The description will be given as if one is calling from
 F77. An include file \ttt{src/hoppet\_v1.h} is provided for calling
-from {\tt \CPP{}} --- the interface is essentially identical to the Fortran
+from \CPP{} --- the interface is essentially identical to the Fortran
 one, with the caveat that names are case sensitive (the cases are as
 given below), and that PDF components referred to below as
 \ttt{pdf(-6:6)} become \ttt{pdf[0..12]}. A summary of the
@@ -4241,9 +4241,9 @@ can allocate a dummy pointer array with bounds that are passed back to
 the calling subroutine (we need this for the flavour dimension of
 PDFs, whose lower bound is most naturally $-6$). 
 
-Note that in contrast to \ttt{C}/\ttt{\CPP{}} pointers, F95 pointers do
+Note that in contrast to C/\CPP{} pointers, F95 pointers do
 not explicitly need to be dereferenced --- in this respect they are
-more like \ttt{\CPP{}} \emph{references}. To associate a pointer with an
+more like \CPP{} \emph{references}. To associate a pointer with an
 object, one uses the \ttt{=>} syntax:
 \begin{lstlisting}
   integer, target  :: target_object(10)

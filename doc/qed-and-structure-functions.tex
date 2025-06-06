@@ -916,6 +916,49 @@ the streamlined interface is to be found in
 %
 %\gps{added this link}
 
+\section{Python interface}
+From version~2.0.0 \hoppet also includes a Python interface to the
+most common evolution routines. It currently includes exactly the same
+functionality as the streamlined interface, and can be called in much
+the same way. The names of functions and routines are the same as in
+the streamlined interface, but stripped of the \ttt{hoppet}
+prefix. The interface is installed automatically as \ttt{hoppet\_v1}
+with \ttt{Cmake} and can be used through \ttt{import hoppet\_v1}. For a
+fully worked out tabulation example the user should take a look at
+\repolink{pyinterface/tabulation_example.py}{pyinterface/tabulation\_example.py}.
+
+One significant difference between the Python interface and the
+streamlined interface is that Python does not provide native support
+for pointers. For this reason all functions and subroutines that
+returned a pointer to a PDF object, through an explicit argument, now
+instead return a Python array directly. For instance, where in \CPP{}
+one might have the call
+%
+\begin{lstlisting}
+  #include "hoppet_v1.h"
+  [...]
+  double x = ...;
+  double Q = ...;
+  double pdf[13];
+  [...]
+  hoppetEval(x, Q, pdf);
+\end{lstlisting}
+%
+instead in Python one would have
+%
+\begin{lstlisting}
+  import hoppet_v1 as hp
+  [...]
+  x = ...
+  Q = ...
+  pdf = hp.Eval(x,Q)
+\end{lstlisting}
+As a consequence the \ttt{Assign}, \ttt{CachedEvolve}, and
+\ttt{Evolve} routines, which all expect a PDF interface as an input in
+the streamlined interface, now instead take a function of \ttt{x} and
+\ttt{Q} that returns a Python array (see \ttt{hera\_lhc} in
+\repolink{pyinterface/tabulation_example.py}{tabulation\_example.py}
+for an explicit example).
 
  	
 
