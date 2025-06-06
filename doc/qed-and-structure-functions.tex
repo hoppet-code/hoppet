@@ -465,9 +465,10 @@ In recent years significant progress in determining the perturbative
 components needed for unpolarised QCD evolution at N$^3$LO has been
 made.
 %
-This has now reached the stage that two PDF groups have released fits at
-approximate N$^3$LO (aN$^3$LO)
-accuracy~\cite{McGowan:2022nag,NNPDF:2024nan}.
+This has now reached the stage that two PDF groups have released fits
+at approximate N$^3$LO (aN$^3$LO)
+accuracy~\cite{McGowan:2022nag,NNPDF:2024nan} along with their
+combination in Ref.~\cite{MSHT:2024tdn}.
 %
 Of the three contributions that are needed at full N$^3$LO accuracy
 only two are fully known.
@@ -960,7 +961,43 @@ the streamlined interface, now instead take a function of \ttt{x} and
 \repolink{pyinterface/tabulation_example.py}{tabulation\_example.py}
 for an explicit example).
 
- 	
+\section{CMake build option}
+In addition to the standard build option through \ttt{./configure} and
+\ttt{make [install]} \hoppet now supports the use of CMake. Although
+the old build option will be supported as far as possible, the CMake
+build option will be the main build option starting from version
+2.0.0 of \hoppet.
+
+For a typical user it will be enough to invoke the following lines
+from the main directory
+\begin{lstlisting}
+  mkdir build; cd build
+  cmake ..
+  make [-j]
+  make install [-j]
+\end{lstlisting}
+This will compile and install \hoppet along with both the streamlined
+and Python interfaces. Note that \ttt{make install} will typically
+install in a location that requires root privileges, unless a user has
+specified a custom prefix (through
+\ttt{-DCMAKE\_INSTALL\_PREFIX=/install/path}). A number of options can
+be passed to CMake. They are documented in
+\repolink{CMakeLists.txt}{CMakeLists.txt} and can be printed on screen
+by a call to \ttt{cmake -LH ..} from the \ttt{build} directory.
+
+Of particular note to most users are
+\begin{lstlisting}
+  option(HOPPET\_USE\_EXACT\_COEF   "Use exact coefficient functions"  OFF)
+  option(HOPPET\_BUILD\_EXAMPLES    "Build examples" ON)
+  option(HOPPET\_ENABLE\_TESTING    "Enable testing. Requires building the examples." ON)
+  option(HOPPET\_BUILD\_BENCHMARK   "Build benchmark." ON)
+  option(HOPPET\_BUILD\_PYINTERFACE "Build python interface." ON)
+  option(HOPPET\_ENABLE\_FPES       "Enable trapping for the floating point exceptions." OFF)
+  option(HOPPET\_BUILD\_TESTDIR     "Enable build of the code in the test directory." OFF)
+\end{lstlisting}
+The can be set when call \ttt{cmake} in the usual way,
+e.g.\ \ttt{cmake .. -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet
+with the exact coefficient functions.
 
 %%% Local Variables:
 %%% TeX-master: "HOPPET-v2.0-release.tex"
