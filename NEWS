@@ -1,7 +1,7 @@
 NEWS for HOPPET
 
 ======================================================================
-Release 1.3.0, XX March 2025
+Release 2.0.0, XX June 2025
 ======================================================================
 
 Major new features:
@@ -12,6 +12,7 @@ Major new features:
   FHMPRUVV group (arXiv:2410.08089 and refs therein)
 * inclusion of mass threshold matrices for VFNS N3LO evolution, including
   code from ABBFMSS group (DESY 24-037 and refs therein)
+* inclusion of a python interface (similar to the streamline interface)
 
 We are grateful to the authors of the N3LO coefficient functions,
 splitting functions and mass threshold terms for providing their code. 

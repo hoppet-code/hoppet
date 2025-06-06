@@ -1,3 +1,14 @@
+2025-06-06  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* CMakeLists.txt
+	* NEWS
+	* doc/HOPPET-v1-doc.tex
+	* doc/HOPPET-v1.3-release.tex -> doc/HOPPET-v2.0-release.tex
+	* doc/qed-and-structure-functions.tex
+	* src/welcome_message.f90
+
+	Updated version number to 2.0.0
+
 2025-05-29 Thu  Alexander + Gavin
 
 	* example_f90/sumrules.f90 -> benchmarking/sumrules.f90:
