@@ -192,37 +192,42 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 }
 %}
 
-%rename(hoppetStart         )      hoppetstart_;
-%rename(hoppetStartExtended )      hoppetstartextended_;
-%rename(hoppetAssign        )      hoppetassign_; // The callback function is Assign
-%rename(hoppetEvolve        )      hoppetevolve_; // The callback function is Evolve
-%rename(PreEvolve           )      hoppetpreevolve_;     
-%rename(hoppetCachedEvolve  )      hoppetcachedevolve_; // The callback function is CachedEvolve
-%rename(AlphaS              )      hoppetalphas_; 
-%rename(SetFFN              )      hoppetsetffn_;       
-%rename(SetVFN              )      hoppetsetvfn_;       
-%rename(SetPoleMassVFN      )      hoppetsetpolemassvfn_;       
-%rename(SetMSbarMassVFN     )      hoppetsetmsbarmassvfn_;       
-%rename(SetExactDGLAP       )      hoppetsetexactdglap_;
-%rename(hoppetEval          )      hoppeteval_;          
-%rename(hoppetEvalSplit     )      hoppetevalsplit_;
-%rename(SetQED              )      hoppetsetqed_;
-%rename(hoppetDeleteAll     )      hoppetdeleteall_;
+// Routines that retain their "hoppet" prefix in this list have an
+// explicit functions defined above in order to correctly return a pdf
+// object.
+%rename(hoppetStart             )      hoppetstart_;
+%rename(hoppetStartExtended     )      hoppetstartextended_;
+%rename(hoppetAssign            )      hoppetassign_; // The callback function is Assign
+%rename(hoppetEvolve            )      hoppetevolve_; // The callback function is Evolve
+%rename(PreEvolve               )      hoppetpreevolve_;     
+%rename(hoppetCachedEvolve      )      hoppetcachedevolve_; // The callback function is CachedEvolve
+%rename(AlphaS                  )      hoppetalphas_; 
+%rename(SetFFN                  )      hoppetsetffn_;       
+%rename(SetVFN                  )      hoppetsetvfn_;       
+%rename(SetPoleMassVFN          )      hoppetsetpolemassvfn_;       
+%rename(SetMSbarMassVFN         )      hoppetsetmsbarmassvfn_;       
+%rename(SetExactDGLAP           )      hoppetsetexactdglap_;
+%rename(SetApproximateDGLAPN3LO )      hoppetsetapproximatedglapn3lo_;
+%rename(SetN3LOnfthresholds     )      hoppetsetn3lonfthresholds_;
+%rename(hoppetEval              )      hoppeteval_;          
+%rename(hoppetEvalSplit         )      hoppetevalsplit_;
+%rename(SetQED                  )      hoppetsetqed_;
+%rename(hoppetDeleteAll         )      hoppetdeleteall_;
 
-%rename(StartStrFct         )      hoppetstartstrfct_;
-%rename(StartStrFctExtended )      hoppetstartstrfctextended_;
-%rename(InitStrFct          )      hoppetinitstrfct_;
-%rename(InitStrFctFlav      )      hoppetinitstrfctflav_;
-%rename(hoppetStrFct        )      hoppetstrfct_;
-%rename(hoppetStrFctNoMu    )      hoppetstrfctnomu_;
-%rename(hoppetStrFctLO      )      hoppetstrfctlo_;
-%rename(hoppetStrFctNLO     )      hoppetstrfctnlo_;
-%rename(hoppetStrFctFlav    )      hoppetstrfctflav_;
-%rename(hoppetStrFctNoMuFlav)      hoppetstrfctnomuflav_;
-%rename(hoppetStrFctLOFlav  )      hoppetstrfctloflav_;
-%rename(hoppetStrFctNLOFlav )      hoppetstrfctnloflav_;
-%rename(hoppetStrFctNNLO    )      hoppetstrfctnnlo_;
-%rename(hoppetStrFctN3LO    )      hoppetstrfctn3lo_;
+%rename(StartStrFct             )      hoppetstartstrfct_;
+%rename(StartStrFctExtended     )      hoppetstartstrfctextended_;
+%rename(InitStrFct              )      hoppetinitstrfct_;
+%rename(InitStrFctFlav          )      hoppetinitstrfctflav_;
+%rename(hoppetStrFct            )      hoppetstrfct_;
+%rename(hoppetStrFctNoMu        )      hoppetstrfctnomu_;
+%rename(hoppetStrFctLO          )      hoppetstrfctlo_;
+%rename(hoppetStrFctNLO         )      hoppetstrfctnlo_;
+%rename(hoppetStrFctFlav        )      hoppetstrfctflav_;
+%rename(hoppetStrFctNoMuFlav    )      hoppetstrfctnomuflav_;
+%rename(hoppetStrFctLOFlav      )      hoppetstrfctloflav_;
+%rename(hoppetStrFctNLOFlav     )      hoppetstrfctnloflav_;
+%rename(hoppetStrFctNNLO        )      hoppetstrfctnnlo_;
+%rename(hoppetStrFctN3LO        )      hoppetstrfctn3lo_;
 
 %include "hoppet_v1.h"
 
