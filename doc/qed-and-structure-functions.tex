@@ -493,10 +493,10 @@ behaviours, approximate splitting functions suitable for phenomenology
 can be reliably
 determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd}.
 %
-We have therefore implemented the aforementioned pieces, with the
+We have therefore incorporated the aforementioned pieces, using the
+code that is publicly available with those reference, with the
 intention of updating the splitting functions as they become more
-precisely known.\gps{implemented $\to$ incorporated? (And mention we
-  used their code?)}
+precisely known.
 
 For the specific implementation in \hoppet version 2.0.0 we rely on
 the approximations computed in
@@ -522,7 +522,7 @@ splitting functions used.
 The approximate splitting functions can return
 three different
 choices corresponding to upper and lower edges of an uncertainty band and their
-average. \gps{rephrased a little}
+average. 
 %
 The user can control which use through the
 \ttt{n3lo\_splitting\_variant} which takes the values
@@ -530,7 +530,7 @@ The user can control which use through the
 \ttt{n3lo\_splitting\_Nfiterr1}, or
 \ttt{n3lo\_splitting\_Nfiterr2}.
 %
-Should\gps{$\to$ When?} the exact splitting functions become available they will
+When the exact splitting functions become available they will
 correspond to \ttt{n3lo\_splitting\_exact}.
 %
 Similarly if a set of parametrisations of the exact splitting
@@ -553,7 +553,14 @@ Ref.~\cite{Falcioni:2024xyt} and the default value of
 approximations in papers up to and including
 Ref.~\cite{Falcioni:2024qpd}.
 
-In Table~\ref{tab:n3lo-evolve} we show the impact of the full N$^3$LO
+Besides the splitting functions, we have also incorporated the
+single-mass thresholds up to N$^3$LO, as calculated in
+Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}
+and kindly supplied to us in the form of Fortran
+code~\cite{BlumleinCode,Fael:2022miw}. 
+
+
+In Table~\ref{tab:n3lo-evolve} we show the results of the full N$^3$LO
 evolution in the VFNS, using the most up-to-date perturbative input at
 the time of writing this release note. To assess the evolution we take
 the initial condition of Ref.~\cite{Dittmar:2005ed} at an initial
@@ -562,6 +569,27 @@ $Q=100~\text{GeV}$. The table can be reproduced by running
 \repolink{example_f90/tabulation_example_n3lo.f90}{example\_f90/tabulation\_example\_n3lo.f90}. The
 numbers are obtained using parametrised NNLO splitting functions, but
 exact mass thresholds at this order.
+%
+The table has been generated with $\texttt{dy}=0.05$,
+$\texttt{dlnlnQ}=\text{dy/4}$.
+%
+Increasing $\texttt{dy}=0.10$ leaves the results unchanged at the
+precision shown, while going to $\texttt{dy}=0.20$ changes the results
+by a relative amount below $10^{-4}$.
+
+Table~\ref{tab:n3lo-evolve} cannot be directly compared to the
+benchmarking tables of Ref.~\cite{Cooper-Sarkar:2024crx} because they
+do not include the mass thresholds in the N3LO evolution.
+%
+To facilitate comparisons we therefore additionally provide
+Table~\ref{tab:n3lo-evolve-nf4}, correspond to fixed-flavour ($n_f=4$)
+evolution, with
+\ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}.
+%
+Of the MSHT and NNPDF results, the NNPDF results (Table~2 of
+Ref.~\cite{Cooper-Sarkar:2024crx}) are closer to ours.
+
+
 
 \begin{table}[ht!]
   %  \footnotesize \centering
@@ -586,9 +614,23 @@ $0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  
     4.4 of Ref.~\cite{Dittmar:2005ed}, using the same notation where
     $a\cdot10^{b} = a^b$. The evolution is performed taking the
     initial condition at $\sqrt{2}~\text{GeV}$ (just below the charm
-    mass) and evolving in the VFNS up to $Q=100~\text{GeV}$.}
+    mass) and evolving in the VFNS up to $Q=100~\text{GeV}$, with a
+    charm-quark pole mass of $\sqrt{2}+10^{-9}\GeV$ and a bottom-quark
+    pole mass of $4.5\GeV$.
+    %
+    The NNLO splitting functions are the parametrised form
+    (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
+    facilitate comparisons by other groups, and the N3LO splitting
+    functions use the
+    \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2410\_08089} choice.}
 \end{table}
 
+\begin{table}
+  \centering
+  \comment{FILL IN THIS TABLE}
+  \caption{N3LO benchmark, $n_f=4$}
+  \label{tab:n3lo-evolve-nf4}
+\end{table}
 
 %\ak{Started collecting some references here as there are many and they are not that easy to find...}
 %\begin{itemize}
