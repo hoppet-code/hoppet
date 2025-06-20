@@ -11,23 +11,60 @@
 # - for a test labelled $test, there should be a reference output file
 #   $test.default_output
 
-# if any arguments are given, run only those tests
-# otherwise run all tests
-if [ $# -gt 0 ]; then
-  tests=("$@")
-else
-  # if no arguments are given, run all tests
-  echo "No arguments given, running all tests."
+# Usage:
+usage="Usage: scripts/check [-s sourcedir] [test1 [test2 [...] ] ]"
+#  
+#
+# if sourcedir is not given, then reference results are taken
+# from the current directory.
+#
+# if not tests are supplied, then it uses the default set of tests
 
-  tests=(example_f90/tabulation_example \
+default_tests=(\
+         example_f90/tabulation_example \
          example_f90/tabulation_example_qed \
          example_f90/tabulation_example_qed_streamlined \
          example_f90/tabulation_example_n3lo \
          example_f90/structure_functions_example \
          example_f90/structure_functions_example_flavour \
-         )
-       #example_f90/tabulation_example_up_and_down
+     )
+
+# parse the command line according to the usage, using a simple loop
+# that just shifts and checks each argument
+# Default sourcedir is one leel up from this script
+sourcedir="$(dirname "$(realpath "$0")")/.."
+tests=()
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -s)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "Error: -s requires an argument"
+        exit 1
+      fi
+      sourcedir="$1"
+      ;;
+    -*)
+      echo "Unknown option: $1"
+      echo "$usage"
+      exit 1
+      ;;
+    *)
+      tests+=("$1")
+      ;;
+  esac
+  shift
+done
+# if tests is empty, replace it with the default tests
+if [ ${#tests[@]} -eq 0 ]; then
+  echo "No tests specified, using default tests."
+  tests=("${default_tests[@]}")
 fi
+
+echo "Source directory: $sourcedir"
+echo "Tests: ${tests[@]}"
 
 for test in ${tests[@]}; do
   echo
@@ -40,7 +77,7 @@ for test in ${tests[@]}; do
   ($test | tee ${checkname}.tmp.new-pregrep) || exit 1;
   
   grep -vi -e '^ *[a-z]' -e '^ *$' ${checkname}.tmp.new-pregrep > ${checkname}.tmp.new
-  grep -vi -e '^ *[a-z]' -e '^ *$' $test.default_output > ${checkname}.tmp.orig  
+  grep -vi -e '^ *[a-z]' -e '^ *$' $sourcedir/$test.default_output > ${checkname}.tmp.orig  
 
   diff ${checkname}.tmp.new ${checkname}.tmp.orig > ${checkname}.tmp.diff
   checkwc=`cat ${checkname}.tmp.diff| wc -l `

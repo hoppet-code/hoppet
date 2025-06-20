@@ -7,13 +7,15 @@
 	to test just one specified test. The actual list of tests is
 	still separate (ctest has its own one-by-one list, to be able
 	to run in parallel, scripts/check when run in make checked
-	uses its own full list sequentially)
+	uses its own full list sequentially)	
 	
 	Added tests for example_f90/tabulation_example_n3lo.f90
 
 	* .github/workflows/main.yml:
-	tried changing gcc versions from 10,13,14 -> 10,14,15 
-	but it failed to find gfortran-15, so went back to 10,13,14
+	- tried changing gcc versions from 10,13,14 -> 10,14,15 
+	  but it failed to find gfortran-15, so went back to 10,13,14
+    - changed some of the buils from Debug -> RelWithDebInfo, to 
+	  speed up the CI tests.
 
 	* example_f90/tabulation_example_n3lo.f90:
 	switched to dy=0.1, which gives identical results to dy=0.05
