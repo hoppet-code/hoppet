@@ -11,13 +11,13 @@
 !!     some public PDF set's evolution) -- to use this part of the code
 !!     you will also need to link with LHAPDF
 !!
-program tabulation_example
+program tabulation_example_n3lo
   use hoppet_v1
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
   !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   implicit none
-  real(dp) :: dy, ymax
+  real(dp) :: dy, ymax, dlnlnQ
   integer  :: order, nloop
   !! holds information about the grid
   type(grid_def) :: grid
@@ -54,7 +54,8 @@ program tabulation_example
   ! set up parameters for grid
   order = -6
   ymax  = 17.0_dp
-  dy    = 0.05_dp
+  dy    = 0.05_dp      ! a large value of 0.20 gives results that are good to within relative 10^{-4}
+  dlnlnQ = dy / 4.0_dp ! a good default as long as ymax is not too large
 
   ! set up the grid itself (this call sets up a nested grid composed of 4 subgrids)
   call InitGridDefDefault(grid, dy, ymax, order=order)
@@ -67,6 +68,8 @@ program tabulation_example
   call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
        &                      nloop=nloop,nflo=3,nfhi=5)
   write(6,'(a)') "Splitting functions initialised!"
+  write(6,'(a,i1)') "Using nloop = ",nloop
+  write(6,'(a,f6.4,a,f8.6)') "Using dy = ",dy," dlnlnQ = ",dlnlnQ
 
   !! set up LHAPDF with cteq
   !call InitPDFsetByName("cteq61.LHgrid")
@@ -91,7 +94,7 @@ program tabulation_example
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
   call AllocPdfTable(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
-       & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
+       & dlnlnQ = dlnlnQ, freeze_at_Qmin=.true.)
   ! add information about the nf transitions to the table (improves
   ! interpolation quality)
   call AddNfInfoToPdfTable(table,coupling)
@@ -185,6 +188,6 @@ contains
     pdf(:,-iflv_d) = dbar
   end function unpolarized_dummy_pdf
 
-end program tabulation_example
+end program tabulation_example_n3lo
 
 
