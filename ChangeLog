@@ -1,3 +1,10 @@
+2025-06-20 Fri  Gavin
+
+	* CMakeLists.txt:
+	in HOPPET_ENABLE_FPES, removed underflow and denormal errors
+	for gcc given that those operations may legitimately occur
+	in some places in the code (e.g. high-order expansions). 
+
 2025-06-20 Fri  Alexander + Gavin
 
 	* CMakeLists.txt:
