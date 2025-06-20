@@ -54,7 +54,7 @@ program tabulation_example_n3lo
   ! set up parameters for grid
   order = -6
   ymax  = 17.0_dp
-  dy    = 0.05_dp      ! a large value of 0.20 gives results that are good to within relative 10^{-4}
+  dy    = 0.1_dp      ! a large value of 0.20 gives results that are good to within relative 10^{-4}, 0.1 agrees with 0.05
   dlnlnQ = dy / 4.0_dp ! a good default as long as ymax is not too large
 
   ! set up the grid itself (this call sets up a nested grid composed of 4 subgrids)

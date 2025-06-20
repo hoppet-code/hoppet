@@ -10,14 +10,24 @@
 # list of tests to run:
 # - for a test labelled $test, there should be a reference output file
 #   $test.default_output
-tests=(example_f90/tabulation_example \
-       example_f90/tabulation_example_qed \
-       example_f90/tabulation_example_qed_streamlined \
-       example_f90/tabulation_example_n3lo \
-       example_f90/structure_functions_example \
-       example_f90/structure_functions_example_flavour \
-       )
+
+# if any arguments are given, run only those tests
+# otherwise run all tests
+if [ $# -gt 0 ]; then
+  tests=("$@")
+else
+  # if no arguments are given, run all tests
+  echo "No arguments given, running all tests."
+
+  tests=(example_f90/tabulation_example \
+         example_f90/tabulation_example_qed \
+         example_f90/tabulation_example_qed_streamlined \
+         example_f90/tabulation_example_n3lo \
+         example_f90/structure_functions_example \
+         example_f90/structure_functions_example_flavour \
+         )
        #example_f90/tabulation_example_up_and_down
+fi
 
 for test in ${tests[@]}; do
   echo
@@ -25,25 +35,25 @@ for test in ${tests[@]}; do
   echo '    ' Doing check with $test
   echo '*****************************************************************'
   echo 
-  ($test | tee check.tmp.new-pregrep) || exit 1;
+  checkname=$(echo $test | sed 's|/|_|g')
+  ($test | tee ${checkname}.tmp.new-pregrep) || exit 1;
   
-  grep -vi -e '^ *[a-z]' -e '^ *$' check.tmp.new-pregrep > check.tmp.new
-  grep -vi -e '^ *[a-z]' -e '^ *$' $test.default_output > check.tmp.orig
-  
-  diff check.tmp.new check.tmp.orig > check.tmp.diff
-  checkwc=`cat check.tmp.diff| wc -l `
+  grep -vi -e '^ *[a-z]' -e '^ *$' ${checkname}.tmp.new-pregrep > ${checkname}.tmp.new
+  grep -vi -e '^ *[a-z]' -e '^ *$' $test.default_output > ${checkname}.tmp.orig  
+
+  diff ${checkname}.tmp.new ${checkname}.tmp.orig > ${checkname}.tmp.diff
+  checkwc=`cat ${checkname}.tmp.diff| wc -l `
   
   echo
   if [ $checkwc == "0" ] 
   then
     echo check PASSED
-    rm -f check.tmp.new check.tmp.orig check.tmp.diff check.tmp.new-pregrep
+    rm -f ${checkname}.tmp.new ${checkname}.tmp.orig ${checkname}.tmp.diff ${checkname}.tmp.new-pregrep
   else
-    echo check FAILED: look at 'check.tmp.*' to see differences
+    echo check FAILED: look at '${checkname}.tmp.*' to see differences
     exit 1;
   fi
   
 done
 
-echo
 echo "All tests passed!"
