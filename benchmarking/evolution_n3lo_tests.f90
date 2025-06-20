@@ -44,7 +44,7 @@ program structure_functions_example
   ! including  parameters for x-grid
   order = -6 ! interpolation order, not perturbative order in alphas!
   ymax  = 12.0_dp
-  dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
+  dy    = dble_val_opt("-dy",0.05_dp)
   dlnlnQ = dy/4.0_dp
   minQval = Qmin
   maxQval = Qmax 
