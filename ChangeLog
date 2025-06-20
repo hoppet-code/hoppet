@@ -12,7 +12,8 @@
 	Added tests for example_f90/tabulation_example_n3lo.f90
 
 	* .github/workflows/main.yml:
-	changed gcc versions from 10,13,14 -> 10,14,15 
+	tried changing gcc versions from 10,13,14 -> 10,14,15 
+	but it failed to find gfortran-15, so went back to 10,13,14
 
 	* example_f90/tabulation_example_n3lo.f90:
 	switched to dy=0.1, which gives identical results to dy=0.05
