@@ -35,6 +35,7 @@ for test in ${tests[@]}; do
   echo '    ' Doing check with $test
   echo '*****************************************************************'
   echo 
+  echo "Running from $(pwd)"
   checkname=$(echo $test | sed 's|/|_|g')
   ($test | tee ${checkname}.tmp.new-pregrep) || exit 1;
   
@@ -50,7 +51,7 @@ for test in ${tests[@]}; do
     echo check PASSED
     rm -f ${checkname}.tmp.new ${checkname}.tmp.orig ${checkname}.tmp.diff ${checkname}.tmp.new-pregrep
   else
-    echo check FAILED: look at '${checkname}.tmp.*' to see differences
+    echo check FAILED: look at ${checkname}'.tmp.*' to see differences
     exit 1;
   fi
   
