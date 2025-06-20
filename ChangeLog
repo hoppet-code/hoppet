@@ -1,3 +1,10 @@
+2025-06-20 Fri  Alexander + Gavin
+
+	* CMakeLists.txt:
+	* scripts/check:
+	added ctest for example_f90/tabulation_example_n3lo.f90
+
+
 2025-06-06  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* CMakeLists.txt

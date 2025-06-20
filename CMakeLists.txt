@@ -326,12 +326,19 @@ if (HOPPET_BUILD_EXAMPLES)
     ENABLE_TESTING()
     set( execs 
     tabulation_example 
+    tabulation_example_n3lo 
     #tabulation_example_up_and_down 
-    tabulation_example_qed structure_functions_example structure_functions_example_flavour
-    tabulation_example_qed_streamlined)
+    tabulation_example_qed structure_functions_example 
+    structure_functions_example_flavour
+    tabulation_example_qed_streamlined
+    )
     foreach ( ex ${execs})
       add_test(NAME ${ex}_copy  COMMAND sh -c "cat ${PROJECT_SOURCE_DIR}/example_f90/${ex}.default_output | grep -vi -e '^ *[a-z]' -e '^ *$' > ${PROJECT_BINARY_DIR}/example_f90/${ex}.default_output")
-      add_test(NAME ${ex} COMMAND sh -c "${PROJECT_BINARY_DIR}/example_f90/${ex} | grep -vi -e '^ *[a-z]' -e '^ *$' > ${PROJECT_BINARY_DIR}/example_f90/${ex}.this_output" )
+      set(runName ${ex})
+      if (ex MATCHES "tabulation_example_n3lo")
+        set(runName "${runName}_takes_up_to_30s")
+      endif()
+      add_test(NAME ${runName} COMMAND sh -c "${PROJECT_BINARY_DIR}/example_f90/${ex} | grep -vi -e '^ *[a-z]' -e '^ *$' > ${PROJECT_BINARY_DIR}/example_f90/${ex}.this_output" )
       add_test(NAME ${ex}_compare  COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/example_f90/${ex}.this_output  ${PROJECT_BINARY_DIR}/example_f90/${ex}.default_output)
       set_tests_properties( ${ex}_compare PROPERTIES DEPENDS "${ex};${ex}_copy")
     endforeach()    

@@ -1,0 +1,29 @@
+Initialisation of Mass Threshold Matrices at N3LO. The paper
+*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,
+*     A. von Manteuffel, C. Schneider, and K. Schönwald,
+*     "The Variable Flavor Number Scheme at  Next-to-Next-to-Leading Order",
+*     DESY 24-037   
+* shall be cited at any use. Corresponding code from J. Bluemlein, March 19 2024 and 
+* K. Schönwald, March 15 2024, including results from arXiv:2207.00027, arXiv:2403.00513
+*
+The initialisation could take up to a minute, depending on the machine.
+Initialising N3LO mass threshold matrices for nf = 3 -> 4
+Initialising N3LO mass threshold matrices for nf = 4 -> 5
+Splitting functions initialised!
+Using nloop = 4
+Using dy = 0.0500 dlnlnQ = 0.012500
+Evolution done!
+
+                                   Evaluating PDFs at Q =  100.000 GeV
+    x      u-ubar      d-dbar     dbr-ubr    2(ubr+dbr)     s+sbar     c+cbar     b+bbar       gluon
+1.0E-07  1.0589E-04  4.8664E-05  8.1967E-06  1.6234E+02  8.0100E+01  7.7207E+01  6.5254E+01  1.1238E+03
+1.0E-06  5.9691E-04  3.2634E-04  3.3146E-05  7.6786E+01  3.7544E+01  3.5836E+01  2.9889E+01  5.1159E+02
+1.0E-05  3.0235E-03  1.7532E-03  1.3081E-04  3.5436E+01  1.7044E+01  1.6106E+01  1.3142E+01  2.2224E+02
+1.0E-04  1.4079E-02  8.2354E-03  4.9511E-04  1.5611E+01  7.2731E+00  6.7862E+00  5.3294E+00  8.8594E+01
+1.0E-03  6.0849E-02  3.5086E-02  1.7751E-03  6.3823E+00  2.7798E+00  2.5204E+00  1.8516E+00  3.0349E+01
+1.0E-02  2.3361E-01  1.3074E-01  5.8324E-03  2.2673E+00  8.5415E-01  7.0444E-01  4.6228E-01  7.7859E+00
+1.0E-01  5.4846E-01  2.6950E-01  9.9965E-03  3.8453E-01  1.1248E-01  6.8296E-02  3.7899E-02  8.4964E-01
+3.0E-01  3.4441E-01  1.2761E-01  2.9457E-03  3.4575E-02  8.8873E-03  3.9659E-03  2.0846E-03  7.8697E-02
+5.0E-01  1.1790E-01  3.0597E-02  3.6526E-04  2.3206E-03  5.6808E-04  2.0185E-04  1.1382E-04  7.6337E-03
+7.0E-01  1.9329E-02  2.9648E-03  1.2848E-05  5.2429E-05  1.2662E-05  3.4020E-06  2.4956E-06  3.7094E-04
+9.0E-01  3.3153E-04  1.6737E-05  8.0961E-09  2.5214E-08  6.6432E-09  7.6153E-10  1.4323E-09  1.1716E-06

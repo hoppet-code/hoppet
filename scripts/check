@@ -13,6 +13,7 @@
 tests=(example_f90/tabulation_example \
        example_f90/tabulation_example_qed \
        example_f90/tabulation_example_qed_streamlined \
+       example_f90/tabulation_example_n3lo \
        example_f90/structure_functions_example \
        example_f90/structure_functions_example_flavour \
        )
