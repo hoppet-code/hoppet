@@ -4,6 +4,8 @@
 	* scripts/check:
 	added ctest for example_f90/tabulation_example_n3lo.f90
 
+	* .github/workflows/main.yml:
+	changed gcc versions from 10,13,14 -> 10,14,15 
 
 2025-06-06  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
