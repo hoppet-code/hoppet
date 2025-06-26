@@ -37,6 +37,7 @@ program tabulation_example_n3lo
        & (/1e-7_dp, 1e-6_dp, 1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   integer  :: i, ix
   real(dp) :: x
+  logical :: vfn = .true. ! Change to false to run nf = 4 FFN for comparison with 2406.16188
 
   !! define the interfaces for LHA pdf (by default not used)
   !! (NB: unfortunately this conflicts with an internal hoppet name,
@@ -54,7 +55,7 @@ program tabulation_example_n3lo
   ! set up parameters for grid
   order = -6
   ymax  = 17.0_dp
-  dy    = 0.1_dp      ! a large value of 0.20 gives results that are good to within relative 10^{-4}, 0.1 agrees with 0.05
+  dy    = 0.05_dp      ! a large value of 0.20 gives results that are good to within relative 10^{-4}, 0.1 agrees with 0.05 to within relative 10^{-5}
   dlnlnQ = dy / 4.0_dp ! a good default as long as ymax is not too large
 
   ! set up the grid itself (this call sets up a nested grid composed of 4 subgrids)
@@ -62,35 +63,60 @@ program tabulation_example_n3lo
 
   ! initialise the splitting-function holder
   nloop = 4 ! 1; LO, 2; NLO, 3; NNLO; 4; N3LO
-  !n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2310_05744 ! Controls the approximation that we use the in n3lo splitting functions
-  call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
-  call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_on) ! To turn on/off the n3lo mass thresholds
-  call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
-       &                      nloop=nloop,nflo=3,nfhi=5)
-  write(6,'(a)') "Splitting functions initialised!"
-  write(6,'(a,i1)') "Using nloop = ",nloop
-  write(6,'(a,f6.4,a,f8.6)') "Using dy = ",dy," dlnlnQ = ",dlnlnQ
+  if(vfn) then 
+     !n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2310_05744 ! Controls the approximation that we use the in n3lo splitting functions
+     call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
+     call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_on) ! To turn on/off the n3lo mass thresholds
+     call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
+          &                      nloop=nloop,nflo=3,nfhi=5)
+     write(6,'(a)') "Splitting functions initialised!"
+     write(6,'(a,i1)') "Using nloop = ",nloop
+     write(6,'(a,f6.4,a,f8.6)') "Using dy = ",dy," dlnlnQ = ",dlnlnQ
 
-  !! set up LHAPDF with cteq
-  !call InitPDFsetByName("cteq61.LHgrid")
-  !call InitPDF(0)
-  ! allocate and set up the initial pdf from LHAPDF ...
-  !Q0 = 5.0_dp 
-  !call AllocPDF(grid, pdf0)
-  !call InitPDF_LHAPDF(grid, pdf0, EvolvePDF, Q0)
+     !! set up LHAPDF with cteq
+     !call InitPDFsetByName("cteq61.LHgrid")
+     !call InitPDF(0)
+     ! allocate and set up the initial pdf from LHAPDF ...
+     !Q0 = 5.0_dp 
+     !call AllocPDF(grid, pdf0)
+     !call InitPDF_LHAPDF(grid, pdf0, EvolvePDF, Q0)
 
-  ! initialise a PDF from the function below (must be contained,
-  ! in a "used" module, or with an explicitly defined interface)
-  call AllocPDF(grid, pdf0)
-  pdf0 = unpolarized_dummy_pdf(xValues(grid))
-  Q0 = sqrt(2.0_dp)  ! the initial scale
-
-  ! allocate and initialise the running coupling with a given
-  ! set of quark masses (NB: charm mass just above Q0).
-  quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 1e100_dp/)
-  call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
-       &                   quark_masses = quark_masses)
-
+     ! initialise a PDF from the function below (must be contained,
+     ! in a "used" module, or with an explicitly defined interface)
+     call AllocPDF(grid, pdf0)
+     pdf0 = unpolarized_dummy_pdf(xValues(grid))
+     Q0 = sqrt(2.0_dp)  ! the initial scale
+     
+     ! allocate and initialise the running coupling with a given
+     ! set of quark masses (NB: charm mass just above Q0).
+     quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 1e100_dp/)
+     call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
+          &                   quark_masses = quark_masses)
+     
+  else
+     ! To perform the nf = 4 FFN run that compares against 2406.16188
+     ! tables 1 & 2 uncomment the below and comment the above
+     n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2404_09701
+     call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_off) ! To turn on/off the n3lo mass thresholds
+     call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
+          &                      nloop=nloop,nflo=4,nfhi=4)
+     write(6,'(a)') "Doing FFN nf = 4 tabulation for comparison with 2406.16188"
+     write(6,'(a)') "Splitting functions initialised!"
+     write(6,'(a,i1)') "Using nloop = ",nloop
+     write(6,'(a,f6.4,a,f8.6)') "Using dy = ",dy," dlnlnQ = ",dlnlnQ
+     
+     ! initialise a PDF from the function below (must be contained,
+     ! in a "used" module, or with an explicitly defined interface)
+     call AllocPDF(grid, pdf0)
+     pdf0 = unpolarized_dummy_pdf(xValues(grid))
+     Q0 = sqrt(2.0_dp)  ! the initial scale
+     
+     ! allocate and initialise the running coupling with a given
+     ! set of quark masses (NB: charm mass just above Q0).
+     quark_masses(4:6) = (/1.414213563_dp, 4.5_dp, 1e100_dp/)
+     call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop,&
+          &                   quark_masses = quark_masses, fixnf = 4)
+  endif
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
   call AllocPdfTable(grid, table, Qmin=1.0_dp, Qmax=10000.0_dp, & 
@@ -110,32 +136,34 @@ program tabulation_example_n3lo
   Q = 100.0_dp
   write(6,'(a)')
   write(6,'(a,f8.3,a)') "                                   Evaluating PDFs at Q = ",Q," GeV"
-  write(6,'(a5,3a12,a14,3a11,a12)') "x",&
-       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
+  write(6,'(a5,3a12,a14,4a11,a12)') "x",&
+       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s-sbar","s+sbar","c+cbar","b+bbar","gluon"
   do ix = 1, size(heralhc_xvals)
      call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
-     write(6,'(es7.1,8es12.4)') heralhc_xvals(ix), &
+     write(6,'(es7.1,9es12.4)') heralhc_xvals(ix), &
           &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
           &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
           &  (pdf_at_xQ(-1)-pdf_at_xQ(-2)), &
           &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+          &  (pdf_at_xQ(3)-pdf_at_xQ(-3)), &
           &  (pdf_at_xQ(-3)+pdf_at_xQ(3)), &
           &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
           &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
           &  pdf_at_xQ(0)
   end do
-  ! Write to a fil
+  ! Write to a file
   
-  write(12,'(a5,3a12,a14,3a11,a12)') "x",&
-       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s+sbar","c+cbar","b+bbar","gluon"
+  write(12,'(a5,3a12,a14,4a11,a12)') "x",&
+       & "u-ubar","d-dbar","dbr-ubr","2(ubr+dbr)","s-sbar","s+sbar","c+cbar","b+bbar","gluon"
   do i = 1, 200
      x     = 0.0001_dp ** (i/200.0_dp)
      call EvalPdfTable_xQ(table,x,Q,pdf_at_xQ)
-     write(12,'(es7.1,8es12.4)') x, &
+     write(12,'(es10.4,9es14.7)') x, &
           &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
           &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
           &  (pdf_at_xQ(-1)-pdf_at_xQ(-2)), &
           &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+          &  (pdf_at_xQ(3)-pdf_at_xQ(-3)), &
           &  (pdf_at_xQ(-3)+pdf_at_xQ(3)), &
           &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
           &  (pdf_at_xQ(-5)+pdf_at_xQ(5)), &
