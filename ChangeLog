@@ -1,3 +1,10 @@
+2025-06-26  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* example_f90/tabulation_example_n3lo.f90:
+	added option to run the tabulation with fixed-flavour number nf =
+	4, to allow for comparisons with 2406.16188. The example now also
+	prints s-sbar since it is contained in that benchmark.
+
 2025-06-20 Fri  Gavin
 
 	* CMakeLists.txt:
