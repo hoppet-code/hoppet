@@ -11,6 +11,11 @@
 !!     some public PDF set's evolution) -- to use this part of the code
 !!     you will also need to link with LHAPDF
 !!
+!! Pipe the output through
+!!
+!!   pcresed 's/E(.).(.)/\$^\{$1$2\}\$/g' | pcresed 's/  ([0-9])/ &  $1/g' | pcresed 's/ -/ & -/g'
+!!
+!! to get the number in LaTeX table format
 program tabulation_example_n3lo
   use hoppet_v1
   !! if using LHAPDF, rename a couple of hoppet functions which
@@ -101,7 +106,7 @@ program tabulation_example_n3lo
      call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
           &                      nloop=nloop,nflo=4,nfhi=4)
      write(6,'(a)') "Doing FFN nf = 4 tabulation for comparison with 2406.16188"
-     write(6,'(a)') "Splitting functions initialised!"
+     write(6,'(a)') "Splitting functions initialised, using 2310_05744 approximation!"
      write(6,'(a,i1)') "Using nloop = ",nloop
      write(6,'(a,f6.4,a,f8.6)') "Using dy = ",dy," dlnlnQ = ",dlnlnQ
      
