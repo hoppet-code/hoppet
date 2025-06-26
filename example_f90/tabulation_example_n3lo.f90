@@ -96,7 +96,7 @@ program tabulation_example_n3lo
   else
      ! To perform the nf = 4 FFN run that compares against 2406.16188
      ! tables 1 & 2 uncomment the below and comment the above
-     n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2404_09701
+     n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2310_05744
      call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_off) ! To turn on/off the n3lo mass thresholds
      call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
           &                      nloop=nloop,nflo=4,nfhi=4)
