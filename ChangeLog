@@ -1,3 +1,11 @@
+2025-06-26 Alexander + Gavin
+
+	* example_f90/tabulation_example_n3lo.f90:
+	* example_f90/tabulation_example_n3lo.default_output.nf4:
+	improved otuput slightly in vfn case, added a commented
+	line about how to convert it into a LaTeX table;
+	added default output for nf=4 (hand-coded )
+
 2025-06-26  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* example_f90/tabulation_example_n3lo.f90:
