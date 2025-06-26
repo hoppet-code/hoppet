@@ -630,11 +630,36 @@ $0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  
     functions use the
     \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2410\_08089} choice.}
 \end{table}
-
+  
 \begin{table}
-  \centering
-  \comment{FILL IN THIS TABLE}
-  \caption{N3LO benchmark, $n_f=4$}
+  \small \centering
+  \begin{tabular}{c|cccccccc}
+    $x$ &  $u-\bar u$ &$d-\bar d$ &$\bar d-\bar u$ &  $ 2(\bar u+\bar d)$  &$s-\bar s$ &$s+\bar s$&$c+\bar c$ &   $g$\\
+    \toprule
+$10^{-7}$ &  $9.8370^{-5}$ &  $4.5171^{-5}$ &  $7.5013^{-6}$ &  $1.5062^{+2}$ &  $-2.9105^{-5}$ &   $7.4239^{+1}$ &  $7.3524^{+1}$ &  $1.0983^{+3}$ \\
+$10^{-6}$ &  $5.6405^{-4}$ &  $3.0895^{-4}$ &  $3.0730^{-5}$ &  $7.2559^{+1}$ &  $-4.6739^{-5}$ &   $3.5428^{+1}$ &  $3.4861^{+1}$ &  $5.0857^{+2}$ \\
+$10^{-5}$ &  $2.8946^{-3}$ &  $1.6810^{-3}$ &  $1.2302^{-4}$ &  $3.4056^{+1}$ &  $-3.5767^{-6}$ &   $1.6352^{+1}$ &  $1.5902^{+1}$ &  $2.2426^{+2}$ \\
+$10^{-4}$ &  $1.3633^{-2}$ &  $7.9832^{-3}$ &  $4.7274^{-4}$ &  $1.5224^{+1}$ &  $\phantom{-}2.1123^{-4}$ &   $7.0780^{+0}$ &  $6.7213^{+0}$ &  $9.0524^{+1}$ \\
+$10^{-3}$ &  $5.9567^{-2}$ &  $3.4382^{-2}$ &  $1.7232^{-3}$ &  $6.3030^{+0}$ &  $\phantom{-}3.9314^{-4}$ &   $2.7388^{+0}$ &  $2.4622^{+0}$ &  $3.1357^{+1}$ \\
+$10^{-2}$ &  $2.3130^{-1}$ &  $1.2962^{-1}$ &  $5.7645^{-3}$ &  $2.2668^{+0}$ &  $-1.9644^{-4}$ &   $8.5219^{-1}$ &  $6.6365^{-1}$ &  $8.1512^{+0}$ \\
+$0.1$    &  $5.5131^{-1}$ &  $2.7140^{-1}$ &  $1.0085^{-2}$ &  $3.8980^{-1}$ &  $-3.1812^{-4}$ &   $1.1388^{-1}$ &  $5.9845^{-2}$ &  $9.0619^{-1}$ \\
+$0.3$    &  $3.5044^{-1}$ &  $1.3015^{-1}$ &  $3.0145^{-3}$ &  $3.5426^{-2}$ &  $-3.8409^{-5}$ &   $9.0900^{-3}$ &  $3.3506^{-3}$ &  $8.4430^{-2}$ \\
+$0.5$    &  $1.2112^{-1}$ &  $3.1518^{-2}$ &  $3.7779^{-4}$ &  $2.3973^{-3}$ &  $-3.3053^{-6}$ &   $5.8501^{-4}$ &  $1.7709^{-4}$ &  $8.1568^{-3}$ \\
+$0.7$    &  $2.0078^{-2}$ &  $3.0889^{-3}$ &  $1.3448^{-5}$ &  $5.4598^{-5}$ &  $-1.1810^{-8}$ &   $1.3105^{-5}$ &  $3.6962^{-6}$ &  $3.9248^{-4}$ \\
+$0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6376^{-8}$ &  $-1.5848^{-10}$ &  $6.8210^{-9}$ &  $2.6764^{-9}$ &  $1.2256^{-6}$ 
+  \end{tabular}
+  \caption{N$^3$LO evolution of the initial condition given in Section
+    4.4 of Ref.~\cite{Dittmar:2005ed}, using the same notation where
+    $a\cdot10^{b} = a^b$. The evolution is performed taking the
+    initial condition at $\sqrt{2}~\text{GeV}$ (just below the charm
+    mass) and evolving in the FFN scheme ($n_f = 4$) up to
+    $Q=100~\text{GeV}$.
+    %
+    The NNLO splitting functions are the parametrised form
+    (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
+    facilitate comparisons by other groups, and the N3LO splitting
+    functions use the
+    \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2404\_09701} choice. This table can be directly compared to tables 1 and 2 in Ref.~\cite{Cooper-Sarkar:2024crx}}
   \label{tab:n3lo-evolve-nf4}
 \end{table}
 
