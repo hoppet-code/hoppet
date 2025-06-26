@@ -30,79 +30,12 @@
 !         specify -ymax 11.5 and -Qmax 1e4 to get sensible timings.
 ! 
 !======================================================================
-module pdf_initial_condition
-  use hoppet_v1
-  implicit none
-  
-contains
-  !======================================================================
-  !! The dummy PDF suggested by Vogt as the initial condition for the 
-  !! unpolazrized evolution
-  function unpolarized_dummy_pdf(xvals) result(pdf)
-    real(dp), intent(in) :: xvals(:)
-    real(dp)             :: pdf(size(xvals),ncompmin:ncompmax)
-    real(dp) :: uv(size(xvals)), dv(size(xvals))
-    real(dp) :: ubar(size(xvals)), dbar(size(xvals))
-    !---------------------
-    real(dp), parameter :: N_g = 1.7_dp, N_ls = 0.387975_dp
-    real(dp), parameter :: N_uv=5.107200_dp, N_dv = 3.064320_dp
-    real(dp), parameter :: N_db = half*N_ls
-  
-    pdf = zero
-    ! clean method for labelling as PDF as being in the human representation
-    call LabelPdfAsHuman(pdf)
-
-    !-- remember that these are all xvals*q(xvals)
-    uv = N_uv * xvals**0.8_dp * (1-xvals)**3
-    dv = N_dv * xvals**0.8_dp * (1-xvals)**4
-    dbar = N_db * xvals**(-0.1_dp) * (1-xvals)**6
-    ubar = dbar * (1-xvals)
-    pdf(:,iflv_g) = N_g * xvals**(-0.1_dp) * (1-xvals)**5
-        
-    pdf(:,-iflv_s) = 0.2_dp*(dbar + ubar)
-    pdf(:, iflv_s) = pdf(:,-iflv_s)
-    pdf(:, iflv_u) = uv + ubar
-    pdf(:,-iflv_u) = ubar
-    pdf(:, iflv_d) = dv + dbar
-    pdf(:,-iflv_d) = dbar
-  end function unpolarized_dummy_pdf
-
-
-  ! an alternative way of providing the same thing
-  subroutine VogtInitSub(y,res)
-    real(dp), intent(in)  :: y
-    real(dp), intent(out) :: res(ncompmin:)
-    real(dp) :: x
-    real(dp) :: uv, dv, ubar, dbar
-    !---------------------
-    real(dp), parameter :: N_g = 1.7_dp, N_ls = 0.387975_dp
-    real(dp), parameter :: N_uv=5.107200_dp, N_dv = 3.064320_dp
-    real(dp), parameter :: N_db = half*N_ls
-    
-    res = zero
-    x = exp(-y)
-    !-- remember that my definitions that these are all x*q(x)
-    uv = N_uv * x**0.8_dp * (1-x)**3
-    dv = N_dv * x**0.8_dp * (1-x)**4
-    dbar = N_db * x**(-0.1_dp) * (1-x)**6
-    ubar = dbar * (1-x)
-    res(iflv_g) = N_g * x**(-0.1_dp) * (1-x)**5
-
-    res(-iflv_s) = 0.2_dp*(dbar + ubar)
-    res( iflv_s) = res(-iflv_s)
-    res( iflv_u) = uv + ubar
-    res(-iflv_u) = ubar
-    res( iflv_d) = dv + dbar
-    res(-iflv_d) = dbar
-  end subroutine VogtInitSub
-end module pdf_initial_condition
-
 
 !======================================================================
 program prec_and_timing
   use hoppet_v1
   use hoppet_git_state
-  use pdf_initial_condition
+  use dummy_pdfs
   use sub_defs_io
   implicit none
   !-------------------------------
@@ -115,8 +48,8 @@ program prec_and_timing
   real(dp)           :: dy, Qinit, Qmax, du, dlnlnQ
   real(dp)           :: ymax
   real(dp)           :: time_start, time_init_done, time_ev_done, time_end
-  real(dp), pointer  :: vogt_init(:,:)
-  type(pdf_table)       :: table
+  real(dp), pointer  :: initial_condition(:,:)
+  type(pdf_table)    :: table
   logical            :: output, outputgrid, preev
   integer :: idev, y_interp_order
   character(len=300) :: hostname
@@ -173,8 +106,8 @@ program prec_and_timing
   ! first way to get the initial distribution
   !call AllocInitPDFSub(grid,vogt_init,VogtInitSub)
   ! alternative way to get the initial distribution
-  call AllocPDF(grid,vogt_init)
-  vogt_init = unpolarized_dummy_pdf(xValues(grid))
+  call AllocPDF(grid,initial_condition)
+  initial_condition = unpolarized_dummy_pdf(xValues(grid))
 
   ! set up the coupling
   Qinit = sqrt(two); Qmax = dble_val_opt('-Qmax',1e4_dp)
@@ -220,9 +153,9 @@ program prec_and_timing
   ! evolution & output
   do i = 1, nrep
      if (preev) then
-        call EvolvePdfTable(table,vogt_init)
+        call EvolvePdfTable(table,initial_condition)
      else
-        call EvolvePdfTable(table,Qinit,vogt_init,dh,coupling)
+        call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
      end if
 
      ! one form of output
@@ -247,7 +180,7 @@ program prec_and_timing
 
   ! clean up
   call Delete(table)
-  call Delete(vogt_init)  ! here can also use deallocate(vogt_init)
+  call Delete(initial_condition)  ! here can also use deallocate(vogt_init)
   call Delete(dh)
   call Delete(coupling)
   call Delete(grid)

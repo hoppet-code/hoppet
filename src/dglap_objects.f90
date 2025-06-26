@@ -1003,8 +1003,15 @@ contains
       call InitGridConv(grid, MTM_N3LO%Sqg_H  , JB(QGL, null(), null(), order=ord3))
       ! there is no AQGL, all is included in QGL
       
+      ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
+      ! to be there to avoid errors in the code.
+      call InitGridConv(grid, MTM_N3LO%PShg_MSbar)
+      MTM_N3LO%masses_are_MSbar = .false.
+      MTM_N3LO%Sgg_H_extra_MSbar_delta = zero
+
       MTM_N3LO%loops = 4
       MTM_N3LO%nf_int = nf_int
+
     else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
       call InitMTMNNLO(grid,MTM_N3LO) !! dummy initialisation to NNLO, just to get started
       MTM_N3LO%loops = 4
@@ -1113,11 +1120,6 @@ contains
     integer :: i, nf_light, nf_heavy
 
     !-- general sanity checks
-    if (MTM%nf_int /= nf_int) then 
-      write(6,*) "nf_int(global) = ", nf_int, ", and MTM%nf_int = ", MTM%nf_int
-      call wae_error('cobj_ConvMTM:',&
-         &'nf_int in MTM does not match current nf_int')
-    end if
     if (MTM%loops <=0 .or. MTM%nf_int <=0) call wae_error('cobj_ConvMTM:',&
          &'Mass threshold matrix is undefined')
 

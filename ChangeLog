@@ -2,9 +2,22 @@
 
 	* example_f90/tabulation_example_n3lo.f90:
 	* example_f90/tabulation_example_n3lo.default_output.nf4:
-	improved otuput slightly in vfn case, added a commented
+	improved output slightly in ffn case, added a commented
 	line about how to convert it into a LaTeX table;
 	added default output for nf=4 (hand-coded )
+
+	* src/dglap_objects.f90:
+	In N3LO MTM, explicitly set MSbar N3LO pieces to zero, rather than leaving 
+	them undefined.
+
+	When carrying out an MTM convolution, eliminated the check that the MTM's
+	nf is equal to the global one -- not needed because the global nf
+	is not being relied on in any way.
+
+	These two fixes get pre-evolution back into a working state.
+
+	* benchmarking/prec_and_timing.f90:
+	start of some restructuring to modernise this a bit.
 
 2025-06-26  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
