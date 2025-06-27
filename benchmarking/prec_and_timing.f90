@@ -37,6 +37,8 @@ program prec_and_timing
   use hoppet_git_state
   use dummy_pdfs
   use sub_defs_io
+  use NameSelect
+
   implicit none
   !-------------------------------
   type(grid_def)     :: grid, gridarray(4)
@@ -54,19 +56,24 @@ program prec_and_timing
   integer :: idev, y_interp_order
   character(len=300) :: hostname
 
+  idev = idev_open_opt("-o","/dev/stdout")    ! output file (required)
+
   ! set the details of the y=ln1/x grid
-  dy    = dble_val_opt('-dy',0.25_dp)
-  ymax  = dble_val_opt('-ymax',11.5_dp)
-  order = int_val_opt('-order',-6)
-  order2 = int_val_opt('-order2',order)
-  order1 = int_val_opt('-order1',order)
+  dy    = dble_val_opt('-dy',0.25_dp)         ! grid spacing in y = ln(1/x)
+  ymax  = dble_val_opt('-ymax',11.5_dp)       ! maximum y = ln(1/x)
+  order = int_val_opt('-order',-6)            ! interpolation order for splitting-function rep
+  dlnlnQ = dble_val_opt('-dlnlnQ',dy/4.0_dp)  ! table spacing in ln(ln(Q))
+  olnlnQ = int_val_opt('-olnlnQ',4)           ! table interpolation order for ln(ln(Q))
 
-  idev = idev_open_opt("-o","/dev/stdout")
+  du = dble_val_opt('-du',0.1_dp) ! evolution step,  in practice often overriden by dlnlnQ
 
-  preev = log_val_opt('-preev',.true.)
+  order2 = int_val_opt('-order2',order) ! override interp order for finest grid
+  order1 = int_val_opt('-order1',order) ! override interp order for finest second grid
 
-  if (log_val_opt('-eps')) call SetDefaultConvolutionEps(dble_val_opt('-eps'))
-  if (log_val_opt('-asdt')) call SetDefaultCouplingDt(dble_val_opt('-asdt'))
+  preev = log_val_opt('-preev',.true.)        ! use pre-evolution (cached evolution)
+
+  if (log_val_opt('-eps')) call SetDefaultConvolutionEps(dble_val_opt('-eps')) ! precision for split.fn. adaptive integration 
+  if (log_val_opt('-asdt')) call SetDefaultCouplingDt(dble_val_opt('-asdt')) ! spacing for coupling ev.
 
   if (log_val_opt('-alt7')) then
      call InitGridDef(gridarray(3),dy/7.0_dp, 1.0_dp, order=order2)
@@ -79,15 +86,20 @@ program prec_and_timing
      call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order )
      call InitGridDef(gridarray(1),dy,        ymax,   order=order )
      call InitGridDef(grid,gridarray(1:4),locked=.true.)
-  else
+  else if (log_val_opt('-3grids')) then
      hires = int_val_opt('-hires',9)
      call InitGridDef(gridarray(3),dy/hires, 0.5_dp, order=order2)
      call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order1)
      call InitGridDef(gridarray(1),dy,        ymax,   order=order )
      call InitGridDef(grid,gridarray(1:3),locked=.true.)
+  else 
+     ! this is like 4 grids and is the standard, without control over order1 and order2
+     call InitGridDefDefault(grid, dy, ymax, order=order)
+     if (order1 /= order .or. order2 /= order) then
+        call wae_error("order1 and order2 != order not suppoed with default grid")
+     end if
   end if
   ! set parameter for evolution step in Q
-  du = dble_val_opt('-du',0.1_dp)
   call SetDefaultEvolutionDu(du)
 
   ! set up the splitting functions
@@ -120,8 +132,6 @@ program prec_and_timing
   !write(0,*) Value(coupling,91.2d0)
 
   ! set up the table
-  dlnlnQ = dble_val_opt('-dlnlnQ',0.07_dp)
-  olnlnQ = int_val_opt('-olnlnQ',4)
   call AllocPdfTable(grid,table,Qinit,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
   call AddNfInfoToPdfTable(table,coupling)
   if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
@@ -132,11 +142,12 @@ program prec_and_timing
 
   ! decide 
   nrep  = int_val_opt('-nrep',1)
-  nrep_eval = int_val_opt('-nrep-eval',1000)
+  nrep_eval = int_val_opt('-nrep-eval',100000)
   nxQ = int_val_opt('-nxQ',0)
   output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
   outputgrid  = log_val_opt('-outputgrid')
   if (output) call output_info
+
 
   !-- security ----------------------
   if (.not. CheckAllArgsUsed(0)) stop
@@ -158,15 +169,16 @@ program prec_and_timing
         call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
      end if
 
-     ! one form of output
-     if (outputgrid) then
-        call eval_output_grid()
-     else
-        call eval_output_lines()
-     end if
      
   end do
   call cpu_time(time_end)
+  ! one form of output
+  if (outputgrid) then
+     call eval_output_grid()
+  else
+     call eval_output_lines()
+  end if
+
   write(0,'(a,4f10.5)') "Timings (init, preevln, evln) = ", &
        &   time_init_done-time_start, &
        &   time_ev_done-time_init_done, &
@@ -201,7 +213,16 @@ contains
     
     write(idev,'(a,f10.5,a,f10.5)') '# Evolution: du = ',du, ",   coupling dt = ", DefaultCouplingDt()
     write(idev,'(a,f10.5,a,i5)') '# Tabulation: dlnlnQ = ',dlnlnQ, ', olnlnQ = ',olnlnQ
-  end subroutine output_info
+
+    if (nloop >= 3) then
+       write(idev,'(a)') '# nnlo_spltting = '//trim(NameOfCode(nnlo_splitting_variant,'nnlo_splitting'))
+    end if
+    if (nloop >= 4) then
+       !write(idev,'(a)') '# n3lo_spltting = '//trim(NameOfCode(n3lo_splitting_variant,'n3lo_splitting'))
+       write(idev,'(a)') '# n3lo_spltting_approx = '// &
+      &       trim(NameOfCode(n3lo_splitting_approximation,'n3lo_splitting_approx'))
+    end if
+   end subroutine output_info
 
 
   !-------------------------------------------------------------------
@@ -260,6 +281,7 @@ contains
 
     zmax = zeta_of_y(ymax, grid_a)
     zQmax = zeta_of_y(log(Qmax/Qinit), gridQ_a)
+    write(idev,'(a)') "# y=ln1/x Q pdf(-5:5)"
     do iQ = 0, nQ
        do iz = 1, nz
           zeta = iz * zmax/nz

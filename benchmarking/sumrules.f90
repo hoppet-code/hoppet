@@ -103,6 +103,7 @@ program sumrules
   ! 
 
   !Q=1.42_dp
+  Q=100.0_dp
   write(6,'(a)') "  "
   write(6,'(a,1x,f11.5,1x,a)') "Sum rules at Q2 =  ",&
        & Q**2," GeV^2"
@@ -119,7 +120,7 @@ program sumrules
   call EvolvePDF(dh,pdf0,coupling,Q0,Q)
 
   ! Compute various sum rules at the scale Q
-   call truncated_sum_rules(grid,pdf0)
+  call truncated_sum_rules(grid,pdf0)
  
  
   ! Some cleaning

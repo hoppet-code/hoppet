@@ -26,8 +26,11 @@ compiler=""
 # note the "-I../src" flag used to provide access to module files
 # (*.mod) in the ../src directory
 
-../../scripts/makef95makefile  compare2files  -L../../src -lhoppet_v1 -I../../src  $compiler -remake "./mkmk"
-
+## for a cmake-based build in ../../build
+CMakeBuildDir=../../build
+../../scripts/makef95makefile  compare2files  -L$CMakeBuildDir/lib -lhoppet_v1 -ICMakeBuildDir/include/hoppet  $compiler -remake "./mkmk"
+## for the configure-based build
+#../../scripts/makef95makefile  compare2files  -L../../src -lhoppet_v1 -I../../src  $compiler -remake "./mkmk"
 
 # old
 #makePNEW.perl  small_fast_tab -lcern -L../src -ldglap -L$LHAPDFDIR -lLHAPDF -I../src

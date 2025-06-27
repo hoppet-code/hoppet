@@ -42,10 +42,30 @@ contains
       code = nnlo_splitting_Nfiterr1
     case('nnlo_splitting_Nfiterr2')
       code = nnlo_splitting_Nfiterr2
+    case('n3lo_splitting_exact')
+      code = n3lo_splitting_exact
+    case('n3lo_splitting_param')
+      code = n3lo_splitting_param
+    case('n3lo_splitting_Nfitav')
+      code = n3lo_splitting_Nfitav
+    case('n3lo_splitting_Nfiterr1')
+      code = n3lo_splitting_Nfiterr1
+    case('n3lo_splitting_Nfiterr2')
+      code = n3lo_splitting_Nfiterr2
+    case('n3lo_splitting_approximation_up_to_2310_05744')
+      code = n3lo_splitting_approximation_up_to_2310_05744
+    case('n3lo_splitting_approximation_up_to_2404_09701')
+      code = n3lo_splitting_approximation_up_to_2404_09701
+    case('n3lo_splitting_approximation_up_to_2410_08089')
+      code = n3lo_splitting_approximation_up_to_2410_08089
     case('nnlo_nfthreshold_exact')
       code = nnlo_nfthreshold_exact
     case('nnlo_nfthreshold_param')
       code = nnlo_nfthreshold_param
+    case('n3lo_nfthreshold_on')
+      code = n3lo_nfthreshold_on
+    case('n3lo_nfthreshold_off')
+      code = n3lo_nfthreshold_off
     case('factscheme_MSbar')
       code = factscheme_MSbar
     case('factscheme_DIS')
@@ -133,12 +153,52 @@ contains
        nocc = nocc + 1; name = 'nnlo_splitting_Nfiterr2'
     end if
 
+    if (PrefixMatches('n3lo_splitting_exact',prefix) .and. code == n3lo_splitting_exact) then
+       nocc = nocc + 1; name = 'n3lo_splitting_exact'
+    end if
+
+    if (PrefixMatches('n3lo_splitting_param',prefix) .and. code == n3lo_splitting_param) then
+       nocc = nocc + 1; name = 'n3lo_splitting_param'
+    end if
+
+    if (PrefixMatches('n3lo_splitting_Nfitav',prefix) .and. code == n3lo_splitting_Nfitav) then
+       nocc = nocc + 1; name = 'n3lo_splitting_Nfitav'
+    end if
+
+    if (PrefixMatches('n3lo_splitting_Nfiterr1',prefix) .and. code == n3lo_splitting_Nfiterr1) then
+       nocc = nocc + 1; name = 'n3lo_splitting_Nfiterr1'
+    end if
+
+    if (PrefixMatches('n3lo_splitting_Nfiterr2',prefix) .and. code == n3lo_splitting_Nfiterr2) then
+       nocc = nocc + 1; name = 'n3lo_splitting_Nfiterr2'
+    end if
+
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2310_05744',prefix) .and. code == n3lo_splitting_approximation_up_to_2310_05744) then
+       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2310_05744'
+    end if
+
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2404_09701',prefix) .and. code == n3lo_splitting_approximation_up_to_2404_09701) then
+       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2404_09701'
+    end if
+
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2410_08089',prefix) .and. code == n3lo_splitting_approximation_up_to_2410_08089) then
+       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2410_08089'
+    end if
+
     if (PrefixMatches('nnlo_nfthreshold_exact',prefix) .and. code == nnlo_nfthreshold_exact) then
        nocc = nocc + 1; name = 'nnlo_nfthreshold_exact'
     end if
 
     if (PrefixMatches('nnlo_nfthreshold_param',prefix) .and. code == nnlo_nfthreshold_param) then
        nocc = nocc + 1; name = 'nnlo_nfthreshold_param'
+    end if
+
+    if (PrefixMatches('n3lo_nfthreshold_on',prefix) .and. code == n3lo_nfthreshold_on) then
+       nocc = nocc + 1; name = 'n3lo_nfthreshold_on'
+    end if
+
+    if (PrefixMatches('n3lo_nfthreshold_off',prefix) .and. code == n3lo_nfthreshold_off) then
+       nocc = nocc + 1; name = 'n3lo_nfthreshold_off'
     end if
 
     if (PrefixMatches('factscheme_MSbar',prefix) .and. code == factscheme_MSbar) then
