@@ -1,3 +1,9 @@
+2025-06-27 Gavin
+
+	* hoppet-config.in:
+	added `-Wl,-rpath,$installationdir/lib` to `hoppet-config --libs`
+	output so that things work also with dynamic libraries
+
 2025-05-28 Gavin & Alexander
 
 	* CMakeLists.txt:
