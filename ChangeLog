@@ -1,3 +1,10 @@
+2025-06-27 Alexander + Gavin
+
+	* src/dglap_choices.f90:
+	changed indices for n3lo_splitting_approximation_up_to_2310_05744 etc.
+	so that they start from 100, facilitating mapping from number
+	to name without ambiguity with some of the other n3lo choices.
+	
 2025-06-26 Alexander + Gavin
 
 	* example_f90/tabulation_example_n3lo.f90:
