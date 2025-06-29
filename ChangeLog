@@ -1,4 +1,7 @@
-2025-06-27 Gavin
+2025-06-29 Gavin
+
+	* scripts/NameSelect.pl:
+	some lines split to avoid long-line problems
 
 	* CMakeLists.txt:
 	* benchmarking/test_acc/compare2files_v2.f90 -> benchmarking/compare2files_v2.f90:

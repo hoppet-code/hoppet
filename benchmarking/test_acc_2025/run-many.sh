@@ -24,7 +24,8 @@ echo -e $term_blue"Running with nloop = $nloop"$term_reset
 echo -e $term_blue"Output directory: $outdir"$term_reset
 echo "======================"
 accdir=$(dirname "$0")
-build_dir=$(dirname "$0")/../../build
+build_dir=./
+#build_dir=$(dirname "$0")/../../build
 compare="$build_dir/benchmarking/compare2files_v2"
 common="$build_dir/benchmarking/prec_and_timing -outputgrid -nxQ 5000 -auto-nrep -nrep-eval 100 -nloop $nloop"
 

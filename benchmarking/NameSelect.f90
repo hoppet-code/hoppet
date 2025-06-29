@@ -133,87 +133,108 @@ contains
     if (present(longname)) longname = ''
 
     ! code specific to used modules starts here
-    if (PrefixMatches('nnlo_splitting_exact',prefix) .and. code == nnlo_splitting_exact) then
+    if (PrefixMatches('nnlo_splitting_exact',prefix) &
+        .and. code == nnlo_splitting_exact) then
        nocc = nocc + 1; name = 'nnlo_splitting_exact'
     end if
 
-    if (PrefixMatches('nnlo_splitting_param',prefix) .and. code == nnlo_splitting_param) then
+    if (PrefixMatches('nnlo_splitting_param',prefix) &
+        .and. code == nnlo_splitting_param) then
        nocc = nocc + 1; name = 'nnlo_splitting_param'
     end if
 
-    if (PrefixMatches('nnlo_splitting_Nfitav',prefix) .and. code == nnlo_splitting_Nfitav) then
+    if (PrefixMatches('nnlo_splitting_Nfitav',prefix) &
+        .and. code == nnlo_splitting_Nfitav) then
        nocc = nocc + 1; name = 'nnlo_splitting_Nfitav'
     end if
 
-    if (PrefixMatches('nnlo_splitting_Nfiterr1',prefix) .and. code == nnlo_splitting_Nfiterr1) then
+    if (PrefixMatches('nnlo_splitting_Nfiterr1',prefix) &
+        .and. code == nnlo_splitting_Nfiterr1) then
        nocc = nocc + 1; name = 'nnlo_splitting_Nfiterr1'
     end if
 
-    if (PrefixMatches('nnlo_splitting_Nfiterr2',prefix) .and. code == nnlo_splitting_Nfiterr2) then
+    if (PrefixMatches('nnlo_splitting_Nfiterr2',prefix) &
+        .and. code == nnlo_splitting_Nfiterr2) then
        nocc = nocc + 1; name = 'nnlo_splitting_Nfiterr2'
     end if
 
-    if (PrefixMatches('n3lo_splitting_exact',prefix) .and. code == n3lo_splitting_exact) then
+    if (PrefixMatches('n3lo_splitting_exact',prefix) &
+        .and. code == n3lo_splitting_exact) then
        nocc = nocc + 1; name = 'n3lo_splitting_exact'
     end if
 
-    if (PrefixMatches('n3lo_splitting_param',prefix) .and. code == n3lo_splitting_param) then
+    if (PrefixMatches('n3lo_splitting_param',prefix) &
+        .and. code == n3lo_splitting_param) then
        nocc = nocc + 1; name = 'n3lo_splitting_param'
     end if
 
-    if (PrefixMatches('n3lo_splitting_Nfitav',prefix) .and. code == n3lo_splitting_Nfitav) then
+    if (PrefixMatches('n3lo_splitting_Nfitav',prefix) &
+        .and. code == n3lo_splitting_Nfitav) then
        nocc = nocc + 1; name = 'n3lo_splitting_Nfitav'
     end if
 
-    if (PrefixMatches('n3lo_splitting_Nfiterr1',prefix) .and. code == n3lo_splitting_Nfiterr1) then
+    if (PrefixMatches('n3lo_splitting_Nfiterr1',prefix) &
+        .and. code == n3lo_splitting_Nfiterr1) then
        nocc = nocc + 1; name = 'n3lo_splitting_Nfiterr1'
     end if
 
-    if (PrefixMatches('n3lo_splitting_Nfiterr2',prefix) .and. code == n3lo_splitting_Nfiterr2) then
+    if (PrefixMatches('n3lo_splitting_Nfiterr2',prefix) &
+        .and. code == n3lo_splitting_Nfiterr2) then
        nocc = nocc + 1; name = 'n3lo_splitting_Nfiterr2'
     end if
 
-    if (PrefixMatches('n3lo_splitting_approximation_up_to_2310_05744',prefix) .and. code == n3lo_splitting_approximation_up_to_2310_05744) then
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2310_05744',prefix) &
+        .and. code == n3lo_splitting_approximation_up_to_2310_05744) then
        nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2310_05744'
     end if
 
-    if (PrefixMatches('n3lo_splitting_approximation_up_to_2404_09701',prefix) .and. code == n3lo_splitting_approximation_up_to_2404_09701) then
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2404_09701',prefix) &
+        .and. code == n3lo_splitting_approximation_up_to_2404_09701) then
        nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2404_09701'
     end if
 
-    if (PrefixMatches('n3lo_splitting_approximation_up_to_2410_08089',prefix) .and. code == n3lo_splitting_approximation_up_to_2410_08089) then
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2410_08089',prefix) &
+        .and. code == n3lo_splitting_approximation_up_to_2410_08089) then
        nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2410_08089'
     end if
 
-    if (PrefixMatches('nnlo_nfthreshold_exact',prefix) .and. code == nnlo_nfthreshold_exact) then
+    if (PrefixMatches('nnlo_nfthreshold_exact',prefix) &
+        .and. code == nnlo_nfthreshold_exact) then
        nocc = nocc + 1; name = 'nnlo_nfthreshold_exact'
     end if
 
-    if (PrefixMatches('nnlo_nfthreshold_param',prefix) .and. code == nnlo_nfthreshold_param) then
+    if (PrefixMatches('nnlo_nfthreshold_param',prefix) &
+        .and. code == nnlo_nfthreshold_param) then
        nocc = nocc + 1; name = 'nnlo_nfthreshold_param'
     end if
 
-    if (PrefixMatches('n3lo_nfthreshold_on',prefix) .and. code == n3lo_nfthreshold_on) then
+    if (PrefixMatches('n3lo_nfthreshold_on',prefix) &
+        .and. code == n3lo_nfthreshold_on) then
        nocc = nocc + 1; name = 'n3lo_nfthreshold_on'
     end if
 
-    if (PrefixMatches('n3lo_nfthreshold_off',prefix) .and. code == n3lo_nfthreshold_off) then
+    if (PrefixMatches('n3lo_nfthreshold_off',prefix) &
+        .and. code == n3lo_nfthreshold_off) then
        nocc = nocc + 1; name = 'n3lo_nfthreshold_off'
     end if
 
-    if (PrefixMatches('factscheme_MSbar',prefix) .and. code == factscheme_MSbar) then
+    if (PrefixMatches('factscheme_MSbar',prefix) &
+        .and. code == factscheme_MSbar) then
        nocc = nocc + 1; name = 'factscheme_MSbar'
     end if
 
-    if (PrefixMatches('factscheme_DIS',prefix) .and. code == factscheme_DIS) then
+    if (PrefixMatches('factscheme_DIS',prefix) &
+        .and. code == factscheme_DIS) then
        nocc = nocc + 1; name = 'factscheme_DIS'
     end if
 
-    if (PrefixMatches('factscheme_PolMSbar',prefix) .and. code == factscheme_PolMSbar) then
+    if (PrefixMatches('factscheme_PolMSbar',prefix) &
+        .and. code == factscheme_PolMSbar) then
        nocc = nocc + 1; name = 'factscheme_PolMSbar'
     end if
 
-    if (PrefixMatches('factscheme_FragMSbar',prefix) .and. code == factscheme_FragMSbar) then
+    if (PrefixMatches('factscheme_FragMSbar',prefix) &
+        .and. code == factscheme_FragMSbar) then
        nocc = nocc + 1; name = 'factscheme_FragMSbar'
     end if
 

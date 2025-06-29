@@ -210,7 +210,8 @@ print MODULE
 foreach $const_name (@consts) {
   print MODULE 
 "
-    if (PrefixMatches('$const_name',prefix) .and. code == $const_name) then
+    if (PrefixMatches('$const_name',prefix) &
+        .and. code == $const_name) then
        nocc = nocc + 1; name = '$const_name'
 ";
   if (exists $longnames{$const_name}) {
