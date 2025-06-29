@@ -17,9 +17,9 @@ from glob import glob
 
 styles = [
     {'color':'#f00000'},
+    {'color':'#404040'},
     {'color':'#0000e0'},
     {'color':'#00c000'},
-    {'color':'#404040'},
     {'color':'#e0a040'},
     ]
 colors = cycler('color', [style['color'] for style in styles])
@@ -29,12 +29,12 @@ plt.rc('axes', prop_cycle=colors)
 mpl.rcParams.update({"axes.grid" : True, "grid.linestyle": ":"})
 plt.rc('figure', figsize=(5,5))
 
-dir="../../build/pp/"
+dirM2pro="../../build/pp/"
 
 def main(pdf):
     #res = h.get_array_plus_comments("filename",regexp='',columns={'x':1,'y':(3,4)}) 
-    run_stats_pre   = RunStats('nloop3-preev-dy*.dat')
-    run_stats_nopre = RunStats('nloop3-nopreev-dy*.dat')
+    run_stats_pre   = RunStats(f'{dirM2pro}/nloop3-preev-dy*.dat')
+    run_stats_nopre = RunStats(f'{dirM2pro}/nloop3-nopreev-dy*.dat')
 
     fig,(ax1,ax2) = plt.subplots(nrows=2,sharex=True)
     fig.subplots_adjust(hspace=0.04)
@@ -42,12 +42,13 @@ def main(pdf):
 
     mask = run_stats_pre.dy > 0.035
 
-    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt09[mask])
-    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt07[mask])
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt09[mask], label='all-flav, $x<0.9$', **styles[0], ls="-")
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt07[mask], label='guds, $x<0.7$'    , **styles[0], ls="--")
 
-    ax2.plot(run_stats_pre  .dy[mask], run_stats_pre  .t_ev_s[mask], label='M2Pro, cached evolution'   )
-    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_ev_s[mask], label='M2Pro, one-off evolution')
-    ax1.set_ylabel("accuracy [all flavs, $x<0.9$]")
+    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_init_s[mask], **styles[1], label='initialisation')
+    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_ev_s  [mask], **styles[2], label='one-off evolution')
+    ax2.plot(run_stats_pre  .dy[mask], run_stats_pre  .t_ev_s  [mask], **styles[3], label='cached evolution'   )
+    ax1.set_ylabel("accuracy")
     ax2.set_ylabel("time [s]")
 
     ax2.set_xscale('log')
@@ -55,6 +56,8 @@ def main(pdf):
     ax2.set_yscale('log')
     ax1.tick_params(axis='both', which='both', left=True, right=True, direction='in')
     ax2.tick_params(axis='both', which='both', left=True, right=True, direction='in')
+
+    ax2.text(0.95,0.95,"M2Pro, gfortran 14.2 (-O3)", va='top',ha='right', transform=ax2.transAxes)
 
 
     xticks_major = ax2.get_xticks().tolist()
@@ -66,7 +69,7 @@ def main(pdf):
     ax2.set_xlim(0.029,0.31)
     ax2.yaxis.set_major_formatter(FuncFormatter(h.log_formatter_fn))
 
-    ax1.text(0.03,0.93, "Hoppet v2.0.0, NNLO\nymax = 12, dlnlnQ = dy/4", va='top', transform=ax1.transAxes)
+    ax1.text(0.03,0.93, "Hoppet v2.0.0, NNLO evolution\nymax = 12, dlnlnQ = dy/4", va='top', transform=ax1.transAxes)
     #ax1.text(0.03,0.86, "", va='top', transform=ax1.transAxes)
 
     # ax.set_xlim(0,2.5)
@@ -80,6 +83,7 @@ def main(pdf):
     # ax.set_title("title")
     # ax.text(x,y,'hello',transform=ax.transAxes)
     #ax.plot(res.x, res.y, label='label', **styles[0])
+    ax1.legend(loc='lower right')
     ax2.legend(loc='lower left')
     pdf.savefig(fig,bbox_inches='tight')
     #pdf.savefig(fig,bbox_inches=Bbox.from_extents(0.0,0.0,7.5,4.8))
@@ -88,9 +92,10 @@ def main(pdf):
 class RunStats(object):
     '''Class to extra run stats for all files matching a certain glob pattern (over dy values)'''
     def __init__(self,glob_str):
-        self.files_timing = sorted(glob(f"{dir}/{glob_str}"))
-        self.files_prec   = sorted(glob(f"{dir}/{glob_str}.acc.smry"))
+        self.files_timing = sorted(glob(f"{glob_str}"))
+        self.files_prec   = sorted(glob(f"{glob_str}.acc.smry"))
         self.n = len(self.files_timing)
+        if self.n == 0: raise RuntimeError(r"Found no files in glob {glob_str}")
         self.dy = np.array([
           float(re.findall(r"dy(0\.[0-9]+)",f)[0]) for f in self.files_timing
         ])
