@@ -1,5 +1,20 @@
 2025-06-27 Gavin
 
+	* CMakeLists.txt:
+	* benchmarking/test_acc/compare2files_v2.f90 -> benchmarking/compare2files_v2.f90:
+	moved compare2files_v2.f90 into the benchmarking directory because we will
+	be using it also outside of the original test_acc directory
+
+	* prec_and_timing.f90:
+	various changes to make the command-line arguments more regular and small
+	improvements in the output
+
+	* benchmarking/README.md:
+	starting to populate this.
+
+
+2025-06-27 Gavin
+
 	* hoppet-config.in:
 	added `-Wl,-rpath,$installationdir/lib` to `hoppet-config --libs`
 	output so that things work also with dynamic libraries

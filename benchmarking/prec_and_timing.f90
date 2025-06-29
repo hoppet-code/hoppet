@@ -6,29 +6,32 @@
 ! A high-accuracy reference grid as used in the documentation can be
 ! prepared with the instructions
 !
-!   ./prec_and_timing -nrep 1 -nxQ 5000 -outputgrid -dy 0.025 -order 6 \
-!                     -nopreev -4grids -dlnlnQ 0.005 -du 0.005 -olnlnQ 4
+!  ./prec_and_timing -outputgrid -nxQ 5000 -nopreev -nloop 3 -dy 0.025 -o refgrid.dat
 !
-! Fig. 1 and fig.2(left) of the doc have been obtained by comparing
+! Fig. 2 and fig.3(left) of the doc can be obtained by comparing
 ! this with the output from 
 !
-!   ./prec_and_timing -nrep 1 -nxQ 5000 -outputgrid -dy 0.2 -order -6 \
-!                     -nopreev -4grids -dlnlnQ 0.05 -du 0.4 -olnlnQ 4
+!   ./prec_and_timing -nrep 1 -nxQ 5000 -outputgrid -dy 0.2 -nopreev -o testgrid.dat
 !
-! using the command
+! To compare the outputs, use the command
 !
-!   test_acc/compare2files_v2 resA resB -channel 11 [-protect]
+!   ./compare2files_v2 testgrid.dat refgrid.dat -channel 11 [-protect]
 !
 ! Other options of interest in prec_and_timing include
 !
 !   -eps [1e-7]       precision of adaptive integration for preparing split.fn.
 !   -asdt [0.2]       step for evolution of alpha_s
-!   -exactsp          use exact 3-loop split-fns
-!   -exactth          use exact 3-loop mass thresholds
+!   -exact-nnlo-sp    use exact 3-loop split-fns
+!   -exact-nnlo-th    use exact 3-loop mass thresholds
 !
 ! BEWARE: older copies of executables have ymax=5 and Qmax=100(?). Explicitly
 !         specify -ymax 11.5 and -Qmax 1e4 to get sensible timings.
-! 
+!
+! NB: hoppet v1 used the following command for the test grid
+!
+!   ./prec_and_timing -nrep 1 -nxQ 5000 -outputgrid -dy 0.2 -order -6 \
+!                     -nopreev -4grids -dlnlnQ 0.05 -du 0.4 -olnlnQ 4 -o testgrid.dat
+!
 !======================================================================
 
 !======================================================================
@@ -44,28 +47,30 @@ program prec_and_timing
   type(grid_def)     :: grid, gridarray(4)
   type(dglap_holder) :: dh
   type(running_coupling)    :: coupling
-  integer            :: order, order1, order2, nloop, i, nrep, nxQ,olnlnQ
-  integer            :: nrep_eval
+  integer            :: order, order1, order2, nloop, i, nrep, nrep_orig, nxQ,olnlnQ
+  integer            :: nrep_eval, n_alphas
   integer            :: hires
   real(dp)           :: dy, Qinit, Qmax, du, dlnlnQ
   real(dp)           :: ymax
   real(dp)           :: time_start, time_init_done, time_ev_done, time_end
   real(dp), pointer  :: initial_condition(:,:)
   type(pdf_table)    :: table
-  logical            :: output, outputgrid, preev
+  logical            :: output, outputgrid, preev, auto_nrep
   integer :: idev, y_interp_order
   character(len=300) :: hostname
 
   idev = idev_open_opt("-o","/dev/stdout")    ! output file (required)
 
   ! set the details of the y=ln1/x grid
-  dy    = dble_val_opt('-dy',0.25_dp)         ! grid spacing in y = ln(1/x)
-  ymax  = dble_val_opt('-ymax',11.5_dp)       ! maximum y = ln(1/x)
+  dy    = dble_val_opt('-dy',0.10_dp)         ! grid spacing in y = ln(1/x)
+  ymax  = dble_val_opt('-ymax',12.0_dp)       ! maximum y = ln(1/x)
   order = int_val_opt('-order',-6)            ! interpolation order for splitting-function rep
   dlnlnQ = dble_val_opt('-dlnlnQ',dy/4.0_dp)  ! table spacing in ln(ln(Q))
   olnlnQ = int_val_opt('-olnlnQ',4)           ! table interpolation order for ln(ln(Q))
+  y_interp_order = int_val_opt('-yinterp-order',-1) ! table interpolation order for y
+  Qmax = dble_val_opt('-Qmax',1e4_dp)
 
-  du = dble_val_opt('-du',0.1_dp) ! evolution step,  in practice often overriden by dlnlnQ
+  du = dble_val_opt('-du',0.1_dp) ! evolution step, overriden by dlnlnQ
 
   order2 = int_val_opt('-order2',order) ! override interp order for finest grid
   order1 = int_val_opt('-order1',order) ! override interp order for finest second grid
@@ -93,22 +98,44 @@ program prec_and_timing
      call InitGridDef(gridarray(1),dy,        ymax,   order=order )
      call InitGridDef(grid,gridarray(1:3),locked=.true.)
   else 
-     ! this is like 4 grids and is the standard, without control over order1 and order2
-     call InitGridDefDefault(grid, dy, ymax, order=order)
      if (order1 /= order .or. order2 /= order) then
         call wae_error("order1 and order2 != order not suppoed with default grid")
      end if
+     ! this is like 4 grids and is the standard, without control over order1 and order2
+     call InitGridDefDefault(grid, dy, ymax, order=order)
   end if
   ! set parameter for evolution step in Q
   call SetDefaultEvolutionDu(du)
 
+
   ! set up the splitting functions
   nloop = int_val_opt('-nloop',3)
-  if (log_val_opt('-exactth')) &
+  if (log_val_opt('-exact-nnlo-th')) &
        &   call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
-  if (log_val_opt('-exactsp')) &
+  if (log_val_opt('-exact-nnlo-sp')) &
        &   call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
  
+
+  ! decide hwo many repetitions, and what form of output
+  n_alphas = int_val_opt("-n-alphas",1)
+  nrep  = int_val_opt('-nrep',1)
+  auto_nrep = log_val_opt('-auto-nrep',.false.)
+  nrep_eval = int_val_opt('-nrep-eval',100000)
+  nxQ = int_val_opt('-nxQ',0)
+  output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
+  outputgrid  = log_val_opt('-outputgrid')
+  !-- security ----------------------
+  if (.not. CheckAllArgsUsed(0)) error stop
+  !----------------------------------
+
+  if (output) call output_info
+  write(idev,'(a)',advance='no') "# "
+  call time_stamp(idev)
+  call get_hostname(hostname)  
+  write(idev,'(a)') "# host: "//trim(hostname)
+  call hoppet_print_git_state(idev,prefix="#")
+
+
   call cpu_time(time_start)
   call InitDglapHolder(grid, dh, factscheme=factscheme_MSbar, &
        &                              nloop=nloop, nflo=3, nfhi=6)
@@ -122,8 +149,8 @@ program prec_and_timing
   initial_condition = unpolarized_dummy_pdf(xValues(grid))
 
   ! set up the coupling
-  Qinit = sqrt(two); Qmax = dble_val_opt('-Qmax',1e4_dp)
-  do i = 1, int_val_opt("-nas",1)
+  Qinit = sqrt(two); 
+  do i = 1, n_alphas 
      if (i /= 1) call Delete(coupling)
      call InitRunningCoupling(coupling, alfas=0.35_dp, Q=Qinit, &
           &nloop=nloop)
@@ -137,27 +164,9 @@ program prec_and_timing
   if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
   call cpu_time(time_ev_done)
 
-  y_interp_order = int_val_opt('-yinterp',-1)
   call PDFTableSetYInterpOrder(y_interp_order)
 
-  ! decide 
-  nrep  = int_val_opt('-nrep',1)
-  nrep_eval = int_val_opt('-nrep-eval',100000)
-  nxQ = int_val_opt('-nxQ',0)
-  output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
-  outputgrid  = log_val_opt('-outputgrid')
-  if (output) call output_info
 
-
-  !-- security ----------------------
-  if (.not. CheckAllArgsUsed(0)) stop
-  !----------------------------------
-
-  write(idev,'(a)',advance='no') "# "
-  call time_stamp(idev)
-  call get_hostname(hostname)  
-  write(idev,'(a)') "# host: "//trim(hostname)
-  call hoppet_print_git_state(idev,prefix="#")
   ! record info about the cpu
   !call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
 
@@ -167,11 +176,25 @@ program prec_and_timing
         call EvolvePdfTable(table,initial_condition)
      else
         call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
-     end if
-
-     
+     end if     
   end do
   call cpu_time(time_end)
+
+  ! auto-timing refinement of nrep
+  if (auto_nrep .and. time_end-time_ev_done < 0.05_dp) then
+     nrep_orig = nrep
+     nrep = 0.1_dp / ((time_end-time_ev_done)/nrep_orig)
+     do i = nrep_orig+1, nrep
+        if (preev) then
+           call EvolvePdfTable(table,initial_condition)
+        else
+           call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
+        end if     
+     end do
+     call cpu_time(time_end)
+  end if
+
+
   ! one form of output
   if (outputgrid) then
      call eval_output_grid()
@@ -179,16 +202,20 @@ program prec_and_timing
      call eval_output_lines()
   end if
 
-  write(0,'(a,4f10.5)') "Timings (init, preevln, evln) = ", &
+  write(6,'(a,3f10.5," s, nrep=",i7)') "Timings (init, preevln, evln) = ", &
        &   time_init_done-time_start, &
        &   time_ev_done-time_init_done, &
-       &   (time_end-time_ev_done)/nrep
-  if (output) write(idev,'(a,4f10.5)') "# Timings (init, preevln, evln) = ", &
+       &   (time_end-time_ev_done)/nrep, nrep
+  if (output) write(idev,'(a,3f10.5," s, nrep=",i7)') "# Init Timings (init, preevln, evln) = ", &
        &   time_init_done-time_start, &
        &   time_ev_done-time_init_done, &
-       &   (time_end-time_ev_done)/nrep
+       &   (time_end-time_ev_done)/nrep, nrep
+  write(idev,'(a,f10.5," s")') "# Initialisation time = ", time_init_done-time_start
+  write(idev,'(a,f10.5," s")') "# Pre-evolution time = ", time_ev_done-time_init_done
+  write(idev,'(a,f10.5," s, nrep = ",i7)') "# Evolution time = ", (time_end-time_ev_done)/nrep, nrep
 
-  call get_evaluation_times()
+  !call get_evaluation_times()
+  call get_evaluation_times_new()
 
   ! clean up
   call Delete(table)
@@ -216,54 +243,73 @@ contains
 
     if (nloop >= 3) then
        write(idev,'(a)') '# nnlo_spltting = '//trim(NameOfCode(nnlo_splitting_variant,'nnlo_splitting'))
+    else   
+       write(idev,'(a)') '# nnlo_spltting = N/A'
     end if
     if (nloop >= 4) then
        !write(idev,'(a)') '# n3lo_spltting = '//trim(NameOfCode(n3lo_splitting_variant,'n3lo_splitting'))
-       write(idev,'(a)') '# n3lo_spltting_approx = '// &
+      write(idev,'(a)') '# n3lo_spltting = '// &
+      &       trim(NameOfCode(n3lo_splitting_variant,'n3lo_splitting'))
+      write(idev,'(a)') '# n3lo_spltting_approx = '// &
       &       trim(NameOfCode(n3lo_splitting_approximation,'n3lo_splitting_approx'))
+    else 
+      write(idev,'(a)') '# n3lo_spltting = N/A'
+      write(idev,'(a)') '# n3lo_spltting_approx = N/A'
     end if
-   end subroutine output_info
+  end subroutine output_info
 
 
   !-------------------------------------------------------------------
-  !! output lines in the y,Q plane
+  !! output 4 lines in the y,Q plane, each with Q relating to y in a different
+  !! way
   subroutine eval_output_lines()
     integer nn, j
     real(dp) :: y, Q, pdfval(-6:6)
+    character(len=*), parameter :: header = "# y=ln1/x Q xf(x,0:4)"
+    if (.not. output) return
+
     nn = nxQ/4
+    write(idev,'(a)') "# Q = Qmax - j*(Qmax-Qinit)/nn"
+    write(idev,'(a)') header
     do j = 1, nn
        y = j*ymax/nn
        Q = Qmax - j*(Qmax-Qinit)/nn
        call EvalPdfTable_yQ(table,y,Q,pdfval)
-       if (output .and. i==1) write(idev,'(20es20.10)') y,Q,pdfval(0:4)
+       write(idev,'(20es20.10)') y,Q,pdfval(0:4)
        !if (output .and. i==1) write(idev,'(20es20.8)') y,Q,vogt_init(:,0:3).atx.(grid.with.exp(-y))
     end do
 
-    if (output .and. i==1) write(idev,*)
-    if (output .and. i==1) write(idev,*)
+    write(idev,*)
+    write(idev,*)
+    write(idev,'(a)') "# Q = 4.0_dp + j*5.0_dp/nn"
+    write(idev,'(a)') header
     do j = nn,1,-1
        y = j*ymax/nn
        Q = 4.0_dp + j*5.0_dp/nn
        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-       if (output .and. i==1) write(idev,'(20es20.10)') y,Q,pdfval(0:4)
+       write(idev,'(20es20.10)') y,Q,pdfval(0:4)
     end do
 
-    if (output .and. i==1) write(idev,*)
-    if (output .and. i==1) write(idev,*)
+    write(idev,*)
+    write(idev,*)
+    write(idev,'(a)') "# Q = Qmax*(1-j*0.2_dp/nn)"
+    write(idev,'(a)') header
     do j = nn,1,-1
        y = j*ymax/nn
        Q = Qmax*(1-j*0.2_dp/nn)
        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-       if (output .and. i==1) write(idev,'(20es20.10)') y,Q,pdfval(0:4)
+       write(idev,'(20es20.10)') y,Q,pdfval(0:4)
     end do
 
-    if (output .and. i==1) write(idev,*)
-    if (output .and. i==1) write(idev,*)
+    write(idev,*)
+    write(idev,*)
+    write(idev,'(a)') "# Q = sqrt(Qinit*Qmax)*(1+j*0.2_dp/nn)"
+    write(idev,'(a)') header
     do j = nn,1,-1
        y = j*ymax/nn
        Q = sqrt(Qinit*Qmax)*(1+j*0.2_dp/nn)
        call EvalPdfTable_yQ(table,y,Q,pdfval) 
-       if (output .and. i==1) write(idev,'(20es20.10)') y,Q,pdfval(0:4)
+       write(idev,'(20es20.10)') y,Q,pdfval(0:4)
     end do
   end subroutine eval_output_lines
 
@@ -281,6 +327,7 @@ contains
 
     zmax = zeta_of_y(ymax, grid_a)
     zQmax = zeta_of_y(log(Qmax/Qinit), gridQ_a)
+    write(6,*) 'nQ = ', nQ, ' nz = ', nz
     write(idev,'(a)') "# y=ln1/x Q pdf(-5:5)"
     do iQ = 0, nQ
        do iz = 1, nz
@@ -289,9 +336,9 @@ contains
           zQ = (iQ+zeta/zmax) * zQmax / nQ
           Q = max(Qinit,min(Qmax,Qinit * exp(y_of_zeta(zQ, gridQ_a))))
           call EvalPdfTable_yQ(table,y,Q,pdfval) 
-          if (output .and. i == 1) write(idev,'(20es20.10)') y,Q,pdfval(-5:5)
+          write(idev,'(20es20.10)') y,Q,pdfval(-5:5)
        end do
-          if (output .and. i == 1) write(idev,'(a)') 
+       write(idev,'(a)') 
     end do
     
   end subroutine eval_output_grid
@@ -300,7 +347,7 @@ contains
   
   !-----------------------------------------------------------------
   !! return zeta = ln 1/x + a*(1-x)  (x = exp(-y))
-  function zeta_of_y(y, a) result(zeta)
+  pure function zeta_of_y(y, a) result(zeta)
     real(dp), intent(in) :: y, a
     real(dp)             :: zeta
     zeta = y + a*(one - exp(-y))
@@ -336,6 +383,7 @@ contains
   subroutine get_evaluation_times()
     real(dp) :: pdf_g, pdf_g_sum, pdf_all(-6:6), pdf_sum(-6:6)
     real(dp) :: y = 0.5d0, Q = 10.0d0
+    character(len=*), parameter :: fmt = '(a,f6.1," ",a)'
     call cpu_time(time_start)
     pdf_sum = zero
     do i = 1, nrep_eval
@@ -343,8 +391,8 @@ contains
       pdf_sum = pdf_sum + pdf_all
     end do  
     call cpu_time(time_end)
-    write(idev,*) "Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
-    write(0   ,*) "Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(idev,fmt) "# Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
 
     call cpu_time(time_start)
     pdf_g_sum = zero
@@ -352,9 +400,62 @@ contains
       pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf(table,y,Q,0)
     end do  
     call cpu_time(time_end)
-    write(idev,*) "Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
-    write(0   ,*) "Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(idev,fmt) "# Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
 
    end subroutine get_evaluation_times
+
+  subroutine get_evaluation_times_new()
+    real(dp) :: pdf_g, pdf_g_sum, pdf_all(-6:6), pdf_sum(-6:6)
+    integer, parameter :: n = 100
+    real(dp) :: yvals(n), Qvals(n), y, Q
+    integer :: i, irep, iQ, iy, nvals
+    character(len=*), parameter :: fmt = '(a,f6.1," ",a)'
+
+    ! set up the y and Q values
+    do i = 1, n
+      yvals(i) = i*ymax/n
+      Qvals(i) = Qinit + i*(Qmax-Qinit)/n
+    end do
+
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable_yQ(table,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+
+    call cpu_time(time_start)
+    pdf_g_sum = zero
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf(table,y,Q,0)
+          !call EvalPdfTable_yQ(table,y,Q,pdf_all)
+          !pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    !do i = 1, nrep_eval
+    !  pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf(table,y,Q,0)
+    !end do  
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (one flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (one flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+
+   end subroutine get_evaluation_times_new
+
 
 end program prec_and_timing

@@ -1,4 +1,4 @@
-!! program for comparing format produced by "small_fast_tab -outputgrid" 
+!! program for comparing format produced by "prec_and_timing [...] -outputgrid" 
 !!
 !! Usage:
 !!   progname file1 file2 {-summary | -channel ic [-minerr val] [-maxerr val]} [-protect]
@@ -33,7 +33,7 @@ program compare2file_v2
   logical  :: mask07(maxn,maxn,-5:5)=.false.
   logical  :: mask09(maxn,maxn,-5:5)=.false.
   real(dp) :: y,Q, minerr, maxerr, this_err, true_err
-  integer  :: iy, iQ, ny, nQ, ic, idy, ml(3)
+  integer  :: iy, iQ, ny, nQ, ic, icmax, idy, ml(3)
   real(dp) :: yval2, Qval2
 
   idev1 = idev_open_arg(1,status='old')
@@ -43,11 +43,20 @@ program compare2file_v2
   write(6,"(a)") "# Comparing files " // trim(string_val_arg(1)) // " and " // trim(string_val_arg(2))
 
   iy = 1; iQ = 1
-  do
+  outer: do
      read(idev1,'(a)',iostat=iostat) line1
-     if (iostat /= 0) exit
+     if (iostat /= 0) exit outer
+     !do while(.true.)
+     !   if (len_trim(line1) > 0 .and. line1(1:1) /= "") exit
+     !end do
      read(idev2,'(a)',iostat=iostat) line2
-     if (iostat /= 0) exit
+     if (iostat /= 0) exit outer
+     !do while(.true.)
+     !   read(line2,*,iostat=iostat) yval2,Qval2,res2(iy,iQ,:)
+     !   if (iostat == 0) exit
+     !end do
+     !read(idev2,'(a)',iostat=iostat) line2
+     !if (iostat /= 0) exit
 
      ! keep track of indicies
      if (trim(line1) == "") then
@@ -58,7 +67,8 @@ program compare2file_v2
 
      read(line1,*,iostat=iostat) yval(iy),Qval(iy,iQ),res1(iy,iQ,:)
      if (iostat /= 0) cycle
-     read(line2,*) yval2,Qval2,res2(iy,iQ,:)
+     read(line2,*,iostat=iostat) yval2,Qval2,res2(iy,iQ,:)
+     if (iostat /= 0) ERROR STOP "Second file has a different format than the first one"
      if (yval(iy) /= yval2 .or. Qval(iy,iQ) /= Qval2) then
         write(6,"(a)") "Mismatch in y or Q values in input files"
         write(6,"(a)") line1
@@ -66,7 +76,7 @@ program compare2file_v2
         stop
      end if
      iy = iy + 1
-  end do
+  end do outer
   nQ = iQ - 1
 
   write(6,"(a,f10.4,a,f20.4)") "# yrange ", minval(yval(1:ny)), "-", maxval(yval(1:ny))
@@ -79,14 +89,6 @@ program compare2file_v2
   if (log_val_opt('-protect')) then
      forall(iQ=1:nQ)
         forall(iy=1:ny)
-           !mask(iy,iQ,:) = (abs(res2(iy,iQ,:)) &
-           !     &               < 3.0_dp*min(abs(res2(max(iy-1,1), iQ,:)), &
-           !     &                            abs(res2(min(iy+1,ny),iQ,:)))&
-           !     & .or.      abs(res2(iy,iQ,:)) &
-           !     &               < 3.0_dp*min(abs(res2(iy,max(iQ-1, 1),:)), &
-           !     &                            abs(res2(iy,min(iQ+1,nQ),:))))
-           ! check for neighbouring sign change
-           !mask(iy,iQ,:) = res2(max(iy-1,1), iQ,:)*res2(min(iy+1,ny),iQ,:) >= 0
            ! check for sign change in x direction
            mask(iy,iQ,:) = mask(iy,iQ,:) .and. &
                 &   minval(res2(max(iy-idy,1):min(iy+idy,ny), iQ,:),dim=1) *&
@@ -131,16 +133,23 @@ program compare2file_v2
      ic = int_val_opt("-channel")
      minerr = dble_val_opt("-minerr",zero)
      maxerr = dble_val_opt("-maxerr",1e100_dp)
+     write(6,'(a,i3,a)') "# Flavour channel ", ic, &
+        " (-5:5 means difference for that flavour; 11 means max difference across all flavours)"
+     write(6,'(a)') "# Columns: y(=ln1/x) Q max_masked_difference max_difference maxflav_masked"
      do iQ = 1, nQ
         do iy = 1, ny
            if (ic == 11) then
+              ! do all flavours
               true_err = maxval(err(iy,iQ,-5:5))
               if (any(mask(iy,iQ,:))) then
                  this_err = maxval(err(iy,iQ,-5:5),mask(iy,iQ,-5:5))
+                 icmax = maxloc(err(iy,iQ,-5:5),mask=mask(iy,iQ,-5:5),dim=1) - 6 ! 1: -> -5:
               else
+                 icmax = 11
                  this_err = -one
               end if
            else 
+              icmax = ic
               true_err = err(iy,iQ,ic)
               if (.not.mask(iy,iQ,ic)) then
                  this_err = -one
@@ -149,11 +158,15 @@ program compare2file_v2
               end if
            end if
            if (this_err >= minerr .and. this_err <= maxerr) then
-              write(6,'(4es20.12)') yval(iy), Qval(iy,iQ), this_err, true_err
+              write(6,'(4es20.12,i3)') yval(iy), Qval(iy,iQ), this_err, true_err, icmax
            end if
         end do
         write(6,*)
      end do
   end if
+
+  !-- security ----------------------
+  if (.not. CheckAllArgsUsed(0)) stop
+  !----------------------------------
 
 end program compare2file_v2
