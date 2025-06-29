@@ -95,7 +95,7 @@ do
         #$compare $fname $fname_ref -channel 11 -protect > $fname.acc.ch11 2>&1
       done
     done
-    echo    
   fi
+  echo    
 
 done

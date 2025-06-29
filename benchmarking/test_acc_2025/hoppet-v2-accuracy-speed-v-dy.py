@@ -45,7 +45,9 @@ def main(pdf,nloop):
     mask = run_stats_pre.dy > 0.035
 
     ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt09[mask], label='all-flav, $x<0.9$', **styles[0], ls="-")
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt07[mask], label='all-flav, $x<0.7$', **styles[0], ls=":")
     ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt07[mask], label='guds, $x<0.7$'    , **styles[0], ls="--")
+    #ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt09[mask], label='guds, $x<0.9$'    , **styles[0], ls=":")
 
     ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_init_s[mask], **styles[1], label='initialisation')
     ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_ev_s  [mask], **styles[2], label='one-off evolution')
