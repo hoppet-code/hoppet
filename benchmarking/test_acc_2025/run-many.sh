@@ -16,8 +16,9 @@ else
 fi
 
 
+nloop=4
+checkinterp=no
 outdir=pp
-nloop=3
 
 dyvals="0.25 0.2 0.15 0.1 0.08 0.07 0.05 0.04 0.03 0.025"
 echo -e $term_blue"Running with nloop = $nloop"$term_reset
@@ -82,17 +83,19 @@ do
   $compare $fname $fname_ref -summary -protect > $fname.acc.smry 2>&1
   #$compare $fname $fname_ref -channel 11 -protect > $fname.acc.ch11 2>&1
 
-  for olnlnQ in 2 3
-  do
-    for oy in 2 3
+  if [ x"$checkinterp" = x"yes" ]; then
+    for olnlnQ in 2 3
     do
-      echo -n " oQ$olnlnQ-oY$oy"
-      fname=$outdir/nloop$nloop-preev-oQ$olnlnQ-oY$oy-dy$dy.dat
-      runthis $fname $common -dy $dy -preev -olnlnQ $olnlnQ -yinterp-order $oy
-      $compare $fname $fname_ref -summary -protect > $fname.acc.smry 2>&1
-      #$compare $fname $fname_ref -channel 11 -protect > $fname.acc.ch11 2>&1
+      for oy in 2 3
+      do
+        echo -n " oQ$olnlnQ-oY$oy"
+        fname=$outdir/nloop$nloop-preev-oQ$olnlnQ-oY$oy-dy$dy.dat
+        runthis $fname $common -dy $dy -preev -olnlnQ $olnlnQ -yinterp-order $oy
+        $compare $fname $fname_ref -summary -protect > $fname.acc.smry 2>&1
+        #$compare $fname $fname_ref -channel 11 -protect > $fname.acc.ch11 2>&1
+      done
     done
-  done
-  echo
+    echo    
+  fi
 
 done

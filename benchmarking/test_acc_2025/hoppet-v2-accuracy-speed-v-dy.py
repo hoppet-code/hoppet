@@ -30,11 +30,13 @@ mpl.rcParams.update({"axes.grid" : True, "grid.linestyle": ":"})
 plt.rc('figure', figsize=(5,5))
 
 dirM2pro="../../build/pp/"
+nloop_names = {1: "LO", 2: "NLO", 3: "NNLO", 4: "N3LO"}
 
-def main(pdf):
+def main(pdf,nloop):
+    
     #res = h.get_array_plus_comments("filename",regexp='',columns={'x':1,'y':(3,4)}) 
-    run_stats_pre   = RunStats(f'{dirM2pro}/nloop3-preev-dy*.dat')
-    run_stats_nopre = RunStats(f'{dirM2pro}/nloop3-nopreev-dy*.dat')
+    run_stats_pre   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-dy*.dat')
+    run_stats_nopre = RunStats(f'{dirM2pro}/nloop{nloop}-nopreev-dy*.dat')
 
     fig,(ax1,ax2) = plt.subplots(nrows=2,sharex=True)
     fig.subplots_adjust(hspace=0.04)
@@ -69,7 +71,7 @@ def main(pdf):
     ax2.set_xlim(0.029,0.31)
     ax2.yaxis.set_major_formatter(FuncFormatter(h.log_formatter_fn))
 
-    ax1.text(0.03,0.93, "Hoppet v2.0.0, NNLO evolution\nymax = 12, dlnlnQ = dy/4", va='top', transform=ax1.transAxes)
+    ax1.text(0.03,0.93, f"Hoppet v2.0.0, {nloop_names[nloop]} evolution\nymax = 12, dlnlnQ = dy/4", va='top', transform=ax1.transAxes)
     #ax1.text(0.03,0.86, "", va='top', transform=ax1.transAxes)
 
     # ax.set_xlim(0,2.5)
@@ -141,6 +143,8 @@ def line_and_band(ax,x,val_and_err,**extra):
 
 if __name__ == "__main__": 
     pdfname = __file__.replace('.py','.pdf')
-    with PdfPages(pdfname) as pdf: main(pdf)
+    with PdfPages(pdfname) as pdf: 
+        main(pdf,nloop=3)
+        main(pdf,nloop=4)
 
 
