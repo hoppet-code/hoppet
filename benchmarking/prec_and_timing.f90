@@ -116,11 +116,11 @@ program prec_and_timing
        &   call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
  
 
-  ! decide hwo many repetitions, and what form of output
+  ! decide how many repetitions, and what form of output
   n_alphas = int_val_opt("-n-alphas",1)
   nrep  = int_val_opt('-nrep',1)
   auto_nrep = log_val_opt('-auto-nrep',.false.)
-  nrep_eval = int_val_opt('-nrep-eval',100000)
+  nrep_eval = int_val_opt('-nrep-eval',10)
   nxQ = int_val_opt('-nxQ',0)
   output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
   outputgrid  = log_val_opt('-outputgrid')
@@ -380,31 +380,11 @@ contains
 
   end function y_of_zeta
   
-  subroutine get_evaluation_times()
-    real(dp) :: pdf_g, pdf_g_sum, pdf_all(-6:6), pdf_sum(-6:6)
-    real(dp) :: y = 0.5d0, Q = 10.0d0
-    character(len=*), parameter :: fmt = '(a,f6.1," ",a)'
-    call cpu_time(time_start)
-    pdf_sum = zero
-    do i = 1, nrep_eval
-      call EvalPdfTable_yQ(table,y,Q,pdf_all)
-      pdf_sum = pdf_sum + pdf_all
-    end do  
-    call cpu_time(time_end)
-    write(idev,fmt) "# Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
-    write(0   ,fmt) "# Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
 
-    call cpu_time(time_start)
-    pdf_g_sum = zero
-    do i = 1, nrep_eval
-      pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf(table,y,Q,0)
-    end do  
-    call cpu_time(time_end)
-    write(idev,fmt) "# Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
-    write(0   ,fmt) "# Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
-
-   end subroutine get_evaluation_times
-
+  !-----------------------------------------------------------------
+  !! new (2025) routine for getting evaluation times, which uses a table
+  !! of y,Q values, to reduce the likelihood of being biased by some
+  !! special case.
   subroutine get_evaluation_times_new()
     real(dp) :: pdf_g, pdf_g_sum, pdf_all(-6:6), pdf_sum(-6:6)
     integer, parameter :: n = 100
@@ -457,5 +437,31 @@ contains
 
    end subroutine get_evaluation_times_new
 
+
+  ! old routine for getting evaluation times, which uses just a single y,Q combination
+  subroutine get_evaluation_times()
+    real(dp) :: pdf_g, pdf_g_sum, pdf_all(-6:6), pdf_sum(-6:6)
+    real(dp) :: y = 0.5d0, Q = 10.0d0
+    character(len=*), parameter :: fmt = '(a,f6.1," ",a)'
+    call cpu_time(time_start)
+    pdf_sum = zero
+    do i = 1, nrep_eval
+      call EvalPdfTable_yQ(table,y,Q,pdf_all)
+      pdf_sum = pdf_sum + pdf_all
+    end do  
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+
+    call cpu_time(time_start)
+    pdf_g_sum = zero
+    do i = 1, nrep_eval
+      pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf(table,y,Q,0)
+    end do  
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (one flav)", (time_end-time_start)/nrep_eval*1e9_dp, "ns"
+
+  end subroutine get_evaluation_times
 
 end program prec_and_timing

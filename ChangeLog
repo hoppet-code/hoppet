@@ -1,3 +1,11 @@
+2025-07-29 Gavin
+
+	* benchmarking/prec_and_timing.f90:
+	changed the default for `-nrep-eval` to 10 (from 10^5), because we
+	are now using the `get_evaluation_times_new()` function, which
+	internally uses 10^4 calls per overall repetition. Also
+	re-ordered some parts and added some comments.
+
 2025-06-29 Gavin
 
 	* scripts/NameSelect.pl:
