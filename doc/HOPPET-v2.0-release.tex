@@ -1,87 +1,8 @@
 \documentclass[preprint,1p,a4paper,11pt]{elsarticle}
+
+\input{preamble.tex}
+
 \biboptions{sort&compress}
-\usepackage{amsmath,amssymb,mathtools}
-\usepackage{graphicx}
-\usepackage{booktabs,cellspace}
-\usepackage{color}
-\usepackage{hyperref}
-\usepackage{xspace}
-\usepackage{adjustbox}
-% for \sout
-\usepackage[normalem]{ulem}
-%\usepackage{fullpage}
-\usepackage{geometry}
-\usepackage{fancyhdr}       % headers and footers
-\usepackage{listings}
-
-\geometry{margin=25mm,
-    headheight=110pt,
-    footskip=30pt
-}
-%\geometry{margin=2.5cm}
-
-\newcommand{\myparagraph}{\paragraph}
-
-\newcommand{\as}{\ensuremath{\alpha_s}\xspace}
-\def\CPP{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}}
-\newcommand{\mb}{\ensuremath{\,\mathrm{mb}}\xspace}
-\newcommand{\fb}{\ensuremath{\,\mathrm{fb}}\xspace}
-\newcommand{\pb}{\ensuremath{\,\mathrm{pb}}\xspace}
-\newcommand{\nb}{\ensuremath{\,\mathrm{nb}}\xspace}
-\newcommand{\GeV}{\ensuremath{\,\mathrm{GeV}}\xspace}
-\newcommand{\TeV}{\ensuremath{\,\mathrm{TeV}}\xspace}
-\newcommand{\mur}{\ensuremath{{\mu_{\mathrm{R}}}}\xspace}
-\newcommand{\muf}{\ensuremath{{\mu_{\mathrm{F}}}}\xspace}
-\newcommand{\muR}{\ensuremath{{\mu_{\mathrm{R}}}}\xspace}
-\newcommand{\muF}{\ensuremath{{\mu_{\mathrm{F}}}}\xspace}
-\newcommand{\nnlo}{\text{NNLO}\xspace}
-\newcommand{\dd}{\mathrm{d}}
-\newcommand{\NC}{\mathrm{NC}}
-\newcommand{\CC}{\mathrm{CC}}
-\newcommand{\hoppet}{\textsc{hoppet}\xspace}
-\newcommand{\apfel}{APFEL++}
-\newcommand{\ttt}[1]{\texttt{#1}}
-\newcommand{\MSbar}{\overline{\mathrm{MS}}}
-\newcommand{\repolink}[2]{\href{https://github.com/hoppet-code/hoppet/blob/master/#1}{\ttt{#2}}}
-\newcommand{\masterlink}[1]{\repolink{#1}{#1}}
-
-\newcommand{\order}[1]{\mathcal{O}\left(#1\right)}
-\newcommand\sss{\mathchoice%
-{\displaystyle}%
-{\scriptstyle}%
-{\scriptscriptstyle}%
-{\scriptscriptstyle}%
-}
-\newcommand{\ydis}{y}
-\newcommand{\xdis}{x}
-
-%---------- author comments -------------------
-\definecolor{darkgreen}{rgb}{0,0.4,0}
-\definecolor{grey}{rgb}{0.5,0.5,0.5}
-\definecolor{orange}{rgb}{0.9,0.5,0.0}
-\definecolor{lightblue}{rgb}{0.0,0.5,1.0}
-\usepackage[dvipsnames]{xcolor}
- \newcommand{\comment}[1]{\textcolor{red}{{\bf [#1]}}}
- \newcommand{\ak}[1]{\textcolor{violet}{{\bf [#1]$_{\text{AK}}$}}}
- \newcommand{\gps}[1]{{\textcolor{red}{\comment{#1}$_\text{GPS}$}}}
- \newcommand{\commentgz}[1]{{\color{red} [\it GZ:  #1}]}
- \newcommand{\commentpn}[1]{{\color{darkgreen} [\bf #1]$_\text{PN}$}}
-
-\definecolor{comment}{rgb}{0,0.3,0}
-\definecolor{identifier}{rgb}{0.0,0,0.3}
-
-\lstset{language=Fortran}
-\lstset{
-  columns=flexible,
-  basicstyle=\tt\footnotesize,
-  keywordstyle=,
-  identifierstyle=\color{black},
-  commentstyle=\tt\color{comment},
-  mathescape=true,
-  escapebegin=\color{comment},
-  showstringspaces=false,
-  keepspaces=true
-}
 
 % We need slightly different text in the manual and in the release note.
 \newif\ifreleasenote
@@ -203,6 +124,9 @@ Technology Facilities Council (STFC) under grant ST/X000761/1.
 %
 PN thanks the Humboldt Foundation for support. 
 %
+\appendix
+
+\input{perturbative-evolution-in-qcd.tex}
 
 \bibliographystyle{elsarticle-num}
 \bibliography{hoppet.bib}

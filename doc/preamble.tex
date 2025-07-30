@@ -1,0 +1,105 @@
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage{xspace}
+\usepackage{graphicx}
+\usepackage{a4wide}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{hyperref}
+%\usepackage[style=numeric,citestyle=numeric-comp,sorting=ynt,defernumbers=true,backend=biber]{biblatex}
+
+% \textwidth 21cm
+% \linewidth 21cm
+% \columnwidth 21cm
+% 
+%\marginparwidth 0 in
+
+%\textheight 22.5cm \textwidth 16cm
+%\oddsidemargin 0.0cm \evensidemargin 0.0cm
+%\topmargin -2.3cm  % for nikhef
+%\topmargin -0.5cm  % for hep-ph
+\def\CPP{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\la}{\left\langle}
+\newcommand{\ra}{\right\rangle}
+\newcommand{\lc}{\left[}
+\newcommand{\rc}{\right]}
+\newcommand{\lp}{\left(}
+\newcommand{\rp}{\right)}
+\newcommand{\aq}{\alpha_s\left( Q^2 \right)}
+\newcommand{\amz}{\alpha_s\left( M_Z^2 \right)}
+\newcommand{\aqq}{\alpha_s \left( Q^2_0 \right)}
+\newcommand{\aqz}{\alpha_s \left( Q^2_0 \right)}
+\newcommand{\nf}{n_f)}
+\newcommand{\nn}{\nonumber}
+\newcommand{\nin}{\noindent}
+
+\newcommand{\dy}{\ttt{dy}}
+\newcommand{\dlnlnQ}{\ttt{dlnlnQ}}
+\newcommand{\bq}{\boldsymbol{q}}
+\newcommand{\mus}{\;\mu\mathrm{s}}
+\newcommand{\ms}{\;\mathrm{ms}}
+\newcommand{\GeV}{\;\mathrm{GeV}}
+\newcommand{\TeV}{\;\mathrm{TeV}}
+\newcommand{\as}{\alpha_s}
+
+% author comments
+\definecolor{darkgreen}{rgb}{0,0.6,0}
+\newcommand{\comment}[1]{{\color{red}\textbf{[#1]}}}
+\newcommand{\commentgz}[1]{{\color{red} [\it GZ:  #1}]}
+\newcommand{\commentpn}[1]{{\color{magenta} [\it PN:  #1}]}
+\newcommand{\gps}[1]{{\textcolor{darkgreen}{\comment{#1}$_\text{GPS}$}}}
+\newcommand{\ak}[1]{{\textcolor{blue}{\comment{#1}$_\text{AK}$}}}
+
+
+\newcommand{\eg}{e.g.\ }
+\newcommand{\ie}{i.e.\ }
+\newcommand{\cf}{cf.\ }
+\newcommand{\MSbar}{\overline{\mathrm{MS}}}
+\newcommand{\hoppet}{\textsc{hoppet}\xspace}
+\newcommand{\ttt}[1]{\texttt{#1}}
+\newcommand{\order}[1]{{\cal O}\left(#1\right)}
+\newcommand{\fn}{\scriptsize}
+\newcommand{\masterlink}[1]{\ttt{#1}}
+\newcommand{\repolink}[2]{\ttt{#2}}
+
+\newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,GuzziThesis,nnpdf,Kosower:1997hg,Ratcliffe:2000kp}
+
+\newcommand{\myparagraph}[1]{\paragraph{#1.}}
+
+% Define special colors
+\definecolor{comment}{rgb}{0,0.3,0}
+\definecolor{identifier}{rgb}{0.0,0,0.3}
+
+
+%% \lstset{% general command to set parameter(s)
+%%   columns=fullflexible
+%%   basicstyle=\tt, % print whole listing small
+%%   keywordstyle=\color{black},
+%%   % underlined bold black keywords
+%%   identifierstyle=, % nothing happens
+%%   commentstyle=\color{comment}, % white comments
+%%   stringstyle=\ttfamily, % typewriter type for strings
+%%   showstringspaces=false} % no special string spaces
+
+\lstset{language=Fortran}
+\lstset{
+  columns=flexible,
+  basicstyle=\tt\footnotesize,
+  keywordstyle=,
+  identifierstyle=\color{black},
+  commentstyle=\tt\color{comment},
+  mathescape=true,
+  escapebegin=\color{comment},
+  showstringspaces=false,
+  keepspaces=true
+}
