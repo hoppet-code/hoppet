@@ -59,8 +59,10 @@ module dglap_objects
   ! for going from nf to nf+1. Currently contains pieces
   ! required for O(as^2), but not the full general structure.
   !
-  ! The full (flavor-symmetric) structure is given in Eqs.(32-35)
-  ! of 1403.6356.
+  ! The full (flavor-symmetric) structure is given in Eqs.(32-35) of
+  ! 1403.6356, and 1406.4654 eq. 7.1 for the non-singlet part (note
+  ! different NF convention between the two papers. We use the
+  ! latter)..
   type mass_threshold_mat
      ! pieces that start at NNLO
      type(grid_conv) :: PShq   !!< A^PS_Qq    Q+Qbar from singlet(nflight)
