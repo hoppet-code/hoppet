@@ -1096,13 +1096,13 @@ by a call to \ttt{cmake -LH ..} from the \ttt{build} directory.
 
 Of particular note to most users are
 \begin{lstlisting}
-  option(HOPPET\_USE\_EXACT\_COEF   "Use exact coefficient functions"  OFF)
-  option(HOPPET\_BUILD\_EXAMPLES    "Build examples" ON)
-  option(HOPPET\_ENABLE\_TESTING    "Enable testing. Requires building the examples." ON)
-  option(HOPPET\_BUILD\_BENCHMARK   "Build benchmark." ON)
-  option(HOPPET\_BUILD\_PYINTERFACE "Build python interface." ON)
-  option(HOPPET\_ENABLE\_FPES       "Enable trapping for the floating point exceptions." OFF)
-  option(HOPPET\_BUILD\_TESTDIR     "Enable build of the code in the test directory." OFF)
+  option(HOPPET_USE_EXACT_COEF   "Use exact coefficient functions"  OFF)
+  option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
+  option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
+  option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
+  option(HOPPET_BUILD_PYINTERFACE "Build python interface." ON)
+  option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
+  option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
 \end{lstlisting}
 The can be set when call \ttt{cmake} in the usual way,
 e.g.\ \ttt{cmake .. -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet
