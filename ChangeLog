@@ -1,3 +1,10 @@
+2025-07-31 Gavin
+
+	* src/new_as.f90:
+	tOfQ(Q) now returns a very negative value (-huge(one)) if Q
+	is negative or zero; QOft(tOfQ(zero)) should return zero.
+	+ improved some comments in the file.
+
 2025-06-27 Gavin
 
 	* hoppet-config.in:

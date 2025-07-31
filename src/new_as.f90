@@ -563,12 +563,22 @@ contains
     dra = seg%beta0 + seg%beta1/ra + seg%beta2/ra**2 + seg%beta3/ra**3
   end subroutine na_deriv
 
-  !-- avoid risk of errors when forgetting factor of two
+  !! Function that returns t = 2*log(Q).
+  !! It is coded as a separate function to avoid the risk of forgetting
+  !! the factor of 2 in the log and to allow for checks that Q is not zero.
   function tOfQ(Q)
     real(dp), intent(in) :: Q
     real(dp)             :: tOfQ
-    tOfQ = two * log(Q)
+    if (Q <= zero) then
+      ! anything that is too small is set to a very negative value for tofQ;
+      ! Recall: huge(Q) is the largest representable number of the same type as Q.
+      tOfQ = -huge(Q)
+    else
+      tOfQ = two * log(Q)
+    end if
   end function tOfQ
+
+  !! Function that returns Q = exp(half*t).
   function QOft(t)
     real(dp), intent(in) :: t
     real(dp)             :: QOft
