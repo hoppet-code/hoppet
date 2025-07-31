@@ -3,7 +3,9 @@
 	* src/new_as.f90:
 	tOfQ(Q) now returns a very negative value (-huge(one)) if Q
 	is negative or zero; QOft(tOfQ(zero)) should return zero.
-	+ improved some comments in the file.
+	+ improved some comments in the file. This is intended to resolve
+	issue #19 about some division by zero errors when one of the
+	quark masses is set to zero. Reported by Andrii Verbytskyi.
 
 2025-06-27 Gavin
 
