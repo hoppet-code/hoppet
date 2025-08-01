@@ -463,12 +463,12 @@ can be found in
 \label{sec:n3lo-evolution}
 In recent years significant progress in determining the perturbative
 components needed for unpolarised QCD evolution at N$^3$LO has been
-made.
+made, cf.\ \ref{sec:pqcd} for more details on the evolution at N$^3$LO.
 %
 This has now reached the stage that two PDF groups have released fits
 at approximate N$^3$LO (aN$^3$LO)
 accuracy~\cite{McGowan:2022nag,NNPDF:2024nan} along with their
-combination in Ref.~\cite{MSHT:2024tdn}.
+combination in Ref.~\cite{Cridge:2024icl}.
 %
 Of the three contributions that are needed at full N$^3$LO accuracy
 only two are fully known.
@@ -496,7 +496,7 @@ determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Fal
 We have therefore incorporated the aforementioned pieces, using the
 code that is publicly available with those reference, with the
 intention of updating the splitting functions as they become more
-precisely known.
+precisely known. 
 
 For the specific implementation in \hoppet version 2.0.0 we rely on
 the approximations computed in
@@ -524,11 +524,10 @@ three different
 choices corresponding to upper and lower edges of an uncertainty band and their
 average. 
 %
-The user can control which use through the
+The user can control which one to use through the
 \ttt{n3lo\_splitting\_variant} which takes the values
 \ttt{n3lo\_splitting\_Nfitav} (default),
-\ttt{n3lo\_splitting\_Nfiterr1}, or
-\ttt{n3lo\_splitting\_Nfiterr2}.
+\ttt{n3lo\_splitting\_Nfiterr1}, or \ttt{n3lo\_splitting\_Nfiterr2}.
 %
 When the exact splitting functions become available they will
 correspond to \ttt{n3lo\_splitting\_exact}.
@@ -685,10 +684,10 @@ package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
 
 The massless structure functions have been found to be in good
 agreement with those that can be obtained with
-APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds} (at the level of
+\APFELPP{}~\cite{Bertone:2013vaa,Bertone:2017gds} (at the level of
 $10^{-5}$ relative precision).
 %
-The benchmarks with APFEL++ and the code used to carry them out are
+The benchmarks with \APFELPP{} and the code used to carry them out are
 described in detail in Ref.~\cite{Bertone:2024dpm} and at
 \url{https://github.com/alexanderkarlberg/n3lo-structure-function-benchmarks}. A
 simplified version of that benchmark is also included in the \hoppet{}

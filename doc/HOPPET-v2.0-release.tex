@@ -64,7 +64,7 @@ CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
 in Fortran~95\footnote{This release of \hoppet makes use of features
 introduced in Fortran~2003, in particular its \ttt{abstract
   interface}, and hence a Fortran~2003 compliant compiler is now needed.},
-with interfaces also for C/C++ and earlier dialects of Fortran.
+with interfaces also for C/\CPP{} and earlier dialects of Fortran.
 %
 It offers both a high-level PDF evolution interface and user-access to
 lower-level functionality for operations such as convolutions of
@@ -78,7 +78,8 @@ of the photon density inside a proton and its extension to lepton
 distributions in the
 proton~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf};
 %
-(2) support for QCD evolution at N$^3$LO in the variable flavour number scheme (VFNS);
+(2) support for QCD evolution at N$^3$LO in the (zero mass) variable
+flavour number scheme (VFNS)~\cite{Buza:1996wv};
 %
 and (3) support for the
 determination of massless hadronic structure functions, as initially developed
@@ -86,8 +87,9 @@ for calculations of vector-boson fusion cross
 sections~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
 
 This release also includes a range of other smaller additions relative
-to the original 1.1.0 release documented in
-\cite{Salam:2008qg}.
+to the original 1.1.0 release documented in \cite{Salam:2008qg}, in
+particular the addition of a new Python interface and CMake build
+option.
 %
 Unified documentation of the whole \hoppet package is part of the
 distribution at \url{https://github.com/hoppet-code/hoppet} in the
