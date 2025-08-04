@@ -1171,28 +1171,6 @@ contains
     dq_from_singlet = (half/nf_light) * ((MTM%PSqq_H * singlet) + (MTM%Sqg_H * q(:,iflv_g)))
 
     ! finally do all individual light-quark flavours
-    do i = -ncomponents, ncomponents
-       if (abs(i) > nf_heavy) then
-          Pxq(:,i) = zero
-       else if (i == iflv_g .or. abs(i) == nf_heavy) then
-          cycle
-       else
-          Pxq(:,i) = (MTM%NSqq_H .conv. q(:,i)) + dq_from_singlet
-       end if
-    end do
-
-    !! finally do all individual light-quark flavours
-    !do i = -ncomponents, ncomponents
-    !   if (abs(i) > nf_heavy) then
-    !      Pxq(:,i) = zero
-    !   else if (i == iflv_g .or. abs(i) == nf_heavy) then
-    !      cycle
-    !   else
-    !      Pxq(:,i) = (MTM%NSqq_H .conv. q(:,i)) + dq_from_singlet
-    !   end if
-    !end do
-
-    ! finally do all individual light-quark flavours
     do i = 1, ncomponents
        if (i > nf_heavy) then
           Pxq(:, i) = zero

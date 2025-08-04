@@ -1,3 +1,11 @@
+2025-08-04 Gavin + Alexander
+
+	* src/dglap_objects.f90:
+
+	removed redundant code in cobj_ConvMTM, which was setting the light
+	flavours incorrectly, but then being overwritten by the correct
+	setup.
+
 2025-07-31 Gavin
 
 	* src/new_as.f90:
