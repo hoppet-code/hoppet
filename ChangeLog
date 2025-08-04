@@ -1,7 +1,10 @@
 2025-08-04 Gavin + Alexander
 
-	* src/dglap_objects.f90:
+	* src/welcome_message.f90:
+	* CMakeLists.txt:
+	updated copyright date range to 2025, made version 2.0.0-devel
 
+	* src/dglap_objects.f90:
 	removed redundant code in cobj_ConvMTM, which was setting the light
 	flavours incorrectly, but then being overwritten by the correct
 	setup.

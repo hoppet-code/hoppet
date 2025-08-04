@@ -7,10 +7,17 @@
 ## ctest --test-dir build [-j8]
 
 cmake_minimum_required(VERSION 3.15)
-# set the project name
+
+# set the project name: note should be updated also in src/welcome_message.f90 and the documentation
 project(hoppet VERSION 2.0.0 LANGUAGES C CXX Fortran)
-set(hoppet_VERSION 2.0.0)
-set(PROJECT_VERSION 2.0.0)
+set(PROJECT_VERSION_PRERELEASE "-devel")
+
+#set(HOPPET_VERSION 2.0.0)
+#set(PROJECT_VERSION 2.0.0)
+
+set(HOPPET_VERSION "${PROJECT_VERSION}${PROJECT_VERSION_PRERELEASE}")
+message(STATUS "HOPPET: HOPPET_VERSION=${HOPPET_VERSION}")
+
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 include("GNUInstallDirs")
@@ -163,7 +170,7 @@ endif()
 # hoppet-config script =================================================
 set(prefix ${CMAKE_INSTALL_PREFIX})
 set(modprefix "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet")
-set(VERSION "${hoppet_VERSION}")
+set(VERSION "${HOPPET_VERSION}")
 configure_file("${PROJECT_SOURCE_DIR}/hoppet-config.in" "${PROJECT_BINARY_DIR}/bin/hoppet-config")
 
 
