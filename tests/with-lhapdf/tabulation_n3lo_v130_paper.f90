@@ -4,7 +4,7 @@ program tabulation_n3lo
   use sub_defs_io, int_value => value
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-  use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+     use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   use streamlined_interface, HoppetInitPDF => initPDF
   use hoppet_git_state
   implicit none

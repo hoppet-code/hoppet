@@ -36,7 +36,7 @@
 
 !======================================================================
 program prec_and_timing
-  use hoppet_v1
+   use hoppet
   use hoppet_git_state
   use dummy_pdfs
   use sub_defs_io

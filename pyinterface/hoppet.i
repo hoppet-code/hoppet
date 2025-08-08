@@ -1,9 +1,9 @@
-/* File: hoppet_v1.i */
-%module hoppet_v1
+/* File: hoppet.i */
+%module hoppet
 
 %{
 #define SWIG_FILE_WITH_INIT
-#include "hoppet_v1.h"
+#include "hoppet.h"
 #include <Python.h>
 
 // Check if the callback is a callable object and set it as a global
@@ -229,7 +229,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %rename(hoppetStrFctNNLO        )      hoppetstrfctnnlo_;
 %rename(hoppetStrFctN3LO        )      hoppetstrfctn3lo_;
 
-%include "hoppet_v1.h"
+%include "hoppet.h"
 
 %inline %{
     void init_global_pdf();

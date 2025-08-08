@@ -1,7 +1,7 @@
 !! An example program using structure functions up to NLO with flavour decomposition. !!
 !!
 program structure_functions_example
-  use hoppet_v1
+     use hoppet
   use dummy_pdfs
   use streamlined_interface
   use structure_functions
@@ -97,7 +97,7 @@ end program structure_functions_example
 ! from the flavour decomposed ones. These routines are essentially
 ! adapted from those that can be found in structure_functions.f90
 subroutine fill_structure_functions(x,FL,F2,F3,SF)
-  use hoppet_v1
+     use hoppet
   use streamlined_interface
   use structure_functions
   use coefficient_functions_holder

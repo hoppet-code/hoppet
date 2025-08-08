@@ -25,7 +25,7 @@
 !!    ./test_qed_evol_lhapdf -Qlo 3.0 -Qhi 100  -pdf CT14qed_proton -nqcdloop-qed 0  -x 1e-3 >! a
 !!
 program test_qed_evol
-  use hoppet_v1
+   use hoppet
   use qed_evolution; use qed_objects; use qed_coupling_module
   use sub_defs_io
   implicit none

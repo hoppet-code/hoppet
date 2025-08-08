@@ -503,7 +503,7 @@ any \ttt{implicit none} or similar declarations). Alternatively, as
 with the rest of the routines described in this documentation, it can
 be accessed indirectly through the \ttt{hoppet\_v1} module
 \begin{lstlisting}
-  use hoppet_v1
+  use hoppet
 \end{lstlisting}
 Unless you are delving into the innards of  \hoppet, the latter is
 more convenient since it provides access to everything you are likely
@@ -1088,7 +1088,7 @@ being in the \ttt{human} representation, either with the
 \ttt{pdf(:,7)} to zero:
 \begin{lstlisting}
 module pdf_initial_condition
-  use hoppet_v1; implicit none
+  use hoppet; implicit none
 contains
   function unpolarized_dummy_pdf(xvals) result(pdf)
     real(dp), intent(in) :: xvals(:)
@@ -1113,7 +1113,7 @@ for the dimension of \ttt{xvals} to be correctly passed).  Writing a
 function such as that above is probably the easiest way of
 initialising a PDF:
 \begin{lstlisting}
-  use hoppet_v1; use pdf_initial_condition; implicit none
+  use hoppet; use pdf_initial_condition; implicit none
   type(grid_def)    :: grid
   real(dp), pointer :: pdf(:,:)
   [...]
@@ -1597,7 +1597,7 @@ a given kind of evolution. To initialise all information for a
 fixed-flavour number evolution, one does as follows
 %
 \begin{lstlisting}
-  use hoppet_v1
+  use hoppet
   type(dglap_holder) :: dglap_h
   integer            :: factscheme, nloop, nf_lcl  
 
@@ -2842,7 +2842,7 @@ the streamlined interface of section~\ref{sec:vanilla}, is to be found as
 
 \begin{lstlisting}
 program tabulation_example
-  use hoppet_v1
+  use hoppet
   implicit none
   real(dp)         :: dy, ymax, quark_masses(4:6)
   integer          :: order, nloop, ix
@@ -2993,10 +2993,10 @@ but in F77, is to be found in
 
 \begin{lstlisting}
 program tabulation_example_streamlined
-  use hoppet_v1
+  use hoppet
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   implicit none
   real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
   real(dp) :: asQ, Q0alphas, Q0pdf
@@ -3084,12 +3084,12 @@ end program tabulation_example_streamlined
 !!
 !!
 program tabulation_example_qed
-  use hoppet_v1
+  use hoppet
   
   !! if using LHAPDF, rename the hoppet functions EvolvePDF and InitPDF, which
   !! would otherwise conflict with LHAPDF, by replacing the use
   !! statement above with:
-  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
 
   implicit none
   real(dp) :: dy, ymax
@@ -3120,7 +3120,7 @@ program tabulation_example_qed
   !! (NB: unfortunately this conflicts with an internal hoppet name,
   !! so make sure that you "redefine" the internal hoppet name, 
   !! as illustrated in the commented "use" line above:
-  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
+  !! use hoppet, EvolvePDF_hoppet => EvolvePDF, ...)
   ! interface
   !    subroutine EvolvePDF(x,Q,res)
   !      use types; implicit none
@@ -3304,7 +3304,7 @@ then accessed from each of the subprograms. The module might be
 \begin{lstlisting}
 ! common location for your table and other evolution components
 module external_table_module 
-   use hoppet_v1
+   use hoppet
    implicit none
    type(pdf_table) :: table
    type(dglap_holder) :: dh

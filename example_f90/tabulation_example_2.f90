@@ -25,10 +25,10 @@
 !! the dglap_holder, the coupling and a table
 !! 
 module table_module
-  use hoppet_v1
+  use hoppet
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   implicit none
   !! holds information about the grid (not strictly needed here, but handy)
   type(grid_def),  save :: grid, gdarray(4)
@@ -47,7 +47,7 @@ end module table_module
 !!
 !! Here we go for the first option
 module initial_condition
-  use hoppet_v1 ! 
+  use hoppet ! 
   implicit none
 contains 
   !======================================================================
@@ -206,7 +206,7 @@ subroutine tabulation_example_evolve_table
   !! (NB: unfortunately this conflicts with an internal hoppet name,
   !! so make sure that you "redefine" the internal hoppet name, 
   !! as illustrated in the commented "use" line above:
-  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
+  !! use hoppet, EvolvePDF_hoppet => EvolvePDF, ...)
   ! interface
   !    subroutine EvolvePDF(x,Q,res)
   !      use types; implicit none

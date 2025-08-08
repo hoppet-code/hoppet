@@ -25,7 +25,7 @@
 !!
 !! Tests carried out 7 May 2006 (will be revision 44)
 program bidirectional_mass_thresholds
-  use hoppet_v1; use sub_defs_io
+  use hoppet; use sub_defs_io
   implicit none
   type(grid_def) :: grid
   type(dglap_holder) :: dh

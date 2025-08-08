@@ -30,7 +30,7 @@ contains
   !! The dummy PDF suggested by Vogt as the initial condition for the 
   !! unpolarized evolution (as used in hep-ph/0511119).
   subroutine LHAsub(x,Q,xpdf)
-    use types; use consts_dp; use hoppet_v1; implicit none
+  use types; use consts_dp; use hoppet; implicit none
     real(dp), intent(in)  :: x,Q
     real(dp), intent(out) :: xpdf(-6:6)
     real(dp) :: uv, dv
@@ -67,10 +67,10 @@ end module lhasub4streamlined
 
 
 program tabulation_example_streamlined
-  use hoppet_v1; use lhasub4streamlined
+  use hoppet; use lhasub4streamlined
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   implicit none
   real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
   real(dp) :: asQ, Q0alphas, Q0pdf
@@ -85,7 +85,7 @@ program tabulation_example_streamlined
   !! (NB: unfortunately this conflicts with an internal hoppet name,
   !! so make sure that you "redefine" the internal hoppet name,
   !! as illustrated in the commented "use" line above:
-  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
+  !! use hoppet, EvolvePDF_hoppet => EvolvePDF, ...)
   ! interface
   !    subroutine EvolvePDF(x,Q,res)
   !      use types; implicit none
