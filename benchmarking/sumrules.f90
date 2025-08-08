@@ -12,12 +12,12 @@
 
 program sumrules
 
-     use hoppet
+  use hoppet_v1
   use hoppet_git_state
   use sub_defs_io
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-     !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
 
   implicit none
   real(dp) :: dy, ymax

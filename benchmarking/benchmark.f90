@@ -40,7 +40,7 @@
 
 ! the initial conditions
 module parton_distributions
-   use hoppet
+  use hoppet_v1
   implicit none
   private
   public :: unpolarized_benchmark_pdf, polarized_benchmark_pdf
@@ -112,7 +112,7 @@ program main_tablevogt
   use parton_distributions
   use NameSelect; use sub_defs_io, int_value => value
   ! hoppet
-   use hoppet
+  use hoppet_v1
   implicit none
   type(running_coupling)  :: coupling, ash3to4
   integer, parameter :: ngrid = 3

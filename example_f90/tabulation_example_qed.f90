@@ -3,12 +3,12 @@
 !!
 !!
 program tabulation_example_qed
-  use hoppet
+  use hoppet_v1
   
   !! if using LHAPDF, rename the hoppet functions EvolvePDF and InitPDF, which
   !! would otherwise conflict with LHAPDF, by replacing the use
   !! statement above with:
-  !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
 
   implicit none
   real(dp) :: dy, ymax
@@ -44,7 +44,7 @@ program tabulation_example_qed
   !! (NB: unfortunately this conflicts with an internal hoppet name,
   !! so make sure that you "redefine" the internal hoppet name, 
   !! as illustrated in the commented "use" line above:
-  !! use hoppet, EvolvePDF_hoppet => EvolvePDF, ...)
+  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
   ! interface
   !    subroutine EvolvePDF(x,Q,res)
   !      use types; implicit none
@@ -180,7 +180,7 @@ contains
     dbar = N_db * xvals**(-0.1_dp) * (1-xvals)**6
     ubar = dbar * (1-xvals)
 
-    ! labels iflv_g, etc., come from the hoppet module, inherited
+    ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
     ! from the main program
     pdf(:, iflv_g) = 0.99_dp * gluon
     pdf(:,-iflv_s) = 0.2_dp*(dbar + ubar)

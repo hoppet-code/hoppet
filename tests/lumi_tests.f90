@@ -2,7 +2,7 @@
 !!
 !!
 module lumi_elements
-  use hoppet
+  use hoppet_v1
   use integrator
   use interpolation
   implicit none
@@ -761,7 +761,7 @@ end module lumi_elements
 
 
 program lumi_tests
-  use hoppet; use sub_defs_io
+  use hoppet_v1; use sub_defs_io
   use lumi_elements
   implicit none
   !-- for PDFs

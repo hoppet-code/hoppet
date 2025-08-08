@@ -12,10 +12,10 @@
 !!     you will also need to link with LHAPDF
 !!
 program tabulation_example
-     use hoppet
+  use hoppet_v1
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-     !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   implicit none
   real(dp) :: dy, ymax
   integer  :: order, nloop
@@ -41,7 +41,7 @@ program tabulation_example
   !! (NB: unfortunately this conflicts with an internal hoppet name,
   !! so make sure that you "redefine" the internal hoppet name, 
   !! as illustrated in the commented "use" line above:
-     !! use hoppet, EvolvePDF_hoppet => EvolvePDF, ...)
+  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
   ! interface
   !    subroutine EvolvePDF(x,Q,res)
   !      use types; implicit none

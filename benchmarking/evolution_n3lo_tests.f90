@@ -1,7 +1,7 @@
 !! An example program using structure functions up to N3LO. !!
 !!
 program structure_functions_example
-  use hoppet
+  use hoppet_v1
   use dummy_pdfs
   use streamlined_interface
   use structure_functions

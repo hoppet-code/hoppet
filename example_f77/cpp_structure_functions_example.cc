@@ -1,13 +1,13 @@
 /// An example in C++ similar to the one found in examples_f90
 ///
-#include "../src/hoppet.h"
+#include "../src/hoppet_v1.h"
 #include<iostream>
 #include<cmath>
 #include<cstdio>
 
 using namespace std;
 // this gets us various constants that are useful to have
-using namespace hoppet;
+using namespace hoppetv1;
 
 // definition of the initial condition function
 void  lha_unpolarized_dummy_pdf(const double & x,

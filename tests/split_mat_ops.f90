@@ -2,7 +2,7 @@
 !! Program for checking that operations on splitting matrices behave
 !! as expected. 
 program split_mat_ops
-  use hoppet
+  use hoppet_v1
   implicit none
   type(grid_def)     :: grid
   type(split_mat)    :: PA, PB, PC

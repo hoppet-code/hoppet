@@ -29,7 +29,7 @@ contains
     dbar = N_db * x**(-0.1_dp) * (1-x)**6
     ubar = dbar * (1-x)
   
-    ! labels iflv_g, etc., come from the hoppet module, inherited
+    ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
     ! from the main program
     xpdf(iflv_g) = N_g * x**(-0.1_dp) * (1-x)**5
     xpdf(-iflv_s) = 0.2_dp*(dbar + ubar)

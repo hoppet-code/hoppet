@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import hoppet as hp
+import hoppet_v1 as hp
 import numpy as np
 
 # This is the PDF subroutine. Notice that the signature is different

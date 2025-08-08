@@ -2,7 +2,7 @@
 !!
 !!
 program msbar_tests
-  use hoppet; use sub_defs_io
+  use hoppet_v1; use sub_defs_io
   implicit none
   !-- for alpha_s
   type(running_coupling) :: coupling_pole, coupling_ms

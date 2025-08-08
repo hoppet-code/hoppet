@@ -1,4 +1,4 @@
-module hoppet
+module hoppet_v1
   use types; use consts_dp
   use convolution; use dglap_objects
   use pdf_representation; use pdf_general
@@ -18,4 +18,4 @@ module hoppet
   use structure_functions
   use coefficient_functions_holder_exact
   implicit none
-end module hoppet
+end module hoppet_v1

@@ -11,10 +11,10 @@ endif()
 
 find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
 
-set_property(SOURCE hoppet.i PROPERTY CPLUSPLUS ON)
-set_property(SOURCE hoppet.i PROPERTY SWIG_MODULE_NAME __init__)
+set_property(SOURCE hoppet_v1.i PROPERTY CPLUSPLUS ON)
+set_property(SOURCE hoppet_v1.i PROPERTY SWIG_MODULE_NAME __init__)
 
-swig_add_library(hoppet_swig LANGUAGE python SOURCES hoppet.i OUTPUT_DIR hoppet_swig)
+swig_add_library(hoppet_swig LANGUAGE python SOURCES hoppet_v1.i OUTPUT_DIR hoppet_swig)
 set_property(TARGET hoppet_swig PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
 # set hoppet_swig to use the same include directories as the main hoppet library
 target_include_directories(hoppet_swig PRIVATE ${PROJECT_SOURCE_DIR}/src)
