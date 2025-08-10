@@ -88,37 +88,37 @@ module pdf_tabulate
   !integer, parameter :: lnlnQ_order = 2
 
   interface AllocPdfTable
-     module procedure pdftab_AllocTab_, pdftab_AllocTab_fromorig,&
+    module procedure pdftab_AllocTab_, pdftab_AllocTab_fromorig,&
           & pdftab_AllocTab_1d, pdftab_AllocTab_fromorig_1d
   end interface
 
   interface AllocPdfTableWithPhoton
-     module procedure pdftab_AllocTabWithPhoton_, pdftab_AllocTabWithPhoton_1d
+    module procedure pdftab_AllocTabWithPhoton_, pdftab_AllocTabWithPhoton_1d
   end interface
   public :: AllocPdfTableWithPhoton
 
   interface AllocPdfTableWithLeptons
-     module procedure pdftab_AllocTabWithLeptons_, pdftab_AllocTabWithLeptons_1d
+    module procedure pdftab_AllocTabWithLeptons_, pdftab_AllocTabWithLeptons_1d
   end interface
   public :: AllocPdfTableWithLeptons  
 
 
   interface AddNfInfoToPdfTable
-     module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
+    module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
   end interface
 
   interface FillPdfTable_f90sub
-     module procedure pdftab_InitTabSub_, pdftab_InitTabSub_iset
+    module procedure pdftab_InitTabSub_, pdftab_InitTabSub_iset
   end interface
 
   public :: FillPdfTable_LHAPDF
 
   interface EvolvePdfTable
-     module procedure pdftab_InitTabEvolve_frompre, EvolvePdfTable
+    module procedure pdftab_InitTabEvolve_frompre, EvolvePdfTable
   end interface
 
   interface Delete
-     module procedure pdftab_DelTab_0d, pdftab_DelTab_1d
+    module procedure pdftab_DelTab_0d, pdftab_DelTab_1d
   end interface
 
   public :: AllocPdfTable, FillPdfTable_f90sub
@@ -318,42 +318,42 @@ contains
     ! figure out how we are going to bin things...
     iQ_prev = -1
     do nflcl = tab%nflo, tab%nfhi
-       !write(0,*) 'nflcl',nflcl
-       seginfo => tab%seginfo(nflcl)
+      !write(0,*) 'nflcl',nflcl
+      seginfo => tab%seginfo(nflcl)
 
-       call QRangeAtNf(coupling, nflcl, Qlo, Qhi_test)
-       call QRangeAtNf(coupling, nflcl, Qlo, Qhi, muM_mQ=one)
-       ! if one weakens this restriction, then one should think about
-       ! the consequences for the determination of alpha_s/2pi, here
-       ! and elsewhere....
-       if (Qhi_test /= Qhi) call wae_error('AddNfInfoToPdfTable',&
-         &'it seems that coupling has muM_mQ /= one. Currently unsupported.',&
-         &dbleval=Qhi_test/Qhi)
+      call QRangeAtNf(coupling, nflcl, Qlo, Qhi_test)
+      call QRangeAtNf(coupling, nflcl, Qlo, Qhi, muM_mQ=one)
+      ! if one weakens this restriction, then one should think about
+      ! the consequences for the determination of alpha_s/2pi, here
+      ! and elsewhere....
+      if (Qhi_test /= Qhi) call wae_error('AddNfInfoToPdfTable',&
+        &'it seems that coupling has muM_mQ /= one. Currently unsupported.',&
+        &dbleval=Qhi_test/Qhi)
 
-       ! Include min_dlnlnQ_singleQ to ensure we do not go EXACTLY to the
-       ! mass threshold, where, in evolution one might run into problems.
-       ! BUT, we will later have to worry about what to do when we
-       ! are in between thresholds...
-       seginfo%lnlnQ_lo = max(lnln(tab,Qlo)+min_dlnlnQ_singleQ, tab%lnlnQ_min)
-       seginfo%lnlnQ_hi = min(lnln(tab,Qhi)-min_dlnlnQ_singleQ, tab%lnlnQ_max)
+      ! Include min_dlnlnQ_singleQ to ensure we do not go EXACTLY to the
+      ! mass threshold, where, in evolution one might run into problems.
+      ! BUT, we will later have to worry about what to do when we
+      ! are in between thresholds...
+      seginfo%lnlnQ_lo = max(lnln(tab,Qlo)+min_dlnlnQ_singleQ, tab%lnlnQ_min)
+      seginfo%lnlnQ_hi = min(lnln(tab,Qhi)-min_dlnlnQ_singleQ, tab%lnlnQ_max)
 
-       seginfo%ilnlnQ_lo = iQ_prev + 1
-       !write(0,*) 'ill_lo', seginfo%ilnlnQ_lo
-       if ((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo) < two*min_dlnlnQ_singleQ) then
-          ! use just one point
-          seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo
-          seginfo%dlnlnQ = zero
-          seginfo%lnlnQ_hi = seginfo%lnlnQ_lo
-       else
-          seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo + max(tab%lnlnQ_order,&
-               & ceiling((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
-               & tab%default_dlnlnQ))
-          seginfo%dlnlnQ = (seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
-               & (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo)
-       end if
-       !write(0,*) 'ill_hi', seginfo%ilnlnQ_hi, seginfo%dlnlnQ, &
-       !     &invlnln(tab,seginfo%lnlnQ_lo),invlnln(tab,seginfo%lnlnQ_hi), tab%default_dlnlnQ
-       iQ_prev = seginfo%ilnlnQ_hi
+      seginfo%ilnlnQ_lo = iQ_prev + 1
+      !write(0,*) 'ill_lo', seginfo%ilnlnQ_lo
+      if ((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo) < two*min_dlnlnQ_singleQ) then
+         ! use just one point
+         seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo
+         seginfo%dlnlnQ = zero
+         seginfo%lnlnQ_hi = seginfo%lnlnQ_lo
+      else
+         seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo + max(tab%lnlnQ_order,&
+              & ceiling((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
+              & tab%default_dlnlnQ))
+         seginfo%dlnlnQ = (seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
+              & (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo)
+      end if
+      !write(0,*) 'ill_hi', seginfo%ilnlnQ_hi, seginfo%dlnlnQ, &
+      !     &invlnln(tab,seginfo%lnlnQ_lo),invlnln(tab,seginfo%lnlnQ_hi), tab%default_dlnlnQ
+      iQ_prev = seginfo%ilnlnQ_hi
     end do
     
     ! this should not happen too often! But check it just in
@@ -376,15 +376,15 @@ contains
 
     ! set up complementary info...
     do nflcl = tab%nflo, tab%nfhi
-       !write(0,*) 'nflcl',nflcl
-       seginfo => tab%seginfo(nflcl)
-       do iQ = seginfo%ilnlnQ_lo, seginfo%ilnlnQ_hi
-          tab%nf_int(iQ) = nflcl
-          tab%lnlnQ_vals(iQ) = seginfo%lnlnQ_lo &
-               & + (iQ-seginfo%ilnlnQ_lo)*seginfo%dlnlnQ
-          tab%Q_vals(iQ)     = invlnln(tab,tab%lnlnQ_vals(iQ))
-          tab%as2pi(iQ) = Value(coupling,invlnln(tab,tab%lnlnQ_vals(iQ)))/twopi
-       end do
+      !write(0,*) 'nflcl',nflcl
+      seginfo => tab%seginfo(nflcl)
+      do iQ = seginfo%ilnlnQ_lo, seginfo%ilnlnQ_hi
+        tab%nf_int(iQ) = nflcl
+        tab%lnlnQ_vals(iQ) = seginfo%lnlnQ_lo &
+              & + (iQ-seginfo%ilnlnQ_lo)*seginfo%dlnlnQ
+        tab%Q_vals(iQ)     = invlnln(tab,tab%lnlnQ_vals(iQ))
+        tab%as2pi(iQ) = Value(coupling,invlnln(tab,tab%lnlnQ_vals(iQ)))/twopi
+      end do
     end do
     
     ! REMEMBER TO COMPLETE FROM ORIG...
@@ -942,7 +942,6 @@ contains
   end subroutine EvalPdfTable_Q
 
 
-  
   !-----------------------------------------------------------
   !! Deletes all allocated info associated with the tabulation
   subroutine pdftab_DelTab_0d(tab)
