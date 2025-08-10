@@ -33,46 +33,46 @@ module pdf_tabulate
   integer :: override_npnt_y = -1
   
   type pdfseginfo
-     real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ
-     integer :: ilnlnQ_lo, ilnlnQ_hi
+    real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ
+    integer :: ilnlnQ_lo, ilnlnQ_hi
   end type pdfseginfo
   public :: pdfseginfo
 
   type pdf_table
-     ! basic elements of a pdf_table, common regardless of whether we
-     ! additionally have the nf segments...
-     logical :: allocated = .false.
-     type(grid_def) :: grid
-     real(dp) :: default_dlnlnQ
-     real(dp) :: lnlnQ_min, lnlnQ_max, lambda_eff
-     real(dp), pointer :: tab(:,:,:)
-     real(dp), pointer :: lnlnQ_vals(:), Q_vals(:)
-     integer :: nQ, lnlnQ_order
-     logical :: freeze_at_Qmin
-     ! this is useful only in absence of nf info.
-     real(dp) :: dlnlnQ
-     !
-     ! Stuff to do with variable nf and alpha_s; not always available.
-     ! In cases with variable nf, the table will be broken into multiple
-     ! segments, each one of which potentially different spacings.
-     !
-     logical :: nf_info_associated
-     integer :: nflo, nfhi
-     type(pdfseginfo), pointer :: seginfo(:)
-     integer, pointer :: nf_int(:)
-     real(dp), pointer :: as2pi(:)
-     !
-     ! Elements needed in case we want to do precalculation of
-     ! of evolution. Not always available.
-     type(evln_operator), pointer :: evops(:)
-     integer                      :: StartScale_iQlo
-     real(dp)                     :: StartScale
+    ! basic elements of a pdf_table, common regardless of whether we
+    ! additionally have the nf segments...
+    logical :: allocated = .false.
+    type(grid_def) :: grid
+    real(dp) :: default_dlnlnQ
+    real(dp) :: lnlnQ_min, lnlnQ_max, lambda_eff
+    real(dp), pointer :: tab(:,:,:)
+    real(dp), pointer :: lnlnQ_vals(:), Q_vals(:)
+    integer :: nQ, lnlnQ_order
+    logical :: freeze_at_Qmin
+    ! this is useful only in absence of nf info.
+    real(dp) :: dlnlnQ
+    !
+    ! Stuff to do with variable nf and alpha_s; not always available.
+    ! In cases with variable nf, the table will be broken into multiple
+    ! segments, each one of which potentially different spacings.
+    !
+    logical :: nf_info_associated
+    integer :: nflo, nfhi
+    type(pdfseginfo), pointer :: seginfo(:)
+    integer, pointer :: nf_int(:)
+    real(dp), pointer :: as2pi(:)
+    !
+    ! Elements needed in case we want to do precalculation of
+    ! of evolution. Not always available.
+    type(evln_operator), pointer :: evops(:)
+    integer                      :: StartScale_iQlo
+    real(dp)                     :: StartScale
 
-     ! for some purposes (e.g. structure function work), it is useful
-     ! for the table to have a user-tuned maximum iflv value (this
-     ! affects the range used for interpolation rather than for
-     ! allocation of the table itself)
-     integer :: tab_iflv_max = iflv_max
+    ! for some purposes (e.g. structure function work), it is useful
+    ! for the table to have a user-tuned maximum iflv value (this
+    ! affects the range used for interpolation rather than for
+    ! allocation of the table itself)
+    integer :: tab_iflv_max = iflv_max
   end type pdf_table
   public :: pdf_table
 
@@ -228,9 +228,9 @@ contains
   end subroutine pdftab_AllocTab_1d
 
 
- subroutine pdftab_AllocTabWithPhoton_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
-   use qed_objects
-   type(grid_def),    intent(in)    :: grid
+  subroutine pdftab_AllocTabWithPhoton_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+    use qed_objects
+    type(grid_def),    intent(in)    :: grid
     type(pdf_table),   intent(inout) :: tab
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
