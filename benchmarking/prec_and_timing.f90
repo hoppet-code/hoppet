@@ -18,7 +18,6 @@
 !   ./compare2files_v2 testgrid.dat refgrid.dat -channel 11 [-protect]
 !
 ! Other options of interest in prec_and_timing include
-!
 !   -eps [1e-7]       precision of adaptive integration for preparing split.fn.
 !   -asdt [0.2]       step for evolution of alpha_s
 !   -exact-nnlo-sp    use exact 3-loop split-fns
@@ -56,7 +55,10 @@ program prec_and_timing
   real(dp), pointer  :: initial_condition(:,:)
   type(pdf_table)    :: table
   logical            :: output, outputgrid, preev, auto_nrep
+  logical            :: write_lhapdf
+  character(len=999) :: lhapdf_out = ""
   integer :: idev, y_interp_order
+  integer, parameter :: lhapdf_unit = 99
   character(len=300) :: hostname
 
   idev = idev_open_opt("-o","/dev/stdout")    ! output file (required)
@@ -77,32 +79,34 @@ program prec_and_timing
 
   preev = log_val_opt('-preev',.true.)        ! use pre-evolution (cached evolution)
 
+  lhapdf_out = string_val_opt("-lhapdf-out","") ! write out an LHAPDF file
+
   if (log_val_opt('-eps')) call SetDefaultConvolutionEps(dble_val_opt('-eps')) ! precision for split.fn. adaptive integration 
   if (log_val_opt('-asdt')) call SetDefaultCouplingDt(dble_val_opt('-asdt')) ! spacing for coupling ev.
 
   if (log_val_opt('-alt7')) then
-     call InitGridDef(gridarray(3),dy/7.0_dp, 1.0_dp, order=order2)
-     call InitGridDef(gridarray(2),dy/2.0_dp, 3.0_dp, order=order1)
-     call InitGridDef(gridarray(1),dy,        ymax, order=order)
-     call InitGridDef(grid,gridarray(1:3),locked=.true.)
+    call InitGridDef(gridarray(3),dy/7.0_dp, 1.0_dp, order=order2)
+    call InitGridDef(gridarray(2),dy/2.0_dp, 3.0_dp, order=order1)
+    call InitGridDef(gridarray(1),dy,        ymax, order=order)
+    call InitGridDef(grid,gridarray(1:3),locked=.true.)
   else if (log_val_opt('-4grids')) then
-     call InitGridDef(gridarray(4),dy/27.0_dp, 0.2_dp, order=order2)
-     call InitGridDef(gridarray(3),dy/9.0_dp, 0.5_dp, order=order1)
-     call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order )
-     call InitGridDef(gridarray(1),dy,        ymax,   order=order )
-     call InitGridDef(grid,gridarray(1:4),locked=.true.)
+    call InitGridDef(gridarray(4),dy/27.0_dp, 0.2_dp, order=order2)
+    call InitGridDef(gridarray(3),dy/9.0_dp, 0.5_dp, order=order1)
+    call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order )
+    call InitGridDef(gridarray(1),dy,        ymax,   order=order )
+    call InitGridDef(grid,gridarray(1:4),locked=.true.)
   else if (log_val_opt('-3grids')) then
-     hires = int_val_opt('-hires',9)
-     call InitGridDef(gridarray(3),dy/hires, 0.5_dp, order=order2)
-     call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order1)
-     call InitGridDef(gridarray(1),dy,        ymax,   order=order )
-     call InitGridDef(grid,gridarray(1:3),locked=.true.)
+    hires = int_val_opt('-hires',9)
+    call InitGridDef(gridarray(3),dy/hires, 0.5_dp, order=order2)
+    call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order1)
+    call InitGridDef(gridarray(1),dy,        ymax,   order=order )
+    call InitGridDef(grid,gridarray(1:3),locked=.true.)
   else 
-     if (order1 /= order .or. order2 /= order) then
-        call wae_error("order1 and order2 != order not suppoed with default grid")
-     end if
-     ! this is like 4 grids and is the standard, without control over order1 and order2
-     call InitGridDefDefault(grid, dy, ymax, order=order)
+    if (order1 /= order .or. order2 /= order) then
+       call wae_error("order1 and order2 != order not suppoed with default grid")
+    end if
+    ! this is like 4 grids and is the standard, without control over order1 and order2
+    call InitGridDefDefault(grid, dy, ymax, order=order)
   end if
   ! set parameter for evolution step in Q
   call SetDefaultEvolutionDu(du)
@@ -216,6 +220,15 @@ program prec_and_timing
 
   !call get_evaluation_times()
   call get_evaluation_times_new()
+
+  if (trim(lhapdf_out) /= "") then
+    open(unit=lhapdf_unit, file=trim(lhapdf_out), status='replace')
+    call WritePdfTableLHAPDF(table, lhapdf_unit, &
+           pdf_type = "central", &
+           flav_indices = (/-5,-4,-3,-2,-1, 0,1,2,3,4,5/), &
+           flav_pdg_ids = (/-5,-4,-3,-2,-1,21,1,2,3,4,5/), &
+           iy_increment = 1)
+  end if
 
   ! clean up
   call Delete(table)
