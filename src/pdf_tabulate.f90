@@ -1127,7 +1127,8 @@ contains
       write(info_unit,'(a)') 'DataVersion: 1'
       write(info_unit,'(a)') 'NumMembers: 1'
       write(info_unit,'(a)') 'Particle: 2212'
-      write(info_unit,'(a)') 'Flavors: [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 21]'
+      write(info_unit,'(a)',advance="no") 'Flavors: '
+      call write_yaml_array(info_unit, '(i3)', flav_pdg_ids(:), 12)
       write(info_unit,'(a,i2)') 'OrderQCD: ', NumberOfLoops(coupling)-1
       if (size(seginfos) == 1) then
         write(info_unit,'(a)') 'FlavorScheme: fixed'
@@ -1147,15 +1148,56 @@ contains
       write(info_unit,'(a,es22.14)') 'MCharm: ',  QuarkMass(coupling,4)
       write(info_unit,'(a,es22.14)') 'MBottom: ', QuarkMass(coupling,5)
       write(info_unit,'(a,es22.14)') 'MTop: ',    QuarkMass(coupling,6)
-      write(info_unit,'(a)') 'AlphaS_MZ: 0.118000E+00'
+      write(info_unit,'(a,es22.14)') 'AlphaS_MZ:', value(coupling, 91.11870_dp)
       write(info_unit,'(a)') 'AlphaS_OrderQCD: 2'
       write(info_unit,'(a)') 'AlphaS_Type: ipol'
+      write(info_unit,'(a)', advance="no") 'AlphaS_Qs: '
+      call write_yaml_array(info_unit, '(es22.14)', table%Q_vals, 4)
+      block
+        real(dp), allocatable :: alphas_vals(:)
+        allocate(alphas_vals(lbound(table%Q_vals,1):ubound(table%Q_vals,1)))
+        do iQ = lbound(table%Q_vals,1), ubound(table%Q_vals,1)
+          if (table%nf_info_associated) then
+            alphas_vals(iQ) = value(coupling, table%Q_vals(iQ), fixnf=table%nf_int(iQ))
+          else
+            alphas_vals(iQ) = value(coupling, table%Q_vals(iQ))
+          end if
+        end do
+        write(info_unit,'(a)', advance="no") 'AlphaS_Vals: '
+        call write_yaml_array(info_unit, '(es22.14)', alphas_vals,4)
+      end block
       close(info_unit)
     end if
 
     ! cleaning
     if (.not. table%nf_info_associated) deallocate(seginfos)
   end subroutine WritePdfTableLHAPDF
+
+  !! write a yaml array (integer or real(dp)), limiting the number
+  !! of elements to max_per_line on each line
+  subroutine write_yaml_array(iunit, format, array, max_per_line)
+    integer,          intent(in) :: iunit
+    character(len=*), intent(in) :: format
+    class(*),         intent(in) :: array(:)
+    integer,          intent(in) :: max_per_line
+    !------------
+    integer :: i
+    write(iunit,'(a)',advance="no") "["
+    do i = 1, size(array)
+      if (i > 1) write(iunit,'(a)',advance="no") ","
+      if (mod(i,max_per_line) == 0) write(iunit,'(a)') ""
+      ! now write the value
+      select type (array)
+      type is (integer)
+        write(iunit,format,advance="no") array(i)
+      type is (real(dp))
+        write(iunit,format,advance="no") array(i)
+      class default
+        call wae_error("write_yaml_array: unsupported array type")
+      end select
+    end do
+    write(iunit,'(a)') "]"
+  end subroutine write_yaml_array
 
   !-----------------------------------------------------------
   !! Deletes all allocated info associated with the tabulation
