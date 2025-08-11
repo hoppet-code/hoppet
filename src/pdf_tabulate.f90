@@ -948,11 +948,14 @@ contains
   !
   ! - table is the pdf_table object that is to be written
   !
+  !  coupling is the coupling object associated with this table
+  ! 
   ! - basename is the basename; if pdf_index is zero, the
   !   
-  !
-  ! - pdf_type can be one of: "central", "error" (makes no difference
-  !   to the rest of the output, but required by LHAPDF)
+  ! - pdf_index is the index that will be used for the LHAPDF .dat file
+  !   If it is zero, the routing will also output the .info file and
+  !   and the .dat will be declared a central member; otherwise 
+  !   the .dat file will be declared an error member.
   !
   ! - flav_indices indicates which indices to use from the PDF table
   !

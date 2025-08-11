@@ -12,7 +12,7 @@ Major new features:
   FHMPRUVV group (arXiv:2410.08089 and refs therein)
 * inclusion of mass threshold matrices for VFNS N3LO evolution, including
   code from ABBFMSS group (DESY 24-037 and refs therein)
-* inclusion of a python interface (similar to the streamline interface)
+* inclusion of a python interface (similar to the streamlined interface)
 
 We are grateful to the authors of the N3LO coefficient functions,
 splitting functions and mass threshold terms for providing their code. 
@@ -22,7 +22,7 @@ Authorship update:
   are now authors
 
 Other changes:
-* A compiler with support for Fortran 2003 is now required
+* A compiler with support for Fortran 2008 is now required
 * various small bug fixes (see ChangeLog for details)
 * ability to declare points where the integration of convolution
   functions should be split up (split optional arg to InitGridConv, etc.)
@@ -31,7 +31,8 @@ Other changes:
 * streamlined interface now has hoppetDeleteAll() function for cleaning up
   all memory it allocated.
 * Users have a choice between traditional makefiles and the CMake build
-  system. CMake is now the preferred option
+  system. CMake is now the preferred option. The two should not be
+  used concurrently in the same directory.
 
 ======================================================================
 Release 1.2.0, 30 October 2020
