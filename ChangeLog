@@ -1,5 +1,9 @@
 2025-08-11 Gavin
 
+	* src/config/hoppet_git_state.f90.in:
+	removed anything to do with HOPPET_GIT_COMMIT_BODY
+	which caused trouble when the body had newlines	
+
 	* src/pdf_tabulate.f90:
 	* benchmarking/prec_and_timing.f90:
 	renamed WritePdfTableLHAPDF -> WriteLHAPDFFromPdfTable

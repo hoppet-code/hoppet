@@ -7,7 +7,6 @@ module hoppet_git_state
   character(len=*), parameter :: HOPPET_GIT_HEAD_SHA1 = "@GIT_HEAD_SHA1@"
   character(len=*), parameter :: HOPPET_GIT_COMMIT_DATE_ISO8601 = "@GIT_COMMIT_DATE_ISO8601@"
   !character(len=*), parameter :: HOPPET_GIT_COMMIT_SUBJECT = "@GIT_COMMIT_SUBJECT@"
-  !character(len=*), parameter :: HOPPET_GIT_COMMIT_BODY = @GIT_COMMIT_BODY@
   character(len=*), parameter :: HOPPET_GIT_DESCRIBE = "@GIT_DESCRIBE@"
   !logical, parameter :: GIT_RETRIEVED_STATE = @GIT_RETRIEVED_STATE@
   !logical, parameter :: GIT_IS_DIRTY = @GIT_IS_DIRTY@
@@ -51,9 +50,6 @@ end module hoppet_git_state
 ! }
 ! std::string GitMetadata::CommitSubject() {
 !     return "@GIT_COMMIT_SUBJECT@";
-! }
-! std::string GitMetadata::CommitBody() {
-!     return @GIT_COMMIT_BODY@;
 ! }
 ! std::string GitMetadata::Describe() {
 !     return "@GIT_DESCRIBE@";
