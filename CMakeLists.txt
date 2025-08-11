@@ -420,10 +420,10 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/hoppet/cmake/hoppetConfig.cmake
 
 # Install  #############################################################
 # Create symlink for backwards compatibility
-install(CODE "
-  set(libdir \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")
-  file(CREATE_LINK \"libhoppet.a\" \"\${libdir}/libhoppet_v1.a\" SYMBOLIC)
-")
+#install(CODE "
+#  set(libdir \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")
+#  file(CREATE_LINK \"libhoppet.a\" \"\${libdir}/libhoppet_v1.a\" SYMBOLIC)
+#")
 install(TARGETS hoppet hoppet_static  EXPORT hoppetTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )
 install(FILES ${PROJECT_SOURCE_DIR}/src/hoppet.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )

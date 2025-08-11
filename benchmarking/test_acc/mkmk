@@ -27,10 +27,10 @@ compiler=""
 # (*.mod) in the ../src directory
 
 ## for a cmake-based build in ../../build
-CMakeBuildDir=../../build
-../../scripts/makef95makefile  compare2files  -L$CMakeBuildDir/lib -lhoppet_v1 -ICMakeBuildDir/include/hoppet  $compiler -remake "./mkmk"
+#CMakeBuildDir=../../build
+#../../scripts/makef95makefile  compare2files  -L$CMakeBuildDir/lib -lhoppet -ICMakeBuildDir/include/hoppet  $compiler -remake "./mkmk"
 ## for the configure-based build
-#../../scripts/makef95makefile  compare2files  -L../../src -lhoppet_v1 -I../../src  $compiler -remake "./mkmk"
+../../scripts/makef95makefile  compare2files  -L../../src -lhoppet -I../../src  $compiler -remake "./mkmk"
 
 # old
 #makePNEW.perl  small_fast_tab -lcern -L../src -ldglap -L$LHAPDFDIR -lLHAPDF -I../src

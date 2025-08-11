@@ -26,7 +26,7 @@
 ! 
 ! The above results correspond roughly to expectation of eps^4
 module accuracy_helper
-   use hoppet; use sort !(not included with hoppet_v1)
+   use hoppet; use sort !(not included with hoppet)
   implicit none
 
   private

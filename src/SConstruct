@@ -10,4 +10,4 @@ import glob
 import os
 env = Environment(ENV = os.environ, FORTRAN=fortran)
 HoppetFiles=[glob.glob("*.f90"), glob.glob("*.f")]
-env.Library(target="hoppet_v1",source=HoppetFiles)
+env.Library(target="hoppet",source=HoppetFiles)

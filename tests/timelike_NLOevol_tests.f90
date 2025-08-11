@@ -51,7 +51,7 @@ contains
     ubar = 1* dbar * (1-x)
     glu  = 1* N_g * x**(-0.1_dp) * (1-x)**5
     
-    ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
+    ! labels iflv_g, etc., come from the hoppet module, inherited
     ! from the main program
     xpdf(iflv_g) = glu
     xpdf(-iflv_s) = 0.2_dp*(dbar + ubar)

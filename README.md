@@ -13,7 +13,7 @@ representation of splitting functions in terms of their convolution
 with a set of piecewise polynomial basis functions, and Runge-Kutta
 techniques are used for the evolution in Q.
 
-Unpolarised evolution is provided in the MSbar scheme to NNLO in the
+Unpolarised evolution is provided in the MSbar scheme to N3LO in the
 coupling, including heavy-quark thresholds, and polarised evolution to
 NLO. The code is structured so as to provide simple access to the
 objects representing splitting function and PDFs, making it possible
@@ -26,6 +26,20 @@ The latest version can always be obtained from
 Details of changes are to be found in the file ChangeLog, while
 summaries of changes between releases are in ReleaseNotes.
 
+
+----------------------------------------------------------------------
+Note on changes since v2.0.0
+-------------
+
+Starting from v2.0.0 backwards compatibility with the v1 series of
+hoppet has been broken in one significant way, namely that `hoppet_v1`
+has become `hoppet` in all places in the code. This in particular
+applies to `libhoppet_v1` which is now `libhoppet`, `module hoppet_v1`
+which is now `module hoppet` and the C++ namespace `hoppet_v1` which
+is now `hoppet`.
+
+Besides this change most users should be able to start using the v2
+series without any difficulties.
 
 ----------------------------------------------------------------------
 Note on Fortran compilers
