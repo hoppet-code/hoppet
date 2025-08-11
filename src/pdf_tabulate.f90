@@ -948,7 +948,8 @@ contains
   !
   ! - table is the pdf_table object that is to be written
   !
-  ! - iunit is the fortran output unit
+  ! - basename is the basename; if pdf_index is zero, the
+  !   
   !
   ! - pdf_type can be one of: "central", "error" (makes no difference
   !   to the rest of the output, but required by LHAPDF)
@@ -969,17 +970,22 @@ contains
   !     gone up by at least iy_increment, it outputs an x point.
   !   * -1: uses a fixed distribution of x points with a coarse ln x spacing
   !     at small x, and a finer spacing at larger x.
-  subroutine WritePdfTableLHAPDF(table, iunit, pdf_type, &
+  subroutine WritePdfTableLHAPDF(table, coupling, basename, pdf_index, &
                                  & flav_indices, flav_pdg_ids, flav_rescale,&
                                  & iy_increment)
     use assertions
-    integer,            intent(in) :: iunit
-    character(len=*),   intent(in) :: pdf_type
-    type(pdf_table),    intent(in) :: table
-    integer,            intent(in) :: flav_indices(:), flav_pdg_ids(:)
-    real(dp), optional, intent(in) :: flav_rescale(:)
-    integer,  optional, intent(in) :: iy_increment
+    type(pdf_table),        intent(in) :: table
+    type(running_coupling), intent(in) :: coupling
+    character(len=*),       intent(in) :: basename
+    integer,                intent(in) :: pdf_index
+    !character(len=*),       intent(in) :: pdf_type
+    integer,                intent(in) :: flav_indices(:), flav_pdg_ids(:)
+    real(dp), optional,     intent(in) :: flav_rescale(:)
+    integer,  optional,     intent(in) :: iy_increment
     !------------------------------------
+    integer          :: dat_unit, info_unit
+    character(len=4) :: pdf_index_str
+    character(len=:), allocatable :: dat_file, info_file
     real(dp) :: flavs(lbound(table%tab,2):ubound(table%tab,2))
     real(dp) :: xVals(0:table%grid%ny), xVals_orig(0:table%grid%ny), last_x, val, yVal
     real(dp) :: zeta, zetamax, dzeta
@@ -991,7 +997,14 @@ contains
     integer  :: iy_inc, last_iy, n_since_last_spacing_change
 
     iy_inc = default_or_opt(-1, iy_increment)
-    
+
+    write(pdf_index_str,'(i4.4)') pdf_index
+    dat_unit = 0
+    dat_file = trim(basename)//"_"//pdf_index_str//'.dat'
+    open(newunit=dat_unit, file=dat_file, status='replace')
+    if (dat_unit == 0) call wae_error("WritePdfTableLHAPDF","Could not open "//dat_file)
+    write(6,'(a)') "# Writing LHAPDF dat file "//trim(dat_file)
+
     ! First work out what x values to use.
     ! In this simple version, we simply take the grid points (eliminating duplications)
     xVals_orig = xValues(table%grid)
@@ -999,7 +1012,7 @@ contains
     last_x = two
     last_iy = -iy_inc
     n_since_last_spacing_change = 0
-    write(iunit,'(a,i4)') '# iy_increment = ', iy_inc
+    write(dat_unit,'(a,i4)') '# iy_increment = ', iy_inc
     if (iy_inc > 0) then
        do iy = 0, table%grid%ny
           if (xVals_orig(iy) > last_x * 0.999999999_dp) then
@@ -1031,7 +1044,7 @@ contains
     !  nx_max = nx_max + 1
     !  xVals(nx_max) = exp(-table%grid%ymax)
     else if (iy_inc == -1) then
-      write(iunit,'(a,f10.5,a,f10.5,a,f10.5)') &
+      write(dat_unit,'(a,f10.5,a,f10.5,a,f10.5)') &
           & '# dzeta_def = ', dzeta_def,&
           & ', zeta_a = ', zeta_a,&
           & ', zeta_b = ', zeta_b
@@ -1051,9 +1064,9 @@ contains
     !write(0,*) 'nx = ', nx_max+1, ', nQ = ', size(table%Q_vals)
 
     ! the official header
-    write(iunit,'(a,a)') 'PdfType: ',trim(pdf_type)
-    write(iunit,'(a)'  ) 'Format: lhagrid1'
-    write(iunit,'(a)'  ) '---'
+    write(dat_unit,'(a,a)') 'PdfType: ',trim(merge("central","error  ",pdf_index==0))!trim(pdf_type)
+    write(dat_unit,'(a)'  ) 'Format: lhagrid1'
+    write(dat_unit,'(a)'  ) '---'
 
     ! handle different seginfo scenarios
     if (table%nf_info_associated) then
@@ -1063,17 +1076,17 @@ contains
        ! otherwise create a fictitious seginfo with the info we need...
        allocate(seginfos(1:1))
        seginfos(1)%ilnlnQ_lo = lbound(table%Q_vals,1)
-       seginfos(1)%ilnlnQ_hi = lbound(table%Q_vals,1)
+       seginfos(1)%ilnlnQ_hi = ubound(table%Q_vals,1)
     end if
 
     ! now loop over the actual or "invented" seginfos
     do iseg = lbound(seginfos,1), ubound(seginfos,1)
        ! first we output info about x structure, Q structure and flavours
-       write(iunit,'(4000es14.7)') xVals(nx_max:0:-1)
+       write(dat_unit,'(4000es14.7)') xVals(nx_max:0:-1)
        iQlo = seginfos(iseg)%ilnlnQ_lo
        iQhi = seginfos(iseg)%ilnlnQ_hi
-       write(iunit,'(4000es14.7)') table%Q_vals(iQlo:iQhi)
-       write(iunit,'(100i4)')      flav_pdg_ids
+       write(dat_unit,'(4000es14.7)') table%Q_vals(iQlo:iQhi)
+       write(dat_unit,'(100i4)')      flav_pdg_ids
 
        ! then write out the PDF itself
        ! Note that LHAPDF wants _increasing_ x values
@@ -1085,23 +1098,63 @@ contains
                 val = flavs(flav_indices(ipdg))
                 if (present(flav_rescale)) val = val * flav_rescale(ipdg)
                 if (val == zero) then
-                   write(iunit,'(a)',advance='no') '  0'
+                   write(dat_unit,'(a)',advance='no') '  0'
                 else
-                   write(iunit,'(es15.7)',advance='no') val
+                   write(dat_unit,'(es15.7)',advance='no') val
                 end if
              end do
-             write(iunit,'(a)') ''
+             write(dat_unit,'(a)') ''
           end do
        end do
 
        ! and finish with a yaml subdocument separator
-       write(iunit,'(a)') '---'
+       write(dat_unit,'(a)') '---'
     end do
+    close(dat_unit)
 
+    if (pdf_index == 0) then
+      info_file = trim(basename)//'.info'
+      info_unit = 0
+      open(newunit=info_unit, file=info_file, status='replace')
+      if (info_unit == 0) call wae_error("WritePdfTableLHAPDF: could not open info file  "//info_file)
+      write(6,'(a)') "# Writing LHAPDF info file "//trim(info_file)
+
+      write(info_unit,'(a)') 'SetDesc: <SetDesc>'
+      write(info_unit,'(a)') 'SetIndex: 00000'
+      write(info_unit,'(a)') 'Authors: <Authors>'
+      write(info_unit,'(a)') 'Reference: <Reference>'
+      write(info_unit,'(a)') 'Format: lhagrid1'
+      write(info_unit,'(a)') 'DataVersion: 1'
+      write(info_unit,'(a)') 'NumMembers: 1'
+      write(info_unit,'(a)') 'Particle: 2212'
+      write(info_unit,'(a)') 'Flavors: [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 21]'
+      write(info_unit,'(a,i2)') 'OrderQCD: ', NumberOfLoops(coupling)-1
+      if (size(seginfos) == 1) then
+        write(info_unit,'(a)') 'FlavorScheme: fixed'
+      else
+        write(info_unit,'(a)') 'FlavorScheme: variable'
+      endif 
+      write(info_unit,'(a,i2)') 'NumFlavors: ', table%nfhi
+      write(info_unit,'(a)') 'ErrorType: <ErrorType>'
+      write(info_unit,'(a,es22.14)') 'XMin: ', minval(xVals(0:nx_max))
+      write(info_unit,'(a,es22.14)') 'XMax: ', maxval(xVals(0:nx_max))
+      write(info_unit,'(a,es22.14)') 'QMin: ', minval(table%Q_vals)
+      write(info_unit,'(a,es22.14)') 'QMax: ', maxval(table%Q_vals)
+      write(info_unit,'(a)') 'MZ: 0.911870E+02'
+      write(info_unit,'(a)') 'MUp: 0'
+      write(info_unit,'(a)') 'MDown: 0'
+      write(info_unit,'(a)') 'MStrange: 0'
+      write(info_unit,'(a,es22.14)') 'MCharm: ',  QuarkMass(coupling,4)
+      write(info_unit,'(a,es22.14)') 'MBottom: ', QuarkMass(coupling,5)
+      write(info_unit,'(a,es22.14)') 'MTop: ',    QuarkMass(coupling,6)
+      write(info_unit,'(a)') 'AlphaS_MZ: 0.118000E+00'
+      write(info_unit,'(a)') 'AlphaS_OrderQCD: 2'
+      write(info_unit,'(a)') 'AlphaS_Type: ipol'
+      close(info_unit)
+    end if
 
     ! cleaning
     if (.not. table%nf_info_associated) deallocate(seginfos)
-    close(iunit)
   end subroutine WritePdfTableLHAPDF
 
   !-----------------------------------------------------------
