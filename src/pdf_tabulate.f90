@@ -127,7 +127,7 @@ module pdf_tabulate
   public :: EvolvePdfTableGen
   public :: EvalPdfTable_yQ, EvalPdfTable_xQ, EvalPdfTable_Q
   public :: EvalPdfTable_yQf, EvalPdfTable_xQf
-  public :: WritePdfTableLHAPDF
+  public :: WriteLHAPDFFromPdfTable
   public :: Delete
 
   public :: PDFTableSetYInterpOrder
@@ -970,7 +970,7 @@ contains
   !     gone up by at least iy_increment, it outputs an x point.
   !   * -1: uses a fixed distribution of x points with a coarse ln x spacing
   !     at small x, and a finer spacing at larger x.
-  subroutine WritePdfTableLHAPDF(table, coupling, basename, pdf_index, &
+  subroutine WriteLHAPDFFromPdfTable(table, coupling, basename, pdf_index, &
                                  & flav_indices, flav_pdg_ids, flav_rescale,&
                                  & iy_increment)
     use assertions
@@ -1151,18 +1151,29 @@ contains
       write(info_unit,'(a,es22.14)') 'AlphaS_MZ:', value(coupling, 91.11870_dp)
       write(info_unit,'(a)') 'AlphaS_OrderQCD: 2'
       write(info_unit,'(a)') 'AlphaS_Type: ipol'
-      write(info_unit,'(a)', advance="no") 'AlphaS_Qs: '
-      call write_yaml_array(info_unit, '(es22.14)', table%Q_vals, 4)
       block
-        real(dp), allocatable :: alphas_vals(:)
-        allocate(alphas_vals(lbound(table%Q_vals,1):ubound(table%Q_vals,1)))
-        do iQ = lbound(table%Q_vals,1), ubound(table%Q_vals,1)
+        real(dp), allocatable :: Q_vals(:), alphas_vals(:)
+        Q_vals = table%Q_vals
+        allocate(alphas_vals(lbound(Q_vals,1):ubound(Q_vals,1)))
+        if (table%nf_info_associated) then
+          ! near thresholds, by default the pdf_table chooses Q_vals that are very slightly
+          ! below/above the thresholds; but LHAPDF wants two identical Q values
+          ! as a signal that it should do separate interpolation above/below
+          do iseg = lbound(seginfos,1), ubound(seginfos,1)-1
+            Q_vals(seginfos(iseg)%ilnlnQ_hi) = 0.5_dp*(&
+              table%Q_vals(seginfos(iseg)%ilnlnQ_hi) + table%Q_vals(seginfos(iseg+1)%ilnlnQ_lo))
+            Q_vals(seginfos(iseg+1)%ilnlnQ_lo) = Q_vals(seginfos(iseg)%ilnlnQ_hi)
+          end do
+        end if
+        do iQ = lbound(Q_vals,1), ubound(Q_vals,1)
           if (table%nf_info_associated) then
-            alphas_vals(iQ) = value(coupling, table%Q_vals(iQ), fixnf=table%nf_int(iQ))
+            alphas_vals(iQ) = value(coupling, Q_vals(iQ), fixnf=table%nf_int(iQ))
           else
             alphas_vals(iQ) = value(coupling, table%Q_vals(iQ))
           end if
         end do
+      write(info_unit,'(a)', advance="no") 'AlphaS_Qs: '
+      call write_yaml_array(info_unit, '(es22.14)', Q_vals, 4)
         write(info_unit,'(a)', advance="no") 'AlphaS_Vals: '
         call write_yaml_array(info_unit, '(es22.14)', alphas_vals,4)
       end block
@@ -1171,7 +1182,7 @@ contains
 
     ! cleaning
     if (.not. table%nf_info_associated) deallocate(seginfos)
-  end subroutine WritePdfTableLHAPDF
+  end subroutine WriteLHAPDFFromPdfTable
 
   !! write a yaml array (integer or real(dp)), limiting the number
   !! of elements to max_per_line on each line
