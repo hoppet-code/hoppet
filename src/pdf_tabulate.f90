@@ -33,46 +33,46 @@ module pdf_tabulate
   integer :: override_npnt_y = -1
   
   type pdfseginfo
-     real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ
-     integer :: ilnlnQ_lo, ilnlnQ_hi
+    real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ
+    integer :: ilnlnQ_lo, ilnlnQ_hi
   end type pdfseginfo
   public :: pdfseginfo
 
   type pdf_table
-     ! basic elements of a pdf_table, common regardless of whether we
-     ! additionally have the nf segments...
-     logical :: allocated = .false.
-     type(grid_def) :: grid
-     real(dp) :: default_dlnlnQ
-     real(dp) :: lnlnQ_min, lnlnQ_max, lambda_eff
-     real(dp), pointer :: tab(:,:,:)
-     real(dp), pointer :: lnlnQ_vals(:), Q_vals(:)
-     integer :: nQ, lnlnQ_order
-     logical :: freeze_at_Qmin
-     ! this is useful only in absence of nf info.
-     real(dp) :: dlnlnQ
-     !
-     ! Stuff to do with variable nf and alpha_s; not always available.
-     ! In cases with variable nf, the table will be broken into multiple
-     ! segments, each one of which potentially different spacings.
-     !
-     logical :: nf_info_associated
-     integer :: nflo, nfhi
-     type(pdfseginfo), pointer :: seginfo(:)
-     integer, pointer :: nf_int(:)
-     real(dp), pointer :: as2pi(:)
-     !
-     ! Elements needed in case we want to do precalculation of
-     ! of evolution. Not always available.
-     type(evln_operator), pointer :: evops(:)
-     integer                      :: StartScale_iQlo
-     real(dp)                     :: StartScale
+    ! basic elements of a pdf_table, common regardless of whether we
+    ! additionally have the nf segments...
+    logical :: allocated = .false.
+    type(grid_def) :: grid
+    real(dp) :: default_dlnlnQ
+    real(dp) :: lnlnQ_min, lnlnQ_max, lambda_eff
+    real(dp), pointer :: tab(:,:,:)
+    real(dp), pointer :: lnlnQ_vals(:), Q_vals(:)
+    integer :: nQ, lnlnQ_order
+    logical :: freeze_at_Qmin
+    ! this is useful only in absence of nf info.
+    real(dp) :: dlnlnQ
+    !
+    ! Stuff to do with variable nf and alpha_s; not always available.
+    ! In cases with variable nf, the table will be broken into multiple
+    ! segments, each one of which potentially different spacings.
+    !
+    logical :: nf_info_associated
+    integer :: nflo, nfhi
+    type(pdfseginfo), pointer :: seginfo(:)
+    integer, pointer :: nf_int(:)
+    real(dp), pointer :: as2pi(:)
+    !
+    ! Elements needed in case we want to do precalculation of
+    ! of evolution. Not always available.
+    type(evln_operator), pointer :: evops(:)
+    integer                      :: StartScale_iQlo
+    real(dp)                     :: StartScale
 
-     ! for some purposes (e.g. structure function work), it is useful
-     ! for the table to have a user-tuned maximum iflv value (this
-     ! affects the range used for interpolation rather than for
-     ! allocation of the table itself)
-     integer :: tab_iflv_max = iflv_max
+    ! for some purposes (e.g. structure function work), it is useful
+    ! for the table to have a user-tuned maximum iflv value (this
+    ! affects the range used for interpolation rather than for
+    ! allocation of the table itself)
+    integer :: tab_iflv_max = iflv_max
   end type pdf_table
   public :: pdf_table
 
@@ -88,37 +88,37 @@ module pdf_tabulate
   !integer, parameter :: lnlnQ_order = 2
 
   interface AllocPdfTable
-     module procedure pdftab_AllocTab_, pdftab_AllocTab_fromorig,&
+    module procedure pdftab_AllocTab_, pdftab_AllocTab_fromorig,&
           & pdftab_AllocTab_1d, pdftab_AllocTab_fromorig_1d
   end interface
 
   interface AllocPdfTableWithPhoton
-     module procedure pdftab_AllocTabWithPhoton_, pdftab_AllocTabWithPhoton_1d
+    module procedure pdftab_AllocTabWithPhoton_, pdftab_AllocTabWithPhoton_1d
   end interface
   public :: AllocPdfTableWithPhoton
 
   interface AllocPdfTableWithLeptons
-     module procedure pdftab_AllocTabWithLeptons_, pdftab_AllocTabWithLeptons_1d
+    module procedure pdftab_AllocTabWithLeptons_, pdftab_AllocTabWithLeptons_1d
   end interface
   public :: AllocPdfTableWithLeptons  
 
 
   interface AddNfInfoToPdfTable
-     module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
+    module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
   end interface
 
   interface FillPdfTable_f90sub
-     module procedure pdftab_InitTabSub_, pdftab_InitTabSub_iset
+    module procedure pdftab_InitTabSub_, pdftab_InitTabSub_iset
   end interface
 
   public :: FillPdfTable_LHAPDF
 
   interface EvolvePdfTable
-     module procedure pdftab_InitTabEvolve_frompre, EvolvePdfTable
+    module procedure pdftab_InitTabEvolve_frompre, EvolvePdfTable
   end interface
 
   interface Delete
-     module procedure pdftab_DelTab_0d, pdftab_DelTab_1d
+    module procedure pdftab_DelTab_0d, pdftab_DelTab_1d
   end interface
 
   public :: AllocPdfTable, FillPdfTable_f90sub
@@ -127,6 +127,7 @@ module pdf_tabulate
   public :: EvolvePdfTableGen
   public :: EvalPdfTable_yQ, EvalPdfTable_xQ, EvalPdfTable_Q
   public :: EvalPdfTable_yQf, EvalPdfTable_xQf
+  public :: WritePdfTableLHAPDF
   public :: Delete
 
   public :: PDFTableSetYInterpOrder
@@ -228,9 +229,9 @@ contains
   end subroutine pdftab_AllocTab_1d
 
 
- subroutine pdftab_AllocTabWithPhoton_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
-   use qed_objects
-   type(grid_def),    intent(in)    :: grid
+  subroutine pdftab_AllocTabWithPhoton_(grid, tab, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin)
+    use qed_objects
+    type(grid_def),    intent(in)    :: grid
     type(pdf_table),   intent(inout) :: tab
     real(dp), intent(in)           :: Qmin, Qmax
     real(dp), intent(in), optional :: dlnlnQ
@@ -318,42 +319,42 @@ contains
     ! figure out how we are going to bin things...
     iQ_prev = -1
     do nflcl = tab%nflo, tab%nfhi
-       !write(0,*) 'nflcl',nflcl
-       seginfo => tab%seginfo(nflcl)
+      !write(0,*) 'nflcl',nflcl
+      seginfo => tab%seginfo(nflcl)
 
-       call QRangeAtNf(coupling, nflcl, Qlo, Qhi_test)
-       call QRangeAtNf(coupling, nflcl, Qlo, Qhi, muM_mQ=one)
-       ! if one weakens this restriction, then one should think about
-       ! the consequences for the determination of alpha_s/2pi, here
-       ! and elsewhere....
-       if (Qhi_test /= Qhi) call wae_error('AddNfInfoToPdfTable',&
-         &'it seems that coupling has muM_mQ /= one. Currently unsupported.',&
-         &dbleval=Qhi_test/Qhi)
+      call QRangeAtNf(coupling, nflcl, Qlo, Qhi_test)
+      call QRangeAtNf(coupling, nflcl, Qlo, Qhi, muM_mQ=one)
+      ! if one weakens this restriction, then one should think about
+      ! the consequences for the determination of alpha_s/2pi, here
+      ! and elsewhere....
+      if (Qhi_test /= Qhi) call wae_error('AddNfInfoToPdfTable',&
+        &'it seems that coupling has muM_mQ /= one. Currently unsupported.',&
+        &dbleval=Qhi_test/Qhi)
 
-       ! Include min_dlnlnQ_singleQ to ensure we do not go EXACTLY to the
-       ! mass threshold, where, in evolution one might run into problems.
-       ! BUT, we will later have to worry about what to do when we
-       ! are in between thresholds...
-       seginfo%lnlnQ_lo = max(lnln(tab,Qlo)+min_dlnlnQ_singleQ, tab%lnlnQ_min)
-       seginfo%lnlnQ_hi = min(lnln(tab,Qhi)-min_dlnlnQ_singleQ, tab%lnlnQ_max)
+      ! Include min_dlnlnQ_singleQ to ensure we do not go EXACTLY to the
+      ! mass threshold, where, in evolution one might run into problems.
+      ! BUT, we will later have to worry about what to do when we
+      ! are in between thresholds...
+      seginfo%lnlnQ_lo = max(lnln(tab,Qlo)+min_dlnlnQ_singleQ, tab%lnlnQ_min)
+      seginfo%lnlnQ_hi = min(lnln(tab,Qhi)-min_dlnlnQ_singleQ, tab%lnlnQ_max)
 
-       seginfo%ilnlnQ_lo = iQ_prev + 1
-       !write(0,*) 'ill_lo', seginfo%ilnlnQ_lo
-       if ((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo) < two*min_dlnlnQ_singleQ) then
-          ! use just one point
-          seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo
-          seginfo%dlnlnQ = zero
-          seginfo%lnlnQ_hi = seginfo%lnlnQ_lo
-       else
-          seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo + max(tab%lnlnQ_order,&
-               & ceiling((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
-               & tab%default_dlnlnQ))
-          seginfo%dlnlnQ = (seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
-               & (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo)
-       end if
-       !write(0,*) 'ill_hi', seginfo%ilnlnQ_hi, seginfo%dlnlnQ, &
-       !     &invlnln(tab,seginfo%lnlnQ_lo),invlnln(tab,seginfo%lnlnQ_hi), tab%default_dlnlnQ
-       iQ_prev = seginfo%ilnlnQ_hi
+      seginfo%ilnlnQ_lo = iQ_prev + 1
+      !write(0,*) 'ill_lo', seginfo%ilnlnQ_lo
+      if ((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo) < two*min_dlnlnQ_singleQ) then
+         ! use just one point
+         seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo
+         seginfo%dlnlnQ = zero
+         seginfo%lnlnQ_hi = seginfo%lnlnQ_lo
+      else
+         seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo + max(tab%lnlnQ_order,&
+              & ceiling((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
+              & tab%default_dlnlnQ))
+         seginfo%dlnlnQ = (seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
+              & (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo)
+      end if
+      !write(0,*) 'ill_hi', seginfo%ilnlnQ_hi, seginfo%dlnlnQ, &
+      !     &invlnln(tab,seginfo%lnlnQ_lo),invlnln(tab,seginfo%lnlnQ_hi), tab%default_dlnlnQ
+      iQ_prev = seginfo%ilnlnQ_hi
     end do
     
     ! this should not happen too often! But check it just in
@@ -376,15 +377,15 @@ contains
 
     ! set up complementary info...
     do nflcl = tab%nflo, tab%nfhi
-       !write(0,*) 'nflcl',nflcl
-       seginfo => tab%seginfo(nflcl)
-       do iQ = seginfo%ilnlnQ_lo, seginfo%ilnlnQ_hi
-          tab%nf_int(iQ) = nflcl
-          tab%lnlnQ_vals(iQ) = seginfo%lnlnQ_lo &
-               & + (iQ-seginfo%ilnlnQ_lo)*seginfo%dlnlnQ
-          tab%Q_vals(iQ)     = invlnln(tab,tab%lnlnQ_vals(iQ))
-          tab%as2pi(iQ) = Value(coupling,invlnln(tab,tab%lnlnQ_vals(iQ)))/twopi
-       end do
+      !write(0,*) 'nflcl',nflcl
+      seginfo => tab%seginfo(nflcl)
+      do iQ = seginfo%ilnlnQ_lo, seginfo%ilnlnQ_hi
+        tab%nf_int(iQ) = nflcl
+        tab%lnlnQ_vals(iQ) = seginfo%lnlnQ_lo &
+              & + (iQ-seginfo%ilnlnQ_lo)*seginfo%dlnlnQ
+        tab%Q_vals(iQ)     = invlnln(tab,tab%lnlnQ_vals(iQ))
+        tab%as2pi(iQ) = Value(coupling,invlnln(tab,tab%lnlnQ_vals(iQ)))/twopi
+      end do
     end do
     
     ! REMEMBER TO COMPLETE FROM ORIG...
@@ -941,8 +942,168 @@ contains
     
   end subroutine EvalPdfTable_Q
 
+  !----------------------------------------------------------------------
+  ! Write a PDF table to an LHAPDF-format file, i.e. the .dat files
+  ! used by LHAPDF
+  !
+  ! - table is the pdf_table object that is to be written
+  !
+  ! - iunit is the fortran output unit
+  !
+  ! - pdf_type can be one of: "central", "error" (makes no difference
+  !   to the rest of the output, but required by LHAPDF)
+  !
+  ! - flav_indices indicates which indices to use from the PDF table
+  !
+  ! - flav_pdg_ids indicates the corresponding PDG IDs
+  !
+  ! - flav_rescale, optional, specifies by how much each flavour should be
+  !   rescaled (usually by one, unless you want to use an entry that
+  !   has a sum of flavour and anti-flavour and so rescale by 50% to get
+  !   just the flavour)
+  !
+  ! - iy_increment (default -1):
+  !   * anything positive: chooses the x-points based on table's own
+  !     grid; the value indicates the increment to use in going up in y.
+  !     The essence of the rule is that every time y goes up and iy has
+  !     gone up by at least iy_increment, it outputs an x point.
+  !   * -1: uses a fixed distribution of x points with a coarse ln x spacing
+  !     at small x, and a finer spacing at larger x.
+  subroutine WritePdfTableLHAPDF(table, iunit, pdf_type, &
+                                 & flav_indices, flav_pdg_ids, flav_rescale,&
+                                 & iy_increment)
+    use assertions
+    integer,            intent(in) :: iunit
+    character(len=*),   intent(in) :: pdf_type
+    type(pdf_table),    intent(in) :: table
+    integer,            intent(in) :: flav_indices(:), flav_pdg_ids(:)
+    real(dp), optional, intent(in) :: flav_rescale(:)
+    integer,  optional, intent(in) :: iy_increment
+    !------------------------------------
+    real(dp) :: flavs(lbound(table%tab,2):ubound(table%tab,2))
+    real(dp) :: xVals(0:table%grid%ny), xVals_orig(0:table%grid%ny), last_x, val, yVal
+    real(dp) :: zeta, zetamax, dzeta
+    ! these parameters appear to give OK accuracy, <=10^{-4} for x<0.5
+    ! and <=10^{-3} for x<0.9, at least for Q=100
+    real(dp), parameter :: dzeta_def = 0.30_dp, zeta_a = 10.0_dp, zeta_b = 5.0_dp
+    integer  :: iyVals(0:table%grid%ny), nx_max, iy, ix, iQ, iseg, iQlo, iQhi, ipdg, iflv
+    type(pdfseginfo), pointer :: seginfos(:)
+    integer  :: iy_inc, last_iy, n_since_last_spacing_change
 
-  
+    iy_inc = default_or_opt(-1, iy_increment)
+    
+    ! First work out what x values to use.
+    ! In this simple version, we simply take the grid points (eliminating duplications)
+    xVals_orig = xValues(table%grid)
+    nx_max = -1
+    last_x = two
+    last_iy = -iy_inc
+    n_since_last_spacing_change = 0
+    write(iunit,'(a,i4)') '# iy_increment = ', iy_inc
+    if (iy_inc > 0) then
+       do iy = 0, table%grid%ny
+          if (xVals_orig(iy) > last_x * 0.999999999_dp) then
+            n_since_last_spacing_change = 0
+          else
+            n_since_last_spacing_change = n_since_last_spacing_change + 1
+            ! skip some points, except just after a transition to a looser
+            ! spacing
+            if ( iy >= (last_iy + iy_inc) .or. &
+                & n_since_last_spacing_change < iy_inc**2) then
+              last_x  = xVals_orig(iy)
+              last_iy = iy
+              nx_max = nx_max + 1
+              xVals (nx_max) = xVals_orig(iy)
+              iyVals(nx_max) = iy
+            end if
+          end if
+       end do
+    !else if (iy_inc == 0) then
+    !  ! use the PDF4LHC15 points; note that we need to reverse their order
+    !  do iy = size(pdf4lhc_yvalues), 1, -1
+    !     yVal = pdf4lhc_yvalues(iy)
+    !     if (yVal < table%grid%ymax) then
+    !        nx_max = nx_max + 1
+    !        xVals(nx_max) = exp(-yVal)
+    !     end if
+    !  end do
+    !  ! finish off with the last grid point
+    !  nx_max = nx_max + 1
+    !  xVals(nx_max) = exp(-table%grid%ymax)
+    else if (iy_inc == -1) then
+      write(iunit,'(a,f10.5,a,f10.5,a,f10.5)') &
+          & '# dzeta_def = ', dzeta_def,&
+          & ', zeta_a = ', zeta_a,&
+          & ', zeta_b = ', zeta_b
+
+      ! use our own smoothly changing spacing
+      zetamax = zetaext_of_y(table%grid%ymax, zeta_a, zeta_b)
+      nx_max = ceiling(zetamax/dzeta_def)
+      dzeta = zetamax / nx_max
+      do ix = 0, nx_max
+        xVals(ix) = exp(-y_of_zetaext(dzeta*ix, zeta_a, zeta_b))
+      end do
+    else
+      call wae_error('WritePdfTableLHAPDF','value of iy_increment could not be handled; it was',&
+          &intval = iy_inc)
+    end if
+    
+    !write(0,*) 'nx = ', nx_max+1, ', nQ = ', size(table%Q_vals)
+
+    ! the official header
+    write(iunit,'(a,a)') 'PdfType: ',trim(pdf_type)
+    write(iunit,'(a)'  ) 'Format: lhagrid1'
+    write(iunit,'(a)'  ) '---'
+
+    ! handle different seginfo scenarios
+    if (table%nf_info_associated) then
+       ! if the table has seginfo, then just point to it
+       seginfos => table%seginfo
+    else
+       ! otherwise create a fictitious seginfo with the info we need...
+       allocate(seginfos(1:1))
+       seginfos(1)%ilnlnQ_lo = lbound(table%Q_vals,1)
+       seginfos(1)%ilnlnQ_hi = lbound(table%Q_vals,1)
+    end if
+
+    ! now loop over the actual or "invented" seginfos
+    do iseg = lbound(seginfos,1), ubound(seginfos,1)
+       ! first we output info about x structure, Q structure and flavours
+       write(iunit,'(4000es14.7)') xVals(nx_max:0:-1)
+       iQlo = seginfos(iseg)%ilnlnQ_lo
+       iQhi = seginfos(iseg)%ilnlnQ_hi
+       write(iunit,'(4000es14.7)') table%Q_vals(iQlo:iQhi)
+       write(iunit,'(100i4)')      flav_pdg_ids
+
+       ! then write out the PDF itself
+       ! Note that LHAPDF wants _increasing_ x values
+       do ix = nx_max, 0, -1
+          iy = iyVals(ix)
+          do iQ = iQlo, iQhi
+             flavs = table%tab(:,:,iQ) .atx. (xVals(ix).with.table%grid)
+             do ipdg = 1, ubound(flav_pdg_ids,1)
+                val = flavs(flav_indices(ipdg))
+                if (present(flav_rescale)) val = val * flav_rescale(ipdg)
+                if (val == zero) then
+                   write(iunit,'(a)',advance='no') '  0'
+                else
+                   write(iunit,'(es15.7)',advance='no') val
+                end if
+             end do
+             write(iunit,'(a)') ''
+          end do
+       end do
+
+       ! and finish with a yaml subdocument separator
+       write(iunit,'(a)') '---'
+    end do
+
+
+    ! cleaning
+    if (.not. table%nf_info_associated) deallocate(seginfos)
+    close(iunit)
+  end subroutine WritePdfTableLHAPDF
+
   !-----------------------------------------------------------
   !! Deletes all allocated info associated with the tabulation
   subroutine pdftab_DelTab_0d(tab)
@@ -1108,6 +1269,43 @@ contains
 
     invlnln = exp(exp(lnlnQ))*tab%lambda_eff
   end function invlnln
+
+  !-----------------------------------------------------------------
+  !! return zeta = ln 1/x + a*(1-x) + b * (1-x)^4 (x = exp(-y))
+  function zetaext_of_y(y, a, b) result(zeta)
+    real(dp), intent(in) :: y, a, b
+    real(dp)             :: zeta, x
+    x = exp(-y)
+    zeta = y + a*(one - x) + b * (one - x**4)
+  end function zetaext_of_y
+
+  
+  !-----------------------------------------------------------------
+  !! return inversion of zetaext = ln 1/x + a*(1-x) +b*(1-x^4) (x = exp(-y))
+  function y_of_zetaext(zetaext, a, b) result(y)
+    real(dp), intent(in) :: zetaext, a, b
+    real(dp)             :: y, x, diff_from_zero, deriv
+    integer              :: iter
+    real(dp), parameter  :: eps = 1e-12_dp
+    integer,  parameter  :: maxiter = 100
+
+    ! starting condition (and soln if a = 0 and b=0)
+    y = zetaext 
+    if (a /= zero .or. b /= zero) then
+      do iter = 0, maxiter
+        x = exp(-y);
+        diff_from_zero = zetaext - (y + a*(one-x) + b*(one-x**4));
+        ! we have found good solution
+        if (abs(diff_from_zero) < eps) exit
+        deriv = -one  - a*x - four*b*x**4;
+        y = y - diff_from_zero / deriv;
+      end do
+    end if
+    
+    if (iter > maxiter) write(0,*) "y_of_zeta reached maxiter"
+
+  end function y_of_zetaext
+
 
 !OLD! function lnln_norm(tab,Q)
 !OLD! type(pdf_table), intent(in) :: tab

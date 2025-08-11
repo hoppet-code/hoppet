@@ -1,3 +1,14 @@
+2025-08-10 Gavin
+
+	* src/pdf_tabulate.f90:
+	added WritePdfTableLHAPDF to write out an LHAPDF .dat file;
+	basic code taken from the LuxQED project; interface may still evolve
+
+	* benchmarking/prec_and_timing.f90:
+	added an -lhapdf-out option to specify that the resulting table
+	should be written to an LHAPDF file; mainly for elementary
+	manual testing at this stage.
+
 2025-08-04 Gavin + Alexander
 
 	* src/welcome_message.f90:
