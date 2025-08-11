@@ -29,10 +29,10 @@ compiler=""
 # (*.mod) in the ../src directory
 
 
-#../scripts/makef95makefile  tabulation_example -L`lhapdf-config --prefix`/lib -lLHAPDF -L../src -lhoppet_v1 -I../src   $lhapdf $compiler -remake "./mkmk"
+#../scripts/makef95makefile  tabulation_example -L`lhapdf-config --prefix`/lib -lLHAPDF -L../src -lhoppet -I../src   $lhapdf $compiler -remake "./mkmk"
 
 # old 1
-../scripts/makef95makefile  tabulation_example  -L../src -lhoppet_v1 -I../src   $lhapdf $compiler -remake "./mkmk"
+../scripts/makef95makefile  tabulation_example  -L../src -lhoppet -I../src   $lhapdf $compiler -remake "./mkmk"
 # old 2
 #makePNEW.perl  small_fast_tab -lcern -L../src -ldglap -L$LHAPDFDIR -lLHAPDF -I../src
 

@@ -30,7 +30,7 @@ contains
   !! The dummy PDF suggested by Vogt as the initial condition for the 
   !! unpolarized evolution (as used in hep-ph/0511119).
   subroutine LHAsub(x,Q,xpdf)
-    use types; use consts_dp; use hoppet_v1; implicit none
+  use types; use consts_dp; use hoppet; implicit none
     real(dp), intent(in)  :: x,Q
     real(dp), intent(out) :: xpdf(-6:ncompmaxLeptons)
     real(dp) :: gluon, uv, dv
@@ -51,7 +51,7 @@ contains
     dbar = N_db * x**(-0.1_dp) * (1-x)**6
     ubar = dbar * (1-x)
   
-    ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
+    ! labels iflv_g, etc., come from the hoppet module, inherited
     ! from the main program
     xpdf( iflv_g) = 0.99_dp * gluon
     xpdf(-iflv_s) = 0.2_dp*(dbar + ubar)
@@ -71,10 +71,10 @@ end module lhasub4streamlinedqed
 
 
 program tabulation_example_qed_streamlined
-  use hoppet_v1; use lhasub4streamlinedqed
+  use hoppet; use lhasub4streamlinedqed
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   implicit none
   real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
   real(dp) :: asQ, Q0alphas, Q0pdf
@@ -90,7 +90,7 @@ program tabulation_example_qed_streamlined
   !! (NB: unfortunately this conflicts with an internal hoppet name,
   !! so make sure that you "redefine" the internal hoppet name,
   !! as illustrated in the commented "use" line above:
-  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
+  !! use hoppet, EvolvePDF_hoppet => EvolvePDF, ...)
   ! interface
   !    subroutine EvolvePDF(x,Q,res)
   !      use types; implicit none

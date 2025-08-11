@@ -1,5 +1,5 @@
 program test_qed_lhapdf
-  use hoppet_v1; use convolution
+  use hoppet; use convolution
   use sub_defs_io
   implicit none
   real(dp) :: ymax = 20.0_dp, dy = 0.10_dp

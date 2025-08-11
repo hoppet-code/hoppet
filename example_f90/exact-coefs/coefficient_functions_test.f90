@@ -3,7 +3,7 @@
 !!
 
 program coefficient_functions_test
-  use hoppet_v1
+   use hoppet
   implicit none
 
   call print()

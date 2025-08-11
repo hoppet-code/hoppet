@@ -54,7 +54,7 @@ for arg do
 	  echo -I$moddir
 	  ;;
 	--libs|--ldflags)
-	  echo -Wl,-rpath,$installationdir/lib -L$installationdir/lib -lhoppet_v1
+	  echo -Wl,-rpath,$installationdir/lib -L$installationdir/lib -lhoppet
 	  ;;
 	--version)
 	  echo $version

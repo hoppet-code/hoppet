@@ -16,7 +16,7 @@ compiler=""
 #compiler="-comp g95"
 
 
-../scripts/makef95makefile  libhoppet_v1.a  $compiler --install-script=../scripts/install-sh -remake "./mkmk"
+../scripts/makef95makefile  libhoppet.a  $compiler --install-script=../scripts/install-sh -remake "./mkmk"
 
 
 

@@ -12,12 +12,12 @@
 
 program sumrules
 
-  use hoppet_v1
+     use hoppet
   use hoppet_git_state
   use sub_defs_io
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+     !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
 
   implicit none
   real(dp) :: dy, ymax
@@ -158,7 +158,7 @@ contains
     dbar = N_db * xvals**(-0.1_dp) * (1-xvals)**6
     ubar = dbar * (1-xvals)
 
-    ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
+    ! labels iflv_g, etc., come from the hoppet module, inherited
     ! from the main program
     pdf(:, iflv_g) = N_g * xvals**(-0.1_dp) * (1-xvals)**5
     pdf(:,-iflv_s) = 0.2_dp*(dbar + ubar)

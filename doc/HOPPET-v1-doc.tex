@@ -501,14 +501,14 @@ adding a
 statement at the beginning of the relevant subprogram (before
 any \ttt{implicit none} or similar declarations). Alternatively, as
 with the rest of the routines described in this documentation, it can
-be accessed indirectly through the \ttt{hoppet\_v1} module
+be accessed indirectly through the \ttt{hoppet} module
 \begin{lstlisting}
-  use hoppet_v1
+  use hoppet
 \end{lstlisting}
 Unless you are delving into the innards of  \hoppet, the latter is
 more convenient since it provides access to everything you are likely
 to need. Some of the more internal \hoppet routines and functions
-have however been left out of the  \ttt{hoppet\_v1} module, in order
+have however been left out of the  \ttt{hoppet} module, in order
 to reduce the likelihood of conflicts with objects in the
 user's namespace.
 
@@ -544,7 +544,7 @@ Numerical Recipes \cite{NRf90} we shall use \texttt{\_dp} to indicate
 that floating-point numbers are in double precision, and \ttt{real(dp)} to declare
 double precision variables. The integer parameter \ttt{dp} is defined
 in the \texttt{module types} (and available indirectly through
-\ttt{module hoppet\_v1}).
+\ttt{module hoppet}).
 
 It is often useful to have multiple grids, with
 coarser coverage at small $x$ and finer coverage at high $x$, to
@@ -1031,7 +1031,7 @@ specifically to address the DGLAP evolution problem.
 
 The routines described in this section
  are available from the \ttt{pdf\_general}
-and \ttt{pdf\_representation} modules, or via the \ttt{hoppet\_v1}
+and \ttt{pdf\_representation} modules, or via the \ttt{hoppet}
 general module.
 
 Full flavour PDFs sets are just like single flavour PDFs except that they
@@ -1088,7 +1088,7 @@ being in the \ttt{human} representation, either with the
 \ttt{pdf(:,7)} to zero:
 \begin{lstlisting}
 module pdf_initial_condition
-  use hoppet_v1; implicit none
+  use hoppet; implicit none
 contains
   function unpolarized_dummy_pdf(xvals) result(pdf)
     real(dp), intent(in) :: xvals(:)
@@ -1113,7 +1113,7 @@ for the dimension of \ttt{xvals} to be correctly passed).  Writing a
 function such as that above is probably the easiest way of
 initialising a PDF:
 \begin{lstlisting}
-  use hoppet_v1; use pdf_initial_condition; implicit none
+  use hoppet; use pdf_initial_condition; implicit none
   type(grid_def)    :: grid
   real(dp), pointer :: pdf(:,:)
   [...]
@@ -1225,7 +1225,7 @@ the PDF is in the
 
 Splitting function matrices and their actions on PDFs are defined in
    ~\ttt{module dglap\_objects} (accessible as usual from \ttt{module
-  hoppet\_v1}). They have type \ttt{split\_mat}. Below we shall discuss
+  hoppet}). They have type \ttt{split\_mat}. Below we shall discuss
 routines for creating specific predefined DGLAP splitting matrices,
 but for now we consider a general splitting matrix.
 
@@ -1597,7 +1597,7 @@ a given kind of evolution. To initialise all information for a
 fixed-flavour number evolution, one does as follows
 %
 \begin{lstlisting}
-  use hoppet_v1
+  use hoppet
   type(dglap_holder) :: dglap_h
   integer            :: factscheme, nloop, nf_lcl  
 
@@ -1969,7 +1969,7 @@ arbitrary values of $x$ and $Q$. For this purpose it is useful
 produce a table of the PDF as a function of $Q$, which then allows
 for access to the PDF at arbitrary $x$ and $Q$ using an interpolation. All
 types and routines discussed in this section are in the
-\ttt{pdf\_tabulate} module, or accessible also from \ttt{hoppet\_v1}.
+\ttt{pdf\_tabulate} module, or accessible also from \ttt{hoppet}.
 
 \subsection{Preparing a PDF table}
 The type that contains a PDF table is \ttt{pdf\_table}. It first needs
@@ -2189,7 +2189,7 @@ to the essential evolution functionality from languages other than
 F95.  It hides all the object-oriented nature of the program, and
 provides access to one \ttt{pdf\_table}, based on a single grid
 definition. The description will be given as if one is calling from
-F77. An include file \ttt{src/hoppet\_v1.h} is provided for calling
+F77. An include file \ttt{src/hoppet.h} is provided for calling
 from \CPP{} --- the interface is essentially identical to the Fortran
 one, with the caveat that names are case sensitive (the cases are as
 given below), and that PDF components referred to below as
@@ -2842,7 +2842,7 @@ the streamlined interface of section~\ref{sec:vanilla}, is to be found as
 
 \begin{lstlisting}
 program tabulation_example
-  use hoppet_v1
+  use hoppet
   implicit none
   real(dp)         :: dy, ymax, quark_masses(4:6)
   integer          :: order, nloop, ix
@@ -2937,7 +2937,7 @@ contains
     dbar = N_db * xvals**(-0.1_dp) * (1-xvals)**6
     ubar = dbar * (1-xvals)
 
-    ! labels iflv_g, etc., come from the hoppet_v1 module
+    ! labels iflv_g, etc., come from the hoppet module
     pdf(:, iflv_g) = N_g * xvals**(-0.1_dp) * (1-xvals)**5
     pdf(:,-iflv_s) = 0.2_dp*(dbar + ubar)
     pdf(:, iflv_s) = pdf(:,-iflv_s)
@@ -2993,10 +2993,10 @@ but in F77, is to be found in
 
 \begin{lstlisting}
 program tabulation_example_streamlined
-  use hoppet_v1
+  use hoppet
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
-  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   implicit none
   real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
   real(dp) :: asQ, Q0alphas, Q0pdf
@@ -3084,12 +3084,12 @@ end program tabulation_example_streamlined
 !!
 !!
 program tabulation_example_qed
-  use hoppet_v1
+  use hoppet
   
   !! if using LHAPDF, rename the hoppet functions EvolvePDF and InitPDF, which
   !! would otherwise conflict with LHAPDF, by replacing the use
   !! statement above with:
-  !use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
 
   implicit none
   real(dp) :: dy, ymax
@@ -3120,7 +3120,7 @@ program tabulation_example_qed
   !! (NB: unfortunately this conflicts with an internal hoppet name,
   !! so make sure that you "redefine" the internal hoppet name, 
   !! as illustrated in the commented "use" line above:
-  !! use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, ...)
+  !! use hoppet, EvolvePDF_hoppet => EvolvePDF, ...)
   ! interface
   !    subroutine EvolvePDF(x,Q,res)
   !      use types; implicit none
@@ -3255,7 +3255,7 @@ contains
     dbar = N_db * xvals**(-0.1_dp) * (1-xvals)**6
     ubar = dbar * (1-xvals)
 
-    ! labels iflv_g, etc., come from the hoppet_v1 module, inherited
+    ! labels iflv_g, etc., come from the hoppet module, inherited
     ! from the main program
     pdf(:, iflv_g) = 0.99_dp * gluon
     pdf(:,-iflv_s) = 0.2_dp*(dbar + ubar)
@@ -3304,7 +3304,7 @@ then accessed from each of the subprograms. The module might be
 \begin{lstlisting}
 ! common location for your table and other evolution components
 module external_table_module 
-   use hoppet_v1
+   use hoppet
    implicit none
    type(pdf_table) :: table
    type(dglap_holder) :: dh
@@ -3362,7 +3362,7 @@ external procedures, as explained in section~\ref{sec:acc_table}.
 %\section{Public objects}
 %In this Appendix we list some of the
 %most important public objects that are
-%accessible through the common {\tt hoppet\_v1} module. For
+%accessible through the common {\tt hoppet} module. For
 %simplicity we describe here only the public procedures and
 %not the public variables.
 
@@ -4029,7 +4029,7 @@ and written numbers with a trailing \texttt{\_dp}
 \end{lstlisting}
 Here \texttt{dp} is an integer parameter (defined in the
 \texttt{types} module and accessible also through the
-\texttt{hoppet\_v1} module), which specifies the \texttt{kind} of real
+\texttt{hoppet} module), which specifies the \texttt{kind} of real
 that we want to define, specifically double precision. We could also
 have written \texttt{double precision} everywhere, but this is less
 compact, and the use of a kind parameter has the advantage that we

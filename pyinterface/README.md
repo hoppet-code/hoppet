@@ -10,7 +10,7 @@ It is compiled by the main CMake file by default.
 
 Alternatively, to generate the swig interface run
 
-`swig -python  -c++ -I../src hoppet_v1.i`
+`swig -python  -c++ -I../src hoppet.i`
 
 And then the python module is generated with
 
@@ -18,10 +18,10 @@ And then the python module is generated with
 
 To install the package locally run
 
-`pip install dist/hoppet_v1-1.3.0.tar.gz`
+`pip install dist/hoppet-2.0.0.tar.gz`
 
 The hoppet interface can be loaded in python through
 
-`import hoppet_v1`
+`import hoppet`
 
 For an example of how to use the interface, take a look at `tabulation_example.py`.

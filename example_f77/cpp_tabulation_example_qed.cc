@@ -1,4 +1,4 @@
-#include "../src/hoppet_v1.h"
+#include "../src/hoppet.h"
 #include<iostream>
 #include<cmath>
 #include<cstdio>

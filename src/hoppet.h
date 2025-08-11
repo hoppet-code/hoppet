@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // C++ include file for hoppet's vanilla interface
-#ifndef __HOPPET_V1__
-#define __HOPPET_V1__
+#ifndef __HOPPET__
+#define __HOPPET__
 
 // define nicer forms of standard f77 naming
 #define hoppetStart                    hoppetstart_
@@ -40,7 +40,7 @@
 #define hoppetStrFctNNLO               hoppetstrfctnnlo_
 #define hoppetStrFctN3LO               hoppetstrfctn3lo_
 
-namespace hoppetv1 {
+namespace hoppet {
   /// indices for the different structure functions
   const int iF1Wp = 1+6; //< F1 W+ : D + Ubar                                                       
   const int iF2Wp = 2+6; //< F2 W+ : D + Ubar                                                      
@@ -321,4 +321,4 @@ extern "C" {
 			double * F);
   
 }
-#endif // __HOPPET_V1__
+#endif // __HOPPET__

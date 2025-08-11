@@ -1031,8 +1031,8 @@ most common evolution routines. It currently includes exactly the same
 functionality as the streamlined interface, and can be called in much
 the same way. The names of functions and routines are the same as in
 the streamlined interface, but stripped of the \ttt{hoppet}
-prefix. The interface is installed automatically as \ttt{hoppet\_v1}
-with \ttt{Cmake} and can be used through \ttt{import hoppet\_v1}. For a
+prefix. The interface is installed automatically as \ttt{hoppet}
+with \ttt{Cmake} and can be used through \ttt{import hoppet}. For a
 fully worked out tabulation example the user should take a look at
 \repolink{pyinterface/tabulation_example.py}{pyinterface/tabulation\_example.py}.
 
@@ -1044,7 +1044,7 @@ instead return a Python array directly. For instance, where in \CPP{}
 one might have the call
 %
 \begin{lstlisting}
-  #include "hoppet_v1.h"
+  #include "hoppet.h"
   [...]
   double x = ...;
   double Q = ...;
@@ -1056,7 +1056,7 @@ one might have the call
 instead in Python one would have
 %
 \begin{lstlisting}
-  import hoppet_v1 as hp
+  import hoppet as hp
   [...]
   x = ...
   Q = ...

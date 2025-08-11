@@ -26,7 +26,7 @@
 ! 
 ! The above results correspond roughly to expectation of eps^4
 module accuracy_helper
-  use hoppet_v1; use sort !(not included with hoppet_v1)
+   use hoppet; use sort !(not included with hoppet)
   implicit none
 
   private
@@ -330,7 +330,7 @@ end module accuracy_helper
 !! -dytable  :   run with a table of ty
 !! -big -div2 n -div3 n : loop over ymax vals, orders, dy
 program determine_accuracies
-  use hoppet_v1; use sub_defs_io
+   use hoppet; use sub_defs_io
   use accuracy_helper
   implicit none
   real(dp)           :: ymax = 12.0_dp, dy_ref, dy, du_ref

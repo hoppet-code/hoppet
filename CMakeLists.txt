@@ -50,7 +50,7 @@ endif()
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 message(STATUS "HOPPET: CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
-set(HOPPET_PYTHON_PACKAGE_NAME "hoppet_v1" CACHE STRING "The name of the installed hoppet python package.")
+set(HOPPET_PYTHON_PACKAGE_NAME "hoppet" CACHE STRING "The name of the installed hoppet python package.")
 set(HOPPET_USE_PYTHON_SITEARCH OFF CACHE BOOL "Force the usage of ${Python_SITEARCH} if CMAKE_INSTALL_PREFIX was defined.")
 set(HOPPET_CUSTOM_PYTHON_INSTALL "" CACHE STRING "Specify a custom python install path, can be absolute or relative to lib.")
 
@@ -210,7 +210,7 @@ list(APPEND SOURCESf90 ${POST_CONFIGURE_FILE})
 # set(SOURCES
 #   hplog.f xpij2e.f xpns2e.f assertions.f90 coefficient_functions.f90
 #   convolution.f90 dglap_choices.f90 dglap_holders.f90 dglap_objects.f90
-#   dummy_pdfs.f90 evolution.f90 hoppet_v1.f90 integrator.f90
+#   dummy_pdfs.f90 evolution.f90 hoppet.f90 integrator.f90
 #   interpolation.f90 new_as.f90 pdf_general.f90 pdf_representation.f90
 #   pdf_tabulate.f90 qcd.f90 qcd_coupling.f90 random.f90 runge_kutta.f90
 #   sort.f90 special_functions.f90 splitting_functions.f90
@@ -243,7 +243,7 @@ endif()
 #  Libraries ===========================================================
 add_library(hoppet SHARED ${SOURCESf90} ${SOURCESf})
 target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
-set_target_properties(hoppet PROPERTIES OUTPUT_NAME hoppet_v1
+set_target_properties(hoppet PROPERTIES OUTPUT_NAME hoppet
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
@@ -256,7 +256,7 @@ add_library(hoppet::hoppet ALIAS hoppet)
 
 add_library(hoppet_static STATIC ${SOURCESf90} ${SOURCESf})
 target_include_directories(hoppet_static PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
-set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet_v1
+set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
@@ -429,10 +429,16 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/hoppet/cmake/hoppetConfig.cmake
               DESTINATION ${CONFIG_INSTALL_DIR} COMPONENT devel)
 
 # Install  #############################################################
+# Create symlink for backwards compatibility
+#install(CODE "
+#  set(libdir \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")
+#  file(CREATE_LINK \"libhoppet.a\" \"\${libdir}/libhoppet_v1.a\" SYMBOLIC)
+#")
 install(TARGETS hoppet hoppet_static  EXPORT hoppetTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )
-install(FILES ${PROJECT_SOURCE_DIR}/src/hoppet_v1.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )
+install(FILES ${PROJECT_SOURCE_DIR}/src/hoppet.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )
 install(FILES ${PROJECT_BINARY_DIR}/bin/hoppet-config 
                                 DESTINATION ${CMAKE_INSTALL_BINDIR} 
                                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
 install(EXPORT hoppetTargets DESTINATION ${CONFIG_INSTALL_DIR} COMPONENT devel)

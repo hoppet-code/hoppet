@@ -19,12 +19,12 @@ C----------------------------------------------------------------------
       ! The following makes most of the f90 part of hoppet available to
       ! the otherwise mainly f77 program. Note that it brings quite a
       ! lot of "names", such as ca, cf, tr, nf, etc. into the namespace;
-      ! so it is good practice to "use hoppet_v1" only where you actually
+      ! so it is good practice to "use hoppet" only where you actually
       ! need the f90 features.
       !
       ! At compile you'll probably need to include the compiler flag "-I../../src" 
       ! to have access to the module files (which are currently not installed...)
-      use hoppet_v1
+      use hoppet
       implicit none
       !--- variables defining the grid and evolution parameters
       double precision dy, ymax, Qmin, Qmax, dlnlnQ
@@ -40,7 +40,7 @@ C----------------------------------------------------------------------
 
       ! arrange for the use of exact NNLO splitting and mass-threshold
       ! functions. These are f90 calls and rely on the presence of the
-      ! line "use hoppet_v1" right at the start of the program. 
+      ! line "use hoppet" right at the start of the program. 
       call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
       call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
 

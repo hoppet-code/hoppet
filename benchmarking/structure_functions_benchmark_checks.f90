@@ -4,7 +4,7 @@
 !!
 
 program structure_functions_benchmark_checks
-  use hoppet_v1
+     use hoppet
   use dummy_pdfs
   use streamlined_interface
   use structure_functions

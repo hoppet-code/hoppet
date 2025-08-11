@@ -37,7 +37,7 @@ FFLAGS = -O
 F90LIB4GCC= -lgfortran
 
 
-LIBS = -L../src -lhoppet_v1 $(F90LIB)
+LIBS = -L../src -lhoppet $(F90LIB)
 LHAPDFLIBS = `lhapdf-config --ldflags`
 
 cpp_tabulation_example_qed: cpp_tabulation_example_qed.o
