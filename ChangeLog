@@ -1,5 +1,16 @@
 2025-08-11 Gavin
 
+	* src/pdf_tabulate.f90:
+	* benchmarking/prec_and_timing.f90:
+	renamed WritePdfTableLHAPDF -> WriteLHAPDFFromPdfTable
+	updated calls accordingly; now takes the base of a 
+	filename as an argument and writes out both the .dat
+	and the .info file (latter only if doing index 0).
+	For now, the info file is to some extent templated, 
+	to avoid excessive numbers of arguments being passed.
+	So proper usage would need to edit the .info file afterwards, 
+	but at least it can be loaded and read correctly by LHAPDF.
+
 	* CMakeLists.txt:
 	- added partial checks that there aren't bits and pieces left
 	  from a build with the old build system
