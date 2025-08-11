@@ -22,6 +22,16 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 include("GNUInstallDirs")
 
+# add check to see if src/Makefile exists, and any src/*.mod, or any src/*.a
+# If so, then bail out because the user probably tried a build with the old build system
+file(GLOB MOD_FILES "${PROJECT_SOURCE_DIR}/src/*.mod")
+file(GLOB A_FILES "${PROJECT_SOURCE_DIR}/src/*.a")
+if(EXISTS "${PROJECT_SOURCE_DIR}/src/Makefile"
+   OR (NOT "${MOD_FILES}" STREQUAL "")
+   OR (NOT "${A_FILES}" STREQUAL ""))
+  message(FATAL_ERROR "HOPPET: Old build system files detected. Please start from a fresh clone (you can also try 'make distclean' from the top-level directory, but we do not guarantee this will work)")
+endif()
+
 # Add options ==========================================================
 option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
 option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)

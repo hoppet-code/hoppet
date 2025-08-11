@@ -11,6 +11,10 @@
 	So proper usage would need to edit the .info file afterwards, 
 	but at least it can be loaded and read correctly by LHAPDF.
 
+	* CMakeLists.txt:
+	- added partial checks that there aren't bits and pieces left
+	  from a build with the old build system
+
 2025-08-10 Gavin
 
 	* src/pdf_tabulate.f90:
