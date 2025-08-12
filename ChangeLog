@@ -1,3 +1,15 @@
+2025-08-12 Gavin
+
+	* src/convolution.f90:
+	added MonotonicUniqueIndices, MonotonicUniqueYValues, MonotonicUniqueXValues
+	functions, which make it possible to get the indices, y or x values
+	corresponding to a monotonically increasing set of y values, prioritising
+	smaller spacings first.
+	Also improved some comments.
+
+	* src/pdf_tabulate.f90:
+	reworked WriteLHAPDFFromPdfTable so that it uses MonotonicUniqueXValues
+
 2025-08-12  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/streamlined_interface.f90:

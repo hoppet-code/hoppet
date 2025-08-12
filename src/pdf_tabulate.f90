@@ -996,17 +996,19 @@ contains
     character(len=4) :: pdf_index_str
     character(len=:), allocatable :: dat_file, info_file
     real(dp) :: flavs(lbound(table%tab,2):ubound(table%tab,2))
-    real(dp) :: xVals(0:table%grid%ny), xVals_orig(0:table%grid%ny), last_x, val, yVal
+    real(dp) :: xVals_orig(0:table%grid%ny), val, yVal
     real(dp) :: zeta, zetamax, dzeta
     ! these parameters appear to give OK accuracy, <=10^{-4} for x<0.5
     ! and <=10^{-3} for x<0.9, at least for Q=100
     real(dp), parameter :: dzeta_def = 0.30_dp, zeta_a = 10.0_dp, zeta_b = 5.0_dp
-    integer  :: iyVals(0:table%grid%ny), nx_max, iy, ix, iQ, iseg, iQlo, iQhi, ipdg, iflv
+    integer  :: iyVals(0:table%grid%ny), nx, nx_max, iy, ix, iQ, iseg, iQlo, iQhi, ipdg, iflv
     type(pdfseginfo), pointer :: seginfos(:)
-    integer  :: iy_inc, last_iy, n_since_last_spacing_change
+    integer  :: iy_inc
 
     integer,  allocatable :: lcl_flav_indices(:), lcl_flav_pdg_ids(:)
     real(dp), allocatable :: lcl_flav_rescale(:)
+    ! for choosing the xvalues output
+    real(dp), allocatable :: xVals_tmp(:), xVals(:)
 
     iy_inc = default_or_opt(1, iy_increment)
 
@@ -1051,29 +1053,16 @@ contains
     ! First work out what x values to use.
     ! In this simple version, we simply take the grid points (eliminating duplications)
     xVals_orig = xValues(table%grid)
-    nx_max = -1
-    last_x = two
-    last_iy = -iy_inc
-    n_since_last_spacing_change = 0
     write(dat_unit,'(a,i4)') '# iy_increment = ', iy_inc
     if (iy_inc > 0) then
-       do iy = 0, table%grid%ny
-          if (xVals_orig(iy) > last_x * 0.999999999_dp) then
-            n_since_last_spacing_change = 0
-          else
-            n_since_last_spacing_change = n_since_last_spacing_change + 1
-            ! skip some points, except just after a transition to a looser
-            ! spacing
-            if ( iy >= (last_iy + iy_inc) .or. &
-                & n_since_last_spacing_change < iy_inc**2) then
-              last_x  = xVals_orig(iy)
-              last_iy = iy
-              nx_max = nx_max + 1
-              xVals (nx_max) = xVals_orig(iy)
-              iyVals(nx_max) = iy
-            end if
-          end if
-       end do
+      xVals_tmp = MonotonicUniqueXValues(table%grid)
+      nx = size(xVals_tmp) / iy_inc
+      nx_max = nx
+      ! make sure we go all the way to the lowest point in x
+      if (nx * iy_inc < size(xVals_tmp)) nx_max = nx + 1
+      allocate(xVals(1:nx_max))
+      xVals(1:nx) = xVals_tmp(::iy_inc)
+      if (nx < nx_max) xVals(nx_max) = xVals_tmp(ubound(xVals_tmp,1))
     !else if (iy_inc == 0) then
     !  ! use the PDF4LHC15 points; note that we need to reverse their order
     !  do iy = size(pdf4lhc_yvalues), 1, -1
@@ -1096,6 +1085,7 @@ contains
       zetamax = zetaext_of_y(table%grid%ymax, zeta_a, zeta_b)
       nx_max = ceiling(zetamax/dzeta_def)
       dzeta = zetamax / nx_max
+      allocate(xVals(0:nx_max))
       do ix = 0, nx_max
         xVals(ix) = exp(-y_of_zetaext(dzeta*ix, zeta_a, zeta_b))
       end do
@@ -1125,7 +1115,7 @@ contains
     ! now loop over the actual or "invented" seginfos
     do iseg = lbound(seginfos,1), ubound(seginfos,1)
        ! first we output info about x structure, Q structure and flavours
-       write(dat_unit,'(4000es14.7)') xVals(nx_max:0:-1)
+       write(dat_unit,'(4000es14.7)') xVals(ubound(xVals,1):lbound(xVals,1):-1)
        iQlo = seginfos(iseg)%ilnlnQ_lo
        iQhi = seginfos(iseg)%ilnlnQ_hi
        write(dat_unit,'(4000es14.7)') table%Q_vals(iQlo:iQhi)
@@ -1133,8 +1123,7 @@ contains
 
        ! then write out the PDF itself
        ! Note that LHAPDF wants _increasing_ x values
-       do ix = nx_max, 0, -1
-          iy = iyVals(ix)
+       do ix = ubound(xVals,1), lbound(xVals,1), -1
           do iQ = iQlo, iQhi
              flavs = table%tab(:,:,iQ) .atx. (xVals(ix).with.table%grid)
              do ipdg = 1, ubound(lcl_flav_pdg_ids,1)
@@ -1180,8 +1169,8 @@ contains
       endif 
       write(info_unit,'(a,i2)') 'NumFlavors: ', table%nfhi
       write(info_unit,'(a)') 'ErrorType: <ErrorType>'
-      write(info_unit,'(a,es22.14)') 'XMin: ', minval(xVals(0:nx_max))
-      write(info_unit,'(a,es22.14)') 'XMax: ', maxval(xVals(0:nx_max))
+      write(info_unit,'(a,es22.14)') 'XMin: ', minval(xVals)
+      write(info_unit,'(a,es22.14)') 'XMax: ', maxval(xVals)
       write(info_unit,'(a,es22.14)') 'QMin: ', minval(table%Q_vals)
       write(info_unit,'(a,es22.14)') 'QMax: ', maxval(table%Q_vals)
       write(info_unit,'(a)') 'MZ: 0.911870E+02'

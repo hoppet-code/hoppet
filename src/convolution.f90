@@ -38,8 +38,8 @@ module convolution
   integer, parameter, public :: WeightGridQuand_npnt_max = npnt_max
 
   !-------------------------------
-  !! definition of a grid
-  !! Includes possibility of one layer of subsidiary definitions
+  !! Definition of a grid.
+  !! Includes possibility of one layer of subsidiary definitions.
   type grid_def
      real(dp) :: dy, ymax, eps
      integer  :: ny, order, nsub = 0
@@ -49,9 +49,7 @@ module convolution
   end type grid_def
 
   !--------------------------------------------------
-  ! used for abbreviated access to EvalGridQuant
-  
-  
+  !! Definition of a convolution object
   type grid_conv
      type(grid_def)           :: grid
      real(dp),        pointer :: conv(:,:) => null()
@@ -83,6 +81,7 @@ module convolution
      module procedure Delete_grid_def_0d, Delete_grid_def_1d
   end interface
   public :: xValues, yValues
+  public :: MonotonicUniqueIndices, MonotonicUniqueYValues, MonotonicUniqueXValues
 
   !-- quant routines -----------------------------------------------
   interface AllocGridQuant
@@ -308,7 +307,14 @@ contains
 
 
   !--------------------------------------------------------------
-  ! Create a multi grid def
+  !! Create a multi-grid grid_def from several individual grid definitions
+  !!
+  !! - grid: the new grid
+  !! - gdarray: the array of individual grid definitions
+  !! - locked: if true the grid is locked, with several implications:
+  !!   * the grids will be stored in order of increasing dy
+  !!   * the grid spacings of the finer grids will be the next coarser grid divided by an integer
+  !!   * finer grids must have ymax values that are smaller than the coarser grids
   subroutine conv_InitGridDef_multi(grid,gdarray,locked)
     use sort
     type(grid_def), intent(out) :: grid
@@ -355,14 +361,6 @@ contains
                 write(err_string2,*) 'gdarray with smaller dy should&
                      & also have smaller gdarray%ymax'
                 call wae_error(trim(err_string1), trim(err_string2))
-                ! for testing ifort_8_0_039...
-                !write(0,*) 'dy   values (i-1,i)', subgd(i-1:i)%dy
-                !write(0,*) 'ymax values (i-1,i)', subgd(i-1:i)%ymax
-                !write(0,*) indx
-                !write(0,*) gdarray%dy
-                !write(0,*) gdarray(indx(:))%dy
-                !write(0,*) i, subgd(i)%ymax, subgd(i-1)%ymax
-                !stop
              end if
           end if
        end do
@@ -396,7 +394,7 @@ contains
           end if
        end do
     else
-       !-- no questions asked!
+       !-- no questions asked!      
        subgd(:) = gdarray(:)
     end if
     
@@ -589,12 +587,97 @@ contains
   
   !======================================================================
   !! Return an array containing the x-value of each point on the grid
+  !!
   function xValues(grid) result(res)
     type(grid_def), intent(in) :: grid
     real(dp)                   :: res(0:grid%ny)
 
     res = exp(-yValues(grid))
   end function xValues
+
+  !======================================================================
+  !! return an array containing a set of indices such that the y-values
+  !! are monotonically increasing. The indices assume that the grid starts
+  !! at index 0. 
+  !!
+  !! The size of the returned array is determined dynamically and if the
+  !! result is assigned (rather than used immediately), it should be
+  !! assigned to an allocatable array. Keep in mind that allocatable array
+  !! will start from index 1.
+  !! 
+  function MonotonicUniqueIndices(grid) result(indices)
+    use sort
+    type(grid_def), intent(in), target :: grid
+    integer,        allocatable        :: indices(:)
+    !----
+    integer,  allocatable :: igrids(:)
+    integer :: tmp_indices(0:grid%ny)
+    integer :: ig, igrid, iy, ny 
+    real(dp) :: last_y, dy
+    real(dp), parameter :: tolerance = 1e-10_dp
+
+    if (grid%nsub == 0) then
+      ! no subsidiary grids, so just return the indices
+      allocate(indices(0:grid%ny))
+      indices = [(iy,iy=0,grid%ny)]
+      return
+    end if
+
+    ! arrange the grids so that they have increasing dy
+    ! (sort not needed in locked case, because they are guaranteed
+    ! to come in increasing dy values)
+    allocate(igrids(grid%nsub))
+    call indexx(grid%subgd(:)%dy, igrids)
+ 
+    ny = -1
+    last_y = -one
+    do ig = 1, grid%nsub
+      igrid = igrids(ig)
+      do iy = 0, grid%subgd(igrid)%ny
+        dy = grid%subgd(igrid)%dy 
+        ! the hard coded tolerance is a bit ugly, but allows us to handle both 
+        ! the locked and unlocked cases
+        if (dy * iy > last_y + tolerance) then
+          ny = ny + 1
+          tmp_indices(ny) = iy + grid%subiy(igrid)
+          last_y = dy * iy
+        end if
+      end do
+    end do
+    indices = tmp_indices(0:ny)
+  end function MonotonicUniqueIndices 
+
+  !======================================================================
+  !! return an array containing a containing the y values corresponding
+  !! to the MonotonicUniqueIndices. 
+  !!
+  !! If this is assigned to an allocatable array, keep in mind that the
+  !! array will start from index 1
+  function MonotonicUniqueYValues(grid) result(yvals)
+    type(grid_def), intent(in) :: grid
+    real(dp), allocatable :: yvals(:)
+    !----
+    real(dp) :: all_yvals(0:grid%ny)
+
+    all_yvals = yValues(grid)
+    yvals = all_yvals(MonotonicUniqueIndices(grid))
+  end function MonotonicUniqueYValues
+
+  !======================================================================
+  !! return an array containing a containing the y values corresponding
+  !! to the MonotonicUniqueIndices
+  !!
+  !! If this is assigned to an allocatable array, keep in mind that the
+  !! array will start from index 1
+  function MonotonicUniqueXValues(grid) result(xvals)
+    type(grid_def), intent(in) :: grid
+    real(dp), allocatable :: xvals(:)
+    !----
+    real(dp) :: all_yvals(0:grid%ny)
+
+    all_yvals = yValues(grid)
+    xvals = exp(-all_yvals(MonotonicUniqueIndices(grid)))
+  end function MonotonicUniqueXValues
 
 
   !======================================================================
