@@ -1026,6 +1026,7 @@ the streamlined interface is to be found in
 %\gps{added this link}
 
 \section{Python interface}
+\label{sec:pyinterface}
 From version~2.0.0 \hoppet also includes a Python interface to the
 most common evolution routines. It currently includes exactly the same
 functionality as the streamlined interface, and can be called in much
@@ -1070,6 +1071,7 @@ the streamlined interface, now instead take a function of \ttt{x} and
 for an explicit example).
 
 \section{CMake build option}
+\label{sec:cmake}
 In addition to the standard build option through \ttt{./configure} and
 \ttt{make [install]} \hoppet now supports the use of CMake. Although
 the old build option will be supported as far as possible, the CMake
@@ -1107,6 +1109,63 @@ The can be set when call \ttt{cmake} in the usual way,
 e.g.\ \ttt{cmake .. -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet
 with the exact coefficient functions.
 
-%%% Local Variables:
+\section{Saving LHAPDF grids}
+\label{sec:lhapdf}
+A minor new feature of this release is the added possibility to save a
+\hoppet{} table in the LHAPDF6~\cite{LHAPDF} grid format. Access to
+this functionality is also provided in the streamlined interface. The
+routine has the following structure
+
+\begin{lstlisting}
+  subroutine WriteLHAPDFFromPdfTable(table, coupling, basename, pdf_index, &
+                                 & iy_increment, flav_indices, flav_pdg_ids, flav_rescale)                                
+    use qed_objects
+    type(pdf_table),        intent(in) :: table
+    type(running_coupling), intent(in) :: coupling
+    character(len=*),       intent(in) :: basename
+    integer,                intent(in) :: pdf_index
+    integer,  optional,     intent(in) :: iy_increment
+    integer,  optional,     intent(in) :: flav_indices(:), flav_pdg_ids(:)
+    real(dp), optional,     intent(in) :: flav_rescale(:)
+\end{lstlisting}
+A user has to provide a \ttt{table} and associated \ttt{coupling}
+object along with a string \ttt{basename} and the \ttt{pdf\_index} as
+needed by LHAPDF. If \ttt{pdf\_index} is equal to 0 then the routine
+will output the content of the table in \ttt{basename\_0000.dat} and
+write a file \ttt{basename.info} again in the LHAPDF format. For any
+other value of \ttt{pdf\_index} only the corresponding \ttt{.dat} file
+will be written.
+
+By default the code uses the same grid spacing as in the internal
+\hoppet{} table (\ttt{iy\_increment = 1}) and prints all the possible
+flavours of the PDF, even if they are zero. The user can overwrite
+this default behaviour by providing an array of flavours and their pdg
+values. If \ttt{iy\_increment > 1} a coarser grid is provided by
+skipping over \ttt{iy\_increment - 1} points in the grid. The
+\ttt{flav\_rescale} is currently needed for the lepton PDF which is
+provided as the sum over flavour and anti-flavour and therefore needs
+an extra factor half.
+
+Finally the routine can also be accessed from the streamlined
+interface through \CPP{} or Python. In this case the routine is
+significantly simplified and only takes \ttt{basename} and the
+\ttt{pdf\_index} arguments, for instance in \CPP{} like this
+\begin{lstlisting}
+  #include "hoppet.h"
+  #include <string>
+  ...
+  int main () {
+    ...
+    const std::string basename = ...;
+    const int pdf_index = ...;
+    hoppetWriteLHAPDFGrid(basename, pdf_index);
+    ...
+  }
+\end{lstlisting}
+The routine writes the content of the streamlined interface
+\ttt{tables(0)} and hence requires that this object has been filled
+either through a call to \ttt{hoppetAssign} or \ttt{hoppetEvolve}.
+
+  %%% Local Variables:
 %%% TeX-master: "HOPPET-v2.0-release.tex"
 %%% End:
