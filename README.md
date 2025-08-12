@@ -35,7 +35,7 @@ Starting from v2.0.0 backwards compatibility with the v1 series of
 hoppet has been broken in one significant way, namely that `hoppet_v1`
 has become `hoppet` in all places in the code. This in particular
 applies to `libhoppet_v1` which is now `libhoppet`, `module hoppet_v1`
-which is now `module hoppet` and the C++ namespace `hoppet_v1` which
+which is now `module hoppet` and the C++ namespace `hoppetv1` which
 is now `hoppet`.
 
 Besides this change most users should be able to start using the v2
