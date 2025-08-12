@@ -1027,9 +1027,15 @@ contains
         lcl_flav_pdg_ids = (/-6,-5,-4,-3,-2,-1,21,1,2,3,4,5,6,22/)
       else if (ubound(table%tab,2) == ncompmaxLeptons) then
         ! recall that our internal representation has 
-        lcl_flav_indices = (/-6,-5,-4,-3,-2,-1, 0,1,2,3,4,5,6, 8, iflv_tau, iflv_muon, iflv_electron, iflv_electron, iflv_muon, iflv_tau/)
-        lcl_flav_pdg_ids = (/-6,-5,-4,-3,-2,-1,21,1,2,3,4,5,6,22,      -15,       -13,           -11,            11,        13,       15/)
-        lcl_flav_rescale = (/ 14* one,                                half,      half,          half,          half,      half,     half/)
+        lcl_flav_indices = (/-6,-5,-4,-3,-2,-1, 0,1,2,3,4,5,6, 8,&
+             & iflv_tau, iflv_muon, iflv_electron, iflv_electron,&
+             & iflv_muon, iflv_tau/)
+        lcl_flav_pdg_ids = (/-6,-5,-4,-3,-2,-1,21,1,2,3,4,5,6,22,    &
+             &  -15,       -13,           -11,            11,       &
+             & 13,       15/)
+        lcl_flav_rescale = (/ 14* one,                               &
+             & half,      half,          half,          half,     &
+             & half,     half/)
       end if
 
     end if
