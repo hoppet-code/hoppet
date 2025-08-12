@@ -1,5 +1,6 @@
 /* File: hoppet.i */
 %module hoppet
+%include "std_string.i"  // This must be included in order to handle c strings
 
 %{
 #define SWIG_FILE_WITH_INIT
@@ -228,6 +229,8 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %rename(hoppetStrFctNLOFlav     )      hoppetstrfctnloflav_;
 %rename(hoppetStrFctNNLO        )      hoppetstrfctnnlo_;
 %rename(hoppetStrFctN3LO        )      hoppetstrfctn3lo_;
+%rename(WriteLHAPDFgrid         )      hoppetWriteLHAPDFgrid;
+%rename(hoppetWriteLHAPDFgrid   )      hoppetwritelhapdfgrid_;
 
 %include "hoppet.h"
 

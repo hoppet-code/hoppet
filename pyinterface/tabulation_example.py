@@ -67,6 +67,8 @@ def main():
             pdf_array[6 + 0]
         ))
 
+    #hp.WriteLHAPDFgrid("test_python",0)
+
     hp.DeleteAll()
 
 if __name__ == "__main__":
