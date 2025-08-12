@@ -5,10 +5,17 @@
 	functions, which make it possible to get the indices, y or x values
 	corresponding to a monotonically increasing set of y values, prioritising
 	smaller spacings first.
+	
 	Also improved some comments.
 
 	* src/pdf_tabulate.f90:
 	reworked WriteLHAPDFFromPdfTable so that it uses MonotonicUniqueXValues
+
+	* CMakeLists.txt:
+	python interface is now disabled is swig is not found, to allow
+	people to build on a relatively "vanilla" system. Note that if
+	swig is there but python3 development files are not, you 
+	will still get an error.
 
 2025-08-12  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
