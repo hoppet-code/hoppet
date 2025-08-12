@@ -335,14 +335,17 @@ contains
     real(dp), intent(in), optional :: muF, muR
     integer, intent(in)  :: idev, ny
     real(dp) :: ytest, xval, mR, mF, F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO, res(-6:7)
+    real(dp) :: F1EM_LO, F1EM_NLO, F1EM_NNLO, F1EM_N3LO, F1gZ_LO, F1gZ_NLO, F1gZ_NNLO, F1gZ_N3LO 
     integer  :: iy
     !F1 Wp Wm Z
     write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
     if (use_sep_orders) then
-       write(idev,'(a,a)') '# x  F1Wp(LO) F1Wm(LO) F1Wp(NLO) F1Wm(NLO) F1Wp(NNLO) F1Wm(NNLO)', &
-            & ' F1Wp(N3LO) F1Wm(N3LO) F1Z(LO) F1Z(NLO) F1Z(NNLO) F1Z(N3LO)'
+       write(idev,'(a,a)') '#     x        F1Wp(LO)    F1Wm(LO)    F1Wp(NLO)   F1Wm(NLO)  F1Wp(NNLO)  F1Wm(NNLO)', &
+            & '  F1Wp(N3LO)  F1Wm(N3LO)    F1Z(LO)    F1Z(NLO)    F1Z(NNLO)&
+            &   F1Z(N3LO)    F1γ(LO)    F1γ(NLO)    F1γ(NNLO)   F1γ(N3LO)   F1γZ(LO)&
+            &   F1γZ(NLO)   F1γZ(NNLO)  F1γZ(N3LO)'
     else
-       write(idev,'(a)') '# x F1Wp F1Wm F1Z'
+       write(idev,'(a)') '# x F1Wp F1Wm F1Z F1γ F1γZ'
     endif
     mF = default_or_opt(sf_muF(Qtest),muF)
     mR = default_or_opt(sf_muR(Qtest),muR)
@@ -353,19 +356,29 @@ contains
           res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es12.4)',advance='no') xval, res(iF1Wp),res(iF1Wm)
           F1Z_LO = res(iF1Z)
+          F1EM_LO = res(iF1EM)
+          F1gZ_LO = res(iF1gZ)
           res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF1Wp), res(iF1Wm)
           F1Z_NLO = res(iF1Z)
+          F1EM_NLO = res(iF1EM)
+          F1gZ_NLO = res(iF1gZ)
           res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF1Wp), res(iF1Wm)
           F1Z_NNLO = res(iF1Z)
+          F1EM_NNLO = res(iF1EM)
+          F1gZ_NNLO = res(iF1gZ)
           res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF1Wp), res(iF1Wm)
           F1Z_N3LO = res(iF1Z)
-          write(idev,'(4es12.4)',advance='no') F1Z_LO, F1Z_NLO, F1Z_NNLO, F1Z_N3LO
+          F1EM_N3LO = res(iF1EM)
+          F1gZ_N3LO = res(iF1gZ)
+          write(idev,'(12es12.4)',advance='no') F1Z_LO, F1Z_NLO,&
+               & F1Z_NNLO, F1Z_N3LO, F1EM_LO, F1EM_NLO, F1EM_NNLO,&
+               & F1EM_N3LO, F1gZ_LO, F1gZ_NLO, F1gZ_NNLO, F1gZ_N3LO 
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es12.4)',advance='no') xval, res(iF1Wp),res(iF1Wm), res(iF1Z)
+          write(idev,'(6es12.4)',advance='no') xval, res(iF1Wp),res(iF1Wm), res(iF1Z), res(iF1EM), res(iF1gZ)
        endif
        write(idev,*)
     end do
@@ -387,14 +400,17 @@ contains
     real(dp), intent(in), optional :: muF, muR
     integer, intent(in)  :: idev, ny
     real(dp) :: ytest, xval, mR, mF, F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO, res(-6:7)
+    real(dp) :: F2EM_LO, F2EM_NLO, F2EM_NNLO, F2EM_N3LO, F2gZ_LO, F2gZ_NLO, F2gZ_NNLO, F2gZ_N3LO 
     integer  :: iy
     !F2 Wp Wm Z
-    write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
+    write(idev,'(a,f20.4,a,f20.4)') '# Q = ', Qtest
     if (use_sep_orders) then
-       write(idev,'(a,a)') '# x  F2Wp(LO) F2Wm(LO) F2Wp(NLO) F2Wm(NLO) F2Wp(NNLO) F2Wm(NNLO)', &
-            & ' F2Wp(N3LO) F2Wm(N3LO) F2Z(LO) F2Z(NLO) F2Z(NNLO) F2Z(N3LO)'
+       write(idev,'(a,a)') '#     x        F2Wp(LO)    F2Wm(LO)    F2Wp(NLO)   F2Wm(NLO)  F2Wp(NNLO)  F2Wm(NNLO)', &
+            & '  F2Wp(N3LO)  F2Wm(N3LO)    F2Z(LO)    F2Z(NLO)    F2Z(NNLO)&
+            &   F2Z(N3LO)    F2γ(LO)    F2γ(NLO)    F2γ(NNLO)   F2γ(N3LO)   F2γZ(LO)&
+            &   F2γZ(NLO)   F2γZ(NNLO)  F2γZ(N3LO)'
     else
-       write(idev,'(a)') '# x F2Wp F2Wm F2Z'
+       write(idev,'(a)') '# x F2Wp F2Wm F2Z F2γ F2γZ'
     endif
     mF = default_or_opt(sf_muF(Qtest),muF)
     mR = default_or_opt(sf_muR(Qtest),muR)
@@ -405,25 +421,77 @@ contains
           res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es12.4)',advance='no') xval, res(iF2Wp),res(iF2Wm)
           F2Z_LO = res(iF2Z)
+          F2EM_LO = res(iF2EM)
+          F2gZ_LO = res(iF2gZ)
           res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
           F2Z_NLO = res(iF2Z)
+          F2EM_NLO = res(iF2EM)
+          F2gZ_NLO = res(iF2gZ)
           res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
           F2Z_NNLO = res(iF2Z)
+          F2EM_NNLO = res(iF2EM)
+          F2gZ_NNLO = res(iF2gZ)
           res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
           F2Z_N3LO = res(iF2Z)
-          write(idev,'(4es12.4)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
+          F2EM_N3LO = res(iF2EM)
+          F2gZ_N3LO = res(iF2gZ)
+          write(idev,'(12es12.4)',advance='no') F2Z_LO, F2Z_NLO,&
+               & F2Z_NNLO, F2Z_N3LO, F2EM_LO, F2EM_NLO, F2EM_NNLO,&
+               & F2EM_N3LO, F2gZ_LO, F2gZ_NLO, F2gZ_NNLO, F2gZ_N3LO 
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es12.4)',advance='no') xval, res(iF2Wp),res(iF2Wm), res(iF2Z)
+          write(idev,'(6es12.4)',advance='no') xval, res(iF2Wp),res(iF2Wm), res(iF2Z), res(iF2EM), res(iF2gZ)
        endif
        write(idev,*)
     end do
     write(idev,*)
     write(idev,*)
   end subroutine write_f2
+!  subroutine write_f2 (idev, Qtest, ymax, ny, muF, muR)
+!    real(dp), intent(in) :: Qtest, ymax
+!    real(dp), intent(in), optional :: muF, muR
+!    integer, intent(in)  :: idev, ny
+!    real(dp) :: ytest, xval, mR, mF, F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO, res(-6:7)
+!    integer  :: iy
+!    !F2 Wp Wm Z
+!    write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
+!    if (use_sep_orders) then
+!       write(idev,'(a,a)') '# x  F2Wp(LO) F2Wm(LO) F2Wp(NLO) F2Wm(NLO) F2Wp(NNLO) F2Wm(NNLO)', &
+!            & ' F2Wp(N3LO) F2Wm(N3LO) F2Z(LO) F2Z(NLO) F2Z(NNLO) F2Z(N3LO)'
+!    else
+!       write(idev,'(a)') '# x F2Wp F2Wm F2Z'
+!    endif
+!    mF = default_or_opt(sf_muF(Qtest),muF)
+!    mR = default_or_opt(sf_muR(Qtest),muR)
+!    do iy = ny, 1, -1
+!       ytest = iy * ymax / ny
+!       xval = exp(-ytest)
+!       if (use_sep_orders) then
+!          res = F_LO(xval, Qtest, mR, mF)
+!          write(idev,'(3es12.4)',advance='no') xval, res(iF2Wp),res(iF2Wm)
+!          F2Z_LO = res(iF2Z)
+!          res = F_NLO(xval, Qtest, mR, mF)
+!          write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
+!          F2Z_NLO = res(iF2Z)
+!          res = F_NNLO(xval, Qtest, mR, mF)
+!          write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
+!          F2Z_NNLO = res(iF2Z)
+!          res = F_N3LO(xval, Qtest, mR, mF)
+!          write(idev,'(2es12.4)',advance='no') res(iF2Wp), res(iF2Wm)
+!          F2Z_N3LO = res(iF2Z)
+!          write(idev,'(4es12.4)',advance='no') F2Z_LO, F2Z_NLO, F2Z_NNLO, F2Z_N3LO
+!       else
+!          res = StrFct(xval, Qtest, mR, mF)
+!          write(idev,'(4es12.4)',advance='no') xval, res(iF2Wp),res(iF2Wm), res(iF2Z)
+!       endif
+!       write(idev,*)
+!    end do
+!    write(idev,*)
+!    write(idev,*)
+!  end subroutine write_f2
 
   !> @brief write the F3 structure function to idev
   !!
@@ -434,19 +502,22 @@ contains
   !! @param[in]     ymax     Largest value of y = - log(x) to print
   !! @param[in]     ny       number of bins in y to print
   !!
-  subroutine write_f3 (idev, Qtest, ymax, ny, muF, muR)
+    subroutine write_f3 (idev, Qtest, ymax, ny, muF, muR)
     real(dp), intent(in) :: Qtest, ymax
     real(dp), intent(in), optional :: muF, muR
     integer, intent(in)  :: idev, ny
     real(dp) :: ytest, xval, mR, mF, F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO, res(-6:7)
+    real(dp) :: F3gZ_LO, F3gZ_NLO, F3gZ_NNLO, F3gZ_N3LO 
     integer  :: iy
     !F3 Wp Wm Z
-    write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
+    write(idev,'(a,f30.4,a,f30.4)') '# Q = ', Qtest
     if (use_sep_orders) then
-       write(idev,'(a,a)') '# x  F3Wp(LO) F3Wm(LO) F3Wp(NLO) F3Wm(NLO) F3Wp(NNLO) F3Wm(NNLO)', &
-            & ' F3Wp(N3LO) F3Wm(N3LO) F3Z(LO) F3Z(NLO) F3Z(NNLO) F3Z(N3LO)'
+       write(idev,'(a,a)') '#     x        F3Wp(LO)    F3Wm(LO)    F3Wp(NLO)   F3Wm(NLO)  F3Wp(NNLO)  F3Wm(NNLO)', &
+            & '  F3Wp(N3LO)  F3Wm(N3LO)    F3Z(LO)    F3Z(NLO)    F3Z(NNLO)&
+            &   F3Z(N3LO)    F3γZ(LO)&
+            &   F3γZ(NLO)  F3γZ(NNLO)  F3γZ(N3LO)'
     else
-       write(idev,'(a)') '# x F3Wp F3Wm F3Z'
+       write(idev,'(a)') '# x F3Wp F3Wm F3Z F3γZ'
     endif
     mF = default_or_opt(sf_muF(Qtest),muF)
     mR = default_or_opt(sf_muR(Qtest),muR)
@@ -457,25 +528,74 @@ contains
           res = F_LO(xval, Qtest, mR, mF)
           write(idev,'(3es12.4)',advance='no') xval, res(iF3Wp),res(iF3Wm)
           F3Z_LO = res(iF3Z)
+          F3gZ_LO = res(iF3gZ)
           res = F_NLO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
           F3Z_NLO = res(iF3Z)
+          F3gZ_NLO = res(iF3gZ)
           res = F_NNLO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
           F3Z_NNLO = res(iF3Z)
+          F3gZ_NNLO = res(iF3gZ)
           res = F_N3LO(xval, Qtest, mR, mF)
           write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
           F3Z_N3LO = res(iF3Z)
-          write(idev,'(4es12.4)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
+          F3gZ_N3LO = res(iF3gZ)
+          write(idev,'(8es12.4)',advance='no') F3Z_LO, F3Z_NLO,&
+               & F3Z_NNLO, F3Z_N3LO, F3gZ_LO, F3gZ_NLO, F3gZ_NNLO,&
+               & F3gZ_N3LO 
        else
           res = StrFct(xval, Qtest, mR, mF)
-          write(idev,'(4es12.4)',advance='no') xval, res(iF3Wp),res(iF3Wm), res(iF3Z)
+          write(idev,'(6es12.4)',advance='no') xval, res(iF3Wp),res(iF3Wm), res(iF3Z), res(iF3gZ)
        endif
        write(idev,*)
     end do
     write(idev,*)
     write(idev,*)
   end subroutine write_f3
+
+!  subroutine write_f3 (idev, Qtest, ymax, ny, muF, muR)
+!    real(dp), intent(in) :: Qtest, ymax
+!    real(dp), intent(in), optional :: muF, muR
+!    integer, intent(in)  :: idev, ny
+!    real(dp) :: ytest, xval, mR, mF, F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO, res(-6:7)
+!    integer  :: iy
+!    !F3 Wp Wm Z
+!    write(idev,'(a,f10.4,a,f10.4)') '# Q = ', Qtest
+!    if (use_sep_orders) then
+!       write(idev,'(a,a)') '# x  F3Wp(LO) F3Wm(LO) F3Wp(NLO) F3Wm(NLO) F3Wp(NNLO) F3Wm(NNLO)', &
+!            & ' F3Wp(N3LO) F3Wm(N3LO) F3Z(LO) F3Z(NLO) F3Z(NNLO) F3Z(N3LO)'
+!    else
+!       write(idev,'(a)') '# x F3Wp F3Wm F3Z'
+!    endif
+!    mF = default_or_opt(sf_muF(Qtest),muF)
+!    mR = default_or_opt(sf_muR(Qtest),muR)
+!    do iy = ny, 1, -1
+!       ytest = iy * ymax / ny
+!       xval = exp(-ytest)
+!       if (use_sep_orders) then
+!          res = F_LO(xval, Qtest, mR, mF)
+!          write(idev,'(3es12.4)',advance='no') xval, res(iF3Wp),res(iF3Wm)
+!          F3Z_LO = res(iF3Z)
+!          res = F_NLO(xval, Qtest, mR, mF)
+!          write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
+!          F3Z_NLO = res(iF3Z)
+!          res = F_NNLO(xval, Qtest, mR, mF)
+!          write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
+!          F3Z_NNLO = res(iF3Z)
+!          res = F_N3LO(xval, Qtest, mR, mF)
+!          write(idev,'(2es12.4)',advance='no') res(iF3Wp), res(iF3Wm)
+!          F3Z_N3LO = res(iF3Z)
+!          write(idev,'(4es12.4)',advance='no') F3Z_LO, F3Z_NLO, F3Z_NNLO, F3Z_N3LO
+!       else
+!          res = StrFct(xval, Qtest, mR, mF)
+!          write(idev,'(4es12.4)',advance='no') xval, res(iF3Wp),res(iF3Wm), res(iF3Z)
+!       endif
+!       write(idev,*)
+!    end do
+!    write(idev,*)
+!    write(idev,*)
+!  end subroutine write_f3
 
   !----------------------------------------------------------------------
   ! set up structure functions for scale_choice = 0, 1, adding up each order
