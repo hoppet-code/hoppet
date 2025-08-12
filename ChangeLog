@@ -2,9 +2,14 @@
 
 	* src/pdf_tabulate.f90:
 	* benchmarking/prec_and_timing.f90:
+
 	changed the arguments in WriteLHAPDFFromPdfTable so that
-	flav_indices are optional and come at the end, chosen
-	automatically based on the
+	flav_indices are optional and come at the end, chosen automatically
+	(QCD/QCD+photon/QCD+photon+leptons) based on the number of flavour
+	indices in the table.
+
+	Also changed the default iy_increment to 1 (instead of -1), based on
+	some very quick tests with dy=0.2.
 
 2025-08-12  Alexander Karlberg  <karlberg@pcth279>
 
