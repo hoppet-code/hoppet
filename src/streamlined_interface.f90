@@ -661,7 +661,7 @@ subroutine hoppetWriteLHAPDFGrid(basename, pdf_index)
 end subroutine hoppetWriteLHAPDFGrid
 
 
-subroutine hoppetWriteLHAPDFWithLen(basename, basename_len, pdf_index)
+subroutine hoppetWriteLHAPDFWithLen(basename_len, basename, pdf_index)
   use streamlined_interface; use warnings_and_errors
   implicit none
   integer,                     intent(in) :: basename_len

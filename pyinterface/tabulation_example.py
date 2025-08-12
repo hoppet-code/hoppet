@@ -67,7 +67,7 @@ def main():
             pdf_array[6 + 0]
         ))
 
-    #hp.WriteLHAPDFgrid("test_python",0)
+    //hp.WriteLHAPDFGrid("test_python",0)
 
     hp.DeleteAll()
 

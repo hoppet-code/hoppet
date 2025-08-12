@@ -46,9 +46,9 @@ int main () {
            pdf[6+0]);
   }
 
-  //const std::string basename = "test_cpp";
-  //const int pdf_index = 0;
-  //hoppetWriteLHAPDFgrid(basename, pdf_index);
+  const std::string basename = "test_cpp";
+  const int pdf_index = 0;
+  //hoppetWriteLHAPDFGrid(basename, pdf_index);
 
   // free all memory that was allocated by hoppet
   hoppetDeleteAll();

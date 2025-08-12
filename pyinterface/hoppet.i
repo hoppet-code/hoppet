@@ -229,7 +229,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %rename(hoppetStrFctNLOFlav     )      hoppetstrfctnloflav_;
 %rename(hoppetStrFctNNLO        )      hoppetstrfctnnlo_;
 %rename(hoppetStrFctN3LO        )      hoppetstrfctn3lo_;
-%rename(WriteLHAPDFgrid         )      hoppetWriteLHAPDFgrid;
+%rename(WriteLHAPDFGrid         )      hoppetWriteLHAPDFGrid;
 %rename(hoppetWriteLHAPDFgrid   )      hoppetwritelhapdfgrid_;
 
 %include "hoppet.h"

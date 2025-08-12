@@ -322,19 +322,19 @@ extern "C" {
 			const double & muF_in,
 			double * F);
   
-  void hoppetwritelhapdfwithlen_(const char* basename,
-				 int & basename_len,
+  void hoppetwritelhapdfwithlen_(int & basename_len,
+				 const char* basename,
 				 const int & pdf_index);
   
   /// Write out the contents of tables(0) (assumed to be the PDF) in the
   /// LHAPDF format
-  void hoppetWriteLHAPDFgrid(const std::string& basename, const int& pdf_index) {
+  void hoppetWriteLHAPDFGrid(const std::string& basename, const int& pdf_index) {
     // Convert std::string to C-style string and get length
     const char* basename_cstr = basename.c_str();
     int basename_len = basename.length();
     
     // Call Fortran subroutine (pass integers by reference)
-    hoppetwritelhapdfwithlen_(basename_cstr, basename_len, pdf_index);
+    hoppetwritelhapdfwithlen_(basename_len, basename_cstr, pdf_index);
   }
   
 }
