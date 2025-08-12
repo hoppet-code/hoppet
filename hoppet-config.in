@@ -60,7 +60,7 @@ for arg do
 	  echo -Wl,-rpath,$installationdir/$installationlibdir -L$installationdir/$installationlibdir -lhoppet
 	  ;;
 	--pythonpath)
-	  echo $pythonpath
+	  echo $installationdir/$pythonpath
 	  ;;
 	--version)
 	  echo $version
