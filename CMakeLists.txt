@@ -177,13 +177,6 @@ if (HOPPET_BUILD_PYINTERFACE)
   message(STATUS "HOPPET: SWIG_VERSION=${SWIG_VERSION} SWIG_LIBRARIES=${SWIG_LIBRARIES} SWIG_INCLUDE_DIRS=${SWIG_INCLUDE_DIRS}")
 endif()
 
-# hoppet-config script =================================================
-set(prefix ${CMAKE_INSTALL_PREFIX})
-set(modprefix "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet")
-set(VERSION "${HOPPET_VERSION}")
-set(libdir "${CMAKE_INSTALL_LIBDIR}")
-configure_file("${PROJECT_SOURCE_DIR}/hoppet-config.in" "${PROJECT_BINARY_DIR}/bin/hoppet-config")
-
 
 # Sources ==============================================================
 file(GLOB SOURCESf90 src/*.f90)
@@ -443,3 +436,11 @@ install(FILES ${PROJECT_BINARY_DIR}/bin/hoppet-config
                                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 install(EXPORT hoppetTargets DESTINATION ${CONFIG_INSTALL_DIR} COMPONENT devel)
+
+# hoppet-config script =================================================
+set(prefix ${CMAKE_INSTALL_PREFIX})
+set(modprefix "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet")
+set(VERSION "${HOPPET_VERSION}")
+set(libdir "${CMAKE_INSTALL_LIBDIR}")
+configure_file("${PROJECT_SOURCE_DIR}/hoppet-config.in" "${PROJECT_BINARY_DIR}/bin/hoppet-config")
+

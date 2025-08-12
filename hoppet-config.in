@@ -6,6 +6,7 @@ installationdir=@prefix@
 installationlibdir=@libdir@
 moddir=@modprefix@
 version=@VERSION@
+pythonpath=@pyexecdir@
 
 # print a usage message and exit
 # exit code passed as argument:
@@ -21,6 +22,7 @@ Usage:
   --fflags     returns the compilation flags to be used with a fortran(90) compiler
   --libs       returns the flags to pass to the linker
   --version    returns the version number
+  --pythonpath returns path for hoppet Python module (add to PYTHONPATH)
 
 NOTE: --libs does not currently provide access to the system f90 libraries, 
       which may be needed if you link a program with a c++ compiler
@@ -56,6 +58,9 @@ for arg do
 	  ;;
 	--libs|--ldflags)
 	  echo -Wl,-rpath,$installationdir/$installationlibdir -L$installationdir/$installationlibdir -lhoppet
+	  ;;
+	--pythonpath)
+	  echo $pythonpath
 	  ;;
 	--version)
 	  echo $version
