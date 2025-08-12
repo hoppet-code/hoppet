@@ -222,9 +222,9 @@ program prec_and_timing
   call get_evaluation_times_new()
 
   if (trim(lhapdf_out) /= "") then
-    open(unit=lhapdf_unit, file=trim(lhapdf_out), status='replace')
-    call WritePdfTableLHAPDF(table, lhapdf_unit, &
-           pdf_type = "central", &
+    !open(unit=lhapdf_unit, file=trim(lhapdf_out), status='replace')
+    call WriteLHAPDFFromPdfTable(table, coupling, lhapdf_out, &
+           pdf_index = 0, &
            flav_indices = (/-5,-4,-3,-2,-1, 0,1,2,3,4,5/), &
            flav_pdg_ids = (/-5,-4,-3,-2,-1,21,1,2,3,4,5/), &
            iy_increment = 1)
