@@ -59,6 +59,7 @@ program prec_and_timing
   character(len=999) :: lhapdf_out = ""
   integer :: idev, y_interp_order
   integer, parameter :: lhapdf_unit = 99
+  integer            :: lhapdf_iyinc
   character(len=300) :: hostname
 
   idev = idev_open_opt("-o","/dev/stdout")    ! output file (required)
@@ -80,6 +81,7 @@ program prec_and_timing
   preev = log_val_opt('-preev',.true.)        ! use pre-evolution (cached evolution)
 
   lhapdf_out = string_val_opt("-lhapdf-out","") ! write out an LHAPDF file
+  lhapdf_iyinc = int_val_opt("-lhapdf-iyinc",1)
 
   if (log_val_opt('-eps')) call SetDefaultConvolutionEps(dble_val_opt('-eps')) ! precision for split.fn. adaptive integration 
   if (log_val_opt('-asdt')) call SetDefaultCouplingDt(dble_val_opt('-asdt')) ! spacing for coupling ev.
@@ -222,12 +224,8 @@ program prec_and_timing
   call get_evaluation_times_new()
 
   if (trim(lhapdf_out) /= "") then
-    !open(unit=lhapdf_unit, file=trim(lhapdf_out), status='replace')
     call WriteLHAPDFFromPdfTable(table, coupling, lhapdf_out, &
-           pdf_index = 0, &
-           flav_indices = (/-5,-4,-3,-2,-1, 0,1,2,3,4,5/), &
-           flav_pdg_ids = (/-5,-4,-3,-2,-1,21,1,2,3,4,5/), &
-           iy_increment = 1)
+           pdf_index = 0, iy_increment = lhapdf_iyinc)
   end if
 
   ! clean up
