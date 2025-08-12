@@ -645,7 +645,7 @@ end subroutine hoppetEvalSplit
 !!   If it is zero, the routing will also output the .info file and
 !!   and the .dat will be declared a central member; otherwise the
 !!   .dat file will be declared an error member.
-subroutine hoppetWriteLHAPDFgrid(basename, pdf_index)
+subroutine hoppetWriteLHAPDFGrid(basename, pdf_index)
   use streamlined_interface; use warnings_and_errors
   implicit none
   character(len=*),       intent(in) :: basename
@@ -658,6 +658,16 @@ subroutine hoppetWriteLHAPDFgrid(basename, pdf_index)
 
   call WriteLHAPDFFromPdfTable(tables(0), coupling, basename, pdf_index)
   
-end subroutine hoppetWriteLHAPDFgrid
+end subroutine hoppetWriteLHAPDFGrid
 
 
+subroutine hoppetWriteLHAPDFWithLen(basename, basename_len, pdf_index)
+  use streamlined_interface; use warnings_and_errors
+  implicit none
+  integer,                     intent(in) :: basename_len
+  character(len=basename_len), intent(in) :: basename
+  integer,                     intent(in) :: pdf_index
+
+  call hoppetWriteLHAPDFGrid(basename, pdf_index)
+  
+end subroutine hoppetWriteLHAPDFWithLen

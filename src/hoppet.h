@@ -39,7 +39,6 @@
 #define hoppetStrFctNLOFlav            hoppetstrfctnloflav_
 #define hoppetStrFctNNLO               hoppetstrfctnnlo_
 #define hoppetStrFctN3LO               hoppetstrfctn3lo_
-#define WriteLHAPDFgrid                hoppetwritelhapdfgrid_
 
 #include <string>
 
@@ -323,12 +322,9 @@ extern "C" {
 			const double & muF_in,
 			double * F);
   
-  void WriteLHAPDFgrid(const char* basename,
-		       const int & pdf_index,
-		       int basename_len); // Fortran has a hidden
-					  // variable containing the
-					  // length of the assumed
-					  // size char
+  void hoppetwritelhapdfwithlen_(const char* basename,
+				 int & basename_len,
+				 const int & pdf_index);
   
   /// Write out the contents of tables(0) (assumed to be the PDF) in the
   /// LHAPDF format
@@ -338,7 +334,7 @@ extern "C" {
     int basename_len = basename.length();
     
     // Call Fortran subroutine (pass integers by reference)
-    WriteLHAPDFgrid(basename_cstr, pdf_index, basename_len);
+    hoppetwritelhapdfwithlen_(basename_cstr, basename_len, pdf_index);
   }
   
 }
