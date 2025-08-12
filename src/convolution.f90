@@ -38,14 +38,14 @@ module convolution
   integer, parameter, public :: WeightGridQuand_npnt_max = npnt_max
 
   !-------------------------------
-  ! definition of a grid
-  ! Includes possibility of one layer of subsiduary definitions
+  !! definition of a grid
+  !! Includes possibility of one layer of subsidiary definitions
   type grid_def
      real(dp) :: dy, ymax, eps
      integer  :: ny, order, nsub = 0
      logical  :: locked
-     integer,        pointer :: subiy(:) => null() ! starting points of subsiduary grid
-     type(grid_def), pointer :: subgd(:) => null() ! subsiduary grid defs
+     integer,        pointer :: subiy(:) => null() ! starting points of subsidiary grid
+     type(grid_def), pointer :: subgd(:) => null() ! subsidiary grid defs
   end type grid_def
 
   !--------------------------------------------------
