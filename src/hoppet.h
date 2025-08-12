@@ -324,8 +324,12 @@ extern "C" {
 			double * F);
   
   void WriteLHAPDFgrid(const char* basename,
-			     const int & pdf_index,
-			     int basename_len);
+		       const int & pdf_index,
+		       int basename_len); // Fortran has a hidden
+					  // variable containing the
+					  // length of the assumed
+					  // size char
+  
   /// Write out the contents of tables(0) (assumed to be the PDF) in the
   /// LHAPDF format
   void hoppetWriteLHAPDFgrid(const std::string& basename, const int& pdf_index) {
