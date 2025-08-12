@@ -3,6 +3,7 @@
 # Licensed under the GPL v2.
 
 installationdir=@prefix@
+installationlibdir=@libdir@
 moddir=@modprefix@
 version=@VERSION@
 
@@ -54,7 +55,7 @@ for arg do
 	  echo -I$moddir
 	  ;;
 	--libs|--ldflags)
-	  echo -Wl,-rpath,$installationdir/lib -L$installationdir/lib -lhoppet
+	  echo -Wl,-rpath,$installationdir/$installationlibdir -L$installationdir/$installationlibdir -lhoppet
 	  ;;
 	--version)
 	  echo $version

@@ -181,6 +181,7 @@ endif()
 set(prefix ${CMAKE_INSTALL_PREFIX})
 set(modprefix "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet")
 set(VERSION "${HOPPET_VERSION}")
+set(libdir "${CMAKE_INSTALL_LIBDIR}")
 configure_file("${PROJECT_SOURCE_DIR}/hoppet-config.in" "${PROJECT_BINARY_DIR}/bin/hoppet-config")
 
 
