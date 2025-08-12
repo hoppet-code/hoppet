@@ -978,7 +978,7 @@ contains
   !!
   !! If flav_indices and flav_pdg_ids are not supplied, these are chosen
   !! by establishing whether the table has photons and leptons based on the
-  !! the upper bound of the flavour index.
+  !! the upper bound of the table's flavour index dimension.
   !!
   subroutine WriteLHAPDFFromPdfTable(table, coupling, basename, pdf_index, &
                                  & iy_increment, &
