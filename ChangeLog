@@ -1,3 +1,21 @@
+2025-08-12  Alexander Karlberg  <karlberg@pcth279>
+
+	* src/hoppet_v1.f90 -> hoppet.f90:
+	* src/hoppet_v1.h -> hoppet.h:
+	* CMakeLists.txt:
+	Changed hoppet_v1 -> hoppet everywhere in preparation for v2
+	release. In particular the library is now called libhoppet, the
+	module is called hoppet, and the c++ namespace is called hoppet.
+
+	* example_f90, example_f77, benchmarking, tests:
+	Updated all examples and test programs to use hoppet instead of
+	hoppet_v1.
+
+	* hoppet.config.in, CMakeLists.txt:
+	Fixed issue where the libdir in hoppet.config was hardcoed to
+	lib. On some systems the libdir in CMake is set to lib64 by
+	default. Now CMake passes the information to hoppet_config.in
+
 2025-08-11 Gavin
 
 	* src/config/hoppet_git_state.f90.in:
