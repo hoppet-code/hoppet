@@ -2,6 +2,7 @@
 #include<iostream>
 #include<cmath>
 #include<cstdio>
+#include <string>
 
 using namespace std;
 
@@ -44,6 +45,10 @@ int main () {
            (pdf[6-4]+pdf[6+4]),
            pdf[6+0]);
   }
+
+  //const std::string basename = "test_cpp";
+  //const int pdf_index = 0;
+  //hoppetWriteLHAPDFgrid(basename, pdf_index);
 
   // free all memory that was allocated by hoppet
   hoppetDeleteAll();

@@ -61,6 +61,8 @@ program structure_functions_example
   call write_f2(6, Q, ymax, 10)
   call write_f3(6, Q, ymax, 10)
 
+  !call hoppetWriteLHAPDFgrid('test',0)
+
 end program structure_functions_example
 
 

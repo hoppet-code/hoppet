@@ -39,6 +39,9 @@
 #define hoppetStrFctNLOFlav            hoppetstrfctnloflav_
 #define hoppetStrFctNNLO               hoppetstrfctnnlo_
 #define hoppetStrFctN3LO               hoppetstrfctn3lo_
+#define WriteLHAPDFgrid                hoppetwritelhapdfgrid_
+
+#include <string>
 
 namespace hoppet {
   /// indices for the different structure functions
@@ -319,6 +322,20 @@ extern "C" {
 			const double & muR_in,
 			const double & muF_in,
 			double * F);
+  
+  void WriteLHAPDFgrid(const char* basename,
+			     const int & pdf_index,
+			     int basename_len);
+  /// Write out the contents of tables(0) (assumed to be the PDF) in the
+  /// LHAPDF format
+  void hoppetWriteLHAPDFgrid(const std::string& basename, const int& pdf_index) {
+    // Convert std::string to C-style string and get length
+    const char* basename_cstr = basename.c_str();
+    int basename_len = basename.length();
+    
+    // Call Fortran subroutine (pass integers by reference)
+    WriteLHAPDFgrid(basename_cstr, pdf_index, basename_len);
+  }
   
 }
 #endif // __HOPPET__

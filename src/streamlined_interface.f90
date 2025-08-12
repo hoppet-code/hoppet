@@ -634,3 +634,30 @@ subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
 
 end subroutine hoppetEvalSplit
 
+!======================================================================
+!! Write out the contents of tables(0) (assumed to be the PDF) in the
+!! LHAPDF format
+!! 
+!! - basename: the basename of the LHAPDF file; the full name will be
+!!   basename_nnnn.dat, where nnnn is given by pdf_index.
+!!   
+!! - pdf_index is the index that will be used for the LHAPDF .dat file
+!!   If it is zero, the routing will also output the .info file and
+!!   and the .dat will be declared a central member; otherwise the
+!!   .dat file will be declared an error member.
+subroutine hoppetWriteLHAPDFgrid(basename, pdf_index)
+  use streamlined_interface; use warnings_and_errors
+  implicit none
+  character(len=*),       intent(in) :: basename
+  integer,                intent(in) :: pdf_index
+
+  if(.not.setup_done(0)) call wae_error("hoppetWriteLHAPDFgrid:"&
+       &,"Trying to write out contents of tables(0) from the&
+       & streamlined interface, but the table has not been filled.&
+       & Did you forget to run hoppetAssign or hoppetEvolve?")
+
+  call WriteLHAPDFFromPdfTable(tables(0), coupling, basename, pdf_index)
+  
+end subroutine hoppetWriteLHAPDFgrid
+
+
