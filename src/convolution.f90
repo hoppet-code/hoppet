@@ -413,8 +413,8 @@ contains
   end subroutine conv_InitGridDef_multi
 
   !======================================================================
-  ! create a grid covering ymax and dy, using our default nested grid
-  ! setup (as created originally for the streamlined interface)
+  !! create a grid covering ymax and dy, using our default nested grid
+  !! setup (as created originally for the streamlined interface)
   subroutine InitGridDefDefault(grid, dy, ymax, order)
     type(grid_def), intent(out) :: grid
     real(dp),       intent(in)  :: ymax, dy
