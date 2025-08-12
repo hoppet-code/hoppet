@@ -943,48 +943,54 @@ contains
   end subroutine EvalPdfTable_Q
 
   !----------------------------------------------------------------------
-  ! Write a PDF table to an LHAPDF-format file, i.e. the .dat files
-  ! used by LHAPDF
-  !
-  ! - table is the pdf_table object that is to be written
-  !
-  !  coupling is the coupling object associated with this table
-  ! 
-  ! - basename is the basename; if pdf_index is zero, the
-  !   
-  ! - pdf_index is the index that will be used for the LHAPDF .dat file
-  !   If it is zero, the routing will also output the .info file and
-  !   and the .dat will be declared a central member; otherwise 
-  !   the .dat file will be declared an error member.
-  !
-  ! - flav_indices indicates which indices to use from the PDF table
-  !
-  ! - flav_pdg_ids indicates the corresponding PDG IDs
-  !
-  ! - flav_rescale, optional, specifies by how much each flavour should be
-  !   rescaled (usually by one, unless you want to use an entry that
-  !   has a sum of flavour and anti-flavour and so rescale by 50% to get
-  !   just the flavour)
-  !
-  ! - iy_increment (default -1):
-  !   * anything positive: chooses the x-points based on table's own
-  !     grid; the value indicates the increment to use in going up in y.
-  !     The essence of the rule is that every time y goes up and iy has
-  !     gone up by at least iy_increment, it outputs an x point.
-  !   * -1: uses a fixed distribution of x points with a coarse ln x spacing
-  !     at small x, and a finer spacing at larger x.
+  !! Write a PDF table to an LHAPDF-format file, i.e. the .dat files
+  !! used by LHAPDF
+  !!
+  !! - table: the pdf_table object that is to be written
+  !!
+  !! - coupling: the coupling object associated with this table
+  !! 
+  !! - basename: the basename of the LHAPDF file; the full name
+  !!   will be basename_nnnn.dat, where nnnn is given by pdf_index.
+  !!   
+  !! - pdf_index is the index that will be used for the LHAPDF .dat file
+  !!   If it is zero, the routing will also output the .info file and
+  !!   and the .dat will be declared a central member; otherwise 
+  !!   the .dat file will be declared an error member.
+  !!
+  !! - iy_increment (optional, default 1):
+  !!   * anything positive: chooses the x-points based on table's own
+  !!     grid; the value indicates the increment to use in going up in y.
+  !!     The essence of the rule is that every time y goes up and iy has
+  !!     gone up by at least iy_increment, it outputs an x point.
+  !!   * -1: uses a fixed distribution of x points with a coarse ln x spacing
+  !!     at small x, and a finer spacing at larger x. LHAPDF's resulting interpolation
+  !!     accuracy should be about $10^{-4}$ for $x<0.5$, $10^{-3}$ for $x<0.9$
+  !!
+  !! - flav_indices (optional): indicates which indices to use from the PDF table
+  !!
+  !! - flav_pdg_ids (optional): indicates the corresponding PDG IDs
+  !!
+  !! - flav_rescale (optional): specifies by how much each flavour should be
+  !!   rescaled (usually by one, unless you want to use an entry that
+  !!   has a sum of flavour and anti-flavour and so rescale by 50% to get
+  !!   just the flavour)
+  !!
+  !! If flav_indices and flav_pdg_ids are not supplied, these are chosen
+  !! by establishing whether the table has photons and leptons based on the
+  !! the upper bound of the flavour index.
+  !!
   subroutine WriteLHAPDFFromPdfTable(table, coupling, basename, pdf_index, &
-                                 & flav_indices, flav_pdg_ids, flav_rescale,&
-                                 & iy_increment)
-    use assertions
+                                 & iy_increment, &
+                                 & flav_indices, flav_pdg_ids, flav_rescale)                                
+    use qed_objects
     type(pdf_table),        intent(in) :: table
     type(running_coupling), intent(in) :: coupling
     character(len=*),       intent(in) :: basename
     integer,                intent(in) :: pdf_index
-    !character(len=*),       intent(in) :: pdf_type
-    integer,                intent(in) :: flav_indices(:), flav_pdg_ids(:)
-    real(dp), optional,     intent(in) :: flav_rescale(:)
     integer,  optional,     intent(in) :: iy_increment
+    integer,  optional,     intent(in) :: flav_indices(:), flav_pdg_ids(:)
+    real(dp), optional,     intent(in) :: flav_rescale(:)
     !------------------------------------
     integer          :: dat_unit, info_unit
     character(len=4) :: pdf_index_str
@@ -999,7 +1005,35 @@ contains
     type(pdfseginfo), pointer :: seginfos(:)
     integer  :: iy_inc, last_iy, n_since_last_spacing_change
 
-    iy_inc = default_or_opt(-1, iy_increment)
+    integer,  allocatable :: lcl_flav_indices(:), lcl_flav_pdg_ids(:)
+    real(dp), allocatable :: lcl_flav_rescale(:)
+
+    iy_inc = default_or_opt(1, iy_increment)
+
+    if (present(flav_indices)) then
+      if (.not. present(flav_pdg_ids)) call wae_error("WritePdfTableLHAPDF",&
+                                    "flav_pdg_ids must be present if flav_indices is present")
+      lcl_flav_indices = flav_indices
+      lcl_flav_pdg_ids = flav_pdg_ids
+    else
+      if (present(flav_pdg_ids) .or. present(flav_rescale)) then
+        call wae_error("WritePdfTableLHAPDF","flav_pdg_ids and flav_rescale must not be present if flav_indices is not present")
+      end if
+      if (ubound(table%tab,2) == ncompmax) then
+        lcl_flav_indices = (/-6,-5,-4,-3,-2,-1, 0,1,2,3,4,5,6/)
+        lcl_flav_pdg_ids = (/-6,-5,-4,-3,-2,-1,21,1,2,3,4,5,6/)
+      else if (ubound(table%tab,2) == ncompmaxPhoton) then
+        lcl_flav_indices = (/-6,-5,-4,-3,-2,-1, 0,1,2,3,4,5,6, 8/)
+        lcl_flav_pdg_ids = (/-6,-5,-4,-3,-2,-1,21,1,2,3,4,5,6,22/)
+      else if (ubound(table%tab,2) == ncompmaxLeptons) then
+        ! recall that our internal representation has 
+        lcl_flav_indices = (/-6,-5,-4,-3,-2,-1, 0,1,2,3,4,5,6, 8, iflv_tau, iflv_muon, iflv_electron, iflv_electron, iflv_muon, iflv_tau/)
+        lcl_flav_pdg_ids = (/-6,-5,-4,-3,-2,-1,21,1,2,3,4,5,6,22,      -15,       -13,           -11,            11,        13,       15/)
+        lcl_flav_rescale = (/ 14* one,                                half,      half,          half,          half,      half,     half/)
+      end if
+
+    end if
+    if (present(flav_rescale)) lcl_flav_rescale = flav_rescale
 
     write(pdf_index_str,'(i4.4)') pdf_index
     dat_unit = 0
@@ -1089,7 +1123,7 @@ contains
        iQlo = seginfos(iseg)%ilnlnQ_lo
        iQhi = seginfos(iseg)%ilnlnQ_hi
        write(dat_unit,'(4000es14.7)') table%Q_vals(iQlo:iQhi)
-       write(dat_unit,'(100i4)')      flav_pdg_ids
+       write(dat_unit,'(100i4)')      lcl_flav_pdg_ids
 
        ! then write out the PDF itself
        ! Note that LHAPDF wants _increasing_ x values
@@ -1097,9 +1131,9 @@ contains
           iy = iyVals(ix)
           do iQ = iQlo, iQhi
              flavs = table%tab(:,:,iQ) .atx. (xVals(ix).with.table%grid)
-             do ipdg = 1, ubound(flav_pdg_ids,1)
-                val = flavs(flav_indices(ipdg))
-                if (present(flav_rescale)) val = val * flav_rescale(ipdg)
+             do ipdg = 1, ubound(lcl_flav_pdg_ids,1)
+                val = flavs(lcl_flav_indices(ipdg))
+                if (allocated(lcl_flav_rescale)) val = val * lcl_flav_rescale(ipdg)
                 if (val == zero) then
                    write(dat_unit,'(a)',advance='no') '  0'
                 else
@@ -1131,7 +1165,7 @@ contains
       write(info_unit,'(a)') 'NumMembers: 1'
       write(info_unit,'(a)') 'Particle: 2212'
       write(info_unit,'(a)',advance="no") 'Flavors: '
-      call write_yaml_array(info_unit, '(i3)', flav_pdg_ids(:), 12)
+      call write_yaml_array(info_unit, '(i3)', lcl_flav_pdg_ids(:), 15)
       write(info_unit,'(a,i2)') 'OrderQCD: ', NumberOfLoops(coupling)-1
       if (size(seginfos) == 1) then
         write(info_unit,'(a)') 'FlavorScheme: fixed'
@@ -1154,6 +1188,7 @@ contains
       write(info_unit,'(a,es22.14)') 'AlphaS_MZ:', value(coupling, 91.11870_dp)
       write(info_unit,'(a)') 'AlphaS_OrderQCD: 2'
       write(info_unit,'(a)') 'AlphaS_Type: ipol'
+      ! allocate, fill and output Q_vals and alphas_vals, 
       block
         real(dp), allocatable :: Q_vals(:), alphas_vals(:)
         Q_vals = table%Q_vals
