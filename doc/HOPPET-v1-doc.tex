@@ -25,7 +25,7 @@ version 2.0.0
 %  a.k.a.\ HOPPETv1
 }
 \author{%
-  Frederic Dreyer,
+  Fr\'ed\'eric Dreyer,
   Alexander Karlberg,
   Paolo Nason,
   Juan Rojo,\\
@@ -2358,8 +2358,6 @@ are to be
 found in \ttt{src/streamlined\_interface.f90} and may provide inspiration
 for the user wishing to write their own F95 code for \hoppet.
 
-\input{qed-and-structure-functions.tex}
-
 \section{Benchmarks}
 \label{sec:benchmarks}
 
@@ -2597,7 +2595,7 @@ This is the combination that we shall use as standard.
 \label{sec:Timing}
 
 
-The time spent in \hoppet for a given analysis can expressed as
+The time spent in \hoppet for a given analysis can be expressed as
 follows, according to whether or not one carries out pre-evolution:
 \begin{subequations}
   \label{eq:timing}
@@ -2615,7 +2613,7 @@ $n_i$ is the number of PDF initial conditions that one wishes to
 consider, $t_i$ is the time to carry out the tabulation for a single
 initial condition, $n_{xQ}$ is the number of points in $x,Q$ at which
 one evaluates the full set of flavours once per PDF initial condition;
-in the case with pre-prepared cached evolution, $t_p$ is the time for a
+in the case with pre-prepared cached evolution, $t_p$ is the time for
 preparing a cached evolution and $t_c$ is the time for performing the
 cached evolution. Finally $t_{xQ}$ is the time it takes to evaluate
 the PDFs at a given value of $(x,Q)$ once the tabulation has
@@ -2727,6 +2725,12 @@ of a tabulated evolution. Default values shown in square
 %      v. Param}}
   \label{tab:acc-param}
 \end{table}
+
+\section{Additions in version 2}
+The following sections detail additions in \hoppet{} that appeared in
+v2.0.0. 
+
+\input{qed-and-structure-functions.tex}
 
 
 %======================================================================

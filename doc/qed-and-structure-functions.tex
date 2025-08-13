@@ -598,7 +598,6 @@ Ref.~\cite{Cooper-Sarkar:2024crx}) are closer to ours.
 
 \begin{table}[ht!]
   %  \footnotesize \centering
-  \label{tab:n3lo-evolve}
   \small \centering
   \begin{tabular}{c|cccccccc}
     $x$ &  $u-\bar u$ &$d-\bar d$ &$\bar d-\bar u$ &  $ 2(\bar u+\bar d)$  &$s+\bar s$&$c+\bar c$ &$b+\bar b$  &   $g$\\
@@ -628,6 +627,7 @@ $0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  
     facilitate comparisons by other groups, and the N3LO splitting
     functions use the
     \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2410\_08089} choice.}
+  \label{tab:n3lo-evolve}
 \end{table}
 
 \begin{table}
@@ -1024,6 +1024,156 @@ the streamlined interface is to be found in
 \repolink{example_f77/cpp_structure_functions_example.cc}{example\_f77/cpp\_structure\_functions\_example.cc}.
 %
 %\gps{added this link}
+
+\section{Updated performance studies}
+In this section we present some updated performance studies relative
+to
+%
+\ifreleasenote
+Section~9 of Ref.~\cite{Salam:2008qg}.
+\else
+Section~\ref{sec:benchmarks}.
+\fi
+%
+Most importantly we benchmark the accuracy and timing of the new
+N$^3$LO evolution. We also present updated plots and
+tables\ak{Currently no table. Do we want to redo table 2?} at NNLO, to
+give a better idea of the performance of \hoppet{} on typical
+compilers and hardware in 2025.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,page=1]{hoppet-v2-accuracy-speed-v-dy.pdf}
+        \caption{}
+        \label{fig:sub1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,page=2]{hoppet-v2-accuracy-speed-v-dy.pdf}
+        \caption{}
+        \label{fig:sub2}
+    \end{subfigure}
+    \caption{Accuracy (top) and timing (bottom) versus \texttt{dy} at
+      (a) NNLO and (b) N$^3$LO in \hoppet{} v2.0.0. The timings were
+      obtained on an \texttt{M2Pro} with \texttt{gfortran v14.2} and
+      \texttt{-O3} optimisation \ak{with some average over N
+        runs?}. We have further used \texttt{ymax = 12} and
+      \texttt{dlnlnQ = dy/4}.}
+    \label{fig:main}
+\end{figure}
+
+The studies are performed using the initial condition of
+Ref.~\cite{Dittmar:2005ed} as detailed in
+%
+\ifreleasenote
+Section~9.1 of Ref.~\cite{Salam:2008qg},
+\else
+Section~\ref{sec:Accuracy},
+\fi
+%
+evolved in the VFNS scheme. At NNLO we use the parametrised splitting
+functions and exact mass thresholds \ak{GS confirm. Do we need to
+  specify what we do at n3lo since we don't really have a choice?}. To
+assess the accuracy we first create a reference run with a very high
+density grid. We then run \hoppet{} with different values of grid
+spacing \texttt{dy} keeping \texttt{dlnlnQ = dy/4}. The accuracy is
+then computed by looking at the largest relative deviation from the
+reference run across either all flavours (all-flav) or the light
+flavours (guds). The full tabulation covers the range $10^{-5} < x <
+1$, $2 < Q < 10^4\, \mathrm{GeV}$ but since the grids quickly
+deteriorate as $x \to 1$ due to divergent logarithmic derivatives we
+limit ourselves to $x < 0.9$ and $x < 0.7$ which cover any potential
+phenomenological application \ak{is this true?}.
+
+The result for the accuracy study can be seen in the top panels of
+Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and N$^3$LO
+respectively. At NNLO the accuracy comes out similar to previous
+versions of \hoppet{}. In particular we note that with \texttt{dy =
+  0.2} one obtains a relative accuracy of $10^{-4}$ across all
+flavours in the range $x < 0.9$. At the finest grid spacing \texttt{dy
+  = 0.04} a relative accuracy of $10^{-7}$ can be achieved, good
+enough for precise benchmark comparisons as were for instance carried
+out in Refs.~\cite{Dittmar:2005ed,Bertone:2024dpm}\ak{Do we want to
+  mention that it is also much better than the most current n3lo
+  benchmark which barely reaches $10^{-4}$?}. At N$^3$LO we observe a
+similar level of accuracy as at NNLO except for the all-flav, $x<0.9$
+case with \texttt{dy} below \texttt{0.1}. We have confirmed that this
+deterioration is due to small numerical instabilities in the exact
+mass threshold expressions at N$^3$LO, presumably when $x \to 1$. We
+therefore suspect that this could be improved by switching to a
+large-$x$ expansion above some threshold. Since this deterioration is
+only present at the relative $10^{-5}$-level, and at very large values
+of $x$, it is unlikely to be visible in any realistic application. In
+particular we note that for $x<0.7$ the accuracy is comparable to that
+at NNLO.
+
+For the timing studies we run \hoppet{} for different values of
+\texttt{dy} on an \texttt{M2Pro} with \texttt{gfortran v14.2} and
+\texttt{-O3} optimisation. In order to avoid fluctuations we take the
+average over \ak{N} runs.
+
+\ak{taken from v1 manual with small modifications} The time spent in
+\hoppet for a given analysis can be expressed as follows, according to
+whether or not one carries out cached evolution (pre-evolution) or
+not:
+\begin{subequations}
+  \label{eq:timing-v2}
+  \begin{align}
+    t_\text{no pre-ev}   &= t_s + n_\alpha t_\alpha + n_i (t_i  + n_{xQ}\, t_{xQ})\,,\\
+    t_\text{with pre-ev} &= t_s + n_\alpha (t_\alpha + t_p) + n_i (t_c + n_{xQ}\,
+    t_{xQ})\,,
+  \end{align}
+\end{subequations}
+where $t_s$ is the time for setting up the splitting functions and
+mass threshold functions, $n_\alpha$ is the number of different
+running couplings that one has, $t_\alpha$ is the time for
+initialising the coupling,
+%
+$n_i$ is the number of PDF initial conditions that one wishes to
+consider, $t_i$ is the time to carry out the tabulation and evolution
+for a single initial condition, $n_{xQ}$ is the number of points in
+$x,Q$ at which one evaluates the full set of flavours once per PDF
+initial condition; in the case with cached evolution, $t_p$ is the
+time for preparing a cached evolution and $t_c$ is the time for
+performing the cached evolution. Finally $t_{xQ}$ is the time it takes
+to evaluate the PDFs at a given value of $(x,Q)$ once the tabulation
+has been performed.
+
+Here we study $t_s$, $t_i$, and $t_c$. The results can be seen in the
+bottom panels of Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and
+N$^3$LO respectively. The timings are seen to obey a power law in
+\texttt{dy} \ak{might be of interest to extract the coefficients}. At
+NNLO the initialisation time of $\sim 60-300\,\mathrm{ms}$ dominates
+the evolution time across almost all \texttt{dy} values that we
+study. We note that when using cached evolution the evolution time
+reaches as little as $1\,\mathrm{ms}$ for \texttt{dy = 0.2}, making
+the code fast enough to perform accurate PDF fits in a few minutes
+even when $n_i$ reaches $10^5$. Comparing these numbers to those of  
+%
+\ifreleasenote
+Table~2 of Ref.~\cite{Salam:2008qg},
+\else
+Table~\ref{tab:timings},
+\fi
+%
+which were obtained with 2008 hardware, we see a speed-up of roughly a
+factor 10.
+
+At N$^3$LO the evolution picture is almost identical to that at NNLO,
+but the initialisation times are dramatically different in the range
+$4-15\, \mathrm{s}$. This boils down to the extra time that it takes
+to initialise the exact mass threshold functions of
+Ref.~\cite{BlumleinCode}. In any application where \hoppet{} either
+has to evolve or access the evolved tables multiple times this extra
+initialisation is insignificant. Should parametrised expressions of
+the mass threshold functions become available we plan to implement
+them to overcome this minor inconvenience \ak{GS rephrase}.
+
+We conclude that \hoppet{} is competitive compared to other evolution
+codes on the market both in terms of accuracy and speed.
 
 \section{Python interface}
 \label{sec:pyinterface}
