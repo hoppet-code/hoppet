@@ -162,6 +162,8 @@ program tabulation_example_qed_streamlined
 
   ! NB: there is no cached evolution option available
   ! with QED turned on
+
+  !call hoppetWriteLHAPDFGrid("test_qed",0)
   
   ! perform cleanup (not strictly required)
   call hoppetDeleteAll()

@@ -1003,7 +1003,7 @@ contains
     real(dp), parameter :: dzeta_def = 0.30_dp, zeta_a = 10.0_dp, zeta_b = 5.0_dp
     integer  :: iyVals(0:table%grid%ny), nx, nx_max, iy, ix, iQ, iseg, iQlo, iQhi, ipdg, iflv
     type(pdfseginfo), pointer :: seginfos(:)
-    integer  :: iy_inc
+    integer  :: iy_inc, i
 
     integer,  allocatable :: lcl_flav_indices(:), lcl_flav_pdg_ids(:)
     real(dp), allocatable :: lcl_flav_rescale(:)
@@ -1020,7 +1020,8 @@ contains
     else
       if (present(flav_pdg_ids) .or. present(flav_rescale)) then
         call wae_error("WritePdfTableLHAPDF","flav_pdg_ids and flav_rescale must not be present if flav_indices is not present")
-      end if
+     end if
+     !print*, "Entered here", ubound(table%tab,2), ncompmax, ncompmaxPhoton, ncompmaxLeptons
       if (ubound(table%tab,2) == ncompmax) then
         lcl_flav_indices = (/-6,-5,-4,-3,-2,-1, 0,1,2,3,4,5,6/)
         lcl_flav_pdg_ids = (/-6,-5,-4,-3,-2,-1,21,1,2,3,4,5,6/)
@@ -1035,9 +1036,8 @@ contains
         lcl_flav_pdg_ids = (/-6,-5,-4,-3,-2,-1,21,1,2,3,4,5,6,22,    &
              &  -15,       -13,           -11,            11,       &
              & 13,       15/)
-        lcl_flav_rescale = (/ 14* one,                               &
-             & half,      half,          half,          half,     &
-             & half,     half/)
+        lcl_flav_rescale = (/ (one, i=1,14), half, half, half, half,&
+             & half, half/)
       end if
 
     end if
@@ -1128,13 +1128,15 @@ contains
              flavs = table%tab(:,:,iQ) .atx. (xVals(ix).with.table%grid)
              do ipdg = 1, ubound(lcl_flav_pdg_ids,1)
                 val = flavs(lcl_flav_indices(ipdg))
-                if (allocated(lcl_flav_rescale)) val = val * lcl_flav_rescale(ipdg)
+                !print*, val, lcl_flav_rescale(ipdg), lcl_flav_indices(ipdg), ipdg
+                if (allocated(lcl_flav_rescale)) val = val * lcl_flav_rescale(lcl_flav_indices(ipdg))
                 if (val == zero) then
                    write(dat_unit,'(a)',advance='no') '  0'
                 else
                    write(dat_unit,'(es15.7)',advance='no') val
                 end if
              end do
+             !stop
              write(dat_unit,'(a)') ''
           end do
        end do
