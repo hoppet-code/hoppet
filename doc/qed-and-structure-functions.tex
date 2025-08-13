@@ -1032,10 +1032,15 @@ most common evolution routines. It currently includes exactly the same
 functionality as the streamlined interface, and can be called in much
 the same way. The names of functions and routines are the same as in
 the streamlined interface, but stripped of the \ttt{hoppet}
-prefix. The interface is installed automatically as \ttt{hoppet}
-with \ttt{Cmake} and can be used through \ttt{import hoppet}. For a
-fully worked out tabulation example the user should take a look at
-\repolink{pyinterface/tabulation_example.py}{pyinterface/tabulation\_example.py}.
+prefix. The interface is installed automatically as \ttt{hoppet} with
+\ttt{Cmake} and can be used through \ttt{import hoppet}. For a fully
+worked out tabulation example the user should take a look at
+\repolink{pyinterface/tabulation_example.py}{pyinterface/tabulation\_example.py}. The
+interface uses SWIG (Simplified Wrapper and Interface Generator) which
+therefore needs to be available on the system. It can be installed
+through most package managers (e.g.\ \texttt{apt install swig}) but
+can also be obtained from the SWIG GitHub
+\href{https://github.com/swig}{repository}.
 
 One significant difference between the Python interface and the
 streamlined interface is that Python does not provide native support
@@ -1132,9 +1137,11 @@ A user has to provide a \ttt{table} and associated \ttt{coupling}
 object along with a string \ttt{basename} and the \ttt{pdf\_index} as
 needed by LHAPDF. If \ttt{pdf\_index} is equal to 0 then the routine
 will output the content of the table in \ttt{basename\_0000.dat} and
-write a file \ttt{basename.info} again in the LHAPDF format. For any
-other value of \ttt{pdf\_index} only the corresponding \ttt{.dat} file
-will be written.
+write a template \ttt{basename.info} again in the LHAPDF
+format. \hoppet{} will fill most of the entries in the \ttt{.info}
+file, but a few need to be filled manually by the user. For any other
+value of \ttt{pdf\_index} only the corresponding \ttt{.dat} file will
+be written.
 
 By default the code uses the same grid spacing as in the internal
 \hoppet{} table (\ttt{iy\_increment = 1}) and prints all the possible
@@ -1144,7 +1151,9 @@ values. If \ttt{iy\_increment > 1} a coarser grid is provided by
 skipping over \ttt{iy\_increment - 1} points in the grid. The
 \ttt{flav\_rescale} is currently needed for the lepton PDF which is
 provided as the sum over flavour and anti-flavour and therefore needs
-an extra factor half.
+an extra factor half. The \ttt{flav\_rescale} array only needs to be
+provided if the user is also providing the array of flavours and pdf
+values.
 
 Finally the routine can also be accessed from the streamlined
 interface through \CPP{} or Python. In this case the routine is

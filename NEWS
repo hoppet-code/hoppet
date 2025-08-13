@@ -6,13 +6,15 @@ Release 2.0.0, XX June 2025
 
 Major new features:
 * inclusion of QED evolution
-* inclusion of structure function calculations, including code from (D)MVV group, 
-  (arXiv:1606.08907 and refs therein)
+* inclusion of structure function calculations, including code from (D)MVV
+  group, (arXiv:1606.08907 and refs therein)
 * inclusion of approximate N3LO splitting functions, including code from 
   FHMPRUVV group (arXiv:2410.08089 and refs therein)
 * inclusion of mass threshold matrices for VFNS N3LO evolution, including
   code from ABBFMSS group (DESY 24-037 and refs therein)
-* inclusion of a python interface (similar to the streamlined interface)
+* inclusion of a python interface (similar to the streamlined interface). The
+  interface is built with SWIG (https://github.com/swig), and will not be
+  compiled if SWIG is not present on the system
 
 We are grateful to the authors of the N3LO coefficient functions,
 splitting functions and mass threshold terms for providing their code. 
@@ -33,6 +35,8 @@ Other changes:
 * Users have a choice between traditional makefiles and the CMake build
   system. CMake is now the preferred option. The two should not be
   used concurrently in the same directory.
+* functionality to print a PDF from a hoppet table in the LHAPDF6 format is
+  now provided, also in the streamlined interface. 
 
 ======================================================================
 Release 1.2.0, 30 October 2020
