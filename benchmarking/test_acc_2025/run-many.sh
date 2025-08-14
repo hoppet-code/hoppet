@@ -1,7 +1,26 @@
 #!/usr/bin/env bash
 ##
-## Script to produce a a series of runs of varying accuracy for easy
+## Script to produce a a series of runs of varying accuracy, for easy
 ## comparisons of accuracy and timing.
+##
+## This script takes about 5 minutes on an M2Pro and produces
+## around 50-90MB of output
+##
+## Reference results are stored in the 
+## https://github.com/hoppet-code/2025-prec-and-timing
+## repository
+
+usage="$0 buildDir outputDir"
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $usage"
+  exit 1
+fi
+build_dir=$1
+outdir=$2
+nloop=4
+checkinterp=no
+#nloop=3
+#checkinterp=yes
 
 
 # Set color variables only if output is a terminal
@@ -16,16 +35,12 @@ else
 fi
 
 
-nloop=4
-checkinterp=no
-outdir=pp
 
 dyvals="0.25 0.2 0.15 0.1 0.08 0.07 0.05 0.04 0.03 0.025"
 echo -e $term_blue"Running with nloop = $nloop"$term_reset
 echo -e $term_blue"Output directory: $outdir"$term_reset
 echo "======================"
 accdir=$(dirname "$0")
-build_dir=./
 #build_dir=$(dirname "$0")/../../build
 compare="$build_dir/benchmarking/compare2files_v2"
 common="$build_dir/benchmarking/prec_and_timing -outputgrid -nxQ 5000 -auto-nrep -nrep-eval 100 -nloop $nloop"

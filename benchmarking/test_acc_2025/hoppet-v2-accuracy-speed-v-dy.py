@@ -29,7 +29,7 @@ plt.rc('axes', prop_cycle=colors)
 mpl.rcParams.update({"axes.grid" : True, "grid.linestyle": ":"})
 plt.rc('figure', figsize=(5,5))
 
-dirM2pro="../../build/pp/"
+dirM2pro="../../../2025-prec-and-timing/M2Pro"
 nloop_names = {1: "LO", 2: "NLO", 3: "NNLO", 4: "N3LO"}
 
 def main(pdf,nloop):
@@ -44,8 +44,8 @@ def main(pdf,nloop):
 
     mask = run_stats_pre.dy > 0.035
 
-    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt09[mask], label='all-flav, $x<0.9$', **styles[0], ls="-")
-    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt07[mask], label='all-flav, $x<0.7$', **styles[0], ls=":")
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt09[mask], label='all-flav, $x<0.9$', **styles[0], ls=":")
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt07[mask], label='all-flav, $x<0.7$', **styles[0], ls="-")
     ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt07[mask], label='guds, $x<0.7$'    , **styles[0], ls="--")
     #ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt09[mask], label='guds, $x<0.9$'    , **styles[0], ls=":")
 
