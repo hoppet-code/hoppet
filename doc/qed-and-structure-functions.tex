@@ -994,7 +994,7 @@ can then be accessed through the subroutines
   call hoppetStrFctN3LO(x, Q, muR, muF, fn3lo) ! N3LO term
 \end{lstlisting}
 The \CPP{} header contains indices for the structure functions and scale
-choices, which are all in the \ttt{hoppetv1} namespace.
+choices, which are all in the \ttt{hoppet} namespace.
 %
 \begin{lstlisting}
   const int iF1Wp = 1+6;
@@ -1076,22 +1076,41 @@ Section~\ref{sec:Accuracy},
 \fi
 %
 evolved in the VFNS scheme. At NNLO we use the parametrised splitting
-functions and exact mass thresholds \ak{GS confirm. Do we need to
-  specify what we do at n3lo since we don't really have a choice?}. To
+functions and mass thresholds, as per \hoppet defaults.
+%
+To
 assess the accuracy we first create a reference run with a very high
 density grid. We then run \hoppet{} with different values of grid
 spacing \texttt{dy} keeping \texttt{dlnlnQ = dy/4}. The accuracy is
 then computed by looking at the largest relative deviation from the
 reference run across either all flavours (all-flav) or the light
-flavours (guds). The full tabulation covers the range $10^{-5} < x <
-1$, $2 < Q < 10^4\, \mathrm{GeV}$ but since the grids quickly
-deteriorate as $x \to 1$ due to divergent logarithmic derivatives we
-limit ourselves to $x < 0.9$ and $x < 0.7$ which cover any potential
-phenomenological application \ak{is this true?}.
+flavours (guds).
+%
+The full tabulation covers the range $10^{-5} < x < 1$,
+$2 < Q < 10^4\, \text{GeV}$.\footnote{For tabulations extending to
+  significantly smaller $x$ values, it may be advantageous to take a
+  smaller \texttt{dlnlnQ} choice, e.g.\ \texttt{dlnlnQ = dy/8},
+  because of the steep $\ln Q$ derivative of the parton
+  distributions.}
+%
+At very large $x$ values, the numerical precision degrades because the
+parton distribution functions because a very steep function of $\ln
+x$.
+%
+However the parton distributions have small values there and so we
+carry out our precision study with two potential upper limits on the
+$x$ value being probed, $x < 0.9$ and $x < 0.7$.
+% 
+% since the grids quickly
+% deteriorate as $x \to 1$ due to divergent logarithmic derivatives we
+% limit ourselves to $x < 0.9$ and $x < 0.7$ which cover any potential
+% phenomenological application \ak{is this true?}.
 
 The result for the accuracy study can be seen in the top panels of
 Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and N$^3$LO
-respectively. At NNLO the accuracy comes out similar to previous
+respectively, as a function of \texttt{dy}.
+%
+At NNLO the accuracy comes out similar to previous
 versions of \hoppet{}. In particular we note that with \texttt{dy =
   0.2} one obtains a relative accuracy of $10^{-4}$ across all
 flavours in the range $x < 0.9$. At the finest grid spacing \texttt{dy
@@ -1161,11 +1180,7 @@ At
 NNLO the initialisation time of $\sim 60-300\,\mathrm{ms}$ dominates
 the evolution time across almost all \texttt{dy} values that we
 study. We note that when using cached evolution the evolution time
-reaches as little as $1\,\mathrm{ms}$ for \texttt{dy = 0.2}, making
-the code fast enough to perform accurate PDF fits in a few minutes
-even when $n_i$ reaches $10^5$.
-\gps{Do we have a basis for this number for $n_i$, i.e.\ something we
-  can cite?}
+reaches as little as $1\,\mathrm{ms}$ for \texttt{dy = 0.2}.
 %
 Comparing these numbers to those of  
 %
@@ -1176,7 +1191,7 @@ Table~\ref{tab:timings},
 \fi
 %
 which were obtained with 2008 hardware, we see a speed-up of roughly a
-factor 10.
+factor 10, which we attribute mainly to improvements in the hardware.
 
 At N$^3$LO the evolution picture is almost identical to that at NNLO,
 but the initialisation times are significantly larger, in the range
@@ -1188,14 +1203,16 @@ Ref.~\cite{BlumleinCode}.
 %
 In any application where \hoppet{} either
 has to evolve or access the evolved tables multiple times this extra
-initialisation is insignificant. Should parametrised expressions of
-the mass threshold functions become available we plan to implement
-them to overcome this minor inconvenience \ak{GS rephrase}.
-
-We conclude that \hoppet{} is competitive compared to other evolution
-codes on the market both in terms of accuracy and speed.
+initialisation is insignificant.
 %
-\gps{We should cite them, and give comparisons where possible}
+Should parametrised expressions of the mass threshold functions become
+available, we expect that the initialisation time will be
+substantially reduced.
+
+% We conclude that \hoppet{} is competitive compared to other evolution
+% codes on the market both in terms of accuracy and speed.
+% %
+% \gps{We should cite them, and give comparisons where possible}
 
 \section{Python interface}
 \label{sec:pyinterface}
@@ -1275,7 +1292,7 @@ by a call to \ttt{cmake -LH ..} from the \ttt{build} directory.
 
 Of particular note to most users are
 \begin{lstlisting}
-  option(HOPPET_USE_EXACT_COEF   "Use exact coefficient functions"  OFF)
+  option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
   option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
   option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
   option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
@@ -1348,6 +1365,6 @@ The routine writes the content of the streamlined interface
 \ttt{tables(0)} and hence requires that this object has been filled
 either through a call to \ttt{hoppetAssign} or \ttt{hoppetEvolve}.
 
-  %%% Local Variables:
+%%% Local Variables:
 %%% TeX-master: "HOPPET-v2.0-release.tex"
 %%% End:
