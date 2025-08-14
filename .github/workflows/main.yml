@@ -170,7 +170,7 @@ jobs:
     - name: Install 
       run: |
           uname -a
-          brew install wget coreutils gcc python3 swig
+          brew install wget coreutils gcc gfortran python3 swig
           brew tap davidchall/hep
           brew install lhapdf
           ls /opt/homebrew/bin/gfortran*
