@@ -806,7 +806,7 @@ argument can take several values:
 % This makes for a slightly slower evaluation compared to the two other
 % scale choices.
 
-If \ttt{param\_coefs} is set to \ttt{.true.} (its defalt) then the
+If \ttt{param\_coefs} is set to \ttt{.true.}\ (its default) then the
 structure functions are computed using the NNLO and N$^3$LO
 parametrisations found in
 Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},
@@ -830,8 +830,9 @@ they are to be preferred for most applications.
 % most applications.
 % 
 Note that the exact expressions also add to compilation time and need
-to be explicitly enabled with the \ttt{--enable-exact-coefs} configure
-flag.\footnote{At N$^3$LO they rely on an extended version of
+to be explicitly enabled with the \texttt{-DHOPPET\_USE\_EXACT\_COEF=ON}
+CMake flag (or the \ttt{--enable-exact-coefs} configure
+flag).\footnote{At N$^3$LO they rely on an extended version of
   \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
   is able to handle harmonic polylogarithms up to weight 5.}
 
@@ -1149,7 +1150,12 @@ N$^3$LO respectively.
 The timings are seen to obey a power law in \texttt{dy}. \ak{might be
   of interest to extract the coefficients}.\gps{I would expect
   $1/\text{\texttt{dy}}^3$ for the evolution and the plot seems
-  roughly consistent with that}
+  roughly consistent with that; in fact perhaps we want to quote the
+  expected timing as $(\text{dy}^2 \text{dlnlnQ})^{-1}$.
+  %
+  I think that we expect precision to go as $\text{dlnlnQ}^4$, while
+  the $\text{dy}$ order might be higher.
+}
 %
 At
 NNLO the initialisation time of $\sim 60-300\,\mathrm{ms}$ dominates
@@ -1278,7 +1284,7 @@ Of particular note to most users are
   option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
 \end{lstlisting}
 The can be set when call \ttt{cmake} in the usual way,
-e.g.\ \ttt{cmake .. -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet
+e.g.\ \ttt{cmake ..\ -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet
 with the exact coefficient functions.
 
 \section{Saving LHAPDF grids}
