@@ -5,8 +5,6 @@
     headheight=110pt,
     footskip=30pt
 }
-\newcommand{\repolink}[2]{\href{https://github.com/hoppet-code/hoppet/blob/master/#1}{\ttt{#2}}}
-\newcommand{\masterlink}[1]{\repolink{#1}{#1}}
 \biboptions{sort&compress}
 
 % We need slightly different text in the manual and in the release note.
@@ -62,12 +60,12 @@ CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
 \section{Introduction}
 
 
-\hoppet is a parton distribution function (PDF) evolution code written
-in modern Fortran,\footnote{This release of \hoppet makes use of
-  features introduced in Fortran~2008, for example its \ttt{abstract
-    interface}, and hence a Fortran~2008 compliant compiler is now
-  needed.}  with interfaces also for C/\CPP{} and earlier dialects of
-Fortran.
+\hoppet~\cite{Salam:2008qg} is a parton distribution function (PDF)
+evolution code written in modern Fortran,\footnote{This release of
+  \hoppet makes use of features introduced in Fortran~2008, for
+  example its \ttt{abstract interface}, and hence a Fortran~2008
+  compliant compiler is now needed.}  with interfaces also for
+C/\CPP{} and earlier dialects of Fortran.
 %
 It offers both a high-level PDF evolution interface and user-access to
 lower-level functionality for operations such as convolutions of
@@ -133,12 +131,12 @@ Details of the other changes since release 1.1.0 can be found in the
 repository.\medskip
 
 \noindent \fbox{\parbox{\textwidth}{
-Note that for this 2.0.0, release \hoppet's library name has been renamed
+\textbf{Note that for this 2.0.0 release, \hoppet's library name has been renamed
 from \texttt{hoppet\_v1} to \texttt{hoppet}, and similarly for the main
 module and \CPP include file.
 %
 Users with an existing installation of \hoppet (v1) should make sure
-that they link with the new library.
+that they link with the new library name.}
 }}
 
 \input{qed-and-structure-functions.tex}
