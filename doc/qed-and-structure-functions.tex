@@ -1144,14 +1144,24 @@ has been performed.
 
 Here we study $t_s$, $t_i$, and $t_c$. The results can be seen in the
 bottom panels of Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and
-N$^3$LO respectively. The timings are seen to obey a power law in
-\texttt{dy} \ak{might be of interest to extract the coefficients}. At
+N$^3$LO respectively.
+%
+The timings are seen to obey a power law in \texttt{dy}. \ak{might be
+  of interest to extract the coefficients}.\gps{I would expect
+  $1/\text{\texttt{dy}}^3$ for the evolution and the plot seems
+  roughly consistent with that}
+%
+At
 NNLO the initialisation time of $\sim 60-300\,\mathrm{ms}$ dominates
 the evolution time across almost all \texttt{dy} values that we
 study. We note that when using cached evolution the evolution time
 reaches as little as $1\,\mathrm{ms}$ for \texttt{dy = 0.2}, making
 the code fast enough to perform accurate PDF fits in a few minutes
-even when $n_i$ reaches $10^5$. Comparing these numbers to those of  
+even when $n_i$ reaches $10^5$.
+\gps{Do we have a basis for this number for $n_i$, i.e.\ something we
+  can cite?}
+%
+Comparing these numbers to those of  
 %
 \ifreleasenote
 Table~2 of Ref.~\cite{Salam:2008qg},
@@ -1163,10 +1173,14 @@ which were obtained with 2008 hardware, we see a speed-up of roughly a
 factor 10.
 
 At N$^3$LO the evolution picture is almost identical to that at NNLO,
-but the initialisation times are dramatically different in the range
-$4-15\, \mathrm{s}$. This boils down to the extra time that it takes
+but the initialisation times are significantly larger, in the range
+$4-15\, \mathrm{s}$, rather than a fraction of a second.
+%
+This is dominated by the extra time that it takes
 to initialise the exact mass threshold functions of
-Ref.~\cite{BlumleinCode}. In any application where \hoppet{} either
+Ref.~\cite{BlumleinCode}.
+%
+In any application where \hoppet{} either
 has to evolve or access the evolved tables multiple times this extra
 initialisation is insignificant. Should parametrised expressions of
 the mass threshold functions become available we plan to implement
@@ -1174,6 +1188,8 @@ them to overcome this minor inconvenience \ak{GS rephrase}.
 
 We conclude that \hoppet{} is competitive compared to other evolution
 codes on the market both in terms of accuracy and speed.
+%
+\gps{We should cite them, and give comparisons where possible}
 
 \section{Python interface}
 \label{sec:pyinterface}
@@ -1188,7 +1204,8 @@ worked out tabulation example the user should take a look at
 \repolink{pyinterface/tabulation_example.py}{pyinterface/tabulation\_example.py}. The
 interface uses SWIG (Simplified Wrapper and Interface Generator) which
 therefore needs to be available on the system. It can be installed
-through most package managers (e.g.\ \texttt{apt install swig}) but
+through most package managers (e.g.\ \texttt{apt install swig},
+\texttt{brew install swig}) but
 can also be obtained from the SWIG GitHub
 \href{https://github.com/swig}{repository}.
 
