@@ -44,9 +44,8 @@ def main(pdf,nloop):
 
     mask = run_stats_pre.dy > 0.035
 
-    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt09[mask], label='all-flav, $x<0.9$', **styles[0], ls=":")
-    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt07[mask], label='all-flav, $x<0.7$', **styles[0], ls="-")
     ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt07[mask], label='guds, $x<0.7$'    , **styles[0], ls="--")
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt07[mask], label='all-flav, $x<0.7$', **styles[0], ls="-")
     #ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt09[mask], label='guds, $x<0.9$'    , **styles[0], ls=":")
 
     ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_init_s[mask], **styles[1], label='initialisation')
@@ -87,10 +86,15 @@ def main(pdf,nloop):
     # ax.set_title("title")
     # ax.text(x,y,'hello',transform=ax.transAxes)
     #ax.plot(res.x, res.y, label='label', **styles[0])
-    ax1.legend(loc='lower right')
+    ax1.legend(loc='lower right',reverse=True)
     ax2.legend(loc='lower left')
     pdf.savefig(fig,bbox_inches='tight')
     #pdf.savefig(fig,bbox_inches=Bbox.from_extents(0.0,0.0,7.5,4.8))
+
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt09[mask], label='all-flav, $x<0.9$', **styles[0], ls=":")
+    ax1.legend(loc='lower right',reverse=True)
+    pdf.savefig(fig,bbox_inches='tight')
+
     plt.close()
 
 class RunStats(object):
