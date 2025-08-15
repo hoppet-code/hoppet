@@ -195,13 +195,9 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 
 // Routines that retain their "hoppet" prefix in this list have an
 // explicit functions defined above in order to correctly return a pdf
-// object.
-%rename(hoppetStart             )      hoppetstart_;
-%rename(hoppetStartExtended     )      hoppetstartextended_;
-%rename(hoppetAssign            )      hoppetassign_; // The callback function is Assign
-%rename(hoppetEvolve            )      hoppetevolve_; // The callback function is Evolve
+// object. The rest we rename to remove the trailing underscore,
+// remove the hoppet prefix and turn into CamelCase.
 %rename(PreEvolve               )      hoppetpreevolve_;     
-%rename(hoppetCachedEvolve      )      hoppetcachedevolve_; // The callback function is CachedEvolve
 %rename(AlphaS                  )      hoppetalphas_; 
 %rename(SetFFN                  )      hoppetsetffn_;       
 %rename(SetVFN                  )      hoppetsetvfn_;       
@@ -210,27 +206,36 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %rename(SetExactDGLAP           )      hoppetsetexactdglap_;
 %rename(SetApproximateDGLAPN3LO )      hoppetsetapproximatedglapn3lo_;
 %rename(SetN3LOnfthresholds     )      hoppetsetn3lonfthresholds_;
-%rename(hoppetEval              )      hoppeteval_;          
-%rename(hoppetEvalSplit         )      hoppetevalsplit_;
 %rename(SetQED                  )      hoppetsetqed_;
-%rename(hoppetDeleteAll         )      hoppetdeleteall_;
-
 %rename(StartStrFct             )      hoppetstartstrfct_;
 %rename(StartStrFctExtended     )      hoppetstartstrfctextended_;
 %rename(InitStrFct              )      hoppetinitstrfct_;
 %rename(InitStrFctFlav          )      hoppetinitstrfctflav_;
-%rename(hoppetStrFct            )      hoppetstrfct_;
-%rename(hoppetStrFctNoMu        )      hoppetstrfctnomu_;
-%rename(hoppetStrFctLO          )      hoppetstrfctlo_;
-%rename(hoppetStrFctNLO         )      hoppetstrfctnlo_;
-%rename(hoppetStrFctFlav        )      hoppetstrfctflav_;
-%rename(hoppetStrFctNoMuFlav    )      hoppetstrfctnomuflav_;
-%rename(hoppetStrFctLOFlav      )      hoppetstrfctloflav_;
-%rename(hoppetStrFctNLOFlav     )      hoppetstrfctnloflav_;
-%rename(hoppetStrFctNNLO        )      hoppetstrfctnnlo_;
-%rename(hoppetStrFctN3LO        )      hoppetstrfctn3lo_;
 %rename(WriteLHAPDFGrid         )      hoppetWriteLHAPDFGrid;
 %rename(hoppetWriteLHAPDFgrid   )      hoppetwritelhapdfgrid_;
+
+// These are the functions that have an explicit interface defined
+// above, so we make sure not to include the C++ versions
+%ignore hoppetstart_;
+%ignore hoppetstartextended_;
+%ignore hoppetassign_; // The callback function is Assign
+%ignore hoppetevolve_; // The callback function is Evolve
+%ignore hoppetcachedevolve_; // The callback function is CachedEvolve
+%ignore hoppeteval_;          
+%ignore hoppetevalsplit_;
+%ignore hoppetdeleteall_;
+%ignore hoppetstrfct_;
+%ignore hoppetstrfctnomu_;
+%ignore hoppetstrfctlo_;
+%ignore hoppetstrfctnlo_;
+%ignore hoppetstrfctflav_;
+%ignore hoppetstrfctnomuflav_;
+%ignore hoppetstrfctloflav_;
+%ignore hoppetstrfctnloflav_;
+%ignore hoppetstrfctnnlo_;
+%ignore hoppetstrfctn3lo_;
+%ignore hoppetwritelhapdfwithlen_;
+
 
 %include "hoppet.h"
 
