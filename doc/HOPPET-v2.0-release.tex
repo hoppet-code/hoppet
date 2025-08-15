@@ -62,10 +62,12 @@ CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
 
 \hoppet~\cite{Salam:2008qg} is a parton distribution function (PDF)
 evolution code written in modern Fortran,\footnote{This release of
-  \hoppet makes use of features introduced in Fortran~2008, for
-  example its \ttt{abstract interface}, and hence a Fortran~2008
-  compliant compiler is now needed.}  with interfaces also for
-C/\CPP{} and earlier dialects of Fortran.
+\hoppet makes use of features introduced in Fortran~2008, for example
+its \ttt{abstract interface}, and hence a Fortran~2008 compliant
+compiler is now needed. The code has been tested to compile and run
+with \texttt{gfortran v9.5.0} and later and the 2025 version of the
+Intel compiler \texttt{ifx}.}  with interfaces also for C/\CPP{} and
+earlier dialects of Fortran.
 %
 It offers both a high-level PDF evolution interface and user-access to
 lower-level functionality for operations such as convolutions of
