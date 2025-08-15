@@ -8,7 +8,7 @@ PURPLE='\033[1;35m'
 NC='\033[0m' # No Color
 
 echo -e "\n######################################################################################"
-echo -e "#${PURPLE}                                   HOPPET 2.0.0 RELEASE                             ${NC}#"
+echo -e "#${PURPLE}                                HOPPET 2.0.0 RELEASE                                ${NC}#"
 echo -e "#                                                                                    #"
 echo -e "# Note that for this 2.0.0 release, hoppet’s library name has been renamed from      #"
 echo -e "# ${RED}hoppet_v1${NC} to ${GREEN}hoppet${NC}, and similarly for the main module and C++ include file. Users #"
