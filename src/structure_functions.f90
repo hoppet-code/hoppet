@@ -32,20 +32,20 @@ module structure_functions
   !!
   public :: iF1Wp, iF2Wp, iF3Wp, iF1Wm, iF2Wm, iF3Wm, iF1Z, iF2Z,&
        & iF3Z, iF1EM, iF2EM, iF1gZ, iF2gZ, iF3gZ
-  integer, parameter :: iF1Wp= 1   !< F1 W+ : D + Ubar 
-  integer, parameter :: iF2Wp= 2   !< F2 W+ : D + Ubar 
-  integer, parameter :: iF3Wp= 3   !< F3 W+ : D + Ubar 
-  integer, parameter :: iF1Wm=-1   !< F1 W- : Dbar + U 
-  integer, parameter :: iF2Wm=-2   !< F2 W- : Dbar + U 
-  integer, parameter :: iF3Wm=-3   !< F3 W- : Dbar + U 
-  integer, parameter :: iF1Z = 4   !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
-  integer, parameter :: iF2Z = 5   !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up
-  integer, parameter :: iF3Z = 6   !< F3 Z  : (D + Dbar) * 2v_i_a_i_down + (U + Ubar) * 2v_i_a_i_up
-  integer, parameter :: iF1EM = -4 !< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
-  integer, parameter :: iF2EM = -5 !< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up
-  integer, parameter :: iF1gZ = 0  !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
-  integer, parameter :: iF2gZ = -6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
-  integer, parameter :: iF3gZ = 7  !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
+  integer, parameter :: iF1Wp = 1 !< F1 W+ : D + Ubar 
+  integer, parameter :: iF2Wp = 2 !< F2 W+ : D + Ubar 
+  integer, parameter :: iF3Wp = 3 !< F3 W+ : D + Ubar 
+  integer, parameter :: iF1Wm =-1 !< F1 W- : Dbar + U 
+  integer, parameter :: iF2Wm =-2 !< F2 W- : Dbar + U 
+  integer, parameter :: iF3Wm =-3 !< F3 W- : Dbar + U 
+  integer, parameter :: iF1Z  = 4 !< F1 Z  : (D + Dbar) * v_i^2a_i^2_down    + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter :: iF2Z  = 5 !< F2 Z  : (D + Dbar) * v_i^2a_i^2_down    + (U + Ubar) * v_i^2a_i^2_up
+  integer, parameter :: iF3Z  = 6 !< F3 Z  : (D + Dbar) * 2v_i_a_i_down      + (U + Ubar) * 2v_i_a_i_up
+  integer, parameter :: iF1EM =-4 !< F1 γ  : (D + Dbar) * e2_down            + (U + Ubar) * e2_up
+  integer, parameter :: iF2EM =-5 !< F2 γ  : (D + Dbar) * e2_down            + (U + Ubar) * e2_up
+  integer, parameter :: iF1gZ = 0 !< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter :: iF2gZ =-6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  integer, parameter :: iF3gZ = 7 !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
 
   !!
   !! coupling constants and fixed parameters

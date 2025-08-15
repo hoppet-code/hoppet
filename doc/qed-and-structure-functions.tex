@@ -912,19 +912,19 @@ The structure functions in this example are stored in the
 array \ttt{ff}. The components of this array can be accessed through
 the indices
 \begin{lstlisting}
-  integer, parameter :: iF1Wp= 1   
-  integer, parameter :: iF2Wp= 2   
-  integer, parameter :: iF3Wp= 3   
-  integer, parameter :: iF1Wm=-1   
-  integer, parameter :: iF2Wm=-2   
-  integer, parameter :: iF3Wm=-3   
-  integer, parameter :: iF1Z = 4   
-  integer, parameter :: iF2Z = 5   
-  integer, parameter :: iF3Z = 6   
-  integer, parameter :: iF1EM = -4   
-  integer, parameter :: iF2EM = -5   
+  integer, parameter :: iF1Wp = 1   
+  integer, parameter :: iF2Wp = 2   
+  integer, parameter :: iF3Wp = 3   
+  integer, parameter :: iF1Wm =-1   
+  integer, parameter :: iF2Wm =-2   
+  integer, parameter :: iF3Wm =-3   
+  integer, parameter :: iF1Z  = 4   
+  integer, parameter :: iF2Z  = 5   
+  integer, parameter :: iF3Z  = 6   
+  integer, parameter :: iF1EM =-4   
+  integer, parameter :: iF2EM =-5   
   integer, parameter :: iF1gZ = 0  
-  integer, parameter :: iF2gZ = -6 
+  integer, parameter :: iF2gZ =-6 
   integer, parameter :: iF3gZ = 7  
 \end{lstlisting}
 For instance one would access the electromagnetic $F_1$ structure
@@ -1037,10 +1037,9 @@ Section~\ref{sec:benchmarks}.
 \fi
 %
 Most importantly we benchmark the accuracy and timing of the new
-N$^3$LO evolution. We also present updated plots and
-tables\ak{Currently no table. Do we want to redo table 2?} at NNLO, to
-give a better idea of the performance of \hoppet{} on typical
-compilers and hardware in 2025.
+N$^3$LO evolution. We also present updated plots at NNLO, to give a
+better idea of the performance of \hoppet{} on typical compilers and
+hardware in 2025.
 
 \begin{figure}[htbp]
     \centering
@@ -1094,7 +1093,7 @@ $2 < Q < 10^4\, \text{GeV}$.\footnote{For tabulations extending to
 %
 At very large $x$ values, the numerical precision degrades because the
 parton distribution functions because a very steep function of $\ln
-x$.
+x$\ak{Not sure I understand this sentence any longer}.
 %
 However the parton distributions have small values there and so we
 carry out our precision study with two potential upper limits on the
@@ -1112,28 +1111,31 @@ Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and N$^3$LO
 respectively, as a function of \texttt{dy}.
 %
 At NNLO, the accuracy comes out similar to previous
-versions of \hoppet{}.
+versions of \hoppet{.}
 %
 In particular we note that with \texttt{dy =
   0.2} one obtains a relative accuracy of $10^{-4}$ across all
 flavours in the range $x < 0.9$.
 %
-At the finest grid spacing \texttt{dy
-  = 0.04} a relative accuracy of $10^{-7}$ can be achieved, good
-enough for precise benchmark comparisons as were for instance carried
-out in Refs.~\cite{Dittmar:2005ed,Bertone:2024dpm}\ak{Do we want to
-  mention that it is also much better than the most current n3lo
-  benchmark which barely reaches $10^{-4}$?}\gps{OK}.
+At the finest grid spacing \texttt{dy = 0.04} a relative accuracy of
+$10^{-7}$ can be achieved, good enough for precise benchmark
+comparisons as were for instance carried out in
+Refs.~\cite{Dittmar:2005ed,Bertone:2024dpm}. We note that in contrast
+the recent benchmark of aN$^3$LO codes in
+Ref.~\cite{Cooper-Sarkar:2024crx} reaches a relative precision of a
+few times $10^{-4}$ at best (cf.\ the gluon PDF at $x = 10^{-2}$ in
+Table~\ref{tab:n3lo-evolve-nf4} and Table 1 of
+Ref.~\cite{Cooper-Sarkar:2024crx} which differ by $\sim 8\cdot 10^{-4}$.)
 %
 The scaling of the precision is roughly consistent with a power law in
 \texttt{dy}.
 %
 In particular the Runge-Kutta algorithm for the $Q^2$ evolution is
 expected to yield an error proportional to $\texttt{dlnlnQ}^4$, which
-would translates a behaviour $\sim \texttt{dy}^4$ in
+translates into a behaviour $\sim \texttt{dy}^4$ in
 Fig.~\ref{fig:main}.
 %
-The observed scaling is, if anything, slightly better that this, given
+The observed scaling is, if anything, slightly better than this, given
 the factor of $1000$ improvement in accuracy when reducing \texttt{dy}
 by a factor of $5$ from $0.2$ to $0.04$.
 %
@@ -1217,7 +1219,7 @@ $(\text{\texttt{dy}}^2 \text{\texttt{dlnlnQ}})^{-1}$, which for our
 choice of $\texttt{dlnlnQ} \propto\texttt{dy}$ reduces to
 $1/\text{\texttt{dy}}^3$.
 %
-That is consistent with what is seem in the plot.
+That is consistent with what is seen in the plot.
 %
 Turning to the initialisation time, at NNLO the initialisation time of
 $\sim 60-300\,\mathrm{ms}$ dominates over the evolution time across
@@ -1236,8 +1238,9 @@ Table~2 of Ref.~\cite{Salam:2008qg},
 Table~\ref{tab:timings},
 \fi
 %
-which were obtained with 2008 hardware, we see a speed-up of roughly a
-factor 10, which we attribute mainly to improvements in the hardware.
+which were obtained with 2008 hardware and compilers, we see a
+speed-up of roughly a factor 10, which we attribute mainly to
+improvements in the hardware.
 
 At N$^3$LO the evolution picture is almost identical to that at NNLO,
 but the initialisation times are significantly larger, in the range
