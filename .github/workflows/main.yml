@@ -173,7 +173,6 @@ jobs:
           brew install wget coreutils gcc gfortran python3 swig
           brew tap davidchall/hep
           brew install lhapdf
-          echo "checking for gfortran:"
           ls /opt/homebrew/bin/gfortran*
     - name: Compile
       run: |
