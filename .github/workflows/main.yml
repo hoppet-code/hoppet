@@ -173,11 +173,13 @@ jobs:
           brew install wget coreutils gcc gfortran python3 swig
           brew tap davidchall/hep
           brew install lhapdf
-          echo "checking for gfortran:"; ls /opt/homebrew/bin/gfortran*
+          echo "checking for gfortran:"
+          ls /opt/homebrew/bin/gfortran*
     - name: Compile
       run: |
           cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
 #          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+#          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-15  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake --build BUILD -j 2
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
