@@ -1,3 +1,17 @@
+2025-08-16 Gavin
+
+	* print_banner.sh -> scripts/print_banner.sh:
+	* CMakeLists.txt:
+	moved print_banner.sh into the scripts directory to reduce clutter
+	in the main directory
+
+2025-08-15 Alexander
+
+	* print_banner.sh: *** ADDED ***
+	* CMakeLists.txt:
+	added printout of a manner when doing make install. It alerts user
+	to the fact that the library name has changed.
+
 2025-08-12 Gavin
 
 	* src/convolution.f90:
@@ -5,7 +19,7 @@
 	functions, which make it possible to get the indices, y or x values
 	corresponding to a monotonically increasing set of y values, prioritising
 	smaller spacings first.
-	
+
 	Also improved some comments.
 
 	* src/pdf_tabulate.f90:
