@@ -49,7 +49,7 @@ program prec_and_timing
   integer            :: order, order1, order2, nloop, i, nrep, nrep_orig, nxQ,olnlnQ
   integer            :: nrep_eval, n_alphas
   integer            :: hires
-  real(dp)           :: dy, Qinit, Qmax, du, dlnlnQ
+  real(dp)           :: dy, Qinit, Qmin, Qmax, du, dlnlnQ
   real(dp)           :: ymax
   real(dp)           :: time_start, time_init_done, time_ev_done, time_end
   real(dp), pointer  :: initial_condition(:,:)
@@ -155,7 +155,8 @@ program prec_and_timing
   initial_condition = unpolarized_dummy_pdf(xValues(grid))
 
   ! set up the coupling
-  Qinit = sqrt(two); 
+  Qinit = sqrt(two)
+  Qmin = one
   do i = 1, n_alphas 
      if (i /= 1) call Delete(coupling)
      call InitRunningCoupling(coupling, alfas=0.35_dp, Q=Qinit, &
@@ -165,9 +166,9 @@ program prec_and_timing
   !write(0,*) Value(coupling,91.2d0)
 
   ! set up the table
-  call AllocPdfTable(grid,table,Qinit,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
+  call AllocPdfTable(grid,table,Qmin,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
   call AddNfInfoToPdfTable(table,coupling)
-  if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
+  if (preev) call PreEvolvePdfTable(table,Qmin,dh,coupling)
   call cpu_time(time_ev_done)
 
   call PDFTableSetYInterpOrder(y_interp_order)
