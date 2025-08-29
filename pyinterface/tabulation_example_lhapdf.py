@@ -9,7 +9,7 @@ import numpy as np
 import argparse
 import sys
 
-def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, Q0_just_above_mb = False, Q0_just_above_mc = False, exact_nnlo_nf = False, exact_nnlo_splitting = False, n3lo_splitting = '2410', FFN = -1):
+def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_above_mb = False, Q0_just_above_mc = False, exact_nnlo_nf = False, exact_nnlo_splitting = False, n3lo_splitting = '2410', FFN = -1):
     # Load the PDF from LHAPDF
     p_lhapdf = lhapdf.mkPDF(lhapdfname, 0)
 
@@ -34,7 +34,7 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, Q0_just_above_mb = Fal
     mb = p_lhapdf.quarkThreshold(5)
     mt = p_lhapdf.quarkThreshold(6)
 
-    # By get alphas at Q0
+    # Get alphas at Q0, and check that Q0 is not below lahpdf Qmin
     Q0 = max(Q0in, Qmin)
     eps = 1e-4
     if Q0_just_above_mc:
@@ -45,7 +45,11 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, Q0_just_above_mb = Fal
 
     # Print some info to the screen
     print(f"{lhapdfname} read succesfully with the following parameters extracted: \nNumber of loops: {nloop}\nxmin: {xmin}\nxmax: {xmax}\nQmin: {Qmin}\nQmax: {Qmax}\nmc: {mc}\nmb: {mb}\nmt: {mt}")
-
+    
+    if nloopin > 0:
+        nloop = nloopin
+        print(f"Overriding number of loops to nloop = {nloop}")
+        
     # Now we start hoppet
     print(f"Starting Hoppet with dy = {dy} and nloop = {nloop}")
 
