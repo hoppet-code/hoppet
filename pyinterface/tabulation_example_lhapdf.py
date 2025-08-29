@@ -1,0 +1,121 @@
+#! /usr/bin/env python3
+
+# This is a small example that uses the hoppet and lahpdf python
+# interfaces. It loads an lhapdf set at a low scale and evolves it up.
+
+import hoppet as hp
+import lhapdf
+import numpy as np
+import argparse
+
+def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, Q0_just_above_mb = False, Q0_just_above_mc = False, exact_nnlo_nf = False, exact_nnlo_splitting = False, n3lo_splitting = '2410', FFN = -1):
+    # Load the PDF from LHAPDF
+    p_lhapdf = lhapdf.mkPDF(lhapdfname, 0)
+
+    # Now that we have the PDF we define the interface as needed by hoppet
+    def lhapdf_interface(x, Q):
+        pdf = np.zeros(13) # Initialise the array with zeros
+        pdf[ 0+6] = p_lhapdf.xfxQ(21, x, Q)
+        # loop over quarks and gluon
+        for flavor in range(-6, 7):
+            if flavor == 0:
+                continue
+            pdf[flavor + 6] = p_lhapdf.xfxQ(flavor, x, Q)
+        return pdf
+
+    # Get some information from the PDF like order in QCD, masses etc.
+    nloop = p_lhapdf.orderQCD + 1 # LHAPDF starts at 0
+    xmin = p_lhapdf.xMin
+    xmax = p_lhapdf.xMax
+    Qmin = np.sqrt(p_lhapdf.q2Min)
+    Qmax = np.sqrt(p_lhapdf.q2Max)
+    mc = p_lhapdf.quarkThreshold(4)
+    mb = p_lhapdf.quarkThreshold(5)
+    mt = p_lhapdf.quarkThreshold(6)
+
+    # By get alphas at Q0
+    Q0 = max(Q0in, Qmin)
+    eps = 1e-4
+    if Q0_just_above_mc:
+        Q0 = mc + eps
+    elif Q0_just_above_mb:
+        Q0 = mb + eps
+    asQ0 = p_lhapdf.alphasQ(Q0)
+
+    # Print some info to the screen
+    print(f"{lhapdfname} read succesfully with the following parameters extracted: \nNumber of loops: {nloop}\nxmin: {xmin}\nxmax: {xmax}\nQmin: {Qmin}\nQmax: {Qmax}\nmc: {mc}\nmb: {mb}\nmt: {mt}")
+
+    # Now we start hoppet
+    print(f"Starting Hoppet with dy = {dy} and nloop = {nloop}")
+
+    # By default we use parametrised nf thresholds and splitting
+    # functions (this only applies to the NNLO part, since at N3LO we
+    # are currently forced to use exact nf but approximate splitting
+    # functions).
+    hp.SetExactDGLAP(exact_nnlo_nf, exact_nnlo_splitting)
+    print(f"Using exact NNLO nf thresholds: {exact_nnlo_nf}, exact NNLO splitting functions: {exact_nnlo_splitting}")
+
+    # n3lo splitting function approximation
+    if nloop == 4:
+        if n3lo_splitting == '2310':
+            hp.SetApproximateDGLAPN3LO(100)
+        elif n3lo_splitting == '2404':
+            hp.SetApproximateDGLAPN3LO(101)
+        elif n3lo_splitting == '2410':
+            hp.SetApproximateDGLAPN3LO(102) # This is the default value in hoppet at the moment
+        else:
+            print(f"Error: Unknown n3lo-splitting value {n3lo_splitting}")
+            sys.exit(1)
+        print(f"N3LO splitting function approximation: {n3lo_splitting}")
+
+    # Right now I can't see a way to find the flavour scheme in the
+    # LHAPDF interface. For now we assume it is variable unless the
+    # user specifies FFN 
+    if FFN > 0:
+        hp.SetFFN(FFN)
+        print(f"Using Fixed Flavour Number scheme with nf = {FFN}")
+    else:
+        hp.SetPoleMassVFN(mc,mb,mt)
+        print(f"Using Pole Mass Variable Flavour Number scheme with mc = {mc}, mb = {mb}, mt = {mt}")
+
+    hp.Start(dy, nloop)
+    
+    print(f"Evolving PDF from Q0 = {Q0} GeV with as(Q0) = {asQ0}")
+    hp.Evolve(asQ0, Q0, nloop, 1.0, lhapdf_interface, Q0)
+
+def main():
+    # Get commandline
+    parser = argparse.ArgumentParser(description="Check of an LHAPDF grid against HOPPET evolution.")
+    parser.add_argument('-pdf', required=True, help='LHAPDF set name (required, ex. NNPDF30_nnlo_as_0118)')
+    parser.add_argument('-dy', type=float, default=0.05, help='dy for HOPPET evolution (default: 0.05)')
+    parser.add_argument('-Q0', type=float, default=1.0, help='Initial Q0 value (default: Qmin from LHAPDF)')
+
+    args = parser.parse_args()
+
+    load_lhapdf_start_evolve_hoppet(args.pdf, args.Q0, args.dy)
+
+    # Evaluate the PDFs at some x values and print them
+    xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
+    Q = 100.0
+
+    print("")
+    print("           Evaluating PDFs at Q =",Q, " GeV")
+    print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon")
+    for ix in range(9):
+        pdf_array = hp.Eval(xvals[ix], Q)
+        print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
+            xvals[ix],
+            pdf_array[6 + 2] - pdf_array[6 - 2], 
+            pdf_array[6 + 1] - pdf_array[6 - 1], 
+            2 * (pdf_array[6 - 1] + pdf_array[6 - 2]),
+            pdf_array[6 - 4] + pdf_array[6 + 4],
+            pdf_array[6 + 0]
+        ))
+    print("")
+    #hp.WriteLHAPDFGrid("test_python",0)
+
+    hp.DeleteAll()
+
+
+if __name__ == "__main__":
+    main()
