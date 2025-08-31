@@ -547,6 +547,39 @@ subroutine hoppetSetApproximateDGLAPN3LO(splitting_variant)
   call dglap_Set_n3lo_splitting_approximation(splitting_variant)
 
 end subroutine hoppetSetApproximateDGLAPN3LO
+!======================================================================
+
+!! Arrange for the use of N3LO splitting functions, either exact (not currently available), parametrised not currently available) or based on upper or lower values of the aproximation
+subroutine hoppetSetSplittingN3LO(splitting_variant)
+  ! splitting_variant can be one of
+  !n3lo_splitting_exact = -2;
+  !n3lo_splitting_param = -1;
+  !n3lo_splitting_Nfitav   =  0;
+  !n3lo_splitting_Nfiterr1 =  1;
+  !n3lo_splitting_Nfiterr2 =  2;
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  integer :: splitting_variant
+
+  call dglap_Set_n3lo_splitting(splitting_variant)
+
+end subroutine hoppetSetSplittingN3LO
+
+!! Arrange for the use of N3LO splitting functions, either exact (not currently available), parametrised not currently available) or based on upper or lower values of the aproximation
+subroutine hoppetSetSplittingNNLO(splitting_variant)
+  ! splitting_variant can be one of
+  !nnlo_splitting_exact = -2;
+  !nnlo_splitting_param = -1;
+  !nnlo_splitting_Nfitav   =  0;
+  !nnlo_splitting_Nfiterr1 =  1;
+  !nnlo_splitting_Nfiterr2 =  2;
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  integer :: splitting_variant
+
+  call dglap_Set_nnlo_splitting(splitting_variant)
+
+end subroutine hoppetSetSplittingNNLO
 
 
 !======================================================================

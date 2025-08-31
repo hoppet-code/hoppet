@@ -205,6 +205,8 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %rename(SetMSbarMassVFN         )      hoppetsetmsbarmassvfn_;       
 %rename(SetExactDGLAP           )      hoppetsetexactdglap_;
 %rename(SetApproximateDGLAPN3LO )      hoppetsetapproximatedglapn3lo_;
+%rename(SetSplittingNNLO        )             hoppetsetsplittingnnlo_;
+%rename(SetSplittingN3LO        )             hoppetsetsplittingn3lo_;
 %rename(SetN3LOnfthresholds     )      hoppetsetn3lonfthresholds_;
 %rename(SetQED                  )      hoppetsetqed_;
 %rename(StartStrFct             )      hoppetstartstrfct_;

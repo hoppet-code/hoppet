@@ -17,6 +17,8 @@
 #define hoppetSetMSbarMassVFN          hoppetsetmsbarmassvfn_       
 #define hoppetSetExactDGLAP            hoppetsetexactdglap_
 #define hoppetSetApproximateDGLAPN3LO  hoppetsetapproximatedglapn3lo_
+#define hoppetSetSplittingNNLO         hoppetsetsplittingnnlo_
+#define hoppetSetSplittingN3LO         hoppetsetsplittingn3lo_
 #define hoppetSetN3LOnfthresholds      hoppetsetn3lonfthresholds_
 #define hoppetEval                     hoppeteval_          
 #define hoppetEvalSplit                hoppetevalsplit_
@@ -59,9 +61,55 @@ namespace hoppet {
   const int iF2gZ =-6+6; //< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
   const int iF3gZ = 7+6; //< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
 
-  const int scale_choice_fixed     = 0; ///< muR,muF scales predetermined in the hoppetStartStrFct call
-  const int scale_choice_Q         = 1; ///< muR,muF scales equal to xR,xQ * Q (xR,xQ to be set in hoppetStartStrFct)
-  const int scale_choice_arbitrary = 2; ///< muR,muF scales can be chosen freely in the hoppetStrFctLO (etc.) and hoppetStrFct calls
+  const int scale_choice_fixed     = 0; ///< muR,muF scales
+					///predetermined in the
+					///hoppetStartStrFct call
+  const int scale_choice_Q         = 1; ///< muR,muF scales equal to
+					///xR,xQ * Q (xR,xQ to be set
+					///in hoppetStartStrFct)
+  const int scale_choice_arbitrary = 2; ///< muR,muF scales can be
+					///chosen freely in the
+					///hoppetStrFctLO (etc.) and
+					///hoppetStrFct calls
+  const int nnlo_splitting_exact = -2;
+  const int nnlo_splitting_param = -1;
+  // these three should keep their numerical values because of a
+  // correspondence with vogt imod values
+  const int nnlo_splitting_Nfitav   =  0;
+  const int nnlo_splitting_Nfiterr1 =  1;
+  const int nnlo_splitting_Nfiterr2 =  2;
+
+  const int n3lo_splitting_exact = -2;
+  const int n3lo_splitting_param = -1;
+  // these three should keep their numerical values because of a
+  // correspondence with vogt imod values
+  const int n3lo_splitting_Nfitav   =  0;
+  const int n3lo_splitting_Nfiterr1 =  1;
+  const int n3lo_splitting_Nfiterr2 =  2;
+  // As of 2024-04-16 there are several approximations available of
+  // the n3lo splitting functions. To maintain some backwards
+  // compatibility we have a switch below that allows the user to pick
+  // which set of approximations to use. The have progressively more
+  // moments.
+  const int n3lo_splitting_approximation_up_to_2310_05744 = 100;
+  //< Uses non-singlet of 1610.07477+1707.08315, pure-singlet (qq) of
+  //2302.07593, qg of 2307.04158 and gq and gg of 2310.05744
+  const int n3lo_splitting_approximation_up_to_2404_09701
+            = 101; //< Replaces gq with that of 2404.09701
+  const int n3lo_splitting_approximation_up_to_2410_08089
+            = 102; //< Additionally replaces gg with that of 2410.08089
+  
+  const int nnlo_nfthreshold_exact = -12;
+  const int nnlo_nfthreshold_param = -11;
+
+  const int n3lo_nfthreshold_on  = 1;
+  const int n3lo_nfthreshold_off = 0;
+
+  const int factscheme_MSbar    = 1;
+  const int factscheme_DIS      = 2;
+  const int factscheme_PolMSbar = 3;
+  const int factscheme_FragMSbar = 4;
+
 }
 
 extern "C" {
@@ -77,13 +125,6 @@ extern "C" {
   /// objects, using the dy grid spacing and splitting functions up to
   /// nloop loops; all other parameters are set automatically
   void hoppetStart(const double & dy, const int & nloop);
-
-
-  // the "factorisation" schemes
-  const int factscheme_MSbar    = 1; //< the unpolarised MSbar fact. scheme
-  const int factscheme_DIS      = 2; //< the unpolarised DIS fact. scheme (partial support)
-  const int factscheme_PolMSbar = 3; //< the polarised MSbar fact. scheme
-  
 
   /// an extended interface for starting hoppet
   void hoppetStartExtended(
@@ -124,6 +165,12 @@ extern "C" {
 
   /// Arrange for the use of various approximate N3LO splitting functions.
   void hoppetSetApproximateDGLAPN3LO(const int & splitting_variant);
+
+  /// Arrange for the use of various NNLO splitting functions.
+  void hoppetSetSplittingNNLO(const int & splitting_variant);
+
+  /// Arrange for the use of various N3LO splitting functions.
+  void hoppetSetSplittingN3LO(const int & splitting_variant);
 
   ///  Arrange for the use of N3LO mass thresholds or not.
   void hoppetSetN3LOnfthresholds(const int & variant);
