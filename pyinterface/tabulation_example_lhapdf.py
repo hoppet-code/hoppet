@@ -63,11 +63,11 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_a
     # n3lo splitting function approximation
     if nloop == 4:
         if n3lo_splitting == '2310':
-            hp.SetApproximateDGLAPN3LO(100)
+            hp.SetApproximateDGLAPN3LO(hp.n3lo_splitting_approximation_up_to_2310_05744)
         elif n3lo_splitting == '2404':
-            hp.SetApproximateDGLAPN3LO(101)
+            hp.SetApproximateDGLAPN3LO(hp.n3lo_splitting_approximation_up_to_2404_09701)
         elif n3lo_splitting == '2410':
-            hp.SetApproximateDGLAPN3LO(102) # This is the default value in hoppet at the moment
+            hp.SetApproximateDGLAPN3LO(hp.n3lo_splitting_approximation_up_to_2410_08089) # This is the default value in hoppet at the moment
         else:
             print(f"Error: Unknown n3lo-splitting value {n3lo_splitting}")
             sys.exit(1)
