@@ -31,9 +31,13 @@
 !   ./prec_and_timing -nrep 1 -nxQ 5000 -outputgrid -dy 0.2 -order -6 \
 !                     -nopreev -4grids -dlnlnQ 0.05 -du 0.4 -olnlnQ 4 -o testgrid.dat
 !
-!======================================================================
-
-!======================================================================
+! LHAPDF output
+! -------------
+! This code can also produce an LHAPDF output file, for example, assuming
+! your LHAPDF sets are kept in ~/LHAPDF, then the following will produce a dummy
+! set corresponding to the standard Les Houches PDF benchmark
+!
+! ./benchmarking/prec_and_timing  -nloop 3 -dy 0.05 -lhapdf-out ~/LHAPDF/dummy/dummy -o ~/LHAPDF/dummy/hoppet.log
 program prec_and_timing
    use hoppet
   use hoppet_git_state
@@ -134,7 +138,7 @@ program prec_and_timing
   if (.not. CheckAllArgsUsed(0)) error stop
   !----------------------------------
 
-  if (output) call output_info
+  if (output .or. trim(lhapdf_out) /= "") call output_info
   write(idev,'(a)',advance='no') "# "
   call time_stamp(idev)
   call get_hostname(hostname)  
