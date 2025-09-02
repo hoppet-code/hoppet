@@ -1,18 +1,18 @@
 /// An example in C++ showing how to replace LHAPDF interpolation with
 /// (faster) hoppet interpolation
 ///
-#include "../src/hoppet.h"
+#include "hoppet.h"
 #include "LHAPDF/LHAPDF.h"
-#include<iostream>
-#include<cmath>
-#include<cstdio>
+#include <iostream>
+#include <cmath>
+#include <cstdio>
 #include <chrono>
 
 using namespace std;
 using namespace hoppet; // To access factscheme_MSbar
 using namespace LHAPDF;
 
-// Gloabl PDF pointer
+// Global PDF pointer
 PDF *pdf = nullptr;
 
 /// Interface to LHAPDF as needed by hoppetAssign
@@ -26,7 +26,7 @@ void lhapdf_interface(const double & x, const double & Q, double * res)  {
 /// Routine that loads an LHAPDF set, extracts some information from it
 /// and transfers the PDF to hoppet. It needs the lhapdf_interface
 /// defined above.
-void load_lhapdf_start_hoppet(const string & pdfname, int imem=0) {
+void load_lhapdf_assign_hoppet(const string & pdfname, int imem=0) {
   // Start by loading a PDF set from LHAPDF
   pdf = mkPDF(pdfname, imem);
 
@@ -71,7 +71,8 @@ void load_lhapdf_start_hoppet(const string & pdfname, int imem=0) {
   hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder); // Set the interpolation orders
   hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, factscheme_MSbar); // Start hoppet
 
-  // Now we fill the hoppet grid using the LHAPDF grid directly, rather than evolving ourselves
+  // Now we fill the hoppet grid using the LHAPDF grid directly,
+  // rather than evolving ourselves
   hoppetAssign(lhapdf_interface);
 }
 
@@ -79,7 +80,7 @@ void load_lhapdf_start_hoppet(const string & pdfname, int imem=0) {
 int main () {
   string pdfname = "PDF4LHC21_40";
   int imem = 0;
-  load_lhapdf_start_hoppet(pdfname, imem);
+  load_lhapdf_assign_hoppet(pdfname, imem);
 
   double x = 0.01;
   double Q = 13.0;
@@ -111,27 +112,27 @@ int main () {
   double qmin = 1.5, qmax = 100000.0;
 
   // Create log-spaced grids
-  std::vector<double> xvals(npoints), qvals(npoints);
+  vector<double> xvals(npoints), qvals(npoints);
   for (int i = 0; i < npoints; ++i) {
-      xvals[i] = std::exp(std::log(xmin) + i * (std::log(xmax) - std::log(xmin)) / (npoints - 1));
-      qvals[i] = std::exp(std::log(qmin) + i * (std::log(qmax) - std::log(qmin)) / (npoints - 1));
+      xvals[i] = exp(log(xmin) + i * (log(xmax) - log(xmin)) / (npoints - 1));
+      qvals[i] = exp(log(qmin) + i * (log(qmax) - log(qmin)) / (npoints - 1));
   }
 
   // Benchmark hoppet_eval
-  auto t1 = std::chrono::high_resolution_clock::now();
+  auto t1 = chrono::high_resolution_clock::now();
   for (double x : xvals)
       for (double q : qvals)
           hoppetEval(x, q, hoppetpdf); 
-  auto t2 = std::chrono::high_resolution_clock::now();
-  std::cout << "hoppet_eval time: " << std::chrono::duration<double>(t2 - t1).count() << " s\n";
-  
+  auto t2 = chrono::high_resolution_clock::now();
+  cout << "hoppet_eval time: " << chrono::duration<double>(t2 - t1).count() << " s\n";
+
   // Benchmark xfxq2
-  t1 = std::chrono::high_resolution_clock::now();
+  t1 = chrono::high_resolution_clock::now();
   for (double x : xvals)
       for (double q : qvals)
-          pdf->xfxQ2(x, q*q, lhapdf); 
-  t2 = std::chrono::high_resolution_clock::now();
-  std::cout << "xfxq2 time: " << std::chrono::duration<double>(t2 - t1).count() << " s\n";
+          pdf->xfxQ2(x, q*q, lhapdf);
+  t2 = chrono::high_resolution_clock::now();
+  cout << "xfxq2 time: " << chrono::duration<double>(t2 - t1).count() << " s\n";
 }
 
 
