@@ -5,8 +5,8 @@ subroutine HoppetWelcomeMessage
   !! when updating the version number, remember to do this also in 
   !! CMakeLists.txt and in the documentation.
   write(0,'(a)') '-----------------------------------------------------------'
-  write(0,'(a)') '               Welcome to HOPPET v. 2.0.0-devel            '
-  write(0,'(a)') '   Higher Order Perturbative Parton Evolution Toolkit      '
+  write(0,'(a)') '              Welcome to HOPPET v. 2.0.0-devel             '
+  write(0,'(a)') '    Higher Order Perturbative Parton Evolution Toolkit     '
   write(0,'(a)') ''
   write(0,'(a)') '                   Written (2001-2025) by                  '
   write(0,'(a)') '     Frederic Dreyer, Alexander Karlberg, Paolo Nason,     '
@@ -21,7 +21,7 @@ subroutine HoppetWelcomeMessage
   write(0,'(a)') ' & F. Dreyer (arXiv:2509.XXXXX).                           '
   write(0,'(a)') ' '
   write(0,'(a)') ' You are also encouraged to cite the original references,  '
-  write(0,'(a)') ' for LO, NLO and NNLO splitting functions, the QCD         '
+  write(0,'(a)') ' for LO, NLO, NNLO, and N3LO splitting functions, the QCD  '
   write(0,'(a)') ' 1, 2, 3, and 4 loop beta functions and the PDF and        '
   write(0,'(a)') ' coupling mass threshold matching functions. Additionally  '
   write(0,'(a)') ' the DIS coefficient functions should be cited when used.  '
