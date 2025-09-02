@@ -1,7 +1,7 @@
 /// An example in C++ showing how to replace LHAPDF interpolation with
 /// (faster) hoppet interpolation
 ///
-#include "hoppet.h"
+#include "../src/hoppet.h"
 #include "LHAPDF/LHAPDF.h"
 #include <iostream>
 #include <cmath>
@@ -52,8 +52,8 @@ void load_lhapdf_assign_hoppet(const string & pdfname, int imem=0) {
     dlnlnQ = dy/8.0; // for large ymax we need a finer grid in Q
   }
   int order = -6; // Default
-  int yorder = 3; // Cubic interpolation in y
-  int lnlnQorder = 3; // Cubic interpolation in lnlnQ
+  int yorder = 2; // Quadratic interpolation in y
+  int lnlnQorder = 2; // Quadratic interpolation in lnlnQ
 
   // Print all the relevant parameters that we have passed to hoppet
   cout << "Hoppet starting with:" << endl;
@@ -124,7 +124,7 @@ int main () {
       for (double q : qvals)
           hoppetEval(x, q, hoppetpdf); 
   auto t2 = chrono::high_resolution_clock::now();
-  cout << "hoppet_eval time: " << chrono::duration<double>(t2 - t1).count() << " s\n";
+  cout << "hoppet_eval time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
 
   // Benchmark xfxq2
   t1 = chrono::high_resolution_clock::now();
@@ -132,7 +132,7 @@ int main () {
       for (double q : qvals)
           pdf->xfxQ2(x, q*q, lhapdf);
   t2 = chrono::high_resolution_clock::now();
-  cout << "xfxq2 time: " << chrono::duration<double>(t2 - t1).count() << " s\n";
+  cout << "xfxq2 time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
 }
 
 
