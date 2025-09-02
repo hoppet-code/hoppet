@@ -107,7 +107,7 @@ int main () {
   cout << endl;
 
 
-  int npoints = 1000; // or your desired value
+  int npoints = 3000; // or your desired value
   double xmin = 1e-5, xmax = 0.9;
   double qmin = 1.5, qmax = 100000.0;
 
@@ -124,15 +124,15 @@ int main () {
       for (double q : qvals)
           hoppetEval(x, q, hoppetpdf); 
   auto t2 = chrono::high_resolution_clock::now();
-  cout << "hoppet_eval time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
+  cout << "hoppetEval time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
 
   // Benchmark xfxq2
   t1 = chrono::high_resolution_clock::now();
   for (double x : xvals)
       for (double q : qvals)
-          pdf->xfxQ2(x, q*q, lhapdf);
+        pdf->xfxQ2(x, q*q, lhapdf);
   t2 = chrono::high_resolution_clock::now();
-  cout << "xfxq2 time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
+  cout << "LHAPDF time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
 }
 
 
