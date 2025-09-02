@@ -596,6 +596,27 @@ subroutine hoppetSetN3LOnfthresholds(variant)
 
 end subroutine hoppetSetN3LOnfthresholds
 
+!======================================================================
+!! Override the default interpolation order in y and lnlnQ. Should be
+!! called before hoppetStart
+subroutine hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder)
+  ! Defaults are
+  ! yorder = -1 (hoppet makes a sensible choice in the ranges 4 to 10)
+  ! lnlnQorder = 4
+  ! For fast cubic interpolation with similar accuracy to LHAPDF one can set
+  ! yorder = 3
+  ! lnlnQorder = 3
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  integer :: yorder, lnlnQorder
+
+  call PDFTableSetYInterpOrder(yorder)
+  def_lnlnQ_order = lnlnQorder
+
+end subroutine hoppetSetYLnlnQInterpOrders
+
+
+
 
 !======================================================================
 !! Assuming this is called with an array starting at index -6, return in f(-6:6) 

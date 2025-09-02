@@ -20,6 +20,7 @@
 #define hoppetSetSplittingNNLO         hoppetsetsplittingnnlo_
 #define hoppetSetSplittingN3LO         hoppetsetsplittingn3lo_
 #define hoppetSetN3LOnfthresholds      hoppetsetn3lonfthresholds_
+#define hoppetSetYLnlnQInterpOrders    hoppetsetylnlnqinterporders_
 #define hoppetEval                     hoppeteval_          
 #define hoppetEvalSplit                hoppetevalsplit_
 #define hoppetSetQED                   hoppetsetqed_
@@ -174,6 +175,9 @@ extern "C" {
 
   ///  Arrange for the use of N3LO mass thresholds or not.
   void hoppetSetN3LOnfthresholds(const int & variant);
+
+  ///  Override the default interpolation order in y and lnlnQ.
+  void hoppetSetYLnlnQInterpOrders(const int & yorder, const int & lnlnQorder);
 
   /// Given a pdf_subroutine with the interface shown below, initialise
   /// our internal pdf table.
