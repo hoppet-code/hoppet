@@ -1,3 +1,12 @@
+2025-09-02  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* streamlined_interface.f90:
+	Added support for the evaluation of products of splitting
+	functions up nloop = 4. Added functionality to change the
+	interpolation order yorder and lnlnQorder in the streamlined
+	interface. Exposed all the dglap_choices in the streamlined
+	interface as well through various new routines.
+
 2025-08-16 Gavin
 
 	* print_banner.sh -> scripts/print_banner.sh:
@@ -15,10 +24,10 @@
 2025-08-12 Gavin
 
 	* src/convolution.f90:
-	added MonotonicUniqueIndices, MonotonicUniqueYValues, MonotonicUniqueXValues
-	functions, which make it possible to get the indices, y or x values
-	corresponding to a monotonically increasing set of y values, prioritising
-	smaller spacings first.
+	added MonotonicUniqueIndices, MonotonicUniqueYValues,
+	MonotonicUniqueXValues functions, which make it possible to get
+	the indices, y or x values corresponding to a monotonically
+	increasing set of y values, prioritising smaller spacings first.
 
 	Also improved some comments.
 

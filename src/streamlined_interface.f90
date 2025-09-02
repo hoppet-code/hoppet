@@ -210,13 +210,25 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   ! Fill the array that will be used for table index lookup (e.g. 21 is PNLO*PLO).
   ! For now do it by hand; one day we might automate this;
   ! entries that aren't filled are automatically -1
+
+  ! First fill the bare splitting functions
   do iloop = 1, nloop
      table_index_from_iloop(iloop) = iloop
   end do
-  table_index_from_iloop(11)  = 4
-  table_index_from_iloop(111) = 5
-  if (nloop >= 2) table_index_from_iloop(12)  = 6
-  if (nloop >= 2) table_index_from_iloop(21)  = 7
+  ! Now fill entries where the sum is 2
+  table_index_from_iloop(11)                   = nloop + 1
+  ! Then the entries where the sum is 3
+  table_index_from_iloop(111)                  = nloop + 2
+  if (nloop >= 2) table_index_from_iloop(12)   = nloop + 3
+  if (nloop >= 2) table_index_from_iloop(21)   = nloop + 4
+  ! Finally the entries where the sum is 4
+  table_index_from_iloop(1111)                 = nloop + 5
+  if (nloop >= 2) table_index_from_iloop(112)  = nloop + 6
+  if (nloop >= 2) table_index_from_iloop(121)  = nloop + 7
+  if (nloop >= 2) table_index_from_iloop(211)  = nloop + 8
+  if (nloop >= 2) table_index_from_iloop(22)   = nloop + 9
+  if (nloop >= 3) table_index_from_iloop(13)   = nloop + 10
+  if (nloop >= 3) table_index_from_iloop(31)   = nloop + 11 ! which is 15 if nloop = 14
   
   ! create the tables that will contain our copy of the user's pdf
   ! as well as the convolutions with the pdf.
@@ -670,7 +682,7 @@ end subroutine hoppetEval
 !!
 !! Note that iloop can also be of the form ij or ijk, which means
 !! P(i)*P(j)*pdf or P(i)*P(j)*P(k)*pdf. The sum of i+j+k is currently
-!! bounded to be <= 3.
+!! bounded to be <= 4.
 !!
 !! The number of loops must be consistent with iloop
 subroutine hoppetEvalSplit(x,Q,iloop,nf,f)
