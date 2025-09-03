@@ -799,9 +799,6 @@ contains
     call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
     nQ = ilnlnQ_hi - ilnlnQ_lo
 
-    do iQ = 0, nQ
-       wgts(:npnt_y-1,iQ) = y_wgts(0:npnt_y-1) * lnlnQ_wgts(iQ)
-    end do
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts? Not calculating it would imply significantly
@@ -815,6 +812,9 @@ contains
     !
     ! (NB: nQ == olnlnQ ; npnt_y == y interpolation order + 1; so cubic -olnlnQ 3 -yinterp 3  gives npnt_y == 4, nQ==3, which means 4 actual points for each...)
     if (npnt_y == 4 .and. nQ == 3) then
+      do iQ = 0, 3
+         wgts(:npnt_y-1,iQ) = y_wgts(0:npnt_y-1) * lnlnQ_wgts(iQ)
+      end do
       ! 110ns/call with this specialisation     -> 186ns/call with -O2 -g (RelWithDebInfo)
       ! 165ns/call without this specialisation
       do iflv = iflv_min, tab%tab_iflv_max
@@ -824,11 +824,23 @@ contains
     else if (npnt_y == 3 .and. nQ == 2) then
       !  85ns/call with this specialisation    -> 150ns/call with -O2 -g (RelWithDebInfo)
       ! 123ns/call without this specialisation -> 160ns/call with -O2 -g (RelWithDebInfo)
+      !do iQ = 0, 2
+      !   wgts(0:2,iQ) = y_wgts(0:2) * lnlnQ_wgts(iQ)
+      !end do
+      !do iflv = iflv_min, tab%tab_iflv_max
+      !      val(iflv) = sum(wgts(0:2,0:2) &
+      !                      * tab%tab(iylo:iylo+2, iflv,ilnlnQ_lo:ilnlnQ_lo+2))
+      !end do
+      !! 2025-09-03 (GPS+AK): the following variant shaves off a further couple of percent
       do iflv = iflv_min, tab%tab_iflv_max
-            val(iflv) = sum(wgts(0:2,0:2) &
-                            * tab%tab(iylo:iylo+2, iflv,ilnlnQ_lo:ilnlnQ_lo+2))
+        val(iflv) = sum(y_wgts(0:2) * tab%tab(iylo:iylo+2, iflv,ilnlnQ_lo  )) * lnlnQ_wgts(0) &
+                +   sum(y_wgts(0:2) * tab%tab(iylo:iylo+2, iflv,ilnlnQ_lo+1)) * lnlnQ_wgts(1) &
+                +   sum(y_wgts(0:2) * tab%tab(iylo:iylo+2, iflv,ilnlnQ_lo+2)) * lnlnQ_wgts(2) 
       end do
     else
+      do iQ = 0, nQ
+         wgts(:npnt_y-1,iQ) = y_wgts(0:npnt_y-1) * lnlnQ_wgts(iQ)
+      end do
       ! 250ns/call with olnlnQ==4 and yinterp==6 -> 290ns/call with -O2 -g (RelWithDebInfo)
       do iflv = iflv_min, tab%tab_iflv_max
           val(iflv) = sum(wgts(0:npnt_y-1,0:nQ) &
