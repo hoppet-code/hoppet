@@ -74,6 +74,13 @@ void load_lhapdf_assign_hoppet(const string & pdfname, int imem=0) {
   // Now we fill the hoppet grid using the LHAPDF grid directly,
   // rather than evolving ourselves
   hoppetAssign(lhapdf_interface);
+
+  // If instead we want to evolve the PDF with hoppet starting from
+  // some low scale Q0 (>= Qmin) make a call to hoppetEvolve instead
+  // of hoppetAssign
+  //double Q0 = Qmin;
+  //hoppetEvolve(pdf->alphasQ(Q0), Q0, nloop, 1.0, lhapdf_interface, Q0);
+
 }
 
 //----------------------------------------------------------------------

@@ -218,10 +218,10 @@ contains
   !======================================================================
   !! Initialise the subroutine using an LHAPDF style subroutine
   !!
-  !! It expects LHAsub to set components -6:6 with plain QCD evolution,
-	!! but the full size of the flavour dimension if the upper limit
-	!! is anything other than ncompax=7 (e.g. for QED evolution 
-	!! it should go from -6 to ncompmaxLeptons=11).  
+  !! It expects LHAsub to set components -6:6 with plain QCD
+  !! evolution, but the full size of the flavour dimension if the
+  !! upper limit is anything other than ncompax=7 (e.g. for QED
+  !! evolution it should go from -6 to ncompmaxLeptons=11).
   subroutine InitPDF_LHAPDF(grid, gq, LHAsub, Q)
     real(dp),         intent(inout) :: gq(0:,ncompmin:)
     type(grid_def),   intent(in)    :: grid
