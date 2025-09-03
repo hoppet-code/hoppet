@@ -38,6 +38,7 @@
 ! set corresponding to the standard Les Houches PDF benchmark
 !
 ! ./benchmarking/prec_and_timing  -nloop 3 -dy 0.05 -lhapdf-out ~/LHAPDF/dummy/dummy -o ~/LHAPDF/dummy/hoppet.log
+!
 program prec_and_timing
    use hoppet
   use hoppet_git_state

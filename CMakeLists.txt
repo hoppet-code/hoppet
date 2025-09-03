@@ -41,6 +41,10 @@ option(HOPPET_BUILD_PYINTERFACE "Build Python interface." ON)
 option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
 option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
 
+# compile-time debugging info
+option(HOPPET_ENABLE_DEBUG "Turn on debug compiler information [default=ON]" ON)
+
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
   #set(CMAKE_BUILD_TYPE "RelWithDebInfo")
@@ -53,6 +57,11 @@ message(STATUS "HOPPET: CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 set(HOPPET_PYTHON_PACKAGE_NAME "hoppet" CACHE STRING "The name of the installed hoppet python package.")
 set(HOPPET_USE_PYTHON_SITEARCH OFF CACHE BOOL "Force the usage of ${Python_SITEARCH} if CMAKE_INSTALL_PREFIX was defined.")
 set(HOPPET_CUSTOM_PYTHON_INSTALL "" CACHE STRING "Specify a custom python install path, can be absolute or relative to lib.")
+
+if (HOPPET_ENABLE_DEBUG)
+  add_compile_options("-g")
+endif()
+
 
 # Flags for compilers ==============================================
 # GNU
@@ -176,6 +185,8 @@ message(STATUS "HOPPET: HOPPET_ENABLE_TESTING=${HOPPET_ENABLE_TESTING}")
 message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
 message(STATUS "HOPPET: HOPPET_BUILD_TESTDIR=${HOPPET_BUILD_TESTDIR}")
 message(STATUS "HOPPET: HOPPET_ENABLE_FPES=${HOPPET_ENABLE_FPES}")
+message(STATUS "HOPPET: HOPPET_ENABLE_DEBUG: ${HOPPET_ENABLE_DEBUG}")
+
 
 if (HOPPET_BUILD_EXAMPLES)
   find_package(LHAPDF) 
