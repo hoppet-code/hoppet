@@ -17,10 +17,9 @@ PDF *pdf = nullptr;
 
 /// Interface to LHAPDF as needed by hoppetAssign
 void lhapdf_interface(const double & x, const double & Q, double * res)  {
-  vector<double> data;
+  vector<double> data(13, 0.0); // Pre-allocate and zero;
   pdf->xfxQ2(x, Q*Q, data);
-  for (unsigned int i=0; i<13; ++i)
-    res[i] = data[i];
+  copy(data.begin(), data.end(), res); // Fast copy to the output array
 };
 
 /// Routine that loads an LHAPDF set, extracts some information from it
