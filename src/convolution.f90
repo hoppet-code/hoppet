@@ -1380,6 +1380,24 @@ contains
     ! real(dp) :: smallest_ymax
     ! integer  :: i
 
+    ! 2025-09-03 GPS+AK, on M2Pro, this variant seemed to make no timing
+    ! difference, even though it avoids loops and exploits the known
+    ! ordering of the grid sizes and should bail out quickly in the 
+    ! most common (large-y) cases.
+    !if (grid%nsub == 4 .and. grid%locked) then
+    !  !! in this case, we have a guarantee that grids have increasing ymax
+    !  if (y > grid%subgd(3)%ymax) then
+    !     isub = 4
+    !  else if (y > grid%subgd(2)%ymax) then
+    !     isub = 3
+    !  else if (y > grid%subgd(1)%ymax) then
+    !     isub = 2
+    !  else
+    !     isub = 1
+    !  end if
+    !  return
+    !end if
+
     !-- this will probably slow things down, but
     !   for the time being accept this penalty
     ! find the grid with the smallest ymax > y

@@ -1,3 +1,19 @@
+2025-09-03 Wed  Gavin + Alexander
+
+	* CMakeLists.txt:
+	added HOPPET_ENABLE_DEBUG which is set to true by default, to make sure that 
+	people get debugging symbols even with the default Release (O3) build.
+
+	* src/pdf_tabulate.f90:
+	a couple more speed optimisations for PDF evaluation, 
+	avoiding the intermediate 2D wgt array in the cases with 
+	quadratic or cubic interpolation.
+
+	* src/convolution.f90:
+	added some commented-out code in conv_BestIsub to exploit the
+	ordering of the nested grid ymax values, but couldn't reliably
+	identify any speed impact.
+
 2025-09-02  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* streamlined_interface.f90:
