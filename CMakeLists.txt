@@ -302,55 +302,48 @@ if (HOPPET_BUILD_EXAMPLES)
                    tabulation_example_qed  
                    tabulation_example_streamlined
                    structure_functions_example_n3lo_tests
+		   )
+ foreach ( p ${f90programs_f90})
+   add_executable( ${p}_f90 example_f90/${p}.f90)
+   target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static)
+   set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
+     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
+     Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
+     POSITION_INDEPENDENT_CODE TRUE
+     )
+ endforeach()
+ if (LHAPDF_FOUND)
+   set( f90programs_lhapdf fast_pdf_evaluation_vs_lhapdf )
+   foreach ( p ${f90programs_lhapdf})
+     add_executable( ${p}_f90 example_f90/with-lhapdf/${p}.f90)
+     target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
+     set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
+       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
+       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
+       POSITION_INDEPENDENT_CODE TRUE
        )
-  if (LHAPDF_FOUND)
-   list(APPEND f90programs_f90 fast_pdf_evaluation_vs_lhapdf)  
-  endif()
-  set( f90programs_f )
-  foreach ( p ${f90programs_f90})
-    add_executable( ${p}_f90 example_f90/${p}.f90)
-    target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static)
-    set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
-      POSITION_INDEPENDENT_CODE TRUE
-     )
-  endforeach()
-  if (LHAPDF_FOUND)
-      target_link_libraries(fast_pdf_evaluation_vs_lhapdf_f90 PUBLIC LHAPDF::LHAPDF)
-  endif()
-  foreach ( p ${f90programs_f})
-    add_executable( ${p}_f90 example_f90/${p}.f)
-    target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static)
-    set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
-      POSITION_INDEPENDENT_CODE TRUE
-     )
-    if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
-      set_source_files_properties( example_f90/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
-    endif()     
-  endforeach()
-  set( f77programs_f
-       tabulation_example)
+     if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
+       set_source_files_properties( example_f90/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
+     endif()     
+   endforeach()
+ endif()
+ set( f77programs_f
+   tabulation_example)
  if (LHAPDF_FOUND)
    list(APPEND f77programs_f compare_lhapdf_hoppet convolution_example)  
  endif()
  set( f77programs_c cpp_structure_functions_example  cpp_tabulation_example_qed cpp_tabulation_example)
- if (LHAPDF_FOUND)
-   list(APPEND f77programs_c cpp_fast_pdf_evaluation_vs_lhapdf)  
- endif()
-  foreach ( p ${f77programs_f})
-    add_executable( ${p}_f77 example_f77/${p}.f)
-    target_link_libraries(${p}_f77 PUBLIC hoppet::hoppet_static)
-    set_target_properties(${p}_f77 PROPERTIES  OUTPUT_NAME ${p} 
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
-      POSITION_INDEPENDENT_CODE TRUE
+ foreach ( p ${f77programs_f})
+   add_executable( ${p}_f77 example_f77/${p}.f)
+   target_link_libraries(${p}_f77 PUBLIC hoppet::hoppet_static)
+   set_target_properties(${p}_f77 PROPERTIES  OUTPUT_NAME ${p} 
+     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
+     Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
+     POSITION_INDEPENDENT_CODE TRUE
      )
-    if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
-      set_source_files_properties( example_f77/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
-    endif()     
+   if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
+     set_source_files_properties( example_f77/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
+   endif()     
   endforeach()
   if (LHAPDF_FOUND)
     target_link_libraries(compare_lhapdf_hoppet_f77 PUBLIC LHAPDF::LHAPDF)
@@ -366,7 +359,16 @@ if (HOPPET_BUILD_EXAMPLES)
      )
   endforeach()
   if (LHAPDF_FOUND)
-    target_link_libraries(cpp_fast_pdf_evaluation_vs_lhapdf_f77c PUBLIC LHAPDF::LHAPDF)
+    set(f77programs_c_lhapdf cpp_fast_pdf_evaluation_vs_lhapdf)
+    foreach ( p ${f77programs_c_lhapdf})
+      add_executable( ${p}_f77c example_f77/with-lhapdf/${p}.cc)
+      target_link_libraries(${p}_f77c PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
+      set_target_properties(${p}_f77c PROPERTIES  OUTPUT_NAME ${p}
+	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
+	Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
+	POSITION_INDEPENDENT_CODE TRUE
+	)
+    endforeach()
   endif()
   if (HOPPET_ENABLE_TESTING)
     ENABLE_TESTING()

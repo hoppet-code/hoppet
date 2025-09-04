@@ -1,7 +1,7 @@
 /// An example in C++ showing how to replace LHAPDF interpolation with
 /// (faster) hoppet interpolation
 ///
-#include "../src/hoppet.h"
+#include "../../src/hoppet.h"
 #include "LHAPDF/LHAPDF.h"
 #include <iostream>
 #include <cmath>
