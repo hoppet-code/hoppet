@@ -1,3 +1,10 @@
+2025-09-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* streamlined_interface.f90, hoppet.h, hoppet.i:
+	Introduce a routine hoppetAssignWithCoupling that just calls the
+	usual hoppetAssign but also set up a coupling object based on an
+	initial condition. The lhapdf examples now use this function.
+
 2025-09-03 Wed  Gavin + Alexander
 
 	* CMakeLists.txt:

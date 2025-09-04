@@ -314,6 +314,51 @@ subroutine hoppetAssign(pdf_subroutine)
   setup_done(1:) = .false.
 end subroutine hoppetAssign
 
+!======================================================================
+!! Given a pdf_subroutine with the interface shown below, initialise
+!! our internal pdf table. Sets up a coupling with initial condition
+!! as(Q0alphas) = asQ0
+subroutine hoppetAssignWithCoupling(pdf_subroutine, asQ0, Q0alphas, nloop)
+  use streamlined_interface ! this module which provides access to the array of tables
+  implicit none
+  real(dp) :: asQ0, Q0alphas
+  integer :: nloop
+  interface ! indicate what "interface" pdf_subroutine is expected to have
+    !! It expects pdf_subroutine to set components -6:6 with plain QCD evolution,
+	  !! but the full size of the flavour dimension if the upper limit
+	  !! is anything other than ncompax=7 (e.g. for QED evolution 
+	  !! it should go from -6 to ncompmaxLeptons=11).
+    subroutine pdf_subroutine(x,Q,res)
+       use types; implicit none
+       real(dp), intent(in)  :: x,Q
+       real(dp), intent(out) :: res(*)
+     end subroutine pdf_subroutine
+  end interface
+
+  ! get a running coupling with the desired scale
+  if (coupling_initialised) then
+    call Delete(coupling) 
+    if (with_qed) call Delete(coupling_qed)
+  end if
+  if (ffn_nf > 0) then
+     call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
+          &                   fixnf=ffn_nf)
+  else 
+     call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
+          &                   quark_masses=masses, &
+          &                   masses_are_MSbar = quark_masses_are_MSbar)
+  end if
+  if(with_qed) then
+     call InitQEDCoupling(coupling_qed, effective_light_quark_masses, masses(4:6))
+  endif
+  
+  call AddNfInfoToPdfTable(tables,coupling)
+  coupling_initialised = .true.
+
+  call hoppetAssign(pdf_subroutine)
+
+end subroutine hoppetAssignWithCoupling
+
 
 !======================================================================
 !! Given a pdf_subroutine with the interface shown below, fill the 

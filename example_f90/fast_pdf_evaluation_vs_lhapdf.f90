@@ -75,7 +75,7 @@ contains
          real(dp), intent(out) :: res(*)
        end subroutine EvolvePDF
     end interface
-    real(dp) :: mc, mb, mt, Q2minPDF, Q2maxPDF, xmin, xmax, Qmin, QMax
+    real(dp) :: mc, mb, mt, Q2minPDF, Q2maxPDF, xmin, xmax, Qmin, QMax, Q0
     real(dp) :: ymax, dy, dlnlnQ
     integer :: orderPDF, nloop, order, yorder, lnlnQorder
 
@@ -125,13 +125,13 @@ contains
 
     ! Now we fill the hoppet grid using the LHAPDF grid directly,
     ! rather than evolving ourselves
-    call hoppetAssign(EvolvePDF)
+    Q0 = Qmin
+    call hoppetAssignWithCoupling(EvolvePDF, alphasPDF(Q0), Q0, nloop)
 
     ! If instead we want to evolve the PDF with hoppet starting from
     ! some low scale Q0 (>= Qmin) make a call to hoppetEvolve instead
     ! of hoppetAssign
-    ! Q0 = Qmin;
-    ! call hoppetEvolve(alphasPDF(Q0), Q0, nloop, 1.0, EvolvePDF, Q0);
+    ! call hoppetEvolve(alphasPDF(Q0), Q0, nloop, 1.0, EvolvePDF, Q0)
 
   end subroutine load_lhapdf_assign_hoppet
 end program fast_pdf_evaluation_vs_lhapdf

@@ -7,6 +7,7 @@
 #define hoppetStart                    hoppetstart_
 #define hoppetStartExtended            hoppetstartextended_
 #define hoppetAssign                   hoppetassign_
+#define hoppetAssignWithCoupling       hoppetassignwithcoupling_
 #define hoppetEvolve                   hoppetevolve_        
 #define hoppetPreEvolve                hoppetpreevolve_     
 #define hoppetCachedEvolve             hoppetcachedevolve_
@@ -183,6 +184,15 @@ extern "C" {
   /// our internal pdf table.
   void hoppetAssign(void (* pdf_subroutine)(const double & x, 
                                             const double & Q, double * res) );
+
+  /// Given a pdf_subroutine with the interface shown below, initialise
+  /// our internal pdf table with a coupling
+  void hoppetAssignWithCoupling(void (* pdf_subroutine)(const double & x, 
+                                            const double & Q, double * res),
+		                const double & asQ0,
+                                const double & Q0alphas,
+                                const int    & nloop
+);
 
 
   /// Given a pdf_subroutine with the interface shown below, fill the 
