@@ -16,12 +16,9 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_a
     # Now that we have the PDF we define the interface as needed by hoppet
     def lhapdf_interface(x, Q):
         pdf = np.zeros(13) # Initialise the array with zeros
-        #pdf[ 0+6] = p_lhapdf.xfxQ(21, x, Q)
         lhapdf = p_lhapdf.xfxQ(None, x, Q)
-
         #lhapdf is a dict. Now assign it to the numpy array pdf
         pdf[ 0+6] = lhapdf[21]
-        
         # loop over quarks and gluon
         for flavor in range(-6, 7):
             if flavor == 0:
