@@ -156,6 +156,18 @@ def main():
             pdf_dict = p_lhapdf.xfxQ(None, x, Q)
     end_lhapdf = time.perf_counter()
     print(f"LHAPDF evaluation time {(end_lhapdf - start_lhapdf)/npoints/npoints*1e9:.2f} ns")
+
+    # AlphaS timings
+    start_hoppet_as = time.perf_counter()
+    for Q in Qvals_timing:
+        as_hoppet = hp.AlphaS(Q)
+    end_hoppet_as = time.perf_counter()
+    print(f"HOPPET alphaS time {(end_hoppet_as - start_hoppet_as)/npoints*1e9:.2f} ns") 
+    start_lhapdf_as = time.perf_counter()
+    for Q in Qvals_timing:
+        as_lhapdf = p_lhapdf.alphasQ(Q)
+    end_lhapdf_as = time.perf_counter()
+    print(f"LHAPDF alphaS time {(end_lhapdf_as - start_lhapdf_as)/npoints*1e9:.2f} ns")
     
     hp.DeleteAll()
 

@@ -140,6 +140,23 @@ int main () {
         pdf->xfxQ2(x, q*q, lhapdf);
   t2 = chrono::high_resolution_clock::now();
   cout << "LHAPDF time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
+
+  // Now check the evaluation time of hoppetAlphaS vs pdf->alphasQ
+  // over the range of Q values
+  t1 = chrono::high_resolution_clock::now();
+  for (double q : qvals)
+      hoppetAlphaS(q);
+  t2 = chrono::high_resolution_clock::now();
+  cout << "hoppetAlphaS time: " << chrono::duration<double>(t2 - t1).count()/npoints*1e9 << " ns\n"; 
+
+  t1 = chrono::high_resolution_clock::now();
+  for (double q : qvals)
+      pdf->alphasQ(q);
+  t2 = chrono::high_resolution_clock::now();
+  cout << "LHAPDF alphasQ time: " << chrono::duration<double>(t2 - t1).count()/npoints*1e9 << " ns\n";
+
+  hoppetDeleteAll();
+
 }
 
 

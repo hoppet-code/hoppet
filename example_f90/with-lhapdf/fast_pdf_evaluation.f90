@@ -11,6 +11,8 @@ program fast_pdf_evaluation_vs_lhapdf
   integer, parameter :: npoints = 3000
   real(dp), parameter :: xmin = 1d-5, xmax = 0.9_dp, Qmin = 1.5_dp, Qmax = 100000.0_dp
   real(dp), allocatable :: xvals(:), qvals(:)
+  real(dp), external :: hoppetAlphaS, alphasPDF
+  real(dp) :: aslhapdf, ashoppet
   integer :: i, j
   real(dp) :: t1, t2
 
@@ -59,7 +61,27 @@ program fast_pdf_evaluation_vs_lhapdf
   end do
   call cpu_time(t2)
   write(*,*) "LHAPDF time: ", (t2-t1)/npoints/npoints*1d9, " ns"
+
+  ! Now let's check the timing of hoppetAlphaS vs LHAPDF alphaS
+  call cpu_time(t1)
+  do i = 1, npoints
+    do j = 1, npoints
+      ashoppet = hoppetAlphaS(qvals(j))
+    end do
+  end do
+  call cpu_time(t2)
+  write(*,*) "hoppet alphaS time: ", (t2-t1)/npoints/npoints*1d9, " ns"
   
+  call cpu_time(t1)
+  do i = 1, npoints
+    do j = 1, npoints
+      aslhapdf = alphasPDF(qvals(j))
+    end do
+  end do
+  call cpu_time(t2)
+  write(*,*) "LHAPDF alphaS time: ", (t2-t1)/npoints/npoints*1d9, " ns" 
+
+  call hoppetDeleteAll()
 contains
   ! Routine that loads an LHAPDF set, extracts some information from
   ! it and transfers the PDF to hoppet. 

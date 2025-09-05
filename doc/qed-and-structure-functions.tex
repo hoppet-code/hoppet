@@ -1496,7 +1496,15 @@ For users who wish to use an existing LHAPDF grid directly with
 can be found here \\[0.2cm]
 \repolink{example_f90/with-lhapdf/fast_pdf_evaluation.f90}{example\_f90/with-lhapdf/fast\_pdf\_evaluation.f90}, \\
 \repolink{example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc}{example\_f77/with-lhapdf/cpp\_fast\_pdf\_evaluation.cc}, \\
-\repolink{pyinterface/tabulation_example_lhapdf.py}{pyinterface/tabulation\_example\_lhapdf.py}.
+\repolink{pyinterface/tabulation_example_lhapdf.py}{pyinterface/tabulation\_example\_lhapdf.py}. \\[0.2cm]
+
+The Fortran and \CPP{} examples are virtually identical, and the
+\ttt{subroutine} respectively \ttt{void}
+\ttt{load\_lhapdf\_assign\_hoppet} can in principle be used in
+applications as they are. The PDF can then be evaluated in the usual
+way through a call to \ttt{hoppetEval} and likewise for the coupling
+through \ttt{hoppetAlphaS}. All three examples will also print the
+above timings to the screen.
 
 %%% Local Variables:
 %%% TeX-master: "HOPPET-v2.0-release.tex"
