@@ -100,7 +100,8 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_a
     
     if assign:
         print(f"Assigning PDF using hoppetAssign using Q0 = {Q0} GeV with as(Q0) = {asQ0}")
-        hp.AssignWithCoupling(lhapdf_interface, asQ0, Q0, nloop)
+        hp.SetCoupling(asQ0, Q0, nloop)
+        hp.Assign(lhapdf_interface)
     else:
         print(f"Evolving PDF from Q0 = {Q0} GeV with as(Q0) = {asQ0}")
         hp.Evolve(asQ0, Q0, nloop, 1.0, lhapdf_interface, Q0)

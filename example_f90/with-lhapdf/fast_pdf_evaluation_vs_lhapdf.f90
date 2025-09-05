@@ -126,7 +126,8 @@ contains
     ! Now we fill the hoppet grid using the LHAPDF grid directly,
     ! rather than evolving ourselves
     Q0 = Qmin
-    call hoppetAssignWithCoupling(EvolvePDF, alphasPDF(Q0), Q0, nloop)
+    call hoppetSetCoupling(alphasPDF(Q0), Q0, nloop)
+    call hoppetAssign(EvolvePDF)
 
     ! If instead we want to evolve the PDF with hoppet starting from
     ! some low scale Q0 (>= Qmin) make a call to hoppetEvolve instead

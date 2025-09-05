@@ -109,11 +109,6 @@ static void Assign(PyObject *callback) {
     hoppetAssign(pdf_subroutine_wrapper);
 }
 
- static void AssignWithCoupling(PyObject *callback, const double & asQ0, const double & Q0alphas, const int & nloop) {
-    CHECK_AND_SET_CALLBACK(callback)
-      hoppetAssignWithCoupling(pdf_subroutine_wrapper, asQ0, Q0alphas, nloop);
-}
-
 static void Evolve(const double & asQ0, const double & Q0alphas, const int & nloop, 
                                  const double & muR_Q, PyObject *callback, const double & Q0pdf) {
     CHECK_AND_SET_CALLBACK(callback)
@@ -204,6 +199,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 // remove the hoppet prefix and turn into CamelCase.
 %rename(PreEvolve               )      hoppetpreevolve_;     
 %rename(AlphaS                  )      hoppetalphas_; 
+%rename(SetCoupling             )      hoppetsetcoupling_;       
 %rename(SetFFN                  )      hoppetsetffn_;       
 %rename(SetVFN                  )      hoppetsetvfn_;       
 %rename(SetPoleMassVFN          )      hoppetsetpolemassvfn_;       
@@ -227,7 +223,6 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %ignore hoppetstart_;
 %ignore hoppetstartextended_;
 %ignore hoppetassign_; // The callback function is Assign
-%ignore hoppetassignwithcoupling_; // The callback function is Assign
 %ignore hoppetevolve_; // The callback function is Evolve
 %ignore hoppetcachedevolve_; // The callback function is CachedEvolve
 %ignore hoppeteval_;          
@@ -258,7 +253,6 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
                         const int & order, const int & factscheme);
     void DeleteAll();
     void Assign(PyObject *callback);
-    void AssignWithCoupling(PyObject *callback, const double & asQ0, const double & Q0alphas, const int & nloop);
     void Evolve(const double & asQ0, const double & Q0alphas, const int & nloop, 
                               const double & muR_Q, PyObject *callback, const double & Q0pdf);
     void CachedEvolve(PyObject *callback);
