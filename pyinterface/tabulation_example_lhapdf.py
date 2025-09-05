@@ -8,6 +8,7 @@ import lhapdf
 import numpy as np
 import argparse
 import sys
+import time
 
 def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_above_mb = False, Q0_just_above_mc = False, exact_nnlo_nf = False, exact_nnlo_splitting = False, n3lo_splitting = '2410', FFN = -1, assign = False):
     # Load the PDF from LHAPDF
@@ -87,6 +88,10 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_a
         hp.SetPoleMassVFN(mc,mb,mt)
         print(f"Using Pole Mass Variable Flavour Number scheme with mc = {mc}, mb = {mb}, mt = {mt}")
 
+    yorder = -1
+    lnlnQorder = 4
+    hp.SetYLnlnQInterpOrders(yorder, lnlnQorder)
+    print(f"Set yorder = {yorder}, lnlnQorder = {lnlnQorder}")
     hp.Start(dy, nloop)
     
     if assign:
@@ -127,6 +132,29 @@ def main():
     print("")
     #hp.WriteLHAPDFGrid("test_python",0)
 
+    # Define grids for timing test
+    npoints = 1000
+    xvals_timing = np.logspace(np.log10(1e-5), np.log10(0.9), npoints)
+    Qvals_timing = np.logspace(np.log10(1.0), np.log10(1000.0), npoints)
+
+    # Timing HOPPET
+    start_hoppet = time.perf_counter()
+    for Q in Qvals_timing:
+        for x in xvals_timing:
+            pdf_array = hp.Eval(x, Q)
+    end_hoppet = time.perf_counter()
+    print(f"HOPPET evaluation time {(end_hoppet - start_hoppet)/npoints/npoints*1e9:.2f} ns")
+
+    # Timing LHAPDF
+    # Load the PDF from LHAPDF
+    p_lhapdf = lhapdf.mkPDF(args.pdf, 0)
+    start_lhapdf = time.perf_counter()
+    for Q in Qvals_timing:
+        for x in xvals_timing:
+            pdf_dict = p_lhapdf.xfxQ(None, x, Q)
+    end_lhapdf = time.perf_counter()
+    print(f"LHAPDF evaluation time {(end_lhapdf - start_lhapdf)/npoints/npoints*1e9:.2f} ns")
+    
     hp.DeleteAll()
 
 

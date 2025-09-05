@@ -30,8 +30,8 @@ program fast_pdf_evaluation_vs_lhapdf
   call hoppetEval(x, Q, hoppetpdf)
 
   ! Print the two PDFs
+  write(*,*) "PDFs at x = ", x, ", Q = ", Q
   write(*,*) "LHAPDF(-5:5): ", lhapdf(-5:5)
-
   write(*,*) "Hoppet(-5:5): ", hoppetpdf(-5:5)
 
   allocate(xvals(npoints), qvals(npoints))
