@@ -9,21 +9,28 @@ import numpy as np
 import argparse
 import sys
 
-def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_above_mb = False, Q0_just_above_mc = False, exact_nnlo_nf = False, exact_nnlo_splitting = False, n3lo_splitting = '2410', FFN = -1):
+def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_above_mb = False, Q0_just_above_mc = False, exact_nnlo_nf = False, exact_nnlo_splitting = False, n3lo_splitting = '2410', FFN = -1, assign = False):
     # Load the PDF from LHAPDF
     p_lhapdf = lhapdf.mkPDF(lhapdfname, 0)
 
     # Now that we have the PDF we define the interface as needed by hoppet
     def lhapdf_interface(x, Q):
         pdf = np.zeros(13) # Initialise the array with zeros
-        pdf[ 0+6] = p_lhapdf.xfxQ(21, x, Q)
+        #pdf[ 0+6] = p_lhapdf.xfxQ(21, x, Q)
+        lhapdf = p_lhapdf.xfxQ(None, x, Q)
+
+        #lhapdf is a dict. Now assign it to the numpy array pdf
+        pdf[ 0+6] = lhapdf[21]
+        
         # loop over quarks and gluon
         for flavor in range(-6, 7):
             if flavor == 0:
                 continue
-            pdf[flavor + 6] = p_lhapdf.xfxQ(flavor, x, Q)
+            # Check that key exists in lhapdf
+            if flavor in lhapdf:
+                pdf[flavor + 6] = lhapdf[flavor]
         return pdf
-
+    
     # Get some information from the PDF like order in QCD, masses etc.
     nloop = p_lhapdf.orderQCD + 1 # LHAPDF starts at 0
     xmin = p_lhapdf.xMin
@@ -85,8 +92,12 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_a
 
     hp.Start(dy, nloop)
     
-    print(f"Evolving PDF from Q0 = {Q0} GeV with as(Q0) = {asQ0}")
-    hp.Evolve(asQ0, Q0, nloop, 1.0, lhapdf_interface, Q0)
+    if assign:
+        print(f"Assigning PDF using hoppetAssign using Q0 = {Q0} GeV with as(Q0) = {asQ0}")
+        hp.AssignWithCoupling(lhapdf_interface, asQ0, Q0, nloop)
+    else:
+        print(f"Evolving PDF from Q0 = {Q0} GeV with as(Q0) = {asQ0}")
+        hp.Evolve(asQ0, Q0, nloop, 1.0, lhapdf_interface, Q0)
 
 def main():
     # Get commandline
