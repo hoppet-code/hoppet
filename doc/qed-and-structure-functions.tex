@@ -1434,7 +1434,8 @@ possible, but only through manually modifying the source code. The new
 functionality essentially allows the user to modify the interpolation
 order of the \hoppet{} grids. Part of the speedup, which was not
 available in earlier releases, comes from manually unwinding a set of
-loops when the user specifies either quadratic or cubic interpolation.
+loops when the user specifies either quadratic or cubic interpolation,
+which are therefore faster than any of the other interpolation orders.
 
 In the streamlined interface the user can now call
 \begin{lstlisting}
@@ -1453,20 +1454,8 @@ be achieved by LHAPDF, then quadratic and cubic interpolation is
 sufficient, as long as the user sets up a dense enough
 grid\footnote{In our tests we have been using \ttt{dy = 0.05} with
 quadratic interpolation, finding agreement with LHAPDF, typically at
-the level of $\mathcal{O}(0.01\%)$.} In
-table~\ref{tab:interp_performance} we show the performance of
-different interpolation orders. The timings were obtained on an
-\texttt{M2Pro} with \texttt{gfortran v14.2} and \texttt{-O3}
-optimisation. For comparison we find that the equivalent time spent by
-LHAPDF is $220$ ns (Fortran), $146$ ns (\CPP{}), and $2700$ ns
-(Python)\footnote{With the Fortran interface that comes with LHAPDF
-6.5.5, \ttt{LHAGlue.cc}, we actually find that a call to EvolvePDF
-takes about 4 times longer than the quoted number. This is due to that
-function calling the \ttt{LHAPDF::xfxQ} method for each flavour. If
-instead one modifies the routine to access the PDF through a
-\ttt{std::vector} timings are as reported here.}.
-
-%A table shoing columns with yorder, lnlnQorder, time per call (ns).
+the level of $\mathcal{O}(0.01\%)$.} 
+%
 \begin{table}[htbp]
   \centering
   \begin{tabular}{|c|c|ccc|}
@@ -1485,7 +1474,29 @@ instead one modifies the routine to access the PDF through a
   \ttt{hoppetEval} with all flavours.\ak{Gavin to update with M2Pro}}
   \label{tab:interp_performance}
 \end{table}
+%
+In table~\ref{tab:interp_performance} we show the performance of
+different interpolation orders. The timings were obtained on an
+\texttt{M2Pro} with \texttt{gfortran v14.2} and \texttt{-O3}
+optimisation. We also report the timings found by calling LHAPDF
+directly.\footnote{With the Fortran interface that comes with LHAPDF
+6.5.5, \ttt{LHAGlue.cc}, we actually find that a call to
+\ttt{EvolvePDF} takes about 4 times longer than the quoted number.
+This is due to that function calling the \ttt{LHAPDF::xfxQ} method for
+each flavour. If instead one modifies the routine to access the PDF
+through a \ttt{std::vector} timings are as reported here.} As can be
+seen, with quadratic interpolation, \hoppet{} is as fast, if not
+faster, than LHAPDF. The difference between Fortran and \CPP{} in
+LHAPDF in all likelihood comes from the fact that the \CPP{} interface
+has to allocate a vector upon each call. It is likely that this could
+be optimised in LHAPDF. 
 
+For users who wish to use an existing LHAPDF grid directly with
+\hoppet{}, we provide examples in Fortran, CPP{}, and Python, which
+can be found here \\[0.2cm]
+\repolink{example_f90/with-lhapdf/fast_pdf_evaluation.f90}{example\_f90/with-lhapdf/fast\_pdf\_evaluation.f90}, \\
+\repolink{example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc}{example\_f77/with-lhapdf/cpp\_fast\_pdf\_evaluation.cc}, \\
+\repolink{pyinterface/tabulation_example_lhapdf.py}{pyinterface/tabulation\_example\_lhapdf.py}.
 
 %%% Local Variables:
 %%% TeX-master: "HOPPET-v2.0-release.tex"

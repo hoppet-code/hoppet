@@ -1,7 +1,7 @@
 2025-09-05  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
-	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation_vs_lhapdf.cc:
-	* example_f90/with-lhapdf/fast_pdf_evaluation_vs_lhapdf.f90:
+	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc:
+	* example_f90/with-lhapdf/fast_pdf_evaluation.f90:
         * pyinterface/hoppet.i:
         * pyinterface/tabulation_example.py:
         * pyinterface/tabulation_example_lhapdf.py:
@@ -20,8 +20,8 @@
 
 2025-09-05 Fri  Alexander
 
-	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation_vs_lhapdf.cc:
-	* example_f90/with-lhapdf/fast_pdf_evaluation_vs_lhapdf.f90:
+	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc:
+	* example_f90/with-lhapdf/fast_pdf_evaluation.f90:
 	* pyinterface/tabulation_example_lhapdf.py:
 	examples to show how to import an LHAPDF member into Hoppet,
 	allowing for speed comparisons between them.
