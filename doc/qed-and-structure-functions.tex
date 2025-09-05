@@ -1471,12 +1471,14 @@ instead one modifies the routine to access the PDF through a
   \centering
   \begin{tabular}{|c|c|ccc|}
     \hline
-    \ttt{yorder} & \ttt{lnlnQ} order & &Time per call (ns)& \\
+    \ttt{yorder} & \ttt{lnlnQorder} & &Time per call (ns)& \\
      \hline
     & & Fortran & \CPP{} & Python \\
     -1 & 4 & 488 & 475 & 850 \\
     3 & 3 & 180& 218 & 610 \\
     2 & 2 & 165& 173&  540 \\
+    \hline
+    \multicolumn{2}{|c|}{LHAPDF} & 220 & 146 & 2700 \\
     \hline
   \end{tabular}
   \caption{Performance of different interpolation orders for a call to
