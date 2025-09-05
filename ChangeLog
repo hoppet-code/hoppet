@@ -1,8 +1,27 @@
+2025-09-05 Fri  Alexander + Gavin
+
+	* src/streamlined_interface.f90:
+	added hoppetSetCoupling(alphas_Q,Q,nloop) to allow a user to set
+	the strong coupling prior to a hoppetAssign call. This will also
+	ensure that a table filled with hoppetAssign has the correct
+	mass thresholds.
+
+2025-09-05 Fri  Alexander
+
+	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation_vs_lhapdf.cc:
+	* example_f90/with-lhapdf/fast_pdf_evaluation_vs_lhapdf.f90:
+	* pyinterface/tabulation_example_lhapdf.py:
+	examples to show how to import an LHAPDF member into Hoppet,
+	allowing for speed comparisons between them.
+
+	Note that by default the python example imports at the low scale and
+	evolves up, while the others import across all scales.
+
 2025-09-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* streamlined_interface.f90, hoppet.h, hoppet.i:
-	Introduce a routine hoppetAssignWithCoupling that just calls the
-	usual hoppetAssign but also set up a coupling object based on an
+	Introduced a routine hoppetAssignWithCoupling that just calls the
+	usual hoppetAssign but also sets up a coupling object based on an
 	initial condition. The lhapdf examples now use this function.
 
 2025-09-03 Wed  Gavin + Alexander

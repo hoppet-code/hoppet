@@ -303,6 +303,11 @@ subroutine hoppetAssign(pdf_subroutine)
   end interface
   !-----------------------------------
 
+  if (ffn_nf < 0 .and. (.not. coupling_initialised)) then
+    call wae_error('hoppetAssign','Since v2 of hoppet, if you assign a PDF with hoppet''s VFN option turned on (default) '//&
+    'you must first set the quark masses (hoppetSetPoleMassVFN(...)) and then the coupling (hoppetSetCoupling(...)). ')
+  end if
+
   ! set up table(0) by copying the values returned by pdf_subroutine onto 
   ! the x-Q grid in table(0)
   call FillPdfTable_LHAPDF(tables(0), pdf_subroutine)
@@ -361,6 +366,49 @@ end subroutine hoppetAssignWithCoupling
 
 
 !======================================================================
+!! Set up the strong coupling such that alphas(Q)=alphas_Q, with the
+!! given number of loops (nloop).
+!!
+!! The user should have set the quark masses or requested a FFN scheme
+!! prior to calling this function.
+!!
+!! This function is provided mainly for use in conjunction with hoppetAssign.
+!! In particular, it has the side effect of modifying the structure of the
+!! PDF tables to make sure they know about the mass thresholds.
+!!
+!! If QED has been requested, a QED coupling will also be set up
+!! (its value is not currently configurable from this interface).
+!!
+!! If you call hoppetEvolve (below), there is no need to separately call
+!! hoppetSetCoupling.
+subroutine hoppetSetCoupling(alphas_Q,Q,nloop)
+  use streamlined_interface
+  implicit none
+  real(dp), intent(in) :: alphas_Q, Q
+  integer, intent(in) :: nloop
+
+  ! get a running coupling with the desired scale
+  if (coupling_initialised) then
+    call Delete(coupling) 
+    if (with_qed) call Delete(coupling_qed)
+  end if
+  if (ffn_nf > 0) then
+     call InitRunningCoupling(coupling, alfas=alphas_Q, Q=Q, nloop=nloop, &
+          &                   fixnf=ffn_nf)
+  else 
+     call InitRunningCoupling(coupling, alfas=alphas_Q, Q=Q, nloop=nloop, &
+          &                   quark_masses=masses, &
+          &                   masses_are_MSbar = quark_masses_are_MSbar)
+  end if
+  if(with_qed) then
+     call InitQEDCoupling(coupling_qed, effective_light_quark_masses, masses(4:6))
+  endif
+  call AddNfInfoToPdfTable(tables,coupling)
+  coupling_initialised = .true.
+
+end subroutine hoppetSetCoupling
+
+!======================================================================
 !! Given a pdf_subroutine with the interface shown below, fill the 
 !! table by evolving the PDF from scale Q0pdf, with alphas provided 
 !! at scale Q0alphas
@@ -394,24 +442,7 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
   !write(*,*)'***********HoppetEvolve, before InitPDF_LHAPDF'
   call InitPDF_LHAPDF(grid, pdf0, pdf_subroutine, Q0pdf)
 
-  ! get a running coupling with the desired scale
-  if (coupling_initialised) then
-    call Delete(coupling) 
-    if (with_qed) call Delete(coupling_qed)
-  end if
-  if (ffn_nf > 0) then
-     call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
-          &                   fixnf=ffn_nf)
-  else 
-     call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
-          &                   quark_masses=masses, &
-          &                   masses_are_MSbar = quark_masses_are_MSbar)
-  end if
-  if(with_qed) then
-     call InitQEDCoupling(coupling_qed, effective_light_quark_masses, masses(4:6))
-  endif
-  call AddNfInfoToPdfTable(tables,coupling)
-  coupling_initialised = .true.
+  call hoppetSetCoupling(asQ0,Q0alphas,nloop)
 
   ! create the tabulation
   if(with_qed) then
