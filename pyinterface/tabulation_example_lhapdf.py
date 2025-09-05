@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
-
-# This is a small example that uses the hoppet and lahpdf python
-# interfaces. It loads an lhapdf set at a low scale and evolves it up.
+"""
+This is a small example that uses the Hoppet and LHAPDF python
+interfaces. It loads an LHAPDF set at a low scale and evolves it up
+with Hoppet.
+"""
 
 import hoppet as hp
 import lhapdf
@@ -10,7 +12,11 @@ import argparse
 import sys
 import time
 
-def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_above_mb = False, Q0_just_above_mc = False, exact_nnlo_nf = False, exact_nnlo_splitting = False, n3lo_splitting = '2410', FFN = -1, assign = False):
+def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_above_mb = False, 
+                                    Q0_just_above_mc = False, 
+                                    exact_nnlo_nf = False, exact_nnlo_splitting = False, 
+                                    n3lo_splitting = '2410', FFN = -1, assign = False,
+                                    yorder=-1, lnlnQorder=4):
     # Load the PDF from LHAPDF
     p_lhapdf = lhapdf.mkPDF(lhapdfname, 0)
 
@@ -88,8 +94,6 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_a
         hp.SetPoleMassVFN(mc,mb,mt)
         print(f"Using Pole Mass Variable Flavour Number scheme with mc = {mc}, mb = {mb}, mt = {mt}")
 
-    yorder = -1
-    lnlnQorder = 4
     hp.SetYLnlnQInterpOrders(yorder, lnlnQorder)
     print(f"Set yorder = {yorder}, lnlnQorder = {lnlnQorder}")
     hp.Start(dy, nloop)
@@ -107,10 +111,12 @@ def main():
     parser.add_argument('-pdf', required=True, help='LHAPDF set name (required, ex. NNPDF30_nnlo_as_0118)')
     parser.add_argument('-dy', type=float, default=0.05, help='dy for HOPPET evolution (default: 0.05)')
     parser.add_argument('-Q0', type=float, default=1.0, help='Initial Q0 value (default: Qmin from LHAPDF)')
+    parser.add_argument('-yorder', type=int, default=-1, help='order for interpolation in y=ln1/x (default of -1 uses same as evolution)')
+    parser.add_argument('-lnlnQorder', type=int, default=4, help='order for interpolation in lnlnQ (default=4)')
 
     args = parser.parse_args()
 
-    load_lhapdf_start_evolve_hoppet(args.pdf, args.Q0, args.dy)
+    load_lhapdf_start_evolve_hoppet(args.pdf, args.Q0, args.dy,yorder=args.yorder, lnlnQorder=args.lnlnQorder)
 
     # Evaluate the PDFs at some x values and print them
     xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
