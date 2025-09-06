@@ -101,13 +101,14 @@ int main () {
   hoppetEval(x, Q, hoppetpdf);
 
   // Print the two PDFs
-  cout << "LHAPDF: ";
+  cout << "PDF Evaluation at x = " << x << ", Q = " << Q << " GeV" << endl;
+  cout << "LHAPDF(-6,...,6): ";
   for (const auto & val : lhapdf) {
     cout << val << " ";
   }
   cout << endl;
 
-  cout << "Hoppet: ";
+  cout << "Hoppet(-6,...,6): ";
   for (const auto & val : hoppetpdf) {
     cout << val << " ";
   }
