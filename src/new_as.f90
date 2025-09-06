@@ -5,7 +5,7 @@ module new_as
   private
 
   type na_segment
-     real(dp) :: tlo, thi, dt
+     real(dp) :: tlo, thi, dt, invdt
      real(dp) :: beta0, beta1, beta2, beta3
      real(dp), pointer :: ra(:)
      !-- above iflip we evolve upwards, below iflip we evolve downwards
@@ -33,6 +33,7 @@ module new_as
   real(dp), parameter :: thi = 93.0_dp 
   integer,  parameter :: nofixnf = -1000000045
 
+  public na_Value_faster
   public :: na_handle
   public :: na_Init, na_Value, na_Del, na_NumberOfLoops
   public :: na_nfRange, na_nfAtQ, na_QrangeAtNf, na_QuarkMass
@@ -184,6 +185,7 @@ contains
        nbin = ceiling((seg%thi - seg%tlo)/seg%dt)
        nbin_total = nbin_total + nbin
        seg%dt    = (seg%thi - seg%tlo) / nbin
+       seg%invdt = one / seg%dt
        allocate(seg%ra(0:nbin))
     end do
     !write(0,*) 'new_as: used total bins ', nbin_total
@@ -389,7 +391,70 @@ contains
     end if
     !write(0,'(f15.10,i,f15.12)') t, nseg, res ! HOPPER TESTING
   end function na_Value
-  
+
+  function na_Value_faster(nah, Q) result(res)
+    type(na_handle), intent(in), target :: nah
+    real(dp),        intent(in)         :: Q
+    real(dp) :: res
+    !---------------
+    real(dp) :: t, tnorm, tdarr(0:4), itd, prod
+    real(dp), parameter :: coeffs(0:4) = [1.0/24.0_dp, -1.0/6.0_dp, 1.0/4.0_dp, -1.0/6.0_dp, 1.0/24.0_dp]
+    integer  :: iseg, it, i
+    type(na_segment), pointer :: this_seg
+    
+    t = tofQ(Q)
+    if (t < nah%seg(nah%nlo)%tlo .or. t > nah%seg(nah%nhi)%thi) then
+      res = na_Value(nah,Q)
+      return
+    end if
+
+    ! choose the segment
+    do iseg = nah%nlo, nah%nhi
+      if (t <= nah%seg(iseg)%thi) exit
+    end do
+
+    this_seg => nah%seg(iseg)
+    if (ubound(this_seg%ra,1) < 4) then
+      ! not enough points to do the interpolation, so just use na_Value
+      res = na_Value(nah,Q)
+      return
+    end if
+
+    ! 2025-09-06: on M2Pro -O3 gfortran, save about 1ns by using multiplication rather than division
+    tnorm = (t - this_seg%tlo) * this_seg%invdt
+    it = int(tnorm)
+    if (it == tnorm) then
+      res = one/this_seg%ra(it)
+      return
+    end if
+
+    ! M2Pro gfortran 15 -O3, save about 0.5 ns with explicit if rather than min,max
+    ! So do not use `it = min(max(it - 2,0),ubound(this_seg%ra,1)-4)`
+    if (it < 0) then
+      it = it + 2
+    else if (it + 4 > ubound(this_seg%ra,1)) then
+      it = ubound(this_seg%ra,1) - 4
+    end if
+
+    itd = it
+    tdarr = (tnorm - itd) - [0.0_dp, 1.0_dp, 2.0_dp, 3.0_dp, 4.0_dp]
+    ! this route involves a division, but on M2Pro-gfortran15-O3 save 0.2-0.3ns
+    prod = product(tdarr)
+    res = prod * sum((coeffs * this_seg%ra(it:it+4)) / tdarr)
+    ! this route skips divisions but on M2Pro-gfortran15-O3 costs an extra 0.2-0.3ns
+    !block
+    !  real(dp) :: prodsl(0:4), prodsr(0:4)
+    !  prodsl(0) = one
+    !  prodsr(4) = one
+    !  do i = 1,4
+    !    prodsl(i) = prodsl(i-1) * tdarr(i-1)
+    !    prodsr(4-i) = prodsr(5-i) * tdarr(5-i)
+    !  end do
+    !  res = sum(prodsl * prodsr * this_seg%ra(it:it+4) * coeffs)
+    !end block 
+    res = one / res
+  end function na_Value_faster
+
 
   !======================================================================
   !! Returns the number of loops in this coupling

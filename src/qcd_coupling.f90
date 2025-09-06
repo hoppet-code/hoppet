@@ -23,7 +23,7 @@ module qcd_coupling
 
 
   type running_coupling 
-     private
+     !private
      type(na_handle) :: nah      ! simply "redirect" to new coupling
      logical         :: use_nah
      !-- following components are related to old analytical approximations

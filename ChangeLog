@@ -1,12 +1,23 @@
+2025-09-06 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/new_as.f90:
+	* example_f90/with-lhapdf/fast_pdf_evaluation.f90:
+	added na_Value_faster(...) which evaluates alphas in about 10ns
+	rather than 30ns (M2Pro-gfortran15-O3), while maintaining ~10^{-9} accuracy.
+	That's currently what's in fast_pdf_evaluation
+
+	* src/qcd_coupling.f90:
+	make access to underlying nah object public
+
 2025-09-05  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc:
 	* example_f90/with-lhapdf/fast_pdf_evaluation.f90:
-        * pyinterface/hoppet.i:
-        * pyinterface/tabulation_example.py:
-        * pyinterface/tabulation_example_lhapdf.py:
-        * src/hoppet.h:
-        * src/streamlined_interface.f90:
+	* pyinterface/hoppet.i:
+	* pyinterface/tabulation_example.py:
+	* pyinterface/tabulation_example_lhapdf.py:
+	* src/hoppet.h:
+	* src/streamlined_interface.f90:
 	Removed hoppetAssignWithCoupling and replaced all calls in
 	examples with hoppetSetCoupling and hoppetAssign.
 

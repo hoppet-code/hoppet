@@ -1,9 +1,10 @@
 ! An example in Fortran90 showing how to replace LHAPDF interpolation with
 ! (faster) hoppet interpolation using the streamlined interface
 !
-program fast_pdf_evaluation_vs_lhapdf
+program fast_pdf_evaluation
   use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF ! Avoid namespace clashes with LHAPDF
   use streamlined_interface
+  use new_as
   implicit none
   character(len=200) :: pdfname
   integer :: imem
@@ -66,7 +67,12 @@ program fast_pdf_evaluation_vs_lhapdf
   call cpu_time(t1)
   do i = 1, npoints
     do j = 1, npoints
-      ashoppet = hoppetAlphaS(qvals(j))
+      !ashoppet = hoppetAlphaS(qvals(j))
+      !! GPS M2Pro 2025-09-06: this variant saves only 0.4ns per call
+      !! out of about 31.7
+      !ashoppet = na_Value(coupling%nah, qvals(j))
+      ashoppet = na_Value_faster(coupling%nah, qvals(j))
+      !if (i == 1) write(6,*) qvals(j), hoppetAlphaS(qvals(j)), na_Value_faster(coupling%nah, qvals(j))
     end do
   end do
   call cpu_time(t2)
@@ -76,6 +82,7 @@ program fast_pdf_evaluation_vs_lhapdf
   do i = 1, npoints
     do j = 1, npoints
       aslhapdf = alphasPDF(qvals(j))
+      !alphasPDF(qvals(j))
     end do
   end do
   call cpu_time(t2)
@@ -157,4 +164,4 @@ contains
     ! call hoppetEvolve(alphasPDF(Q0), Q0, nloop, 1.0, EvolvePDF, Q0)
 
   end subroutine load_lhapdf_assign_hoppet
-end program fast_pdf_evaluation_vs_lhapdf
+end program fast_pdf_evaluation
