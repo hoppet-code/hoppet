@@ -40,7 +40,7 @@ module new_as
   public :: na_QuarkMassesAreMSbar
   public :: na_Set_dt_base
 
-  type(na_segment), pointer :: seg
+  !type(na_segment), pointer :: seg
 
   interface SetDefaultCouplingDt
      module procedure na_Set_dt_base
@@ -91,6 +91,7 @@ contains
     integer  :: nf_store
     integer  :: nbin, i, j, nseg, istart
     integer  :: nbin_total
+    type(na_segment), pointer :: seg
 
     !-- we may well play with nf, so need to be able to reset it
     nf_store = nf_int
@@ -210,12 +211,12 @@ contains
     seg => nah%seg(nseg)
     istart = nint((tstart-seg%tlo)/seg%dt)
     t = tstart
-    seg%ra(istart) = na_evolve(ra, seg%tlo+istart*seg%dt - tstart)
+    seg%ra(istart) = na_evolve(ra, seg%tlo+istart*seg%dt - tstart,seg)
     do i = istart+1, ubound(seg%ra,dim=1)
-       seg%ra(i) = na_evolve(seg%ra(i-1), seg%dt)
+       seg%ra(i) = na_evolve(seg%ra(i-1), seg%dt, seg)
     end do
     do i = istart-1, lbound(seg%ra,dim=1), -1
-       seg%ra(i) = na_evolve(seg%ra(i+1), -seg%dt)
+       seg%ra(i) = na_evolve(seg%ra(i+1), -seg%dt, seg)
     end do
     seg%iflip = istart
 
@@ -263,7 +264,7 @@ contains
        seg%ra(0) = one/alfas_here
        ! recall that this is the reciprocal of alpha!
        do i = 1, ubound(seg%ra,dim=1)
-          seg%ra(i) = na_evolve(seg%ra(i-1), seg%dt)
+          seg%ra(i) = na_evolve(seg%ra(i-1), seg%dt, seg)
        end do
        seg%iflip = -1
     end do
@@ -296,7 +297,7 @@ contains
        end if
        seg%ra(ubound(seg%ra,dim=1)) = one/alfas_here
        do i = ubound(seg%ra,dim=1)-1, 0, -1
-          seg%ra(i) = na_evolve(seg%ra(i+1), -seg%dt)
+          seg%ra(i) = na_evolve(seg%ra(i+1), -seg%dt, seg)
        end do
        seg%iflip = ubound(seg%ra,dim=1)+1
     end do
@@ -324,6 +325,7 @@ contains
     integer  :: nseg, i, n
     integer, save :: warn_id = warn_id_INIT
     integer, parameter :: max_warn = 1
+    type(na_segment), pointer :: seg
 
     if (nah%nloop == 0) then
       res = nah%alfas
@@ -375,7 +377,7 @@ contains
     !   if the procedure is not particularly recommended.
     delta_t = t - (seg%tlo+i*seg%dt)
     if (abs(delta_t) <= 1.3_dp*seg%dt) then
-       res = one/na_evolve(seg%ra(i), delta_t)
+       res = one/na_evolve(seg%ra(i), delta_t, seg)
     else
        call wae_warn(max_warn,warn_id,'na_Value: will evolve &
             &fixed-nf alpha_s beyond precalculated range.',&
@@ -385,7 +387,7 @@ contains
        delta_t = delta_t/n
        ra = seg%ra(i)
        do i = 1, n
-          ra = na_evolve(ra,delta_t)
+          ra = na_evolve(ra,delta_t, seg)
        end do
        res = one/ra
     end if
@@ -607,25 +609,31 @@ contains
   
   !------------------------------------------------------------
   ! given ra return the value evolve by dt
-  function na_evolve(ra,dt) result(res)
+  function na_evolve(ra,dt, seg) result(res)
     use runge_kutta
     real(dp), intent(in) :: ra, dt
+    class(*), intent(in) :: seg
     !----------------------------------
     real(dp) :: res,t
     t = zero
     res = ra
-    call rkstp(dt,t,res,na_deriv)
+    !call rkstp_arg(dt,t,res,na_deriv,seg)
+    call rkstp_arg(dt,t,res,na_deriv,seg)
   end function na_evolve
   
-  
-
   !---------------------------------------------------------
-  ! derivative of 1/alpha
-  subroutine na_deriv(t, ra, dra)
+  !! derivative of 1/alpha
+  subroutine na_deriv(t, ra, dra, seg)
     real(dp), intent(in)  :: t, ra
     real(dp), intent(out) :: dra
+    class(*), intent(in)  :: seg
 
-    dra = seg%beta0 + seg%beta1/ra + seg%beta2/ra**2 + seg%beta3/ra**3
+    select type(seg)
+    type is (na_segment)
+      dra = seg%beta0 + seg%beta1/ra + seg%beta2/ra**2 + seg%beta3/ra**3
+    class default
+      dra = zero
+    end select
   end subroutine na_deriv
 
   !! Function that returns t = 2*log(Q).
