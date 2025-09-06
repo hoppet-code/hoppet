@@ -49,6 +49,9 @@ contains
   end subroutine rkstp_0d
 
   ! version that takes a generic extra argument
+  ! Note that the actual conv must genuinely taks a class(*) arg
+  ! and then use select type(arg) to specialise to the correct
+  ! variant.
   subroutine rkstp_0d_arg(h,x,y,conv, arg)
     real(dp), intent(in)    :: h
     real(dp), intent(inout) :: x, y
