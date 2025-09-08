@@ -25,6 +25,9 @@ It also contains
 
 - git_watcher.cmake by Andrew Hardin (MIT License)
 
+- the ftlMacros.inc file from the Fortran Template Library,
+  by Robert Rüger (GPLv3 or later)
+
 --------------------------------------------------------------------------
 
 

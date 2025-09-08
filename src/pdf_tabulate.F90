@@ -50,8 +50,13 @@ module pdf_tabulate
     integer :: nQ, lnlnQ_order
     logical :: freeze_at_Qmin
     ! this is useful only in absence of nf info.
-    real(dp) :: dlnlnQ
-    !
+    real(dp) :: dlnlnQ    
+
+    ! a seginfo-like object when there is no nf info,
+    ! makes it easier to have common code across nf and no-nf 
+    ! cases
+    type(pdfseginfo) :: seginfo_no_nf
+
     ! Stuff to do with variable nf and alpha_s; not always available.
     ! In cases with variable nf, the table will be broken into multiple
     ! segments, each one of which potentially different spacings.
@@ -59,8 +64,8 @@ module pdf_tabulate
     logical :: nf_info_associated
     integer :: nflo, nfhi
     type(pdfseginfo), pointer :: seginfo(:)
-    integer, pointer :: nf_int(:)
-    real(dp), pointer :: as2pi(:)
+    integer,          pointer :: nf_int(:)
+    real(dp),         pointer :: as2pi(:)
     !
     ! Elements needed in case we want to do precalculation of
     ! of evolution. Not always available.
@@ -83,10 +88,8 @@ module pdf_tabulate
   ! used in various contexts for deciding when an interval is
   ! sufficiently small that it can be ignored...
   real(dp), parameter :: min_dlnlnQ_singleQ = 1e-10_dp
-!  integer, parameter :: def_lnlnQ_order = 4
   integer, public :: def_lnlnQ_order = 4
   integer, parameter :: max_lnlnQ_order = 6
-  !integer, parameter :: lnlnQ_order = 2
 
   interface AllocPdfTable
     module procedure pdftab_AllocTab_, pdftab_AllocTab_fromorig,&
@@ -199,18 +202,29 @@ contains
     nullify(tab%evops)
 
     !write(0,*) 'pdf_table info: Number of Q bins is ',tab%nQ
+    ! start off with this default
+    tab%tab_iflv_max = iflv_max
     if (present(iflv_max_table)) then
-       call AllocGridQuant(grid, tab%tab, iflv_min, iflv_max_table, 0, tab%nQ)
-       if (iflv_max_table /= ncompmax) tab%tab_iflv_max = iflv_max_table
+      if (iflv_max_table < iflv_max) call wae_error('pdftab_AllocTab_','iflv_max_table too small (<iflv_max)',intval=iflv_max_table)
+      call AllocGridQuant(grid, tab%tab, iflv_min, iflv_max_table, 0, tab%nQ)
+      if (iflv_max_table /= ncompmax) tab%tab_iflv_max = iflv_max_table
     else
        call AllocPDF(grid,tab%tab,0,tab%nQ)
     end if
     allocate(tab%lnlnQ_vals(0:tab%nQ))
     allocate(tab%Q_vals(0:tab%nQ))
     do iQ = 0, tab%nQ
-       tab%lnlnQ_vals(iQ) = tab%lnlnQ_min + iQ * tab%dlnlnQ
-       tab%Q_vals(iQ) = invlnln(tab,tab%lnlnQ_vals(iQ))
+      tab%lnlnQ_vals(iQ) = tab%lnlnQ_min + iQ * tab%dlnlnQ
+      tab%Q_vals(iQ) = invlnln(tab,tab%lnlnQ_vals(iQ))
     end do
+
+
+    tab%seginfo_no_nf%lnlnQ_lo = tab%lnlnQ_min
+    tab%seginfo_no_nf%lnlnQ_hi = tab%lnlnQ_max
+    tab%seginfo_no_nf%dlnlnQ = tab%dlnlnQ
+    tab%seginfo_no_nf%inv_dlnlnQ = 1.0_dp / tab%dlnlnQ
+    tab%seginfo_no_nf%ilnlnQ_lo = 0
+    tab%seginfo_no_nf%ilnlnQ_hi = tab%nQ
 
     ! label this tab as allocated
     tab%allocated = .true.
@@ -302,7 +316,7 @@ contains
   !! KNOWN LIMITATIONS: What happens with muM_mQ /= 1? All hell breaks
   !! loose?
   subroutine AddNfInfoToPdfTable(tab,coupling)
-    type(pdf_table), intent(inout) :: tab
+    type(pdf_table), intent(inout), target :: tab
     type(running_coupling), intent(in) :: coupling
     !-----------------------------------
     integer  :: nflcl, iQ_prev, iQ, iflv_max_table
@@ -1032,8 +1046,29 @@ contains
       grid_ptr => grid
       iy_offset = 0
     endif
-
   end subroutine tab_get_grid_ptr
+
+  !subroutine tab_get_seginfo_ptr(tab, lnlnQ, seginfo_ptr)
+  !  type(pdf_table), intent(in), target :: tab
+  !  real(dp),        intent(inout)      :: lnlnQ
+  !  type(pdfseginfo), pointer           :: seginfo_ptr
+  !  !----------------------------------------
+  !  integer :: i_nf
+  !
+  !  if (lnlnQ < tab%lnlnQ_min) then
+  !    lnlnQ = tab%lnlnQ_min
+  !  else if (lnlnQ > tab%lnlnQ_max) then
+  !    call wae_error("EvalPdfTable_yQ_orderNNNN","Q was too large",dbleval=invlnln(tab,lnlnQ))
+  !  endif
+  !  if (.not. tab%nf_info_associated) then
+  !    seginfo_ptr => tab%seginfo_no_nf
+  !  else
+  !    do i_nf = tab%nflo, tab%nfhi-1
+  !      if (lnlnQ < tab%seginfo(i_nf)%lnlnQ_lo) exit
+  !    end do
+  !    seginfo_ptr => tab%seginfo(i_nf)
+  !  end if
+  !end subroutine tab_get_seginfo_ptr
 
   ! the following code loads the appropriate PDF evaluation subroutine
   ! with the order hard-coded to NNNN
@@ -1126,7 +1161,7 @@ contains
                                  & iy_increment, &
                                  & flav_indices, flav_pdg_ids, flav_rescale)                                
     use qed_objects
-    type(pdf_table),        intent(in) :: table
+    type(pdf_table), target, intent(in) :: table
     type(running_coupling), intent(in) :: coupling
     character(len=*),       intent(in) :: basename
     integer,                intent(in) :: pdf_index
@@ -1482,7 +1517,7 @@ contains
   !! return value of lnlnQ_norm = (lnlnQ - lnlnQ(iQ_lo))/dlnlnQ
   !!
   subroutine request_iQrange(tab, lnlnQ, nrequest, iQ_lo, iQ_hi, lnlnQ_norm)
-    type(pdf_table), intent(in) :: tab
+    type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: lnlnQ
     integer,      intent(in) :: nrequest
     integer,     intent(out) :: iQ_lo, iQ_hi
