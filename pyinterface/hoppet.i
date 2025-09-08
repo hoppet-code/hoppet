@@ -200,6 +200,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %rename(PreEvolve               )      hoppetpreevolve_;     
 %rename(AlphaS                  )      hoppetalphas_; 
 %rename(SetCoupling             )      hoppetsetcoupling_;       
+%rename(EvalPID                 )      hoppetevalpid_; 
 %rename(SetFFN                  )      hoppetsetffn_;       
 %rename(SetVFN                  )      hoppetsetvfn_;       
 %rename(SetPoleMassVFN          )      hoppetsetpolemassvfn_;       

@@ -1,3 +1,11 @@
+2025-09-08  Alexander Karlberg  <karlberg@Latitude-E7470>
+
+	* src/streamlined_interface.f90:
+	* src/hoppet.h:
+	* pyinterface/hoppet.i:
+	Added hoppetEvalPID to access single flavour PDFs from the
+	streamlined interface
+
 2025-09-08 Alexander + Gavin
 
 	* src/inc/ftlMacros.inc: *** ADDED ***

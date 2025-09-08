@@ -685,6 +685,20 @@ subroutine hoppetEval(x,Q,f)
   call EvalPdfTable_xQ(tables(0),x,Q,f(1:tables(0)%tab_iflv_max-ncompmin+1))
 end subroutine hoppetEval
 
+!======================================================================
+!! Assuming this is called with an array starting at index -6, return in f(-6:6) 
+!! the value of the internally stored pdf at the
+!! given x,Q, and for the hoppet PID
+function hoppetEvalPID(x,Q,pid) 
+  use streamlined_interface; use pdf_representation
+  implicit none
+  real(dp), intent(in)  :: x, Q
+  integer, intent(in) :: pid
+  real(dp) :: hoppetEvalPID
+
+  hoppetEvalPID = EvalPdfTable_xQf(tables(0),x,Q,pid)
+end function hoppetEvalPID
+
 
 
 !======================================================================
