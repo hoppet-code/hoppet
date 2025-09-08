@@ -10,7 +10,7 @@
 	* src/pdf_tabulate.f90 -> src/pdf_tabulate.F90:
 	started to put in code for specific orders of interpolation, 
 	using hard-coded array sizes, loops etc., using 
-	a template-style mechanism. Not yet fully tested
+	a template-style mechanism. Not yet fully tested.
 
 	* src/interpolation.f90:
 	added `module interpolation_coeffs`, with hard-coded
