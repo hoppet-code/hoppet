@@ -29,7 +29,7 @@
         return nullptr; \
     }
 
-const unsigned int pdf_len = 13;
+const unsigned int pdf_len = 18; // 18 to have space for photon and leptons if needed
 double *global_pdf = nullptr;
 
 // Wrapper function to bridge Python and C callback
