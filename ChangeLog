@@ -1,5 +1,9 @@
 2025-09-08  Alexander Karlberg  <karlberg@Latitude-E7470>
 
+	* pyinterface/tabulation_example_qed.py:
+	* pyinterface/hoppet.i:
+	Added QED example in python and fixed a hard coded 13 -> pdf_len
+
 	* src/streamlined_interface.f90:
 	* src/hoppet.h:
 	* pyinterface/hoppet.i:

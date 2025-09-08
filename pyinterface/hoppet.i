@@ -43,7 +43,7 @@ static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res
         Py_DECREF(arglist);
 
         if (result && PySequence_Check(result)) {
-            for (int i = 0; i < 13; i++) {
+            for (int i = 0; i < pdf_len; i++) {
                 PyObject *item = PySequence_GetItem(result, i);
                 res[i] = PyFloat_AsDouble(item);
                 Py_DECREF(item);
