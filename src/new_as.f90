@@ -392,6 +392,9 @@ contains
     !write(0,'(f15.10,i,f15.12)') t, nseg, res ! HOPPER TESTING
   end function na_Value
 
+  !! Faster evaluation of alpha_s, with fewer options; reverts
+  !! na_Value for some edge cases and also doesn't have the 
+  !! fixnf option
   function na_Value_faster(nah, Q) result(res)
     type(na_handle), intent(in), target :: nah
     real(dp),        intent(in)         :: Q
