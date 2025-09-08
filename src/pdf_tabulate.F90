@@ -33,7 +33,7 @@ module pdf_tabulate
   integer :: override_npnt_y = -1
   
   type pdfseginfo
-    real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ
+    real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ, inv_dlnlnQ
     integer :: ilnlnQ_lo, ilnlnQ_hi
   end type pdfseginfo
   public :: pdfseginfo
@@ -132,6 +132,12 @@ module pdf_tabulate
   public :: Delete
 
   public :: PDFTableSetYInterpOrder
+
+
+  public :: EvalPdfTable_yQf_order2
+  public :: EvalPdfTable_yQ_order2
+  public :: EvalPdfTable_yQ_order3
+  public :: EvalPdfTable_yQ_order4
 
 contains
 
@@ -356,6 +362,7 @@ contains
       !write(0,*) 'ill_hi', seginfo%ilnlnQ_hi, seginfo%dlnlnQ, &
       !     &invlnln(tab,seginfo%lnlnQ_lo),invlnln(tab,seginfo%lnlnQ_hi), tab%default_dlnlnQ
       iQ_prev = seginfo%ilnlnQ_hi
+      seginfo%inv_dlnlnQ = one / seginfo%dlnlnQ
     end do
     
     ! this should not happen too often! But check it just in
@@ -930,6 +937,118 @@ contains
     real(dp) :: val
     val = EvalPdfTable_yQf(tab,-log(x),Q,iflv)
   end function EvalPdfTable_xQf
+
+  ! 2025-09-08 attempt to explore potential for speedup in PDF
+  ! evaluation when we hard-code and inline as much as possible
+  function EvalPdfTable_yQf_order2(tab,y,Q,iflv) result(val)
+    use interpolation_coeffs
+    type(pdf_table), intent(in), target :: tab
+    real(dp),        intent(in)         :: y, Q
+    integer,         intent(in)         :: iflv
+    real(dp)                            :: val
+    !----------------------------------------
+    integer, parameter :: NN = 2, halfNN=0
+    real(dp) :: y_wgts(0:NN), lnlnQ_wgts(0:NN), lnlnQ
+    integer  :: i_nf, iylo, ilnlnQ, igd
+    real(dp) :: ynorm, lnlnQ_norm
+    type(grid_def),   pointer :: subgd
+    type(pdfseginfo), pointer :: seginfo
+
+    !------ First deal with the y interpolation ------
+    ! For now, to get a sense of the maximal possible speed, we 
+    ! assume we have a standard 4-part locked grid -- we will revisit this later
+    ! once we have a better picture of speed
+    ! With that assumption, we know tab%grid%subgd(4) has largest ymax
+    if (y > tab%grid%subgd(4)%ymax .or. y < 0) then
+      call wae_error("EvalPdfTable_yQf_order2","y did not satisfy 0 <= y <= ymax, with y=",dbleval=y)
+    endif
+    do igd = 4, 2, -1
+      if (y > tab%grid%subgd(igd-1)%ymax) exit
+    end do
+
+    subgd => tab%grid%subgd(igd)
+    ynorm = y / subgd%dy
+    iylo = int(ynorm) - halfNN
+    if (iylo < 0) iylo = 0
+    if (iylo + NN > subgd%ny) iylo = subgd%ny - NN
+    call fill_interp_weights2(ynorm - iylo, y_wgts)
+    iylo = iylo + tab%grid%subiy(igd)
+
+    !----- next deal with the Q interpolation
+    lnlnQ = lnln(tab,Q)
+    if (lnlnQ < tab%lnlnQ_min) then
+      lnlnQ = tab%lnlnQ_min
+    else if (lnlnQ > tab%lnlnQ_max) then
+      call wae_error("EvalPdfTable_yQf_order2","Q was too large",dbleval=Q)
+    endif
+    if (.not. tab%nf_info_associated) call wae_error("EvalPdfTable_yQf_order2",&
+         &"tab%nf_info_associated was not set")
+    do i_nf = tab%nflo, tab%nfhi-1
+      if (lnlnQ < tab%seginfo(i_nf)%lnlnQ_lo) exit
+    end do
+
+    seginfo => tab%seginfo(i_nf)
+    lnlnQ_norm = (lnlnQ - seginfo%lnlnQ_lo) / seginfo%dlnlnQ
+    if (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo < NN) then
+      call wae_error("EvalPdfTable_yQf_order2","not enough points in Q segment")
+    end if
+    ilnlnQ = int(lnlnQ_norm) + seginfo%ilnlnQ_lo - halfNN
+    if (ilnlnQ    < seginfo%ilnlnQ_lo) ilnlnQ = seginfo%ilnlnQ_lo
+    if (ilnlnQ+NN > seginfo%ilnlnQ_hi) ilnlnQ = seginfo%ilnlnQ_hi - NN
+    call fill_interp_weights2(lnlnQ_norm - (ilnlnQ-seginfo%ilnlnQ_lo), lnlnQ_wgts)
+
+    val = sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0) &
+        + sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ+1) * y_wgts) * lnlnQ_wgts(1) &
+        + sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ+2) * y_wgts) * lnlnQ_wgts(2)
+  end function EvalPdfTable_yQf_order2
+
+  subroutine tab_get_grid_ptr(tab, y, grid_ptr, iy_offset)
+    type(pdf_table), intent(in), target :: tab
+    real(dp), intent(in) :: y
+    type(grid_def), pointer :: grid_ptr
+    integer, intent(out) :: iy_offset
+    !----------------------------------------
+    type(grid_def), pointer :: grid
+    integer :: igd
+
+    grid => tab%grid
+    if (y > grid%ymax .or. y < 0) then
+      call wae_error("EvalPdfTable_yQf_order2","y did not satisfy 0 <= y <= ymax, with y=",dbleval=y)
+    endif
+
+    if (associated(grid%subgd)) then
+      !igd = conv_BestIsub(grid,y)
+      if (grid%locked) then
+        do igd = size(grid%subgd), 2, -1
+          if (y > grid%subgd(igd-1)%ymax) exit
+        end do
+      else
+        igd = minloc(grid%subgd%ymax,dim=1,mask=(grid%subgd%ymax>=y))
+        !igd = conv_BestIsub(grid,y)
+      end if
+      grid_ptr => grid%subgd(igd)
+      iy_offset = grid%subiy(igd)
+    else
+      grid_ptr => grid
+      iy_offset = 0
+    endif
+
+  end subroutine tab_get_grid_ptr
+
+  ! the following code loads the appropriate PDF evaluation subroutine
+  ! with the order hard-coded to NNNN
+#define __HOPPET_InterpOrder__ 2
+#include "inc/pdf_tabulate_OrderNNN.F90"
+#undef __HOPPET_InterpOrder__
+
+#define __HOPPET_InterpOrder__ 3
+#include "inc/pdf_tabulate_OrderNNN.F90"
+#undef __HOPPET_InterpOrder__
+
+#define __HOPPET_InterpOrder__ 4
+#include "inc/pdf_tabulate_OrderNNN.F90"
+#undef __HOPPET_InterpOrder__
+
 
   !--------------------------------------------------------------------
   !! Sets the pdf(0:iflv_min:) for the PDF at this value of Q.

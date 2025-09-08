@@ -432,6 +432,58 @@ contains
     write(idev,fmt) "# Evaluation (all flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
     write(0   ,fmt) "# Evaluation (all flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
 
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable_yQ_order2(table,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable_yQ_order3(table,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o3)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o3)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable_yQ_order4(table,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o4)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o4)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+
+
     call cpu_time(time_start)
     pdf_g_sum = zero
     do irep = 1, nrep_eval
@@ -452,7 +504,25 @@ contains
     write(idev,fmt) "# Evaluation (one flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
     write(0   ,fmt) "# Evaluation (one flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
 
-   end subroutine get_evaluation_times_new
+
+    call cpu_time(time_start)
+    pdf_g_sum = zero
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf_order2(table,y,Q,0)
+          !call EvalPdfTable_yQ(table,y,Q,pdf_all)
+          !pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (1fl,ord2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (1fl,ord2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+
+  end subroutine get_evaluation_times_new
 
 
   ! old routine for getting evaluation times, which uses just a single y,Q combination

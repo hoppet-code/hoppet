@@ -63,6 +63,7 @@ module convolution
   
 
   public :: grid_def, grid_conv
+  public :: conv_BestIsub
 
 
   !-- public routines --

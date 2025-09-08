@@ -1,3 +1,27 @@
+2025-09-08 Alexander + Gavin
+
+	* src/inc/ftlMacros.inc: *** ADDED ***
+	some helpers for fortran macros, from the Fortran Template Library
+
+	* src/convolution.f90:
+	exposed conv_BestIsub
+
+	* src/inc/pdf_tabulate_OrderNNN.F90: *** ADDED***
+	* src/pdf_tabulate.f90 -> src/pdf_tabulate.F90:
+	started to put in code for specific orders of interpolation, 
+	using hard-coded array sizes, loops etc., using 
+	a template-style mechanism. Not yet fully tested
+
+	* src/interpolation.f90:
+	added `module interpolation_coeffs`, with hard-coded
+	interpolation coefficients (interp_coeffsN) and simple functions to 
+	return interpolations at 1st, 2nd, 3rd and 4th order 
+	(fill_interp_weightsN).
+
+	* benchmarking/prec_and_timing.f90:
+	added temporary timing tests for the hard-coded interpolation
+	routines
+
 2025-09-06 Sat  <gavin.salam@physics.ox.ac.uk>
 
 	* src/new_as.f90:
