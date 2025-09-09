@@ -217,61 +217,61 @@ static void InitStrFctFlav(const int & order_max, const int & separate_orders, c
     hoppetInitStrFctFlav(order_max, separate_orders, xR, xF, flavour_decomposition);
 }
 static PyObject* StrFct(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFct(x, Q, muR_in, muF_in, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNoMu(const double & x, const double & Q) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctNoMu(x, Q, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctLO(x, Q, muR_in, muF_in, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctNLO(x, Q, muR_in, muF_in, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctFlav(x, Q, muR_in, muF_in, flav, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNoMuFlav(const double & x, const double & Q, const int & flav) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctNoMuFlav(x, Q, flav, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctLOFlav(x, Q, muR_in, muF_in, flav, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctNLOFlav(x, Q, muR_in, muF_in, flav, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctNNLO(x, Q, muR_in, muF_in, global_pdf);
     return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctN3LO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
-    CHECK_GLOBAL_PDF_INITIALIZED
+    CHECK_GLOBAL_STR_FNC_INITIALIZED
     hoppetStrFctN3LO(x, Q, muR_in, muF_in, global_pdf);
     return str_fnc_to_array(global_pdf);
 }

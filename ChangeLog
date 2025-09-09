@@ -5,7 +5,7 @@
 	Added proper support for structure functions and QED PDFs in the
 	Python interface. Compared to the previous commit, the Python
 	interface now sets up the PDF array based on whether the user
-	needs a QED PDF or not. The structure cunctions also live in a
+	needs a QED PDF or not. The structure functions also live in a
 	separate NumPy array.
 
 2025-09-08  Alexander Karlberg  <karlberg@Latitude-E7470>
