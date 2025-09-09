@@ -8,7 +8,9 @@
 	* example_f77/cpp_tabulation_example_qed.cc -> example_cpp/tabulation_example_qed.cc:
 	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc -> example_cpp/with-lhapdf/fast_pdf_evaluation.cc:
 	* CMakeLists.txt:
-	moved C++ examples into a new dedicated example_cpp/ directory
+	* example_cpp/tabulation_example.default_output: *** ADDED *** (symlink)
+	moved C++ examples into a new dedicated example_cpp/ directory.
+	Also added example_cpp/tabulation_example to the ctest set.
 
 	* doc/auto/: *** ADDED ***
 	added templates for code-documentation systems (FORD, Doxygen), which

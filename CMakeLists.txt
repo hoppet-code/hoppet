@@ -397,7 +397,14 @@ if (HOPPET_BUILD_EXAMPLES)
       add_test(NAME ${testName} COMMAND 
          sh -c "${CMAKE_SOURCE_DIR}/scripts/check example_f90/${ex}")
     endforeach()
-  endif()
+    set( execs_cpp tabulation_example)
+    foreach (ex ${execs_cpp})
+      set(testName "${ex}_cpp")
+      add_test(NAME ${testName} COMMAND 
+         sh -c "${CMAKE_SOURCE_DIR}/scripts/check example_cpp/${ex}")
+    endforeach()
+  endif() # end of HOPPET_ENABLE_TESTING
+
 endif()
 
 if (HOPPET_BUILD_BENCHMARK)
