@@ -29,8 +29,20 @@
         return nullptr; \
     }
 
-const unsigned int pdf_len = 13; // 18 to have space for photon and leptons if needed
-double *global_pdf = nullptr;
+# define CHECK_GLOBAL_STR_FNC_INITIALIZED \
+    if (global_str_fnc == nullptr) { \
+        PyErr_SetString(PyExc_RuntimeError, "Global structure function array is not initialized"); \
+        return nullptr; \
+    }
+const unsigned int pdf_len          = 13; 
+const unsigned int qed_pdf_len      = 18; // 18 to have space for photon and leptons if needed
+const unsigned int str_fnc_len      = 14; // We have 14 structure functions (6 CC, 3 Z, 2 photon, 3 gammaZ)
+const unsigned int str_fnc_flav_len = 3; // F1, F2, F3
+unsigned int py_pdf_len             = pdf_len; // Default to pdf_len, can be set to qed_pdf_len
+unsigned int py_str_fnc_len         = str_fnc_len; // Default to str_fnc_pdf_len, can be set to str_fnc_flav_pdf_len
+
+double *global_pdf     = nullptr;
+double *global_str_fnc = nullptr;
 
 // Wrapper function to bridge Python and C callback
 static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res) {
@@ -43,7 +55,30 @@ static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res
         Py_DECREF(arglist);
 
         if (result && PySequence_Check(result)) {
-            for (int i = 0; i < pdf_len; i++) {
+            for (int i = 0; i < py_pdf_len; i++) {
+                PyObject *item = PySequence_GetItem(result, i);
+                res[i] = PyFloat_AsDouble(item);
+                Py_DECREF(item);
+            }
+            Py_DECREF(result);
+        }
+    }
+
+    PyGILState_Release(gstate);  // Release GIL
+}
+
+// Wrapper function to bridge Python and C callback for the structure functions
+static void str_fnc_subroutine_wrapper(const double &x, const double &Q, double *res) {
+    PyGILState_STATE gstate = PyGILState_Ensure();  // Ensure GIL for Python calls
+
+    PyObject *callback = PyObject_GetAttrString(PyImport_AddModule("__main__"), "str_fnc_callback");
+    if (callback && PyCallable_Check(callback)) {
+        PyObject *arglist = Py_BuildValue("(dd)", x, Q);
+        PyObject *result = PyObject_CallObject(callback, arglist);
+        Py_DECREF(arglist);
+
+        if (result && PySequence_Check(result)) {
+            for (int i = 0; i < py_str_fnc_len; i++) {
                 PyObject *item = PySequence_GetItem(result, i);
                 res[i] = PyFloat_AsDouble(item);
                 Py_DECREF(item);
@@ -58,7 +93,7 @@ static void pdf_subroutine_wrapper(const double &x, const double &Q, double *res
 // Initialize the global pdf array
 void init_global_pdf() {
     if (global_pdf == nullptr) {
-        global_pdf = new double[pdf_len];
+        global_pdf = new double[py_pdf_len];
     }
 }
 
@@ -72,11 +107,50 @@ void free_global_pdf() {
 
 // Wrapper function to convert the pdf array to a Python list
 static PyObject* pdf_to_array(double *pdf) {
-    PyObject *py_list = PyList_New(pdf_len);
-    for (unsigned int i = 0; i < pdf_len; i++) {
+    PyObject *py_list = PyList_New(py_pdf_len);
+    for (unsigned int i = 0; i < py_pdf_len; i++) {
         PyList_SetItem(py_list, i, PyFloat_FromDouble(pdf[i]));
     }
     return py_list;
+}
+
+// Initialize the global pdf array
+void init_global_str_fnc() {
+    if (global_str_fnc == nullptr) {
+        global_str_fnc = new double[py_str_fnc_len];
+    }
+}
+
+// Free the global pdf array
+void free_global_str_fnc() {
+    if (global_str_fnc != nullptr) {
+        delete[] global_str_fnc;
+        global_str_fnc = nullptr;
+    }
+}
+
+// Wrapper function to convert the pdf array to a Python list
+static PyObject* str_fnc_to_array(double *str_fnc) {
+    PyObject *py_list = PyList_New(py_str_fnc_len);
+    for (unsigned int i = 0; i < py_str_fnc_len; i++) {
+        PyList_SetItem(py_list, i, PyFloat_FromDouble(str_fnc[i]));
+    }
+    return py_list;
+}
+
+// To setup the QED pdfs we need a small wrapper to SetQED. Needs to
+// be called before Start because it modifies the global PDF settings.
+static void SetQED(const int & withqed, const int & qcdqed, const int & plq) {
+    if (global_pdf != nullptr) {
+        PyErr_SetString(PyExc_RuntimeError, "Cannot change QED settings after PDF initialization");
+        return;
+    }
+    hoppetSetQED(withqed, qcdqed, plq); 
+    if (withqed) {
+        py_pdf_len = qed_pdf_len;
+    } else {
+        py_pdf_len = pdf_len;
+    }
 }
 
 // To correctly initialize the global pdf array we need to modify the
@@ -101,6 +175,7 @@ static void StartExtended(const double & ymax,   //< highest value of ln1/x user
 
 static void DeleteAll() {
     free_global_pdf();
+    free_global_str_fnc();
     hoppetDeleteAll();
 }
 
@@ -131,65 +206,74 @@ static PyObject* EvalSplit(const double & x, const double & Q, const int & iloop
     hoppetEvalSplit(x, Q, iloop, nf, global_pdf);
     return pdf_to_array(global_pdf);
 }
+static void InitStrFct(const int & order_max, const int & separate_orders, const double & xR, const double & xF) {
+    init_global_str_fnc();
+    hoppetInitStrFct(order_max, separate_orders, xR, xF);
+}
 
+static void InitStrFctFlav(const int & order_max, const int & separate_orders, const double & xR, const double & xF, const int & flavour_decomposition) {
+    py_str_fnc_len = str_fnc_flav_len;
+    init_global_str_fnc();
+    hoppetInitStrFctFlav(order_max, separate_orders, xR, xF, flavour_decomposition);
+}
 static PyObject* StrFct(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFct(x, Q, muR_in, muF_in, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNoMu(const double & x, const double & Q) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctNoMu(x, Q, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctLO(x, Q, muR_in, muF_in, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctNLO(x, Q, muR_in, muF_in, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctFlav(x, Q, muR_in, muF_in, flav, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNoMuFlav(const double & x, const double & Q, const int & flav) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctNoMuFlav(x, Q, flav, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctLOFlav(x, Q, muR_in, muF_in, flav, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctNLOFlav(x, Q, muR_in, muF_in, flav, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctNNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctNNLO(x, Q, muR_in, muF_in, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 
 static PyObject* StrFctN3LO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetStrFctN3LO(x, Q, muR_in, muF_in, global_pdf);
-    return pdf_to_array(global_pdf);
+    return str_fnc_to_array(global_pdf);
 }
 %}
 
@@ -211,13 +295,9 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %rename(SetSplittingN3LO        )      hoppetsetsplittingn3lo_;
 %rename(SetN3LOnfthresholds     )      hoppetsetn3lonfthresholds_;
 %rename(SetYLnlnQInterpOrders   )      hoppetsetylnlnqinterporders_;
-%rename(SetQED                  )      hoppetsetqed_;
 %rename(StartStrFct             )      hoppetstartstrfct_;
 %rename(StartStrFctExtended     )      hoppetstartstrfctextended_;
-%rename(InitStrFct              )      hoppetinitstrfct_;
-%rename(InitStrFctFlav          )      hoppetinitstrfctflav_;
 %rename(WriteLHAPDFGrid         )      hoppetWriteLHAPDFGrid;
-%rename(hoppetWriteLHAPDFgrid   )      hoppetwritelhapdfgrid_;
 
 // These are the functions that have an explicit interface defined
 // above, so we make sure not to include the C++ versions
@@ -240,6 +320,9 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %ignore hoppetstrfctnnlo_;
 %ignore hoppetstrfctn3lo_;
 %ignore hoppetwritelhapdfwithlen_;
+%ignore hoppetsetqed_;
+%ignore hoppetinitstrfct_;
+%ignore hoppetinitstrfctflav_;
 
 
 %include "hoppet.h"
@@ -247,11 +330,17 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %inline %{
     void init_global_pdf();
     void free_global_pdf();
+    void init_global_str_fnc();
+    void free_global_str_fnc();
     PyObject* pdf_to_array(double *pdf);
+    PyObject* str_fnc_to_array(double *str_fnc);
+    void SetQED(const int & withqed, const int & qcdqed, const int & plq);
     void Start(const double & dy, const int & nloop);
     void StartExtended(const double & ymax, const double & dy, const double & Qmin, 
                         const double & Qmax, const double & dlnlnQ, const int & nloop, 
                         const int & order, const int & factscheme);
+    void InitStrFct(const int & order_max, const int & separate_orders, const double & xR, const double & xF);
+    void InitStrFctFlav(const int & order_max, const int & separate_orders, const double & xR, const double & xF, const int & flavour_decomposition);
     void DeleteAll();
     void Assign(PyObject *callback);
     void Evolve(const double & asQ0, const double & Q0alphas, const int & nloop, 
