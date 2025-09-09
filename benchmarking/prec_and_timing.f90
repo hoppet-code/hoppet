@@ -176,7 +176,8 @@ program prec_and_timing
   if (preev) call PreEvolvePdfTable(table,Qmin,dh,coupling)
   call cpu_time(time_ev_done)
 
-  call PDFTableSetYInterpOrder(y_interp_order)
+  !call PDFTableSetYInterpOrder(y_interp_order)
+  call PdfTableOverrideInterpOrders(y_interp_order,olnlnQ)
 
 
   ! record info about the cpu

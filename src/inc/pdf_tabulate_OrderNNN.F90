@@ -29,6 +29,7 @@
 ! Again, NNNN -> __HOPPET_InterpOrder__
 #define EvalPdfTable_get_weights_orderNNNN CAT(EvalPdfTable_get_weights_order,__HOPPET_InterpOrder__)
 #define EvalPdfTable_yQ_orderNNNN CAT(EvalPdfTable_yQ_order,__HOPPET_InterpOrder__)
+#define EvalPdfTable_yQf_orderNNNN CAT(EvalPdfTable_yQf_order,__HOPPET_InterpOrder__)
 
 subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, ilnlnQ)
   use interpolation_coeffs; use convolution
@@ -70,7 +71,7 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
   else if (lnlnQ > tab%lnlnQ_max) then
     call wae_error("EvalPdfTable_yQ_orderNNNN","Q was too large",dbleval=Q)
   endif
-  
+
   if (.not. tab%nf_info_associated) then
     seginfo => tab%seginfo_no_nf
   else
@@ -130,6 +131,28 @@ subroutine EvalPdfTable_yQ_orderNNNN(tab,y,Q,res)
     end do
   end do
 end subroutine EvalPdfTable_yQ_orderNNNN
+
+
+function EvalPdfTable_yQf_orderNNNN(tab,y,Q,iflv) result(res)
+  use interpolation_coeffs; use convolution
+  type(pdf_table), intent(in), target :: tab
+  real(dp),        intent(in)         :: y, Q
+  integer,         intent(in)         :: iflv
+  real(dp)                            :: res
+  !----------------------------------------
+  integer, parameter :: NN = __HOPPET_InterpOrder__, halfNN=(NN-1)/2
+  real(dp) :: y_wgts(0:NN), lnlnQ_wgts(0:NN)
+  integer  :: iylo, ilnlnQ, iQ
+
+  call EvalPdfTable_get_weights_orderNNNN(tab, y, Q, y_wgts, lnlnQ_wgts, iylo, ilnlnQ)
+
+  ! now do the interpolation.
+  ! first do the flavours we know we will need (this loop is easier to unroll)
+  res = sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0)
+  do iQ = 1, NN
+    res = res + sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ+iQ) * y_wgts) * lnlnQ_wgts(iQ)
+  end do
+end function EvalPdfTable_yQf_orderNNNN
 
 
 #undef EvalPdfTable_yQ_orderNNNN

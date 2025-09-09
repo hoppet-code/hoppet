@@ -652,7 +652,8 @@ subroutine hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder)
   implicit none
   integer :: yorder, lnlnQorder
 
-  call PDFTableSetYInterpOrder(yorder)
+  call PdfTableOverrideInterpOrders(yorder, lnlnQorder)
+  !call PDFTableSetYInterpOrder(yorder)
   def_lnlnQ_order = lnlnQorder
 
 end subroutine hoppetSetYLnlnQInterpOrders

@@ -1,7 +1,33 @@
-2025-09-09 Gavin + Alexander
+2025-09-09 Gavin + Alexander (later)
 
 	* src/pdf_tabulate.F90:
 	* src/inc/pdf_tabulate_OrderNNN.F90:
+
+	Added EvalPdfTable_yQf_orderNNNN with NNNN = 2,3,4
+
+	Removed PDFTableSetYInterpOrder and instead introduced PdfTableOverrideInterpOrders,
+	which sets both the y and Q orders.
+
+	For special cases (2,2) (3,3) and (4,4), internal pointers are set:
+	EvalPdfTable_yQ_ptr and EvalPdfTable_yQf_ptr. If these are non-null
+	then they are used to redirect EvalPdfTable_yQ and EvalPdfTable_yQf
+	calls to the appropriate orderN routines.
+
+	Relative to a direct call to the orderN routines, this adds about
+	2ns on M2Pro-gfortran15-O3.
+
+	**BEWARE**: outside of these special cases the override is not
+	yet active as concerns the Q order.
+
+	**BEWARE**: correctness of the output has not been tested, nor has the optimal
+	choice of halfNN (currently (NN-1)/2, could also be NN/2).
+
+	* src/streamlined_interface.f90:
+	* benchmarking/prec_and_timing.f90:
+	switched these over to use PdfTableOverrideInterpOrders
+
+2025-09-09 Gavin + Alexander
+
 
 	Introduced __HOPPET_tab_min_subgrid_ny__ and __HOPPET_tab_min_nQ__,
 	and in the table allocation routines:
@@ -17,6 +43,7 @@
       if we encounter a single-point segment
 
 	Also got added treatment of freeze_at_Qmin.
+
 
 	* pyinterface/*example*.py -> example_py/:
 	moved python examples into a dedicated directory
