@@ -15,9 +15,13 @@
 ! macro in a way that works across compilers
 #include "ftlMacros.inc"
 
+! this definition refers to functions in the interpolation_coeffs module (interpolation.f90)
+! It will expand, e.g., as fill_interp_weights3 if __HOPPET_InterpOrder__ is 3
 #define fill_interp_weightsNNNN   CAT(fill_interp_weights,__HOPPET_InterpOrder__)
-#define EvalPdfTable_yQ_orderNNNN CAT(EvalPdfTable_yQ_order,__HOPPET_InterpOrder__)
+! the next two definitions are shorthands for functions defined below.
+! Again, NNNN -> __HOPPET_InterpOrder__
 #define EvalPdfTable_get_weights_orderNNNN CAT(EvalPdfTable_get_weights_order,__HOPPET_InterpOrder__)
+#define EvalPdfTable_yQ_orderNNNN CAT(EvalPdfTable_yQ_order,__HOPPET_InterpOrder__)
 
 subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, ilnlnQ)
   use interpolation_coeffs; use convolution
