@@ -1,7 +1,13 @@
+2025-09-09 Gavin + Alexander
+
+	* doc/auto/: *** ADDED ***
+	added templates for code-documentation systems (FORD, Doxygen), which
+	however, are not yet functional
+
 2025-09-09  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* pyinterface/hoppet.i:
-	* pyinterface/structure_functions_example.py:
+	* pyinterface/structure_functions_example.py: *** ADDED ***
 	Added proper support for structure functions and QED PDFs in the
 	Python interface. Compared to the previous commit, the Python
 	interface now sets up the PDF array based on whether the user
@@ -10,7 +16,7 @@
 
 2025-09-08  Alexander Karlberg  <karlberg@Latitude-E7470>
 
-	* pyinterface/tabulation_example_qed.py:
+	* pyinterface/tabulation_example_qed.py: *** ADDED ***
 	* pyinterface/hoppet.i:
 	Added QED example in python and fixed a hard coded 13 -> pdf_len
 

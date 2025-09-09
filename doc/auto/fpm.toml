@@ -1,0 +1,11 @@
+name = "HOPPET"
+
+[extra.ford]
+
+project = "HOPPET"
+summary = "My project in one sentence."
+#src_dir = "example_f90"
+output_dir = "ford-doc"
+exclude_dir = ["src/inc"]
+docmark = "<"        # trailing docs use !<
+predocmark = "!"     # preceding docs use !!
