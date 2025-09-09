@@ -1,5 +1,8 @@
 2025-09-09 Gavin + Alexander
 
+	* pyinterface/*example*.py -> example_py/:
+	moved python examples into a dedicated directory
+
 	* doc/auto/: *** ADDED ***
 	added templates for code-documentation systems (FORD, Doxygen), which
 	however, are not yet functional

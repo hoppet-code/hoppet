@@ -79,7 +79,7 @@ jobs:
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
           # now try running the python example
-          python3 pyinterface/tabulation_example.py
+          python3 example_py/tabulation_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT

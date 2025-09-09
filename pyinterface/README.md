@@ -24,4 +24,5 @@ The hoppet interface can be loaded in python through
 
 `import hoppet`
 
-For an example of how to use the interface, take a look at `tabulation_example.py`.
+For examples of how to use the interface, take a look at 
+[../example_py](../example_py)
