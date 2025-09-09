@@ -12,6 +12,12 @@
 	moved C++ examples into a new dedicated example_cpp/ directory.
 	Also added example_cpp/tabulation_example to the ctest set.
 
+	* CMakeLists.txt:
+	turned off some spurious gfortran warnings for two specific files
+
+	* src/special_functions.f90:
+	renamed dgamma as cernlib_dgamma to avoid warnings
+
 	* doc/auto/: *** ADDED ***
 	added templates for code-documentation systems (FORD, Doxygen), which
 	however, are not yet functional

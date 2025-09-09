@@ -16,7 +16,7 @@ module special_functions
   !--------------------------------------------
   ! want them accessible with simpler names?
   interface gamma
-     module procedure dgamma
+     module procedure cernlib_dgamma
   end interface
   interface dilog
      module procedure ddilog
@@ -167,7 +167,7 @@ contains
 ! Mathlib gen                                                           
 !                                                                       
 !                                                                       
-      FUNCTION DGAMMA(X) 
+      FUNCTION CERNLIB_DGAMMA(X) result(DGAMMA)
 !                                                                       
 !                                                                       
 !                                                                       
@@ -233,7 +233,7 @@ contains
                                                                         
       RETURN 
   101 FORMAT('ARGUMENT IS NEGATIVE = ',1P,E15.1) 
-      END FUNCTION DGAMMA                                
+      END FUNCTION CERNLIB_DGAMMA                                
 
 
 !======================================================================

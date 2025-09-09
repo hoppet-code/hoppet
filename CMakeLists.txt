@@ -73,6 +73,12 @@ add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-compare-reals;-Wn
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-integer-division>")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -fbacktrace -fcheck=all")
+  # in qed-evolution, avoid a spurious target-lifetime warning by turning off that
+  # warning just for that file
+  set_source_files_properties(
+    src/qed_evolution.f90
+    PROPERTIES COMPILE_OPTIONS "-Wno-target-lifetime"
+  )
 endif()
 
 # Intel
@@ -420,6 +426,11 @@ if (HOPPET_BUILD_BENCHMARK)
       POSITION_INDEPENDENT_CODE TRUE
      )
   endforeach()
+  if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+    # turn off a spurious warning in benchmarking/benchmark.f90
+    target_compile_options(benchmark PRIVATE "-Wno-do-subscript")
+  endif()
+
 
 endif()
 
