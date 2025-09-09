@@ -2,8 +2,8 @@
 
 
 !======================================================================
-! Module exlcusively for communication between convolution and 
-! any routine which might supply convolutions
+!! Module exclusively for communication between convolution and 
+!! any routine which might supply convolutions
 !======================================================================
 module convolution_communicator
   use types
@@ -18,7 +18,7 @@ end module convolution_communicator
 
 
 !======================================================================
-! All the base types and routines for happy convolution
+!! All the base types and routines for convolution in y=log(1/x) space
 !
 ! Decide on the following policy: grid details will be copied rather
 ! than pointed to (avoids danger of object that is pointed to being 
