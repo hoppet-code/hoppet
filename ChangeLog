@@ -3,6 +3,13 @@
 	* pyinterface/*example*.py -> example_py/:
 	moved python examples into a dedicated directory
 
+	* example_f77/cpp_structure_functions_example.cc -> example_cpp/structure_functions_example.cc:
+	* example_f77/cpp_tabulation_example.cc -> example_cpp/tabulation_example.cc:
+	* example_f77/cpp_tabulation_example_qed.cc -> example_cpp/tabulation_example_qed.cc:
+	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc -> example_cpp/with-lhapdf/fast_pdf_evaluation.cc:
+	* CMakeLists.txt:
+	moved C++ examples into a new dedicated example_cpp/ directory
+
 	* doc/auto/: *** ADDED ***
 	added templates for code-documentation systems (FORD, Doxygen), which
 	however, are not yet functional
