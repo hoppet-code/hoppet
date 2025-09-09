@@ -15,6 +15,13 @@
 ! macro in a way that works across compilers
 #include "ftlMacros.inc"
 
+#if __HOPPET_InterpOrder__ > __HOPPET_tab_min_subgrid_ny__
+#error "Interpolation order is too high for the current grid configuration: __HOPPET_InterpOrder__ > __HOPPET_tab_min_subgrid_ny__"
+#endif
+#if __HOPPET_InterpOrder__ > __HOPPET_tab_min_nQ__
+#error "Interpolation order is too high for the current grid configuration: __HOPPET_InterpOrder__ > __HOPPET_tab_min_nQ__"
+#endif
+
 ! this definition refers to functions in the interpolation_coeffs module (interpolation.f90)
 ! It will expand, e.g., as fill_interp_weights3 if __HOPPET_InterpOrder__ is 3
 #define fill_interp_weightsNNNN   CAT(fill_interp_weights,__HOPPET_InterpOrder__)
@@ -28,7 +35,7 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
   type(pdf_table), intent(in), target :: tab
   real(dp),        intent(in)         :: y, Q
   real(dp),        intent(out)        :: y_wgts(0:__HOPPET_InterpOrder__), lnlnQ_wgts(0:__HOPPET_InterpOrder__)
-  integer,        intent(out)        :: iylo, ilnlnQ
+  integer,         intent(out)        :: iylo, ilnlnQ
   !----------------------------------------
   integer, parameter :: NN = __HOPPET_InterpOrder__, halfNN=(NN-1)/2
   real(dp) :: lnlnQ
@@ -51,12 +58,19 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
 
   !----- next deal with the Q interpolation
   lnlnQ = lnln(tab,Q)
-  !call tab_get_seginfo_ptr(tab, lnlnQ, seginfo)
+
   if (lnlnQ < tab%lnlnQ_min) then
     lnlnQ = tab%lnlnQ_min
+    ilnlnQ = lbound(tab%lnlnQ_vals,1)
+    lnlnQ_wgts = zero
+    if (tab%freeze_at_Qmin) then
+      lnlnQ_wgts(0) = one
+    endif
+    return
   else if (lnlnQ > tab%lnlnQ_max) then
     call wae_error("EvalPdfTable_yQ_orderNNNN","Q was too large",dbleval=Q)
   endif
+  
   if (.not. tab%nf_info_associated) then
     seginfo => tab%seginfo_no_nf
   else
@@ -65,6 +79,11 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
     end do
     seginfo => tab%seginfo(i_nf)
   end if
+  if (seginfo%ilnlnQ_hi == seginfo%ilnlnQ_lo) then
+    lnlnQ_wgts = zero
+    lnlnQ_wgts(0) = 1.0_dp
+    return
+  endif
 
   lnlnQ_norm = (lnlnQ - seginfo%lnlnQ_lo) * seginfo%inv_dlnlnQ
   if (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo < NN) then
@@ -91,7 +110,7 @@ subroutine EvalPdfTable_yQ_orderNNNN(tab,y,Q,res)
 
   call EvalPdfTable_get_weights_orderNNNN(tab, y, Q, y_wgts, lnlnQ_wgts, iylo, ilnlnQ)
 
-  ! now do the interpolation
+  ! now do the interpolation.
   ! first do the flavours we know we will need (this loop is easier to unroll)
   do iflv = iflv_min, iflv_max
     res(iflv) = sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0)
@@ -102,7 +121,7 @@ subroutine EvalPdfTable_yQ_orderNNNN(tab,y,Q,res)
     !    + sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ+1) * y_wgts) * lnlnQ_wgts(1) &
     !    + sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ+2) * y_wgts) * lnlnQ_wgts(2)
   end do
-  
+
   ! and then do any remaining flavours (separating things gains us a couple of ns)
   do iflv = iflv_max+1, tab%tab_iflv_max
     res(iflv) = sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0)

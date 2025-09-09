@@ -1,5 +1,23 @@
 2025-09-09 Gavin + Alexander
 
+	* src/pdf_tabulate.F90:
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+
+	Introduced __HOPPET_tab_min_subgrid_ny__ and __HOPPET_tab_min_nQ__,
+	and in the table allocation routines:
+
+	- made sure that the y grid and each subgrid is 
+	  at least of size __HOPPET_tab_min_subgrid_ny__
+
+    - made sure that the number of Q points is at least of size __HOPPET_tab_min_nQ__
+	  and in segments made sure that are at least __HOPPET_tab_min_nQ__ points
+	  above any single-point segment,
+
+	- adapted EvalPdfTable_get_weights_orderNNNN to use a weights of just 1,0,,0,... 
+      if we encounter a single-point segment
+
+	Also got added treatment of freeze_at_Qmin.
+
 	* pyinterface/*example*.py -> example_py/:
 	moved python examples into a dedicated directory
 

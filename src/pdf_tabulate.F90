@@ -1,5 +1,13 @@
+
+! the minimum ny we expect in a grid or subgrid in order for
+! interpolation assumptions to correct; provided as a define
+! so that it can be checked at preprocessor level in 
+! "templated" code in pdf_tabulate_OrderNNN.F90
+#define __HOPPET_tab_min_subgrid_ny__ 4
+#define __HOPPET_tab_min_nQ__         4
+
 !-----------------------------------------------------------
-!! Module that will hopefully make tabulation easy
+!! Module to make tabulation easy
 !!
 !! Currently does not know anything about nf thresholds.
 !!
@@ -85,10 +93,13 @@ module pdf_tabulate
   real(dp), parameter :: default_lambda_eff = 0.1_dp
   real(dp), parameter :: default_dlnlnQ = 0.07_dp
   real(dp), parameter :: warn_tolerance = 1e-3_dp
-  ! used in various contexts for deciding when an interval is
-  ! sufficiently small that it can be ignored...
+  !! used in various contexts for deciding when an interval is
+  !! sufficiently small that it can be ignored...
   real(dp), parameter :: min_dlnlnQ_singleQ = 1e-10_dp
   integer, public :: def_lnlnQ_order = 4
+  !! the max_lnlnQ_order is used in certain hard-coded array sizes
+  !! so that they can be created on the stack rather than the heap,
+  !! which has a speed advantage
   integer, parameter :: max_lnlnQ_order = 6
 
   interface AllocPdfTable
@@ -177,7 +188,8 @@ contains
     logical,  intent(in), optional :: freeze_at_Qmin
     integer,  intent(in), optional :: iflv_max_table
     !----------------------------------------------
-    integer :: iQ
+    integer :: iQ, igd
+    logical :: grids_bad
 
     ! clear memory if the table was already allocated
     if (tab%allocated) call Delete(tab)
@@ -187,9 +199,21 @@ contains
     tab%lnlnQ_min = lnln(tab,Qmin)
     tab%lnlnQ_max = lnln(tab,Qmax)
 
+    ! some of our interpolation needs a minimum number of ny points in
+    ! the grid or each sub-grid, so check that
+    if (associated(tab%grid%subgd)) then
+      grids_bad = any(tab%grid%subgd(:)%ny < __HOPPET_tab_min_subgrid_ny__)
+    else
+      grids_bad = tab%grid%ny < __HOPPET_tab_min_subgrid_ny__
+    end if
+    if (grids_bad) call wae_error("pdftab_AllocTab_",&
+                  "grid or subgrid has ny < __HOPPET_tab_min_subgrid_ny__=",intval=__HOPPET_tab_min_subgrid_ny__)
+
     tab%default_dlnlnQ = default_or_opt(default_dlnlnQ, dlnlnQ)
     tab%nQ = ceiling((tab%lnlnQ_max - tab%lnlnQ_min)/tab%default_dlnlnQ)
+    tab%nQ = max(tab%nQ, __HOPPET_tab_min_nQ__)
     tab%dlnlnQ = (tab%lnlnQ_max - tab%lnlnQ_min)/tab%nQ
+
     tab%freeze_at_Qmin = default_or_opt(.false.,freeze_at_Qmin)
     tab%lnlnQ_order = default_or_opt(def_lnlnQ_order,lnlnQ_order)
     if (tab%lnlnQ_order > max_lnlnQ_order) call wae_error('pdftab_AllocTab_',&
@@ -367,9 +391,10 @@ contains
          seginfo%dlnlnQ = zero
          seginfo%lnlnQ_hi = seginfo%lnlnQ_lo
       else
-         seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo + max(tab%lnlnQ_order,&
-              & ceiling((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
-              & tab%default_dlnlnQ))
+         seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo + &
+            & max(__HOPPET_tab_min_nQ__,&
+                & tab%lnlnQ_order,&
+                & ceiling((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/tab%default_dlnlnQ))
          seginfo%dlnlnQ = (seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
               & (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo)
       end if
@@ -379,6 +404,7 @@ contains
       seginfo%inv_dlnlnQ = one / seginfo%dlnlnQ
     end do
     
+
     ! this should not happen too often! But check it just in
     ! case...
     if (tab%seginfo(tab%nflo)%lnlnQ_lo /= tab%lnlnQ_min .or.&
@@ -396,6 +422,22 @@ contains
     allocate(tab%Q_vals(0:tab%nQ))
     allocate(tab%nf_int(0:tab%nQ))
     allocate(tab%as2pi(0:tab%nQ))
+
+    ! carry out a check that it's always safe to use up to __HOPPET_tab_min_nQ__+1 points
+    ! in the Q interpolation, even for segments with a single Q (for those segments, the
+    ! interpolation weights in some high-efficiency routines will be just 1 for that iQ
+    ! and 0 at higher iQ, but table must actually contain valid higher iQ points to avoid
+    ! accessing invalid memory)
+    do nflcl = tab%nflo, tab%nfhi      
+      seginfo => tab%seginfo(nflcl)
+      if (seginfo%ilnlnQ_lo == seginfo%ilnlnQ_hi .and. tab%nQ - seginfo%ilnlnQ_hi < __HOPPET_tab_min_nQ__) then
+        call wae_error("AddNfInfoToPdfTable",&
+              "too few ilnlnQ points for safe interpolation, above a segment with a single ilnlnQ.",&
+              "Try raising the table's Qmax.",&
+              "The problem occurred for nf=",intval=nflcl)
+      end if
+    end do
+
 
     ! set up complementary info...
     do nflcl = tab%nflo, tab%nfhi
