@@ -1,3 +1,6 @@
+!! Module containing dummy PDFs that are widely used for benchmarking
+!! and other tests. Used notably as part of hep-ph/0511119 and 
+!! follow-up work.
 module dummy_pdfs
   use types; use consts_dp; use pdf_representation
   implicit none
@@ -8,7 +11,7 @@ module dummy_pdfs
 contains
   !======================================================================
   !! The dummy PDF suggested by Vogt as the initial condition for the 
-  !! unpolazrized evolution
+  !! unpolarized evolution
   pure subroutine lha_unpolarized_dummy_pdf(x, Q, xpdf)
     real(dp), intent(in)  :: x,Q
     real(dp), intent(out) :: xpdf(-6:6)
