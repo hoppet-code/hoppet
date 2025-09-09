@@ -38,6 +38,8 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
   real(dp) :: ynorm, lnlnQ_norm
 
   !----- get the info for the y interpolation
+  ! (NB 2025-09-09, tried manually inlining the routine on M2Pro-gfortran15-O3,
+  ! but made no difference to timing)
   call tab_get_grid_ptr(tab, y, subgd, iy_offset)
 
   ynorm = y / subgd%dy

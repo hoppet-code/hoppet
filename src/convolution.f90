@@ -1372,7 +1372,12 @@ contains
   end subroutine WgtGridQuant_noalloc
   
 
-  !-- for internal use only
+  !! returns the index of the best subgrid to use for the given y value
+  !! 
+  !! Mainly intended for internal use. Note also that if any of the logic
+  !! here changes, one should also revisit tab_get_grid_ptr(...) in pdf_tabulate.f90, 
+  !! which replicates much of the functionality, but is coded separately
+  !! for speed reasons.
   function conv_BestIsub(grid,y) result(isub)
     type(grid_def), intent(in) :: grid
     real(dp),       intent(in) :: y

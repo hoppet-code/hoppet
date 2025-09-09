@@ -1016,6 +1016,13 @@ contains
         + sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ+2) * y_wgts) * lnlnQ_wgts(2)
   end function EvalPdfTable_yQf_order2
 
+  !! given a table and a y value, sets up a pointer (grid_ptr) to the relevant
+  !! grid or sub-grid, as well as the iy_offset to the start of that grid
+  !! in the y dimension of the table.
+  !!
+  !! Note that this function overlaps substantially with conv_BestISub,
+  !! Because of its location it can be inlined in other pdf_tabulate.f90 
+  !! routines, which gives a small but relevant speed advantage
   subroutine tab_get_grid_ptr(tab, y, grid_ptr, iy_offset)
     type(pdf_table), intent(in), target :: tab
     real(dp), intent(in) :: y
@@ -1026,19 +1033,19 @@ contains
     integer :: igd
 
     grid => tab%grid
+    ! note that relative to conv_BestIsub, we bail out if we are
+    ! beyond grid%ymax
     if (y > grid%ymax .or. y < 0) then
-      call wae_error("EvalPdfTable_yQf_order2","y did not satisfy 0 <= y <= ymax, with y=",dbleval=y)
+      call wae_error("tab_get_grid_ptr","y did not satisfy 0 <= y <= ymax, with y=",dbleval=y)
     endif
 
     if (associated(grid%subgd)) then
-      !igd = conv_BestIsub(grid,y)
       if (grid%locked) then
         do igd = size(grid%subgd), 2, -1
           if (y > grid%subgd(igd-1)%ymax) exit
         end do
       else
         igd = minloc(grid%subgd%ymax,dim=1,mask=(grid%subgd%ymax>=y))
-        !igd = conv_BestIsub(grid,y)
       end if
       grid_ptr => grid%subgd(igd)
       iy_offset = grid%subiy(igd)
