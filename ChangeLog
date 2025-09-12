@@ -1,3 +1,10 @@
+2025-09-12 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* git_watcher.cmake -> cmake/git_watcher.cmake:
+	* CMakeLists.txt:
+	moved git watched out of top-level directory, to help 
+	with cleaning that up
+
 2025-09-09 Gavin + Alexander (later)
 
 	* src/pdf_tabulate.F90:
