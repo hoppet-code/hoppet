@@ -86,7 +86,7 @@ module interpolation_coeffs
   real(dp), parameter :: interp_coeffs1(0:1) = [-1.0_dp, 1.0_dp]
   real(dp), parameter :: interp_coeffs2(0:2) = [ 0.5_dp, -1.0_dp, 0.5_dp ]
   real(dp), parameter :: interp_coeffs3(0:3) = [ -1.0_dp/6.0_dp, 1.0_dp/2.0_dp, -1.0_dp/2.0_dp, 1.0_dp/6.0_dp ]
-  real(dp), parameter :: interp_coeffs4(0:4) = [ 1.0_dp/24.0_dp, -1.0_dp/6.0_dp, 1.0_dp/4.0_dp,  1.0_dp/6.0_dp,  -1.0_dp/24.0_dp ]
+  real(dp), parameter :: interp_coeffs4(0:4) = [ 1.0_dp/24.0_dp, -1.0_dp/6.0_dp, 1.0_dp/4.0_dp, -1.0_dp/6.0_dp,  1.0_dp/24.0_dp ]
 
   public :: interp_coeffs1, interp_coeffs2, interp_coeffs3, interp_coeffs4
   public :: fill_interp_weights1, fill_interp_weights2, fill_interp_weights3, fill_interp_weights4

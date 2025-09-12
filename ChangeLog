@@ -2,7 +2,7 @@
 
 	* git_watcher.cmake -> cmake/git_watcher.cmake:
 	* CMakeLists.txt:
-	moved git watched out of top-level directory, to help 
+	moved git watcher out of top-level directory, to help 
 	with cleaning that up
 
 	* test.sh: *** Deleted ***
@@ -10,6 +10,17 @@
 
 	* tarit.sh -> scripts/tarit.sh:
 	part of cleaning up TLD
+
+	* unit-tests/: *** ADDED ***
+	new directory to help carry out minimal unit tests
+
+	* src/interpolation.f90:
+	fixed coefficients for 4th order interpolation
+
+	* benchmarking/prec_and_timing.f90:
+	preev and non-preev runs were returning inconsistent results because
+	they took the initial condition at different scales (Qmin v. Qinit).
+	Now fixed and they both start at Qinit.
 
 2025-09-09 Gavin + Alexander (later)
 

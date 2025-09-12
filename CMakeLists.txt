@@ -287,6 +287,11 @@ set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet
     )
 add_library(hoppet::hoppet_static ALIAS hoppet_static)
 
+if (HOPPET_ENABLE_TESTING)
+  ENABLE_TESTING()
+  add_subdirectory(unit-tests)
+endif()
+
 # Examples =============================================================
 #
 # Note that below, all examples link against the static library.
@@ -381,11 +386,9 @@ if (HOPPET_BUILD_EXAMPLES)
                             POSITION_INDEPENDENT_CODE TRUE
       )
     endforeach()
-  endif()
-
+  endif()  
 
   if (HOPPET_ENABLE_TESTING)
-    ENABLE_TESTING()
     set( execs 
       tabulation_example 
       tabulation_example_n3lo 

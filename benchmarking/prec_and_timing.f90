@@ -59,10 +59,10 @@ program prec_and_timing
   real(dp)           :: time_start, time_init_done, time_ev_done, time_end
   real(dp), pointer  :: initial_condition(:,:)
   type(pdf_table)    :: table
-  logical            :: output, outputgrid, preev, auto_nrep
+  logical            :: output, outputgrid, output_benchmark, preev, auto_nrep
   logical            :: write_lhapdf
   character(len=999) :: lhapdf_out = ""
-  integer :: idev, y_interp_order
+  integer            :: idev, y_interp_order
   integer, parameter :: lhapdf_unit = 99
   integer            :: lhapdf_iyinc
   character(len=300) :: hostname
@@ -135,6 +135,7 @@ program prec_and_timing
   nxQ = int_val_opt('-nxQ',0)
   output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
   outputgrid  = log_val_opt('-outputgrid')
+  output_benchmark = log_val_opt('-output-benchmark')
   !-- security ----------------------
   if (.not. CheckAllArgsUsed(0)) error stop
   !----------------------------------
@@ -173,7 +174,7 @@ program prec_and_timing
   ! set up the table
   call AllocPdfTable(grid,table,Qmin,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
   call AddNfInfoToPdfTable(table,coupling)
-  if (preev) call PreEvolvePdfTable(table,Qmin,dh,coupling)
+  if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
   call cpu_time(time_ev_done)
 
   !call PDFTableSetYInterpOrder(y_interp_order)
@@ -208,6 +209,10 @@ program prec_and_timing
   end if
 
 
+  if (output_benchmark) then
+    call write_benchmark_output()
+  end if
+
   ! one form of output
   if (outputgrid) then
      call eval_output_grid()
@@ -234,6 +239,7 @@ program prec_and_timing
     call WriteLHAPDFFromPdfTable(table, coupling, lhapdf_out, &
            pdf_index = 0, iy_increment = lhapdf_iyinc)
   end if
+
 
   ! clean up
   call Delete(table)
@@ -552,4 +558,25 @@ contains
 
   end subroutine get_evaluation_times
 
+  subroutine write_benchmark_output
+
+    real(dp), parameter :: heralhc_xvals(9) = &
+       & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
+    integer  :: ix    ! get the value of the tabulation at some point
+    real(dp) :: Q, pdf_at_xQ(-6:6)
+    Q = 100.0_dp
+    write(6,'(a)')
+    write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
+    write(6,'(a5,2a12,a14,a10,a12)') "x",&
+         & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
+    do ix = 1, size(heralhc_xvals)
+      call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
+      write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
+            &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+            &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+            &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+            &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+            &  pdf_at_xQ(0)
+    end do
+  end subroutine write_benchmark_output
 end program prec_and_timing
