@@ -1,5 +1,10 @@
 2025-09-12 Fri  <gavin.salam@physics.ox.ac.uk>
 
+	* src/pdf_tabulate.F90:
+	temporarily disabled pointer-setting in PdfTableOverrideInterpOrders
+	because answers are coming out wrong. Will investigate in a separate
+	branch
+
 	* git_watcher.cmake -> cmake/git_watcher.cmake:
 	* CMakeLists.txt:
 	moved git watcher out of top-level directory, to help 
