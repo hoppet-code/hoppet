@@ -28,8 +28,10 @@ The latest version can always be obtained from
 
     git clone https://github.com/hoppet-code/hoppet
 
-Details of changes are to be found in the file ChangeLog, while
-summaries of changes between releases are in ReleaseNotes.
+Summaries of main new features in each release are in
+[NEWS.md](NEWS.md). More detailed lists of changes are in the
+[ChangeLog](ChangeLog) file.
+
 
 
 ## Note on changes in v2.0.0
@@ -49,7 +51,7 @@ series without any difficulties.
 
 HOPPET requires support for Fortran 2008. It is developed and tested
 with recent versions of the gfortran compiler on Linux and Mac, and also
-also gets tested the Intel (ifx) compiler. 
+also gets tested with the Intel (ifx) compiler, as part of the CI.
 
 # Build with `CMake`
 
