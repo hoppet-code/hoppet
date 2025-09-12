@@ -5,6 +5,12 @@
 	moved git watched out of top-level directory, to help 
 	with cleaning that up
 
+	* test.sh: *** Deleted ***
+	not used any longer
+
+	* tarit.sh -> scripts/tarit.sh:
+	part of cleaning up TLD
+
 2025-09-09 Gavin + Alexander (later)
 
 	* src/pdf_tabulate.F90:
