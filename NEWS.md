@@ -1,8 +1,6 @@
 # NEWS for HOPPET
 
-
 # Release 2.0.0, XX September 2025
-
 
 ## Major new features:
 * inclusion of QED evolution
@@ -50,7 +48,6 @@ splitting functions and mass threshold terms for providing their code.
 * 4-loop running coupling is now available
 * Frederic Dreyer and Alexander Karlberg joined as contributors
 * small fixes to build system and examples, memory management
-
 
 
 # Release 1.1.5  August 2012
