@@ -99,9 +99,11 @@ do
   #$compare $fname $fname_ref -channel 11 -protect > $fname.acc.ch11 2>&1
 
   if [ x"$checkinterp" = x"yes" ]; then
+    #for olnlnQ in 2 3 4
     for olnlnQ in 2 3
     do
       for oy in 2 3
+      #for oy in $olnlnQ
       do
         echo -n " oQ$olnlnQ-oY$oy"
         fname=$outdir/nloop$nloop-preev-oQ$olnlnQ-oY$oy-dy$dy.dat
