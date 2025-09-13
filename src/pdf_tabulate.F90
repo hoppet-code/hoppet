@@ -1058,9 +1058,9 @@ contains
    call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
    nQ = ilnlnQ_hi - ilnlnQ_lo
 
-   write(6,*) "general: iylo = ", iylo, "y_wgts = ", y_wgts(0:npnt_y-1)
-   write(6,*) "general: ilnlnQ = ", ilnlnQ_lo, "lnlnQ_wgts = ", lnlnQ_wgts(0:nQ)
-   write(6,*) "general: Qvals = ", tab%Q_vals(ilnlnQ_lo:ilnlnQ_hi)
+   !write(6,*) "general: iylo = ", iylo, "y_wgts = ", y_wgts(0:npnt_y-1)
+   !write(6,*) "general: ilnlnQ = ", ilnlnQ_lo, "lnlnQ_wgts = ", lnlnQ_wgts(0:nQ)
+   !write(6,*) "general: Qvals = ", tab%Q_vals(ilnlnQ_lo:ilnlnQ_hi)
 
 
    ! 2024-11-29 (Mac M2, gfortran 14.2) explored various options here,
