@@ -1,9 +1,9 @@
-! the minimum ny we expect in a grid or subgrid in order for
-! interpolation assumptions to correct; provided as a define
-! so that it can be checked at preprocessor level in 
-! "templated" code in pdf_tabulate_OrderNNN.F90
-#define __HOPPET_tab_min_subgrid_ny__ 4
-#define __HOPPET_tab_min_nQ__         4
+!
+! This include sets __HOPPET_tab_min_subgrid_ny__ and
+! __HOPPET_tab_min_nQ__, which are the minimum values for the subgrid ny
+! and nQ respectively for various interpolation assumptions to be
+! correct, avoiding the need for runtime checks
+#include "inc/pdf_tabulate.inc"
 
 !-----------------------------------------------------------
 !! Module to make tabulation easy
@@ -1057,6 +1057,11 @@ contains
    !   signal for Q being out of range
    call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
    nQ = ilnlnQ_hi - ilnlnQ_lo
+
+   write(6,*) "general: iylo = ", iylo, "y_wgts = ", y_wgts(0:npnt_y-1)
+   write(6,*) "general: ilnlnQ = ", ilnlnQ_lo, "lnlnQ_wgts = ", lnlnQ_wgts(0:nQ)
+   write(6,*) "general: Qvals = ", tab%Q_vals(ilnlnQ_lo:ilnlnQ_hi)
+
 
    ! 2024-11-29 (Mac M2, gfortran 14.2) explored various options here,
    ! including going via a 2D wgts vector, and having an if statement to
