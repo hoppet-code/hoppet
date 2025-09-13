@@ -1,3 +1,17 @@
+2025-09-13 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/inc/pdf_tabulate.inc: *** ADDED ***
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	* src/pdf_tabulate.F90:
+	moved the __HOPPET_tab_min_subgrid_ny__ and __HOPPET_tab_min_nQ__
+	definitions into pdf_tabulate.inc so that they can be separately
+	included in pdf_tabulate_OrderNNN.F90, facilitating manual
+	preprocessor checks
+
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	fixed bug in selection of nf value because we were comparing to a 
+	"lo" rathe than "hi" extent of Q segment.
+
 2025-09-12 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* src/pdf_tabulate.F90:

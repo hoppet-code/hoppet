@@ -14,6 +14,15 @@
 ! include the Fortran Template Library Macros, which define the CAT
 ! macro in a way that works across compilers
 #include "ftlMacros.inc"
+#include "pdf_tabulate.inc"
+
+!#ifndef __HOPPET_InterpOrderY__
+!#define __HOPPET_InterpOrderY__ __HOPPET_InterpOrder__
+!#endif
+!#ifndef __HOPPET_InterpOrderQ__
+!#define __HOPPET_InterpOrderQ__ __HOPPET_InterpOrder__
+!#endif
+
 
 #if __HOPPET_InterpOrder__ > __HOPPET_tab_min_subgrid_ny__
 #error "Interpolation order is too high for the current grid configuration: __HOPPET_InterpOrder__ > __HOPPET_tab_min_subgrid_ny__"
@@ -21,6 +30,8 @@
 #if __HOPPET_InterpOrder__ > __HOPPET_tab_min_nQ__
 #error "Interpolation order is too high for the current grid configuration: __HOPPET_InterpOrder__ > __HOPPET_tab_min_nQ__"
 #endif
+
+
 
 ! this definition refers to functions in the interpolation_coeffs module (interpolation.f90)
 ! It will expand, e.g., as fill_interp_weights3 if __HOPPET_InterpOrder__ is 3
@@ -38,7 +49,7 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
   real(dp),        intent(out)        :: y_wgts(0:__HOPPET_InterpOrder__), lnlnQ_wgts(0:__HOPPET_InterpOrder__)
   integer,         intent(out)        :: iylo, ilnlnQ
   !----------------------------------------
-  integer, parameter :: NN = __HOPPET_InterpOrder__, halfNN=(NN-1)/2
+  integer, parameter :: NN = __HOPPET_InterpOrder__, halfNN=(NN)/2 !halfNN=(NN-1)/2
   real(dp) :: lnlnQ
   type(grid_def),   pointer :: grid, subgd
   type(pdfseginfo), pointer :: seginfo
@@ -76,7 +87,7 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
     seginfo => tab%seginfo_no_nf
   else
     do i_nf = tab%nflo, tab%nfhi-1
-      if (lnlnQ < tab%seginfo(i_nf)%lnlnQ_lo) exit
+      if (lnlnQ < tab%seginfo(i_nf)%lnlnQ_hi) exit
     end do
     seginfo => tab%seginfo(i_nf)
   end if
@@ -145,6 +156,11 @@ function EvalPdfTable_yQf_orderNNNN(tab,y,Q,iflv) result(res)
   integer  :: iylo, ilnlnQ, iQ
 
   call EvalPdfTable_get_weights_orderNNNN(tab, y, Q, y_wgts, lnlnQ_wgts, iylo, ilnlnQ)
+
+  ! diagnostics
+  !write(6,*) "orderNNNN: iylo = ", iylo, "y_wgts = ", y_wgts
+  !write(6,*) "orderNNNN: ilnlnQ = ", ilnlnQ, "lnlnQ_wgts = ", lnlnQ_wgts
+  !write(6,*) "orderNNNN: Qvals = ", tab%Q_vals(ilnlnQ:ilnlnQ+NN)
 
   ! now do the interpolation.
   ! first do the flavours we know we will need (this loop is easier to unroll)
