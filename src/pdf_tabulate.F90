@@ -1660,8 +1660,13 @@ contains
       return
     end if
 
+    
     nQ_request = tab%lnlnQ_order    
-    if (override_order_Q > 0) nQ_request = override_order_Q
+    if (override_order_Q > 0) then
+      nQ_request = override_order_Q
+    else
+      nQ_request = tab%lnlnQ_order
+    end if
     if (nQ_request > ubound(lnlnQ_wgts,1)) then
       call wae_error('get_lnlnQ_wgts',&
          & 'lnlnQ_wgts too small (ubound='//trim(to_string(ubound(lnlnQ_wgts,1)))&
