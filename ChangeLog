@@ -14,9 +14,9 @@
 
 	* unit-tests/hoppet-unit-tests.f90:
 	* unit-tests/unit_tests.f90:
-	added test that evaluation a single flavour at a time gave the same
+	added test that evaluation of a single flavour at a time gives the same
 	answer as all-flavour evaluation.
-	
+
 	* testing-other/: *** DELETED ***
 	to reduce clutter, removed this directory, which contained outdated
 	cteq6 tests. Use an example such as
