@@ -150,7 +150,6 @@ module pdf_tabulate
   public :: WriteLHAPDFFromPdfTable
   public :: Delete
 
-  !public :: PDFTableSetYInterpOrder
   public :: PdfTableOverrideInterpOrders
 
 
@@ -161,6 +160,7 @@ module pdf_tabulate
   public :: EvalPdfTable_yQ_order2
   public :: EvalPdfTable_yQ_order3
   public :: EvalPdfTable_yQ_order4
+  public :: EvalPdfTable_yQ_any_order
 
   abstract interface
     subroutine EvalPdfTable_yQ_interface(tab,y,Q,val)
@@ -188,7 +188,7 @@ module pdf_tabulate
   procedure(EvalPdfTable_yQ_interface ), pointer :: EvalPdfTable_yQ_ptr  => null()
   procedure(EvalPdfTable_yQf_interface), pointer :: EvalPdfTable_yQf_ptr => null()
 
-  
+  public :: EvalPdfTable_yQ_interface, EvalPdfTable_yQf_interface
 
 contains
 
@@ -221,21 +221,20 @@ contains
       override_order_both = -1
     end if
       
-    ! GPS 2025-09-12: disable this part of the code because
     ! 
-    !if      (override_order_Q == 2 .and. override_order_y == 2) then
-    !  EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order2
-    !  EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order2
-    !else if (override_order_Q == 3 .and. override_order_y == 3) then
-    !  EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order3
-    !  EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order3
-    !else if (override_order_Q == 4 .and. override_order_y == 4) then
-    !  EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order4
-    !  EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order4
-    !else
-    !  EvalPdfTable_yQ_ptr  => null()
-    !  EvalPdfTable_yQf_ptr => null()
-    !end if
+    if      (override_order_Q == 2 .and. override_order_y == 2) then
+      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order2
+      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order2
+    else if (override_order_Q == 3 .and. override_order_y == 3) then
+      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order3
+      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order3
+    else if (override_order_Q == 4 .and. override_order_y == 4) then
+      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order4
+      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order4
+    else
+      EvalPdfTable_yQ_ptr  => null()
+      EvalPdfTable_yQf_ptr => null()
+    end if
   end subroutine PdfTableOverrideInterpOrders
 
   !---------------------------------------------------------
@@ -915,7 +914,7 @@ contains
   !! the number of flavours in the table and all will get set
   !! (including the "representation" flavour).
   subroutine EvalPdfTable_yQ(tab,y,Q,val)
-    type(pdf_table), intent(in) :: tab
+    type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: y, Q
     real(dp),    intent(out) :: val(iflv_min:)
     !----------------------------------------
@@ -933,6 +932,8 @@ contains
        return
     end if
 
+    call EvalPdfTable_yQ_any_order(tab,y,Q,val)
+
     !select case (override_order_both)
     !case (22)
     !   call EvalPdfTable_yQ_order2(tab,y,Q,val)
@@ -945,6 +946,22 @@ contains
     !   return
     !end select
 
+  end subroutine EvalPdfTable_yQ
+
+  !! subsidiary routine that handles arbitrary interpolation orders.
+  !! Note that this is quite a bit slower than the specialized versions
+  !! (order2, etc.)
+  subroutine EvalPdfTable_yQ_any_order(tab,y,Q,val)
+    type(pdf_table), intent(in), target :: tab
+    real(dp),     intent(in) :: y, Q
+    real(dp),    intent(out) :: val(iflv_min:)
+    !----------------------------------------
+    real(dp) :: lnlnQ_wgts(0:max_lnlnQ_order)
+    real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
+    real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
+    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv, iflv_max_table, npnt_y
+    integer, save :: warn_id = warn_id_INIT    
+
     !-- y weights taken care of elsewhere....
     call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y, npnt_in = override_npnt_y)
 
@@ -952,6 +969,10 @@ contains
     !   signal for Q being out of range
     call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
     nQ = ilnlnQ_hi - ilnlnQ_lo
+
+    ! diagnostics
+    !print *, "any_order: Q weights:", lnlnQ_wgts(0:nQ), ilnlnQ_lo
+    !print *, "any_order: y weights:", y_wgts(0:npnt_y-1), iylo
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts? Not calculating it would imply significantly
@@ -1013,7 +1034,7 @@ contains
        !write(0,*) ilnlnQ_lo, ilnlnQ_hi, real(lnlnQ_wgts), val(1)
    end if
     
-  end subroutine EvalPdfTable_yQ
+  end subroutine EvalPdfTable_yQ_any_order
 
   !--------------------------------------------------------------------
   !! Sets the vector val(iflv_min:) for the PDF at this
@@ -1026,7 +1047,7 @@ contains
   !! the number of flavours in the table and all will get set
   !! (including the "representation" flavour).
   function EvalPdfTable_yQf(tab,y,Q,iflv) result(val)
-   type(pdf_table), intent(in) :: tab
+   type(pdf_table), intent(in), target :: tab
    real(dp),     intent(in) :: y, Q
    integer,      intent(in) :: iflv
    real(dp)                 :: val
@@ -1080,7 +1101,7 @@ contains
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
   subroutine EvalPdfTable_xQ(tab,x,Q,val)
-    type(pdf_table), intent(in) :: tab
+    type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: x, Q
     real(dp),    intent(out) :: val(iflv_min:)
     call EvalPdfTable_yQ(tab,-log(x),Q,val)
@@ -1089,7 +1110,7 @@ contains
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
   function EvalPdfTable_xQf(tab,x,Q,iflv) result(val)
-    type(pdf_table), intent(in) :: tab
+    type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: x, Q
     integer,      intent(in) :: iflv
     real(dp) :: val
@@ -1613,13 +1634,14 @@ contains
   !! interpolating the table
   !!
   subroutine get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
+    use hoppet_to_string
     type(pdf_table), intent(in) :: tab
     real(dp), intent(in)    :: Q
     real(dp), intent(out)   :: lnlnQ_wgts(0:)
     integer,  intent(out)   :: ilnlnQ_lo, ilnlnQ_hi
     !------------------------------------------------
     real(dp) :: lnlnQ, lnlnQ_norm
-    integer  :: nQ
+    integer  :: nQ, nQ_request
     integer, save :: warn_id = warn_id_INIT
 
     !-- Q weights need some help in finding location etc.
@@ -1637,20 +1659,37 @@ contains
       lnlnQ_wgts = zero ! set this to avoid warning
       return
     end if
-    
-    call request_iQrange(tab,lnlnQ, tab%lnlnQ_order,&
+
+    nQ_request = tab%lnlnQ_order    
+    if (override_order_Q > 0) nQ_request = override_order_Q
+    if (nQ_request > ubound(lnlnQ_wgts,1)) then
+      call wae_error('get_lnlnQ_wgts',&
+         & 'lnlnQ_wgts too small (ubound='//trim(to_string(ubound(lnlnQ_wgts,1)))&
+         //') for requested Q interpolation (nQ_request='//trim(to_string(nQ_request))//')')
+    end if
+    call request_iQrange(tab,lnlnQ, nQ_request,&
          &               ilnlnQ_lo, ilnlnQ_hi, lnlnQ_norm)
 
     nQ = ilnlnQ_hi - ilnlnQ_lo
-    if (nQ < ubound(lnlnQ_wgts,1)) then 
-      ! nQ can be zero if the table had a very narrow range of Q values (< O(min_dlnlnQ_singleQ))
-      if (nQ == 0 .and. abs(lnlnQ - tab%lnlnQ_vals(ilnlnQ_lo)) < two * min_dlnlnQ_singleQ) then
-         lnlnQ_wgts(0) = 1
-      else
-         !write(6,*) "Q=", Q, 'nQ = ',nQ, 'lnlnQ_wgts = ',ubound(lnlnQ_wgts,1), tab%nf_int
+    if (nQ == 0) then
+       if (abs(lnlnQ - tab%lnlnQ_vals(ilnlnQ_lo)) < two * min_dlnlnQ_singleQ) then
+          lnlnQ_wgts(0) = 1
+       else
          call wae_error('get_lnlnQ_wgts',&
-            & 'lnlnQ_wgts too small for requested Q interpolation')
-      end if
+            & 'nQ=0 but lnlnQ='//trim(to_string(lnlnQ))//&
+            & ' not close enough to tab%lnlnQ_vals(ilnlnQ_lo)(='//trim(to_string(tab%lnlnQ_vals(ilnlnQ_lo)))//')')
+       end if
+
+    !else if (nQ < ubound(lnlnQ_wgts,1)) then
+    !  ! nQ can be zero if the table had a very narrow range of Q values (< O(min_dlnlnQ_singleQ))
+    !  if (nQ == 0 .and. abs(lnlnQ - tab%lnlnQ_vals(ilnlnQ_lo)) < two * min_dlnlnQ_singleQ) then
+    !     lnlnQ_wgts(0) = 1
+    !  else
+    !     !write(6,*) "Q=", Q, 'nQ = ',nQ, 'lnlnQ_wgts = ',ubound(lnlnQ_wgts,1), tab%nf_int
+    !     call wae_error('get_lnlnQ_wgts',&
+    !        & 'lnlnQ_wgts too small (ubound='//trim(to_string(ubound(lnlnQ_wgts,1)))&
+    !        //') for requested Q interpolation (nQ='//trim(to_string(nQ))//')')
+    !  end if
     end if
     call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
 

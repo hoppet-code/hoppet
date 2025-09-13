@@ -110,6 +110,8 @@ contains
     use streamlined_interface
     real(dp), parameter :: xvals(*) = [1e-5_dp, 0.12_dp, 0.9_dp]
     real(dp), parameter :: Qvals(*) = [1.0_dp, sqrt(2.0_dp), 3.0_dp, 7.0_dp, 100.0_dp, 700.0_dp]
+    !real(dp), parameter :: xvals(*) = [1e-5_dp]
+    !real(dp), parameter :: Qvals(*) = [3.0_dp]
     real(dp) :: x, Q, xpdf(iflv_min:tables(0)%tab_iflv_max), xpdff
     integer  :: iflv, ix, iQ
 
@@ -129,7 +131,53 @@ contains
       end do
     end do 
 
-    ! Add tests for the tabulation evaluation routines here
+    ! Add tests that the general table-evaluation routine and the 
+    ! order-specific ones agree
+    block
+      real(dp) :: xpdf_ord(iflv_min:tables(0)%tab_iflv_max)
+      procedure(EvalPdfTable_yQ_interface ), pointer :: EvalPdfTable_yQ_order
+      procedure(EvalPdfTable_yQf_interface), pointer :: EvalPdfTable_yQf_order
+      integer, parameter :: orders(*) = [2,3,4]
+      integer            :: iord
+
+      do iord = 1, size(orders)
+        select case (orders(iord))
+          !case (1)
+          !  EvalPdfTable_yQ_order => EvalPdfTable_yQ_order1
+          !  EvalPdfTable_yQf_order => EvalPdfTable_yQf_order1
+          case (2)
+            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order2
+            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order2
+          case (3)
+            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order3
+            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order3
+          case (4)
+            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order4
+            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order4
+          case Default
+            call fail("Unsupported order "//trim(to_string(orders(iord)))//" in test_tab_eval")
+            cycle
+        end select
+        call PdfTableOverrideInterpOrders(orders(iord), orders(iord))
+        do ix = 1, size(xvals)
+          x = xvals(ix)
+          do iQ = 1, size(Qvals)
+            Q = Qvals(iQ)
+            call EvalPdfTable_yQ(tables(0), -log(x), Q, xpdf)
+            call EvalPdfTable_yQ_order(tables(0), -log(x), Q, xpdf_ord)
+            call check_approx_eq("EvalPdfTable_yQ, order="//trim(to_string(orders(iord)))//&
+                                 ", x="//trim(to_string(x))//", Q="//trim(to_string(Q)), &
+                                 xpdf_ord, xpdf, tol_abs = 1e-10_dp)
+            do iflv = iflv_min, iflv_max
+              xpdff = EvalPdfTable_yQf_order(tables(0), -log(x), Q, iflv)
+              call check_approx_eq_0d("EvalPdfTable_yQf, order="//trim(to_string(orders(iord)))//&
+                                   ", x="//trim(to_string(x))//", Q="//trim(to_string(Q))//", iflv="//trim(to_string(iflv)), &
+                                   xpdf_ord(iflv), xpdff, tol_abs = 1e-10_dp)
+            end do
+          end do
+        end do
+      end do
+    end block
   end subroutine test_tab_eval
 
 end program hoppet_unit_tests

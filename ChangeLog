@@ -6,7 +6,12 @@
 	moved the __HOPPET_tab_min_subgrid_ny__ and __HOPPET_tab_min_nQ__
 	definitions into pdf_tabulate.inc so that they can be separately
 	included in pdf_tabulate_OrderNNN.F90, facilitating manual
-	preprocessor checks
+	preprocessor checks.
+
+	Modified get_lnlnQ_wgts so that it takes into account override_order_Q.
+	separated any-order part of EvalPdfTable_yQ into EvalPdfTable_yQ_any_order
+	so that we can guarantee that we're getting that bit of code. Used
+	in the unit tests.
 
 	* src/inc/pdf_tabulate_OrderNNN.F90:
 	fixed bug in selection of nf value because we were comparing to a 
@@ -14,8 +19,10 @@
 
 	* unit-tests/hoppet-unit-tests.f90:
 	* unit-tests/unit_tests.f90:
-	added test that evaluation of a single flavour at a time gives the same
-	answer as all-flavour evaluation.
+	added tests that evaluation of a single flavour at a time gives the same
+	answer as all-flavour evaluation and that the routines with fixed
+	interpolation orders give identical results to that with a flexible
+	interpolation order.
 
 	* testing-other/: *** DELETED ***
 	to reduce clutter, removed this directory, which contained outdated
