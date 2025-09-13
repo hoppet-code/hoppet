@@ -12,6 +12,11 @@
 	fixed bug in selection of nf value because we were comparing to a 
 	"lo" rather than "hi" extent of Q segment.
 
+	* unit-tests/hoppet-unit-tests.f90:
+	* unit-tests/unit_tests.f90:
+	added test that evaluation a single flavour at a time gave the same
+	answer as all-flavour evaluation.
+
 2025-09-12 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* src/pdf_tabulate.F90:

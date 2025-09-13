@@ -1,13 +1,58 @@
+module hoppet_unit_tests_setup
+  implicit none
+contains
+  subroutine hoppet_setup()
+    use streamlined_interface
+    use dummy_pdfs
+
+    real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
+    real(dp) :: asQ, Q0alphas, Q0pdf
+    real(dp) :: mc,mb,mt
+    integer  :: order, nloop
+
+    order = -6
+    ymax  = 12.0_dp
+    dy    = 0.1_dp
+    ! and parameters for Q tabulation
+    Qmin=1.0_dp
+    Qmax=28000.0_dp
+    dlnlnQ = dy/4.0_dp
+    ! and number of loops to initialise!
+    nloop = 3
+    call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,&
+       &         order,factscheme_MSbar)
+
+    ! Set heavy flavour scheme
+    mc = 1.414213563_dp   ! sqrt(2.0_dp) + epsilon
+    mb = 4.5_dp
+    mt = 175.0_dp
+    call hoppetSetVFN(mc, mb, mt)
+
+    ! Streamlined evolution
+    
+    ! Set parameters of running coupling
+    asQ = 0.35_dp
+    Q0alphas = sqrt(2.0_dp)
+    muR_Q = 1.0_dp
+    Q0pdf = sqrt(2.0_dp) ! The initial evolution scale
+    call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, lha_unpolarized_dummy_pdf, Q0pdf)
+  end subroutine hoppet_setup
+
+end module hoppet_unit_tests_setup
+
 program hoppet_unit_tests
   use types
   use unit_tests
+  use hoppet_unit_tests_setup
   use interpolation
   use interpolation_coeffs
   implicit none
 
   print '(a)', "Running HOPPET unit tests"
+  call hoppet_setup()
 
   call test_interpolation_coeffs()
+  call test_tab_eval()
 
   if (unit_test_failures > 0) then
     ! print a message in red
@@ -21,7 +66,7 @@ program hoppet_unit_tests
 contains
 
   !! checks equivalence between interpolation weights from
-  !!  uniform_interpolation_weights and fill_interp_weightsN
+  !! uniform_interpolation_weights and fill_interp_weightsN
   subroutine test_interpolation_coeffs()
     real(dp) :: x
     real(dp) :: weights(0:4)
@@ -50,12 +95,41 @@ contains
         end select
 
         call check_approx_eq("fill_interp_weightsN, order = "//trim(to_string(i))//", x="//trim(to_string(x)), &
-                              weights2(0:i), weights1(0:i), tol = 1e-10_dp)
+                              weights2(0:i), weights1(0:i), tol_abs = 1e-10_dp)
 
       end do
     end do
 
   end subroutine test_interpolation_coeffs
 
+
+  !! a number of tests of the evaluation of the PDF tables
+  subroutine test_tab_eval()
+    use pdf_tabulate
+    use pdf_representation
+    use streamlined_interface
+    real(dp), parameter :: xvals(*) = [1e-5_dp, 0.12_dp, 0.9_dp]
+    real(dp), parameter :: Qvals(*) = [1.0_dp, sqrt(2.0_dp), 3.0_dp, 7.0_dp, 100.0_dp, 700.0_dp]
+    real(dp) :: x, Q, xpdf(iflv_min:tables(0)%tab_iflv_max), xpdff
+    integer  :: iflv, ix, iQ
+
+    ! first check that single-flavour evaluation gives the same answer
+    ! as all-flavour evaluation
+    do ix = 1, size(xvals)
+      x = xvals(ix)
+      do iQ = 1, size(Qvals)
+        Q = Qvals(iQ)
+        call EvalPdfTable_xQ(tables(0), x, Q, xpdf)
+        do iflv = iflv_min, iflv_max
+          xpdff = EvalPdfTable_xQf(tables(0), x, Q, iflv)
+          call check_approx_eq_0d("EvalPdfTable_xQf, x="//trim(to_string(x))//&
+                               ", Q="//trim(to_string(Q))//", iflv="//trim(to_string(iflv)), &
+                               xpdff, xpdf(iflv), tol_abs = 1e-10_dp)
+        end do
+      end do
+    end do 
+
+    ! Add tests for the tabulation evaluation routines here
+  end subroutine test_tab_eval
 
 end program hoppet_unit_tests
