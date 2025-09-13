@@ -16,6 +16,14 @@
 	* unit-tests/unit_tests.f90:
 	added test that evaluation a single flavour at a time gave the same
 	answer as all-flavour evaluation.
+	
+	* testing-other/: *** DELETED ***
+	to reduce clutter, removed this directory, which contained outdated
+	cteq6 tests. Use an example such as
+	example_f77/compare_lhapdf_hoppet.f instead.
+
+	* example_f77/compare_lhapdf_hoppet.f:
+	changed set to CT18NNLO.
 
 2025-09-12 Fri  <gavin.salam@physics.ox.ac.uk>
 
