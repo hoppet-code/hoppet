@@ -1,10 +1,8 @@
 module unit_tests
   use types
+  use hoppet_to_string
   implicit none
 
-  interface to_string
-     module procedure to_string_dp, to_string_int
-  end interface
   interface check_approx_eq
      module procedure check_approx_eq_0d, check_approx_eq_1d
   end interface
@@ -74,23 +72,6 @@ contains
     unit_test_failures = unit_test_failures + 1
   end subroutine fail
 
-  function to_string_dp(x) result(str)
-    implicit none
-    real(dp), intent(in) :: x
-    character(len=100) :: str
-
-    write(str, *) x
-    str = adjustl(str)
-  end function to_string_dp
-
-  function to_string_int(x) result(str)
-    implicit none
-    integer, intent(in) :: x
-    character(len=100) :: str
-
-    write(str, *) x
-    str = adjustl(str)
-  end function to_string_int
 
 
 end module unit_tests

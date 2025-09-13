@@ -25,6 +25,10 @@
 	* example_f77/compare_lhapdf_hoppet.f:
 	changed set to CT18NNLO.
 
+	* src/hoppet_to_string.f90: *** ADDED ***
+	moved the to_string functionality into the main library, because of its
+	use in error messages
+
 2025-09-12 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* src/pdf_tabulate.F90:
