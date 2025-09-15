@@ -75,6 +75,7 @@ foreach my $dir (@dirs) {
   # this code enables alternative sets of files to be used in compilation
   # depending on whether the user wants exact coefficient functions; the
   # alternatives should live in sub-directories exact-coefs/ and no-exact-coefs/
+  $mkmk .= " -srcdir param-coefs -srcdir splitting-functions -srcdir mass-thresholds";
   if ($enableExactCoefs && -d "exact-coefs") {$mkmk .= " -srcdir exact-coefs";}
   elsif (!$enableExactCoefs && -d "no-exact-coefs") {$mkmk .= " -srcdir no-exact-coefs";}
   if (-d "config") {$mkmk .= " -srcdir config";}
