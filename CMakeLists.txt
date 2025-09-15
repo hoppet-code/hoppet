@@ -305,7 +305,6 @@ endif()
 if (HOPPET_BUILD_EXAMPLES)
   set( f90programs_f90 
                    structure_functions_example  
-                   structure_functions_example_exact  
                    structure_functions_example_flavour  
                    tabulation_example_2                  
                    tabulation_example      
