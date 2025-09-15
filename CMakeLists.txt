@@ -29,7 +29,7 @@ file(GLOB A_FILES "${PROJECT_SOURCE_DIR}/src/*.a")
 if(EXISTS "${PROJECT_SOURCE_DIR}/src/Makefile"
    OR (NOT "${MOD_FILES}" STREQUAL "")
    OR (NOT "${A_FILES}" STREQUAL ""))
-  message(FATAL_ERROR "HOPPET: Old build system files detected. Please start from a fresh clone (you can also try 'make distclean' from the top-level directory, but we do not guarantee this will work)")
+  message(FATAL_ERROR "HOPPET: Old build system files detected (including potentially ${MOD_FILES} ${A_FILES}). Please start from a fresh clone (you can also try 'make distclean' from the top-level directory, but we do not guarantee this will work)")
 endif()
 
 # Add options ==========================================================
