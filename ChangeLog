@@ -1,3 +1,15 @@
+2025-09-15  Gavin
+
+	* src/interpolation.f90:
+	added fill_interp_weights5 and fill_interp_weights6, as well as
+	corresponding coefficients
+
+	* unit-tests/hoppet-unit-tests.F90: (.f90 -> .F90)
+	added tests for fill_interp_weights5 and fill_interp_weights6;
+	also tried to add some basic timing macros and tried them out
+	on fill_interp_weights6
+
+
 2025-09-15  Alexander + Gavin
 
 	* CMakeLists.txt:

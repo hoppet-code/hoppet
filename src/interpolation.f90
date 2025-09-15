@@ -82,14 +82,22 @@ module interpolation_coeffs
   implicit none
   private
 
+  ! shorthands for factorials, kept private
+  real(dp), parameter :: f(0:6) = [1.0_dp, 1.0_dp, 2.0_dp, 6.0_dp, 24.0_dp, 120.0_dp, 720.0_dp]
+  real(dp), parameter :: nn(0:6) = [0.0_dp, 1.0_dp, 2.0_dp, 3.0_dp, 4.0_dp, 5.0_dp, 6.0_dp]
+
   !! Interp_coeffsN(i) should multiply $f(x=i) \prod_{j=0,j\neq i}^N (x-j)$
   real(dp), parameter :: interp_coeffs1(0:1) = [-1.0_dp, 1.0_dp]
   real(dp), parameter :: interp_coeffs2(0:2) = [ 0.5_dp, -1.0_dp, 0.5_dp ]
   real(dp), parameter :: interp_coeffs3(0:3) = [ -1.0_dp/6.0_dp, 1.0_dp/2.0_dp, -1.0_dp/2.0_dp, 1.0_dp/6.0_dp ]
   real(dp), parameter :: interp_coeffs4(0:4) = [ 1.0_dp/24.0_dp, -1.0_dp/6.0_dp, 1.0_dp/4.0_dp, -1.0_dp/6.0_dp,  1.0_dp/24.0_dp ]
+  real(dp), parameter :: interp_coeffs5(0:5) = 1.0_dp/[ -f(0)*f(5), f(1)*f(4), -f(2)*f(3), f(3)*f(2), -f(4)*f(1), f(5)*f(0) ]
+  real(dp), parameter :: interp_coeffs6(0:6) = 1.0_dp/[  f(0)*f(6), -f(1)*f(5), f(2)*f(4), -f(3)*f(3), f(4)*f(2), -f(5)*f(1), f(6)*f(0) ]
 
-  public :: interp_coeffs1, interp_coeffs2, interp_coeffs3, interp_coeffs4
-  public :: fill_interp_weights1, fill_interp_weights2, fill_interp_weights3, fill_interp_weights4
+  public :: interp_coeffs1, interp_coeffs2, interp_coeffs3
+  public :: interp_coeffs4, interp_coeffs5, interp_coeffs6
+  public :: fill_interp_weights1, fill_interp_weights2, fill_interp_weights3
+  public :: fill_interp_weights4, fill_interp_weights5, fill_interp_weights6
 
 contains
 
@@ -149,19 +157,97 @@ contains
 
   ! this variant is a bit slower, by about 1ns on M2Pro-gfortran15-O3
   !pure subroutine fill_interp_weights4(x, weights)
+  !  integer,  parameter   :: N=4
   !  real(dp), intent(in)  :: x
-  !  real(dp), intent(out) :: weights(0:4)
+  !  real(dp), intent(out) :: weights(0:N)
   !  !-----------------------------------------
-  !  real(dp) :: xm(0:4), prodsl(0:4), prodsr(0:4)
+  !  real(dp) :: xm(0:N), prodsl(0:N), prodsr(0:N)
   !  integer  :: i
-  !  xm = x - [0.0_dp, 1.0_dp, 2.0_dp, 3.0_dp, 4.0_dp]
+  !  xm = x - nn(0:N)
   !  prodsl(0) = 1.0_dp
-  !  prodsr(4) = 1.0_dp
-  !  do i = 1,4
-  !    prodsl(i) = prodsl(i-1) * xm(i-1)
-  !    prodsr(4-i) = prodsr(5-i) * xm(5-i)
+  !  prodsr(N) = 1.0_dp
+  !  do i = 1,N
+  !    prodsl(i)     = prodsl(i-1) * xm(i-1)
+  !    prodsr(N-i) = prodsr(N+1-i) * xm(N+1-i)
   !  end do
   !  weights = prodsl * prodsr * interp_coeffs4
   !end subroutine fill_interp_weights4
+
+  pure subroutine fill_interp_weights5(x, weights)
+    real(dp), intent(in)  :: x
+    real(dp), intent(out) :: weights(0:5)
+    !-----------------------------------------
+    real(dp) :: xm1,xm2,xm3,xm4,xm5,xm012,xm345
+    xm1 = x-1.0_dp
+    xm2 = x-2.0_dp
+    xm3 = x-3.0_dp
+    xm4 = x-4.0_dp
+    xm5 = x-5.0_dp
+    ! speed of the following has not been tested
+    xm012 = x * xm1 * xm2
+    xm345 = xm3 * xm4 * xm5
+
+    weights(0) = xm1*xm2*xm345 * interp_coeffs5(0)
+    weights(1) = x  *xm2*xm345 * interp_coeffs5(1)
+    weights(2) = x*xm1  *xm345 * interp_coeffs5(2)
+    weights(3) = xm012*xm4*xm5 * interp_coeffs5(3)
+    weights(4) = xm012*xm3*xm5 * interp_coeffs5(4)
+    weights(5) = xm012*xm3*xm4 * interp_coeffs5(5)
+  end subroutine fill_interp_weights5
+
+  pure subroutine fill_interp_weights6(x, weights)
+    real(dp), intent(in)  :: x
+    real(dp), intent(out) :: weights(0:6)
+    !-----------------------------------------
+    real(dp) :: xm1,xm2,xm3,xm4,xm5,xm6,xm012,xm456
+    !real(dp) :: xm23, xm34
+    xm1 = x-1.0_dp
+    xm2 = x-2.0_dp
+    xm3 = x-3.0_dp
+    xm4 = x-4.0_dp
+    xm5 = x-5.0_dp
+    xm6 = x-6.0_dp
+    ! On M2Pro-gfortran15-O3, no discernible advantage
+    ! to adding xm23 and xm34 intermediates, tested
+    ! with the code in hoppet_unit_tests::test_interpolation_coeffs
+    xm012 = x * xm1 * xm2
+    xm456 = xm4 * xm5 * xm6  
+    weights(0) = xm1*xm2*xm3*xm456 * interp_coeffs6(0)
+    weights(1) = x  *xm2*xm3*xm456 * interp_coeffs6(1)
+    weights(2) = x*xm1  *xm3*xm456 * interp_coeffs6(2)
+    weights(3) = xm012      *xm456 * interp_coeffs6(3)
+    weights(4) = xm012*xm3*xm5*xm6 * interp_coeffs6(4)
+    weights(5) = xm012*xm3*xm4*xm6 * interp_coeffs6(5)
+    weights(6) = xm012*xm3*xm4*xm5 * interp_coeffs6(6)
+    !xm23 = xm2*xm3
+    !xm34 = xm3*xm4
+    !weights(0) = xm1*xm23   *xm456 * interp_coeffs6(0)
+    !weights(1) = x  *xm23   *xm456 * interp_coeffs6(1)
+    !weights(2) = x*xm1  *xm3*xm456 * interp_coeffs6(2)
+    !weights(3) = xm012      *xm456 * interp_coeffs6(3)
+    !weights(4) = xm012*xm3*xm5*xm6 * interp_coeffs6(4)
+    !weights(5) = xm012*xm34   *xm6 * interp_coeffs6(5)
+    !weights(6) = xm012*xm34   *xm5 * interp_coeffs6(6)
+  end subroutine fill_interp_weights6
+
+
+!  ! this variant seems to be about 2.5ns slower than the hard-coded one
+!  ! above
+!  pure subroutine fill_interp_weights6(x, weights)
+!    integer,  parameter   :: N=6
+!    real(dp), intent(in)  :: x
+!    real(dp), intent(out) :: weights(0:N)
+!    !-----------------------------------------
+!    real(dp) :: xm(0:N), prodsl(0:N), prodsr(0:N)
+!    integer  :: i
+!    xm = x - nn(0:N)
+!    prodsl(0) = 1.0_dp
+!    prodsr(N) = 1.0_dp
+!    do i = 1,N 
+!      prodsl(i)   = prodsl(i-1) * xm(i-1)
+!      prodsr(N-i) = prodsr(N+1-i) * xm(N+1-i)
+!    end do
+!    weights = prodsl * prodsr * interp_coeffs6
+!  end subroutine fill_interp_weights6
 
 end module interpolation_coeffs

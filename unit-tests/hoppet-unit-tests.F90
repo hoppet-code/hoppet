@@ -1,5 +1,15 @@
+!! a block of code to help with timing
+#define TIME_START(NAME,NREP) block;real(dp)::t_start,t_end;integer::irep,nrep=(NREP);\
+character(len=*),parameter::name=NAME
+#define TIME_LOOP  if (trim(timing_name)==name) then; call cpu_time(t_start); do irep = 1, nrep
+! OUT is there to make sure we accumulate some kind of result and print
+! is, so the result is not optimized away
+#define TIME_END(OUT) end do;call cpu_time(t_end);print *,"TIME:",name,": ",(t_end-t_start)/nrep*1e9_dp,"ns",OUT;end if;end block
+
+
 module hoppet_unit_tests_setup
   implicit none
+  
 contains
   subroutine hoppet_setup()
     use streamlined_interface
@@ -40,6 +50,7 @@ contains
 
 end module hoppet_unit_tests_setup
 
+!!!!!!!!!!!!!!!!!!!!!!!
 program hoppet_unit_tests
   use types
   use unit_tests
@@ -47,6 +58,9 @@ program hoppet_unit_tests
   use interpolation
   use interpolation_coeffs
   implicit none
+
+  character(len=100):: timing_name = "fill_interp_weights6:x4"
+
 
   print '(a)', "Running HOPPET unit tests"
   call hoppet_setup()
@@ -71,9 +85,9 @@ contains
     real(dp) :: x
     real(dp) :: weights(0:4)
     integer   :: i, ix
-    integer, parameter :: nlo = 1, nhi = 4
+    integer, parameter :: nlo = 1, nhi = 6
     real(dp) :: weights1(0:nhi), weights2(0:nhi)
-    real(dp), parameter :: xvals(3) = [0.2_dp,1.5_dp,3.4_dp]
+    real(dp), parameter :: xvals(*) = [0.2_dp,1.5_dp,3.4_dp, 1.0_dp]
 
     do ix = 1, size(xvals)
       x = xvals(ix)
@@ -89,6 +103,10 @@ contains
             call fill_interp_weights3(x, weights2)
           case (4)
             call fill_interp_weights4(x, weights2)
+          case (5)
+            call fill_interp_weights5(x, weights2)
+          case (6)
+            call fill_interp_weights6(x, weights2)
           case Default
             call fail("Unsupported order "//trim(to_string(i))//" in test_interpolation_coeffs")
             continue
@@ -96,9 +114,19 @@ contains
 
         call check_approx_eq("fill_interp_weightsN, order = "//trim(to_string(i))//", x="//trim(to_string(x)), &
                               weights2(0:i), weights1(0:i), tol_abs = 1e-10_dp)
-
       end do
     end do
+
+  ! some basic timing code
+  TIME_START("fill_interp_weights6:x4",10**5)
+  real(dp) :: weights_sum(0:6) = 0.0_dp
+  TIME_LOOP
+    ! cover a range of x values to include special cases & not
+    do ix = 1, size(xvals)
+      call fill_interp_weights6(xvals(ix), weights2)
+      weights_sum = weights_sum + weights2
+    end do
+  TIME_END(weights_sum)
 
   end subroutine test_interpolation_coeffs
 
