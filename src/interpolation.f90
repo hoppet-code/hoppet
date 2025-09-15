@@ -92,7 +92,7 @@ module interpolation_coeffs
   real(dp), parameter :: interp_coeffs3(0:3) = [ -1.0_dp/6.0_dp, 1.0_dp/2.0_dp, -1.0_dp/2.0_dp, 1.0_dp/6.0_dp ]
   real(dp), parameter :: interp_coeffs4(0:4) = [ 1.0_dp/24.0_dp, -1.0_dp/6.0_dp, 1.0_dp/4.0_dp, -1.0_dp/6.0_dp,  1.0_dp/24.0_dp ]
   real(dp), parameter :: interp_coeffs5(0:5) = 1.0_dp/[ -f(0)*f(5), f(1)*f(4), -f(2)*f(3), f(3)*f(2), -f(4)*f(1), f(5)*f(0) ]
-  real(dp), parameter :: interp_coeffs6(0:6) = 1.0_dp/[  f(0)*f(6), -f(1)*f(5), f(2)*f(4), -f(3)*f(3), f(4)*f(2), -f(5)*f(1), f(6)*f(0) ]
+  real(dp), parameter :: interp_coeffs6(0:6) = 1.0_dp/[f(0)*f(6),-f(1)*f(5),f(2)*f(4),-f(3)*f(3),f(4)*f(2),-f(5)*f(1),f(6)*f(0)]
 
   public :: interp_coeffs1, interp_coeffs2, interp_coeffs3
   public :: interp_coeffs4, interp_coeffs5, interp_coeffs6

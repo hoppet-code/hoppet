@@ -1,4 +1,6 @@
 !! a block of code to help with timing
+!! It will run only if an existing variable timing_name coincides
+!! with the NAME that is set
 #define TIME_START(NAME,NREP) block;real(dp)::t_start,t_end;integer::irep,nrep=(NREP);\
 character(len=*),parameter::name=NAME
 #define TIME_LOOP  if (trim(timing_name)==name) then; call cpu_time(t_start); do irep = 1, nrep
@@ -59,6 +61,7 @@ program hoppet_unit_tests
   use interpolation_coeffs
   implicit none
 
+  ! decide which timing variant to run
   character(len=100):: timing_name = "fill_interp_weights6:x4"
 
 
@@ -118,6 +121,7 @@ contains
     end do
 
   ! some basic timing code
+  ! NB: it only runs if timing_name=="fill_interp_weights6:x4"
   TIME_START("fill_interp_weights6:x4",10**5)
   real(dp) :: weights_sum(0:6) = 0.0_dp
   TIME_LOOP
