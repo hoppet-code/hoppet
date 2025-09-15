@@ -1,4 +1,14 @@
-2025-09-13 Sat  <gavin.salam@physics.ox.ac.uk>
+2025-09-15  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/splitting-functions: *** ADDED ***
+	* src/mass-thresholds: *** ADDED ***
+	* src/no-exact-coefs:
+	Created new directories to contain all the external codes that we
+	use for splitting functions and mass thresholds. Moved the
+	parametrised coefficient functions into a separate directory as
+	well.
+
+	2025-09-13 Sat  <gavin.salam@physics.ox.ac.uk>
 
 	* src/inc/pdf_tabulate.inc: *** ADDED ***
 	* src/inc/pdf_tabulate_OrderNNN.F90:

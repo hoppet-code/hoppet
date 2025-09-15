@@ -207,8 +207,8 @@ endif()
 
 
 # Sources ==============================================================
-file(GLOB SOURCESf90 src/*.f90 src/*.F90)
-file(GLOB SOURCESf src/*.f)
+file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds/*.f90)
+file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/mass-thresholds/*.f)
 
 #------------------------------------------------------------------------- 
 # Define the two required variables before including
@@ -245,7 +245,7 @@ file(GLOB EXACT_COEF_SOURCESf90 src/exact-coefs/*.f90)
 file(GLOB EXACT_COEF_SOURCESf src/exact-coefs/*.f)
 file(GLOB NO_EXACT_COEF_SOURCES src/no-exact-coefs/*.f src/no-exact-coefs/*.f90)
 file(GLOB NO_EXACT_COEF_SOURCESf90 src/no-exact-coefs/*.f90)
-file(GLOB NO_EXACT_COEF_SOURCESf src/no-exact-coefs/*.f90)
+file(GLOB NO_EXACT_COEF_SOURCESf src/no-exact-coefs/*.f)
 
 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
