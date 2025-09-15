@@ -441,6 +441,21 @@ if (HOPPET_BUILD_BENCHMARK)
     target_compile_options(benchmark PRIVATE "-Wno-do-subscript")
   endif()
 
+  if (HOPPET_ENABLE_TESTING)
+    # this list of tests should align with the list of runs at the start of
+    # benchmarking/prec_and_timing.default_output/gen-default-output.sh
+    set (prec_and_timing_tests 
+      benchmarking/prec_and_timing:-dy:0.2:-olnlnQ:2:-yinterp-order:2
+      benchmarking/prec_and_timing:-dy:0.2:-olnlnQ:3:-yinterp-order:3
+      benchmarking/prec_and_timing:-dy:0.2:-olnlnQ:4:-yinterp-order:4
+      benchmarking/prec_and_timing:-dy:0.1:-exact-nnlo-th:-exact-nnlo-sp
+    )
+    foreach (test ${prec_and_timing_tests})
+      set(testName ${test})
+      add_test(NAME ${testName} COMMAND 
+         sh -c "${CMAKE_SOURCE_DIR}/scripts/check ${test}")
+    endforeach()
+  endif()
 
 endif()
 

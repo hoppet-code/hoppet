@@ -14,6 +14,16 @@
 	renamed dummy_pdfs and functions inside to better reflect its purpose
 	and updated a range of examples and tests accordingly.
 
+	* scripts/checks:
+	* CMakeLists.txt:
+	* benchmarking/prec_and_timing.default_output/gen-default-output.sh: *** ADDED ***
+	* benchmarking/prec_and_timing.default_output/*.default_output:      *** ADDED ***
+	added tests with prec_and_timing, where the options make it easier
+	to test a range of setups; for now they cover different interpolation orders
+	and an evolution with exact NNLO splitting and thresholds.
+	Format for tests is `prec_and_timing:<option1>:<value1>:<option2>:<value2>:...`
+
+
 2025-09-15  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/splitting-functions/: *** ADDED ***
