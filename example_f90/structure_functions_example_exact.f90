@@ -39,7 +39,7 @@ program structure_functions_example
          &         order,factscheme_MSbar)
 
   ! Setup all constants and parameters needed by the structure functions
-  call StartStrFct(nloop_coefs, scale_choice = sc_choice, param_coefs&
+  call StartStrFct(nloop_coefs, nflav = 5, scale_choice = sc_choice, param_coefs&
        & = .false.)
 
   ! Evolve the PDF

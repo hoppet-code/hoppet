@@ -408,7 +408,7 @@ if (HOPPET_BUILD_EXAMPLES)
         set(testName "${testName}_takes_up_to_30s")
       endif()
       if (ex MATCHES "structure_functions_example_exact")
-        set(testName "${testName}_takes_up_to_90s")
+        set(testName "${testName}_takes_up_to_30s")
       endif()
       add_test(NAME ${testName} COMMAND 
          sh -c "${CMAKE_SOURCE_DIR}/scripts/check example_f90/${ex}")
