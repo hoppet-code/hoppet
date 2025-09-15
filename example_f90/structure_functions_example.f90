@@ -9,7 +9,19 @@ program structure_functions_example
   real(dp) :: Qmax, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0,&
        & muR_Q, dy, dlnlnQ, minQval, maxQval
   integer  :: nloop_coefs, sc_choice,nloop, order
-  
+  integer :: nargs
+  character(len=5) :: arg_string
+  logical :: param_coefs = .true.
+
+  ! Get the number of command line arguments
+  nargs = iargc()
+
+  ! Very simple commandline.
+  if(nargs == 1) then
+     call getarg(1, arg_string)
+     if(arg_string == "exact") param_coefs = .false.
+  endif
+     
   Qmax = 13000.0_dp 
   nloop_coefs = 4
   xmur = one
@@ -39,8 +51,8 @@ program structure_functions_example
          &         order,factscheme_MSbar)
 
   ! Setup all constants and parameters needed by the structure functions
-  call StartStrFct(nloop_coefs, scale_choice = sc_choice, param_coefs&
-       & = .true.)
+  call StartStrFct(nloop_coefs, nflav = 5, scale_choice = sc_choice, param_coefs&
+       & = param_coefs)
 
   ! Evolve the PDF
   asQ = 0.35_dp
