@@ -305,6 +305,7 @@ endif()
 if (HOPPET_BUILD_EXAMPLES)
   set( f90programs_f90 
                    structure_functions_example  
+                   structure_functions_example_exact  
                    structure_functions_example_flavour  
                    tabulation_example_2                  
                    tabulation_example      
@@ -393,15 +394,21 @@ if (HOPPET_BUILD_EXAMPLES)
       tabulation_example 
       tabulation_example_n3lo 
       tabulation_example_qed 
-      structure_functions_example 
+      structure_functions_example
       structure_functions_example_flavour
       tabulation_example_qed_streamlined
       #tabulation_example_up_and_down 
-    )
+      )
+    if(HOPPET_USE_EXACT_COEF)
+      list(APPEND execs structure_functions_example_exact )
+    endif()
     foreach (ex ${execs})
       set(testName ${ex})
       if (ex MATCHES "tabulation_example_n3lo")
         set(testName "${testName}_takes_up_to_30s")
+      endif()
+      if (ex MATCHES "structure_functions_example_exact")
+        set(testName "${testName}_takes_up_to_90s")
       endif()
       add_test(NAME ${testName} COMMAND 
          sh -c "${CMAKE_SOURCE_DIR}/scripts/check example_f90/${ex}")

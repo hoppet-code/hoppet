@@ -40,7 +40,7 @@ program structure_functions_example
 
   ! Setup all constants and parameters needed by the structure functions
   call StartStrFct(nloop_coefs, scale_choice = sc_choice, param_coefs&
-       & = .true.)
+       & = .false.)
 
   ! Evolve the PDF
   asQ = 0.35_dp
