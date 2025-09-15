@@ -447,7 +447,7 @@ contains
         Q = Qvals(iQ)
         do iy = 1, n
           y = yvals(iy)
-          call EvalPdfTable_yQ_order2(table,y,Q,pdf_all)
+          call EvalPdfTable_yQ_order22(table,y,Q,pdf_all)
           pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
         end do
       end do
@@ -464,7 +464,7 @@ contains
         Q = Qvals(iQ)
         do iy = 1, n
           y = yvals(iy)
-          call EvalPdfTable_yQ_order3(table,y,Q,pdf_all)
+          call EvalPdfTable_yQ_order33(table,y,Q,pdf_all)
           pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
         end do
       end do
@@ -481,7 +481,7 @@ contains
         Q = Qvals(iQ)
         do iy = 1, n
           y = yvals(iy)
-          call EvalPdfTable_yQ_order4(table,y,Q,pdf_all)
+          call EvalPdfTable_yQ_order44(table,y,Q,pdf_all)
           pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
         end do
       end do
@@ -519,7 +519,7 @@ contains
         Q = Qvals(iQ)
         do iy = 1, n
           y = yvals(iy)
-          pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf_order2(table,y,Q,0)
+          pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf_order22(table,y,Q,0)
           !call EvalPdfTable_yQ(table,y,Q,pdf_all)
           !pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
         end do

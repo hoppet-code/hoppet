@@ -178,14 +178,14 @@ contains
           !  EvalPdfTable_yQ_order => EvalPdfTable_yQ_order1
           !  EvalPdfTable_yQf_order => EvalPdfTable_yQf_order1
           case (2)
-            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order2
-            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order2
+            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order22
+            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order22
           case (3)
-            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order3
-            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order3
+            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order33
+            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order33
           case (4)
-            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order4
-            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order4
+            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order44
+            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order44
           case Default
             call fail("Unsupported order "//trim(to_string(orders(iord)))//" in test_tab_eval")
             cycle

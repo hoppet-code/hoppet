@@ -9,6 +9,14 @@
 	also tried to add some basic timing macros and tried them out
 	on fill_interp_weights6
 
+	* benchmarking/prec_and_timing.f90:
+	* src/inc/pdf_tabulate.inc:
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	* src/pdf_tabulate.F90:
+	reworked things so that the NNNN routines are now numbered orderYQ
+	where Y is the y-order and Q is the lnlnQ order, e.g. order33
+	if both are 3. This is preparation for being able to handle
+	cases where the orders are different.
 
 2025-09-15  Alexander + Gavin
 

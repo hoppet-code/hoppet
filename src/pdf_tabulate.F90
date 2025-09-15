@@ -153,13 +153,13 @@ module pdf_tabulate
   public :: PdfTableOverrideInterpOrders
 
 
-  public :: EvalPdfTable_yQf_order2
-  public :: EvalPdfTable_yQf_order3
-  public :: EvalPdfTable_yQf_order4
+  public :: EvalPdfTable_yQf_order22
+  public :: EvalPdfTable_yQf_order33
+  public :: EvalPdfTable_yQf_order44
 
-  public :: EvalPdfTable_yQ_order2
-  public :: EvalPdfTable_yQ_order3
-  public :: EvalPdfTable_yQ_order4
+  public :: EvalPdfTable_yQ_order22
+  public :: EvalPdfTable_yQ_order33
+  public :: EvalPdfTable_yQ_order44
   public :: EvalPdfTable_yQ_any_order
 
   abstract interface
@@ -223,14 +223,14 @@ contains
       
     ! 
     if      (override_order_Q == 2 .and. override_order_y == 2) then
-      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order2
-      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order2
+      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order22
+      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order22
     else if (override_order_Q == 3 .and. override_order_y == 3) then
-      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order3
-      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order3
+      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order33
+      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order33
     else if (override_order_Q == 4 .and. override_order_y == 4) then
-      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order4
-      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order4
+      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order44
+      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order44
     else
       EvalPdfTable_yQ_ptr  => null()
       EvalPdfTable_yQf_ptr => null()
