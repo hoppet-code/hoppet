@@ -8,7 +8,7 @@
 	parametrised coefficient functions into a separate directory as
 	well.
 
-	2025-09-13 Sat  <gavin.salam@physics.ox.ac.uk>
+2025-09-13 Sat  <gavin.salam@physics.ox.ac.uk>
 
 	* src/inc/pdf_tabulate.inc: *** ADDED ***
 	* src/inc/pdf_tabulate_OrderNNN.F90:
