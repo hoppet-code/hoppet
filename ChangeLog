@@ -1,8 +1,19 @@
+2025-09-15  Alexander + Gavin
+
+	* CMakeLists.txt:
+	added better diagnostics if CMake finds traces of a Makefile build
+
+	* cmake/git_watcher.cmake:
+	* src/config/hoppet_git_state.f90.in:
+	added new GIT_F90_STATUS_UNO variable that is split into lines
+	to reduce the chance of going over 132 characters. Note that
+	long filenames could still cause problems
+
 2025-09-15  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/splitting-functions/: *** ADDED ***
-	* src/mass-thresholds/: *** ADDED ***
-	* src/no-exact-coefs/:
+	* src/mass-thresholds/:     *** ADDED ***
+	* src/param-coefs/:         *** ADDED ***
 	Created new directories to contain all the external codes that we
 	use for splitting functions and mass thresholds. Moved the
 	parametrised coefficient functions into a separate directory as

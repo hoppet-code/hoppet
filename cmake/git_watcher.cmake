@@ -109,6 +109,7 @@ set(_state_variable_names
     GIT_HEAD_SHA1
     GIT_IS_DIRTY
     GIT_STATUS_UNO
+    GIT_F90_STATUS_UNO
     GIT_AUTHOR_NAME
     GIT_AUTHOR_EMAIL
     GIT_COMMIT_DATE_ISO8601
@@ -147,7 +148,6 @@ macro(RunGitCommand)
 endmacro()
 
 
-
 # Function: GetGitState
 # Description: gets the current state of the git repo.
 # Args:
@@ -161,13 +161,17 @@ function(GetGitState _working_dir)
     # Get whether or not the working tree is dirty (ignore files not added)
     RunGitCommand(status --porcelain -uno)
     if(NOT exit_code EQUAL 0)
-        set(ENV{GIT_STATUS_UNO} "")
+        set(ENV{GIT_STATUS_UNO} "[error]")
         set(ENV{GIT_IS_DIRTY} "false")
     else()
         if(NOT "${output}" STREQUAL "")
             string(REGEX REPLACE "[\r\n]" ";" outputproc ${output})
             set(ENV{GIT_STATUS_UNO} "${outputproc}")
             set(ENV{GIT_IS_DIRTY} "true")
+            # create an variable GIT_F90_STATUS_UNO which is equal to
+            # GIT_STATUS_UNO, with every space replaced by `"///&\n"`
+            string(REPLACE ";" ";\"//&\n     \"" outputproc "${outputproc}")
+            set(ENV{GIT_F90_STATUS_UNO} "${outputproc}")
         else()
             set(ENV{GIT_IS_DIRTY} "false")
         endif()
