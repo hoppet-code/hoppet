@@ -1,18 +1,19 @@
 !! Module containing dummy PDFs that are widely used for benchmarking
 !! and other tests. Used notably as part of hep-ph/0511119 and 
 !! follow-up work.
-module dummy_pdfs
+module pdfs_for_benchmarks
   use types; use consts_dp; use pdf_representation
   implicit none
   private
 
-  public :: unpolarized_dummy_pdf, lha_unpolarized_dummy_pdf
+  public :: benchmark_pdf_unpolarized, benchmark_pdf_unpolarized_lha
   
 contains
   !======================================================================
   !! The dummy PDF suggested by Vogt as the initial condition for the 
-  !! unpolarized evolution
-  pure subroutine lha_unpolarized_dummy_pdf(x, Q, xpdf)
+  !! unpolarized evolution, subsequently adopted in a wide range of
+  !! of benchmarks
+  pure subroutine benchmark_pdf_unpolarized_lha(x, Q, xpdf)
     real(dp), intent(in)  :: x,Q
     real(dp), intent(out) :: xpdf(-6:6)
     real(dp) :: uv, dv
@@ -41,12 +42,12 @@ contains
     xpdf(-iflv_u) = ubar
     xpdf(iflv_d) = dv + dbar
     xpdf(-iflv_d) = dbar
-  end subroutine lha_unpolarized_dummy_pdf
+  end subroutine benchmark_pdf_unpolarized_lha
   
 
   !----------------------------------------------------------------------
   ! the same dummy PDF, in a slightly different interface
-  function unpolarized_dummy_pdf(xvals) result(pdf)
+  function benchmark_pdf_unpolarized(xvals) result(pdf)
     real(dp), intent(in) :: xvals(:)
     real(dp)             :: pdf(size(xvals),ncompmin:ncompmax)
     !---------------------
@@ -58,8 +59,8 @@ contains
     dummy_Q = 10.0_dp
 
     do iy = 1, size(xvals)
-       call lha_unpolarized_dummy_pdf(xvals(iy), dummy_Q, pdf(iy, iflv_min:iflv_max))
+       call benchmark_pdf_unpolarized_lha(xvals(iy), dummy_Q, pdf(iy, iflv_min:iflv_max))
     end do
-  end function unpolarized_dummy_pdf
+  end function benchmark_pdf_unpolarized
 
-end module dummy_pdfs
+end module pdfs_for_benchmarks

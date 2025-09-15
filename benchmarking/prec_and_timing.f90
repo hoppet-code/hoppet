@@ -40,9 +40,9 @@
 ! ./benchmarking/prec_and_timing  -nloop 3 -dy 0.05 -lhapdf-out ~/LHAPDF/dummy/dummy -o ~/LHAPDF/dummy/hoppet.log
 !
 program prec_and_timing
-   use hoppet
+  use hoppet
   use hoppet_git_state
-  use dummy_pdfs
+  use pdfs_for_benchmarks
   use sub_defs_io
   use NameSelect
 
@@ -158,7 +158,7 @@ program prec_and_timing
   !call AllocInitPDFSub(grid,vogt_init,VogtInitSub)
   ! alternative way to get the initial distribution
   call AllocPDF(grid,initial_condition)
-  initial_condition = unpolarized_dummy_pdf(xValues(grid))
+  initial_condition = benchmark_pdf_unpolarized(xValues(grid))
 
   ! set up the coupling
   Qinit = sqrt(two)

@@ -2,7 +2,7 @@
 !!
 program structure_functions_example
   use hoppet
-  use dummy_pdfs
+  use pdfs_for_benchmarks
   use streamlined_interface
   use structure_functions
   implicit none
@@ -113,9 +113,7 @@ contains
     
     call write_time()
     write(6,'(a)') "Doing evolution to fill PDF table"
-    call hoppetEvolve(asQ, Q0, nloop_evolv, xmur_evolv, lha_unpolarized_dummy_pdf, Q0)
-    
-    ! Initialise the structure functions using separate orders 
+    call hoppetEvolve(asQ, Q0, nloop_evolv, xmur_evolv, benchmark_pdf_unpolarized_lha, Q0)
     ! NB: this uses the PDFs that were set up in the streamlined interface
     ! with the hoppetEvolve routine
     call write_time()

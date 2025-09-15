@@ -9,6 +9,11 @@
 	to reduce the chance of going over 132 characters. Note that
 	long filenames could still cause problems
 
+	* src/dummy_pdfs.f90 -> src/pdfs_for_benchmarks.f90:
+	* [a range of examples and tests]:
+	renamed dummy_pdfs and functions inside to better reflect its purpose
+	and updated a range of examples and tests accordingly.
+
 2025-09-15  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/splitting-functions/: *** ADDED ***

@@ -3,7 +3,7 @@ module hoppet_unit_tests_setup
 contains
   subroutine hoppet_setup()
     use streamlined_interface
-    use dummy_pdfs
+    use pdfs_for_benchmarks
 
     real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
     real(dp) :: asQ, Q0alphas, Q0pdf
@@ -35,7 +35,7 @@ contains
     Q0alphas = sqrt(2.0_dp)
     muR_Q = 1.0_dp
     Q0pdf = sqrt(2.0_dp) ! The initial evolution scale
-    call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, lha_unpolarized_dummy_pdf, Q0pdf)
+    call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, benchmark_pdf_unpolarized_lha, Q0pdf)
   end subroutine hoppet_setup
 
 end module hoppet_unit_tests_setup

@@ -2,7 +2,7 @@
 !!
 program structure_functions_example
   use hoppet
-  use dummy_pdfs
+  use pdfs_for_benchmarks
   use streamlined_interface
   use structure_functions
   implicit none
@@ -47,9 +47,9 @@ program structure_functions_example
   Q0 = sqrt(2.0_dp)
   muR_Q = 1.0_dp
 
-  call hoppetEvolve(asQ, Q0, nloop,muR_Q, lha_unpolarized_dummy_pdf, Q0)
-  
-  ! Initialise the structure functions using separate orders 
+  call hoppetEvolve(asQ, Q0, nloop,muR_Q, benchmark_pdf_unpolarized_lha, Q0)
+
+  ! Initialise the structure functions using separate orders
   ! NB: this uses the PDFs that were set up in the streamlined interface
   ! with the hoppetEvolve routine
   call InitStrFct(nloop_coefs, .true., xR = xmur, xF = xmuf)
