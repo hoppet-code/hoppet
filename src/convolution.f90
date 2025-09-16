@@ -36,6 +36,8 @@ module convolution
   ! minimum and maximum number of points for interpolation
   integer, parameter :: npnt_min = 4, npnt_max = 10
   integer, parameter, public :: WeightGridQuand_npnt_max = npnt_max
+  integer, parameter, public :: grid_interp_npnt_min = npnt_min !< better-qualified public name
+  integer, parameter, public :: grid_interp_npnt_max = npnt_max !< better-qualified public name
 
   !-------------------------------
   !! Definition of a grid.
@@ -1214,7 +1216,6 @@ contains
     real(dp), intent(in) :: y
     real(dp) :: f(size(gq,dim=2))
     !-----------------------------------------
-    integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: i, j, ny, npnt, isub
     !real(dp) :: ey, df
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)

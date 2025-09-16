@@ -50,8 +50,8 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
   real(dp),        intent(out)        :: y_wgts(0:__HOPPET_InterpOrderY__), lnlnQ_wgts(0:__HOPPET_InterpOrderQ__)
   integer,         intent(out)        :: iylo, ilnlnQ
   !----------------------------------------
-  integer, parameter :: NNY = __HOPPET_InterpOrder__, halfNNY=(NNY)/2 !halfNNY=(NNY-1)/2
-  integer, parameter :: NNQ = __HOPPET_InterpOrder__, halfNNQ=(NNQ)/2 !halfNNQ=(NNQ-1)/2
+  integer, parameter :: NNY = __HOPPET_InterpOrderY__, halfNNY=(NNY)/2 !halfNNY=(NNY-1)/2
+  integer, parameter :: NNQ = __HOPPET_InterpOrderQ__, halfNNQ=(NNQ)/2 !halfNNQ=(NNQ-1)/2
   real(dp) :: lnlnQ
   type(grid_def),   pointer :: grid, subgd
   type(pdfseginfo), pointer :: seginfo

@@ -6,6 +6,15 @@
 	* benchmarking/prec_and_timing.f90:
 	now only calls overide if both -olnlnQ and -yinterp-order have values >0
 
+	* src/convolution.f90:
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	* src/interpolation.f90:
+	* src/pdf_tabulate.F90:
+	* unit-tests/hoppet-unit-tests.F90:
+	got support for different y & Q orders, and pdf_tables 
+	now automatically use the faster hard-coded routines if these are 
+	available (pointer to the routine is cached on table creation)
+
 2025-09-15  Gavin
 
 	* src/interpolation.f90:

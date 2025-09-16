@@ -130,7 +130,7 @@ contains
       call fill_interp_weights6(xvals(ix), weights2)
       weights_sum = weights_sum + weights2
     end do
-  TIME_END(weights_sum)
+  TIME_END(weights_sum(0))
 
   end subroutine test_interpolation_coeffs
 
@@ -169,33 +169,30 @@ contains
       real(dp) :: xpdf_ord(iflv_min:tables(0)%tab_iflv_max)
       procedure(EvalPdfTable_yQ_interface ), pointer :: EvalPdfTable_yQ_order
       procedure(EvalPdfTable_yQf_interface), pointer :: EvalPdfTable_yQf_order
-      integer, parameter :: orders(*) = [2,3,4]
-      integer            :: iord
+      integer, parameter :: orders(*) = [22,33,44,54,64]
+      integer            :: iord, order_y, order_Q
 
       do iord = 1, size(orders)
-        select case (orders(iord))
-          !case (1)
-          !  EvalPdfTable_yQ_order => EvalPdfTable_yQ_order1
-          !  EvalPdfTable_yQf_order => EvalPdfTable_yQf_order1
-          case (2)
-            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order22
-            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order22
-          case (3)
-            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order33
-            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order33
-          case (4)
-            EvalPdfTable_yQ_order => EvalPdfTable_yQ_order44
-            EvalPdfTable_yQf_order => EvalPdfTable_yQf_order44
-          case Default
-            call fail("Unsupported order "//trim(to_string(orders(iord)))//" in test_tab_eval")
-            cycle
-        end select
-        call PdfTableOverrideInterpOrders(orders(iord), orders(iord))
+        order_y = orders(iord)/10
+        order_Q = mod(orders(iord),10)
+        call PdfTableSetInterpPointers(order_y, order_Q, EvalPdfTable_yQ_order, EvalPdfTable_yQf_order)
+        if (.not. associated(EvalPdfTable_yQ_order) .or. .not.associated(EvalPdfTable_yQf_order)) then
+          call fail("Unsupported order "//trim(to_string(orders(iord)))//" in test_tab_eval")
+          cycle
+        end if
+
+        ! this makes sure that the call below to the any_order routine takes into account
+        ! the override
+        call PdfTableOverrideInterpOrders(order_y, order_Q)
+
         do ix = 1, size(xvals)
           x = xvals(ix)
           do iQ = 1, size(Qvals)
             Q = Qvals(iQ)
-            call EvalPdfTable_yQ(tables(0), -log(x), Q, xpdf)
+            ! call the "any_order" routine to make sure we don't have the automatic
+            ! bypass to one of the hard-coded routines
+            call EvalPdfTable_yQ_any_order(tables(0), -log(x), Q, xpdf)
+            ! then call our own pointer to a hard-coded routine
             call EvalPdfTable_yQ_order(tables(0), -log(x), Q, xpdf_ord)
             call check_approx_eq("EvalPdfTable_yQ, order="//trim(to_string(orders(iord)))//&
                                  ", x="//trim(to_string(x))//", Q="//trim(to_string(Q)), &

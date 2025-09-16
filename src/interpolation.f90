@@ -231,8 +231,9 @@ contains
   end subroutine fill_interp_weights6
 
 
-!  ! this variant seems to be about 2.5ns slower than the hard-coded one
-!  ! above
+  ! On M2Pro-gfortran15-O3 this variant seems to be about 3ns slower
+  ! than the hard-coded one above, cf. the timing code 
+  ! in hoppet_unit_tests::test_interpolation_coeffs
 !  pure subroutine fill_interp_weights6(x, weights)
 !    integer,  parameter   :: N=6
 !    real(dp), intent(in)  :: x

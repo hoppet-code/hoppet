@@ -84,6 +84,11 @@ module pdf_tabulate
     ! affects the range used for interpolation rather than for
     ! allocation of the table itself)
     integer :: tab_iflv_max = iflv_max
+
+    ! pointers to evaluation routines; the abstract interfaces
+    ! are defined below
+    procedure(EvalPdfTable_yQ_interface ), pointer, nopass :: EvalPdfTable_yQ_ptr  => null()
+    procedure(EvalPdfTable_yQf_interface), pointer, nopass :: EvalPdfTable_yQf_ptr => null()
   end type pdf_table
   public :: pdf_table
 
@@ -91,7 +96,7 @@ module pdf_tabulate
   integer :: override_npnt_y = -1
   integer :: override_order_y = -1
   integer :: override_order_Q = -1
-  integer :: override_order_both = -1
+  logical :: override_on = .false.
   
 
   !-- for calculating ln ln Q/lambda_eff
@@ -126,6 +131,8 @@ module pdf_tabulate
   interface AddNfInfoToPdfTable
     module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
   end interface
+
+  public :: PdfTableSetInterpPointers
 
   interface FillPdfTable_f90sub
     module procedure pdftab_InitTabSub_, pdftab_InitTabSub_iset
@@ -191,51 +198,6 @@ module pdf_tabulate
   public :: EvalPdfTable_yQ_interface, EvalPdfTable_yQf_interface
 
 contains
-
-  !! Override all tables' default interpolation orders (which are
-  !! normally set by the grid and the olnlnQ in the table constructor)
-  !!
-  !! If an order is negative, it is ignored and any table's default is
-  !! used.
-  !!
-  !! Specific settings give significant speed improvements. Currently:
-  !! (2,2), (3,3) and (4,4), because these correspond to cases where
-  !! there are specific routines with hard-coded orders
-  subroutine PdfTableOverrideInterpOrders(new_order_y, new_order_Q)
-    integer, intent(in) :: new_order_y, new_order_Q
-
-    if (new_order_y <= 0) then
-      override_order_y = -1
-      override_npnt_y  = -1
-    else
-      override_order_y = new_order_y
-      override_npnt_y  = new_order_y + 1
-    end if
-
-    override_order_Q = new_order_Q
-    if (override_order_Q <= 0) override_order_Q = -1
-
-    if (override_order_y > 0 .and. override_order_Q > 0) then
-      override_order_both = 10*override_order_y + override_order_Q
-    else
-      override_order_both = -1
-    end if
-      
-    ! 
-    if      (override_order_Q == 2 .and. override_order_y == 2) then
-      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order22
-      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order22
-    else if (override_order_Q == 3 .and. override_order_y == 3) then
-      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order33
-      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order33
-    else if (override_order_Q == 4 .and. override_order_y == 4) then
-      EvalPdfTable_yQ_ptr  => EvalPdfTable_yQ_order44
-      EvalPdfTable_yQf_ptr => EvalPdfTable_yQf_order44
-    else
-      EvalPdfTable_yQ_ptr  => null()
-      EvalPdfTable_yQf_ptr => null()
-    end if
-  end subroutine PdfTableOverrideInterpOrders
 
   !---------------------------------------------------------
   !! Allocate a pdf_table, which covers a range Qmin to Qmax, using
@@ -322,6 +284,8 @@ contains
     tab%seginfo_no_nf%inv_dlnlnQ = 1.0_dp / tab%dlnlnQ
     tab%seginfo_no_nf%ilnlnQ_lo = 0
     tab%seginfo_no_nf%ilnlnQ_hi = tab%nQ
+
+    call pdftab_SetupEvalPtrs(tab)
 
     ! label this tab as allocated
     tab%allocated = .true.
@@ -524,11 +488,38 @@ contains
         tab%as2pi(iQ) = Value(coupling,invlnln(tab,tab%lnlnQ_vals(iQ)))/twopi
       end do
     end do
-    
+
+    call pdftab_SetupEvalPtrs(tab)
+
     ! REMEMBER TO COMPLETE FROM ORIG...
     tab%nf_info_associated = .true.
   end subroutine AddNfInfoToPdfTable
 
+  !---------------------------------------------------------------
+  subroutine pdftab_SetupEvalPtrs(tab)
+    type(pdf_table), intent(inout) :: tab
+    integer :: grid_order, npnt_y, order_y
+
+    if (associated(tab%grid%subgd)) then
+      grid_order = tab%grid%subgd(1)%order
+      if (any(tab%grid%subgd(:)%order /= grid_order)) then
+        ! different per-grid orders not yet supported, so set the
+        ! orders to -1, which sets the pointers to null
+        call PdfTableSetInterpPointers(-1,-1, &
+                                   tab%EvalPdfTable_yQ_ptr, tab%EvalPdfTable_yQf_ptr)
+      end if
+    else
+      grid_order = tab%grid%order
+    end if
+
+    ! convolution.f90's default is to set the interpolation order to abs(grid%order)-1
+    ! with limits on the range; so table-specific interpolation, we adopt the 
+    ! same defaults here
+    npnt_y = min(grid_interp_npnt_max, max(grid_interp_npnt_min, abs(grid_order)))
+    order_y = npnt_y - 1
+    call PdfTableSetInterpPointers(order_y, tab%lnlnQ_order, &
+                                   tab%EvalPdfTable_yQ_ptr, tab%EvalPdfTable_yQf_ptr)
+  end subroutine pdftab_SetupEvalPtrs
 
   !---------------------------------------------------------------
   !! 1d-overloaded verseion of AddNfInfoToPdfTable
@@ -902,6 +893,71 @@ contains
     deallocate(dist)
   end subroutine EvolvePdfTableQED
 
+  !--------------------------------------------------------------------
+  !! Override all tables' default interpolation orders (which are
+  !! normally set by the grid and the olnlnQ in the table constructor)
+  !!
+  !! Either both orders should be >0 or both negative (negative means
+  !! use the table's defaults)
+  !!
+  !! Specific settings give significant speed improvements. Currently:
+  !! (2,2), (3,3) and (4,4), because these correspond to cases where
+  !! there are specific routines with hard-coded orders
+  subroutine PdfTableOverrideInterpOrders(new_order_y, new_order_Q)
+    integer, intent(in) :: new_order_y, new_order_Q
+
+    if (new_order_y * new_order_Q <= 0) call wae_error("PdfTableOverrideInterpOrders: both orders must be >0 or <0")
+
+    if (new_order_y <= 0) then
+      override_order_y = -1
+      override_npnt_y  = -1
+    else
+      override_order_y = new_order_y
+      override_npnt_y  = new_order_y + 1
+    end if
+
+    override_order_Q = new_order_Q
+    if (override_order_Q <= 0) override_order_Q = -1
+
+    ! it's enough for one to be >0 for override to be turned on
+    override_on = (override_order_y > 0 .or. override_order_Q > 0)
+
+    ! this will only set pointers if there is a hard-coded routine for
+    ! the override; if either of the overrides <=0, then no pointers
+    ! are set, consistent with override_on being .false.
+    call PdfTableSetInterpPointers(override_order_y, override_order_Q, &
+                                   EvalPdfTable_yQ_ptr, EvalPdfTable_yQf_ptr)
+  end subroutine PdfTableOverrideInterpOrders
+
+  !--------------------------------------------------------------------
+  !! Set up the pointers if we have a hard-coded routine for this specific
+  !! order_y and order_Q, otherwise set them to null.
+  subroutine PdfTableSetInterpPointers(order_y, order_Q, yQ_ptr, yQf_ptr)
+    integer, intent(in) :: order_y, order_Q
+    procedure(EvalPdfTable_yQ_interface ), pointer, intent(out) :: yQ_ptr
+    procedure(EvalPdfTable_yQf_interface), pointer, intent(out) :: yQf_ptr
+
+    if      (order_y == 2 .and. order_Q == 2) then
+      yQ_ptr  => EvalPdfTable_yQ_order22
+      yQf_ptr => EvalPdfTable_yQf_order22
+    else if (order_y == 3 .and. order_Q == 3) then
+      yQ_ptr  => EvalPdfTable_yQ_order33
+      yQf_ptr => EvalPdfTable_yQf_order33
+    else if (order_y == 4 .and. order_Q == 4) then
+      yQ_ptr  => EvalPdfTable_yQ_order44
+      yQf_ptr => EvalPdfTable_yQf_order44
+    else if (order_y == 5 .and. order_Q == 4) then
+      yQ_ptr  => EvalPdfTable_yQ_order54
+      yQf_ptr => EvalPdfTable_yQf_order54
+    else if (order_y == 6 .and. order_Q == 4) then
+      yQ_ptr  => EvalPdfTable_yQ_order64
+      yQf_ptr => EvalPdfTable_yQf_order64
+    else
+      yQ_ptr  => null()
+      yQf_ptr => null()
+    end if
+  end subroutine PdfTableSetInterpPointers
+
   
   !--------------------------------------------------------------------
   !! Sets the vector val(iflv_min:) for the PDF at this
@@ -922,30 +978,20 @@ contains
     real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
     real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
     integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv, iflv_max_table, npnt_y
-    integer, save :: warn_id = warn_id_INIT    
+    integer, save :: warn_id = 4!warn_id_INIT    
 
     if (ubound(val,dim=1) < tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
          &'upper bound of val is too low', intval=ubound(val,dim=1))
 
     if (associated(EvalPdfTable_yQ_ptr)) then
-       call EvalPdfTable_yQ_ptr(tab,y,Q,val)
-       return
+      call EvalPdfTable_yQ_ptr(tab,y,Q,val)
+    else if (associated(tab%EvalPdfTable_yQ_ptr) .and. (.not. override_on)) then
+      call tab%EvalPdfTable_yQ_ptr(tab,y,Q,val)
+    else
+      call wae_warn(warn_id, "EvalPdfTable_yQ: y & Q interpolation orders not available hard-coded, reverting to slower routine")
+      call EvalPdfTable_yQ_any_order(tab,y,Q,val)      
     end if
-
-    call EvalPdfTable_yQ_any_order(tab,y,Q,val)
-
-    !select case (override_order_both)
-    !case (22)
-    !   call EvalPdfTable_yQ_order2(tab,y,Q,val)
-    !   return
-    !case (33)
-    !   call EvalPdfTable_yQ_order3(tab,y,Q,val)
-    !   return
-    !case (44)
-    !   call EvalPdfTable_yQ_order4(tab,y,Q,val)
-    !   return
-    !end select
-
+    
   end subroutine EvalPdfTable_yQ
 
   !! subsidiary routine that handles arbitrary interpolation orders.
@@ -1057,8 +1103,8 @@ contains
    real(dp) :: lnlnQ_wgts(0:max_lnlnQ_order)
    real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, npnt_y
-   integer, save :: warn_id = warn_id_INIT
-   real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
+   integer, save :: warn_id = 5
+   real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)    
 
    if (iflv > tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
         &'iflv is too high', intval=iflv)
@@ -1068,8 +1114,12 @@ contains
    if (associated(EvalPdfTable_yQf_ptr)) then
      val = EvalPdfTable_yQf_ptr(tab,y,Q,iflv)
      return
+   else if (associated(tab%EvalPdfTable_yQf_ptr) .and. (.not. override_on)) then
+     val = tab%EvalPdfTable_yQf_ptr(tab,y,Q,iflv)
+     return
    end if
 
+   call wae_warn(warn_id, "EvalPdfTable_yQf: y & Q interpolation orders not available hard-coded, reverting to slower routine")
 
    !-- y weights taken care of elsewhere....
    call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y, override_npnt_y)
@@ -1246,16 +1296,20 @@ contains
   ! with the order hard-coded to NNNN
 #define __HOPPET_InterpOrder__ 2
 #include "inc/pdf_tabulate_OrderNNN.F90"
-#undef __HOPPET_InterpOrder__
 
 #define __HOPPET_InterpOrder__ 3
 #include "inc/pdf_tabulate_OrderNNN.F90"
-#undef __HOPPET_InterpOrder__
 
 #define __HOPPET_InterpOrder__ 4
 #include "inc/pdf_tabulate_OrderNNN.F90"
-#undef __HOPPET_InterpOrder__
 
+#define __HOPPET_InterpOrderY__ 5
+#define __HOPPET_InterpOrderQ__ 4
+#include "inc/pdf_tabulate_OrderNNN.F90"
+
+#define __HOPPET_InterpOrderY__ 6
+#define __HOPPET_InterpOrderQ__ 4
+#include "inc/pdf_tabulate_OrderNNN.F90"
 
   !--------------------------------------------------------------------
   !! Sets the pdf(0:iflv_min:) for the PDF at this value of Q.
