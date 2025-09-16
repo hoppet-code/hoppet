@@ -3,6 +3,9 @@
 	* CMakeLists.txt:
 	added -ffree-line-length-none option for gfortran, to allow longer lines	
 
+	* benchmarking/prec_and_timing.f90:
+	now only calls overide if both -olnlnQ and -yinterp-order have values >0
+
 2025-09-15  Gavin
 
 	* src/interpolation.f90:

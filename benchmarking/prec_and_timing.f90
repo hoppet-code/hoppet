@@ -178,8 +178,9 @@ program prec_and_timing
   call cpu_time(time_ev_done)
 
   !call PDFTableSetYInterpOrder(y_interp_order)
-  call PdfTableOverrideInterpOrders(y_interp_order,olnlnQ)
-
+  if (y_interp_order > 0 .and. olnlnQ >0) then
+    call PdfTableOverrideInterpOrders(y_interp_order,olnlnQ)
+  end if
 
   ! record info about the cpu
   !call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
