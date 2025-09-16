@@ -2,10 +2,9 @@
 
 # HOPPET: Higher Order Perturbative Parton Evolution Toolkit
 
-
 HOPPET is a Fortran package for carrying out DGLAP evolution and other
-common manipulations of parton distribution functions (PDFs). It
-also includes C++ and Python interfaces to may of the key features.
+common manipulations of parton distribution functions (PDFs). It also
+includes C++ and Python interfaces to many of the key features.
 
 Within HOPPET, PDFs are represented on a grid in x-space so as to
 avoid limitations on the functional form of input
@@ -18,7 +17,7 @@ Key features include:
 
 * unpolarized evolution in the MSbar scheme to N3LO including heavy-quark thresholds
 * QED evolution
-* structure function evaluation up to N3LO
+* massless structure function evaluation up to N3LO
 * polarized evolution up to NLO
 * simple access (in Fortran 90) to the objects representing splitting
   function and PDFs, making it possible for a user to extend the
@@ -50,8 +49,9 @@ series without any difficulties.
 ## Note on Fortran compilers
 
 HOPPET requires support for Fortran 2008. It is developed and tested
-with recent versions of the gfortran compiler on Linux and Mac, and also
-also gets tested with the Intel (ifx) compiler, as part of the CI.
+with recent versions of the gfortran compiler (v12 and later) on Linux
+and Mac, and also also gets tested with the Intel (ifx) compiler, as
+part of the CI.
 
 # Build with `CMake`
 
@@ -109,9 +109,9 @@ There are examples for basic QCD evolution in
 Other features illustrated in the examples include
 
 - accessing convolutions with splitting functions ([Fortran](example_f77/convolution_example.f))
-- QCD+QED evolution ([Fortran](example_f90/tabulation_example_qed_streamlined.f90), [C++](example_cpp/tabulation_example_qed.cc), [Python](example_py/tabulation_example_qed.py))
-- massless structure functions ([Fortran](example_f90/structure_functions_example.f90), [C++](example_cpp/structure_functions_example.cc), [Python](example_py/structure_function_example.py))
-- comparisons with LHAPDF ([Fortran](example_f77/compare_lhapdf_hoppet.f))
+- QCD+QED evolution ([Fortran90](example_f90/tabulation_example_qed_streamlined.f90), [C++](example_cpp/tabulation_example_qed.cc), [Python](example_py/tabulation_example_qed.py))
+- massless structure functions ([Fortran90](example_f90/structure_functions_example.f90), [C++](example_cpp/structure_functions_example.cc), [Python](example_py/structure_function_example.py))
+- comparisons with LHAPDF ([Fortran](example_f77/compare_lhapdf_hoppet.f), [Fortran90](example_f90/with-lhapdf/fast_pdf_evaluation.f90), [C++](example_cpp/with-lhapdf/fast_pdf_evaluation.cc), [Python](example_py/tabulation_example_lhapdf.py))
 
 
 ## Full interface  
