@@ -16,7 +16,7 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_a
                                     Q0_just_above_mc = False, 
                                     exact_nnlo_nf = False, exact_nnlo_splitting = False, 
                                     n3lo_splitting = '2410', FFN = -1, assign = False,
-                                    yorder=-1, lnlnQorder=4):
+                                    yorder=6, lnlnQorder=4):
     # Load the PDF from LHAPDF
     p_lhapdf = lhapdf.mkPDF(lhapdfname, 0)
 
@@ -107,7 +107,7 @@ def main():
     parser.add_argument('-pdf', required=True, help='LHAPDF set name (required, ex. NNPDF30_nnlo_as_0118)')
     parser.add_argument('-dy', type=float, default=0.05, help='dy for HOPPET evolution (default: 0.05)')
     parser.add_argument('-Q0', type=float, default=1.0, help='Initial Q0 value (default: Qmin from LHAPDF)')
-    parser.add_argument('-yorder', type=int, default=-1, help='order for interpolation in y=ln1/x (default of -1 uses same as evolution)')
+    parser.add_argument('-yorder', type=int, default=6, help='order for interpolation in y=ln1/x (default of -1 uses same as evolution)')
     parser.add_argument('-lnlnQorder', type=int, default=4, help='order for interpolation in lnlnQ (default=4)')
 
     args = parser.parse_args()
