@@ -65,6 +65,7 @@ endif()
 
 # Flags for compilers ==============================================
 # GNU
+#add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-fstack-arrays>") # stack allocation of arrays seems to have no impact
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-ffree-line-length-none>") # allow lines>132 characters (as in recent std)
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wall>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wextra;-Wno-unused-parameter;-Wno-unused-variable>")
