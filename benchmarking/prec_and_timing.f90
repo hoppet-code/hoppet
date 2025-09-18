@@ -53,7 +53,7 @@ program prec_and_timing
   type(running_coupling) :: coupling
   real(dp), allocatable  :: yvals(:), Qvals(:)
   integer            :: order, order1, order2, nloop, i, j, nrep, nrep_orig, nxQ,olnlnQ
-  integer            :: nrep_eval, n_alphas, ny, nQ
+  integer            :: nrep_eval, n_alphas, ny, nQ, nrep_interp
   integer            :: hires
   real(dp)           :: dy, Qinit, Qmin, Qmax, du, dlnlnQ
   real(dp)           :: ymax, pdfval(-6:6)
@@ -133,6 +133,7 @@ program prec_and_timing
   nrep  = int_val_opt('-nrep',1)
   auto_nrep = log_val_opt('-auto-nrep',.false.)
   nrep_eval = int_val_opt('-nrep-eval',10)
+  nrep_interp = int_val_opt('-nrep-interp',1000)
   nxQ = int_val_opt('-nxQ',0)
   output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
   outputgrid  = log_val_opt('-outputgrid')
@@ -211,8 +212,8 @@ program prec_and_timing
 
   ! Here we compute a list of y and Q values to use when interpolating
   ! the grid. We use ceiling(sqrt(nrep)) points in each direction.
-  ny = nint(sqrt(four*nxQ))
-  nQ = nint(sqrt(0.25_dp*nxQ))-1
+  ny = nint(sqrt(four*nrep_interp))
+  nQ = nint(sqrt(0.25_dp*nrep_interp))-1
   if (ny > 0) then
     ALLOCATE(yvals(ny))
     do i = 1, ny
@@ -245,20 +246,20 @@ program prec_and_timing
      call eval_output_lines()
   end if
 
-  write(6,'(a,4f16.11," s, nrep=",i7, ", nxQ=", i7)') "Timings (init, preevln, evln, interp) = ", &
+  write(6,'(a,4f16.11," s, nrep=",i7, ", nrep_interp=", i7)') "Timings (init, preevln, evln, interp) = ", &
        &   time_init_done-time_start, &
        &   time_prev_done-time_init_done, &
        &   (time_ev_done-time_prev_done)/nrep, &
-       &   (time_end - time_interp_start)/ny/nQ, nrep , nxQ
-  if (output) write(idev,'(a,4f16.11," s, nrep=",i7, ", nxQ=", i7)') "# Init Timings (init, preevln, evln, interp) = ", &
+       &   (time_end - time_interp_start)/ny/nQ, nrep , nrep_interp
+  if (output) write(idev,'(a,4f16.11," s, nrep=",i7, ", nrep_interp=", i7)') "# Init Timings (init, preevln, evln, interp) = ", &
        &   time_init_done-time_start, &
        &   time_prev_done-time_init_done, &
        &   (time_ev_done-time_prev_done)/nrep,  &
-       &   (time_end - time_interp_start)/ny/nQ, nrep, nxQ
+       &   (time_end - time_interp_start)/ny/nQ, nrep, nrep_interp
   write(idev,'(a,f10.5," s")') "# Initialisation time = ", time_init_done-time_start
   write(idev,'(a,f10.5," s")') "# Pre-evolution time = ", time_prev_done-time_init_done
   write(idev,'(a,f10.5," s, nrep = ",i7)') "# Evolution time = ", (time_ev_done-time_prev_done)/nrep, nrep
-  write(idev,'(a,f10.5," ns, nxQ =", i7)') "# Interpolation time = ", (time_end - time_interp_start)/ny/nQ*1d9, nxQ
+  write(idev,'(a,f10.5," ns, nrep_interp =", i7)') "# Interpolation time = ", (time_end - time_interp_start)/ny/nQ*1d9, nrep_interp
 
   !call get_evaluation_times()
   call get_evaluation_times_new()

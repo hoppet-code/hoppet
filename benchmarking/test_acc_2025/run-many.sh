@@ -43,7 +43,7 @@ echo "======================"
 accdir=$(dirname "$0")
 #build_dir=$(dirname "$0")/../../build
 compare="$build_dir/benchmarking/compare2files_v2"
-common="$build_dir/benchmarking/prec_and_timing -outputgrid -nxQ 10000 -auto-nrep -nrep-eval 100 -nloop $nloop"
+common="$build_dir/benchmarking/prec_and_timing -outputgrid -nxQ 5000 -auto-nrep -nrep-eval 100 -nrep-interp 100000 -nloop $nloop"
 
 # a shortcut for running comamnd and checking output
 # Usage: `runthis outname command args`

@@ -100,7 +100,7 @@ def main(pdf,nloop):
     run_stats_oQ2_oY2   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ2-oY2-dy*.dat')
     run_stats_oQ3_oY3   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ3-oY3-dy*.dat')
     run_stats_oQ4_oY4   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY4-dy*.dat')
-    run_stats_oQ4_oY5   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY5-dy*.dat')
+    #run_stats_oQ4_oY5   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY5-dy*.dat')
     run_stats_oQ4_oY6   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY6-dy*.dat')
 
     fig,(ax1,ax2) = plt.subplots(nrows=2,sharex=True)
