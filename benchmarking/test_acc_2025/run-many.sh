@@ -43,7 +43,7 @@ echo "======================"
 accdir=$(dirname "$0")
 #build_dir=$(dirname "$0")/../../build
 compare="$build_dir/benchmarking/compare2files_v2"
-common="$build_dir/benchmarking/prec_and_timing -outputgrid -nxQ 50000 -auto-nrep -nrep-eval 100 -nloop $nloop"
+common="$build_dir/benchmarking/prec_and_timing -outputgrid -nxQ 10000 -auto-nrep -nrep-eval 100 -nloop $nloop"
 
 # a shortcut for running comamnd and checking output
 # Usage: `runthis outname command args`
@@ -99,18 +99,16 @@ do
   #$compare $fname $fname_ref -channel 11 -protect > $fname.acc.ch11 2>&1
 
   if [ x"$checkinterp" = x"yes" ]; then
-    #for olnlnQ in 2 3 4
-    for olnlnQ in 2 3 4 5 6
+    for pair in "2 2" "3 3" "4 4" "4 6"
     do
-      for oy in 2 3 4 5 6
-      #for oy in $olnlnQ
-      do
-        echo -n " oQ$olnlnQ-oY$oy"
-        fname=$outdir/nloop$nloop-preev-oQ$olnlnQ-oY$oy-dy$dy.dat
-        runthis $fname $common -dy $dy -preev -olnlnQ $olnlnQ -yinterp-order $oy
-        $compare $fname $fname_ref -summary -protect > $fname.acc.smry 2>&1
-        #$compare $fname $fname_ref -channel 11 -protect > $fname.acc.ch11 2>&1
-      done
+      set -- $pair
+      olnlnQ=$1
+      oy=$2
+      echo -n " oQ$olnlnQ-oY$oy"
+      fname=$outdir/nloop$nloop-preev-oQ$olnlnQ-oY$oy-dy$dy.dat
+      runthis $fname $common -dy $dy -preev -olnlnQ $olnlnQ -yinterp-order $oy
+      $compare $fname $fname_ref -summary -protect > $fname.acc.smry 2>&1
+      #$compare $fname $fname_ref -channel 11 -protect > $fname.acc.ch11 2>&1
     done
   fi
   echo    
