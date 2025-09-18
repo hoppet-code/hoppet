@@ -29,7 +29,7 @@ plt.rc('axes', prop_cycle=colors)
 mpl.rcParams.update({"axes.grid" : True, "grid.linestyle": ":"})
 plt.rc('figure', figsize=(5,5))
 
-dirM2pro="../../../2025-prec-and-timing/M2Pro"
+dirM2pro="../../../../2025-prec-and-timing/M2Pro-gfortran15.1-O3-2025-09-18"
 nloop_names = {1: "LO", 2: "NLO", 3: "NNLO", 4: "N3LO"}
 
 def main(pdf,nloop):
@@ -60,7 +60,7 @@ def main(pdf,nloop):
     ax1.tick_params(axis='both', which='both', left=True, right=True, direction='in')
     ax2.tick_params(axis='both', which='both', left=True, right=True, direction='in')
 
-    ax2.text(0.95,0.95,"M2Pro, gfortran 14.2 (-O3)", va='top',ha='right', transform=ax2.transAxes)
+    ax2.text(0.95,0.95,"M2Pro, gfortran 15.1 (-O3)", va='top',ha='right', transform=ax2.transAxes)
 
 
     xticks_major = ax2.get_xticks().tolist()
@@ -100,7 +100,7 @@ def main(pdf,nloop):
     run_stats_oQ2_oY2   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ2-oY2-dy*.dat')
     run_stats_oQ3_oY3   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ3-oY3-dy*.dat')
     run_stats_oQ4_oY4   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY4-dy*.dat')
-    #run_stats_oQ4_oY5   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY5-dy*.dat')
+    run_stats_oQ4_oY5   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-dy*.dat')
     run_stats_oQ4_oY6   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY6-dy*.dat')
 
     fig,(ax1,ax2) = plt.subplots(nrows=2,sharex=True)
@@ -112,14 +112,14 @@ def main(pdf,nloop):
     ax1.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.acc_allf_xlt07[mask], label='oQ=2, oY=2', **styles[0], ls="-")
     ax1.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.acc_allf_xlt07[mask], label='oQ=3, oY=3', **styles[1], ls="-")
     ax1.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.acc_allf_xlt07[mask], label='oQ=4, oY=4', **styles[2], ls="-")
-    #ax1.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.acc_allf_xlt07[mask], label='oQ=4, oY=5', **styles[3], ls="-")
-    ax1.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.acc_allf_xlt07[mask], label='oQ=4, oY=6', **styles[4], ls="-")
+    ax1.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.acc_allf_xlt07[mask], label='oQ=4, oY=5', **styles[3], ls="-")
+    #ax1.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.acc_allf_xlt07[mask], label='oQ=4, oY=6', **styles[4], ls="-")
 
     ax2.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.t_interp_ns[mask], **styles[0], label='')
     ax2.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.t_interp_ns[mask], **styles[1], label='')
     ax2.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.t_interp_ns[mask], **styles[2], label='')
-    #ax2.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.t_interp_ns[mask], **styles[3], label='')
-    ax2.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.t_interp_ns[mask], **styles[4], label='')
+    ax2.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.t_interp_ns[mask], **styles[3], label='')
+    #ax2.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.t_interp_ns[mask], **styles[4], label='')
 
     ax1.set_ylabel("accuracy")
     ax2.set_ylabel("time [ns]")
@@ -130,7 +130,7 @@ def main(pdf,nloop):
     ax1.tick_params(axis='both', which='both', left=True, right=True, direction='in')
     ax2.tick_params(axis='both', which='both', left=True, right=True, direction='in')
 
-    ax2.text(0.95,0.95,"M2Pro, gfortran 14.2 (-O3)", va='top',ha='right', transform=ax2.transAxes)
+    ax2.text(0.95,0.95,"M2Pro, gfortran 15.1 (-O3)", va='top',ha='right', transform=ax2.transAxes)
 
 
     xticks_major = ax2.get_xticks().tolist()
