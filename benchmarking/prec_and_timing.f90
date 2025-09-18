@@ -50,13 +50,14 @@ program prec_and_timing
   !-------------------------------
   type(grid_def)     :: grid, gridarray(4)
   type(dglap_holder) :: dh
-  type(running_coupling)    :: coupling
-  integer            :: order, order1, order2, nloop, i, nrep, nrep_orig, nxQ,olnlnQ
-  integer            :: nrep_eval, n_alphas
+  type(running_coupling) :: coupling
+  real(dp), allocatable  :: yvals(:), Qvals(:)
+  integer            :: order, order1, order2, nloop, i, j, nrep, nrep_orig, nxQ,olnlnQ
+  integer            :: nrep_eval, n_alphas, ny, nQ
   integer            :: hires
   real(dp)           :: dy, Qinit, Qmin, Qmax, du, dlnlnQ
-  real(dp)           :: ymax
-  real(dp)           :: time_start, time_init_done, time_ev_done, time_end
+  real(dp)           :: ymax, pdfval(-6:6)
+  real(dp)           :: time_start, time_init_done, time_prev_done, time_ev_done, time_interp_start, time_end
   real(dp), pointer  :: initial_condition(:,:)
   type(pdf_table)    :: table
   logical            :: output, outputgrid, output_benchmark, preev, auto_nrep
@@ -147,7 +148,6 @@ program prec_and_timing
   write(idev,'(a)') "# host: "//trim(hostname)
   call hoppet_print_git_state(idev,prefix="#")
 
-
   call cpu_time(time_start)
   call InitDglapHolder(grid, dh, factscheme=factscheme_MSbar, &
        &                              nloop=nloop, nflo=3, nfhi=6)
@@ -175,7 +175,7 @@ program prec_and_timing
   call AllocPdfTable(grid,table,Qmin,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
   call AddNfInfoToPdfTable(table,coupling)
   if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
-  call cpu_time(time_ev_done)
+  call cpu_time(time_prev_done)
 
   !call PDFTableSetYInterpOrder(y_interp_order)
   if (y_interp_order > 0 .and. olnlnQ >0) then
@@ -193,12 +193,12 @@ program prec_and_timing
         call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
      end if     
   end do
-  call cpu_time(time_end)
+  call cpu_time(time_ev_done)
 
   ! auto-timing refinement of nrep
-  if (auto_nrep .and. time_end-time_ev_done < 0.05_dp) then
+  if (auto_nrep .and. time_ev_done-time_prev_done < 0.05_dp) then
      nrep_orig = nrep
-     nrep = 0.1_dp / ((time_end-time_ev_done)/nrep_orig)
+     nrep = 0.1_dp / ((time_ev_done-time_prev_done)/nrep_orig)
      do i = nrep_orig+1, nrep
         if (preev) then
            call EvolvePdfTable(table,initial_condition)
@@ -206,9 +206,33 @@ program prec_and_timing
            call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
         end if     
      end do
-     call cpu_time(time_end)
+     call cpu_time(time_ev_done)
   end if
 
+  ! Here we compute a list of y and Q values to use when interpolating
+  ! the grid. We use ceiling(sqrt(nrep)) points in each direction.
+  ny = nint(sqrt(four*nxQ))
+  nQ = nint(sqrt(0.25_dp*nxQ))-1
+  if (ny > 0) then
+    ALLOCATE(yvals(ny))
+    do i = 1, ny
+       yvals(i) = i*ymax/ny
+    end do
+  end if 
+  if (nQ > 0) then
+    ALLOCATE(Qvals(nQ))
+    do i = 1, nQ
+       Qvals(i) = Qinit + i*(Qmax-Qinit)/nQ
+    end do
+  end if
+
+  call cpu_time(time_interp_start)
+  do i = 1, ny
+     do j = 1, nQ
+        call EvalPdfTable_yQ(table,yvals(i),Qvals(j),pdfval)
+     end do
+  end do
+  call cpu_time(time_end)
 
   if (output_benchmark) then
     call write_benchmark_output()
@@ -221,17 +245,20 @@ program prec_and_timing
      call eval_output_lines()
   end if
 
-  write(6,'(a,3f10.5," s, nrep=",i7)') "Timings (init, preevln, evln) = ", &
+  write(6,'(a,4f16.11," s, nrep=",i7, ", nxQ=", i7)') "Timings (init, preevln, evln, interp) = ", &
        &   time_init_done-time_start, &
-       &   time_ev_done-time_init_done, &
-       &   (time_end-time_ev_done)/nrep, nrep
-  if (output) write(idev,'(a,3f10.5," s, nrep=",i7)') "# Init Timings (init, preevln, evln) = ", &
+       &   time_prev_done-time_init_done, &
+       &   (time_ev_done-time_prev_done)/nrep, &
+       &   (time_end - time_interp_start)/ny/nQ, nrep , nxQ
+  if (output) write(idev,'(a,4f16.11," s, nrep=",i7, ", nxQ=", i7)') "# Init Timings (init, preevln, evln, interp) = ", &
        &   time_init_done-time_start, &
-       &   time_ev_done-time_init_done, &
-       &   (time_end-time_ev_done)/nrep, nrep
+       &   time_prev_done-time_init_done, &
+       &   (time_ev_done-time_prev_done)/nrep,  &
+       &   (time_end - time_interp_start)/ny/nQ, nrep, nxQ
   write(idev,'(a,f10.5," s")') "# Initialisation time = ", time_init_done-time_start
-  write(idev,'(a,f10.5," s")') "# Pre-evolution time = ", time_ev_done-time_init_done
-  write(idev,'(a,f10.5," s, nrep = ",i7)') "# Evolution time = ", (time_end-time_ev_done)/nrep, nrep
+  write(idev,'(a,f10.5," s")') "# Pre-evolution time = ", time_prev_done-time_init_done
+  write(idev,'(a,f10.5," s, nrep = ",i7)') "# Evolution time = ", (time_ev_done-time_prev_done)/nrep, nrep
+  write(idev,'(a,f10.5," ns, nxQ =", i7)') "# Interpolation time = ", (time_end - time_interp_start)/ny/nQ*1d9, nxQ
 
   !call get_evaluation_times()
   call get_evaluation_times_new()

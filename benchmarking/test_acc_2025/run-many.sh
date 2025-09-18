@@ -17,10 +17,10 @@ if [ "$#" -ne 2 ]; then
 fi
 build_dir=$1
 outdir=$2
-nloop=4
-checkinterp=no
-#nloop=3
-#checkinterp=yes
+#nloop=4
+#checkinterp=no
+nloop=3
+checkinterp=yes
 
 
 # Set color variables only if output is a terminal
@@ -43,7 +43,7 @@ echo "======================"
 accdir=$(dirname "$0")
 #build_dir=$(dirname "$0")/../../build
 compare="$build_dir/benchmarking/compare2files_v2"
-common="$build_dir/benchmarking/prec_and_timing -outputgrid -nxQ 5000 -auto-nrep -nrep-eval 100 -nloop $nloop"
+common="$build_dir/benchmarking/prec_and_timing -outputgrid -nxQ 50000 -auto-nrep -nrep-eval 100 -nloop $nloop"
 
 # a shortcut for running comamnd and checking output
 # Usage: `runthis outname command args`
@@ -100,9 +100,9 @@ do
 
   if [ x"$checkinterp" = x"yes" ]; then
     #for olnlnQ in 2 3 4
-    for olnlnQ in 2 3
+    for olnlnQ in 2 3 4 5 6
     do
-      for oy in 2 3
+      for oy in 2 3 4 5 6
       #for oy in $olnlnQ
       do
         echo -n " oQ$olnlnQ-oY$oy"
