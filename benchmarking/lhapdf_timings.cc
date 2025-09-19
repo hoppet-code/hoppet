@@ -26,7 +26,7 @@ double y_of_zeta(double zeta, double a) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
+    if (argc < 3) {
         std::cerr << "Usage: ./lhapdf_timings PDFsetName outputdir\n";
         return 1;
     }
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     std::string outputdir = argv[2];
 
     // Output file
-    std::ofstream fout(outputdir + "/" + pdfname + ".dat");
+    std::ofstream fout(outputdir + "/" + pdfname + ".lhapdf.dat");
     fout << std::setprecision(10) << std::scientific;
 
     // Grid parameters (set to match Fortran defaults, or parse from command line)
@@ -80,21 +80,22 @@ int main(int argc, char* argv[]) {
     }
 
     // Interpolation timing
-    int ny = static_cast<int>(std::round(std::sqrt(4.0 * nxQ)));
-    int nQ_interp = static_cast<int>(std::round(std::sqrt(0.25 * nxQ))) - 1;
-    int nrep_interp = 100000; // or your desired value
+    int nrep_interp = 1000000; // or your desired value
+    int ny = static_cast<int>(std::round(std::sqrt(4.0 * nrep_interp)));
+    int nQ_interp = static_cast<int>(std::round(std::sqrt(0.25 * nrep_interp))) - 1;
 
-    std::vector<double> yvals(ny), Qvals(nQ_interp);
-    for (int i = 0; i < ny; ++i)
+    std::vector<double> yvals(ny), xvals(ny), Qvals(nQ_interp);
+    for (int i = 0; i < ny; ++i) {
         yvals[i] = (i + 1) * ymax / ny;
+        xvals[i] = std::exp(-yvals[i]);
+    }
     for (int i = 0; i < nQ_interp; ++i)
         Qvals[i] = Qinit + (i + 1) * (Qmax - Qinit) / nQ_interp;
 
     auto time_interp_start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < ny; ++i) {
         for (int j = 0; j < nQ_interp; ++j) {
-            double x = std::exp(-yvals[i]);
-            pdf->xfxQ(x, Qvals[j], pdfval);
+            pdf->xfxQ(xvals[i], Qvals[j], pdfval);
         }
     }
     auto time_end = std::chrono::high_resolution_clock::now();

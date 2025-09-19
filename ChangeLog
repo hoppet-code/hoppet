@@ -1,3 +1,18 @@
+2025-09-19 Alexander + Gavin
+
+	* CMakeLists.txt:
+	* benchmarking/lhapdf_timings.cc:  *** ADDED ***
+	* benchmarking/run-many-lhapdf.sh: *** ADDED ***
+	* benchmarking/run-and-process-lhapdf-grids.sh: *** ADDED ***
+	code used to benchmark LHAPDF interpolation accuracy and
+	timings
+
+	* benchmarking/prec_and_timing.f90:
+	added an alternative test of interpolation timings, using
+	a single run over a dense x,Q grid, where density is controlled
+	with the `-nrep-interp N` option (gives a total of N points).
+	This is similar to the test used in lhapdf_timings.cc.
+
 2025-09-16  Gavin + Alexander
 
 	* CMakeLists.txt:

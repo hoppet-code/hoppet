@@ -367,7 +367,7 @@ if (HOPPET_BUILD_EXAMPLES)
   endif()
 
   # and finally the C++ examples
-  set( cppprograms structure_functions_example  tabulation_example_qed tabulation_example)
+  set( cppprograms structure_functions_example tabulation_example_qed tabulation_example)
   foreach ( p ${cppprograms})
     add_executable( ${p}_cpp example_cpp/${p}.cc)
     target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static)
@@ -378,7 +378,7 @@ if (HOPPET_BUILD_EXAMPLES)
      )
   endforeach()
   if (LHAPDF_FOUND)
-    set(cppprograms_lhapdf fast_pdf_evaluation lhapdf_timings)
+    set(cppprograms_lhapdf fast_pdf_evaluation)
     foreach ( p ${cppprograms_lhapdf})
       add_executable( ${p}_cpp example_cpp/with-lhapdf/${p}.cc)
       target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
@@ -433,7 +433,9 @@ if (HOPPET_BUILD_BENCHMARK)
     #target_link_libraries(${b} PUBLIC LHAPDF::LHAPDF)
     set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/${b}_modules
+      # each target gets its modules built separately, even though some 
+      # could in principle be shared (which would require a different CMake setup)
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/modules/${b}_modules
       POSITION_INDEPENDENT_CODE TRUE
      )
   endforeach()
@@ -457,6 +459,19 @@ if (HOPPET_BUILD_BENCHMARK)
          sh -c "${CMAKE_SOURCE_DIR}/scripts/check ${test}")
     endforeach()
   endif()
+
+  if (LHAPDF_FOUND)
+    set(lhapdf_cpp_bms lhapdf_timings)
+    foreach ( p ${lhapdf_cpp_bms})
+      add_executable( ${p}_cpp benchmarking/${p}.cc)
+      target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
+      set_target_properties(${p}_cpp PROPERTIES  OUTPUT_NAME ${p}
+                            RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking
+                            POSITION_INDEPENDENT_CODE TRUE
+      )
+    endforeach()
+  endif()  
+
 
 endif()
 

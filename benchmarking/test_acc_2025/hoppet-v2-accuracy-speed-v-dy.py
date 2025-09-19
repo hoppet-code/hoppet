@@ -30,6 +30,7 @@ mpl.rcParams.update({"axes.grid" : True, "grid.linestyle": ":"})
 plt.rc('figure', figsize=(5,5))
 
 dirM2pro="../../../../2025-prec-and-timing/M2Pro-gfortran15.1-O3-2025-09-18"
+dirM2proLHAPDF="../../../../2025-prec-and-timing/M2Pro-gfortran15.1-O3-2025-09-18-LHAPDF"
 nloop_names = {1: "LO", 2: "NLO", 3: "NNLO", 4: "N3LO"}
 
 def main(pdf,nloop):
@@ -103,6 +104,9 @@ def main(pdf,nloop):
     run_stats_oQ4_oY5   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-dy*.dat')
     run_stats_oQ4_oY6   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY6-dy*.dat')
 
+    run_stats_LHAPDF    = RunStats(f'{dirM2proLHAPDF}/nloop{nloop}-preev-dy*.lhapdf.dat')
+
+
     fig,(ax1,ax2) = plt.subplots(nrows=2,sharex=True)
     fig.subplots_adjust(hspace=0.04)
     ax2.set_xlabel(r'dy')
@@ -113,12 +117,16 @@ def main(pdf,nloop):
     ax1.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.acc_allf_xlt07[mask], label='oQ=3, oY=3', **styles[1], ls="-")
     ax1.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.acc_allf_xlt07[mask], label='oQ=4, oY=4', **styles[2], ls="-")
     ax1.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.acc_allf_xlt07[mask], label='oQ=4, oY=5', **styles[3], ls="-")
+    ax1.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .acc_allf_xlt07[mask], label='LHAPDF', **styles[4], ls="-")
     #ax1.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.acc_allf_xlt07[mask], label='oQ=4, oY=6', **styles[4], ls="-")
+
+    print(h.reformat(run_stats_LHAPDF .dy[mask],run_stats_LHAPDF .acc_allf_xlt07[mask] ))
 
     ax2.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.t_interp_ns[mask], **styles[0], label='')
     ax2.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.t_interp_ns[mask], **styles[1], label='')
     ax2.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.t_interp_ns[mask], **styles[2], label='')
     ax2.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.t_interp_ns[mask], **styles[3], label='')
+    ax2.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .t_interp_ns[mask], **styles[4], label='LHAPDF')
     #ax2.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.t_interp_ns[mask], **styles[4], label='')
 
     ax1.set_ylabel("accuracy")
