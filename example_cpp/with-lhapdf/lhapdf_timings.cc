@@ -27,14 +27,15 @@ double y_of_zeta(double zeta, double a) {
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: ./lhapdf_timings PDFsetName [member]\n";
+        std::cerr << "Usage: ./lhapdf_timings PDFsetName outputdir\n";
         return 1;
     }
     std::string pdfname = argv[1];
-    int member = (argc > 2) ? std::stoi(argv[2]) : 0;
+    int member = 0;
+    std::string outputdir = argv[2];
 
     // Output file
-    std::ofstream fout(pdfname + ".dat");
+    std::ofstream fout(outputdir + "/" + pdfname + ".dat");
     fout << std::setprecision(10) << std::scientific;
 
     // Grid parameters (set to match Fortran defaults, or parse from command line)
