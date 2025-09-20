@@ -1,28 +1,14 @@
-The Python interface can be compiled with CMake
+## Hoppet Python Interface
+To install the interface run
 
 ```
-mkdir build; cd build
-cmake ..
-make [-j]
+pip install hoppet
 ```
-It is compiled by the main CMake file by default.
 
+The interface can be loaded using
 
-Alternatively, to generate the swig interface run
+```
+import hoppet
+```
 
-`swig -python  -c++ -I../src hoppet.i`
-
-And then the python module is generated with
-
-`python setup.py sdist build_ext --inplace`
-
-To install the package locally run
-
-`pip install dist/hoppet-2.0.0.tar.gz`
-
-The hoppet interface can be loaded in python through
-
-`import hoppet`
-
-For examples of how to use the interface, take a look at 
-[../example_py](../example_py)
+For a few minimal examples of how to use the interface, have a look at [https://github.com/hoppet-code/hoppet/tree/master/example_py](https://github.com/hoppet-code/hoppet/tree/master/example_py)
