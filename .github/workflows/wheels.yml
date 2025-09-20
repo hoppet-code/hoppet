@@ -2,7 +2,7 @@ name: Build Python Wheels
 
 on:
   push:
-    branches: [main]
+    branches: [2025-09-python-wheels]
   pull_request:
   workflow_dispatch:
 
