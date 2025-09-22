@@ -72,7 +72,8 @@ jobs:
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DHOPPET_USE_EXACT_COEF=ON \
-            -DBUILD_PYTHON_BINDINGS=ON \
+            -DHOPPET_BUILD_PYWHEELS=ON \
+            -DHOPPET_BUILD_PYINTERFACE=OFF \
             -DHOPPET_BUILD_BENCHMARK=OFF \
             -DHOPPET_BUILD_EXAMPLES=OFF \
             -DHOPPET_ENABLE_TESTING=OFF \
@@ -97,7 +98,8 @@ jobs:
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DHOPPET_USE_EXACT_COEF=ON \
-            -DBUILD_PYTHON_BINDINGS=ON \
+            -DHOPPET_BUILD_PYWHEELS=ON \
+            -DHOPPET_BUILD_PYINTERFACE=OFF \
             -DHOPPET_BUILD_BENCHMARK=OFF \
             -DHOPPET_BUILD_EXAMPLES=OFF \
             -DHOPPET_ENABLE_TESTING=OFF \
@@ -180,7 +182,7 @@ jobs:
       with:
         repository-url: https://test.pypi.org/legacy/
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        skip-existing: true
+        #skip-existing: true
 
 #jobs:
 #  build_linux_wheels:
