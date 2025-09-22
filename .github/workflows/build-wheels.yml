@@ -29,7 +29,7 @@ jobs:
 
     - name: Build wheel
       run: |
-        pip install scikit-build-core swig
+        pip install build scikit-build-core swig
         CMAKE_BUILD_PARALLEL_LEVEL=4 python -m build
 
     - name: Test import
