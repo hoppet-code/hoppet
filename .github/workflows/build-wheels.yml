@@ -1,44 +1,41 @@
-name: Test Build
+name: Test Python Wheels
 
 on:
   push:
-    branches: [ 2025-09-python-wheels-new ]
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
-  test_build:
-    name: Test build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]  # Start with just Linux
-        python-version: ['3.10']  # Test with one Python version first
-
+  simple_test:
+    name: Simple Python Test
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install system dependencies
-      if: runner.os == 'Linux'
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential gfortran swig cmake
-
-    - name: Build wheel
+        yum -y install gcc gcc-c++ gcc-gfortran cmake swig
+        yum -y install lhapdf lhapdf-devel
+        yum -y install python3-devel python3-pip
+    
+    - name: Build and test Python bindings
       run: |
-        pip install build scikit-build-core swig
-        CMAKE_BUILD_PARALLEL_LEVEL=4 python -m build
-
-    - name: Test import
-      run: |
-        pip install dist/*.whl
-        python -c "import hoppet; print('Success!')"
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: wheels-test
-        path: dist/
+        # Build the main library first
+        cmake -S . -B BUILD -DBUILD_PYTHON_BINDINGS=ON
+        cmake --build BUILD -j
+        
+        # Test the Python example
+        python3 example_py/tabulation_example.py
+        
+        # Build Python wheel
+        python3 -m pip install build scikit-build-core
+        python3 -m build
+        
+        # Test wheel installation
+        python3 -m pip install dist/*.whl
+        python3 -c "import hoppet; print('Success!')"
