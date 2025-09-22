@@ -443,7 +443,7 @@ print MAKEFILE "PROG =\t$ARGV[0]\n\n";
 # want files containing program to not be included in list
 if (@extra_dirs) {print MAKEFILE "VPATH = ".join(":",@extra_dirs)."\n";}
 push @extra_dirs, "";
-foreach (@extra_dirs) {push @ffiles,<$_*.f $_*.f90 $_*.F>}
+foreach (@extra_dirs) {push @ffiles,<$_*.f $_*.f90 $_*.F $_*.F90>}
 foreach (@extra_dirs) {push @cinclude,<$_*.h $_*.hh>}
 
 
@@ -641,6 +641,23 @@ if ($make eq 'gmake') {
 else {
   print MAKEFILE ".f90.o:\n";
   print MAKEFILE "\t\$(F90) \$(F90FLAGS) -c \$<\n\n";}
+
+# Make .f90 a valid suffix
+#
+print MAKEFILE ".SUFFIXES: \$(SUFFIXES) .F90\n\n";
+#
+# .F90 -> .o
+#
+# this does not seem to work on linux:
+#print MAKEFILE ".F90.o:\n";
+# so change to
+if ($make eq 'gmake') {
+  print MAKEFILE "%.o: %.F90 \n";
+  print MAKEFILE "\t\$(F90) \$(F90FLAGS) -c \$<\n\n";}
+else {
+  print MAKEFILE ".F90.o:\n";
+  print MAKEFILE "\t\$(F90) \$(F90FLAGS) -c \$<\n\n";}
+
 
 #
 # Dependency listings

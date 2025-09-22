@@ -394,13 +394,19 @@ contains
     !write(0,'(f15.10,i,f15.12)') t, nseg, res ! HOPPER TESTING
   end function na_Value
 
+  !! Faster evaluation of alpha_s, with fewer options; reverts
+  !! to na_Value for some edge cases and also doesn't have the 
+  !! fixnf option
   function na_Value_faster(nah, Q) result(res)
+    use interpolation_coeffs; use interpolation
     type(na_handle), intent(in), target :: nah
     real(dp),        intent(in)         :: Q
     real(dp) :: res
     !---------------
     real(dp) :: t, tnorm, tdarr(0:4), itd, prod
-    real(dp), parameter :: coeffs(0:4) = [1.0/24.0_dp, -1.0/6.0_dp, 1.0/4.0_dp, -1.0/6.0_dp, 1.0/24.0_dp]
+    ! on M2Pro-gfortran15-O3 there's a small (~2%, 0.2ns out of 10ns) speed advantage
+    ! in having the interpolation coefficients hard-coded here
+    real(dp), parameter :: coeffs(0:4) = [one/24.0_dp, -one/6.0_dp, one/4.0_dp, -one/6.0_dp, one/24.0_dp]
     integer  :: iseg, it, i
     type(na_segment), pointer :: this_seg
     
@@ -439,10 +445,12 @@ contains
     end if
 
     itd = it
+    ! This route gives a total timing of 10.0-10.2 ns on M2Pro-gfortran15-O3
     tdarr = (tnorm - itd) - [0.0_dp, 1.0_dp, 2.0_dp, 3.0_dp, 4.0_dp]
-    ! this route involves a division, but on M2Pro-gfortran15-O3 save 0.2-0.3ns
+    !!! this route involves a division, but on M2Pro-gfortran15-O3 save 0.2-0.3ns
     prod = product(tdarr)
     res = prod * sum((coeffs * this_seg%ra(it:it+4)) / tdarr)
+
     ! this route skips divisions but on M2Pro-gfortran15-O3 costs an extra 0.2-0.3ns
     !block
     !  real(dp) :: prodsl(0:4), prodsr(0:4)
@@ -454,6 +462,13 @@ contains
     !  end do
     !  res = sum(prodsl * prodsr * this_seg%ra(it:it+4) * coeffs)
     !end block 
+
+    !! alt1: 12.2-12.4 ns
+    !call fill_interp_weights4(tnorm-itd, tdarr)
+    !! alt2: 14.7-15.0 ns
+    !call uniform_interpolation_weights(tnorm-itd, tdarr)
+    !res = sum(tdarr * this_seg%ra(it:it+4))
+
     res = one / res
   end function na_Value_faster
 

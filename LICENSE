@@ -6,17 +6,20 @@ publication(s) but also the original literature on which the program is
 based, insofar as relevant (e.g. splitting functions, threshold matching
 functions, coefficient functions, etc.)
 
-HOPPET includes some 3rd party code, which the respective authors have
-allowed us to distribute with HOPPET under the same GPLv3 terms:
+HOPPET includes some 3rd party code, which is either publicly released
+under GPLv3, or which the respective authors have allowed us to
+distribute with HOPPET under the same GPLv3 terms:
 
-- the src/hplog.f and (hep-ph/0107173) by Gehrmann and Remiddi the
+- the src/hplog.f and (hep-ph/0107173) by Gehrmann and Remiddi, and the
   weight 5 extension, src/exact-coefs/hplog5.f by Gehrmann.
 
 - code for the NNLO splitting functions and NNLO/N3LO coefficient
-  functions by Moch, Vermaseren and Vogt.
+  functions by Moch, Vermaseren and Vogt, see
+  https://github.com/svenolafmoch/Conformal-EIC
 
 - code for the N3LO splitting functions by Davies, Falcioni, Herzog,
-  Moch, Pelloni, Ruijl, Ueda, Vermaseren and Vogt.  
+  Moch, Pelloni, Ruijl, Ueda, Vermaseren and Vogt, see
+  https://github.com/svenolafmoch/Conformal-EIC
 
 - code for the N3LO mass thresholds by J. Blümlein and K. Schönwald
   DESY 24-037.
@@ -24,6 +27,9 @@ allowed us to distribute with HOPPET under the same GPLv3 terms:
 It also contains 
 
 - git_watcher.cmake by Andrew Hardin (MIT License)
+
+- the ftlMacros.inc file from the Fortran Template Library,
+  by Robert Rüger (GPLv3 or later)
 
 --------------------------------------------------------------------------
 

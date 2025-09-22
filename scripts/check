@@ -73,11 +73,19 @@ for test in ${tests[@]}; do
   echo '*****************************************************************'
   echo 
   echo "Running from $(pwd)"
-  checkname=$(echo $test | sed 's|/|_|g')
-  ($test | tee ${checkname}.tmp.new-pregrep) || exit 1;
+  refname=$(echo "$test" | sed -e 's/:/_/g')
+  checkname=$(echo "$test" | sed -e 's|/|_|g' -e 's/:/_/g')
+  testcmd=$(echo "$test" | sed -e 's/:/ /g')
+  extraargs=""  
+  if [[ "$testcmd" == benchmarking/prec_and_timing* ]]; then
+    extraargs="-o /dev/null -output-benchmark"
+    refname=$(echo "$refname" | sed -e 's|prec_and_timing|prec_and_timing.default_output/prec_and_timing|g')
+  fi
+  echo "Running: ($testcmd $extraargs)"
+  ($testcmd $extraargs | tee ${checkname}.tmp.new-pregrep) || exit 1;
   
   grep -vi -e '^ *[a-z]' -e '^ *$' ${checkname}.tmp.new-pregrep > ${checkname}.tmp.new
-  grep -vi -e '^ *[a-z]' -e '^ *$' $sourcedir/$test.default_output > ${checkname}.tmp.orig  
+  grep -vi -e '^ *[a-z]' -e '^ *$' $sourcedir/$refname.default_output > ${checkname}.tmp.orig  
 
   diff ${checkname}.tmp.new ${checkname}.tmp.orig > ${checkname}.tmp.diff
   checkwc=`cat ${checkname}.tmp.diff| wc -l `

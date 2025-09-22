@@ -4,8 +4,8 @@
 !!
 
 program structure_functions_benchmark_checks
-     use hoppet
-  use dummy_pdfs
+  use hoppet
+  use pdfs_for_benchmarks
   use streamlined_interface
   use structure_functions
   use sub_defs_io !< for command-line access
@@ -65,7 +65,7 @@ program structure_functions_benchmark_checks
   Q0alphas = sqrt(2.0_dp)
   muR_Q = 1.0_dp
   Q0pdf = sqrt(2.0_dp) ! The initial evolution scale
-  call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, lha_unpolarized_dummy_pdf, Q0pdf)
+  call hoppetEvolve(asQ, Q0alphas, nloop,muR_Q, benchmark_pdf_unpolarized_lha, Q0pdf)
 
   write(6,'(a)') "Quick output of alphas and PDFs, e.g. to enable consistency checks with other codes"
   Q = 100.0_dp

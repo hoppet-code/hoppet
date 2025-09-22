@@ -2,8 +2,8 @@
 
 
 !======================================================================
-! Module exlcusively for communication between convolution and 
-! any routine which might supply convolutions
+!! Module exclusively for communication between convolution and 
+!! any routine which might supply convolutions
 !======================================================================
 module convolution_communicator
   use types
@@ -18,7 +18,7 @@ end module convolution_communicator
 
 
 !======================================================================
-! All the base types and routines for happy convolution
+!! All the base types and routines for convolution in y=log(1/x) space
 !
 ! Decide on the following policy: grid details will be copied rather
 ! than pointed to (avoids danger of object that is pointed to being 
@@ -36,6 +36,8 @@ module convolution
   ! minimum and maximum number of points for interpolation
   integer, parameter :: npnt_min = 4, npnt_max = 10
   integer, parameter, public :: WeightGridQuand_npnt_max = npnt_max
+  integer, parameter, public :: grid_interp_npnt_min = npnt_min !< better-qualified public name
+  integer, parameter, public :: grid_interp_npnt_max = npnt_max !< better-qualified public name
 
   !-------------------------------
   !! Definition of a grid.
@@ -63,6 +65,7 @@ module convolution
   
 
   public :: grid_def, grid_conv
+  public :: conv_BestIsub
 
 
   !-- public routines --
@@ -1213,7 +1216,6 @@ contains
     real(dp), intent(in) :: y
     real(dp) :: f(size(gq,dim=2))
     !-----------------------------------------
-    integer, parameter :: npnt_min = 4, npnt_max = 10
     integer :: i, j, ny, npnt, isub
     !real(dp) :: ey, df
     real(dp), parameter :: resc_yvals(npnt_max) = (/ (i,i=0,npnt_max-1) /)
@@ -1371,7 +1373,12 @@ contains
   end subroutine WgtGridQuant_noalloc
   
 
-  !-- for internal use only
+  !! returns the index of the best subgrid to use for the given y value
+  !! 
+  !! Mainly intended for internal use. Note also that if any of the logic
+  !! here changes, one should also revisit tab_get_grid_ptr(...) in pdf_tabulate.f90, 
+  !! which replicates much of the functionality, but is coded separately
+  !! for speed reasons.
   function conv_BestIsub(grid,y) result(isub)
     type(grid_def), intent(in) :: grid
     real(dp),       intent(in) :: y

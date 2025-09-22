@@ -23,6 +23,7 @@
 #define hoppetSetN3LOnfthresholds      hoppetsetn3lonfthresholds_
 #define hoppetSetYLnlnQInterpOrders    hoppetsetylnlnqinterporders_
 #define hoppetEval                     hoppeteval_          
+#define hoppetEvalPID                  hoppetevalpid_          
 #define hoppetEvalSplit                hoppetevalsplit_
 #define hoppetSetQED                   hoppetsetqed_
 #define hoppetDeleteAll                hoppetdeleteall_
@@ -235,11 +236,20 @@ extern "C" {
   /// Return the coupling at scale Q
   double hoppetAlphaS(const double & Q);
 
-  /// Return in f[0..12] the value of the internally stored pdf at the
-  /// given x,Q, with the usual LHApdf meanings for the indices -6:6.
+  /// Return in f[0..12+5] the value of the internally stored pdf at
+  /// the given x,Q, with the usual LHApdf meanings for the indices
+  /// -6:6 + photon and lepton.
   void hoppetEval(const double & x,
                   const double & Q,
                   double * f);
+
+
+  /// Return in f the value of the internally stored pdf at the given
+  /// x,Q, and pid with the usual LHApdf meanings for the indices
+  /// -6:6.
+  double hoppetEvalPID(const double & x,
+		       const double & Q,
+		       const int & pid);
 
 
   /// Return in f[0..12] the value of 

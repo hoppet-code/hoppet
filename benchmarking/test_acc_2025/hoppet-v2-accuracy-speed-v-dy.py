@@ -29,7 +29,8 @@ plt.rc('axes', prop_cycle=colors)
 mpl.rcParams.update({"axes.grid" : True, "grid.linestyle": ":"})
 plt.rc('figure', figsize=(5,5))
 
-dirM2pro="../../../2025-prec-and-timing/M2Pro"
+dirM2pro="../../../../2025-prec-and-timing/M2Pro-gfortran15.1-O3-2025-09-18"
+dirM2proLHAPDF="../../../../2025-prec-and-timing/M2Pro-gfortran15.1-O3-2025-09-18-LHAPDF"
 nloop_names = {1: "LO", 2: "NLO", 3: "NNLO", 4: "N3LO"}
 
 def main(pdf,nloop):
@@ -60,7 +61,7 @@ def main(pdf,nloop):
     ax1.tick_params(axis='both', which='both', left=True, right=True, direction='in')
     ax2.tick_params(axis='both', which='both', left=True, right=True, direction='in')
 
-    ax2.text(0.95,0.95,"M2Pro, gfortran 14.2 (-O3)", va='top',ha='right', transform=ax2.transAxes)
+    ax2.text(0.95,0.95,"M2Pro, gfortran 15.1 (-O3)", va='top',ha='right', transform=ax2.transAxes)
 
 
     xticks_major = ax2.get_xticks().tolist()
@@ -96,6 +97,62 @@ def main(pdf,nloop):
     pdf.savefig(fig,bbox_inches='tight')
 
     plt.close()
+    # Plot over different interpolation orders
+    run_stats_oQ2_oY2   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ2-oY2-dy*.dat')
+    run_stats_oQ3_oY3   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ3-oY3-dy*.dat')
+    run_stats_oQ4_oY4   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY4-dy*.dat')
+    run_stats_oQ4_oY5   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-dy*.dat')
+    run_stats_oQ4_oY6   = RunStats(f'{dirM2pro}/nloop{nloop}-preev-oQ4-oY6-dy*.dat')
+
+    run_stats_LHAPDF    = RunStats(f'{dirM2proLHAPDF}/nloop{nloop}-preev-dy*.lhapdf.dat')
+
+
+    fig,(ax1,ax2) = plt.subplots(nrows=2,sharex=True)
+    fig.subplots_adjust(hspace=0.04)
+    ax2.set_xlabel(r'dy')
+
+    mask = run_stats_oQ2_oY2.dy > 0.035
+
+    ax1.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.acc_allf_xlt07[mask], label='oQ=2, oY=2', **styles[0], ls="-")
+    ax1.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.acc_allf_xlt07[mask], label='oQ=3, oY=3', **styles[1], ls="-")
+    ax1.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.acc_allf_xlt07[mask], label='oQ=4, oY=4', **styles[2], ls="-")
+    ax1.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.acc_allf_xlt07[mask], label='oQ=4, oY=5', **styles[3], ls="-")
+    ax1.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .acc_allf_xlt07[mask], label='LHAPDF', **styles[4], ls="-")
+    #ax1.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.acc_allf_xlt07[mask], label='oQ=4, oY=6', **styles[4], ls="-")
+
+    print(h.reformat(run_stats_LHAPDF .dy[mask],run_stats_LHAPDF .acc_allf_xlt07[mask] ))
+
+    ax2.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.t_interp_ns[mask], **styles[0], label='')
+    ax2.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.t_interp_ns[mask], **styles[1], label='')
+    ax2.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.t_interp_ns[mask], **styles[2], label='')
+    ax2.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.t_interp_ns[mask], **styles[3], label='')
+    ax2.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .t_interp_ns[mask], **styles[4], label='LHAPDF')
+    #ax2.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.t_interp_ns[mask], **styles[4], label='')
+
+    ax1.set_ylabel("accuracy")
+    ax2.set_ylabel("time [ns]")
+
+    ax2.set_xscale('log')
+    ax1.set_yscale('log')
+    #ax2.set_yscale('log')
+    ax1.tick_params(axis='both', which='both', left=True, right=True, direction='in')
+    ax2.tick_params(axis='both', which='both', left=True, right=True, direction='in')
+
+    ax2.text(0.95,0.95,"M2Pro, gfortran 15.1 (-O3)", va='top',ha='right', transform=ax2.transAxes)
+
+
+    xticks_major = ax2.get_xticks().tolist()
+    extra_xticks = [0.05, 0.2]
+    all_xtics = sorted(xticks_major + extra_xticks)
+    ax2.set_xticks(all_xtics)
+
+    ax2.set_xticklabels(f"{xt}" for xt in all_xtics)
+    ax2.set_xlim(0.029,0.31)
+    #ax2.yaxis.set_major_formatter(FuncFormatter(h.log_formatter_fn))
+    ax1.text(0.03,0.95, f"Hoppet v2.0.0, {nloop_names[nloop]} evolution\nymax = 12, dlnlnQ = dy/4", va='top', transform=ax1.transAxes)
+    ax1.legend(loc='lower right')
+    pdf.savefig(fig,bbox_inches='tight')
+    plt.close()
 
 class RunStats(object):
     '''Class to extra run stats for all files matching a certain glob pattern (over dy values)'''
@@ -112,6 +169,7 @@ class RunStats(object):
         self.t_init_s = get_number(self.files_timing,"Initialisation time")
         self.t_preev_s = get_number(self.files_timing,"Pre-evolution time")
         self.t_ev_s = get_number(self.files_timing,"Evolution time")
+        self.t_interp_ns = get_number(self.files_timing,"Interpolation time")
         self.t_eval_all_flav_ns = get_number(self.files_timing,"Evaluation..all")
         self.t_eval_one_flav_ns = get_number(self.files_timing,"Evaluation..one")
 
@@ -151,6 +209,6 @@ if __name__ == "__main__":
     pdfname = __file__.replace('.py','.pdf')
     with PdfPages(pdfname) as pdf: 
         main(pdf,nloop=3)
-        main(pdf,nloop=4)
+        #main(pdf,nloop=4)
 
 

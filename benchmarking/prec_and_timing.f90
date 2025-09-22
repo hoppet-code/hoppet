@@ -40,9 +40,9 @@
 ! ./benchmarking/prec_and_timing  -nloop 3 -dy 0.05 -lhapdf-out ~/LHAPDF/dummy/dummy -o ~/LHAPDF/dummy/hoppet.log
 !
 program prec_and_timing
-   use hoppet
+  use hoppet
   use hoppet_git_state
-  use dummy_pdfs
+  use pdfs_for_benchmarks
   use sub_defs_io
   use NameSelect
 
@@ -50,19 +50,20 @@ program prec_and_timing
   !-------------------------------
   type(grid_def)     :: grid, gridarray(4)
   type(dglap_holder) :: dh
-  type(running_coupling)    :: coupling
-  integer            :: order, order1, order2, nloop, i, nrep, nrep_orig, nxQ,olnlnQ
-  integer            :: nrep_eval, n_alphas
+  type(running_coupling) :: coupling
+  real(dp), allocatable  :: yvals(:), Qvals(:)
+  integer            :: order, order1, order2, nloop, i, j, nrep, nrep_orig, nxQ,olnlnQ
+  integer            :: nrep_eval, n_alphas, ny, nQ, nrep_interp
   integer            :: hires
   real(dp)           :: dy, Qinit, Qmin, Qmax, du, dlnlnQ
-  real(dp)           :: ymax
-  real(dp)           :: time_start, time_init_done, time_ev_done, time_end
+  real(dp)           :: ymax, pdfval(-6:6)
+  real(dp)           :: time_start, time_init_done, time_prev_done, time_ev_done, time_interp_start, time_end
   real(dp), pointer  :: initial_condition(:,:)
   type(pdf_table)    :: table
-  logical            :: output, outputgrid, preev, auto_nrep
+  logical            :: output, outputgrid, output_benchmark, preev, auto_nrep
   logical            :: write_lhapdf
   character(len=999) :: lhapdf_out = ""
-  integer :: idev, y_interp_order
+  integer            :: idev, y_interp_order
   integer, parameter :: lhapdf_unit = 99
   integer            :: lhapdf_iyinc
   character(len=300) :: hostname
@@ -132,9 +133,11 @@ program prec_and_timing
   nrep  = int_val_opt('-nrep',1)
   auto_nrep = log_val_opt('-auto-nrep',.false.)
   nrep_eval = int_val_opt('-nrep-eval',10)
+  nrep_interp = int_val_opt('-nrep-interp',1000)
   nxQ = int_val_opt('-nxQ',0)
   output = log_val_opt('-output') .or. log_val_opt('-outputgrid')
   outputgrid  = log_val_opt('-outputgrid')
+  output_benchmark = log_val_opt('-output-benchmark')
   !-- security ----------------------
   if (.not. CheckAllArgsUsed(0)) error stop
   !----------------------------------
@@ -146,7 +149,6 @@ program prec_and_timing
   write(idev,'(a)') "# host: "//trim(hostname)
   call hoppet_print_git_state(idev,prefix="#")
 
-
   call cpu_time(time_start)
   call InitDglapHolder(grid, dh, factscheme=factscheme_MSbar, &
        &                              nloop=nloop, nflo=3, nfhi=6)
@@ -157,7 +159,7 @@ program prec_and_timing
   !call AllocInitPDFSub(grid,vogt_init,VogtInitSub)
   ! alternative way to get the initial distribution
   call AllocPDF(grid,initial_condition)
-  initial_condition = unpolarized_dummy_pdf(xValues(grid))
+  initial_condition = benchmark_pdf_unpolarized(xValues(grid))
 
   ! set up the coupling
   Qinit = sqrt(two)
@@ -173,11 +175,13 @@ program prec_and_timing
   ! set up the table
   call AllocPdfTable(grid,table,Qmin,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
   call AddNfInfoToPdfTable(table,coupling)
-  if (preev) call PreEvolvePdfTable(table,Qmin,dh,coupling)
-  call cpu_time(time_ev_done)
+  if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
+  call cpu_time(time_prev_done)
 
-  call PDFTableSetYInterpOrder(y_interp_order)
-
+  !call PDFTableSetYInterpOrder(y_interp_order)
+  if (y_interp_order > 0 .and. olnlnQ >0) then
+    call PdfTableOverrideInterpOrders(y_interp_order,olnlnQ)
+  end if
 
   ! record info about the cpu
   !call system("grep -e name -e cache -e MHz /proc/cpuinfo | sed 's/^/# /'")
@@ -190,12 +194,12 @@ program prec_and_timing
         call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
      end if     
   end do
-  call cpu_time(time_end)
+  call cpu_time(time_ev_done)
 
   ! auto-timing refinement of nrep
-  if (auto_nrep .and. time_end-time_ev_done < 0.05_dp) then
+  if (auto_nrep .and. time_ev_done-time_prev_done < 0.05_dp) then
      nrep_orig = nrep
-     nrep = 0.1_dp / ((time_end-time_ev_done)/nrep_orig)
+     nrep = 0.1_dp / ((time_ev_done-time_prev_done)/nrep_orig)
      do i = nrep_orig+1, nrep
         if (preev) then
            call EvolvePdfTable(table,initial_condition)
@@ -203,9 +207,37 @@ program prec_and_timing
            call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
         end if     
      end do
-     call cpu_time(time_end)
+     call cpu_time(time_ev_done)
   end if
 
+  ! Here we compute a list of y and Q values to use when interpolating
+  ! the grid. We use ceiling(sqrt(nrep)) points in each direction.
+  ny = nint(sqrt(four*nrep_interp))
+  nQ = nint(sqrt(0.25_dp*nrep_interp))-1
+  if (ny > 0) then
+    ALLOCATE(yvals(ny))
+    do i = 1, ny
+       yvals(i) = i*ymax/ny
+    end do
+  end if 
+  if (nQ > 0) then
+    ALLOCATE(Qvals(nQ))
+    do i = 1, nQ
+       Qvals(i) = Qinit + i*(Qmax-Qinit)/nQ
+    end do
+  end if
+
+  call cpu_time(time_interp_start)
+  do i = 1, ny
+     do j = 1, nQ
+        call EvalPdfTable_yQ(table,yvals(i),Qvals(j),pdfval)
+     end do
+  end do
+  call cpu_time(time_end)
+
+  if (output_benchmark) then
+    call write_benchmark_output()
+  end if
 
   ! one form of output
   if (outputgrid) then
@@ -214,17 +246,20 @@ program prec_and_timing
      call eval_output_lines()
   end if
 
-  write(6,'(a,3f10.5," s, nrep=",i7)') "Timings (init, preevln, evln) = ", &
+  write(6,'(a,4f16.11," s, nrep=",i7, ", nrep_interp=", i7)') "Timings (init, preevln, evln, interp) = ", &
        &   time_init_done-time_start, &
-       &   time_ev_done-time_init_done, &
-       &   (time_end-time_ev_done)/nrep, nrep
-  if (output) write(idev,'(a,3f10.5," s, nrep=",i7)') "# Init Timings (init, preevln, evln) = ", &
+       &   time_prev_done-time_init_done, &
+       &   (time_ev_done-time_prev_done)/nrep, &
+       &   (time_end - time_interp_start)/ny/nQ, nrep , nrep_interp
+  if (output) write(idev,'(a,4f16.11," s, nrep=",i7, ", nrep_interp=", i7)') "# Init Timings (init, preevln, evln, interp) = ", &
        &   time_init_done-time_start, &
-       &   time_ev_done-time_init_done, &
-       &   (time_end-time_ev_done)/nrep, nrep
+       &   time_prev_done-time_init_done, &
+       &   (time_ev_done-time_prev_done)/nrep,  &
+       &   (time_end - time_interp_start)/ny/nQ, nrep, nrep_interp
   write(idev,'(a,f10.5," s")') "# Initialisation time = ", time_init_done-time_start
-  write(idev,'(a,f10.5," s")') "# Pre-evolution time = ", time_ev_done-time_init_done
-  write(idev,'(a,f10.5," s, nrep = ",i7)') "# Evolution time = ", (time_end-time_ev_done)/nrep, nrep
+  write(idev,'(a,f10.5," s")') "# Pre-evolution time = ", time_prev_done-time_init_done
+  write(idev,'(a,f10.5," s, nrep = ",i7)') "# Evolution time = ", (time_ev_done-time_prev_done)/nrep, nrep
+  write(idev,'(a,f10.5," ns, nrep_interp =", i7)') "# Interpolation time = ", (time_end - time_interp_start)/ny/nQ*1d9, nrep_interp
 
   !call get_evaluation_times()
   call get_evaluation_times_new()
@@ -233,6 +268,7 @@ program prec_and_timing
     call WriteLHAPDFFromPdfTable(table, coupling, lhapdf_out, &
            pdf_index = 0, iy_increment = lhapdf_iyinc)
   end if
+
 
   ! clean up
   call Delete(table)
@@ -432,6 +468,58 @@ contains
     write(idev,fmt) "# Evaluation (all flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
     write(0   ,fmt) "# Evaluation (all flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
 
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable_yQ_order22(table,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable_yQ_order33(table,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o3)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o3)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable_yQ_order44(table,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o4)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o4)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+
+
     call cpu_time(time_start)
     pdf_g_sum = zero
     do irep = 1, nrep_eval
@@ -452,7 +540,25 @@ contains
     write(idev,fmt) "# Evaluation (one flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
     write(0   ,fmt) "# Evaluation (one flav)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
 
-   end subroutine get_evaluation_times_new
+
+    call cpu_time(time_start)
+    pdf_g_sum = zero
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          pdf_g_sum = pdf_g_sum + EvalPdfTable_yQf_order22(table,y,Q,0)
+          !call EvalPdfTable_yQ(table,y,Q,pdf_all)
+          !pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (1fl,ord2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (1fl,ord2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
+
+  end subroutine get_evaluation_times_new
 
 
   ! old routine for getting evaluation times, which uses just a single y,Q combination
@@ -481,4 +587,25 @@ contains
 
   end subroutine get_evaluation_times
 
+  subroutine write_benchmark_output
+
+    real(dp), parameter :: heralhc_xvals(9) = &
+       & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
+    integer  :: ix    ! get the value of the tabulation at some point
+    real(dp) :: Q, pdf_at_xQ(-6:6)
+    Q = 100.0_dp
+    write(6,'(a)')
+    write(6,'(a,f8.3,a)') "           Evaluating PDFs at Q = ",Q," GeV"
+    write(6,'(a5,2a12,a14,a10,a12)') "x",&
+         & "u-ubar","d-dbar","2(ubr+dbr)","c+cbar","gluon"
+    do ix = 1, size(heralhc_xvals)
+      call EvalPdfTable_xQ(table,heralhc_xvals(ix),Q,pdf_at_xQ)
+      write(6,'(es7.1,5es12.4)') heralhc_xvals(ix), &
+            &  pdf_at_xQ(2)-pdf_at_xQ(-2), &
+            &  pdf_at_xQ(1)-pdf_at_xQ(-1), &
+            &  2*(pdf_at_xQ(-1)+pdf_at_xQ(-2)), &
+            &  (pdf_at_xQ(-4)+pdf_at_xQ(4)), &
+            &  pdf_at_xQ(0)
+    end do
+  end subroutine write_benchmark_output
 end program prec_and_timing

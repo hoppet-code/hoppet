@@ -1,6 +1,10 @@
 /// An example in C++ showing how to replace LHAPDF interpolation with
 /// (faster) hoppet interpolation
 ///
+/// Usage (from CMake build directory):
+///
+///   example_cpp/fast_pdf_evaluation [PDFsetName]
+///
 #include "../../src/hoppet.h"
 #include "LHAPDF/LHAPDF.h"
 #include <iostream>
@@ -84,8 +88,12 @@ void load_lhapdf_assign_hoppet(const string & pdfname, int imem=0) {
 }
 
 //----------------------------------------------------------------------
-int main () {
+int main (int argc, char *argv[]) {
   string pdfname = "PDF4LHC21_40";
+  if (argc > 1) {
+    pdfname = argv[1];
+  }
+  cout << "Using PDF set: " << pdfname << endl;
   int imem = 0;
   load_lhapdf_assign_hoppet(pdfname, imem);
 
@@ -117,7 +125,7 @@ int main () {
 
   int npoints = 3000; // or your desired value
   double xmin = 1e-5, xmax = 0.9;
-  double qmin = 1.5, qmax = 100000.0;
+  double qmin = 1.5, qmax = 7000.0;
 
   // Create log-spaced grids
   vector<double> xvals(npoints), qvals(npoints);

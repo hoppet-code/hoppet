@@ -74,12 +74,12 @@ jobs:
     - name: Compile
       run: |
           #cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          cmake -S . -B BUILD  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake -S . -B BUILD  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_USE_EXACT_COEF=ON
           cmake --build BUILD -j
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
           # now try running the python example
-          python3 pyinterface/tabulation_example.py
+          python3 example_py/tabulation_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT

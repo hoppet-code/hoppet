@@ -32,8 +32,7 @@ else
                       $dirhere/(src|example_f77|example_f90|benchmarking)/**/Makefile \
                       $dirhere/**/(README|INSTALL|Doxyfile|NEWS|COPYING|mkmk|configure|Makefile) \
                       $dirhere/scripts/*[a-z] \
-                      $dirhere/example_f90/*.default_output \
-                      $dirhere/test.sh
+                      $dirhere/example_f90/*.default_output 
 
   fulltarloc=`pwd`
   pushd /tmp

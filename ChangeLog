@@ -1,3 +1,273 @@
+2025-09-19 Alexander + Gavin
+
+	* CMakeLists.txt:
+	* benchmarking/lhapdf_timings.cc:  *** ADDED ***
+	* benchmarking/run-many-lhapdf.sh: *** ADDED ***
+	* benchmarking/run-and-process-lhapdf-grids.sh: *** ADDED ***
+	code used to benchmark LHAPDF interpolation accuracy and
+	timings
+
+	* benchmarking/prec_and_timing.f90:
+	added an alternative test of interpolation timings, using
+	a single run over a dense x,Q grid, where density is controlled
+	with the `-nrep-interp N` option (gives a total of N points).
+	This is similar to the test used in lhapdf_timings.cc.
+
+2025-09-16  Gavin + Alexander
+
+	* CMakeLists.txt:
+	added -ffree-line-length-none option for gfortran, to allow longer lines	
+
+	* benchmarking/prec_and_timing.f90:
+	now only calls overide if both -olnlnQ and -yinterp-order have values >0
+
+	* src/convolution.f90:
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	* src/interpolation.f90:
+	* src/pdf_tabulate.F90:
+	* unit-tests/hoppet-unit-tests.F90:
+	got support for different y & Q orders, and pdf_tables 
+	now automatically use the faster hard-coded routines if these are 
+	available (pointer to the routine is cached on table creation)
+
+2025-09-15  Gavin
+
+	* src/interpolation.f90:
+	added fill_interp_weights5 and fill_interp_weights6, as well as
+	corresponding coefficients
+
+	* unit-tests/hoppet-unit-tests.F90: (.f90 -> .F90)
+	added tests for fill_interp_weights5 and fill_interp_weights6;
+	also tried to add some basic timing macros and tried them out
+	on fill_interp_weights6
+
+	* benchmarking/prec_and_timing.f90:
+	* src/inc/pdf_tabulate.inc:
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	* src/pdf_tabulate.F90:
+	reworked things so that the NNNN routines are now numbered orderYQ
+	where Y is the y-order and Q is the lnlnQ order, e.g. order33
+	if both are 3. This is preparation for being able to handle
+	cases where the orders are different.
+
+2025-09-15  Alexander + Gavin
+
+	* CMakeLists.txt:
+	added better diagnostics if CMake finds traces of a Makefile build
+
+	* cmake/git_watcher.cmake:
+	* src/config/hoppet_git_state.f90.in:
+	added new GIT_F90_STATUS_UNO variable that is split into lines
+	to reduce the chance of going over 132 characters. Note that
+	long filenames could still cause problems
+
+	* src/dummy_pdfs.f90 -> src/pdfs_for_benchmarks.f90:
+	* [a range of examples and tests]:
+	renamed dummy_pdfs and functions inside to better reflect its purpose
+	and updated a range of examples and tests accordingly.
+
+	* scripts/checks:
+	* CMakeLists.txt:
+	* benchmarking/prec_and_timing.default_output/gen-default-output.sh: *** ADDED ***
+	* benchmarking/prec_and_timing.default_output/*.default_output:      *** ADDED ***
+	added tests with prec_and_timing, where the options make it easier
+	to test a range of setups; for now they cover different interpolation orders
+	and an evolution with exact NNLO splitting and thresholds.
+	Format for tests is `prec_and_timing:<option1>:<value1>:<option2>:<value2>:...`
+
+
+2025-09-15  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/splitting-functions/: *** ADDED ***
+	* src/mass-thresholds/:     *** ADDED ***
+	* src/param-coefs/:         *** ADDED ***
+	Created new directories to contain all the external codes that we
+	use for splitting functions and mass thresholds. Moved the
+	parametrised coefficient functions into a separate directory as
+	well.
+
+2025-09-13 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* src/inc/pdf_tabulate.inc: *** ADDED ***
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	* src/pdf_tabulate.F90:
+	moved the __HOPPET_tab_min_subgrid_ny__ and __HOPPET_tab_min_nQ__
+	definitions into pdf_tabulate.inc so that they can be separately
+	included in pdf_tabulate_OrderNNN.F90, facilitating manual
+	preprocessor checks.
+
+	Modified get_lnlnQ_wgts so that it takes into account override_order_Q.
+	separated any-order part of EvalPdfTable_yQ into EvalPdfTable_yQ_any_order
+	so that we can guarantee that we're getting that bit of code. Used
+	in the unit tests.
+
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	fixed bug in selection of nf value because we were comparing to a 
+	"lo" rather than "hi" extent of Q segment.
+
+	* unit-tests/hoppet-unit-tests.f90:
+	* unit-tests/unit_tests.f90:
+	added tests that evaluation of a single flavour at a time gives the same
+	answer as all-flavour evaluation and that the routines with fixed
+	interpolation orders give identical results to that with a flexible
+	interpolation order.
+
+	* testing-other/: *** DELETED ***
+	to reduce clutter, removed this directory, which contained outdated
+	cteq6 tests. Use an example such as
+	example_f77/compare_lhapdf_hoppet.f instead.
+
+	* example_f77/compare_lhapdf_hoppet.f:
+	changed set to CT18NNLO.
+
+	* src/hoppet_to_string.f90: *** ADDED ***
+	moved the to_string functionality into the main library, because of its
+	use in error messages
+
+2025-09-12 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* src/pdf_tabulate.F90:
+	temporarily disabled pointer-setting in PdfTableOverrideInterpOrders
+	because answers are coming out wrong. Will investigate in a separate
+	branch
+
+	* git_watcher.cmake -> cmake/git_watcher.cmake:
+	* CMakeLists.txt:
+	moved git watcher out of top-level directory, to help 
+	with cleaning that up
+
+	* test.sh: *** Deleted ***
+	not used any longer
+
+	* tarit.sh -> scripts/tarit.sh:
+	part of cleaning up TLD
+
+	* unit-tests/: *** ADDED ***
+	new directory to help carry out minimal unit tests
+
+	* src/interpolation.f90:
+	fixed coefficients for 4th order interpolation
+
+	* benchmarking/prec_and_timing.f90:
+	preev and non-preev runs were returning inconsistent results because
+	they took the initial condition at different scales (Qmin v. Qinit).
+	Now fixed and they both start at Qinit.
+
+2025-09-09 Gavin + Alexander (later)
+
+	* src/pdf_tabulate.F90:
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+
+	Added EvalPdfTable_yQf_orderNNNN with NNNN = 2,3,4
+
+	Removed PDFTableSetYInterpOrder and instead introduced PdfTableOverrideInterpOrders,
+	which sets both the y and Q orders.
+
+	For special cases (2,2) (3,3) and (4,4), internal pointers are set:
+	EvalPdfTable_yQ_ptr and EvalPdfTable_yQf_ptr. If these are non-null
+	then they are used to redirect EvalPdfTable_yQ and EvalPdfTable_yQf
+	calls to the appropriate orderN routines.
+
+	Relative to a direct call to the orderN routines, this adds about
+	2ns on M2Pro-gfortran15-O3.
+
+	**BEWARE**: outside of these special cases the override is not
+	yet active as concerns the Q order.
+
+	**BEWARE**: correctness of the output has not been tested, nor has the optimal
+	choice of halfNN (currently (NN-1)/2, could also be NN/2).
+
+	* src/streamlined_interface.f90:
+	* benchmarking/prec_and_timing.f90:
+	switched these over to use PdfTableOverrideInterpOrders
+
+2025-09-09 Gavin + Alexander
+
+
+	Introduced __HOPPET_tab_min_subgrid_ny__ and __HOPPET_tab_min_nQ__,
+	and in the table allocation routines:
+
+	- made sure that the y grid and each subgrid is 
+	  at least of size __HOPPET_tab_min_subgrid_ny__
+
+    - made sure that the number of Q points is at least of size __HOPPET_tab_min_nQ__
+	  and in segments made sure that are at least __HOPPET_tab_min_nQ__ points
+	  above any single-point segment,
+
+	- adapted EvalPdfTable_get_weights_orderNNNN to use a weights of just 1,0,,0,... 
+      if we encounter a single-point segment
+
+	Also got added treatment of freeze_at_Qmin.
+
+
+	* pyinterface/*example*.py -> example_py/:
+	moved python examples into a dedicated directory
+
+	* example_f77/cpp_structure_functions_example.cc -> example_cpp/structure_functions_example.cc:
+	* example_f77/cpp_tabulation_example.cc -> example_cpp/tabulation_example.cc:
+	* example_f77/cpp_tabulation_example_qed.cc -> example_cpp/tabulation_example_qed.cc:
+	* example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc -> example_cpp/with-lhapdf/fast_pdf_evaluation.cc:
+	* CMakeLists.txt:
+	* example_cpp/tabulation_example.default_output: *** ADDED *** (symlink)
+	moved C++ examples into a new dedicated example_cpp/ directory.
+	Also added example_cpp/tabulation_example to the ctest set.
+
+	* CMakeLists.txt:
+	turned off some spurious gfortran warnings for two specific files
+
+	* src/special_functions.f90:
+	renamed dgamma as cernlib_dgamma to avoid warnings
+
+	* doc/auto/: *** ADDED ***
+	added templates for code-documentation systems (FORD, Doxygen), which
+	however, are not yet functional
+
+2025-09-09  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* pyinterface/hoppet.i:
+	* pyinterface/structure_functions_example.py: *** ADDED ***
+	Added proper support for structure functions and QED PDFs in the
+	Python interface. Compared to the previous commit, the Python
+	interface now sets up the PDF array based on whether the user
+	needs a QED PDF or not. The structure functions also live in a
+	separate NumPy array.
+
+2025-09-08  Alexander Karlberg  <karlberg@Latitude-E7470>
+
+	* pyinterface/tabulation_example_qed.py: *** ADDED ***
+	* pyinterface/hoppet.i:
+	Added QED example in python and fixed a hard coded 13 -> pdf_len
+
+	* src/streamlined_interface.f90:
+	* src/hoppet.h:
+	* pyinterface/hoppet.i:
+	Added hoppetEvalPID to access single flavour PDFs from the
+	streamlined interface
+
+2025-09-08 Alexander + Gavin
+
+	* src/inc/ftlMacros.inc: *** ADDED ***
+	some helpers for fortran macros, from the Fortran Template Library
+
+	* src/convolution.f90:
+	exposed conv_BestIsub
+
+	* src/inc/pdf_tabulate_OrderNNN.F90: *** ADDED***
+	* src/pdf_tabulate.f90 -> src/pdf_tabulate.F90:
+	started to put in code for specific orders of interpolation, 
+	using hard-coded array sizes, loops etc., using 
+	a template-style mechanism. Not yet fully tested.
+
+	* src/interpolation.f90:
+	added `module interpolation_coeffs`, with hard-coded
+	interpolation coefficients (interp_coeffsN) and simple functions to 
+	return interpolations at 1st, 2nd, 3rd and 4th order 
+	(fill_interp_weightsN).
+
+	* benchmarking/prec_and_timing.f90:
+	added temporary timing tests for the hard-coded interpolation
+	routines
+
 2025-09-06 Sat  <gavin.salam@physics.ox.ac.uk>
 
 	* src/new_as.f90:

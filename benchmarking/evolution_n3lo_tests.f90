@@ -2,7 +2,7 @@
 !!
 program structure_functions_example
   use hoppet
-  use dummy_pdfs
+  use pdfs_for_benchmarks
   use streamlined_interface
   use structure_functions
   use sub_defs_io, int_value => value
@@ -56,7 +56,7 @@ program structure_functions_example
 
   do ixmur_evolv = 1, size(xmur_evolv_vals)
      write(idev,"(a,f10.4)") "# xmuR = ", xmur_evolv_vals(ixmur_evolv)
-     call hoppetEvolve(asQ0, Q0, nloop_max, xmur_evolv_vals(ixmur_evolv), lha_unpolarized_dummy_pdf, Q0)
+     call hoppetEvolve(asQ0, Q0, nloop_max, xmur_evolv_vals(ixmur_evolv), benchmark_pdf_unpolarized_lha, Q0)
      call write_pdf(Q, 100)
   end do
 

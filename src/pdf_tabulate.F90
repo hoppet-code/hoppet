@@ -1,5 +1,12 @@
+!
+! This include sets __HOPPET_tab_min_subgrid_ny__ and
+! __HOPPET_tab_min_nQ__, which are the minimum values for the subgrid ny
+! and nQ respectively for various interpolation assumptions to be
+! correct, avoiding the need for runtime checks
+#include "inc/pdf_tabulate.inc"
+
 !-----------------------------------------------------------
-!! Module that will hopefully make tabulation easy
+!! Module to make tabulation easy
 !!
 !! Currently does not know anything about nf thresholds.
 !!
@@ -25,15 +32,14 @@ module pdf_tabulate
   use pdf_representation; use pdf_general
   use interpolation
   use warnings_and_errors
+  !use pdf_tabulate_types
   !-- needed only for EvolvePdfTable [separate it out one day?]
   use qcd_coupling; use evolution; use dglap_holders
   implicit none
   private
 
-  integer :: override_npnt_y = -1
-  
   type pdfseginfo
-    real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ
+  real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ, inv_dlnlnQ
     integer :: ilnlnQ_lo, ilnlnQ_hi
   end type pdfseginfo
   public :: pdfseginfo
@@ -50,8 +56,13 @@ module pdf_tabulate
     integer :: nQ, lnlnQ_order
     logical :: freeze_at_Qmin
     ! this is useful only in absence of nf info.
-    real(dp) :: dlnlnQ
-    !
+    real(dp) :: dlnlnQ    
+
+    ! a seginfo-like object when there is no nf info,
+    ! makes it easier to have common code across nf and no-nf 
+    ! cases
+    type(pdfseginfo) :: seginfo_no_nf
+
     ! Stuff to do with variable nf and alpha_s; not always available.
     ! In cases with variable nf, the table will be broken into multiple
     ! segments, each one of which potentially different spacings.
@@ -59,8 +70,8 @@ module pdf_tabulate
     logical :: nf_info_associated
     integer :: nflo, nfhi
     type(pdfseginfo), pointer :: seginfo(:)
-    integer, pointer :: nf_int(:)
-    real(dp), pointer :: as2pi(:)
+    integer,          pointer :: nf_int(:)
+    real(dp),         pointer :: as2pi(:)
     !
     ! Elements needed in case we want to do precalculation of
     ! of evolution. Not always available.
@@ -73,20 +84,33 @@ module pdf_tabulate
     ! affects the range used for interpolation rather than for
     ! allocation of the table itself)
     integer :: tab_iflv_max = iflv_max
+
+    ! pointers to evaluation routines; the abstract interfaces
+    ! are defined below
+    procedure(EvalPdfTable_yQ_interface ), pointer, nopass :: EvalPdfTable_yQ_ptr  => null()
+    procedure(EvalPdfTable_yQf_interface), pointer, nopass :: EvalPdfTable_yQf_ptr => null()
   end type pdf_table
   public :: pdf_table
+
+
+  integer :: override_npnt_y = -1
+  integer :: override_order_y = -1
+  integer :: override_order_Q = -1
+  logical :: override_on = .false.
+  
 
   !-- for calculating ln ln Q/lambda_eff
   real(dp), parameter :: default_lambda_eff = 0.1_dp
   real(dp), parameter :: default_dlnlnQ = 0.07_dp
   real(dp), parameter :: warn_tolerance = 1e-3_dp
-  ! used in various contexts for deciding when an interval is
-  ! sufficiently small that it can be ignored...
+  !! used in various contexts for deciding when an interval is
+  !! sufficiently small that it can be ignored...
   real(dp), parameter :: min_dlnlnQ_singleQ = 1e-10_dp
-!  integer, parameter :: def_lnlnQ_order = 4
   integer, public :: def_lnlnQ_order = 4
+  !! the max_lnlnQ_order is used in certain hard-coded array sizes
+  !! so that they can be created on the stack rather than the heap,
+  !! which has a speed advantage
   integer, parameter :: max_lnlnQ_order = 6
-  !integer, parameter :: lnlnQ_order = 2
 
   interface AllocPdfTable
     module procedure pdftab_AllocTab_, pdftab_AllocTab_fromorig,&
@@ -107,6 +131,8 @@ module pdf_tabulate
   interface AddNfInfoToPdfTable
     module procedure AddNfInfoToPdfTable, pdftab_AssocNfInfo_1d
   end interface
+
+  public :: PdfTableSetInterpPointers
 
   interface FillPdfTable_f90sub
     module procedure pdftab_InitTabSub_, pdftab_InitTabSub_iset
@@ -131,18 +157,47 @@ module pdf_tabulate
   public :: WriteLHAPDFFromPdfTable
   public :: Delete
 
-  public :: PDFTableSetYInterpOrder
+  public :: PdfTableOverrideInterpOrders
+
+
+  public :: EvalPdfTable_yQf_order22
+  public :: EvalPdfTable_yQf_order33
+  public :: EvalPdfTable_yQf_order44
+
+  public :: EvalPdfTable_yQ_order22
+  public :: EvalPdfTable_yQ_order33
+  public :: EvalPdfTable_yQ_order44
+  public :: EvalPdfTable_yQ_any_order
+
+  abstract interface
+    subroutine EvalPdfTable_yQ_interface(tab,y,Q,val)
+      use types
+      import :: pdf_table ! ensures pdf_table is visible
+      implicit none
+      type(pdf_table), intent(in), target  :: tab
+      real(dp),        intent(in)          :: y, Q
+      real(dp),        intent(out)         :: val(:)
+    end subroutine EvalPdfTable_yQ_interface
+  end interface
+
+  abstract interface
+    function EvalPdfTable_yQf_interface(tab,y,Q,iflv) result(res)
+      use types
+      import :: pdf_table ! ensures pdf_table is visible
+      implicit none
+      type(pdf_table), intent(in), target  :: tab
+      real(dp),        intent(in)          :: y, Q
+      integer,         intent(in)          :: iflv
+      real(dp)                             :: res
+    end function EvalPdfTable_yQf_interface
+  end interface
+
+  procedure(EvalPdfTable_yQ_interface ), pointer :: EvalPdfTable_yQ_ptr  => null()
+  procedure(EvalPdfTable_yQf_interface), pointer :: EvalPdfTable_yQf_ptr => null()
+
+  public :: EvalPdfTable_yQ_interface, EvalPdfTable_yQf_interface
 
 contains
-
-  subroutine PDFTableSetYInterpOrder(interp_order)
-    integer, intent(in) :: interp_order
-    if (interp_order < 0) then
-      override_npnt_y = -1
-    else
-      override_npnt_y = interp_order + 1
-    end if
-  end subroutine PDFTableSetYInterpOrder
 
   !---------------------------------------------------------
   !! Allocate a pdf_table, which covers a range Qmin to Qmax, using
@@ -168,7 +223,8 @@ contains
     logical,  intent(in), optional :: freeze_at_Qmin
     integer,  intent(in), optional :: iflv_max_table
     !----------------------------------------------
-    integer :: iQ
+    integer :: iQ, igd
+    logical :: grids_bad
 
     ! clear memory if the table was already allocated
     if (tab%allocated) call Delete(tab)
@@ -178,9 +234,21 @@ contains
     tab%lnlnQ_min = lnln(tab,Qmin)
     tab%lnlnQ_max = lnln(tab,Qmax)
 
+    ! some of our interpolation needs a minimum number of ny points in
+    ! the grid or each sub-grid, so check that
+    if (associated(tab%grid%subgd)) then
+      grids_bad = any(tab%grid%subgd(:)%ny < __HOPPET_tab_min_subgrid_ny__)
+    else
+      grids_bad = tab%grid%ny < __HOPPET_tab_min_subgrid_ny__
+    end if
+    if (grids_bad) call wae_error("pdftab_AllocTab_",&
+                  "grid or subgrid has ny < __HOPPET_tab_min_subgrid_ny__=",intval=__HOPPET_tab_min_subgrid_ny__)
+
     tab%default_dlnlnQ = default_or_opt(default_dlnlnQ, dlnlnQ)
     tab%nQ = ceiling((tab%lnlnQ_max - tab%lnlnQ_min)/tab%default_dlnlnQ)
+    tab%nQ = max(tab%nQ, __HOPPET_tab_min_nQ__)
     tab%dlnlnQ = (tab%lnlnQ_max - tab%lnlnQ_min)/tab%nQ
+
     tab%freeze_at_Qmin = default_or_opt(.false.,freeze_at_Qmin)
     tab%lnlnQ_order = default_or_opt(def_lnlnQ_order,lnlnQ_order)
     if (tab%lnlnQ_order > max_lnlnQ_order) call wae_error('pdftab_AllocTab_',&
@@ -193,18 +261,31 @@ contains
     nullify(tab%evops)
 
     !write(0,*) 'pdf_table info: Number of Q bins is ',tab%nQ
+    ! start off with this default
+    tab%tab_iflv_max = iflv_max
     if (present(iflv_max_table)) then
-       call AllocGridQuant(grid, tab%tab, iflv_min, iflv_max_table, 0, tab%nQ)
-       if (iflv_max_table /= ncompmax) tab%tab_iflv_max = iflv_max_table
+      if (iflv_max_table < iflv_max) call wae_error('pdftab_AllocTab_','iflv_max_table too small (<iflv_max)',intval=iflv_max_table)
+      call AllocGridQuant(grid, tab%tab, iflv_min, iflv_max_table, 0, tab%nQ)
+      if (iflv_max_table /= ncompmax) tab%tab_iflv_max = iflv_max_table
     else
        call AllocPDF(grid,tab%tab,0,tab%nQ)
     end if
     allocate(tab%lnlnQ_vals(0:tab%nQ))
     allocate(tab%Q_vals(0:tab%nQ))
     do iQ = 0, tab%nQ
-       tab%lnlnQ_vals(iQ) = tab%lnlnQ_min + iQ * tab%dlnlnQ
-       tab%Q_vals(iQ) = invlnln(tab,tab%lnlnQ_vals(iQ))
+      tab%lnlnQ_vals(iQ) = tab%lnlnQ_min + iQ * tab%dlnlnQ
+      tab%Q_vals(iQ) = invlnln(tab,tab%lnlnQ_vals(iQ))
     end do
+
+
+    tab%seginfo_no_nf%lnlnQ_lo = tab%lnlnQ_min
+    tab%seginfo_no_nf%lnlnQ_hi = tab%lnlnQ_max
+    tab%seginfo_no_nf%dlnlnQ = tab%dlnlnQ
+    tab%seginfo_no_nf%inv_dlnlnQ = 1.0_dp / tab%dlnlnQ
+    tab%seginfo_no_nf%ilnlnQ_lo = 0
+    tab%seginfo_no_nf%ilnlnQ_hi = tab%nQ
+
+    call pdftab_SetupEvalPtrs(tab)
 
     ! label this tab as allocated
     tab%allocated = .true.
@@ -296,7 +377,7 @@ contains
   !! KNOWN LIMITATIONS: What happens with muM_mQ /= 1? All hell breaks
   !! loose?
   subroutine AddNfInfoToPdfTable(tab,coupling)
-    type(pdf_table), intent(inout) :: tab
+    type(pdf_table), intent(inout), target :: tab
     type(running_coupling), intent(in) :: coupling
     !-----------------------------------
     integer  :: nflcl, iQ_prev, iQ, iflv_max_table
@@ -347,17 +428,20 @@ contains
          seginfo%dlnlnQ = zero
          seginfo%lnlnQ_hi = seginfo%lnlnQ_lo
       else
-         seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo + max(tab%lnlnQ_order,&
-              & ceiling((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
-              & tab%default_dlnlnQ))
+         seginfo%ilnlnQ_hi = seginfo%ilnlnQ_lo + &
+            & max(__HOPPET_tab_min_nQ__,&
+                & tab%lnlnQ_order,&
+                & ceiling((seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/tab%default_dlnlnQ))
          seginfo%dlnlnQ = (seginfo%lnlnQ_hi - seginfo%lnlnQ_lo)/&
               & (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo)
       end if
       !write(0,*) 'ill_hi', seginfo%ilnlnQ_hi, seginfo%dlnlnQ, &
       !     &invlnln(tab,seginfo%lnlnQ_lo),invlnln(tab,seginfo%lnlnQ_hi), tab%default_dlnlnQ
       iQ_prev = seginfo%ilnlnQ_hi
+      seginfo%inv_dlnlnQ = one / seginfo%dlnlnQ
     end do
     
+
     ! this should not happen too often! But check it just in
     ! case...
     if (tab%seginfo(tab%nflo)%lnlnQ_lo /= tab%lnlnQ_min .or.&
@@ -376,6 +460,22 @@ contains
     allocate(tab%nf_int(0:tab%nQ))
     allocate(tab%as2pi(0:tab%nQ))
 
+    ! carry out a check that it's always safe to use up to __HOPPET_tab_min_nQ__+1 points
+    ! in the Q interpolation, even for segments with a single Q (for those segments, the
+    ! interpolation weights in some high-efficiency routines will be just 1 for that iQ
+    ! and 0 at higher iQ, but table must actually contain valid higher iQ points to avoid
+    ! accessing invalid memory)
+    do nflcl = tab%nflo, tab%nfhi      
+      seginfo => tab%seginfo(nflcl)
+      if (seginfo%ilnlnQ_lo == seginfo%ilnlnQ_hi .and. tab%nQ - seginfo%ilnlnQ_hi < __HOPPET_tab_min_nQ__) then
+        call wae_error("AddNfInfoToPdfTable",&
+              "too few ilnlnQ points for safe interpolation, above a segment with a single ilnlnQ.",&
+              "Try raising the table's Qmax.",&
+              "The problem occurred for nf=",intval=nflcl)
+      end if
+    end do
+
+
     ! set up complementary info...
     do nflcl = tab%nflo, tab%nfhi
       !write(0,*) 'nflcl',nflcl
@@ -388,11 +488,38 @@ contains
         tab%as2pi(iQ) = Value(coupling,invlnln(tab,tab%lnlnQ_vals(iQ)))/twopi
       end do
     end do
-    
+
+    call pdftab_SetupEvalPtrs(tab)
+
     ! REMEMBER TO COMPLETE FROM ORIG...
     tab%nf_info_associated = .true.
   end subroutine AddNfInfoToPdfTable
 
+  !---------------------------------------------------------------
+  subroutine pdftab_SetupEvalPtrs(tab)
+    type(pdf_table), intent(inout) :: tab
+    integer :: grid_order, npnt_y, order_y
+
+    if (associated(tab%grid%subgd)) then
+      grid_order = tab%grid%subgd(1)%order
+      if (any(tab%grid%subgd(:)%order /= grid_order)) then
+        ! different per-grid orders not yet supported, so set the
+        ! orders to -1, which sets the pointers to null
+        call PdfTableSetInterpPointers(-1,-1, &
+                                   tab%EvalPdfTable_yQ_ptr, tab%EvalPdfTable_yQf_ptr)
+      end if
+    else
+      grid_order = tab%grid%order
+    end if
+
+    ! convolution.f90's default is to set the interpolation order to abs(grid%order)-1
+    ! with limits on the range; so table-specific interpolation, we adopt the 
+    ! same defaults here
+    npnt_y = min(grid_interp_npnt_max, max(grid_interp_npnt_min, abs(grid_order)))
+    order_y = npnt_y - 1
+    call PdfTableSetInterpPointers(order_y, tab%lnlnQ_order, &
+                                   tab%EvalPdfTable_yQ_ptr, tab%EvalPdfTable_yQf_ptr)
+  end subroutine pdftab_SetupEvalPtrs
 
   !---------------------------------------------------------------
   !! 1d-overloaded verseion of AddNfInfoToPdfTable
@@ -766,6 +893,71 @@ contains
     deallocate(dist)
   end subroutine EvolvePdfTableQED
 
+  !--------------------------------------------------------------------
+  !! Override all tables' default interpolation orders (which are
+  !! normally set by the grid and the olnlnQ in the table constructor)
+  !!
+  !! Either both orders should be >0 or both negative (negative means
+  !! use the table's defaults)
+  !!
+  !! Specific settings give significant speed improvements. Currently:
+  !! (2,2), (3,3) and (4,4), because these correspond to cases where
+  !! there are specific routines with hard-coded orders
+  subroutine PdfTableOverrideInterpOrders(new_order_y, new_order_Q)
+    integer, intent(in) :: new_order_y, new_order_Q
+
+    if (new_order_y * new_order_Q <= 0) call wae_error("PdfTableOverrideInterpOrders: both orders must be >0 or <0")
+
+    if (new_order_y <= 0) then
+      override_order_y = -1
+      override_npnt_y  = -1
+    else
+      override_order_y = new_order_y
+      override_npnt_y  = new_order_y + 1
+    end if
+
+    override_order_Q = new_order_Q
+    if (override_order_Q <= 0) override_order_Q = -1
+
+    ! it's enough for one to be >0 for override to be turned on
+    override_on = (override_order_y > 0 .or. override_order_Q > 0)
+
+    ! this will only set pointers if there is a hard-coded routine for
+    ! the override; if either of the overrides <=0, then no pointers
+    ! are set, consistent with override_on being .false.
+    call PdfTableSetInterpPointers(override_order_y, override_order_Q, &
+                                   EvalPdfTable_yQ_ptr, EvalPdfTable_yQf_ptr)
+  end subroutine PdfTableOverrideInterpOrders
+
+  !--------------------------------------------------------------------
+  !! Set up the pointers if we have a hard-coded routine for this specific
+  !! order_y and order_Q, otherwise set them to null.
+  subroutine PdfTableSetInterpPointers(order_y, order_Q, yQ_ptr, yQf_ptr)
+    integer, intent(in) :: order_y, order_Q
+    procedure(EvalPdfTable_yQ_interface ), pointer, intent(out) :: yQ_ptr
+    procedure(EvalPdfTable_yQf_interface), pointer, intent(out) :: yQf_ptr
+
+    if      (order_y == 2 .and. order_Q == 2) then
+      yQ_ptr  => EvalPdfTable_yQ_order22
+      yQf_ptr => EvalPdfTable_yQf_order22
+    else if (order_y == 3 .and. order_Q == 3) then
+      yQ_ptr  => EvalPdfTable_yQ_order33
+      yQf_ptr => EvalPdfTable_yQf_order33
+    else if (order_y == 4 .and. order_Q == 4) then
+      yQ_ptr  => EvalPdfTable_yQ_order44
+      yQf_ptr => EvalPdfTable_yQf_order44
+    else if (order_y == 5 .and. order_Q == 4) then
+      yQ_ptr  => EvalPdfTable_yQ_order54
+      yQf_ptr => EvalPdfTable_yQf_order54
+    else if (order_y == 6 .and. order_Q == 4) then
+      yQ_ptr  => EvalPdfTable_yQ_order64
+      yQf_ptr => EvalPdfTable_yQf_order64
+    else
+      yQ_ptr  => null()
+      yQf_ptr => null()
+    end if
+  end subroutine PdfTableSetInterpPointers
+
   
   !--------------------------------------------------------------------
   !! Sets the vector val(iflv_min:) for the PDF at this
@@ -778,7 +970,7 @@ contains
   !! the number of flavours in the table and all will get set
   !! (including the "representation" flavour).
   subroutine EvalPdfTable_yQ(tab,y,Q,val)
-    type(pdf_table), intent(in) :: tab
+    type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: y, Q
     real(dp),    intent(out) :: val(iflv_min:)
     !----------------------------------------
@@ -786,18 +978,47 @@ contains
     real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
     real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
     integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv, iflv_max_table, npnt_y
-    integer, save :: warn_id = warn_id_INIT
+    integer, save :: warn_id = 4!warn_id_INIT    
 
     if (ubound(val,dim=1) < tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
          &'upper bound of val is too low', intval=ubound(val,dim=1))
 
+    if (associated(EvalPdfTable_yQ_ptr)) then
+      call EvalPdfTable_yQ_ptr(tab,y,Q,val)
+    else if (associated(tab%EvalPdfTable_yQ_ptr) .and. (.not. override_on)) then
+      call tab%EvalPdfTable_yQ_ptr(tab,y,Q,val)
+    else
+      call wae_warn(warn_id, "EvalPdfTable_yQ: y & Q interpolation orders not available hard-coded, reverting to slower routine")
+      call EvalPdfTable_yQ_any_order(tab,y,Q,val)      
+    end if
+    
+  end subroutine EvalPdfTable_yQ
+
+  !! subsidiary routine that handles arbitrary interpolation orders.
+  !! Note that this is quite a bit slower than the specialized versions
+  !! (order2, etc.)
+  subroutine EvalPdfTable_yQ_any_order(tab,y,Q,val)
+    type(pdf_table), intent(in), target :: tab
+    real(dp),     intent(in) :: y, Q
+    real(dp),    intent(out) :: val(iflv_min:)
+    !----------------------------------------
+    real(dp) :: lnlnQ_wgts(0:max_lnlnQ_order)
+    real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
+    real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
+    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv, iflv_max_table, npnt_y
+    integer, save :: warn_id = warn_id_INIT    
+
     !-- y weights taken care of elsewhere....
-    call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y, override_npnt_y)
+    call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y, npnt_in = override_npnt_y)
 
     !-- new routine for getting Q weights; ilnlnQ_lo > ilnlnQ_hi is the
     !   signal for Q being out of range
     call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
     nQ = ilnlnQ_hi - ilnlnQ_lo
+
+    ! diagnostics
+    !print *, "any_order: Q weights:", lnlnQ_wgts(0:nQ), ilnlnQ_lo
+    !print *, "any_order: y weights:", y_wgts(0:npnt_y-1), iylo
 
     !-- is this order more efficient, or should we not bother to
     !   calculate wgts? Not calculating it would imply significantly
@@ -859,7 +1080,7 @@ contains
        !write(0,*) ilnlnQ_lo, ilnlnQ_hi, real(lnlnQ_wgts), val(1)
    end if
     
-  end subroutine EvalPdfTable_yQ
+  end subroutine EvalPdfTable_yQ_any_order
 
   !--------------------------------------------------------------------
   !! Sets the vector val(iflv_min:) for the PDF at this
@@ -872,7 +1093,7 @@ contains
   !! the number of flavours in the table and all will get set
   !! (including the "representation" flavour).
   function EvalPdfTable_yQf(tab,y,Q,iflv) result(val)
-   type(pdf_table), intent(in) :: tab
+   type(pdf_table), intent(in), target :: tab
    real(dp),     intent(in) :: y, Q
    integer,      intent(in) :: iflv
    real(dp)                 :: val
@@ -882,13 +1103,23 @@ contains
    real(dp) :: lnlnQ_wgts(0:max_lnlnQ_order)
    real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
    integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, npnt_y
-   integer, save :: warn_id = warn_id_INIT
-   real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
+   integer, save :: warn_id = 5
+   real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)    
 
    if (iflv > tab%tab_iflv_max) call wae_error('pdftab_ValTab',&
         &'iflv is too high', intval=iflv)
    if (iflv < iflv_min) call wae_error('pdftab_ValTab',&
         &'iflv is too low', intval=iflv)
+
+   if (associated(EvalPdfTable_yQf_ptr)) then
+     val = EvalPdfTable_yQf_ptr(tab,y,Q,iflv)
+     return
+   else if (associated(tab%EvalPdfTable_yQf_ptr) .and. (.not. override_on)) then
+     val = tab%EvalPdfTable_yQf_ptr(tab,y,Q,iflv)
+     return
+   end if
+
+   call wae_warn(warn_id, "EvalPdfTable_yQf: y & Q interpolation orders not available hard-coded, reverting to slower routine")
 
    !-- y weights taken care of elsewhere....
    call WgtGridQuant_noalloc(tab%grid, y, iylo, y_wgts, npnt_y, override_npnt_y)
@@ -897,6 +1128,11 @@ contains
    !   signal for Q being out of range
    call get_lnlnQ_wgts(tab, Q, lnlnQ_wgts(0:tab%lnlnQ_order), ilnlnQ_lo, ilnlnQ_hi)
    nQ = ilnlnQ_hi - ilnlnQ_lo
+
+   !write(6,*) "general: iylo = ", iylo, "y_wgts = ", y_wgts(0:npnt_y-1)
+   !write(6,*) "general: ilnlnQ = ", ilnlnQ_lo, "lnlnQ_wgts = ", lnlnQ_wgts(0:nQ)
+   !write(6,*) "general: Qvals = ", tab%Q_vals(ilnlnQ_lo:ilnlnQ_hi)
+
 
    ! 2024-11-29 (Mac M2, gfortran 14.2) explored various options here,
    ! including going via a 2D wgts vector, and having an if statement to
@@ -915,7 +1151,7 @@ contains
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
   subroutine EvalPdfTable_xQ(tab,x,Q,val)
-    type(pdf_table), intent(in) :: tab
+    type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: x, Q
     real(dp),    intent(out) :: val(iflv_min:)
     call EvalPdfTable_yQ(tab,-log(x),Q,val)
@@ -924,12 +1160,156 @@ contains
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
   function EvalPdfTable_xQf(tab,x,Q,iflv) result(val)
-    type(pdf_table), intent(in) :: tab
+    type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: x, Q
     integer,      intent(in) :: iflv
     real(dp) :: val
     val = EvalPdfTable_yQf(tab,-log(x),Q,iflv)
   end function EvalPdfTable_xQf
+
+  ! 2025-09-08 attempt to explore potential for speedup in PDF
+  ! evaluation when we hard-code and inline as much as possible
+  function EvalPdfTable_yQf_order2_hc(tab,y,Q,iflv) result(val)
+    use interpolation_coeffs
+    type(pdf_table), intent(in), target :: tab
+    real(dp),        intent(in)         :: y, Q
+    integer,         intent(in)         :: iflv
+    real(dp)                            :: val
+    !----------------------------------------
+    integer, parameter :: NN = 2, halfNN=0
+    real(dp) :: y_wgts(0:NN), lnlnQ_wgts(0:NN), lnlnQ
+    integer  :: i_nf, iylo, ilnlnQ, igd
+    real(dp) :: ynorm, lnlnQ_norm
+    type(grid_def),   pointer :: subgd
+    type(pdfseginfo), pointer :: seginfo
+
+    !------ First deal with the y interpolation ------
+    ! For now, to get a sense of the maximal possible speed, we 
+    ! assume we have a standard 4-part locked grid -- we will revisit this later
+    ! once we have a better picture of speed
+    ! With that assumption, we know tab%grid%subgd(4) has largest ymax
+    if (y > tab%grid%subgd(4)%ymax .or. y < 0) then
+      call wae_error("EvalPdfTable_yQf_order2","y did not satisfy 0 <= y <= ymax, with y=",dbleval=y)
+    endif
+    do igd = 4, 2, -1
+      if (y > tab%grid%subgd(igd-1)%ymax) exit
+    end do
+
+    subgd => tab%grid%subgd(igd)
+    ynorm = y / subgd%dy
+    iylo = int(ynorm) - halfNN
+    if (iylo < 0) iylo = 0
+    if (iylo + NN > subgd%ny) iylo = subgd%ny - NN
+    call fill_interp_weights2(ynorm - iylo, y_wgts)
+    iylo = iylo + tab%grid%subiy(igd)
+
+    !----- next deal with the Q interpolation
+    lnlnQ = lnln(tab,Q)
+    if (lnlnQ < tab%lnlnQ_min) then
+      lnlnQ = tab%lnlnQ_min
+    else if (lnlnQ > tab%lnlnQ_max) then
+      call wae_error("EvalPdfTable_yQf_order2","Q was too large",dbleval=Q)
+    endif
+    if (.not. tab%nf_info_associated) call wae_error("EvalPdfTable_yQf_order2",&
+         &"tab%nf_info_associated was not set")
+    do i_nf = tab%nflo, tab%nfhi-1
+      if (lnlnQ < tab%seginfo(i_nf)%lnlnQ_lo) exit
+    end do
+
+    seginfo => tab%seginfo(i_nf)
+    lnlnQ_norm = (lnlnQ - seginfo%lnlnQ_lo) / seginfo%dlnlnQ
+    if (seginfo%ilnlnQ_hi - seginfo%ilnlnQ_lo < NN) then
+      call wae_error("EvalPdfTable_yQf_order2","not enough points in Q segment")
+    end if
+    ilnlnQ = int(lnlnQ_norm) + seginfo%ilnlnQ_lo - halfNN
+    if (ilnlnQ    < seginfo%ilnlnQ_lo) ilnlnQ = seginfo%ilnlnQ_lo
+    if (ilnlnQ+NN > seginfo%ilnlnQ_hi) ilnlnQ = seginfo%ilnlnQ_hi - NN
+    call fill_interp_weights2(lnlnQ_norm - (ilnlnQ-seginfo%ilnlnQ_lo), lnlnQ_wgts)
+
+    val = sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0) &
+        + sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ+1) * y_wgts) * lnlnQ_wgts(1) &
+        + sum(tab%tab(iylo:iylo+NN, iflv,ilnlnQ+2) * y_wgts) * lnlnQ_wgts(2)
+  end function EvalPdfTable_yQf_order2_hc
+
+  !! given a table and a y value, sets up a pointer (grid_ptr) to the relevant
+  !! grid or sub-grid, as well as the iy_offset to the start of that grid
+  !! in the y dimension of the table.
+  !!
+  !! Note that this function overlaps substantially with conv_BestISub,
+  !! Because of its location it can be inlined in other pdf_tabulate.f90 
+  !! routines, which gives a small but relevant speed advantage
+  subroutine tab_get_grid_ptr(tab, y, grid_ptr, iy_offset)
+    type(pdf_table), intent(in), target :: tab
+    real(dp), intent(in) :: y
+    type(grid_def), pointer :: grid_ptr
+    integer, intent(out) :: iy_offset
+    !----------------------------------------
+    type(grid_def), pointer :: grid
+    integer :: igd
+
+    grid => tab%grid
+    ! note that relative to conv_BestIsub, we bail out if we are
+    ! beyond grid%ymax
+    if (y > grid%ymax .or. y < 0) then
+      call wae_error("tab_get_grid_ptr","y did not satisfy 0 <= y <= ymax, with y=",dbleval=y)
+    endif
+
+    if (associated(grid%subgd)) then
+      if (grid%locked) then
+        do igd = size(grid%subgd), 2, -1
+          if (y > grid%subgd(igd-1)%ymax) exit
+        end do
+      else
+        igd = minloc(grid%subgd%ymax,dim=1,mask=(grid%subgd%ymax>=y))
+      end if
+      grid_ptr => grid%subgd(igd)
+      iy_offset = grid%subiy(igd)
+    else
+      grid_ptr => grid
+      iy_offset = 0
+    endif
+  end subroutine tab_get_grid_ptr
+
+  !subroutine tab_get_seginfo_ptr(tab, lnlnQ, seginfo_ptr)
+  !  type(pdf_table), intent(in), target :: tab
+  !  real(dp),        intent(inout)      :: lnlnQ
+  !  type(pdfseginfo), pointer           :: seginfo_ptr
+  !  !----------------------------------------
+  !  integer :: i_nf
+  !
+  !  if (lnlnQ < tab%lnlnQ_min) then
+  !    lnlnQ = tab%lnlnQ_min
+  !  else if (lnlnQ > tab%lnlnQ_max) then
+  !    call wae_error("EvalPdfTable_yQ_orderNNNN","Q was too large",dbleval=invlnln(tab,lnlnQ))
+  !  endif
+  !  if (.not. tab%nf_info_associated) then
+  !    seginfo_ptr => tab%seginfo_no_nf
+  !  else
+  !    do i_nf = tab%nflo, tab%nfhi-1
+  !      if (lnlnQ < tab%seginfo(i_nf)%lnlnQ_lo) exit
+  !    end do
+  !    seginfo_ptr => tab%seginfo(i_nf)
+  !  end if
+  !end subroutine tab_get_seginfo_ptr
+
+  ! the following code loads the appropriate PDF evaluation subroutine
+  ! with the order hard-coded to NNNN
+#define __HOPPET_InterpOrder__ 2
+#include "inc/pdf_tabulate_OrderNNN.F90"
+
+#define __HOPPET_InterpOrder__ 3
+#include "inc/pdf_tabulate_OrderNNN.F90"
+
+#define __HOPPET_InterpOrder__ 4
+#include "inc/pdf_tabulate_OrderNNN.F90"
+
+#define __HOPPET_InterpOrderY__ 5
+#define __HOPPET_InterpOrderQ__ 4
+#include "inc/pdf_tabulate_OrderNNN.F90"
+
+#define __HOPPET_InterpOrderY__ 6
+#define __HOPPET_InterpOrderQ__ 4
+#include "inc/pdf_tabulate_OrderNNN.F90"
 
   !--------------------------------------------------------------------
   !! Sets the pdf(0:iflv_min:) for the PDF at this value of Q.
@@ -1007,7 +1387,7 @@ contains
                                  & iy_increment, &
                                  & flav_indices, flav_pdg_ids, flav_rescale)                                
     use qed_objects
-    type(pdf_table),        intent(in) :: table
+    type(pdf_table), target, intent(in) :: table
     type(running_coupling), intent(in) :: coupling
     character(len=*),       intent(in) :: basename
     integer,                intent(in) :: pdf_index
@@ -1308,13 +1688,14 @@ contains
   !! interpolating the table
   !!
   subroutine get_lnlnQ_wgts(tab, Q, lnlnQ_wgts, ilnlnQ_lo, ilnlnQ_hi)
+    use hoppet_to_string
     type(pdf_table), intent(in) :: tab
     real(dp), intent(in)    :: Q
     real(dp), intent(out)   :: lnlnQ_wgts(0:)
     integer,  intent(out)   :: ilnlnQ_lo, ilnlnQ_hi
     !------------------------------------------------
     real(dp) :: lnlnQ, lnlnQ_norm
-    integer  :: nQ
+    integer  :: nQ, nQ_request
     integer, save :: warn_id = warn_id_INIT
 
     !-- Q weights need some help in finding location etc.
@@ -1332,20 +1713,42 @@ contains
       lnlnQ_wgts = zero ! set this to avoid warning
       return
     end if
+
     
-    call request_iQrange(tab,lnlnQ, tab%lnlnQ_order,&
+    nQ_request = tab%lnlnQ_order    
+    if (override_order_Q > 0) then
+      nQ_request = override_order_Q
+    else
+      nQ_request = tab%lnlnQ_order
+    end if
+    if (nQ_request > ubound(lnlnQ_wgts,1)) then
+      call wae_error('get_lnlnQ_wgts',&
+         & 'lnlnQ_wgts too small (ubound='//trim(to_string(ubound(lnlnQ_wgts,1)))&
+         //') for requested Q interpolation (nQ_request='//trim(to_string(nQ_request))//')')
+    end if
+    call request_iQrange(tab,lnlnQ, nQ_request,&
          &               ilnlnQ_lo, ilnlnQ_hi, lnlnQ_norm)
 
     nQ = ilnlnQ_hi - ilnlnQ_lo
-    if (nQ < ubound(lnlnQ_wgts,1)) then 
-      ! nQ can be zero if the table had a very narrow range of Q values (< O(min_dlnlnQ_singleQ))
-      if (nQ == 0 .and. abs(lnlnQ - tab%lnlnQ_vals(ilnlnQ_lo)) < two * min_dlnlnQ_singleQ) then
-         lnlnQ_wgts(0) = 1
-      else
-         !write(6,*) "Q=", Q, 'nQ = ',nQ, 'lnlnQ_wgts = ',ubound(lnlnQ_wgts,1), tab%nf_int
+    if (nQ == 0) then
+       if (abs(lnlnQ - tab%lnlnQ_vals(ilnlnQ_lo)) < two * min_dlnlnQ_singleQ) then
+          lnlnQ_wgts(0) = 1
+       else
          call wae_error('get_lnlnQ_wgts',&
-            & 'lnlnQ_wgts too small for requested Q interpolation')
-      end if
+            & 'nQ=0 but lnlnQ='//trim(to_string(lnlnQ))//&
+            & ' not close enough to tab%lnlnQ_vals(ilnlnQ_lo)(='//trim(to_string(tab%lnlnQ_vals(ilnlnQ_lo)))//')')
+       end if
+
+    !else if (nQ < ubound(lnlnQ_wgts,1)) then
+    !  ! nQ can be zero if the table had a very narrow range of Q values (< O(min_dlnlnQ_singleQ))
+    !  if (nQ == 0 .and. abs(lnlnQ - tab%lnlnQ_vals(ilnlnQ_lo)) < two * min_dlnlnQ_singleQ) then
+    !     lnlnQ_wgts(0) = 1
+    !  else
+    !     !write(6,*) "Q=", Q, 'nQ = ',nQ, 'lnlnQ_wgts = ',ubound(lnlnQ_wgts,1), tab%nf_int
+    !     call wae_error('get_lnlnQ_wgts',&
+    !        & 'lnlnQ_wgts too small (ubound='//trim(to_string(ubound(lnlnQ_wgts,1)))&
+    !        //') for requested Q interpolation (nQ='//trim(to_string(nQ))//')')
+    !  end if
     end if
     call uniform_interpolation_weights(lnlnQ_norm, lnlnQ_wgts(0:nQ))
 
@@ -1363,7 +1766,7 @@ contains
   !! return value of lnlnQ_norm = (lnlnQ - lnlnQ(iQ_lo))/dlnlnQ
   !!
   subroutine request_iQrange(tab, lnlnQ, nrequest, iQ_lo, iQ_hi, lnlnQ_norm)
-    type(pdf_table), intent(in) :: tab
+    type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: lnlnQ
     integer,      intent(in) :: nrequest
     integer,     intent(out) :: iQ_lo, iQ_hi

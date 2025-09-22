@@ -450,8 +450,8 @@ suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons.
 Examples of the streamlined interface being used with QED evolution
 can be found in
 \begin{quote}
-  \repolink{example_f90/tabulation_example_qed_streamlined.f90}{example\_f90/tabulation\_example\_qed\_streamlined.f90}\\
-  \repolink{example_f77/cpp_tabulation_example_qed.cc}{example\_f77/cpp\_tabulation\_example\_qed.cc}
+  \masterlink{example_f90/tabulation_example_qed_streamlined.f90}\\
+  \masterlink{example_cpp/tabulation_example_qed.cc}
 \end{quote}
 %\gps{added this last paragraph}
 %\gps{NB: to make links work, I've hard-coded them to the current
@@ -571,7 +571,7 @@ the time of writing this release note. To assess the evolution we take
 the initial condition of Ref.~\cite{Dittmar:2005ed} at an initial
 scale $\sqrt{2}~\text{GeV}$ and $n_f=3$. We evolve to
 $Q=100~\text{GeV}$. The table can be reproduced by running
-\repolink{example_f90/tabulation_example_n3lo.f90}{example\_f90/tabulation\_example\_n3lo.f90}. The
+\masterlink{example_f90/tabulation_example_n3lo.f90}. The
 numbers are obtained using parametrised NNLO splitting functions, but
 exact mass thresholds at this order.
 %
@@ -1022,7 +1022,7 @@ would be defined as \ttt{double ff[14]}.
 
 An example of structure function evaluations using the \CPP{} version of
 the streamlined interface is to be found in
-\repolink{example_f77/cpp_structure_functions_example.cc}{example\_f77/cpp\_structure\_functions\_example.cc}.
+\repolink{example_cpp/cpp_structure_functions_example.cc}{example\_cpp/cpp\_structure\_functions\_example.cc}.
 %
 %\gps{added this link}
 
@@ -1058,9 +1058,15 @@ hardware in 2025.
     \end{subfigure}
     \caption{Accuracy (top) and timing (bottom) versus \texttt{dy} at
       (a) NNLO and (b) N$^3$LO in \hoppet{} v2.0.0. The timings were
-      obtained on an \texttt{M2Pro} with \texttt{gfortran v14.2} and
+      obtained on an \texttt{M2Pro} with \texttt{gfortran v15.1} and
       \texttt{-O3} optimisation. We have further used \texttt{ymax = 12} and
-      \texttt{dlnlnQ = dy/4}.}
+      \texttt{dlnlnQ = dy/4}.
+      %
+      \gps{Should second plot move to \S~\ref{sec:fastpdf}? And put
+        $Y$-order first, as in the override call?}
+      \gps{Comment on \texttt{eps} as concerns initialisation time, or
+      cut off the plot}
+    }
     \label{fig:main}
 \end{figure}
 
@@ -1179,7 +1185,7 @@ NNLO.\footnote{Note that at N3LO we have omitted the
 % $x<0.7$ the accuracy is comparable to that at NNLO.
 
 For the timing studies we again run \hoppet{} for different values of
-\texttt{dy}, on an \texttt{M2Pro} with \texttt{gfortran v14.2} and
+\texttt{dy}, on an \texttt{M2Pro} (MacOS 15.6.1) with \texttt{gfortran v15.1} and
 \texttt{-O3} optimisation.
 %In order to avoid fluctuations we take the
 %average over \ak{N} runs.
@@ -1427,6 +1433,8 @@ either through a call to \ttt{hoppetAssign} or \ttt{hoppetEvolve}.
 
 \section{Fast PDF access}
 \label{sec:fastpdf}
+\gps{Proximity to  ``performance'' section?}
+
 In this section we detail some new functionality which provides fast
 PDF access within the streamlined interface (including the Python
 interface). Outside the streamlined interface this was already
@@ -1471,13 +1479,13 @@ the level of $\mathcal{O}(0.01\%)$.}
     \hline
   \end{tabular}
   \caption{Performance of different interpolation orders for a call to
-  \ttt{hoppetEval} with all flavours.\ak{Gavin to update with M2Pro}}
+  \ttt{hoppetEval} with all flavours, and the equivalent call in LHAPDF.  \ak{Gavin to update with M2Pro}}
   \label{tab:interp_performance}
 \end{table}
 %
 In table~\ref{tab:interp_performance} we show the performance of
 different interpolation orders. The timings were obtained on an
-\texttt{M2Pro} with \texttt{gfortran v14.2} and \texttt{-O3}
+\texttt{M2Pro} with \texttt{gfortran v15.1} and \texttt{-O3}
 optimisation. We also report the timings found by calling LHAPDF
 directly.\footnote{With the Fortran interface that comes with LHAPDF
 6.5.5, \ttt{LHAGlue.cc}, we actually find that a call to
@@ -1495,8 +1503,8 @@ For users who wish to use an existing LHAPDF grid directly with
 \hoppet{}, we provide examples in Fortran, CPP{}, and Python, which
 can be found here \\[0.2cm]
 \repolink{example_f90/with-lhapdf/fast_pdf_evaluation.f90}{example\_f90/with-lhapdf/fast\_pdf\_evaluation.f90}, \\
-\repolink{example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc}{example\_f77/with-lhapdf/cpp\_fast\_pdf\_evaluation.cc}, \\
-\repolink{pyinterface/tabulation_example_lhapdf.py}{pyinterface/tabulation\_example\_lhapdf.py}. \\[0.2cm]
+\repolink{example_cpp/with-lhapdf/cpp_fast_pdf_evaluation.cc}{example\_cpp/with-lhapdf/cpp\_fast\_pdf\_evaluation.cc}, \\
+\repolink{example_py/tabulation_example_lhapdf.py}{example\_py/tabulation\_example\_lhapdf.py}. \\[0.2cm]
 
 The Fortran and \CPP{} examples are virtually identical, and the
 \ttt{subroutine} respectively \ttt{void}
