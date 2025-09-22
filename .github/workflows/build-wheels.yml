@@ -86,17 +86,10 @@ jobs:
           brew install gcc gfortran swig cmake
           brew tap davidchall/hep
           brew install lhapdf || echo "LHAPDF install failed, continuing..."
-          ls /opt/homebrew/bin/g*
+          #ls /opt/homebrew/bin/g*
 
-          # Find and set gfortran path
-          GFORTRAN_PATH=$(find /opt/homebrew/bin /usr/local/bin -name "gfortran*" | head -1)
-          echo "Found gfortran at: $GFORTRAN_PATH"
-          
-          # Create a simple wrapper or symlink
-          ln -sf "$GFORTRAN_PATH" /usr/local/bin/gfortran
-          
           cmake -S . -B BUILD \
-            -DCMAKE_Fortran_COMPILER="$GFORTRAN_PATH" \
+            -DCMAKE_Fortran_COMPILER=gfortran-15 \
             -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL \
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -112,6 +105,7 @@ jobs:
         # Simplified environment variables for macOS
         CIBW_ENVIRONMENT_MACOS: >
           CMAKE_BUILD_PARALLEL_LEVEL=2
+          CMAKE_GENERATOR="Unix Makefiles"
           FC=/opt/homebrew/bin/gfortran-15
           CMAKE_Fortran_COMPILER=/opt/homebrew/bin/gfortran-15
           CC=/opt/homebrew/bin/gcc-15
