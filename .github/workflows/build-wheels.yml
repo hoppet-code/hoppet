@@ -78,7 +78,7 @@ jobs:
           cmake --install BUILD
           ldconfig
         
-        # macOS dependencies
+        # macOS dependencies and build
         CIBW_BEFORE_BUILD_MACOS: |
           brew install gcc gfortran swig cmake
           brew tap davidchall/hep
@@ -88,8 +88,9 @@ jobs:
           GFORTRAN_PATH=$(find /opt/homebrew/bin /usr/local/bin -name "gfortran*" | head -1)
           echo "Found gfortran at: $GFORTRAN_PATH"
           
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL \
+          cmake -S . -B BUILD \
             -DCMAKE_Fortran_COMPILER="$GFORTRAN_PATH" \
+            -DCMAKE_INSTALL_PREFIX="$(pwd)/install" \
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DHOPPET_USE_EXACT_COEF=ON \
@@ -97,6 +98,17 @@ jobs:
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON
           cmake --build BUILD -j 2
           cmake --install BUILD
+          
+          # Export paths for the wheel build
+          export DYLD_LIBRARY_PATH="$(pwd)/install/lib:$DYLD_LIBRARY_PATH"
+
+        # Set environment variables for macOS wheel build
+        CIBW_ENVIRONMENT_MACOS: >
+          CMAKE_BUILD_PARALLEL_LEVEL=2
+          FC=$(find /opt/homebrew/bin /usr/local/bin -name "gfortran*" | head -1)
+          CMAKE_Fortran_COMPILER=$(find /opt/homebrew/bin /usr/local/bin -name "gfortran*" | head -1)
+          CC=/opt/homebrew/bin/gcc-13
+          CXX=/opt/homebrew/bin/g++-13
         
         # Use parallel compilation
         CIBW_ENVIRONMENT: CMAKE_BUILD_PARALLEL_LEVEL=4
