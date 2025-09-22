@@ -25,6 +25,7 @@ program hoppet_unit_tests
 
   call test_interpolation_coeffs()
   call test_tab_eval()
+  call unit_tests_alphas()
 
   if (unit_test_failures > 0) then
     ! print a message in red

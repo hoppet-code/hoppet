@@ -22,14 +22,16 @@ module qcd_coupling
   private
 
 
-  type running_coupling 
-     !private
-     type(na_handle) :: nah      ! simply "redirect" to new coupling
-     logical         :: use_nah
-     !-- following components are related to old analytical approximations
-     real(dp) :: QCDL5
-     real(dp) :: BN(3:6), CN(3:6), CN5(3:6)
-     integer  :: nloop, nf
+type running_coupling 
+    !private
+    type(na_handle) :: nah      ! simply "redirect" to new coupling
+    logical         :: use_nah
+    !-- following components are related to old analytical approximations
+    real(dp) :: QCDL5
+    real(dp) :: BN(3:6), CN(3:6), CN5(3:6)
+    integer  :: nloop, nf
+ contains
+    procedure :: Value => as_Value_ash
   end type running_coupling
   public :: running_coupling
 
@@ -241,9 +243,9 @@ contains
 
   !======================================================================
   function as_Value_ash(coupling, Q, fixnf) result(Value)
+    class(running_coupling)      :: coupling
     real(dp), intent(in) :: Q
     real(dp)             :: Value
-    type(running_coupling)      :: coupling
     integer, intent(in), optional :: fixnf
     if (coupling%use_nah) then
        Value = na_Value(coupling%nah, Q, fixnf)

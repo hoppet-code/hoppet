@@ -24,7 +24,7 @@ block;\
 #define TIME_END(OUT) \
     end do;\
     call cpu_time(t_end);\
-    print *,"TIME:",name,": ",(t_end-t_start)/nrep*1e9_dp,"ns",OUT;\
+    print *,"TIME:",name,": ",(t_end-t_start)/nrep*1e9_dp,"ns, result =",OUT;\
   else if (list_timing) then;\
     print *,"TIME: (skipped) ",trim(name);\
   end if;\

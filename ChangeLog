@@ -13,6 +13,15 @@
 	some reorganisation, addition of some command-line arguments
 	to control timing tests
 
+	* unit-tests/test_alphas.f90: *** ADDED ***
+	* unit-tests/gen-alphas-ref.py: *** ADDED ***
+	added code for testing alphas routines, including a Python
+	script to generate reference results
+
+	* src/qcd_coupling.f90:
+	given an type(qcd_coupling) object alphas, one can now call
+	alphas%Value(Q[,fixnf]).
+
 2025-09-19 Alexander + Gavin
 
 	* CMakeLists.txt:
