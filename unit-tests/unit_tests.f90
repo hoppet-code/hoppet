@@ -14,6 +14,7 @@ module unit_tests
 
   character(len=*), parameter :: red = achar(27)//'[31m'
   character(len=*), parameter :: green = achar(27)//'[32m'
+  character(len=*), parameter :: blue = achar(27)//'[34m'
   character(len=*), parameter :: reset = achar(27)//'[0m'
 
   integer :: unit_test_failures = 0

@@ -22,6 +22,16 @@
 	given an type(qcd_coupling) object alphas, one can now call
 	alphas%Value(Q[,fixnf]).
 
+	* src/new_as.f90:
+
+	the na_Value routine is now a routine that uses polynominal
+	interpolation by default, but reverts to na_Value_full (the old
+	na_Value) if the requested Q is beyond the pre-calculated range
+	(overall or for that nf) or if fixnf is requested. 
+	This brings a speed fain from about 33ns/call to about 11ns/call
+	on M2Pro-gfortran15.1-O3
+	(test timing with ./unit-tests/hoppet-unit-tests -time alphas)
+
 2025-09-19 Alexander + Gavin
 
 	* CMakeLists.txt:

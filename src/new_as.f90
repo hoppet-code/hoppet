@@ -33,9 +33,8 @@ module new_as
   real(dp), parameter :: thi = 93.0_dp 
   integer,  parameter :: nofixnf = -1000000045
 
-  public na_Value_faster
   public :: na_handle
-  public :: na_Init, na_Value, na_Del, na_NumberOfLoops
+  public :: na_Init, na_Value, na_Value_full, na_Del, na_NumberOfLoops
   public :: na_nfRange, na_nfAtQ, na_QrangeAtNf, na_QuarkMass
   public :: na_QuarkMassesAreMSbar
   public :: na_Set_dt_base
@@ -315,7 +314,7 @@ contains
   ! steps at alpha_s thresholds, it is important so that certain D.E.
   ! routines (e.g. for PDF evolution) do not give alpha values at end 
   ! points that give non-smoothness.
-  function na_Value(nah, Q, fixnf) result(res)
+  function na_Value_full(nah, Q, fixnf) result(res)
     type(na_handle), intent(in), target :: nah
     real(dp),        intent(in)         :: Q
     integer,         intent(in), optional :: fixnf
@@ -336,23 +335,23 @@ contains
 
     if (present(fixnf) .and. nah%fixnf == nofixnf) then
        if (fixnf < nah%nlo .or. fixnf > nah%nhi) then
-          call wae_error('na_Value:', 'the fixnf requested is&
+          call wae_error('na_Value_full:', 'the fixnf requested is&
                & outside the range supported this na_handle')
        end if
        if (t < tlo .or. t > thi) then
-          call wae_error('na_Value:', 'the Q value is&
+          call wae_error('na_Value_full:', 'the Q value is&
                & outside the range supported this na_handle')
        end if
        nseg = fixnf
        !if (t > nah%seg(nseg)%thi+ nah%seg(nseg)%dt .or.&
        !     & t < nah%seg(nseg)%tlo-nah%seg(nseg)%dt) then
-       !   call wae_error('na_Value:', &
+       !   call wae_error('na_Value_full:', &
        !        &  'With fixnf, Q is too far outside supported range.')
        !end if
     else
        if (present(fixnf) .and. nah%fixnf /= nofixnf) then
           if (fixnf /= nah%fixnf) then
-             call wae_error('na_Value:', 'the fixnf requested is &
+             call wae_error('na_Value_full:', 'the fixnf requested is &
                   &different from that supported by na_handle')
           end if
        end if
@@ -360,7 +359,7 @@ contains
           if (t <= nah%seg(nseg)%thi .and. t >= nah%seg(nseg)%tlo) exit
        end do
        if (nseg > nah%nhi) &
-            &call wae_Error('na_Value: Specified Q is not in supported range'&
+            &call wae_Error('na_Value_full: Specified Q is not in supported range'&
             &,dbleval=Q)
     end if
     
@@ -379,7 +378,7 @@ contains
     if (abs(delta_t) <= 1.3_dp*seg%dt) then
        res = one/na_evolve(seg%ra(i), delta_t, seg)
     else
-       call wae_warn(max_warn,warn_id,'na_Value: will evolve &
+       call wae_warn(max_warn,warn_id,'na_Value_full: will evolve &
             &fixed-nf alpha_s beyond precalculated range.',&
             &'This procedure may be very slow, Q=', dbleval=Q)
        !write(0,*) Qoft(seg%tlo),Qoft(seg%thi),Q
@@ -392,15 +391,16 @@ contains
        res = one/ra
     end if
     !write(0,'(f15.10,i,f15.12)') t, nseg, res ! HOPPER TESTING
-  end function na_Value
+  end function na_Value_full
 
   !! Faster evaluation of alpha_s, with fewer options; reverts
-  !! to na_Value for some edge cases and also doesn't have the 
+  !! to _full for some edge cases and also doesn't have the 
   !! fixnf option
-  function na_Value_faster(nah, Q) result(res)
+  function na_Value(nah, Q, fixnf) result(res)
     use interpolation_coeffs; use interpolation
     type(na_handle), intent(in), target :: nah
     real(dp),        intent(in)         :: Q
+    integer,         intent(in), optional :: fixnf
     real(dp) :: res
     !---------------
     real(dp) :: t, tnorm, tdarr(0:4), itd, prod
@@ -410,9 +410,14 @@ contains
     integer  :: iseg, it, i
     type(na_segment), pointer :: this_seg
     
+    if (present(fixnf)) then
+      res = na_Value_full(nah, Q, fixnf)
+      return
+    end if
+
     t = tofQ(Q)
     if (t < nah%seg(nah%nlo)%tlo .or. t > nah%seg(nah%nhi)%thi) then
-      res = na_Value(nah,Q)
+      res = na_Value_full(nah,Q)
       return
     end if
 
@@ -423,8 +428,8 @@ contains
 
     this_seg => nah%seg(iseg)
     if (ubound(this_seg%ra,1) < 4) then
-      ! not enough points to do the interpolation, so just use na_Value
-      res = na_Value(nah,Q)
+      ! not enough points to do the interpolation, so just use na_value_full
+      res = na_Value_full(nah,Q)
       return
     end if
 
@@ -470,7 +475,7 @@ contains
     !res = sum(tdarr * this_seg%ra(it:it+4))
 
     res = one / res
-  end function na_Value_faster
+  end function na_Value
 
 
   !======================================================================
