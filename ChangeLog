@@ -1,3 +1,18 @@
+2025-09-22 Gavin
+
+	* benchmarking/io_utils.f90:
+	* benchmarking/lcl_dec.f90:
+	moved routines for accessing command-line arguments from lcl_dec.f90 
+	to io_utils.f90 so as to require compilation with just one file;
+	also added an io_utils module to provide a name that matches the 
+	filename.
+
+	* unit-tests/:
+	* unit_tests/timing.inc: *** ADDED ***
+	* unit_tests/test_interpolation.F90: *** ADDED ***
+	some reorganisation, addition of some command-line arguments
+	to control timing tests
+
 2025-09-19 Alexander + Gavin
 
 	* CMakeLists.txt:

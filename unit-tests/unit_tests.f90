@@ -1,7 +1,12 @@
 module unit_tests
   use types
   use hoppet_to_string
+  use io_utils
   implicit none
+
+  ! anything matching this will be timed
+  character(len=max_arg_len):: timing_name = "fill_interp_weights6:x4"
+  logical :: list_timing = .false.
 
   interface check_approx_eq
      module procedure check_approx_eq_0d, check_approx_eq_1d
