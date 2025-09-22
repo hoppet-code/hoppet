@@ -9,6 +9,10 @@
 \usepackage{listings}
 \usepackage{hyperref}
 \usepackage{subcaption}
+\usepackage{xstring}
+\newcommand{\escapeunderscores}[1]{%
+  \StrSubstitute{#1}{_}{\_}%
+}
 %\usepackage[style=numeric,citestyle=numeric-comp,sorting=ynt,defernumbers=true,backend=biber]{biblatex}
 
 % \textwidth 21cm
@@ -23,7 +27,7 @@
 %\topmargin -0.5cm  % for hep-ph
 
 \newcommand{\repolink}[2]{\href{https://github.com/hoppet-code/hoppet/blob/master/#1}{\ttt{#2}}}
-\newcommand{\masterlink}[1]{\repolink{#1}{#1}}
+\newcommand{\masterlink}[1]{\repolink{#1}{\escapeunderscores{#1}}}
 
 
 \def\APFELPP{{APFEL\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}}

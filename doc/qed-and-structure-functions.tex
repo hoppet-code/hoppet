@@ -450,8 +450,8 @@ suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons.
 Examples of the streamlined interface being used with QED evolution
 can be found in
 \begin{quote}
-  \repolink{example_f90/tabulation_example_qed_streamlined.f90}{example\_f90/tabulation\_example\_qed\_streamlined.f90}\\
-  \repolink{example_f77/cpp_tabulation_example_qed.cc}{example\_f77/cpp\_tabulation\_example\_qed.cc}
+  \masterlink{example_f90/tabulation_example_qed_streamlined.f90}\\
+  \masterlink{example_cpp/tabulation_example_qed.cc}
 \end{quote}
 %\gps{added this last paragraph}
 %\gps{NB: to make links work, I've hard-coded them to the current
@@ -571,7 +571,7 @@ the time of writing this release note. To assess the evolution we take
 the initial condition of Ref.~\cite{Dittmar:2005ed} at an initial
 scale $\sqrt{2}~\text{GeV}$ and $n_f=3$. We evolve to
 $Q=100~\text{GeV}$. The table can be reproduced by running
-\repolink{example_f90/tabulation_example_n3lo.f90}{example\_f90/tabulation\_example\_n3lo.f90}. The
+\masterlink{example_f90/tabulation_example_n3lo.f90}. The
 numbers are obtained using parametrised NNLO splitting functions, but
 exact mass thresholds at this order.
 %
@@ -1022,7 +1022,7 @@ would be defined as \ttt{double ff[14]}.
 
 An example of structure function evaluations using the \CPP{} version of
 the streamlined interface is to be found in
-\repolink{example_f77/cpp_structure_functions_example.cc}{example\_f77/cpp\_structure\_functions\_example.cc}.
+\repolink{example_cpp/cpp_structure_functions_example.cc}{example\_cpp/cpp\_structure\_functions\_example.cc}.
 %
 %\gps{added this link}
 
@@ -1503,8 +1503,8 @@ For users who wish to use an existing LHAPDF grid directly with
 \hoppet{}, we provide examples in Fortran, CPP{}, and Python, which
 can be found here \\[0.2cm]
 \repolink{example_f90/with-lhapdf/fast_pdf_evaluation.f90}{example\_f90/with-lhapdf/fast\_pdf\_evaluation.f90}, \\
-\repolink{example_f77/with-lhapdf/cpp_fast_pdf_evaluation.cc}{example\_f77/with-lhapdf/cpp\_fast\_pdf\_evaluation.cc}, \\
-\repolink{pyinterface/tabulation_example_lhapdf.py}{pyinterface/tabulation\_example\_lhapdf.py}. \\[0.2cm]
+\repolink{example_cpp/with-lhapdf/cpp_fast_pdf_evaluation.cc}{example\_cpp/with-lhapdf/cpp\_fast\_pdf\_evaluation.cc}, \\
+\repolink{example_py/tabulation_example_lhapdf.py}{example\_py/tabulation\_example\_lhapdf.py}. \\[0.2cm]
 
 The Fortran and \CPP{} examples are virtually identical, and the
 \ttt{subroutine} respectively \ttt{void}
