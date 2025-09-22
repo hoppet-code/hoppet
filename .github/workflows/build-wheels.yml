@@ -86,7 +86,8 @@ jobs:
           brew install gcc gfortran swig cmake
           brew tap davidchall/hep
           brew install lhapdf || echo "LHAPDF install failed, continuing..."
-          
+          ls /opt/homebrew/bin/g*
+
           # Find and set gfortran path
           GFORTRAN_PATH=$(find /opt/homebrew/bin /usr/local/bin -name "gfortran*" | head -1)
           echo "Found gfortran at: $GFORTRAN_PATH"
@@ -111,10 +112,10 @@ jobs:
         # Simplified environment variables for macOS
         CIBW_ENVIRONMENT_MACOS: >
           CMAKE_BUILD_PARALLEL_LEVEL=2
-          FC=/usr/local/bin/gfortran
-          CMAKE_Fortran_COMPILER=/usr/local/bin/gfortran
-          CC=/opt/homebrew/bin/gcc-13
-          CXX=/opt/homebrew/bin/g++-13
+          FC=/opt/homebrew/bin/gfortran-15
+          CMAKE_Fortran_COMPILER=/opt/homebrew/bin/gfortran-15
+          CC=/opt/homebrew/bin/gcc-15
+          CXX=/opt/homebrew/bin/g++-15
 
         CIBW_ENVIRONMENT_LINUX: CMAKE_BUILD_PARALLEL_LEVEL=4
         
