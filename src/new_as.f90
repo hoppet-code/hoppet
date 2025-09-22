@@ -647,7 +647,7 @@ contains
     type is (na_segment)
       dra = seg%beta0 + seg%beta1/ra + seg%beta2/ra**2 + seg%beta3/ra**3
     class default
-      dra = zero
+      call wae_error('na_deriv: unknown polymorphic type for seg')
     end select
   end subroutine na_deriv
 
