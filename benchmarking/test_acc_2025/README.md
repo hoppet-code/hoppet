@@ -4,6 +4,9 @@ This directory contains the scripts used for the 2025 paper discussing
 the v2 release of hoppet. The datafiles for the actual precision and
 timing results are to be found at
 https://github.com/hoppet-code/2025-prec-and-timing
+For some plotting scripts, this is assumed to be in the
+which is assumed to be in the `../../../2025-prec-and-timing/`
+directory.
 
 ## Scripts for generating results
 
