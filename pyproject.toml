@@ -9,9 +9,11 @@ version = "2.0.0"
 description = "HOPPET -- A Higher Order Perturbative Parton Evolution Toolkit"
 authors = [
     {name = "Frederic Dreyer"},
+    {name = "Alexander Karlberg"},
     {name = "Alexander Karlberg", email = "alexander.karlberg@cern.ch"},
     {name = "Paolo Nason"},
     {name = "Juan Rojo"},
+    {name = "Gavin Salam"},
     {name = "Gavin Salam", email = "gavin.salam@physics.ox.ac.uk"},
     {name = "Giulia Zanderighi"}
 ]
@@ -29,11 +31,16 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Physics",
 ]
-license = "GPL-3.0-or-later"
+license = {text = "GPL-3.0-or-later"}
 readme = "README.md"
 requires-python = ">=3.8"
 # Add any Python dependencies here
 dependencies = ["numpy"]
+
+[project.urls]
+Homepage = "https://github.com/hoppet-code"
+Repository = "https://github.com/hoppet-code/hoppet"
+Changelog = "https://github.com/hoppet-code/hoppet/blob/master/ChangeLog"
 
 [tool.scikit-build]
 cmake.source-dir = "."
