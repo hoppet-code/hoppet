@@ -25,7 +25,7 @@ jobs:
       run: |
         # Build Python wheel
         python3 -m pip install build scikit-build-core
-        python3 -m build
+        CMAKE_BUILD_PARALLEL_LEVEL=$(nproc) python3 -m build
         
         # Test wheel installation
         python3 -m pip install dist/*.whl

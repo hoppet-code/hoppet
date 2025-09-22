@@ -32,7 +32,8 @@ endif()
 # Unix only, Windows is different
 set_property(TARGET hoppet_swig PROPERTY SUFFIX ".${Python_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
 
-target_link_libraries(hoppet_swig PUBLIC hoppet)
+#target_link_libraries(hoppet_swig PUBLIC hoppet)
+target_link_libraries(hoppet_swig PUBLIC hoppet_static)
 target_link_libraries(hoppet_swig PUBLIC Python::Module)
 
 #set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "$ORIGIN/../../../../lib")
@@ -67,6 +68,6 @@ set(pyexecdir "${HOPPET_PYTHON_INSTALL_DIR}" PARENT_SCOPE) # PARENT_SCOPE tells 
 #install(TARGETS hoppet_swig EXPORT HoppetTargets DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/hoppet_swig/__init__.py" DESTINATION hoppet)
 install(TARGETS hoppet_swig EXPORT HoppetTargets DESTINATION hoppet)
-install(TARGETS hoppet DESTINATION hoppet)
+#install(TARGETS hoppet DESTINATION hoppet)
 set(HOPPET_PYTHON_INSTALL_DIR ${HOPPET_PYTHON_INSTALL_DIR} PARENT_SCOPE) 
 
