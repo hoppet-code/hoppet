@@ -15,6 +15,39 @@ module sub_defs_io_consts
   integer, parameter :: max_line_len = 600
 end module sub_defs_io_consts
 
+!----------------------------------------------------------------------
+! Interfaces to the dec f90 iargc and getarg routines
+!----------------------------------------------------------------------
+integer function lcl_iargc()
+   implicit none
+   lcl_iargc = COMMAND_ARGUMENT_COUNT()
+end function lcl_iargc
+
+subroutine lcl_getarg(k, argk)
+   implicit none
+   integer,      intent(in)  :: k
+   character(*), intent(out) :: argk
+
+   call GET_COMMAND_ARGUMENT(k, argk)
+end subroutine lcl_getarg
+
+
+subroutine lcl_flush(idev)
+   implicit none
+   integer, intent(in) :: idev
+
+   flush(idev)
+end subroutine lcl_flush
+
+subroutine lcl_system(string)
+   implicit none
+   character(*), intent(in) :: string
+   !------------------------------------------------------------
+   !integer return_val, system
+
+   call  EXECUTE_COMMAND_LINE(string)
+end subroutine lcl_system
+
 
 
 !----------------------------------------------------------------------
@@ -22,6 +55,7 @@ end module sub_defs_io_consts
 !----------------------------------------------------------------------
 module sub_defs_io
   use sub_defs_io_consts
+
 
   interface
      subroutine open_arg(iarg, idev, ext, status, form, default_val)
@@ -248,6 +282,7 @@ module sub_defs_io
   end interface
   
 contains
+   
   !! sets hostname to the name of the machine (up to a max of 255 or the length
   !! of the string, whichever is smaller)
   !!
@@ -1085,3 +1120,10 @@ subroutine error_report(subname,line1,line2,line3,line4,action)
      write(0,'(a)') 'Execution continuing'
   end if
 end subroutine error_report
+
+!! alternative name to access to the sub_defs_io module,
+!! so as to match this filename
+module io_utils
+  use sub_defs_io
+  implicit none
+end module io_utils
