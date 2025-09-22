@@ -73,9 +73,9 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DHOPPET_USE_EXACT_COEF=ON \
             -DBUILD_PYTHON_BINDINGS=ON \
-	    -DHOPPET_BUILD_BENCHMARK=OFF \
-	    -DHOPPET_BUILD_EXAMPLES=OFF \
-	    -DHOPPET_ENABLE_TESTING=OFF \
+            -DHOPPET_BUILD_BENCHMARK=OFF \
+            -DHOPPET_BUILD_EXAMPLES=OFF \
+            -DHOPPET_ENABLE_TESTING=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON
           cmake --build BUILD -j
           cmake --install BUILD
@@ -101,9 +101,9 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DHOPPET_USE_EXACT_COEF=ON \
             -DBUILD_PYTHON_BINDINGS=ON \
-	    -DHOPPET_BUILD_BENCHMARK=OFF \
-	    -DHOPPET_BUILD_EXAMPLES=OFF \
-	    -DHOPPET_ENABLE_TESTING=OFF \
+            -DHOPPET_BUILD_BENCHMARK=OFF \
+            -DHOPPET_BUILD_EXAMPLES=OFF \
+            -DHOPPET_ENABLE_TESTING=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON
           cmake --build BUILD -j 2
           cmake --install BUILD
