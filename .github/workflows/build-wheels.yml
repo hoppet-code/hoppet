@@ -83,10 +83,13 @@ jobs:
         
         # macOS dependencies and build
         CIBW_BEFORE_BUILD_MACOS: |
-          brew install gcc gfortran swig cmake
+          brew install gcc gfortran swig cmake make
           brew tap davidchall/hep
           brew install lhapdf || echo "LHAPDF install failed, continuing..."
           #ls /opt/homebrew/bin/g*
+
+          # Remove ninja to force make
+          brew uninstall ninja || echo "ninja not installed"
 
           cmake -S . -B BUILD \
             -DCMAKE_Fortran_COMPILER=gfortran-15 \
