@@ -2,9 +2,7 @@ name: Test Python Wheels
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ 2025-09-python-wheels-new ]
 
 jobs:
   simple_test:
