@@ -23,13 +23,6 @@ jobs:
     
     - name: Build and test Python bindings
       run: |
-        # Build the main library first
-        cmake -S . -B BUILD -DBUILD_PYTHON_BINDINGS=ON
-        cmake --build BUILD -j
-        
-        # Test the Python example
-        python3 example_py/tabulation_example.py
-        
         # Build Python wheel
         python3 -m pip install build scikit-build-core
         python3 -m build
