@@ -45,7 +45,8 @@ Changelog = "https://github.com/hoppet-code/hoppet/blob/master/ChangeLog"
 [tool.scikit-build]
 cmake.source-dir = "."
 # Turn on hoppet interface and off all the examples
-cmake.define.HOPPET_BUILD_PYINTERFACE = "ON"
+cmake.define.HOPPET_BUILD_PYINTERFACE = "OFF"
+cmake.define.HOPPET_BUILD_PYWHEELS = "ON"
 cmake.define.HOPPET_BUILD_BENCHMARK = "OFF"
 cmake.define.HOPPET_BUILD_EXAMPLES = "OFF"
 cmake.define.HOPPET_BUILD_TESTDIR = "OFF"
