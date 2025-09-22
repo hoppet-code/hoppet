@@ -96,7 +96,7 @@ jobs:
           
           cmake -S . -B BUILD \
             -DCMAKE_Fortran_COMPILER="$GFORTRAN_PATH" \
-            -DCMAKE_INSTALL_PREFIX="$(pwd)/install" \
+            -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL \
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DHOPPET_USE_EXACT_COEF=ON \
