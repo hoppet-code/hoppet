@@ -1,0 +1,44 @@
+name: Test Build
+
+on:
+  push:
+    branches: [ 2025-09-python-wheels-new ]
+
+jobs:
+  test_build:
+    name: Test build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]  # Start with just Linux
+        python-version: ['3.10']  # Test with one Python version first
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install system dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gfortran swig cmake
+
+    - name: Build wheel
+      run: |
+        pip install scikit-build-core swig
+        CMAKE_BUILD_PARALLEL_LEVEL=4 python -m build
+
+    - name: Test import
+      run: |
+        pip install dist/*.whl
+        python -c "import hoppet; print('Success!')"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheels-test
+        path: dist/

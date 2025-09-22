@@ -1,0 +1,57 @@
+# hoppet/pyinterface/pyproject.toml
+[build-system]
+requires = ["scikit-build-core", "cmake", "swig"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "hoppet"
+version = "2.0.0"
+description = "HOPPET -- A Higher Order Perturbative Parton Evolution Toolkit"
+authors = [
+    {name = "Frederic Dreyer"},
+    {name = "Alexander Karlberg", email = "alexander.karlberg@cern.ch"},
+    {name = "Paolo Nason"},
+    {name = "Juan Rojo"},
+    {name = "Gavin Salam", email = "gavin.salam@physics.ox.ac.uk"},
+    {name = "Giulia Zanderighi"}
+]
+keywords = ["physics", "pdf", "evolution"]
+classifiers = [
+    # Choose ONE of these: 
+    #"Development Status :: 1 - Planning",
+    #"Development Status :: 2 - Pre-Alpha", 
+    #"Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
+    #"Development Status :: 5 - Production/Stable",
+    #"Development Status :: 6 - Mature",
+    #"Development Status :: 7 - Inactive"
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+requires-python = ">=3.8"
+# Add any Python dependencies here
+dependencies = ["numpy"]
+
+[tool.scikit-build]
+cmake.source-dir = "."
+# Turn on hoppet interface and off all the examples
+cmake.define.HOPPET_BUILD_PYINTERFACE = "ON"
+cmake.define.HOPPET_BUILD_BENCHMARK = "OFF"
+cmake.define.HOPPET_BUILD_EXAMPLES = "OFF"
+cmake.define.HOPPET_BUILD_TESTDIR = "OFF"
+cmake.define.HOPPET_ENABLE_TESTING = "OFF"
+cmake.define.HOPPET_USE_EXACT_COEF = "ON"
+wheel.packages = ["pyinterface/hoppet"]
+#build-dir = "build_python"
+## Make sure source files are properly included
+#sdist.include = [
+#    "CMakeLists.txt",
+#    "cmake/**",
+#    "src/**", 
+#    "pyinterface/**"
+#]
+# Use Unix Makefiles instead of Ninja
+cmake.args = ["-G", "Unix Makefiles"]
