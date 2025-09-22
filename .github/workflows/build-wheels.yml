@@ -88,8 +88,7 @@ jobs:
           GFORTRAN_PATH=$(find /opt/homebrew/bin /usr/local/bin -name "gfortran*" | head -1)
           echo "Found gfortran at: $GFORTRAN_PATH"
           
-          cmake -S . -B BUILD \
-	    -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL \
+          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL \
             -DCMAKE_Fortran_COMPILER="$GFORTRAN_PATH" \
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
