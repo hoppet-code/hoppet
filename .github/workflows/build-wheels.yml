@@ -148,7 +148,7 @@ jobs:
   upload_test_pypi:
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/2025-09-python-wheels-new' || github.ref == 'refs/heads/master'
     
     steps:
     - name: Download all artifacts
