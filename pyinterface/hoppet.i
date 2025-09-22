@@ -1,6 +1,22 @@
 /* File: hoppet.i */
+%module(docstring="
+HOPPET - A Higher Order Perturbative Parton Evolution Toolkit
+
+HOPPET is a Fortran 95 package for carrying out DGLAP evolution and other 
+common manipulations of parton distribution functions (PDFs).
+
+Citation:
+G.P. Salam, J. Rojo, 'A Higher Order Perturbative Parton Evolution Toolkit (HOPPET)',
+Comput. Phys. Commun. 180 (2009) 120-156, arXiv:0804.3755
+") hoppet
+
 %module hoppet
 %include "std_string.i"  // This must be included in order to handle c strings
+
+%pythoncode %{
+__version__ = "2.0.0"
+__author__ = "Frederic Dreyer, Alexander Karlberg, Paolo Nason, Juan Rojo, Gavin Salam, Giulia Zanderighi"
+%}
 
 %{
 #define SWIG_FILE_WITH_INIT
