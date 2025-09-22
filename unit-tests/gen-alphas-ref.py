@@ -11,7 +11,7 @@ import alphas as al
 mc = 1.67
 mb = 4.78
 mt = 172.57
-mz = 91.1876
+mz = 91.1880
 asmz=0.1180 
 
 # pole masses by default
