@@ -4,9 +4,9 @@ requires = ["scikit-build-core", "cmake", "swig"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "hoppet"
+name = "HOPPET"
 dynamic = ["version"]
-description = "HOPPET -- A Higher Order Perturbative Parton Evolution Toolkit"
+description = "HOPPET: A Higher Order Perturbative Parton Evolution Toolkit"
 authors = [
     {name = "Frederic Dreyer"},
     {name = "Alexander Karlberg"},
@@ -38,9 +38,9 @@ requires-python = ">=3.8"
 dependencies = ["numpy"]
 
 [project.urls]
-Homepage = "https://github.com/hoppet-code"
+#Homepage = "https://github.com/hoppet-code"
 Repository = "https://github.com/hoppet-code/hoppet"
-Changelog = "https://github.com/hoppet-code/hoppet/blob/master/ChangeLog"
+Changelog = "https://github.com/hoppet-code/hoppet/blob/master/NEWS.md"
 
 [tool.scikit-build]
 cmake.source-dir = "."
