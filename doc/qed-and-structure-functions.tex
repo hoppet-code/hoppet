@@ -1022,7 +1022,7 @@ would be defined as \ttt{double ff[14]}.
 
 An example of structure function evaluations using the \CPP{} version of
 the streamlined interface is to be found in
-\repolink{example_cpp/cpp_structure_functions_example.cc}{example\_cpp/cpp\_structure\_functions\_example.cc}.
+\repolink{example_cpp/structure_functions_example.cc}{example\_cpp/structure\_functions\_example.cc}.
 %
 %\gps{added this link}
 
@@ -1279,7 +1279,7 @@ the streamlined interface, but stripped of the \ttt{hoppet}
 prefix. The interface is installed automatically as \ttt{hoppet} with
 \ttt{Cmake} and can be used through \ttt{import hoppet}. For a fully
 worked out tabulation example the user should take a look at
-\repolink{pyinterface/tabulation_example.py}{pyinterface/tabulation\_example.py}. The
+\repolink{example_py/tabulation_example.py}{example\_py/tabulation\_example.py}. The
 interface uses SWIG (Simplified Wrapper and Interface Generator) which
 therefore needs to be available on the system. It can be installed
 through most package managers (e.g.\ \texttt{apt install swig},
@@ -1317,7 +1317,7 @@ As a consequence the \ttt{Assign}, \ttt{CachedEvolve}, and
 \ttt{Evolve} routines, which all expect a PDF interface as an input in
 the streamlined interface, now instead take a function of \ttt{x} and
 \ttt{Q} that returns a Python array (see \ttt{hera\_lhc} in
-\repolink{pyinterface/tabulation_example.py}{tabulation\_example.py}
+\repolink{example\_py/tabulation_example.py}{tabulation\_example.py}
 for an explicit example).
 
 \section{CMake build option}
