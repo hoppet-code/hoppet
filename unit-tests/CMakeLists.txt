@@ -7,9 +7,11 @@ add_test(NAME hoppet-unit-tests COMMAND hoppet-unit-tests)
 add_executable(check-thread-safety check-thread-safety.cc)
 target_include_directories(check-thread-safety PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(check-thread-safety hoppet_static)
+
 # as of 2025-09-23, thread safety checks currently fail with ifx, for reasons
 # that we have not been able to understand yet. So we enable them only
 # for other tools.
-if(NOT "${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel*")
-    add_test(NAME check-thread-safety COMMAND check-thread-safety)
-endif()
+# if(NOT "${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel*")
+# 
+# endif()
+add_test(NAME check-thread-safety COMMAND check-thread-safety)

@@ -93,8 +93,10 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -check")
   add_compile_options("-fPIE")
   add_compile_options("-fPIC")
-  # this should not be needed with ifx (it is supposed to be the default)
-  # set(CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -reentrancy:threaded")
+  # -recusrive is needed to ensure that routines for accessing PDFs and
+  # coupling are thread-safe
+  # (also tried  -reentrancy:threaded, but it didn't work
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -recursive")
 endif()
 
 
