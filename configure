@@ -28,6 +28,11 @@ if ($#ARGV >=0 && ($ARGV[0] eq "-h" || $ARGV[0] eq "--help")) {
   exit;
 }
 
+# top-level Makefile is in scripts/ to reduce clutter 
+# in top-level directory and reduce temptation to run make
+# without having configured first
+system("cp -p scripts/Makefile.in Makefile");
+
 my $configline=$0." ".join(" ",@ARGV);
 my $prefix="/usr/local";
 my $modPrefix="";
@@ -92,7 +97,7 @@ $prefix=`cat src/.makef95.prefix`;
 chomp $prefix;
 (my $escprefix    = $prefix)    =~ s/\//\\\//g;
 (my $escmodprefix = $modPrefix) =~ s/\//\\\//g;
-system("sed -e 's/\@prefix\@/$escprefix/' -e 's/\@modprefix\@/$escmodprefix/' -e 's/\@VERSION\@/$version/'  hoppet-config.in > hoppet-config");
+system("sed -e 's/\@prefix\@/$escprefix/' -e 's/\@modprefix\@/$escmodprefix/' -e 's/\@VERSION\@/$version/'  scripts/hoppet-config.in > hoppet-config");
 system("chmod +x hoppet-config");
 
 # write a file config.log

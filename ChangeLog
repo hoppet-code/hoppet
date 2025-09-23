@@ -1,10 +1,19 @@
+2025-09-23 Gavin
+
+	* CMakeLists.txt:
+	* configure:
+	* mkmk: ***REMOVED***
+	* Makefile -> scripts/Makefile.in:
+	* hoppet-config.in -> scripts/hoppet-config.in:
+	moved some things out of the top-level directory to reduce clutter
+	and adapted configure and CMakeLists accordingly
+	
 2025-09-23 Gavin + Alexander
 
 	* benchmarking/io_utils.f90:
 	* + all files that used sub_defs_io:
 	more renaming so that io_utils (and io_utils_consts) become
-	the main module rather than sub_defs_io
-
+	the main module rather than sub_defs_i
 
 
 2025-09-22 Gavin
@@ -40,6 +49,7 @@
 	This brings a speed fain from about 33ns/call to about 11ns/call
 	on M2Pro-gfortran15.1-O3
 	(test timing with ./unit-tests/hoppet-unit-tests -time alphas)
+	
 
 2025-09-19 Alexander + Gavin
 

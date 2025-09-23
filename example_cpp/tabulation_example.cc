@@ -1,4 +1,4 @@
-#include "../src/hoppet.h"
+#include "hoppet.h"
 #include<iostream>
 #include<cmath>
 #include<cstdio>
@@ -46,8 +46,9 @@ int main () {
            pdf[6+0]);
   }
 
-  const std::string basename = "test_cpp";
-  const int pdf_index = 0;
+  // write out the PDF in LHAPDF format (basename/ directory must exist)
+  //const std::string basename = "test_cpp";
+  //const int pdf_index = 0;
   //hoppetWriteLHAPDFGrid(basename, pdf_index);
 
   // free all memory that was allocated by hoppet
