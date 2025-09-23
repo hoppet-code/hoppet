@@ -97,8 +97,14 @@ bool check_thread_safety(int nrep = 20) {
       if (tasks[i].results != tasks[0].results) {
         cout << red 
              << " ↳ mismatch in thread " << i 
-             << ", repetition " << irep 
-             << reset << endl;
+             << ", repetition " << irep;
+        if (tasks[i].results.size() != tasks[0].results.size()) {
+          cout << ": different sizes " 
+               << tasks[i].results.size() << " vs " 
+               << tasks[0].results.size() << endl;
+        }
+        cout << reset << endl;
+
         fail = true;
         break;
       }
