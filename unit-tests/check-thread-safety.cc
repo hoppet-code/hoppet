@@ -93,6 +93,7 @@ bool check_thread_safety(int nrep = 20) {
     }
 
     // check the results are the same across all tasks
+    int nfail = 0, nfail_max = 10;
     for (int i = 1; i < nthreads; ++i) {
       //if (tasks[i].results != tasks[0].results) {
       //  cout << red 
@@ -103,6 +104,7 @@ bool check_thread_safety(int nrep = 20) {
                << tasks[i].results.size() << " vs " 
                << tasks[0].results.size() << reset << endl;
           fail = true;
+          nfail++;
         } else {
           //cout << ": same size " << tasks[i].results.size() << ", first few mismatches:" << endl;
           for (size_t j = 0; j < tasks[i].results.size(); ++j) {
@@ -114,9 +116,14 @@ bool check_thread_safety(int nrep = 20) {
                    << ", thread " << i << ": " << tasks[i].results[j]
                    << ", diff: " << fabs(tasks[0].results[j] - tasks[i].results[j])
                    << reset << endl;
-              if (j > 10) break;
+              nfail++;
+              if (nfail >= nfail_max) break;
             }
           }
+        }
+        if (nfail >= nfail_max) {
+          cout << red << " ↳ ... too many failures, stopping output." << reset << endl;
+          break;
         }
         //cout << reset << endl;
 
