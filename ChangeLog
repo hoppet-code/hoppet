@@ -1,5 +1,15 @@
 2025-09-23 Gavin
 
+	* unit-tests/check-thread-safety.cc: *** ADDED ***
+	* unit-tests/CMakeLists.txt:
+	added a test that PDF and alphas evaluations are thread-safe, 
+	using multiple threads to check for consistency.
+
+	* CMakeLists.txt:
+	* example_cpp/*.cc:
+	changed include from ../src/hoppet.h -> hoppet.h so that someone
+	can copy the example and use it standalone.
+
 	* CMakeLists.txt:
 	* configure:
 	* mkmk: ***REMOVED***

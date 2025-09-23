@@ -7,6 +7,7 @@
 
 
 #include "hoppet.h"
+#include <cmath>
 #include <iostream>
 #include <thread>
 
