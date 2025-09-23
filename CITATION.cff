@@ -1,0 +1,78 @@
+# CITATION.cff
+cff-version: 1.2.0
+message: "If you use this software, please cite the following papers"
+title: "HOPPET - A Higher Order Perturbative Parton Evolution Toolkit"
+authors:
+  - family-names: Salam
+    given-names: Gavin P.
+    orcid: "https://orcid.org/0000-0002-2655-4373"
+  - family-names: Rojo
+    given-names: Juan
+    orcid: "https://orcid.org/0000-0003-4279-2192"
+  - family-names: Karlberg
+    given-names: Alexander
+    orcid: "https://orcid.org/0000-0003-0422-5891"
+  - family-names: Nason
+    given-names: Paolo
+    orcid: "https://orcid.org/0000-0001-9250-246X"
+  - family-names: Zanderighi
+    given-names: Giulia
+  - family-names: Dreyer
+    given-names: Frédéric A.
+    orcid: "https://orcid.org/0000-0002-0445-7863"
+version: "2.0.0"
+date-released: "2025-XX-XX"  # Adjust to actual release date
+url: "https://github.com/hoppet-code/hoppet"
+repository-code: "https://github.com/hoppet-code/hoppet"
+license: "GPL-3.0-or-later"  # Adjust if different
+keywords:
+  - "parton evolution"
+  - "DGLAP"
+  - "PDF"
+  - "high energy physics"
+  - "particle physics"
+  - "perturbative QCD"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Salam
+      given-names: Gavin P.
+    - family-names: Rojo
+      given-names: Juan
+  title: "A Higher Order Perturbative Parton Evolution Toolkit (HOPPET)"
+  journal: "Computer Physics Communications"
+  volume: 180
+  start: 120
+  end: 156
+  year: 2009
+  doi: "10.1016/j.cpc.2008.08.010"
+  url: "https://arxiv.org/abs/0804.3755"
+references:
+  - type: article
+    authors:
+      - family-names: Salam
+        given-names: Gavin P.
+      - family-names: Rojo
+        given-names: Juan
+    title: "A Higher Order Perturbative Parton Evolution Toolkit (HOPPET)"
+    journal: "Computer Physics Communications"
+    volume: 180
+    start: 120
+    end: 156
+    year: 2009
+    doi: "10.1016/j.cpc.2008.08.010"
+    url: "https://arxiv.org/abs/0804.3755"
+  - type: unpublished
+    authors:
+      - family-names: Karlberg
+        given-names: Alexander
+      - family-names: Nason
+        given-names: Paolo
+      - family-names: Salam
+        given-names: Gavin
+      - family-names: Zanderighi
+        given-names: Giulia
+      - family-names: Dreyer
+        given-names: Frédéric
+    title: "Hoppet v2.0.0 release note"
+    notes: "CERN-TH-2023-237, MPP-2023-285, OUTP-23-15P"

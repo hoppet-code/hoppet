@@ -6,11 +6,11 @@ publication(s) but also the original literature on which the program is
 based, insofar as relevant (e.g. splitting functions, threshold matching
 functions, coefficient functions, etc.)
 
-HOPPET includes some 3rd party code, which are either publicly under
-GPLv3, or which the respective authors have allowed us to distribute
-with HOPPET under the same GPLv3 terms:
+HOPPET includes some 3rd party code, which is either publicly released
+under GPLv3, or which the respective authors have allowed us to
+distribute with HOPPET under the same GPLv3 terms:
 
-- the src/hplog.f and (hep-ph/0107173) by Gehrmann and Remiddi the
+- the src/hplog.f and (hep-ph/0107173) by Gehrmann and Remiddi, and the
   weight 5 extension, src/exact-coefs/hplog5.f by Gehrmann.
 
 - code for the NNLO splitting functions and NNLO/N3LO coefficient

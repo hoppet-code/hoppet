@@ -1,1 +1,0 @@
-../../notebooks/Large-x-expansions-from-MVV.nb
