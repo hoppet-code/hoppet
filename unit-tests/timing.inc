@@ -30,4 +30,4 @@ block;\
   end if;\
 end block
 
-#endif // __HOPPET_TIMING_INC__
+#endif
