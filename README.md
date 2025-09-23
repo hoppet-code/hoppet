@@ -1,10 +1,5 @@
 [![build](https://github.com/hoppet-code/hoppet/actions/workflows/main.yml/badge.svg)](https://github.com/hoppet-code/hoppet/actions/workflows/main.yml)
 
-![logo](doc/logo/2025-09-logo.png)
-
-| <img src="doc/logo/2025-09-logo.png" width="80"/> | # HOPPET: Higher Order Perturbative Parton Evolution Toolkit |
-|------------------------------------------|-----------------|
-
 # HOPPET: Higher Order Perturbative Parton Evolution Toolkit
 
 HOPPET is a Fortran package for carrying out DGLAP evolution and other
