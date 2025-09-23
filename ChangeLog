@@ -1,3 +1,13 @@
+2025-09-19 Gavin
+
+	* CMakeLists.txt:
+	* configure:
+	* mkmk: ***REMOVED***
+	* Makefile -> scripts/Makefile.in:
+	* hoppet-config.in -> scripts/hoppet-config.in:
+	moved some things out of the top-level directory to reduce clutter
+	and adapted configure and CMakeLists accordingly
+
 2025-09-19 Alexander + Gavin
 
 	* CMakeLists.txt:
