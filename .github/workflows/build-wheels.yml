@@ -1,38 +1,4 @@
-#name: Test Python Wheels
-#
-#on:
-#  push:
-#    branches: [ 2025-09-python-wheels-new ]
-#
-#jobs:
-#  simple_test:
-#    name: Simple Python Test
-#    runs-on: ubuntu-latest
-#    container:
-#      image: fedora:latest
-#    
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v4
-#    
-#    - name: Install dependencies
-#      run: |
-#        yum -y install gcc gcc-c++ gcc-gfortran cmake swig
-#        yum -y install lhapdf lhapdf-devel
-#        yum -y install python3-devel python3-pip
-#    
-#    - name: Build and test Python bindings
-#      run: |
-#        # Build Python wheel
-#        python3 -m pip install build scikit-build-core
-#        CMAKE_BUILD_PARALLEL_LEVEL=$(nproc) python3 -m build
-#        
-#        # Test wheel installation
-#        python3 -m pip install dist/*.whl
-#        python3 -c "import hoppet; print('Success!')"
-
-
-name: Build Linux Wheels
+name: Build Python Wheels
 
 on:
   push:
@@ -57,8 +23,8 @@ jobs:
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.16.2
       env:
-        # Build for Python 3.8-3.12
-        CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
+        # Build for Python 3.9-3.13
+        CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-*
         
         # Skip 32-bit and musl builds
         CIBW_SKIP: "*-manylinux_i686 *-musllinux* *-win32"
