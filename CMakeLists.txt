@@ -22,6 +22,9 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 include("GNUInstallDirs")
 
+# set the C++ standard to c++14 for the example
+set(CMAKE_CXX_STANDARD 14)
+
 # add check to see if src/Makefile exists, and any src/*.mod, or any src/*.a
 # If so, then bail out because the user probably tried a build with the old build system
 file(GLOB MOD_FILES "${PROJECT_SOURCE_DIR}/src/*.mod")
@@ -370,6 +373,7 @@ if (HOPPET_BUILD_EXAMPLES)
   set( cppprograms structure_functions_example tabulation_example_qed tabulation_example)
   foreach ( p ${cppprograms})
     add_executable( ${p}_cpp example_cpp/${p}.cc)
+    target_include_directories(${p}_cpp PUBLIC ${PROJECT_SOURCE_DIR}/src)
     target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_cpp PROPERTIES  OUTPUT_NAME ${p}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_cpp/
@@ -381,6 +385,7 @@ if (HOPPET_BUILD_EXAMPLES)
     set(cppprograms_lhapdf fast_pdf_evaluation)
     foreach ( p ${cppprograms_lhapdf})
       add_executable( ${p}_cpp example_cpp/with-lhapdf/${p}.cc)
+      target_include_directories(${p}_cpp PUBLIC ${PROJECT_SOURCE_DIR}/src)
       target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
       set_target_properties(${p}_cpp PROPERTIES  OUTPUT_NAME ${p}
                             RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_cpp/
