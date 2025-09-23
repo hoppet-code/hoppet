@@ -94,22 +94,35 @@ bool check_thread_safety(int nrep = 20) {
 
     // check the results are the same across all tasks
     for (int i = 1; i < nthreads; ++i) {
-      if (tasks[i].results != tasks[0].results) {
-        cout << red 
-             << " ↳ mismatch in thread " << i 
-             << ", repetition " << irep;
+      //if (tasks[i].results != tasks[0].results) {
+      //  cout << red 
+      //       << " ↳ mismatch in thread " << i 
+      //       << ", repetition " << irep;
         if (tasks[i].results.size() != tasks[0].results.size()) {
           cout << ": different sizes " 
                << tasks[i].results.size() << " vs " 
                << tasks[0].results.size() << endl;
+          fail = true;
+        } else {
+          //cout << ": same size " << tasks[i].results.size() << ", first few mismatches:" << endl;
+          for (size_t j = 0; j < tasks[i].results.size(); ++j) {
+            if (tasks[i].results[j] != tasks[0].results[j]) {
+              fail = true;
+              cout << "   index " << j 
+                   << ", thread 0: " << tasks[0].results[j]
+                   << ", thread " << i << ": " << tasks[i].results[j]
+                   << ", diff: " << fabs(tasks[0].results[j] - tasks[i].results[j])
+                   << endl;
+              if (j > 10) break;
+            }
+          }
         }
-        cout << reset << endl;
+        //cout << reset << endl;
 
-        fail = true;
-        break;
-      }
+        if (fail) break;
+        //break;
+      //}
     }
-    if (fail) break;
   }
   if (!fail) cout << green << " ↳ all threads produced identical results." << reset << endl;
   return !fail;
