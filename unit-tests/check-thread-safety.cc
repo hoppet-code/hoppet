@@ -99,20 +99,21 @@ bool check_thread_safety(int nrep = 20) {
       //       << " ↳ mismatch in thread " << i 
       //       << ", repetition " << irep;
         if (tasks[i].results.size() != tasks[0].results.size()) {
-          cout << ": different sizes " 
+          cout << red << " ↳ Failure for repetition " << irep << ", thread " << i << ": different results sizes "
                << tasks[i].results.size() << " vs " 
-               << tasks[0].results.size() << endl;
+               << tasks[0].results.size() << reset << endl;
           fail = true;
         } else {
           //cout << ": same size " << tasks[i].results.size() << ", first few mismatches:" << endl;
           for (size_t j = 0; j < tasks[i].results.size(); ++j) {
             if (tasks[i].results[j] != tasks[0].results[j]) {
               fail = true;
-              cout << "   index " << j 
+              cout << red << " ↳ Failure for repetition " << irep 
+                   << "   index " << j 
                    << ", thread 0: " << tasks[0].results[j]
                    << ", thread " << i << ": " << tasks[i].results[j]
                    << ", diff: " << fabs(tasks[0].results[j] - tasks[i].results[j])
-                   << endl;
+                   << reset << endl;
               if (j > 10) break;
             }
           }
