@@ -30,6 +30,9 @@ public:
   constexpr static double Qmin = 1.5, Qmax = 10000.0;
   constexpr static int nxQ = 1000;
   vector<double> results;
+  double Qval(int i) const { 
+    return Qmin * exp(i * log(Qmax/Qmin) / nxQ); 
+  }
 };
 
 /// class for a PDF (and coupling) evaluation task
@@ -39,7 +42,7 @@ public:
   void run() {
     for (unsigned i = 0; i <= nxQ; ++i) {
       double x = xmin * exp(i * log(xmax/xmin) / nxQ);
-      double Q = Qmin * exp(i * log(Qmax/Qmin) / nxQ);
+      double Q = Qval(i);
       double pdf[13];
       hoppetEval(x, Q, pdf);
       results.push_back(pdf[6+2] - pdf[6-2]); // u - ubar
@@ -50,8 +53,61 @@ public:
       results.push_back(hoppetAlphaS(Q)); // alpha_s
     }
   }
+  string name() const { return "PDFThreadTask"; }
+};
 
-};                  
+/// class for a PDF (and coupling) evaluation task
+class AlphaSThreadTask : public TestBase {
+public:
+  AlphaSThreadTask() {}
+  void run() {
+    for (unsigned i = 0; i <= nxQ; ++i) {
+      double Q = Qval(i);
+      results.push_back(hoppetAlphaS(Q)); // alpha_s
+    }
+  }
+  string name() const { return "AlphaSThreadTask"; }
+};
+
+
+// code to run the thread safety check for a class of type T
+template<class T>
+bool check_thread_safety(int nrep = 20) {
+  cout << "Checking thread safety of " << T().name() << " with " << nrep << " repetitions..." << endl;
+  bool fail = false;
+  for (int irep = 0; irep < nrep; ++irep) {
+    constexpr int nthreads = 8;
+
+    // the tasks are defined above in PDFThreadTask
+    T tasks[nthreads];
+
+    // create the threads, each of which runs a task
+    vector<thread> threads;
+    for (int i = 0; i < nthreads; ++i) {
+      threads.emplace_back(&T::run, &tasks[i]);
+    }
+
+    // wait for all threads to finish
+    for (auto& t : threads) {
+      t.join();
+    }
+
+    // check the results are the same across all tasks
+    for (int i = 1; i < nthreads; ++i) {
+      if (tasks[i].results != tasks[0].results) {
+        cout << red 
+             << " ↳ mismatch in thread " << i 
+             << ", repetition " << irep 
+             << reset << endl;
+        fail = true;
+        break;
+      }
+    }
+    if (fail) break;
+  }
+  if (!fail) cout << green << " ↳ all threads produced identical results." << reset << endl;
+  return !fail;
+}
 
 //----------------------------------------------------------------------
 int main(int argc, char** argv) {
@@ -67,39 +123,12 @@ int main(int argc, char** argv) {
   double asQ0 = 0.35, Q0=sqrt(2.0);
   hoppetEvolve(asQ0, Q0, nloop, 1.0, heralhc_init, Q0);
 
-  int nrep = 20;
-  bool global_fail = false;
-  for (int irep = 0; irep < nrep; ++irep) {
-    constexpr int nthreads = 8;
+  int nrep = 0;
+  bool global_pass = false;
+  global_pass |= check_thread_safety<PDFThreadTask>();
+  global_pass |= check_thread_safety<AlphaSThreadTask>();
 
-    // the tasks are defined above in PDFThreadTask
-    PDFThreadTask tasks[nthreads];
-
-    // create the threads, each of which runs a task
-    vector<thread> threads;
-    for (int i = 0; i < nthreads; ++i) {
-      threads.emplace_back(&PDFThreadTask::run, &tasks[i]);
-    }
-
-    // wait for all threads to finish
-    for (auto& t : threads) {
-      t.join();
-    }
-
-    // check the results are the same across all tasks
-    bool local_fail = false;
-    for (int i = 1; i < nthreads; ++i) {
-      if (tasks[i].results != tasks[0].results) {
-        cout << red << "irep=" << irep << ": mismatch in thread " << i << reset << endl;
-        local_fail = true;
-        break;
-      }
-    }
-    if (!local_fail) cout << green << "irep=" << irep << ": all threads produced identical results." << endl;
-    global_fail = global_fail || local_fail;
-  }
-
-  if (global_fail) {
+  if (!global_pass) {
     cout << red << "Thread safety test failed!" << reset << endl;
     return 1;
   } else {
