@@ -75,6 +75,7 @@ template<class T>
 bool check_thread_safety(int nrep = 20) {
   cout << "Checking thread safety of " << T().name() << " with " << nrep << " repetitions..." << endl;
   bool fail = false;
+  int nfail = 0, nfail_max = 5;
   for (int irep = 0; irep < nrep; ++irep) {
     constexpr int nthreads = 8;
 
@@ -93,43 +94,38 @@ bool check_thread_safety(int nrep = 20) {
     }
 
     // check the results are the same across all tasks
-    int nfail = 0, nfail_max = 10;
     for (int i = 1; i < nthreads; ++i) {
       //if (tasks[i].results != tasks[0].results) {
       //  cout << red 
       //       << " ↳ mismatch in thread " << i 
       //       << ", repetition " << irep;
-        if (tasks[i].results.size() != tasks[0].results.size()) {
-          cout << red << " ↳ Failure for repetition " << irep << ", thread " << i << ": different results sizes "
-               << tasks[i].results.size() << " vs " 
-               << tasks[0].results.size() << reset << endl;
-          fail = true;
-          nfail++;
-        } else {
-          //cout << ": same size " << tasks[i].results.size() << ", first few mismatches:" << endl;
-          for (size_t j = 0; j < tasks[i].results.size(); ++j) {
-            if (tasks[i].results[j] != tasks[0].results[j]) {
-              fail = true;
-              cout << red << " ↳ Failure for repetition " << irep 
-                   << "   index " << j 
-                   << ", thread 0: " << tasks[0].results[j]
-                   << ", thread " << i << ": " << tasks[i].results[j]
-                   << ", diff: " << fabs(tasks[0].results[j] - tasks[i].results[j])
-                   << reset << endl;
-              nfail++;
-              if (nfail >= nfail_max) break;
-            }
+      if (tasks[i].results.size() != tasks[0].results.size()) {
+        cout << red << " ↳ Failure for repetition " << irep << ", thread " << i << ": different results sizes "
+              << tasks[i].results.size() << " vs " 
+              << tasks[0].results.size() << reset << endl;
+        fail = true;
+        nfail++;
+      } else {
+        //cout << ": same size " << tasks[i].results.size() << ", first few mismatches:" << endl;
+        for (size_t j = 0; j < tasks[i].results.size(); ++j) {
+          if (tasks[i].results[j] != tasks[0].results[j]) {
+            fail = true;
+            cout << red << " ↳ Failure for repetition " << irep 
+                  << "   index " << j 
+                  << ", thread 0: " << tasks[0].results[j]
+                  << ", thread " << i << ": " << tasks[i].results[j]
+                  << ", diff: " << fabs(tasks[0].results[j] - tasks[i].results[j])
+                  << reset << endl;
+            nfail++;
+            if (nfail >= nfail_max) break;
           }
         }
-        if (nfail >= nfail_max) {
-          cout << red << " ↳ ... too many failures, stopping output." << reset << endl;
-          break;
-        }
-        //cout << reset << endl;
-
-        if (fail) break;
-        //break;
-      //}
+      }
+      if (nfail >= nfail_max) break;
+    }
+    if (nfail >= nfail_max) {
+      cout << red << " ↳ ... too many failures, stopping output." << reset << endl;
+      break;
     }
   }
   if (!fail) cout << green << " ↳ all threads produced identical results." << reset << endl;
