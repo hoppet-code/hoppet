@@ -5,6 +5,10 @@
 	COMMAND_ARGUMENT_COUNT and GET_COMMAND_ARGUMENT calls
 	(fixes a compilation issue with flang-21)
 
+	* src/inc/ftlMacros.inc:
+	adding special case for __flang__, to fix compilation
+	with arm flang (20)
+
 	* unit-tests/check-thread-safety.cc: *** ADDED ***
 	* unit-tests/CMakeLists.txt:
 	added a test that PDF and alphas evaluations are thread-safe, 
