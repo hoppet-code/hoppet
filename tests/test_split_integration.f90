@@ -100,7 +100,7 @@ program main
   use consts_dp
   use split_helper
   use integrator
-  use sub_defs_io
+  use io_utils
   use convolution
   use splitting_functions
 

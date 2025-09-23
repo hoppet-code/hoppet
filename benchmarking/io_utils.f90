@@ -1,7 +1,5 @@
 !! io_utils.f90
 !!
-!! version 1.1, GPS, 24 September 2003
-!!
 !======================================================================
 !! All the various bits and pieces which could be useful regarding i/o,
 !! such as opening the right files, getting numerical values for
@@ -9,10 +7,15 @@
 !======================================================================
 
 
-! unfortunate that we need an extra module...
-module sub_defs_io_consts
+!! some of the constants used in the io_utils module
+module io_utils_consts
   integer, parameter :: max_arg_len  = 180
   integer, parameter :: max_line_len = 600
+end module io_utils_consts
+
+! for backwards compatibility
+module sub_defs_io_consts
+   use io_utils_consts
 end module sub_defs_io_consts
 
 !----------------------------------------------------------------------
@@ -53,8 +56,8 @@ end subroutine lcl_system
 !----------------------------------------------------------------------
 !! All the interfaces needed here and in the lcl_???.f90 routines
 !----------------------------------------------------------------------
-module sub_defs_io
-  use sub_defs_io_consts
+module io_utils
+  use io_utils_consts
 
 
   interface
@@ -93,7 +96,7 @@ module sub_defs_io
 
   interface
      function command_line()
-       use sub_defs_io_consts
+       use io_utils_consts
        implicit none
        character(len=max_line_len) ::  command_line
      end function command_line
@@ -101,7 +104,7 @@ module sub_defs_io
 
   interface
      function string_val_opt(opt,default_val)
-       use sub_defs_io_consts
+       use io_utils_consts
        implicit none
        character(len=max_arg_len)             :: string_val_opt
        character(len=*), intent(in)           :: opt
@@ -161,7 +164,7 @@ module sub_defs_io
 
   interface
      function string_val_arg(argk, default_val)
-       use sub_defs_io_consts
+       use io_utils_consts
        implicit none
        character(len=max_arg_len)             :: string_val_arg
        integer,          intent(in)           :: argk
@@ -323,7 +326,7 @@ contains
     end do
 
   end subroutine get_hostname
-end module sub_defs_io
+end module io_utils
 
 
 !--------------------------------------------------------------
@@ -335,8 +338,8 @@ module track_args
   ! (not immediately clear why, though it could be related to fact
   ! that interface CheckAllArgsUsed is being used, but that the 
   ! corresponding subroutine uses track_args?)
-  use sub_defs_io, only: lcl_iargc, lcl_getarg
-  use sub_defs_io_consts
+  use io_utils, only: lcl_iargc, lcl_getarg
+  use io_utils_consts
   implicit none
   private
   logical, allocatable, save :: argsused(:)
@@ -465,7 +468,7 @@ end function CheckAllOptsUsed
 !! device number
 !----------------------------------------------------------------------
 function idev_open_arg(iarg, ext, status, form) result(idev)
-  use sub_defs_io, except => idev_open_arg
+  use io_utils, except => idev_open_arg
   implicit none
   integer             :: idev
   integer, intent(in) :: iarg
@@ -483,7 +486,7 @@ end function idev_open_arg
 !! GPS 05/01/01
 !---------------------------------------------------------------------
 function idev_open_opt(opt, default_val, ext, status, form) result(idev)
-  use sub_defs_io, except => idev_open_opt
+  use io_utils, except => idev_open_opt
   implicit none
   character(*), intent(in) :: opt
   character(*), optional, intent(in) :: default_val, ext, status, form
@@ -506,7 +509,7 @@ end function idev_open_opt
 !! GPS 20/03/97
 !----------------------------------------------------------------------
 subroutine open_arg(iarg, idev, ext, status, form, default_val)
-  use sub_defs_io, only : lcl_getarg, lcl_iargc, max_arg_len, time_stamp
+  use io_utils, only : lcl_getarg, lcl_iargc, max_arg_len, time_stamp
   use track_args
   implicit none
   integer, intent(in) :: iarg, idev
@@ -563,7 +566,7 @@ end subroutine open_arg
 !! returns a string which conatins the command name and all the arguments
 !----------------------------------------------------------------------
 function command_line()
-  use sub_defs_io, except => command_line
+  use io_utils, except => command_line
   implicit none
   character(len=max_line_len) ::  command_line
   !----------------------------------------------------------------------
@@ -590,7 +593,7 @@ end function command_line
 !! GPS 24/01/98 
 !----------------------------------------------------------------------
 function iargc_opt(opt)
-  use sub_defs_io, except => iargc_opt
+  use io_utils, except => iargc_opt
   use track_args
   implicit none
   integer                      :: iargc_opt
@@ -623,7 +626,7 @@ end function iargc_opt
 !! GPS 8/11/95 (CCN8 23)
 !----------------------------------------------------------------------
 function string_val_opt(opt,default_val)
-  use sub_defs_io, except => string_val_opt
+  use io_utils, except => string_val_opt
   use track_args
   implicit none
   character(len=max_arg_len)             :: string_val_opt
@@ -655,7 +658,7 @@ end function string_val_opt
 !! GPS 8/11/95 (CCN8 23)
 !----------------------------------------------------------------------
 function int_val_opt(opt,default_val)
-  use sub_defs_io, except => int_val_opt
+  use io_utils, except => int_val_opt
   implicit none
   integer                      :: int_val_opt
   character(len=*), intent(in) :: opt
@@ -683,7 +686,7 @@ end function int_val_opt
 !! Similar to int_val_opt, but for dble value
 !----------------------------------------------------------------------
 function dble_val_opt(opt,default_val)
-  use sub_defs_io, except => dble_val_opt
+  use io_utils, except => dble_val_opt
   implicit none
   real(kind(1d0))                      :: dble_val_opt
   character(len=*), intent(in) :: opt
@@ -717,7 +720,7 @@ end function dble_val_opt
 !! GPS 8/11/95 (CCN8 23)
 !----------------------------------------------------------------------
 function log_val_opt(opt,default_val)
-  use sub_defs_io, except => log_val_opt
+  use io_utils, except => log_val_opt
   implicit none
   logical                       :: log_val_opt
   character(len=*), intent(in)  :: opt
@@ -753,7 +756,7 @@ end function log_val_opt
 !----------------------------------------------------------------------
 integer function int_val_arg(argk, default_val)
   use track_args
-  use sub_defs_io, except => int_val_arg
+  use io_utils, except => int_val_arg
   implicit none
   integer, intent(in)           :: argk
   integer, intent(in), optional :: default_val
@@ -835,7 +838,7 @@ end function value
 !----------------------------------------------------------------------
 real(kind(1d0)) function dble_val_arg(argk, default_val)
   use track_args
-  use sub_defs_io, except => dble_val_arg
+  use io_utils, except => dble_val_arg
   implicit none
   integer,         intent(in)           :: argk
   real(kind(1d0)), intent(in), optional :: default_val
@@ -871,7 +874,7 @@ end function dble_val_arg
 !! If that argument is absent, return the default_val (if provided)
 function string_val_arg(argk, default_val)
   use track_args
-  use sub_defs_io, except => string_val_arg
+  use io_utils, except => string_val_arg
   implicit none
   character(len=max_arg_len)             :: string_val_arg
   integer,          intent(in)           :: argk
@@ -1007,7 +1010,7 @@ end function dp2char
 !! GPS 13/04/98
 !======================================================================
 function get_new_device() result(dev)
-  use sub_defs_io, except => get_new_device
+  use io_utils, except => get_new_device
   implicit none
   integer :: dev
   !--------------------------------------------------------------
@@ -1035,7 +1038,7 @@ end function get_new_device
 !! GPS 4/12/96
 !==========================================================================
 subroutine time_stamp(idev,string)
-  use sub_defs_io, excepts => time_stamp
+  use io_utils, excepts => time_stamp
   implicit none
   integer,          intent(in),  optional :: idev
   character(len=*), intent(out), optional :: string
@@ -1078,7 +1081,7 @@ end subroutine time_stamp
 !! GPS 19/08/97
 !======================================================================
 subroutine error_report(subname,line1,line2,line3,line4,action)
-  use sub_defs_io, excepts => error_report; implicit none
+  use io_utils, excepts => error_report; implicit none
   character(*), intent(in) :: subname
   character(*), intent(in), optional :: line1, line2, line3, line4
   character(*), intent(in), optional :: action
@@ -1123,7 +1126,7 @@ end subroutine error_report
 
 !! alternative name to access to the sub_defs_io module,
 !! so as to match this filename
-module io_utils
-  use sub_defs_io
+module sub_defs_io
+  use io_utils
   implicit none
-end module io_utils
+end module sub_defs_io

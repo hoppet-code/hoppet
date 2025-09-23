@@ -330,7 +330,7 @@ end module accuracy_helper
 !! -dytable  :   run with a table of ty
 !! -big -div2 n -div3 n : loop over ymax vals, orders, dy
 program determine_accuracies
-   use hoppet; use sub_defs_io
+   use hoppet; use io_utils
   use accuracy_helper
   implicit none
   real(dp)           :: ymax = 12.0_dp, dy_ref, dy, du_ref

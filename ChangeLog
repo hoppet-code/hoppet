@@ -1,3 +1,12 @@
+2025-09-23 Gavin + Alexander
+
+	* benchmarking/io_utils.f90:
+	* + all files that used sub_defs_io:
+	more renaming so that io_utils (and io_utils_consts) become
+	the main module rather than sub_defs_io
+
+
+
 2025-09-22 Gavin
 
 	* benchmarking/io_utils.f90:

@@ -1,5 +1,5 @@
 program compare2file
-  use sub_defs_io
+  use io_utils
   use types; use consts_dp
   implicit none
   character(len=300) :: line1, line2

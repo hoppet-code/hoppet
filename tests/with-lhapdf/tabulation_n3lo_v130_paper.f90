@@ -1,7 +1,7 @@
 !! A program that can be used to produce the results presented for
 !! n3lo evolution in the v130 manual.
 program tabulation_n3lo
-  use sub_defs_io, int_value => value
+  use io_utils, int_value => value
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
      use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF

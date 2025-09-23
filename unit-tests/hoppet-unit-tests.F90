@@ -6,7 +6,7 @@ program hoppet_unit_tests
   use unit_tests
   use test_interpolation
   use test_alphas
-  use sub_defs_io
+  use io_utils
   implicit none
 
   if (log_val_opt("-h", .false.) .or. log_val_opt("--help", .false.)) then

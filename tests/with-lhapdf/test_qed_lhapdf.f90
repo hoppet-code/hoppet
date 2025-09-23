@@ -1,6 +1,6 @@
 program test_qed_lhapdf
   use hoppet; use convolution
-  use sub_defs_io
+  use io_utils
   implicit none
   real(dp) :: ymax = 20.0_dp, dy = 0.10_dp
   type(grid_def) :: grid

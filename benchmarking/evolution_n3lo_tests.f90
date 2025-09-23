@@ -5,7 +5,7 @@ program structure_functions_example
   use pdfs_for_benchmarks
   use streamlined_interface
   use structure_functions
-  use sub_defs_io, int_value => value
+  use io_utils, int_value => value
   implicit none
   character (len=400) :: filename,dirname
   real(dp) :: Qmax, Qmin, ymax, Q, mc, mb, mt, asQ0, Q0,&

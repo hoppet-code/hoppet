@@ -12,7 +12,7 @@ program test_blumlein
   !use A3Sqg_He
   !use A3PSqq_Hp
   !use A3Sqg_Hp
-  use sub_defs_io
+  use io_utils
   use streamlined_interface
   use dglap_choices
   use vfnsmod

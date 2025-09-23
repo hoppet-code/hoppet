@@ -6,7 +6,7 @@ program timelike_tests
   use convolution_communicator;
   use splitting_functions
   use qcd
-  use sub_defs_io
+  use io_utils
   implicit none
   !---------------------
   integer  :: i
