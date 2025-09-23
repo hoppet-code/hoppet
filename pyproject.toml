@@ -5,7 +5,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "hoppet"
-version = "2.0.1"
+dynamic = ["version"]
 description = "HOPPET -- A Higher Order Perturbative Parton Evolution Toolkit"
 authors = [
     {name = "Frederic Dreyer"},
@@ -63,3 +63,11 @@ wheel.packages = ["hoppet"]
 #]
 # Use Unix Makefiles instead of Ninja
 cmake.args = ["-G", "Unix Makefiles"]
+#metadata.version.provider = "scikit_build_core.metadata.cmake"
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "CMakeLists.txt"
+# Capture the value after 'VERSION' in the project() call (PEP 440-ish token)
+regex = '''(?im)^\s*project\([^)]*VERSION\s+(?P<value>[0-9]+(?:\.[0-9]+){1,2}[A-Za-z0-9.+-]*)'''
+result = "{value}"

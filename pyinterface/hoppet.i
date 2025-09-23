@@ -1,13 +1,56 @@
 /* File: hoppet.i */
 %module(docstring="
-HOPPET - A Higher Order Perturbative Parton Evolution Toolkit
+A Higher Order Perturbative Parton Evolution Toolkit
 
 HOPPET is a Fortran 95 package for carrying out DGLAP evolution and other 
 common manipulations of parton distribution functions (PDFs).
 
 Citation:
-G.P. Salam, J. Rojo, 'A Higher Order Perturbative Parton Evolution Toolkit (HOPPET)',
+G.P. Salam, J. Rojo, 'A Higher Order Perturbative Parton Evolution Toolkit (HOPPET)', 
 Comput. Phys. Commun. 180 (2009) 120-156, arXiv:0804.3755
+
+and                                                       
+
+A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer (arXiv:2509.XXXXX). 
+
+Example:
+
+   import hoppet as hp
+   import numpy as np
+   
+   def main():
+       dy = 0.1    
+       nloop = 3
+       # Start hoppet
+       hp.Start(dy, nloop)
+       
+       asQ0 = 0.35
+       Q0 = np.sqrt(2.0)
+       # Do the evolution. 
+       hp.Evolve(asQ0, Q0, nloop, 1.0, hp.BenchmarkPDFunpol, Q0)
+   
+       # Evaluate the PDFs at some x values and print them
+       xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
+       Q = 100.0
+   
+       print('')
+       print('           Evaluating PDFs at Q =',Q, ' GeV')
+       print('    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon')
+       for ix in range(9):
+           pdf_array = hp.Eval(xvals[ix], Q)
+           print('{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}'.format(
+               xvals[ix],
+               pdf_array[6 + 2] - pdf_array[6 - 2], 
+               pdf_array[6 + 1] - pdf_array[6 - 1], 
+               2 * (pdf_array[6 - 1] + pdf_array[6 - 2]),
+               pdf_array[6 - 4] + pdf_array[6 + 4],
+               pdf_array[6 + 0]
+           ))
+
+   
+       hp.DeleteAll()
+   
+For more examples look at https://github.com/hoppet-code/hoppet/tree/master/example_py	
 ") hoppet
 
 %module hoppet
@@ -221,7 +264,15 @@ static PyObject* EvalSplit(const double & x, const double & Q, const int & iloop
     CHECK_GLOBAL_PDF_INITIALIZED
     hoppetEvalSplit(x, Q, iloop, nf, global_pdf);
     return pdf_to_array(global_pdf);
+
 }
+ 
+static PyObject* BenchmarkPDFunpol(const double & x, const double & Q) {
+    CHECK_GLOBAL_PDF_INITIALIZED
+    hoppetBenchmarkPDFunpol(x, Q, global_pdf);
+    return pdf_to_array(global_pdf);
+}
+
 static void InitStrFct(const int & order_max, const int & separate_orders, const double & xR, const double & xF) {
     init_global_str_fnc();
     hoppetInitStrFct(order_max, separate_orders, xR, xF);
@@ -324,6 +375,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %ignore hoppetcachedevolve_; // The callback function is CachedEvolve
 %ignore hoppeteval_;          
 %ignore hoppetevalsplit_;
+%ignore hoppetbenchmarkpdfunpol_;
 %ignore hoppetdeleteall_;
 %ignore hoppetstrfct_;
 %ignore hoppetstrfctnomu_;
@@ -364,6 +416,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
     void CachedEvolve(PyObject *callback);
     PyObject* Eval(const double & x, const double & Q);
     PyObject* EvalSplit(const double & x, const double & Q, const int & iloop, const int & nf);
+    PyObject* BenchmarkPDFunpol(const double & x, const double & Q);
     PyObject* StrFct(const double & x, const double & Q, const double & muR_in, const double & muF_in);
     PyObject* StrFctNoMu(const double & x, const double & Q);
     PyObject* StrFctLO(const double & x, const double & Q, const double & muR_in, const double & muF_in);

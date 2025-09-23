@@ -1,3 +1,18 @@
+2025-09-23  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* pyproject.toml: *** ADDED ***
+	* .github/workflows/build-wheels.yml: *** ADDED ***
+	* CMakeLists.txt:
+	Added support for python wheels building through the github CI
+	actions in addition to the local build and install
+
+	* src/streamlined_interface.f90:
+	* src/hoppet.h:
+	* pyinterface/hoppet.i:
+	* example_py/tabulation_example.py:
+	Added interface to the benchmark PDF functions which is now being
+	used in one of the python examples.
+
 2025-09-19 Alexander + Gavin
 
 	* CMakeLists.txt:

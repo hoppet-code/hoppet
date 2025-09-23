@@ -8,6 +8,7 @@ module streamlined_interface
   use qed_objects
   use qed_coupling_module
   use qcd, only: quark_masses_def
+  use pdfs_for_benchmarks
   use warnings_and_errors
   implicit none
 
@@ -780,5 +781,20 @@ subroutine hoppetWriteLHAPDFWithLen(basename_len, basename, pdf_index)
   integer,                     intent(in) :: pdf_index
 
   call hoppetWriteLHAPDFGrid(basename, pdf_index)
-  
+
 end subroutine hoppetWriteLHAPDFWithLen
+
+!======================================================================
+!! The dummy PDF suggested by Vogt as the initial condition for the 
+!! unpolarized evolution, subsequently adopted in a wide range of
+!! of benchmarks
+subroutine hoppetBenchmarkPDFunpol(x, Q, xpdf)
+  use streamlined_interface; use warnings_and_errors
+  implicit none
+  real(dp) :: x, Q, xpdf(-6:6)
+  
+  call benchmark_pdf_unpolarized_lha(x, Q, xpdf)
+
+end subroutine hoppetBenchmarkPDFunpol
+
+  

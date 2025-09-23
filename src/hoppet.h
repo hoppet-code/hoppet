@@ -27,6 +27,7 @@
 #define hoppetEvalSplit                hoppetevalsplit_
 #define hoppetSetQED                   hoppetsetqed_
 #define hoppetDeleteAll                hoppetdeleteall_
+#define hoppetBenchmarkPDFunpol        hoppetbenchmarkpdfunpol_
 
 /// The fortran subroutines pertaining to the below structure function 
 /// interfaces can be found at the end of structure_functions.f90
@@ -418,6 +419,11 @@ extern "C" {
     // Call Fortran subroutine (pass integers by reference)
     hoppetwritelhapdfwithlen_(basename_len, basename_cstr, pdf_index);
   }
-  
+
+  void hoppetBenchmarkPDFunpol(const double & x,
+			       const double &Q,
+			       double * xpdf);
+
 }
+
 #endif // __HOPPET__
