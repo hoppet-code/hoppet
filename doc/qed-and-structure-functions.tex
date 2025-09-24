@@ -1026,33 +1026,221 @@ the streamlined interface is to be found in
 %
 %\gps{added this link}
 
+
+\section{Python interface}
+\label{sec:pyinterface}
+From version~2.0.0 \hoppet also includes a Python interface to the
+most common evolution routines. It currently includes exactly the same
+functionality as the streamlined interface, and can be called in much
+the same way. The names of functions and routines are the same as in
+the streamlined interface, but stripped of the \ttt{hoppet}
+prefix. The interface can be obtained from \ttt{PyPi} by invoking
+\begin{lstlisting}
+  pip install hoppet
+\end{lstlisting}
+Alternatively the interface can be built by \ttt{Cmake} with
+\ttt{-DHOPPET\_BUILD\_PYINTERFACE=ON}. In both cases the interface can
+be imported into a \ttt{Python} instance through \ttt{import
+  hoppet}. For a simple tabulation example the user should take a look
+at
+\repolink{example_py/tabulation_example.py}{example\_py/tabulation\_example.py}
+(and in the same directory for a number of other illustrative examples
+of how to use the interface, including in conjunction with
+LHAPDF~\cite{LHAPDF}). The interface uses SWIG (Simplified Wrapper and
+Interface Generator) which therefore needs to be available on the
+system if building with \ttt{Cmake}. It can be installed through most
+package managers (e.g.\ \texttt{apt install swig}, \texttt{brew
+  install swig}) but can also be obtained from the SWIG GitHub
+\href{https://github.com/swig}{repository}.
+
+One significant difference between the Python interface and the
+streamlined interface is that Python does not provide native support
+for pointers. For this reason all functions and subroutines that
+returned a pointer to a PDF object, through an explicit argument, now
+instead return a Python array directly. For instance, where in \CPP{}
+one might have the call
+%
+\begin{lstlisting}
+  #include "hoppet.h"
+  [...]
+  double x = ...;
+  double Q = ...;
+  double pdf[13];
+  [...]
+  hoppetEval(x, Q, pdf);
+\end{lstlisting}
+%
+instead in Python one would have
+%
+\begin{lstlisting}
+  import hoppet as hp
+  [...]
+  x = ...
+  Q = ...
+  pdf = hp.Eval(x,Q)
+\end{lstlisting}
+As a consequence the \ttt{Assign}, \ttt{CachedEvolve}, and
+\ttt{Evolve} routines, which all expect a PDF interface as an input in
+the streamlined interface, now instead take a function of \ttt{x} and
+\ttt{Q} that returns a Python array (see \ttt{hera\_lhc} in
+\repolink{example\_py/tabulation_example.py}{tabulation\_example.py}
+for an explicit example).
+
+In addition to the examples provided in
+\repolink{example\_py/}{example\_py/} we have also developed a small tool that loads a grid from LHAPDF at an initial scale and evolves it with \hoppet{} over a large range of $Q$. The resulting grids are then compared between \hoppet{} and LHAPDF to determine the relative accuracy of the LHAPDF grids. The tool, along with some documentation, can be found at \href{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}.
+
+\section{CMake build option}
+\label{sec:cmake}
+In addition to the standard build option through \ttt{./configure} and
+\ttt{make [install]} \hoppet now supports the use of CMake. Although
+the old build option will be supported as far as possible, the CMake
+build option is the main build option starting from version
+2.0.0 of \hoppet.
+
+For a typical user it will be enough to invoke the following lines
+from the main directory
+\begin{lstlisting}
+  mkdir build; cd build
+  cmake ..
+  make [-j]
+  make install [-j]
+\end{lstlisting}
+This will compile and install \hoppet along with both the streamlined
+and Python interfaces. Note that \ttt{make install} will typically
+install in a location that requires root privileges, unless a user has
+specified a custom prefix (through
+\ttt{-DCMAKE\_INSTALL\_PREFIX=/install/path}). A number of options can
+be passed to CMake. They are documented in
+\repolink{CMakeLists.txt}{CMakeLists.txt} and can be printed on screen
+by a call to \ttt{cmake -LH ..} from the \ttt{build} directory.
+
+Of particular note to most users are
+\begin{lstlisting}
+  option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
+  option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
+  option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
+  option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
+  option(HOPPET_BUILD_PYINTERFACE "Build python interface." ON)
+  option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
+  option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
+\end{lstlisting}
+The can be set when call \ttt{cmake} in the usual way,
+e.g.\ \ttt{cmake ..\ -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet
+with the exact coefficient functions.
+
+\section{Saving LHAPDF grids}
+\label{sec:lhapdf}
+A minor new feature of this release is the possibility to save a
+\hoppet{} table in the form of an LHAPDF6~\cite{LHAPDF} grid.
+%Access to this functionality is also provided in the streamlined interface.
+% GPS -> removed this because it's said below
+The main routine has the following structure
+\begin{lstlisting}
+  subroutine WriteLHAPDFFromPdfTable(table, coupling, basename, pdf_index, &
+                                 & iy_increment, flav_indices, flav_pdg_ids, flav_rescale)                                
+    use qed_objects
+    type(pdf_table),        intent(in) :: table
+    type(running_coupling), intent(in) :: coupling
+    character(len=*),       intent(in) :: basename
+    integer,                intent(in) :: pdf_index
+    integer,  optional,     intent(in) :: iy_increment
+    integer,  optional,     intent(in) :: flav_indices(:), flav_pdg_ids(:)
+    real(dp), optional,     intent(in) :: flav_rescale(:)
+\end{lstlisting}
+A user has to provide a \ttt{table} and associated \ttt{coupling}
+object along with a string \ttt{basename} and the \ttt{pdf\_index} as
+needed by LHAPDF.
+%
+If \ttt{pdf\_index} is equal to 0 then the routine
+outputs the content of the table in \ttt{basename\_0000.dat} and
+writes a template \ttt{basename.info} again in the LHAPDF
+format.
+%
+\hoppet{} fills most of the entries in the \ttt{.info}
+file, but a few need to be edited manually by the user.
+%
+For any other value of \ttt{pdf\_index} only the corresponding
+\ttt{.dat} file gets written.
+
+By default the code uses the same grid spacing as in the internal
+\hoppet{} table (\ttt{iy\_increment = 1}) and prints all the possible
+flavours of the PDF, even if they are zero.
+%
+The user can overwrite
+this default behaviour by providing an array of flavours and their pdg
+values.
+%
+If \ttt{iy\_increment > 1} a coarser grid is provided by
+skipping over \ttt{iy\_increment - 1} points in the grid. The
+\ttt{flav\_rescale} is currently needed for the lepton PDF which is
+provided as the sum over flavour and anti-flavour and therefore needs
+an extra factor half.
+%
+The \ttt{flav\_rescale} array only needs to be
+provided if the user is also providing the array of flavours and pdf
+values.
+
+Finally the routine can also be accessed from the streamlined
+interface for \CPP{} or Python usage. In this case the routine is
+significantly simplified and only takes \ttt{basename} and the
+\ttt{pdf\_index} arguments, for instance in \CPP{} like this
+\begin{lstlisting}
+  #include "hoppet.h"
+  #include <string>
+  ...
+  int main () {
+    ...
+    const std::string basename = ...;
+    const int pdf_index = ...;
+    hoppetWriteLHAPDFGrid(basename, pdf_index);
+    ...
+  }
+\end{lstlisting}
+The routine writes the contents of the streamlined interface
+\ttt{tables(0)} and hence requires that this object has been filled
+either through a call to \ttt{hoppetAssign} or \ttt{hoppetEvolve}.
+
 \section{Updated performance studies}
+
 In this section we present some updated performance studies relative
 to
 %
 \ifreleasenote
-Section~9 of Ref.~\cite{Salam:2008qg}.
+Section~9 of Ref.~\cite{Salam:2008qg},
 \else
-Section~\ref{sec:benchmarks}.
+Section~\ref{sec:benchmarks},
 \fi
-%
-Most importantly we benchmark the accuracy and timing of the new
-N$^3$LO evolution. We also present updated plots at NNLO, to give a
-better idea of the performance of \hoppet{} on typical compilers and
-hardware in 2025.
+mainly reflecting updated hardware and compilers of 2025, but also the
+standard nested grid choice that is obtained with the streamlined
+interface or, from the modern Fortran interface by calling
+\ttt{InitGridDefDefault(grid, dy, ymax[, order])}, with the default
+choice of interpolation \ttt{order=-6}.
+
+We split the analysis into the accuracy of PDF evolution and
+tabulation (section~\ref{sec:acc-pdf-evol}) and PDF evaluation
+(section~\ref{sec:fastpdf}).
+
+% %
+% Most importantly we benchmark the accuracy and timing of the new
+% N$^3$LO evolution. We also present updated plots at NNLO, to give a
+% better idea of the performance of \hoppet{} on typical compilers and
+% hardware in 2025.
+
+\subsection{PDF evolution and tabulation}
+\label{sec:acc-pdf-evol}
 
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.49\textwidth}
         \centering
-        \includegraphics[width=\textwidth,page=2]{hoppet-v2-accuracy-speed-v-dy.pdf}
+        \includegraphics[width=\textwidth,page=2]{figs/hoppet-v2-accuracy-speed-v-dy.pdf}
         \caption{}
         \label{fig:sub1}
     \end{subfigure}
     \hfill
     \begin{subfigure}{0.49\textwidth}
         \centering
-        \includegraphics[width=\textwidth,page=3]{hoppet-v2-accuracy-speed-v-dy.pdf}
+        \includegraphics[width=\textwidth,page=3]{figs/hoppet-v2-accuracy-speed-v-dy.pdf}
         \caption{}
         \label{fig:sub2}
     \end{subfigure}
@@ -1269,180 +1457,7 @@ substantially reduced.
 % %
 % \gps{We should cite them, and give comparisons where possible}
 
-\section{Python interface}
-\label{sec:pyinterface}
-From version~2.0.0 \hoppet also includes a Python interface to the
-most common evolution routines. It currently includes exactly the same
-functionality as the streamlined interface, and can be called in much
-the same way. The names of functions and routines are the same as in
-the streamlined interface, but stripped of the \ttt{hoppet}
-prefix. The interface can be obtained from \ttt{PyPi} by invoking
-\begin{lstlisting}
-  pip install hoppet
-\end{lstlisting}
-Alternatively the interface can be built by \ttt{Cmake} with
-\ttt{-DHOPPET\_BUILD\_PYINTERFACE=ON}. In both cases the interface can
-be imported into a \ttt{Python} instance through \ttt{import
-  hoppet}. For a simple tabulation example the user should take a look
-at
-\repolink{example_py/tabulation_example.py}{example\_py/tabulation\_example.py}
-(and in the same directory for a number of other illustrative examples
-of how to use the interface, including in conjunction with
-LHAPDF~\cite{LHAPDF}). The interface uses SWIG (Simplified Wrapper and
-Interface Generator) which therefore needs to be available on the
-system if building with \ttt{Cmake}. It can be installed through most
-package managers (e.g.\ \texttt{apt install swig}, \texttt{brew
-  install swig}) but can also be obtained from the SWIG GitHub
-\href{https://github.com/swig}{repository}.
-
-One significant difference between the Python interface and the
-streamlined interface is that Python does not provide native support
-for pointers. For this reason all functions and subroutines that
-returned a pointer to a PDF object, through an explicit argument, now
-instead return a Python array directly. For instance, where in \CPP{}
-one might have the call
-%
-\begin{lstlisting}
-  #include "hoppet.h"
-  [...]
-  double x = ...;
-  double Q = ...;
-  double pdf[13];
-  [...]
-  hoppetEval(x, Q, pdf);
-\end{lstlisting}
-%
-instead in Python one would have
-%
-\begin{lstlisting}
-  import hoppet as hp
-  [...]
-  x = ...
-  Q = ...
-  pdf = hp.Eval(x,Q)
-\end{lstlisting}
-As a consequence the \ttt{Assign}, \ttt{CachedEvolve}, and
-\ttt{Evolve} routines, which all expect a PDF interface as an input in
-the streamlined interface, now instead take a function of \ttt{x} and
-\ttt{Q} that returns a Python array (see \ttt{hera\_lhc} in
-\repolink{example\_py/tabulation_example.py}{tabulation\_example.py}
-for an explicit example).
-
-In addition to the examples provided in
-\repolink{example\_py/}{example\_py/} we have also developed a small tool that loads a grid from LHAPDF at an initial scale and evolves it with \hoppet{} over a large range of $Q$. The resulting grids are then compared between \hoppet{} and LHAPDF to determine the relative accuracy of the LHAPDF grids. The tool, along with some documentation, can be found at \href{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}.
-
-\section{CMake build option}
-\label{sec:cmake}
-In addition to the standard build option through \ttt{./configure} and
-\ttt{make [install]} \hoppet now supports the use of CMake. Although
-the old build option will be supported as far as possible, the CMake
-build option is the main build option starting from version
-2.0.0 of \hoppet.
-
-For a typical user it will be enough to invoke the following lines
-from the main directory
-\begin{lstlisting}
-  mkdir build; cd build
-  cmake ..
-  make [-j]
-  make install [-j]
-\end{lstlisting}
-This will compile and install \hoppet along with both the streamlined
-and Python interfaces. Note that \ttt{make install} will typically
-install in a location that requires root privileges, unless a user has
-specified a custom prefix (through
-\ttt{-DCMAKE\_INSTALL\_PREFIX=/install/path}). A number of options can
-be passed to CMake. They are documented in
-\repolink{CMakeLists.txt}{CMakeLists.txt} and can be printed on screen
-by a call to \ttt{cmake -LH ..} from the \ttt{build} directory.
-
-Of particular note to most users are
-\begin{lstlisting}
-  option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
-  option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
-  option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
-  option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
-  option(HOPPET_BUILD_PYINTERFACE "Build python interface." ON)
-  option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
-  option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
-\end{lstlisting}
-The can be set when call \ttt{cmake} in the usual way,
-e.g.\ \ttt{cmake ..\ -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet
-with the exact coefficient functions.
-
-\section{Saving LHAPDF grids}
-\label{sec:lhapdf}
-A minor new feature of this release is the possibility to save a
-\hoppet{} table in the form of an LHAPDF6~\cite{LHAPDF} grid.
-%Access to this functionality is also provided in the streamlined interface.
-% GPS -> removed this because it's said below
-The main routine has the following structure
-\begin{lstlisting}
-  subroutine WriteLHAPDFFromPdfTable(table, coupling, basename, pdf_index, &
-                                 & iy_increment, flav_indices, flav_pdg_ids, flav_rescale)                                
-    use qed_objects
-    type(pdf_table),        intent(in) :: table
-    type(running_coupling), intent(in) :: coupling
-    character(len=*),       intent(in) :: basename
-    integer,                intent(in) :: pdf_index
-    integer,  optional,     intent(in) :: iy_increment
-    integer,  optional,     intent(in) :: flav_indices(:), flav_pdg_ids(:)
-    real(dp), optional,     intent(in) :: flav_rescale(:)
-\end{lstlisting}
-A user has to provide a \ttt{table} and associated \ttt{coupling}
-object along with a string \ttt{basename} and the \ttt{pdf\_index} as
-needed by LHAPDF.
-%
-If \ttt{pdf\_index} is equal to 0 then the routine
-outputs the content of the table in \ttt{basename\_0000.dat} and
-writes a template \ttt{basename.info} again in the LHAPDF
-format.
-%
-\hoppet{} fills most of the entries in the \ttt{.info}
-file, but a few need to be edited manually by the user.
-%
-For any other value of \ttt{pdf\_index} only the corresponding
-\ttt{.dat} file gets written.
-
-By default the code uses the same grid spacing as in the internal
-\hoppet{} table (\ttt{iy\_increment = 1}) and prints all the possible
-flavours of the PDF, even if they are zero.
-%
-The user can overwrite
-this default behaviour by providing an array of flavours and their pdg
-values.
-%
-If \ttt{iy\_increment > 1} a coarser grid is provided by
-skipping over \ttt{iy\_increment - 1} points in the grid. The
-\ttt{flav\_rescale} is currently needed for the lepton PDF which is
-provided as the sum over flavour and anti-flavour and therefore needs
-an extra factor half.
-%
-The \ttt{flav\_rescale} array only needs to be
-provided if the user is also providing the array of flavours and pdf
-values.
-
-Finally the routine can also be accessed from the streamlined
-interface for \CPP{} or Python usage. In this case the routine is
-significantly simplified and only takes \ttt{basename} and the
-\ttt{pdf\_index} arguments, for instance in \CPP{} like this
-\begin{lstlisting}
-  #include "hoppet.h"
-  #include <string>
-  ...
-  int main () {
-    ...
-    const std::string basename = ...;
-    const int pdf_index = ...;
-    hoppetWriteLHAPDFGrid(basename, pdf_index);
-    ...
-  }
-\end{lstlisting}
-The routine writes the contents of the streamlined interface
-\ttt{tables(0)} and hence requires that this object has been filled
-either through a call to \ttt{hoppetAssign} or \ttt{hoppetEvolve}.
-
-\section{Fast PDF access}
+\subsection{Fast PDF access}
 \label{sec:fastpdf}
 \gps{Proximity to  ``performance'' section?}
 
