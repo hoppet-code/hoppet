@@ -40,22 +40,31 @@ version 2.0.0
 \maketitle 
 
 \begin{abstract}
-  This document describes \hoppet, a Fortran~95 package for carrying out DGLAP
+  This document describes \hoppet, a Fortran package for carrying out DGLAP
   evolution and other common manipulations of parton distribution
   functions (PDFs). The PDFs are represented on a grid in $x$--space so
   as to avoid limitations on the functional form of input
   distributions.  Good speed and accuracy are obtained through the
   representation of splitting functions in terms of their convolution
   with a set of piecewise polynomial basis functions, and Runge-Kutta
-  techniques are used for the evolution in $Q$.  Unpolarised evolution
-  is provided to NNLO, including heavy-quark thresholds in the
-  $\MSbar$ scheme, and longitudinally polarised evolution to NLO. The
+  techniques are used for the evolution in $Q$.
+  %
+  Unpolarised evolution
+  is provided to N$^3$LO, including heavy-quark thresholds in the
+  pole and $\MSbar$ schemes (the latter only to NNLO),
+  %
+  and longitudinally polarised evolution to NLO.
+  %
+  The code also includes QED evolution and N$^3$LO massless structure
+  functions.
+  %
+  The
   code is structured so as to provide simple access to the objects
   representing splitting functions and PDFs, making it possible for a
   user to extend the facilities already provided.
 %
   A streamlined interface is also available, facilitating use of the
-  evolution part of the code from F77 and C/\CPP.  \smallskip
+  evolution part of the code from F77, C/\CPP and Python.  \smallskip
 \end{abstract}
 
 % \newpage
@@ -112,11 +121,24 @@ version 2.0.0
 % processor). Further details in section~\ref{sec:Timing}.
 
 \newpage
+\noindent \fbox{\parbox{\textwidth}{%
+\textbf{Note:} this manual is structured as follows: it
+   consists of the original v1 manual with a few key updates, such as
+   N$^3$LO evolution in section~\ref{sec:pqcd},
+   %
+   followed by sections~\ref{sec:v2-additions} onwards, describing the
+   main additions in v2 and with updated performance studies,
+   whose timings notably supersede those in section~\ref{sec:Timing}.
+ }}
+
 \tableofcontents
 
 
+
 %======================================================================
 %======================================================================
+
+
 \section{Introduction}
 \label{sec:intro}
 
@@ -2725,6 +2747,7 @@ of a tabulated evolution. Default values shown in square
 \end{table}
 
 \section{Additions in version 2}
+\label{sec:v2-additions}
 The following sections detail additions in \hoppet{} that appeared in
 v2.0.0. 
 
