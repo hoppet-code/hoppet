@@ -32,7 +32,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 license = {text = "GPL-3.0-or-later"}
-readme = "README.md"
+readme = "pyinterface/README.md"
 requires-python = ">=3.8"
 # Add any Python dependencies here
 dependencies = ["numpy"]
@@ -53,21 +53,17 @@ cmake.define.HOPPET_BUILD_TESTDIR = "OFF"
 cmake.define.HOPPET_ENABLE_TESTING = "OFF"
 cmake.define.HOPPET_USE_EXACT_COEF = "ON"
 wheel.packages = ["hoppet"]
-#build-dir = "build_python"
-## Make sure source files are properly included
-#sdist.include = [
-#    "CMakeLists.txt",
-#    "cmake/**",
-#    "src/**", 
-#    "pyinterface/**"
-#]
 # Use Unix Makefiles instead of Ninja
 cmake.args = ["-G", "Unix Makefiles"]
-#metadata.version.provider = "scikit_build_core.metadata.cmake"
 
+# Small regexp to get version number from cmake file
+#
+# Note that we have to increment the python version by hand in the
+# "result" below. So if hoppet version is 2.0.0, and we set
+# result = "{value}.2" the python version would be 2.0.0.2.
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.regex"
 input = "CMakeLists.txt"
 # Capture the value after 'VERSION' in the project() call (PEP 440-ish token)
 regex = '''(?im)^\s*project\([^)]*VERSION\s+(?P<value>[0-9]+(?:\.[0-9]+){1,2}[A-Za-z0-9.+-]*)'''
-result = "{value}"
+result = "{value}.0"

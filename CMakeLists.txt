@@ -12,7 +12,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 # set the project name: note should be updated also in src/welcome_message.f90 and the documentation
-project(hoppet VERSION 2.0.0 LANGUAGES C CXX Fortran)
+project(hoppet VERSION 2.1.0 LANGUAGES C CXX Fortran)
 set(PROJECT_VERSION_PRERELEASE "-devel")
 
 set(HOPPET_VERSION "${PROJECT_VERSION}${PROJECT_VERSION_PRERELEASE}")
