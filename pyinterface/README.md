@@ -42,7 +42,7 @@ def main():
 
     hp.DeleteAll()
 ```   
-For more examples take a look at https://github.com/hoppet-code/hoppet/tree/master/example_py. The above example is essentially identical to https://github.com/hoppet-code/hoppet/tree/master/example_py/tabulation_example.py and prints the output of a typical benchmark PDF.
+For more examples take a look at [example_py](https://github.com/hoppet-code/hoppet/tree/master/example_py). The above example is essentially identical to [tabulation_example.py](https://github.com/hoppet-code/hoppet/tree/master/example_py/tabulation_example.py) and prints the output of a typical benchmark PDF.
 
 
 ## Citation policy
@@ -58,4 +58,4 @@ A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer [arXiv:2509.XXXXX](
 
 ## A note on version numbering
 
-The version of the Python interface has an extra suffix, which only gets incremented when the Python interface gets an update but the underlying hoppet code stays the same. A vversion number `X.Y.Z.a` then means that the interface uses hoppet version `X.Y.Z`.
+The version of the Python interface has an extra suffix, which only gets incremented when the Python interface gets an update but the underlying hoppet code stays the same. A version number `X.Y.Z.a` then means that the interface uses hoppet version `X.Y.Z`.
