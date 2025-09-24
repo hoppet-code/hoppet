@@ -66,4 +66,5 @@ provider = "scikit_build_core.metadata.regex"
 input = "CMakeLists.txt"
 # Capture the value after 'VERSION' in the project() call (PEP 440-ish token)
 regex = '''(?im)^\s*project\([^)]*VERSION\s+(?P<value>[0-9]+(?:\.[0-9]+){1,2}[A-Za-z0-9.+-]*)'''
-result = "{value}.0"
+# pipversion gets an extra index
+result = "{value}.1"

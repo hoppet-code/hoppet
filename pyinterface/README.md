@@ -1,9 +1,13 @@
 # HOPPET: A Higher Order Perturbative Parton Evolution Toolkit
 
-HOPPET is a Fortran 95 package for carrying out DGLAP evolution and other 
-common manipulations of parton distribution functions (PDFs). It includes a Python interface which is what is being provided here!
+HOPPET is a package for carrying out DGLAP evolution and other common
+manipulations of parton distribution functions (PDFs) in particle
+physics. The core package is written in Fortran. This Python interface
+provides access to a key subset of the functionality, the part known 
+in the documentation as the "streamlined" interface.
 
-The full documentation of the underlying code can be found at https://github.com/hoppet-code/hoppet.
+The full underlying code and documentation can be found at
+https://github.com/hoppet-code/hoppet.
 
 ## Example usage
 
@@ -12,14 +16,17 @@ import hoppet as hp
 import numpy as np
 
 def main():
-    dy = 0.1    
-    nloop = 3
+    # choose the underlying spacing in y=log(1/x): 
+    # smaller spacing gives higher accuracy but slower evolution
+    dy = 0.1  
+    # choose NNLO evolution
+    nloop = 3 
     # Start hoppet
     hp.Start(dy, nloop)
     
     asQ0 = 0.35
     Q0 = np.sqrt(2.0)
-    # Do the evolution. 
+    # Do the evolution starting from a standard benchmark initial condition 
     hp.Evolve(asQ0, Q0, nloop, 1.0, hp.BenchmarkPDFunpol, Q0)
 
     # Evaluate the PDFs at some x values and print them
@@ -42,7 +49,11 @@ def main():
 
     hp.DeleteAll()
 ```   
-For more examples take a look at [example_py](https://github.com/hoppet-code/hoppet/tree/master/example_py). The above example is essentially identical to [tabulation_example.py](https://github.com/hoppet-code/hoppet/tree/master/example_py/tabulation_example.py) and prints the output of a typical benchmark PDF.
+For more examples take a look at
+[example_py](https://github.com/hoppet-code/hoppet/tree/master/example_py).
+The above example is essentially identical to
+[tabulation_example.py](https://github.com/hoppet-code/hoppet/tree/master/example_py/tabulation_example.py)
+and prints the output of a typical benchmark PDF.
 
 
 ## Citation policy
@@ -56,6 +67,9 @@ and
 
 A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer [arXiv:2509.XXXXX](https://arxiv.org/abs/2509.XXXXX). 
 
-## A note on version numbering
+## Version numbering
 
-The version of the Python interface has an extra suffix, which only gets incremented when the Python interface gets an update but the underlying hoppet code stays the same. A version number `X.Y.Z.a` then means that the interface uses hoppet version `X.Y.Z`.
+A version number `X.Y.Z.a` means that the interface uses hoppet version
+`X.Y.Z`. The `.a` part of the version number gets incremented when the
+Python pip package and/or wheels are updated, but the underlying hoppet
+code stays the same. 
