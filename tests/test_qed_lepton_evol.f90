@@ -27,7 +27,7 @@
 program test_qed_evol
    use hoppet
   use qed_evolution; use qed_objects; use qed_coupling_module
-  use sub_defs_io
+  use io_utils
   implicit none
   character(len=200) :: pdfname
   type(grid_def)      :: grid

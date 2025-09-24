@@ -4,6 +4,7 @@
 F90LIB4GCC= -L/opt/homebrew/opt/gcc/lib/gcc/current -lgfortran
 #F90LIB4GCC=  -lgfortran
 
+CXXFLAGS= -O3 -g -Wall -std=c++14 -I../src
 LIBS=-L../src -lhoppet
 
 all: tabulation_example tabulation_example_qed structure_functions_example

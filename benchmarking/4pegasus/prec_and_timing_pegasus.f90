@@ -13,7 +13,7 @@ module pegasus_communicator
 end module pegasus_communicator
 
 program prec_and_timing_pegasus
-  use sub_defs_io
+  use io_utils
   use pegasus_communicator
   use types; use consts_dp
   implicit none

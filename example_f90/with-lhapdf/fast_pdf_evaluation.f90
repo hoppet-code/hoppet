@@ -67,11 +67,11 @@ program fast_pdf_evaluation
   call cpu_time(t1)
   do i = 1, npoints
     do j = 1, npoints
-      !ashoppet = hoppetAlphaS(qvals(j))
+      ashoppet = hoppetAlphaS(qvals(j))
       !! GPS M2Pro 2025-09-06: this variant saves only 0.4ns per call
       !! out of about 31.7
       !ashoppet = na_Value(coupling%nah, qvals(j))
-      ashoppet = na_Value_faster(coupling%nah, qvals(j))
+      !ashoppet = na_Value_faster(coupling%nah, qvals(j))
       !if (i == 1) write(6,*) qvals(j), hoppetAlphaS(qvals(j)), na_Value_faster(coupling%nah, qvals(j))
     end do
   end do

@@ -2,7 +2,7 @@ program test_qed_obj
   use hoppet; use convolution
   use qed_objects
   use qed_coupling_module
-  use sub_defs_io
+  use io_utils
   implicit none
   type(grid_def)     :: grid
   type(qed_split_mat) :: qed_split

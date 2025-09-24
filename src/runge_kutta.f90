@@ -8,9 +8,15 @@ module runge_kutta
   real(dp),  parameter :: third = one/three
 
   interface rkstp
-     module procedure rkstp_0d, rkstp_1d, rkstp_2d
+     module procedure rkstp_0d, rkstp_1d, rkstp_2d!
+     !module procedure rkstp_0d_arg
   end interface
   public :: rkstp
+
+  interface rkstp_arg
+     module procedure rkstp_0d_arg
+  end interface
+  public :: rkstp_arg, rkstp_0d_arg
 
 
 contains
@@ -41,6 +47,37 @@ contains
     !                k1/2 + k2  + k3 + k4/2
     y = y + third * (w2         + w3 + w1)
   end subroutine rkstp_0d
+
+  ! version that takes a generic extra argument
+  ! Note that the actual conv must genuinely taks a class(*) arg
+  ! and then use select type(arg) to specialise to the correct
+  ! variant.
+  subroutine rkstp_0d_arg(h,x,y,conv, arg)
+    real(dp), intent(in)    :: h
+    real(dp), intent(inout) :: x, y
+    class(*), intent(in)    :: arg
+    interface
+       subroutine conv(x,y,dy,arg)
+         use types
+         real(dp), intent(in)  :: x, y
+         real(dp), intent(out) :: dy
+         class(*), intent(in)  :: arg
+       end subroutine conv
+    end interface
+    !------------------------------------------------------------
+    real(dp) :: w1, w2, w3
+    real(dp) :: hh
+    hh = half * h
+    call conv(x,y,w1,arg); w1 = w1 * hh            ! w1 = k1/2
+    call conv(x+hh, y + w1, w2,arg); w2 = w2 * hh  ! w2 = k2/2
+    call conv(x+hh, y + w2, w3,arg); w3 = w3 * h   ! w3 = k3
+    w2 = w1 + two*w2                               ! w2 = half*k1 + k2
+    call conv(x+h , y + w3, w1,arg); w1 = w1 * hh  ! w1 = k4/2
+
+    x = x + h
+    !                k1/2 + k2  + k3 + k4/2
+    y = y + third * (w2         + w3 + w1)
+  end subroutine rkstp_0d_arg
 
   !----------------------------------------------------------------------
   subroutine rkstp_1d(h,x,y,conv)

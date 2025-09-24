@@ -1,3 +1,4 @@
+! -*- mode: fortran -*-
 ! This is a Fortran free-form include file
 
 #ifndef __HOPPET_PDF_TABULATE_INC__
@@ -11,4 +12,4 @@
 #define __HOPPET_tab_min_subgrid_ny__ 6
 #define __HOPPET_tab_min_nQ__         5
 
-#endif ! __HOPPET_PDF_TABULATE_INC__
+#endif
