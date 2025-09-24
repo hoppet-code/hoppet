@@ -1,6 +1,6 @@
 # hoppet/pyinterface/pyproject.toml
 [build-system]
-requires = ["scikit-build-core", "cmake", "swig"]
+requires = ["scikit-build-core", "swig"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -38,7 +38,7 @@ requires-python = ">=3.8"
 dependencies = ["numpy"]
 
 [project.urls]
-#Homepage = "https://github.com/hoppet-code"
+Homepage = "https://github.com/hoppet-code"
 Repository = "https://github.com/hoppet-code/hoppet"
 Changelog = "https://github.com/hoppet-code/hoppet/blob/master/NEWS.md"
 

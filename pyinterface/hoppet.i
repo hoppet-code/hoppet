@@ -56,10 +56,9 @@ For more examples look at https://github.com/hoppet-code/hoppet/tree/master/exam
 %module hoppet
 %include "std_string.i"  // This must be included in order to handle c strings
 
- //%pythoncode %{
-   //__version__ = "2.0.0"
-   //__author__ = "Frederic Dreyer, Alexander Karlberg, Paolo Nason, Juan Rojo, Gavin Salam, Giulia Zanderighi"
-   //%}
+%pythoncode %{
+  __author__ = "Frederic Dreyer, Alexander Karlberg, Paolo Nason, Juan Rojo, Gavin Salam, Giulia Zanderighi"
+%}
 
 %{
 #define SWIG_FILE_WITH_INIT
