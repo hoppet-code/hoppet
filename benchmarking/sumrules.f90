@@ -14,7 +14,7 @@ program sumrules
 
      use hoppet
   use hoppet_git_state
-  use sub_defs_io
+  use io_utils
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
      !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF

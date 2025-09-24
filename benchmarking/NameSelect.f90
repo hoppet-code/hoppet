@@ -92,7 +92,7 @@ contains
   !! fed to CodeOfName
   !!
   function code_val_opt(option, default, prefix) result(code)
-    use sub_defs_io
+    use io_utils
     character(len=*),           intent(in) :: option
     integer, optional,          intent(in) :: default
     character(len=*), optional, intent(in) :: prefix

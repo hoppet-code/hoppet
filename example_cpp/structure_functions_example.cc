@@ -1,6 +1,6 @@
 /// An example in C++ similar to the one found in examples_f90
 ///
-#include "../src/hoppet.h"
+#include "hoppet.h"
 #include<iostream>
 #include<cmath>
 #include<cstdio>

@@ -22,6 +22,9 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 include("GNUInstallDirs")
 
+# set the C++ standard to c++14 for the example
+set(CMAKE_CXX_STANDARD 14)
+
 # add check to see if src/Makefile exists, and any src/*.mod, or any src/*.a
 # If so, then bail out because the user probably tried a build with the old build system
 file(GLOB MOD_FILES "${PROJECT_SOURCE_DIR}/src/*.mod")
@@ -90,6 +93,10 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g -traceback -check")
   add_compile_options("-fPIE")
   add_compile_options("-fPIC")
+  # -recusrive is needed to ensure that routines for accessing PDFs and
+  # coupling are thread-safe
+  # (also tried  -reentrancy:threaded, but it didn't work
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -recursive")
 endif()
 
 
@@ -139,6 +146,7 @@ if (HOPPET_ENABLE_FPES)
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-ffpe-trap=zero,overflow,invalid>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-fpe0>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,IntelLLVM>:-fpe0>")
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,IntelLLVM>:-O3>") # Intel needs explicit -O3 with the debug flag
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Ktrap=divz,denorm,fp,inexact,inv,ovf,unf>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NAG>:-ieee=stop>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qflttrap=overflow:underflow:invalid:zerodivide:enable>")
@@ -370,6 +378,7 @@ if (HOPPET_BUILD_EXAMPLES)
   set( cppprograms structure_functions_example tabulation_example_qed tabulation_example)
   foreach ( p ${cppprograms})
     add_executable( ${p}_cpp example_cpp/${p}.cc)
+    target_include_directories(${p}_cpp PUBLIC ${PROJECT_SOURCE_DIR}/src)
     target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_cpp PROPERTIES  OUTPUT_NAME ${p}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_cpp/
@@ -381,6 +390,7 @@ if (HOPPET_BUILD_EXAMPLES)
     set(cppprograms_lhapdf fast_pdf_evaluation)
     foreach ( p ${cppprograms_lhapdf})
       add_executable( ${p}_cpp example_cpp/with-lhapdf/${p}.cc)
+      target_include_directories(${p}_cpp PUBLIC ${PROJECT_SOURCE_DIR}/src)
       target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
       set_target_properties(${p}_cpp PROPERTIES  OUTPUT_NAME ${p}
                             RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_cpp/

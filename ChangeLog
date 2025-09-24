@@ -1,4 +1,25 @@
-2025-09-19 Gavin
+2025-09-23 Gavin
+
+	* example_f90/structure_functions_example.f90:
+	replaced iargc and getarg calls with standard Fortran
+	COMMAND_ARGUMENT_COUNT and GET_COMMAND_ARGUMENT calls
+	(fixes a compilation issue with flang-21)
+
+	* src/inc/ftlMacros.inc:
+	adding special case for __flang__, to fix compilation
+	with arm flang (20)
+
+	* unit-tests/check-thread-safety.cc: *** ADDED ***
+	* unit-tests/CMakeLists.txt:
+	added a test that PDF and alphas evaluations are thread-safe, 
+	using multiple threads to check for consistency. Also
+	fixed an issue where we were linking with hoppet rather than
+	hoppet_static.
+
+	* CMakeLists.txt:
+	* example_cpp/*.cc:
+	changed include from ../src/hoppet.h -> hoppet.h so that someone
+	can copy the example and use it standalone.
 
 	* CMakeLists.txt:
 	* configure:
@@ -7,6 +28,49 @@
 	* hoppet-config.in -> scripts/hoppet-config.in:
 	moved some things out of the top-level directory to reduce clutter
 	and adapted configure and CMakeLists accordingly
+	
+2025-09-23 Gavin + Alexander
+
+	* benchmarking/io_utils.f90:
+	* + all files that used sub_defs_io:
+	more renaming so that io_utils (and io_utils_consts) become
+	the main module rather than sub_defs_i
+
+
+2025-09-22 Gavin
+
+	* benchmarking/io_utils.f90:
+	* benchmarking/lcl_dec.f90:
+	moved routines for accessing command-line arguments from lcl_dec.f90 
+	to io_utils.f90 so as to require compilation with just one file;
+	also added an io_utils module to provide a name that matches the 
+	filename.
+
+	* unit-tests/:
+	* unit_tests/timing.inc: *** ADDED ***
+	* unit_tests/test_interpolation.F90: *** ADDED ***
+	some reorganisation, addition of some command-line arguments
+	to control timing tests
+
+	* unit-tests/test_alphas.f90: *** ADDED ***
+	* unit-tests/gen-alphas-ref.py: *** ADDED ***
+	added code for testing alphas routines, including a Python
+	script to generate reference results
+
+	* src/qcd_coupling.f90:
+	given an type(qcd_coupling) object alphas, one can now call
+	alphas%Value(Q[,fixnf]).
+
+	* src/new_as.f90:
+
+	the na_Value routine is now a routine that uses polynominal
+	interpolation by default, but reverts to na_Value_full (the old
+	na_Value) if the requested Q is beyond the pre-calculated range
+	(overall or for that nf) or if fixnf is requested. 
+	This brings a speed fain from about 33ns/call to about 11ns/call
+	on M2Pro-gfortran15.1-O3
+	(test timing with ./unit-tests/hoppet-unit-tests -time alphas)
+	
 
 2025-09-19 Alexander + Gavin
 

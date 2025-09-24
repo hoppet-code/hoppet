@@ -19,7 +19,9 @@
 #ifndef FTL_MACROS_INCLUDED
 #define FTL_MACROS_INCLUDED
 
-#if defined(__GFORTRAN__) || defined(NAGFOR)
+! GPS 2025-09-23: added __flang__ to get compilers such as arm flang (20)
+! working
+#if defined(__GFORTRAN__) || defined(NAGFOR) || defined(__flang__)
 #define PASTE(a) a
 #define CAT(a,b) PASTE(a)b
 #define CAT3(a,b,c) CAT(a,b)c

@@ -14,11 +14,11 @@ program structure_functions_example
   logical :: param_coefs = .true.
 
   ! Get the number of command line arguments
-  nargs = iargc()
+  nargs = COMMAND_ARGUMENT_COUNT()
 
   ! Very simple commandline.
   if(nargs == 1) then
-     call getarg(1, arg_string)
+     call GET_COMMAND_ARGUMENT(1, arg_string)
      if(arg_string == "exact") param_coefs = .false.
   endif
      

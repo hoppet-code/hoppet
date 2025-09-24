@@ -8,7 +8,7 @@ program structure_functions_benchmark_checks
   use pdfs_for_benchmarks
   use streamlined_interface
   use structure_functions
-  use sub_defs_io !< for command-line access
+  use io_utils !< for command-line access
   implicit none
   real(dp) :: Qmax, xmur, xmuf, Qmin, ymax, Q, mc, mb, mt, asQ, Q0alphas, muR_Q, Q0pdf
   real(dp) :: xpdf_at_xQ(-6:6), dy, dlnlnQ, minQval, maxQval

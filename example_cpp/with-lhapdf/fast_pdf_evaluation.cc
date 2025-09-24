@@ -5,7 +5,7 @@
 ///
 ///   example_cpp/fast_pdf_evaluation [PDFsetName]
 ///
-#include "../../src/hoppet.h"
+#include "hoppet.h"
 #include "LHAPDF/LHAPDF.h"
 #include <iostream>
 #include <cmath>

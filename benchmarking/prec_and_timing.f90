@@ -43,7 +43,7 @@ program prec_and_timing
   use hoppet
   use hoppet_git_state
   use pdfs_for_benchmarks
-  use sub_defs_io
+  use io_utils
   use NameSelect
 
   implicit none

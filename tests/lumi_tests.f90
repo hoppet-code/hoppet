@@ -761,7 +761,7 @@ end module lumi_elements
 
 
 program lumi_tests
-  use hoppet; use sub_defs_io
+  use hoppet; use io_utils
   use lumi_elements
   implicit none
   !-- for PDFs

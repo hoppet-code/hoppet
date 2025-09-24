@@ -33,14 +33,13 @@ module new_as
   real(dp), parameter :: thi = 93.0_dp 
   integer,  parameter :: nofixnf = -1000000045
 
-  public na_Value_faster
   public :: na_handle
-  public :: na_Init, na_Value, na_Del, na_NumberOfLoops
+  public :: na_Init, na_Value, na_Value_full, na_Del, na_NumberOfLoops
   public :: na_nfRange, na_nfAtQ, na_QrangeAtNf, na_QuarkMass
   public :: na_QuarkMassesAreMSbar
   public :: na_Set_dt_base
 
-  type(na_segment), pointer :: seg
+  !type(na_segment), pointer :: seg
 
   interface SetDefaultCouplingDt
      module procedure na_Set_dt_base
@@ -91,6 +90,7 @@ contains
     integer  :: nf_store
     integer  :: nbin, i, j, nseg, istart
     integer  :: nbin_total
+    type(na_segment), pointer :: seg
 
     !-- we may well play with nf, so need to be able to reset it
     nf_store = nf_int
@@ -210,12 +210,12 @@ contains
     seg => nah%seg(nseg)
     istart = nint((tstart-seg%tlo)/seg%dt)
     t = tstart
-    seg%ra(istart) = na_evolve(ra, seg%tlo+istart*seg%dt - tstart)
+    seg%ra(istart) = na_evolve(ra, seg%tlo+istart*seg%dt - tstart,seg)
     do i = istart+1, ubound(seg%ra,dim=1)
-       seg%ra(i) = na_evolve(seg%ra(i-1), seg%dt)
+       seg%ra(i) = na_evolve(seg%ra(i-1), seg%dt, seg)
     end do
     do i = istart-1, lbound(seg%ra,dim=1), -1
-       seg%ra(i) = na_evolve(seg%ra(i+1), -seg%dt)
+       seg%ra(i) = na_evolve(seg%ra(i+1), -seg%dt, seg)
     end do
     seg%iflip = istart
 
@@ -263,7 +263,7 @@ contains
        seg%ra(0) = one/alfas_here
        ! recall that this is the reciprocal of alpha!
        do i = 1, ubound(seg%ra,dim=1)
-          seg%ra(i) = na_evolve(seg%ra(i-1), seg%dt)
+          seg%ra(i) = na_evolve(seg%ra(i-1), seg%dt, seg)
        end do
        seg%iflip = -1
     end do
@@ -296,7 +296,7 @@ contains
        end if
        seg%ra(ubound(seg%ra,dim=1)) = one/alfas_here
        do i = ubound(seg%ra,dim=1)-1, 0, -1
-          seg%ra(i) = na_evolve(seg%ra(i+1), -seg%dt)
+          seg%ra(i) = na_evolve(seg%ra(i+1), -seg%dt, seg)
        end do
        seg%iflip = ubound(seg%ra,dim=1)+1
     end do
@@ -314,7 +314,7 @@ contains
   ! steps at alpha_s thresholds, it is important so that certain D.E.
   ! routines (e.g. for PDF evolution) do not give alpha values at end 
   ! points that give non-smoothness.
-  function na_Value(nah, Q, fixnf) result(res)
+  function na_Value_full(nah, Q, fixnf) result(res)
     type(na_handle), intent(in), target :: nah
     real(dp),        intent(in)         :: Q
     integer,         intent(in), optional :: fixnf
@@ -324,6 +324,7 @@ contains
     integer  :: nseg, i, n
     integer, save :: warn_id = warn_id_INIT
     integer, parameter :: max_warn = 1
+    type(na_segment), pointer :: seg
 
     if (nah%nloop == 0) then
       res = nah%alfas
@@ -334,23 +335,23 @@ contains
 
     if (present(fixnf) .and. nah%fixnf == nofixnf) then
        if (fixnf < nah%nlo .or. fixnf > nah%nhi) then
-          call wae_error('na_Value:', 'the fixnf requested is&
+          call wae_error('na_Value_full:', 'the fixnf requested is&
                & outside the range supported this na_handle')
        end if
        if (t < tlo .or. t > thi) then
-          call wae_error('na_Value:', 'the Q value is&
+          call wae_error('na_Value_full:', 'the Q value is&
                & outside the range supported this na_handle')
        end if
        nseg = fixnf
        !if (t > nah%seg(nseg)%thi+ nah%seg(nseg)%dt .or.&
        !     & t < nah%seg(nseg)%tlo-nah%seg(nseg)%dt) then
-       !   call wae_error('na_Value:', &
+       !   call wae_error('na_Value_full:', &
        !        &  'With fixnf, Q is too far outside supported range.')
        !end if
     else
        if (present(fixnf) .and. nah%fixnf /= nofixnf) then
           if (fixnf /= nah%fixnf) then
-             call wae_error('na_Value:', 'the fixnf requested is &
+             call wae_error('na_Value_full:', 'the fixnf requested is &
                   &different from that supported by na_handle')
           end if
        end if
@@ -358,7 +359,7 @@ contains
           if (t <= nah%seg(nseg)%thi .and. t >= nah%seg(nseg)%tlo) exit
        end do
        if (nseg > nah%nhi) &
-            &call wae_Error('na_Value: Specified Q is not in supported range'&
+            &call wae_Error('na_Value_full: Specified Q is not in supported range'&
             &,dbleval=Q)
     end if
     
@@ -375,9 +376,9 @@ contains
     !   if the procedure is not particularly recommended.
     delta_t = t - (seg%tlo+i*seg%dt)
     if (abs(delta_t) <= 1.3_dp*seg%dt) then
-       res = one/na_evolve(seg%ra(i), delta_t)
+       res = one/na_evolve(seg%ra(i), delta_t, seg)
     else
-       call wae_warn(max_warn,warn_id,'na_Value: will evolve &
+       call wae_warn(max_warn,warn_id,'na_Value_full: will evolve &
             &fixed-nf alpha_s beyond precalculated range.',&
             &'This procedure may be very slow, Q=', dbleval=Q)
        !write(0,*) Qoft(seg%tlo),Qoft(seg%thi),Q
@@ -385,20 +386,21 @@ contains
        delta_t = delta_t/n
        ra = seg%ra(i)
        do i = 1, n
-          ra = na_evolve(ra,delta_t)
+          ra = na_evolve(ra,delta_t, seg)
        end do
        res = one/ra
     end if
     !write(0,'(f15.10,i,f15.12)') t, nseg, res ! HOPPER TESTING
-  end function na_Value
+  end function na_Value_full
 
   !! Faster evaluation of alpha_s, with fewer options; reverts
-  !! to na_Value for some edge cases and also doesn't have the 
+  !! to _full for some edge cases and also doesn't have the 
   !! fixnf option
-  function na_Value_faster(nah, Q) result(res)
+  function na_Value(nah, Q, fixnf) result(res)
     use interpolation_coeffs; use interpolation
     type(na_handle), intent(in), target :: nah
     real(dp),        intent(in)         :: Q
+    integer,         intent(in), optional :: fixnf
     real(dp) :: res
     !---------------
     real(dp) :: t, tnorm, tdarr(0:4), itd, prod
@@ -408,9 +410,14 @@ contains
     integer  :: iseg, it, i
     type(na_segment), pointer :: this_seg
     
+    if (present(fixnf)) then
+      res = na_Value_full(nah, Q, fixnf)
+      return
+    end if
+
     t = tofQ(Q)
     if (t < nah%seg(nah%nlo)%tlo .or. t > nah%seg(nah%nhi)%thi) then
-      res = na_Value(nah,Q)
+      res = na_Value_full(nah,Q)
       return
     end if
 
@@ -421,8 +428,8 @@ contains
 
     this_seg => nah%seg(iseg)
     if (ubound(this_seg%ra,1) < 4) then
-      ! not enough points to do the interpolation, so just use na_Value
-      res = na_Value(nah,Q)
+      ! not enough points to do the interpolation, so just use na_value_full
+      res = na_Value_full(nah,Q)
       return
     end if
 
@@ -468,7 +475,7 @@ contains
     !res = sum(tdarr * this_seg%ra(it:it+4))
 
     res = one / res
-  end function na_Value_faster
+  end function na_Value
 
 
   !======================================================================
@@ -622,25 +629,31 @@ contains
   
   !------------------------------------------------------------
   ! given ra return the value evolve by dt
-  function na_evolve(ra,dt) result(res)
+  function na_evolve(ra,dt, seg) result(res)
     use runge_kutta
     real(dp), intent(in) :: ra, dt
+    class(*), intent(in) :: seg
     !----------------------------------
     real(dp) :: res,t
     t = zero
     res = ra
-    call rkstp(dt,t,res,na_deriv)
+    !call rkstp_arg(dt,t,res,na_deriv,seg)
+    call rkstp_arg(dt,t,res,na_deriv,seg)
   end function na_evolve
   
-  
-
   !---------------------------------------------------------
-  ! derivative of 1/alpha
-  subroutine na_deriv(t, ra, dra)
+  !! derivative of 1/alpha
+  subroutine na_deriv(t, ra, dra, seg)
     real(dp), intent(in)  :: t, ra
     real(dp), intent(out) :: dra
+    class(*), intent(in)  :: seg
 
-    dra = seg%beta0 + seg%beta1/ra + seg%beta2/ra**2 + seg%beta3/ra**3
+    select type(seg)
+    type is (na_segment)
+      dra = seg%beta0 + seg%beta1/ra + seg%beta2/ra**2 + seg%beta3/ra**3
+    class default
+      call wae_error('na_deriv: unknown polymorphic type for seg')
+    end select
   end subroutine na_deriv
 
   !! Function that returns t = 2*log(Q).
