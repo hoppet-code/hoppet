@@ -35,7 +35,7 @@ public:
   }
 };
 
-/// class for a PDF (and coupling) evaluation task
+/// class for a multi-flavour PDF evaluation task
 class PDFThreadTask : public TestBase {
 public:
   PDFThreadTask() {}
@@ -50,13 +50,27 @@ public:
       results.push_back(2 * (pdf[6-1] + pdf[6-2])); // 2(ubar + dbar)
       results.push_back(pdf[6+4] + pdf[6-4]); // c + cbar
       results.push_back(pdf[6+0]); // gluon
-      results.push_back(hoppetAlphaS(Q)); // alpha_s
     }
   }
   string name() const { return "PDFThreadTask"; }
 };
 
-/// class for a PDF (and coupling) evaluation task
+/// class for a multi-flavour PDF evaluation task
+class PDFOneFlavThreadTask : public TestBase {
+public:
+  PDFOneFlavThreadTask() {}
+  void run() {
+    for (unsigned i = 0; i <= nxQ; ++i) {
+      double x = xmin * exp(i * log(xmax/xmin) / nxQ);
+      double Q = Qval(i);
+      double pdf[13];
+      results.push_back(hoppetEvalPID(x, Q, i%5));
+    }
+  }
+  string name() const { return "PDFOneFlavThreadTask"; }
+};
+
+/// class for a AlphaS evaluation task
 class AlphaSThreadTask : public TestBase {
 public:
   AlphaSThreadTask() {}
@@ -70,7 +84,9 @@ public:
 };
 
 
-// code to run the thread safety check for a class of type T
+/// Code to run the thread safety check for a class of type T
+/// It calls T::run() in multiple threads and checks that the T::results
+/// vector is identical across all the results
 template<class T>
 bool check_thread_safety(int nrep = 20) {
   cout << "Checking thread safety of " << T().name() << " with " << nrep << " repetitions..." << endl;
@@ -148,8 +164,14 @@ int main(int argc, char** argv) {
 
   int nrep = 0;
   bool global_pass = false;
+
+
   global_pass |= check_thread_safety<PDFThreadTask>();
+  global_pass |= check_thread_safety<PDFOneFlavThreadTask>();
   global_pass |= check_thread_safety<AlphaSThreadTask>();
+
+  hoppetSetYLnlnQInterpOrders(4,3); // to try a case with warnings
+  global_pass |= check_thread_safety<PDFThreadTask>();
 
   if (!global_pass) {
     cout << red << "Thread safety test failed!" << reset << endl;
