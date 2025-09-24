@@ -1022,7 +1022,7 @@ would be defined as \ttt{double ff[14]}.
 
 An example of structure function evaluations using the \CPP{} version of
 the streamlined interface is to be found in
-\repolink{example_cpp/cpp_structure_functions_example.cc}{example\_cpp/cpp\_structure\_functions\_example.cc}.
+\repolink{example_cpp/structure_functions_example.cc}{example\_cpp/structure\_functions\_example.cc}.
 %
 %\gps{added this link}
 
@@ -1276,15 +1276,23 @@ most common evolution routines. It currently includes exactly the same
 functionality as the streamlined interface, and can be called in much
 the same way. The names of functions and routines are the same as in
 the streamlined interface, but stripped of the \ttt{hoppet}
-prefix. The interface is installed automatically as \ttt{hoppet} with
-\ttt{Cmake} and can be used through \ttt{import hoppet}. For a fully
-worked out tabulation example the user should take a look at
-\repolink{pyinterface/tabulation_example.py}{pyinterface/tabulation\_example.py}. The
-interface uses SWIG (Simplified Wrapper and Interface Generator) which
-therefore needs to be available on the system. It can be installed
-through most package managers (e.g.\ \texttt{apt install swig},
-\texttt{brew install swig}) but
-can also be obtained from the SWIG GitHub
+prefix. The interface can be obtained from \ttt{PyPi} by invoking
+\begin{lstlisting}
+  pip install hoppet
+\end{lstlisting}
+Alternatively the interface can be built by \ttt{Cmake} with
+\ttt{-DHOPPET\_BUILD\_PYINTERFACE=ON}. In both cases the interface can
+be imported into a \ttt{Python} instance through \ttt{import
+  hoppet}. For a simple tabulation example the user should take a look
+at
+\repolink{example_py/tabulation_example.py}{example\_py/tabulation\_example.py}
+(and in the same directory for a number of other illustrative examples
+of how to use the interface, including in conjunction with
+LHAPDF~\cite{LHAPDF}). The interface uses SWIG (Simplified Wrapper and
+Interface Generator) which therefore needs to be available on the
+system if building with \ttt{Cmake}. It can be installed through most
+package managers (e.g.\ \texttt{apt install swig}, \texttt{brew
+  install swig}) but can also be obtained from the SWIG GitHub
 \href{https://github.com/swig}{repository}.
 
 One significant difference between the Python interface and the
@@ -1317,8 +1325,11 @@ As a consequence the \ttt{Assign}, \ttt{CachedEvolve}, and
 \ttt{Evolve} routines, which all expect a PDF interface as an input in
 the streamlined interface, now instead take a function of \ttt{x} and
 \ttt{Q} that returns a Python array (see \ttt{hera\_lhc} in
-\repolink{pyinterface/tabulation_example.py}{tabulation\_example.py}
+\repolink{example\_py/tabulation_example.py}{tabulation\_example.py}
 for an explicit example).
+
+In addition to the examples provided in
+\repolink{example\_py/}{example\_py/} we have also developed a small tool that loads a grid from LHAPDF at an initial scale and evolves it with \hoppet{} over a large range of $Q$. The resulting grids are then compared between \hoppet{} and LHAPDF to determine the relative accuracy of the LHAPDF grids. The tool, along with some documentation, can be found at \href{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}.
 
 \section{CMake build option}
 \label{sec:cmake}
