@@ -903,20 +903,20 @@ contains
   !! Specific settings give significant speed improvements. Currently:
   !! (2,2), (3,3) and (4,4), because these correspond to cases where
   !! there are specific routines with hard-coded orders
-  subroutine PdfTableOverrideInterpOrders(new_order_y, new_order_Q)
-    integer, intent(in) :: new_order_y, new_order_Q
+  subroutine PdfTableOverrideInterpOrders(yorder, lnlnQorder)
+    integer, intent(in) :: yorder, lnlnQorder
 
-    if (new_order_y * new_order_Q <= 0) call wae_error("PdfTableOverrideInterpOrders: both orders must be >0 or <0")
+    if (yorder * lnlnQorder <= 0) call wae_error("PdfTableOverrideInterpOrders: both orders must be >0 or <0")
 
-    if (new_order_y <= 0) then
+    if (yorder <= 0) then
       override_order_y = -1
       override_npnt_y  = -1
     else
-      override_order_y = new_order_y
-      override_npnt_y  = new_order_y + 1
+      override_order_y = yorder
+      override_npnt_y  = yorder + 1
     end if
 
-    override_order_Q = new_order_Q
+    override_order_Q = lnlnQorder
     if (override_order_Q <= 0) override_order_Q = -1
 
     ! it's enough for one to be >0 for override to be turned on
