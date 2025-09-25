@@ -1,1 +1,0 @@
-/usr/bin/gfortran -Wl,--dependency-file=CMakeFiles/prec_and_timing.dir/link.d -O3 CMakeFiles/prec_and_timing.dir/benchmarking/prec_and_timing.f90.o CMakeFiles/prec_and_timing.dir/benchmarking/io_utils.f90.o CMakeFiles/prec_and_timing.dir/benchmarking/lcl_dec.f90.o CMakeFiles/prec_and_timing.dir/benchmarking/NameSelect.f90.o -o benchmarking/prec_and_timing  lib/libhoppet.a

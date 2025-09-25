@@ -8,3 +8,14 @@
 benchmarking/structure_functions_benchmark_checks
 example_f90/tabulation_example_qed_streamlined
 src/.vscode
+
+# Build directories
+build/
+_build/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python

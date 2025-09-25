@@ -1,2 +1,0 @@
-# Empty dependencies file for tabulation_example_n3lo_f90.
-# This may be replaced when dependencies are built.

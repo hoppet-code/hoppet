@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -O3 -DNDEBUG -flto -Wl,--dependency-file=CMakeFiles/hoppet_pybind11.dir/link.d -shared  -o hoppet/hoppet_pybind11.cpython-312-x86_64-linux-gnu.so CMakeFiles/hoppet_pybind11.dir/hoppet_pybind11.cpp.o  -Wl,-rpath,:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ../lib/libhoppet.a -lgfortran -lquadmath

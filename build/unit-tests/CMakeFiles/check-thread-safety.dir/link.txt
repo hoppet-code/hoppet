@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/check-thread-safety.dir/link.d "CMakeFiles/check-thread-safety.dir/check-thread-safety.cc.o" -o check-thread-safety  ../lib/libhoppet.a -lgfortran -lquadmath
