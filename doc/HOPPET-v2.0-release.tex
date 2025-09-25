@@ -40,9 +40,12 @@ CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
   support for QED evolution to an accuracy phenomenologically
   equivalent to NNLO QCD, for N$^3$LO QCD evolution in the variable
   flavour number scheme, and for the determination of hadronic
-  structure functions for massless quarks up to N$^3$LO. Additionally
-  we describe a new Python interface, CMake build option, and
-  functionality to save a \hoppet{} table as an LHAPDF grid.
+  structure functions for massless quarks up to N$^3$LO.
+  %
+  Additionally we describe a new Python interface, CMake build option,
+  functionality to save a \hoppet table as an LHAPDF grid and update
+  our performance benchmarks, including optimisations in
+  interpolating PDF tables.\gps{added last bit}
 \end{abstract}
 
 \begin{keyword}
@@ -126,7 +129,7 @@ This release also includes a range of other smaller additions relative
 to the original 1.1.0 release documented in \cite{Salam:2008qg}, in
 particular the addition of a new Python interface
 (Section~\ref{sec:pyinterface}), a CMake-based build system
-(Section~\ref{sec:cmake}), the ability to write LHAPDF grids
+(Section~\ref{sec:cmake}), and the ability to write LHAPDF grids
 (Section~\ref{sec:lhapdf}).
 %
 We have also updated the performance benchmarks and improved the speed
