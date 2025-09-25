@@ -1,25 +1,18 @@
 #!/usr/bin/env python
 
 """
-setup.py file for SWIG hoppet interface
+Legacy setup.py file for hoppet interface.
+
+Note: This file is kept for backwards compatibility but is no longer used.
+The build system now uses pyproject.toml with scikit-build-core and pybind11.
 """
 
-from distutils.core import setup, Extension
+# This file is legacy and not used in the current build system.
+# The actual Python interface is built using:
+# - pyproject.toml (build configuration)
+# - CMakeLists.txt (build system)
+# - hoppet_pybind11.cpp (pybind11 bindings)
 
-
-hoppet_module = Extension('_hoppet',
-                           sources=['hoppet_wrap.cxx'],
-                           include_dirs = ['../src','.'],
-                           swig_opts=['-c++'],
-                           libraries=['hoppet', 'gfortran'])
-
-setup (name = 'hoppet',
-       version     = '2.0.0',
-       author      = "Frederic Dreyer, Alexander Karlberg, Paolo Nason, Juan Rojo, Gavin P. Salam and Giulia Zanderighi",
-       author_email= "gavin.salam@physics.ox.ac.uk",
-       url         = "https://github.com/hoppet-code/hoppet",
-       license     = 'GPLv3',
-       description = """A python interface for Hoppet v2 created using pybind11""",
-       ext_modules = [hoppet_module],
-       py_modules  = ["hoppet"],
-       )
+print("WARNING: This setup.py file is legacy and not used.")
+print("The Python interface is now built using pyproject.toml with scikit-build-core and pybind11.")
+print("Please use 'pip install .' from the root directory to build the package.")

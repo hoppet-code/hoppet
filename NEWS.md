@@ -11,8 +11,8 @@
 * inclusion of mass threshold matrices for VFNS N3LO evolution, including
   code from ABBFMSS group (DESY 24-037 and refs therein)
 * inclusion of a python interface (similar to the streamlined interface). The
-  interface is built with SWIG (https://github.com/swig), and will not be
-  compiled if SWIG is not present on the system
+  interface is built with pybind11 (https://github.com/pybind/pybind11), and will not be
+  compiled if pybind11 is not present on the system
 
 We are grateful to the authors of the N3LO coefficient functions,
 splitting functions and mass threshold terms for providing their code. 
