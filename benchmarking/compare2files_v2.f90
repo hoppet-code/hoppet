@@ -32,12 +32,37 @@ program compare2file_v2
   logical  :: mask  (maxn,maxn,-5:5)=.true.
   logical  :: mask07(maxn,maxn,-5:5)=.false.
   logical  :: mask09(maxn,maxn,-5:5)=.false.
-  real(dp) :: y,Q, minerr, maxerr, this_err, true_err
+  real(dp) :: y,Q, minerr, maxerr, this_err, true_err, Qmin
   integer  :: iy, iQ, ny, nQ, ic, icmax, idy, ml(3)
   real(dp) :: yval2, Qval2
+  logical  :: do_help
+
+  if (iargc() < 2) then
+     do_help = .true.
+  else
+     do_help = trim(string_val_arg(1)) == "-h"
+  end if
+  if (do_help) then
+       write(6,"(a)") "Usage: " // trim(command_line()) // " file1 file2 {-summary | -channel ic [-minerr val] [-maxerr val]} [-protect]"
+       write(6,"(a)") ""
+       write(6,"(a)") "Arguments:"
+       write(6,"(a)") ""
+       write(6,"(a)") "-summary: print a single-line summary of the relative differences between files"
+       write(6,"(a)") ""
+       write(6,"(a)") "-channel ic: print out an x,Q grid for the given flavour channel (ic = 11 for all flavours)"
+       write(6,"(a)") ""
+       write(6,"(a)") "-protect: apply a protection mask to eliminate points close to a sign change"
+       write(6,"(a)") "          (hard-coded to be within 0.4 in y and within one grid point in Q)"
+       write(6,"(a)") ""
+       write(6,"(a)") "-minerr val: only print errors greater than val"
+       write(6,"(a)") "-maxerr val: only print errors less than val"
+       write(6,"(a)") "-Qmin val: only consider points with Q >= val (default 0.0)"
+       stop
+   end if
 
   idev1 = idev_open_arg(1,status='old')
   idev2 = idev_open_arg(2,status='old')
+  Qmin = dble_val_opt("-Qmin",0.0_dp)
 
   write(6,"(a)") "# " // trim(command_line())
   write(6,"(a)") "# Comparing files " // trim(string_val_arg(1)) // " and " // trim(string_val_arg(2))
@@ -92,19 +117,21 @@ program compare2file_v2
            ! check for sign change in x direction
            mask(iy,iQ,:) = mask(iy,iQ,:) .and. &
                 &   minval(res2(max(iy-idy,1):min(iy+idy,ny), iQ,:),dim=1) *&
-                &   maxval(res2(max(iy-idy,1):min(iy+idy,ny), iQ,:),dim=1) >= 0
+                &   maxval(res2(max(iy-idy,1):min(iy+idy,ny), iQ,:),dim=1) > 0
            ! check for sign change in Q direction
            mask(iy,iQ,:) = mask(iy,iQ,:) .and. &
                 &   minval(res2(iy,max(iQ-1,1):min(iQ+1,nQ),:),dim=1) *&
-                &   maxval(res2(iy,max(iQ-1,1):min(iQ+1,nQ),:),dim=1) >= 0
+                &   maxval(res2(iy,max(iQ-1,1):min(iQ+1,nQ),:),dim=1) > 0
         end forall
      end forall
   end if
 
   ! now get masks for the x range
   xval(:ny) = exp(-yval(:ny))
+  mask  (:ny,:nQ,:) = mask(:ny,:nQ,:) .and. spread(Qval(:ny,:nQ)>=Qmin,3,11)
   mask07(:ny,:nQ,:) = mask(:ny,:nQ,:) .and. spread(spread(xval<0.7_dp,2,nQ),3,11)
   mask09(:ny,:nQ,:) = mask(:ny,:nQ,:) .and. spread(spread(xval<0.9_dp,2,nQ),3,11)
+
 
   ! now establish errors
   where (res2 /= zero)
@@ -158,7 +185,7 @@ program compare2file_v2
               end if
            end if
            if (this_err >= minerr .and. this_err <= maxerr) then
-              write(6,'(4es20.12,i3)') yval(iy), Qval(iy,iQ), this_err, true_err, icmax
+              write(6,'(4es20.12,i3,es20.12)') yval(iy), Qval(iy,iQ), this_err, true_err, icmax, merge(res1(iy,iQ,ic),zero,ic/=11)
            end if
         end do
         write(6,*)
