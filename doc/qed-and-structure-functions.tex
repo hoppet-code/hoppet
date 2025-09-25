@@ -1216,8 +1216,23 @@ interface or, from the modern Fortran interface by calling
 \ttt{InitGridDefDefault(grid, dy, ymax[, order])}, with the default
 choice of interpolation \ttt{order=-6}.
 %
-% The \ttt{InitGridDefDefault}
-\gps{explain this}
+\ifreleasenote
+The \ttt{InitGridDefDefault(...)} routine is new relative to v1 and sets up
+the following grid
+\begin{lstlisting}
+  call InitGridDef(gdarray(4),dy/27.0_dp, 0.2_dp, order)
+  call InitGridDef(gdarray(3),dy/9.0_dp,  0.5_dp, order)
+  call InitGridDef(gdarray(2),dy/3.0_dp,  2.0_dp, order)
+  call InitGridDef(gdarray(1),dy,         ymax  , order)
+  call InitGridDef(grid,gdarray(1:4),locked=.true.)
+\end{lstlisting}
+Users will usually only need a different choice if they plan studies
+at $x$ very close to $1$ or if they wish to explore fine optimisation of
+grid choices.
+\else
+  The \ttt{InitGridDefDefault(...)} routine is the recommended default
+  for setting up a grid, as described in Section~\ref{sec:grid}.
+\fi
 
 We split the analysis into the accuracy of PDF evolution and
 tabulation (section~\ref{sec:acc-pdf-evol}) and PDF evaluation
