@@ -49,9 +49,9 @@ def main(pdf,nloop):
     ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt07[mask], label='all-flav, $x<0.7$', **styles[0], ls="--")
     #ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt09[mask], label='guds, $x<0.9$'    , **styles[0], ls=":")
 
-    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_init_s[mask], **styles[1], label='initialisation')
-    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_ev_s  [mask], **styles[2], label='one-off evolution')
-    ax2.plot(run_stats_pre  .dy[mask], run_stats_pre  .t_ev_s  [mask], **styles[3], label='cached evolution'   )
+    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_init_s[mask], **styles[1], label='setup ($t_s$)')
+    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_ev_s  [mask], **styles[2], label='one-off evol. ($t_i$)')
+    ax2.plot(run_stats_pre  .dy[mask], run_stats_pre  .t_ev_s  [mask], **styles[3], label='cached evol. ($t_c$)'   )
     ax1.set_ylabel("rel. accuracy")
     ax2.set_ylabel("time [s]")
 
@@ -145,7 +145,7 @@ def main(pdf,nloop):
     #ax2.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.t_interp_ns[mask], **styles[4], label='')
 
     ax1.set_ylabel("rel. accuracy")
-    ax2.set_ylabel("interpolation time [ns]")
+    ax2.set_ylabel("interp. time ($t_{xQ}$) [ns]")
 
     ax2.set_xscale('log')
     ax1.set_yscale('log')

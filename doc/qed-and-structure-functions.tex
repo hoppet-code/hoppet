@@ -1234,8 +1234,8 @@ grid choices.
   for setting up a grid, as described in Section~\ref{sec:grid}.
 \fi
 
-We split the analysis into the accuracy of PDF evolution and
-tabulation (section~\ref{sec:acc-pdf-evol}) and PDF evaluation
+We split our study here into two parts: the accuracy of PDF evolution
+and tabulation (section~\ref{sec:acc-pdf-evol}) and PDF evaluation
 (section~\ref{sec:fastpdf}).
 %
 The latter also outlines new functionality for choosing interpolation
@@ -1257,14 +1257,14 @@ it includes comparisons to LHAPDF.
         \centering
         \includegraphics[width=\textwidth,page=2]{figs/hoppet-v2-accuracy-speed-v-dy.pdf}
         \caption{}
-        \label{fig:sub1}
+        \label{fig:main-sub1}
     \end{subfigure}
     \hfill
     \begin{subfigure}{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth,page=4]{figs/hoppet-v2-accuracy-speed-v-dy.pdf}
         \caption{}
-        \label{fig:sub2}
+        \label{fig:main-sub2}
     \end{subfigure}
     \caption{Accuracy (top) and timing (bottom) versus \texttt{dy} at
       (a) NNLO and (b) N$^3$LO in \hoppet{} v2.0.0.
@@ -1278,10 +1278,7 @@ it includes comparisons to LHAPDF.
       \texttt{-O3} optimisation. We have further used \texttt{ymax = 12} and
       \texttt{dlnlnQ = dy/4}.
       %
-      \gps{Should second plot move to \S~\ref{sec:fastpdf}? And put
-        $Y$-order first, as in the override call?}  \gps{Comment on
-        \texttt{eps} as concerns initialisation time, or cut off the
-        plot} }
+    }
     \label{fig:main}
 \end{figure}
 
@@ -1315,7 +1312,7 @@ $2 < Q < 10^4\, \text{GeV}$.\footnote{For tabulations extending to
   because of the steep $\ln Q$ derivative of the parton
   distributions at the smallest $x$ values.}
 %
-At very large $x$ values, the numerical precision degrades because the
+At $x$ values close to $1$, the numerical precision degrades because the
 parton distribution functions become a very steep function of $\ln
 x$.
 %
@@ -1331,20 +1328,22 @@ change, as per Ref.\cite{Salam:2008qg}.
 % phenomenological application \ak{is this true?}.
 
 The result for the accuracy study can be seen in the top panels of
-Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and N$^3$LO
+Figures~\ref{fig:main-sub1}--\ref{fig:main-sub2} at NNLO and N$^3$LO
 respectively, as a function of \texttt{dy}.
 %
 At NNLO, the accuracy comes out similar to previous
-versions of \hoppet{.}
+versions of \hoppet.
 %
-In particular we note that with \texttt{dy =
+With \texttt{dy =
   0.2} one obtains a relative accuracy of $10^{-4}$ across all
 flavours in the range $x < 0.9$.
 %
-At the finest grid spacing \texttt{dy = 0.04} a relative accuracy of
-$10^{-7}$ can be achieved, good enough for precise benchmark
+At the finest grid spacing \texttt{dy = 0.05}, a relative accuracy of
+few times $10^{-7}$ can be achieved, good enough for precise benchmark
 comparisons as were for instance carried out in
-Refs.~\cite{Dittmar:2005ed,Bertone:2024dpm}. We note that in contrast
+Refs.~\cite{Dittmar:2005ed,Bertone:2024dpm}.
+%
+For comparison,
 the recent benchmark of aN$^3$LO codes in
 Ref.~\cite{Cooper-Sarkar:2024crx} reaches a relative precision of a
 few times $10^{-4}$ at best (cf.\ the gluon PDF at $x = 10^{-2}$ in
@@ -1364,13 +1363,13 @@ the factor of $1000$ improvement in accuracy when reducing \texttt{dy}
 by a factor of $5$ from $0.2$ to $0.04$.
 %
 At N$^3$LO we observe a similar level of accuracy as at
-NNLO.\footnote{Note that at N3LO we have omitted the 
+NNLO.\footnote{Note that at N$^3$LO we have omitted the 
   all-flav, $x<0.9$ line.
   %
   For that case, we have observed issues affecting the accuracy at the
   level of up to relative $10^{-5}$ accuracy.
   %
-  The deterioration is there only when the N3LO mass thresholds are
+  The deterioration is there only when the N$^3$LO mass thresholds are
   used and we suspect that it may be connected with difficulties in the
   integration over the $x \to 1$ region of the mass-threshold
   functions.
@@ -1435,23 +1434,23 @@ to evaluate the PDFs at a given value of $(x,Q)$ once the tabulation
 has been performed.
 
 Here we focus on $t_s$, $t_i$, and $t_c$. The results can be seen in the
-bottom panels of Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and
+bottom panels of Figures~\ref{fig:main-sub1}--\ref{fig:main-sub2} at NNLO and
 N$^3$LO respectively.
 %
 The expected scaling is
-$(\text{\texttt{dy}}^2 \text{\texttt{dlnlnQ}})^{-1}$, which for our
+$t_i, t_c \sim (\text{\texttt{dy}}^2 \text{\texttt{dlnlnQ}})^{-1}$, which for our
 choice of $\texttt{dlnlnQ} \propto\texttt{dy}$ reduces to
 $1/\text{\texttt{dy}}^3$.
 %
 That is consistent with what is seen in the plot.
 %
-Turning to the initialisation time, at NNLO the initialisation time of
-$\sim 60-300\,\mathrm{ms}$ dominates over the evolution time across
+Turning to the setup time, at NNLO 
+$t_s \sim 60-300\,\mathrm{ms}$ dominates over the evolution time across
 almost all \texttt{dy} values that we study.
 %
-It scales slightly more slowly than $1/\texttt{dy}$.
+It scales slightly more slowly than $t_s \sim 1/\texttt{dy}$.
 
-We note that when using cached evolution, the evolution time reaches as
+We note that when using cached evolution, the evolution time $t_c$ reaches as
 little as $1\,\mathrm{ms}$ for \texttt{dy = 0.2}.
 %
 Comparing these numbers to those of  
@@ -1475,12 +1474,13 @@ to initialise the exact mass threshold functions of
 Ref.~\cite{BlumleinCode}.
 %
 In any application where \hoppet{} either
-has to evolve or access the evolved tables multiple times this extra
+has to evolve or access the evolved tables multiple times, this extra
 initialisation is insignificant.
 %
-Should parametrised expressions of the mass threshold functions become
-available, we expect that the initialisation time will be
-substantially reduced.
+Were parametrised expressions of the mass threshold functions to
+become available, we expect that the initialisation time would be
+substantially reduced and we believe this would be useful for many
+users.
 
 % We conclude that \hoppet{} is competitive compared to other evolution
 % codes on the market both in terms of accuracy and speed.
@@ -1497,41 +1497,88 @@ substantially reduced.
         \centering
         \includegraphics[width=\textwidth,page=3]{figs/hoppet-v2-accuracy-speed-v-dy.pdf}
         \caption{}
-        \label{fig:sub2}
+        \label{fig:interp-orders}
     \end{subfigure}
-    \caption{Accuracy (top) and timing (bottom) versus \texttt{dy} at
-      (a) NNLO and (b) N$^3$LO in \hoppet{} v2.0.0. The timings were
+    \caption{
+      Study of the impact of the choice of the $y$ and $Q$ interpolation
+      orders (\ttt{oY}, \ttt{oQ}) on accuracy (upper panel) and speed
+      (lower panel) for evaluating
+      the PDF table at a given $y$ and $Q$ point.
+      %
+      Note that the interpolation order that enters the splitting
+      functions remains $6$ as in Fig.~\ref{fig:main}.
+      %
+      The timing corresponds to the \ttt{EvalPdfTable\_yQ(table,y,Q)} modern
+      Fortran call.
+      %
+      Calling \ttt{EvalPdfTable\_xQ(table,x,Q)}, or the corresponding
+      functions in the streamlined interfaces, adds about $5\ns$.
+      %
+      The timings were
       obtained on an \texttt{M2Pro} with \texttt{gfortran v15.1} and
       \texttt{-O3} optimisation. We have further used \texttt{ymax = 12} and
       \texttt{dlnlnQ = dy/4}.
       %
-      \gps{update caption}
-    }
+      \gps{update caption} }
     \label{fig:main}
 \end{figure}
 
 In this section we detail some new functionality which provides fast
 PDF access within the streamlined interface (including the Python
-interface). Outside the streamlined interface this was already
-possible, but only through manually modifying the source code. The new
-functionality essentially allows the user to modify the interpolation
-order of the \hoppet{} grids. Part of the speedup, which was not
-available in earlier releases, comes from manually unwinding a set of
-loops when the user specifies either quadratic or cubic interpolation,
-which are therefore faster than any of the other interpolation orders.
+interface).
+% 
+% Outside the streamlined interface this was already
+% possible, but only through manually modifying the source code.
+%
+In earlier version of \hoppet, the interpolation was carried out by a
+single routine that could flexibly handle any choice of $y$ and $Q$
+interpolation orders up to some hard-coded maximum.
+%
+As of v2.0.0, a number of interpolation-order choices now have
+dedicated code, which makes it easier for the compiler to optimise the
+underlying assembly, e.g.\ with loop unrolling, giving speed gains of
+about a factor two.
+%
+% 
+Additionally new functionality essentially allows the user to modify
+the interpolation order of the \hoppet{} grids, trading accuracy
+versus speed.
 
-In the streamlined interface the user can now call
+% Part of the speedup, which was not
+% available in earlier releases, comes from manually unwinding a set of
+% loops when the user specifies either quadratic or cubic interpolation,
+% which are therefore faster than any of the other interpolation orders.
+
+The user can now call one of
 \begin{lstlisting}
-  call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder)
+  call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder) % streamlined interface
 \end{lstlisting}
-to set the interpolation order in $y$ and $\ln\ln Q$. A value of $2$
-for both of them corresponds to quadratic interpolation, while a value
-of $3$ corresponds to cubic interpolation. The default interpolation
-order is quartic in the \ttt{lnlnQ} direction, while \hoppet{}
-dynamically picks an order in \ttt{y} between $6$ and $10$
-(corresponding to \ttt{yorder = -1}). These rather high interpolation
-orders are to guarantee numerical accuracy in a normal \hoppet{} run,
-but comes with a speed penalty. However, if the user is only
+or
+\begin{lstlisting}
+  call PdfTableOverrideInterpOrders(yorder, lnlnQorder) % F90 interface
+\end{lstlisting}
+to set the interpolation order in $y$ and $\ln\ln Q$.
+%
+These calls globally override any table-specific interpolation order
+settings.
+%
+A value of $2$ for both of them corresponds to quadratic
+interpolation, while a value of $3$ corresponds to cubic
+interpolation.
+%
+The default interpolation order is quartic in the \ttt{lnlnQ}
+direction, and \ttt{|grid\%order|-1} in the \ttt{y} direction (bounded
+to be between 3 and 9 if outside that range).
+%
+These rather high interpolation orders are to guarantee numerical
+accuracy in a normal \hoppet{} run, but come with a speed penalty
+because of the larger number of operations.
+%
+However, if PDF evaluation represents a significant fraction of the
+time for a user's code, they can choose to lower the interpolation
+order and reduce \ttt{dy} and \ttt{dlnlnQ} so as to retain good accuracy.
+
+\comment{continue here}is only
 interested in fast PDF access, with similar accuracy as can typically
 be achieved by LHAPDF, then quadratic and cubic interpolation is
 sufficient, as long as the user sets up a dense enough
