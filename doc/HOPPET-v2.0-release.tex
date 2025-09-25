@@ -107,24 +107,30 @@ the continued development of tools such as \hoppet remains important
 for the field.
 
 This release note documents three major additions to \hoppet, made
-available as part of release~2.0.0: (1) support for QED evolution,
+available as part of release~2.0.0: (1) support for QED evolution (Section~\ref{sec:qed-evolution}),
 originally developed as part of the LuxQED project for the evaluation
 of the photon density inside a proton and its extension to lepton
 distributions in the
 proton~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf};
 %
 (2) support for QCD evolution at N$^3$LO in the (zero mass) variable
-flavour number scheme (VFNS)~\cite{Buza:1996wv};
+flavour number scheme (VFNS)~\cite{Buza:1996wv} (Section~\ref{sec:n3lo-evolution});
 %
 and (3) support for the
 determination of massless hadronic structure functions, as initially developed
 for calculations of vector-boson fusion, and later deep inelastic scattering, cross
-sections~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu,Karlberg:2024hnl}.
+sections~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu,Karlberg:2024hnl}
+(Section~\ref{sec:structure-funcs}).
 
 This release also includes a range of other smaller additions relative
 to the original 1.1.0 release documented in \cite{Salam:2008qg}, in
-particular the addition of a new Python interface and CMake build
-option.
+particular the addition of a new Python interface
+(Section~\ref{sec:pyinterface}), a CMake-based build system
+(Section~\ref{sec:cmake}), the ability to write LHAPDF grids
+(Section~\ref{sec:lhapdf}).
+%
+We have also updated the performance benchmarks and improved the speed
+for interpolating PDF tables (Section~\ref{sec:v2-performance}).
 %
 Unified documentation of the whole \hoppet package is part of the
 distribution at \url{https://github.com/hoppet-code/hoppet} in the
