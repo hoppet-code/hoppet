@@ -588,7 +588,7 @@ do not include the mass thresholds in the N3LO evolution.
 %
 To facilitate comparisons we therefore additionally provide
 Table~\ref{tab:n3lo-evolve-nf4}, correspond to fixed-flavour ($n_f=4$)
-evolution, with
+evolution, with the choice of
 \ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}.
 %
 Of the MSHT and NNPDF results, the NNPDF results (Table~2 of
@@ -673,7 +673,7 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
 %======================================================================
 \section{Hadronic Structure Functions}
 \label{sec:structure-funcs}
-As of \hoppet version 2.0.0 the code provides access to the massless
+As of \hoppet version 2.0.0, the code provides access to the massless
 hadronic structure functions. The structure functions are expressed as
 convolutions of a set of massless hard coefficient functions and PDFs,
 and make use of the tabulated PDFs and streamlined interface.  They
@@ -1494,9 +1494,8 @@ users.
 \subsection{Fast PDF access}
 \label{sec:fastpdf}
 
-In this section we detail some new functionality which provides fast
-PDF access within the streamlined interface (including the Python
-interface).
+In this section we detail updates for fasted PDF access within the
+modern Fortran and streamlined interfaces (including the Python interface).
 % 
 % Outside the streamlined interface this was already
 % possible, but only through manually modifying the source code.
