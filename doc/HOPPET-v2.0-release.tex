@@ -148,19 +148,27 @@ that they link with the new library name.}
 %======================================================================
 \section{Conclusion}
 
-The \hoppet additions described here provide fast access to QED
-evolution and to structure-function calculations, including evolution
-in the VFNS at N$^3$LO, which we hope may be of benefit beyond the
-projects where they have already been used.
+Version 2 of \hoppet brings major additions to its functionality.
+%
+These includes evolution up to N$^3$LO, QED evolution, massless
+structure function evaluation, a Python interface, a modern build
+system, functionality for writing LHAPDF grids and significant speed
+improvements in the interpolation of its internal PDF tables.
+%
+\hoppet continues to provide a good combination of flexibility, speed
+and accuracy, including powerful control over the accuracy through a
+small set of parameters.
+%
 
 
 \section*{Acknowledgements}
 
-We gratefully acknowledge the work of Luca Buonocore
-for the implementation of the $P_{lq}$ splitting function in the QED
-code,
+We gratefully acknowledge Luca Buonocore for his
+implementation of the $P_{lq}$ splitting function in the QED code,
+Andrii Verbitskyi for contributing the initial version of the CMake
+build system,
 %
-and collaboration with Melissa van Beekveld on options for speed
+and Melissa van Beekveld for collaboration on options for speed
 improvements in the evaluation of tabulated PDFs.
 %
 We are grateful to Johannes Bl\"umlein for providing us with a
