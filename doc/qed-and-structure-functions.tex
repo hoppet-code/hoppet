@@ -1712,19 +1712,49 @@ the level of $\mathcal{O}(0.01\%)$.}
   \centering
   \begin{tabular}{|c|c|ccc|}
     \hline
-    \ttt{yorder} & \ttt{lnlnQorder} & &Time per call (ns)& \\
+    \ttt{yorder} & \ttt{lnlnQorder} & &Time per \ttt{hoppetEval} call (ns)& \\
      \hline
-    & & Fortran & \CPP{} & Python \\
-    5 & 4 & 488 & 475 & 850 \\
-    4 & 4 & 488 & 475 & 850 \\
-    3 & 3 & 180& 218 & 610 \\
-    2 & 2 & 165& 173&  540 \\
+      &                          & Fortran & \CPP{} & Python \\
+    5 & 4                        & 108     & 108    & 295 \\
+    4 & 4                        &  92     &  93    & 278 \\
+    3 & 3                        &  76     &  77    & 258 \\
+    2 & 2                        &  63     &  63    & 244 \\
+  %%hoppet-alphas                &  11     &  13    &  86
     \hline
-    \multicolumn{2}{|c|}{LHAPDF} & 220 & 146 & 2700 \\
+    \multicolumn{2}{|c|}{\rule{0pt}{2.5ex}LHAPDF 6.5.5}
+                                 &520$^\dagger$ &  87    & 1645$^\dagger$ \\
+  %%LHAPDF-alphas                &  28     &  18    &  76
     \hline
+    %% Timings from Gavin on 2025-09-25
+    %%
+    %% Fortran: evaluated by calling build/example_f90/fast_pdf_evaluation
+    %%      manually editing yorder and lnlnQorder
+    %%
+    %% C++: evaluated by calling build/example_cpp/fast_pdf_evaluation,
+    %%      manually editing yorder and lnlnQorder
+    %%
+    %% Python: make install, make sure Python picks up that version
+    %%      then run example_py/tabulation_example_lhapdf.py -pdf PDF4LHC21_40 -yorder 2 -lnlnQorder 2
+    %%
+    %% Zoom was on, and I picked the smallest consistent speed
+    %% (i.e. I needed to see it a couple of times before putting it in) 
   \end{tabular}
-  \caption{Performance of different interpolation orders for a call to
-  \ttt{hoppetEval} with all flavours, and the equivalent call in LHAPDF.  \ak{Gavin to update with M2Pro}}
+  \caption{Time for a call to
+  \ttt{hoppetEval} with all flavours, considering different
+  interpolation orders.
+  %
+  The table also shows the timing for the equivalent call in LHAPDF~6.5.5.
+  %
+  The results have been obtained with the \ttt{PDF4LHC21\_40} set, on an M2Pro with
+  gfortran-15.1, Apple clang version 17.0.0, O3 optimisation and
+  Python 3.12.7. \\
+  %
+  $^\dagger$\ Note that in its Fortran and Python interfaces, this version of
+  LHAPDF loops over an underlying call to single-flavour evaluation,
+  which is why it is significantly slower than the \CPP interface,
+  which evaluates all flavours in one go.
+  %
+}
   \label{tab:interp_performance}
 \end{table}
 %
