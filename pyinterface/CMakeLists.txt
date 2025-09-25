@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.16...3.31)
 
-set(UseSWIG_MODULE_VERSION 2)
-include(UseSWIG)
-
 if (CMAKE_VERSION VERSION_LESS 3.18)
   set(DEV_MODULE Development)
 else()
@@ -11,45 +8,38 @@ endif()
 
 find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
 
-set_property(SOURCE hoppet.i PROPERTY CPLUSPLUS ON)
-set_property(SOURCE hoppet.i PROPERTY SWIG_MODULE_NAME __init__)
+# Find pybind11
+find_package(pybind11 REQUIRED)
 
-swig_add_library(hoppet_swig LANGUAGE python SOURCES hoppet.i OUTPUT_DIR hoppet_swig)
-set_property(TARGET hoppet_swig PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
-# set hoppet_swig to use the same include directories as the main hoppet library
-target_include_directories(hoppet_swig PRIVATE ${PROJECT_SOURCE_DIR}/src)
+# Create the pybind11 module
+pybind11_add_module(hoppet_pybind11 hoppet_pybind11.cpp)
 
-#set_property(TARGET hoppet_swig PROPERTY INSTALL_RPATH lib)
-#set_property(TARGET hoppet_swig PROPERTY INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+# Set the output directory to create hoppet package
+set_target_properties(hoppet_pybind11 PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/hoppet"
+)
+
+# Copy the __init__.py file
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py ${CMAKE_CURRENT_BINARY_DIR}/hoppet/__init__.py COPYONLY)
+
+# Include directories
+target_include_directories(hoppet_pybind11 PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 # NB this is specifically for building scikit-hep/hoppet wheels
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "@loader_path/../lib;@loader_path/../../../../lib")
+  set_target_properties(hoppet_pybind11 PROPERTIES INSTALL_RPATH "@loader_path/../lib;@loader_path/../../../../lib")
 else()
-  set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/../../../../lib:$ORIGIN/../../../../lib64")
+  set_target_properties(hoppet_pybind11 PROPERTIES INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/../../../../lib:$ORIGIN/../../../../lib64")
 endif()
 
-# Unix only, Windows is different
-set_property(TARGET hoppet_swig PROPERTY SUFFIX ".${Python_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
+target_link_libraries(hoppet_pybind11 PUBLIC hoppet_static)
 
-#target_link_libraries(hoppet_swig PUBLIC hoppet)
-target_link_libraries(hoppet_swig PUBLIC hoppet_static)
-target_link_libraries(hoppet_swig PUBLIC Python::Module)
-
-#set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "$ORIGIN/../../../../lib")
-#set_target_properties(hoppet_swig PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-if ("${SWIG_VERSION}" VERSION_LESS "4.2.0")
-  target_compile_definitions(hoppet_swig PUBLIC -DSWIG)
-  target_compile_definitions(hoppet_swig PUBLIC -DSWIG_TYPE_TABLE=hoppet_swig)
-endif()
-
-target_include_directories(hoppet_swig 
+target_include_directories(hoppet_pybind11 
                            PUBLIC 
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
                             $<INSTALL_INTERFACE:include>
                            )
-add_library(hoppet::hoppet_swig ALIAS hoppet_swig)
+add_library(hoppet::hoppet_pybind11 ALIAS hoppet_pybind11)
 
 # Really should go to ${Python_SITEARCH} or into the wheel dir of scikit-build-core
 if (HOPPET_USE_PYTHON_SITEARCH)
@@ -64,11 +54,9 @@ else()
 endif()
 set(pyexecdir "${HOPPET_PYTHON_INSTALL_DIR}" PARENT_SCOPE) # PARENT_SCOPE tells CMake to pass this back to the parent CMakeLists.txt
 if(HOPPET_BUILD_PYINTERFACE)
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/hoppet_swig/__init__.py" DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
-  install(TARGETS hoppet_swig EXPORT HoppetTargets DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
+  install(TARGETS hoppet_pybind11 EXPORT HoppetTargets DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
 elseif(HOPPET_BUILD_PYWHEELS)
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/hoppet_swig/__init__.py" DESTINATION hoppet)
-  install(TARGETS hoppet_swig EXPORT HoppetTargets DESTINATION hoppet)
+  install(TARGETS hoppet_pybind11 EXPORT HoppetTargets DESTINATION hoppet)
 endif()
   #install(TARGETS hoppet DESTINATION hoppet)
 set(HOPPET_PYTHON_INSTALL_DIR ${HOPPET_PYTHON_INSTALL_DIR} PARENT_SCOPE) 

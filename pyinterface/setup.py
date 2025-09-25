@@ -19,7 +19,7 @@ setup (name = 'hoppet',
        author_email= "gavin.salam@physics.ox.ac.uk",
        url         = "https://github.com/hoppet-code/hoppet",
        license     = 'GPLv3',
-       description = """A python interface for Hoppet v1 created using SWIG""",
+       description = """A python interface for Hoppet v2 created using pybind11""",
        ext_modules = [hoppet_module],
        py_modules  = ["hoppet"],
        )

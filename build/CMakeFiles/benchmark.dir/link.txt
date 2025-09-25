@@ -1,0 +1,1 @@
+/usr/bin/gfortran -Wl,--dependency-file=CMakeFiles/benchmark.dir/link.d -O3 CMakeFiles/benchmark.dir/benchmarking/benchmark.f90.o CMakeFiles/benchmark.dir/benchmarking/io_utils.f90.o CMakeFiles/benchmark.dir/benchmarking/lcl_dec.f90.o CMakeFiles/benchmark.dir/benchmarking/NameSelect.f90.o -o benchmarking/benchmark  lib/libhoppet.a

@@ -1,0 +1,1 @@
+/usr/bin/gfortran -Wl,--dependency-file=CMakeFiles/sumrules.dir/link.d -O3 CMakeFiles/sumrules.dir/benchmarking/sumrules.f90.o CMakeFiles/sumrules.dir/benchmarking/io_utils.f90.o CMakeFiles/sumrules.dir/benchmarking/lcl_dec.f90.o CMakeFiles/sumrules.dir/benchmarking/NameSelect.f90.o -o benchmarking/sumrules  lib/libhoppet.a

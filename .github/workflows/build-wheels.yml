@@ -32,7 +32,8 @@ jobs:
         
         # Linux dependencies
         CIBW_BEFORE_BUILD_LINUX: |
-          yum install -y gcc gcc-c++ gcc-gfortran cmake swig
+          yum install -y gcc gcc-c++ gcc-gfortran cmake
+          pip install pybind11
           yum install -y lhapdf lhapdf-devel || echo "LHAPDF not available, continuing..."
           
           cmake -S . -B BUILD \
@@ -51,7 +52,8 @@ jobs:
         
         # macOS dependencies and build
         CIBW_BEFORE_BUILD_MACOS: |
-          brew install gcc gfortran swig cmake make
+          brew install gcc gfortran cmake make
+          pip install pybind11
           brew tap davidchall/hep
           brew install lhapdf || echo "LHAPDF install failed, continuing..."
           #ls /opt/homebrew/bin/g*

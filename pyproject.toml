@@ -1,6 +1,6 @@
 # hoppet/pyinterface/pyproject.toml
 [build-system]
-requires = ["scikit-build-core", "swig"]
+requires = ["scikit-build-core", "pybind11"]
 build-backend = "scikit_build_core.build"
 
 [project]
