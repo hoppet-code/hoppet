@@ -188,6 +188,9 @@ jobs:
           # Debug: Check if the Python interface was built correctly
           ls -la BUILD/pyinterface/ || echo "No pyinterface directory found"
           ls -la BUILD/pyinterface/hoppet/ || echo "No hoppet directory found"
-          cd BUILD && PYTHONPATH=./pyinterface python3 ../pyinterface/test-hoppet-import.py
+          echo "Current working directory: $(pwd)"
+          echo "Python executable: $(which python3)"
+          echo "PYTHONPATH will be set to: $(pwd)/BUILD/pyinterface"
+          cd BUILD && PYTHONPATH=./pyinterface python3 "$(pwd)/../pyinterface/test-hoppet-import.py"
           # now try running the python example with the built module in the path  
           cd BUILD && PYTHONPATH=./pyinterface python3 ../example_py/tabulation_example.py

@@ -17,7 +17,7 @@ def main():
     
     try:
         import hoppet as hp
-        print("✅ Import successful!")
+        print("PASS: Import successful!")
         
         # List available functions (first 10)
         available_functions = sorted([x for x in dir(hp) if not x.startswith('_')])
@@ -25,33 +25,34 @@ def main():
         
         # Test for Start function specifically
         if hasattr(hp, 'Start'):
-            print("✅ Start function found!")
+            print("PASS: Start function found!")
             
             # Test basic functionality
             hp.Start(0.1, 2)
-            print("✅ Start function works!")
+            print("PASS: Start function works!")
             
             # Clean up
             hp.DeleteAll()
-            print("✅ DeleteAll works!")
+            print("PASS: DeleteAll works!")
             
         else:
-            print("❌ Start function NOT found!")
+            print("FAIL: Start function NOT found!")
             start_like = [x for x in available_functions if 'start' in x.lower() or 'Start' in x]
             print("Functions containing 'start':", start_like)
+            return 1
             
     except ImportError as e:
-        print("❌ Import failed:", e)
+        print("FAIL: Import failed:", e)
         print("This suggests the hoppet module was not built or is not in the Python path")
         traceback.print_exc()
         return 1
         
     except Exception as e:
-        print("❌ Error during testing:", e)
+        print("FAIL: Error during testing:", e)
         traceback.print_exc()
         return 1
     
-    print("✅ All tests passed!")
+    print("PASS: All tests passed!")
     return 0
 
 if __name__ == "__main__":
