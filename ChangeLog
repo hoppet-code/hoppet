@@ -1,3 +1,10 @@
+2025-09-25 Gavin
+
+	* pdf_tabulate.f90:
+	PdfTableOverrideInterpOrders arguments changed to 
+	(yorder, lnlnQorder) to match the argument names
+	in the Python interface.
+
 2025-09-23  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* pyproject.toml: *** ADDED ***
@@ -35,7 +42,6 @@
 	* example_cpp/*.cc:
 	changed include from ../src/hoppet.h -> hoppet.h so that someone
 	can copy the example and use it standalone.
->>>>>>> master
 
 	* CMakeLists.txt:
 	* configure:

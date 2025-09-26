@@ -428,6 +428,9 @@ The option of using artificial (zero-valued) points at $x>1$ is denoted by $\tt
 order=-n$, and does allow us to write $P_{\alpha\beta} =
 \mathcal{P}_{\alpha-\beta}$ (thus we store only $\order{N_x}$
 entries), with $\mathcal{P}_{\alpha-\beta} = 0$ for $\alpha < \beta$.
+%
+In general we recommend the use of negative orders, because they give
+faster initialisation time.
 
 \begin{figure}
   \centering
@@ -437,7 +440,14 @@ entries), with $\mathcal{P}_{\alpha-\beta} = 0$ for $\alpha < \beta$.
     indicate two regions in which we illustrate the interpolation of
     the PDF, while the (blue, red) lines with arrows indicate the
     corresponding range of grid points on which the interpolation is
-    based.}
+    based.
+    %
+    This strategy choice affects only the interpolation as used for
+    creating a representation of splitting functions.
+    %
+    Interpolation for evaluation of a PDF is always centred around the
+    point of interest.
+  }
   \label{fig:interpolation-orders}
 \end{figure}
 
@@ -542,7 +552,7 @@ Information concerning the grid is stored in a derived type
 % which could be initialised  for example as follows:
 \begin{lstlisting}
   type(grid_def) :: grid
-  call InitGridDef(grid,dy=0.1_dp,ymax=10.0_dp,order=5)
+  call InitGridDef(grid,dy=0.1_dp,ymax=12.0_dp,order=-6)
 \end{lstlisting}
 This initialises a grid between $x=1$ and down to $x =
 e^{-\texttt{ymax}}$, with uniform grid spacing in $y = \ln 1/x$ of
@@ -552,7 +562,7 @@ The user can modify this choice to better
 suit his/her particular needs, as explained
 in section~\ref{sec:highord}.
 %
-One notes 
+Notes
 the use of keyword arguments --- the keywords are not
 mandatory in this case, but have been included to improve the
 legibility. Having defined a grid, 
@@ -590,9 +600,9 @@ initialise a combined grid as follows:
   type(grid_def) :: grid, subgrids(3)
 
   ! define the various sub-grids
-  call InitGridDef(subgrids(1),dy=0.30_dp, ymax=10.0_dp, order=5)
-  call InitGridDef(subgrids(2),dy=0.10_dp, ymax= 2.0_dp, order=5)
-  call InitGridDef(subgrids(3),dy=0.03333_dp, ymax= 0.6_dp, order=5) 
+  call InitGridDef(subgrids(1),dy=0.30_dp, ymax=10.0_dp, order=-6)
+  call InitGridDef(subgrids(2),dy=0.10_dp, ymax= 2.0_dp, order=-6)
+  call InitGridDef(subgrids(3),dy=0.03333_dp, ymax= 0.6_dp, order=-6) 
                ! Smaller dy at small ymax / large xmin 
 
   ! put them together into a single combined grid
@@ -613,6 +623,23 @@ Note that the two kinds of invocation of \ttt{InitGridDef} actually
 correspond to different (overloaded) subroutines. The Fortran~95 compiler
 automatically selects the correct one on the basis of the types of
 arguments passed.
+
+For general usage, \hoppet provides a standard arrange of the
+subgrids, which can be obtained by calling
+%
+the \ttt{InitGridDefDefault(grid, dy, ymax[, order])} routine.
+%
+That sets up the following grid
+\begin{lstlisting}
+  call InitGridDef(gdarray(4),dy/27.0_dp, 0.2_dp, order)
+  call InitGridDef(gdarray(3),dy/9.0_dp,  0.5_dp, order)
+  call InitGridDef(gdarray(2),dy/3.0_dp,  2.0_dp, order)
+  call InitGridDef(gdarray(1),dy,         ymax  , order)
+  call InitGridDef(grid,gdarray(1:4),locked=.true.)
+\end{lstlisting}
+Users will usually only need a different choice if they plan studies
+at $x$ very close to $1$ or if they wish to explore fine optimisation of
+grid choices.
 
 Though only grids that are uniform in $y$ have been implemented
 (and the option of a simultaneous combination of them),

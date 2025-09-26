@@ -103,6 +103,12 @@ program prec_and_timing
     call InitGridDef(gridarray(2),dy/3.0_dp, 2.0_dp, order=order )
     call InitGridDef(gridarray(1),dy,        ymax,   order=order )
     call InitGridDef(grid,gridarray(1:4),locked=.true.)
+  else if (log_val_opt('-4grids-wider')) then
+    call InitGridDef(gridarray(4),dy/27.0_dp, 0.24_dp, order=order2)
+    call InitGridDef(gridarray(3),dy/9.0_dp, 0.6_dp, order=order1)
+    call InitGridDef(gridarray(2),dy/3.0_dp, 2.4_dp, order=order )
+    call InitGridDef(gridarray(1),dy,        ymax,   order=order )
+    call InitGridDef(grid,gridarray(1:4),locked=.true.)
   else if (log_val_opt('-3grids')) then
     hires = int_val_opt('-hires',9)
     call InitGridDef(gridarray(3),dy/hires, 0.5_dp, order=order2)

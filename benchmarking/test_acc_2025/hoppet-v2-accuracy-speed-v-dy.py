@@ -45,13 +45,13 @@ def main(pdf,nloop):
 
     mask = run_stats_pre.dy > 0.035
 
-    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt07[mask], label='guds, $x<0.7$'    , **styles[0], ls="--")
-    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt07[mask], label='all-flav, $x<0.7$', **styles[0], ls="-")
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt07[mask], label='guds, $x<0.7$'    , **styles[0], ls="-")
+    ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_allf_xlt07[mask], label='all-flav, $x<0.7$', **styles[0], ls="--")
     #ax1.plot(run_stats_pre.dy[mask], run_stats_pre.acc_guds_xlt09[mask], label='guds, $x<0.9$'    , **styles[0], ls=":")
 
-    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_init_s[mask], **styles[1], label='initialisation')
-    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_ev_s  [mask], **styles[2], label='one-off evolution')
-    ax2.plot(run_stats_pre  .dy[mask], run_stats_pre  .t_ev_s  [mask], **styles[3], label='cached evolution'   )
+    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_init_s[mask], **styles[1], label='setup ($t_s$)')
+    ax2.plot(run_stats_nopre.dy[mask], run_stats_nopre.t_ev_s  [mask], **styles[2], label='one-off evol. ($t_i$)')
+    ax2.plot(run_stats_pre  .dy[mask], run_stats_pre  .t_ev_s  [mask], **styles[3], label='cached evol. ($t_c$)'   )
     ax1.set_ylabel("rel. accuracy")
     ax2.set_ylabel("time [s]")
 
@@ -119,16 +119,23 @@ def main(pdf,nloop):
 
     mask = run_stats_oQ2_oY2.dy > 0.035
 
-    ax1.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .acc_allf_xlt07[mask], label='LHAPDF', **styles[4], ls="-")
-    ax1.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.acc_allf_xlt07[mask], label='oY=2, oQ=2', **styles[3], ls="-")
-    ax1.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.acc_allf_xlt07[mask], label='oY=3, oQ=3', **styles[1], ls="-")
-    ax1.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.acc_allf_xlt07[mask], label='oY=4, oQ=4', **styles[2], ls="-")
-    ax1.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.acc_allf_xlt07[mask], label='default: oY=5, oQ=4', **styles[0], ls="-")
+    ax1.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .acc_guds_xlt07[mask], label='LHAPDF', **styles[4], ls="-")
+    ax1.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.acc_guds_xlt07[mask], label='oY=2, oQ=2', **styles[3], ls="-")
+    ax1.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.acc_guds_xlt07[mask], label='oY=3, oQ=3', **styles[1], ls="-")
+    ax1.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.acc_guds_xlt07[mask], label='oY=4, oQ=4', **styles[2], ls="-")
+    ax1.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.acc_guds_xlt07[mask], label='default: oY=5, oQ=4', **styles[0], ls="-")
+
+    #ax1.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .acc_allf_xlt07[mask], label='LHAPDF', **styles[4], ls="-")
+    #ax1.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.acc_allf_xlt07[mask], label='oY=2, oQ=2', **styles[3], ls="-")
+    #ax1.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.acc_allf_xlt07[mask], label='oY=3, oQ=3', **styles[1], ls="-")
+    #ax1.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.acc_allf_xlt07[mask], label='oY=4, oQ=4', **styles[2], ls="-")
+    #ax1.plot(run_stats_oQ4_oY5.dy[mask], run_stats_oQ4_oY5.acc_allf_xlt07[mask], label='default: oY=5, oQ=4', **styles[0], ls="-")
+
     #ax1.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.acc_allf_xlt07[mask], label='oQ=4, oY=6', **styles[4], ls="-")
 
     #
     print("LHAPDF accuracy stats (allf_xlt07):")
-    print(h.reformat(run_stats_LHAPDF .dy[mask],run_stats_LHAPDF .acc_allf_xlt07[mask] ))
+    print(h.reformat(run_stats_LHAPDF .dy[mask],run_stats_LHAPDF .acc_guds_xlt07[mask] ))
 
     ax2.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.t_interp_ns[mask], **styles[3], label='')
     ax2.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.t_interp_ns[mask], **styles[1], label='')
@@ -137,8 +144,8 @@ def main(pdf,nloop):
     ax2.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .t_interp_ns[mask], **styles[4], label='LHAPDF')
     #ax2.plot(run_stats_oQ4_oY6.dy[mask], run_stats_oQ4_oY6.t_interp_ns[mask], **styles[4], label='')
 
-    ax1.set_ylabel("accuracy")
-    ax2.set_ylabel("interpolation time [ns]")
+    ax1.set_ylabel("rel. accuracy")
+    ax2.set_ylabel("interp. time ($t_{xQ}$) [ns]")
 
     ax2.set_xscale('log')
     ax1.set_yscale('log')
@@ -150,7 +157,8 @@ def main(pdf,nloop):
     ax2.text(0.95,0.95,"M2Pro, gfortran 15.1 (-O3)", va='top',ha='right', transform=ax2.transAxes)
 
     #ax2.yaxis.set_major_formatter(FuncFormatter(h.log_formatter_fn))
-    ax1.text(0.03,0.95, f"Hoppet v2.0.0, {nloop_names[nloop]} evolution\nymax = 12, dlnlnQ = dy/4", va='top', transform=ax1.transAxes)
+    ax1.text(0.03,0.95, f"Hoppet v2.0.0, {nloop_names[nloop]} evolution\n" +
+             "ymax = 12, dlnlnQ = dy/4\n[guds, $x<0.7$]", va='top', transform=ax1.transAxes)
     ax1.legend(loc='lower right',markerfirst=False)
     standard_ticks(ax1,ax2)
 

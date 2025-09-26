@@ -588,7 +588,7 @@ do not include the mass thresholds in the N3LO evolution.
 %
 To facilitate comparisons we therefore additionally provide
 Table~\ref{tab:n3lo-evolve-nf4}, correspond to fixed-flavour ($n_f=4$)
-evolution, with
+evolution, with the choice of
 \ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}.
 %
 Of the MSHT and NNPDF results, the NNPDF results (Table~2 of
@@ -673,7 +673,7 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
 %======================================================================
 \section{Hadronic Structure Functions}
 \label{sec:structure-funcs}
-As of \hoppet version 2.0.0 the code provides access to the massless
+As of \hoppet version 2.0.0, the code provides access to the massless
 hadronic structure functions. The structure functions are expressed as
 convolutions of a set of massless hard coefficient functions and PDFs,
 and make use of the tabulated PDFs and streamlined interface.  They
@@ -1201,6 +1201,7 @@ The routine writes the contents of the streamlined interface
 either through a call to \ttt{hoppetAssign} or \ttt{hoppetEvolve}.
 
 \section{Updated performance studies}
+\label{sec:v2-performance}
 
 In this section we present some updated performance studies relative
 to
@@ -1215,9 +1216,27 @@ standard nested grid choice that is obtained with the streamlined
 interface or, from the modern Fortran interface by calling
 \ttt{InitGridDefDefault(grid, dy, ymax[, order])}, with the default
 choice of interpolation \ttt{order=-6}.
+%
+\ifreleasenote
+The \ttt{InitGridDefDefault(...)} routine is new relative to v1 and sets up
+the following grid
+\begin{lstlisting}
+  call InitGridDef(gdarray(4),dy/27.0_dp, 0.2_dp, order)
+  call InitGridDef(gdarray(3),dy/9.0_dp,  0.5_dp, order)
+  call InitGridDef(gdarray(2),dy/3.0_dp,  2.0_dp, order)
+  call InitGridDef(gdarray(1),dy,         ymax  , order)
+  call InitGridDef(grid,gdarray(1:4),locked=.true.)
+\end{lstlisting}
+Users will usually only need a different choice if they plan studies
+at $x$ very close to $1$ or if they wish to explore fine optimisation of
+grid choices.
+\else
+  The \ttt{InitGridDefDefault(...)} routine is the recommended default
+  for setting up a grid, as described in Section~\ref{sec:grid}.
+\fi
 
-We split the analysis into the accuracy of PDF evolution and
-tabulation (section~\ref{sec:acc-pdf-evol}) and PDF evaluation
+We split our study here into two parts: the accuracy of PDF evolution
+and tabulation (section~\ref{sec:acc-pdf-evol}) and PDF evaluation
 (section~\ref{sec:fastpdf}).
 %
 The latter also outlines new functionality for choosing interpolation
@@ -1237,27 +1256,29 @@ it includes comparisons to LHAPDF.
     \centering
     \begin{subfigure}{0.49\textwidth}
         \centering
-        \includegraphics[width=\textwidth,page=2]{figs/hoppet-v2-accuracy-speed-v-dy.pdf}
+        \includegraphics[width=\textwidth,page=2]{figs-v2/hoppet-v2-accuracy-speed-v-dy.pdf}
         \caption{}
-        \label{fig:sub1}
+        \label{fig:main-sub1}
     \end{subfigure}
     \hfill
     \begin{subfigure}{0.49\textwidth}
         \centering
-        \includegraphics[width=\textwidth,page=3]{figs/hoppet-v2-accuracy-speed-v-dy.pdf}
+        \includegraphics[width=\textwidth,page=4]{figs-v2/hoppet-v2-accuracy-speed-v-dy.pdf}
         \caption{}
-        \label{fig:sub2}
+        \label{fig:main-sub2}
     \end{subfigure}
     \caption{Accuracy (top) and timing (bottom) versus \texttt{dy} at
-      (a) NNLO and (b) N$^3$LO in \hoppet{} v2.0.0. The timings were
+      (a) NNLO and (b) N$^3$LO in \hoppet{} v2.0.0.
+      %
+      The accuracy corresponds to the worst fractional accuracy for any flavour,
+      at any $x$ value below the corresponding limit, as described in
+      the text.
+      %
+      The timings were
       obtained on an \texttt{M2Pro} with \texttt{gfortran v15.1} and
       \texttt{-O3} optimisation. We have further used \texttt{ymax = 12} and
       \texttt{dlnlnQ = dy/4}.
       %
-      \gps{Should second plot move to \S~\ref{sec:fastpdf}? And put
-        $Y$-order first, as in the override call?}
-      \gps{Comment on \texttt{eps} as concerns initialisation time, or
-      cut off the plot}
     }
     \label{fig:main}
 \end{figure}
@@ -1271,16 +1292,19 @@ Section~9.1 of Ref.~\cite{Salam:2008qg},
 Section~\ref{sec:Accuracy},
 \fi
 %
-evolved in the VFNS scheme. At NNLO we use the parametrised splitting
+evolved in the VFNS scheme.
+%
+At NNLO we use the parametrised splitting
 functions and mass thresholds, as per \hoppet defaults.
 %
 To
 assess the accuracy we first create a reference run with a very high
 density grid. We then run \hoppet{} with different values of grid
-spacing \texttt{dy} keeping \texttt{dlnlnQ = dy/4}. The accuracy is
-then computed by looking at the largest relative deviation from the
-reference run across either all flavours (all-flav) or the light
-flavours (guds).
+spacing \texttt{dy} keeping \texttt{dlnlnQ = dy/4}.
+%
+The accuracy is then computed by looking at the largest relative
+deviation from the reference run across either all flavours (all-flav)
+or the light flavours (guds).
 %
 The full tabulation covers the range $10^{-5} < x < 1$,
 $2 < Q < 10^4\, \text{GeV}$.\footnote{For tabulations extending to
@@ -1289,7 +1313,7 @@ $2 < Q < 10^4\, \text{GeV}$.\footnote{For tabulations extending to
   because of the steep $\ln Q$ derivative of the parton
   distributions at the smallest $x$ values.}
 %
-At very large $x$ values, the numerical precision degrades because the
+At $x$ values close to $1$, the numerical precision degrades because the
 parton distribution functions become a very steep function of $\ln
 x$.
 %
@@ -1305,20 +1329,22 @@ change, as per Ref.\cite{Salam:2008qg}.
 % phenomenological application \ak{is this true?}.
 
 The result for the accuracy study can be seen in the top panels of
-Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and N$^3$LO
+Figures~\ref{fig:main-sub1}--\ref{fig:main-sub2} at NNLO and N$^3$LO
 respectively, as a function of \texttt{dy}.
 %
 At NNLO, the accuracy comes out similar to previous
-versions of \hoppet{.}
+versions of \hoppet.
 %
-In particular we note that with \texttt{dy =
+With \texttt{dy =
   0.2} one obtains a relative accuracy of $10^{-4}$ across all
 flavours in the range $x < 0.9$.
 %
-At the finest grid spacing \texttt{dy = 0.04} a relative accuracy of
-$10^{-7}$ can be achieved, good enough for precise benchmark
+At the finest grid spacing \texttt{dy = 0.05}, a relative accuracy of
+few times $10^{-7}$ can be achieved, good enough for precise benchmark
 comparisons as were for instance carried out in
-Refs.~\cite{Dittmar:2005ed,Bertone:2024dpm}. We note that in contrast
+Refs.~\cite{Dittmar:2005ed,Bertone:2024dpm}.
+%
+For comparison,
 the recent benchmark of aN$^3$LO codes in
 Ref.~\cite{Cooper-Sarkar:2024crx} reaches a relative precision of a
 few times $10^{-4}$ at best (cf.\ the gluon PDF at $x = 10^{-2}$ in
@@ -1329,7 +1355,8 @@ The scaling of the precision is roughly consistent with a power law in
 \texttt{dy}.
 %
 In particular the Runge-Kutta algorithm for the $Q^2$ evolution is
-expected to yield an error proportional to $\texttt{dlnlnQ}^4$, which
+expected to yield an error proportional to $\texttt{dlnlnQ}^4$, which,
+given our choice of $\ttt{dlnlnQ} = \ttt{dy}/4$
 translates into a behaviour $\sim \texttt{dy}^4$ in
 Fig.~\ref{fig:main}.
 %
@@ -1337,14 +1364,17 @@ The observed scaling is, if anything, slightly better than this, given
 the factor of $1000$ improvement in accuracy when reducing \texttt{dy}
 by a factor of $5$ from $0.2$ to $0.04$.
 %
+The precise scaling depends on whether it is Runge-Kutta or the
+splitting function grid representation that dominates the error.
+%
 At N$^3$LO we observe a similar level of accuracy as at
-NNLO.\footnote{Note that at N3LO we have omitted the 
+NNLO.\footnote{Note that at N$^3$LO we have omitted the 
   all-flav, $x<0.9$ line.
   %
   For that case, we have observed issues affecting the accuracy at the
   level of up to relative $10^{-5}$ accuracy.
   %
-  The deterioration is there only when the N3LO mass thresholds are
+  The deterioration is there only when the N$^3$LO mass thresholds are
   used and we suspect that it may be connected with difficulties in the
   integration over the $x \to 1$ region of the mass-threshold
   functions.
@@ -1409,23 +1439,23 @@ to evaluate the PDFs at a given value of $(x,Q)$ once the tabulation
 has been performed.
 
 Here we focus on $t_s$, $t_i$, and $t_c$. The results can be seen in the
-bottom panels of Figures~\ref{fig:sub1}--\ref{fig:sub2} at NNLO and
+bottom panels of Figures~\ref{fig:main-sub1}--\ref{fig:main-sub2} at NNLO and
 N$^3$LO respectively.
 %
 The expected scaling is
-$(\text{\texttt{dy}}^2 \text{\texttt{dlnlnQ}})^{-1}$, which for our
+$t_i, t_c \sim (\text{\texttt{dy}}^2 \text{\texttt{dlnlnQ}})^{-1}$, which for our
 choice of $\texttt{dlnlnQ} \propto\texttt{dy}$ reduces to
 $1/\text{\texttt{dy}}^3$.
 %
 That is consistent with what is seen in the plot.
 %
-Turning to the initialisation time, at NNLO the initialisation time of
-$\sim 60-300\,\mathrm{ms}$ dominates over the evolution time across
+Turning to the setup time, at NNLO 
+$t_s \sim 60-300\,\mathrm{ms}$ dominates over the evolution time across
 almost all \texttt{dy} values that we study.
 %
-It scales slightly more slowly than $1/\texttt{dy}$.
+It scales slightly more slowly than $t_s \sim 1/\texttt{dy}$.
 
-We note that when using cached evolution, the evolution time reaches as
+We note that when using cached evolution, the evolution time $t_c$ reaches as
 little as $1\,\mathrm{ms}$ for \texttt{dy = 0.2}.
 %
 Comparing these numbers to those of  
@@ -1449,12 +1479,13 @@ to initialise the exact mass threshold functions of
 Ref.~\cite{BlumleinCode}.
 %
 In any application where \hoppet{} either
-has to evolve or access the evolved tables multiple times this extra
+has to evolve or access the evolved tables multiple times, this extra
 initialisation is insignificant.
 %
-Should parametrised expressions of the mass threshold functions become
-available, we expect that the initialisation time will be
-substantially reduced.
+Were parametrised expressions of the mass threshold functions to
+become available, we expect that the initialisation time would be
+substantially reduced and we believe this would be useful for many
+users.
 
 % We conclude that \hoppet{} is competitive compared to other evolution
 % codes on the market both in terms of accuracy and speed.
@@ -1464,104 +1495,313 @@ substantially reduced.
 \subsection{Fast PDF access}
 \label{sec:fastpdf}
 
+In this section we detail updates for fasted PDF access within the
+modern Fortran and streamlined interfaces (including the Python interface).
+% 
+% Outside the streamlined interface this was already
+% possible, but only through manually modifying the source code.
+%
+In earlier version of \hoppet, the interpolation was carried out by a
+single routine that could flexibly handle any choice of $y$ and $Q$
+interpolation orders up to some hard-coded maximum.
+%
+As of v2.0.0, a number of interpolation-order choices now have
+dedicated code, which makes it easier for the compiler to optimise the
+underlying assembly, e.g.\ with loop unrolling, giving speed gains of
+about a factor two.
+%
+% 
+Additionally new functionality essentially allows the user to modify
+the interpolation order of the \hoppet{} grids, trading accuracy
+versus speed.
 
-\begin{figure}[htbp]
+% Part of the speedup, which was not
+% available in earlier releases, comes from manually unwinding a set of
+% loops when the user specifies either quadratic or cubic interpolation,
+% which are therefore faster than any of the other interpolation orders.
+
+
+
+The user can now globally override any table-specific interpolation order
+settings by calling one of
+\begin{lstlisting}
+  call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder)  ! streamlined interface
+\end{lstlisting}
+or
+\begin{lstlisting}
+  call PdfTableOverrideInterpOrders(yorder, lnlnQorder) ! F90 interface
+\end{lstlisting}
+A value of $\ttt{order}=2$ corresponds to quadratic interpolation, $3$ to
+cubic interpolation, etc.\footnote{The \ttt{(yorder, lnlnQorder)}
+  choices with dedicated code are $(2,2)$, $(3,3)$, $(4,4)$, $(5,4)$
+  and $(6,4)$.}
+%
+The default interpolation order is quartic in the \ttt{lnlnQ}
+direction, and \ttt{|grid\%order|-1} in the \ttt{y} direction (bounded
+to be between 3 and 9 if outside that range).
+%
+These rather high interpolation orders help with accuracy in a normal
+\hoppet{} run even with $\ttt{dy=0.2}$, but come with a speed penalty
+because of the larger number of operations.
+%
+However, if PDF evaluation represents a significant fraction of the
+time for a user's code, the user can choose to lower the interpolation
+order and still retain good accuracy by reducing \ttt{dy} and
+\ttt{dlnlnQ}.
+
+\begin{figure}[tbp]
     \centering
-    \begin{subfigure}{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth,page=3]{figs/hoppet-v2-accuracy-speed-v-dy.pdf}
-        \caption{}
-        \label{fig:sub2}
-    \end{subfigure}
-    \caption{Accuracy (top) and timing (bottom) versus \texttt{dy} at
-      (a) NNLO and (b) N$^3$LO in \hoppet{} v2.0.0. The timings were
-      obtained on an \texttt{M2Pro} with \texttt{gfortran v15.1} and
-      \texttt{-O3} optimisation. We have further used \texttt{ymax = 12} and
-      \texttt{dlnlnQ = dy/4}.
+    %\begin{subfigure}{0.49\textwidth}
+    %    \centering
+        \includegraphics[width=0.49\textwidth,page=3]{figs-v2/hoppet-v2-accuracy-speed-v-dy.pdf}
+    %    \caption{}
+    %\end{subfigure}
+    \caption{
+      Study of the impact of the choice of the $y$ and $Q$ interpolation
+      orders (\ttt{oY}, \ttt{oQ}) on accuracy (upper panel) and speed
+      (lower panel) for evaluating
+      the PDF table at a given $y$ and $Q$ point.
       %
-      \gps{update caption}
-    }
-    \label{fig:main}
+      Note that the interpolation order that enters the splitting
+      functions remains $6$ as in Fig.~\ref{fig:main}.
+      %
+      The timing corresponds to the \ttt{EvalPdfTable\_yQ(table,y,Q)} modern
+      Fortran call.
+      %
+      Calling \ttt{EvalPdfTable\_xQ(table,x,Q)}, or the corresponding
+      functions in the streamlined interfaces, adds about $5\ns$.
+      %
+      The timings have been
+      obtained on an \texttt{M2Pro} with \texttt{gfortran v15.1} and
+      \texttt{-O3} optimisation.
+      %
+      We have further used \texttt{ymax = 12} and
+      \texttt{dlnlnQ = dy/4}.
+      }
+        \label{fig:interp-accuracy}
+    %\label{fig:interp-accuracy}
 \end{figure}
 
-In this section we detail some new functionality which provides fast
-PDF access within the streamlined interface (including the Python
-interface). Outside the streamlined interface this was already
-possible, but only through manually modifying the source code. The new
-functionality essentially allows the user to modify the interpolation
-order of the \hoppet{} grids. Part of the speedup, which was not
-available in earlier releases, comes from manually unwinding a set of
-loops when the user specifies either quadratic or cubic interpolation,
-which are therefore faster than any of the other interpolation orders.
 
-In the streamlined interface the user can now call
-\begin{lstlisting}
-  call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder)
-\end{lstlisting}
-to set the interpolation order in $y$ and $\ln\ln Q$. A value of $2$
-for both of them corresponds to quadratic interpolation, while a value
-of $3$ corresponds to cubic interpolation. The default interpolation
-order is quartic in the \ttt{lnlnQ} direction, while \hoppet{}
-dynamically picks an order in \ttt{y} between $6$ and $10$
-(corresponding to \ttt{yorder = -1}). These rather high interpolation
-orders are to guarantee numerical accuracy in a normal \hoppet{} run,
-but comes with a speed penalty. However, if the user is only
-interested in fast PDF access, with similar accuracy as can typically
-be achieved by LHAPDF, then quadratic and cubic interpolation is
-sufficient, as long as the user sets up a dense enough
-grid\footnote{In our tests we have been using \ttt{dy = 0.05} with
-quadratic interpolation, finding agreement with LHAPDF, typically at
-the level of $\mathcal{O}(0.01\%)$.} 
+Fig.~\ref{fig:interp-accuracy} shows the accuracy and timing as a
+function of \ttt{dy} for different interpolation order choices.
+%
+It compares evolution as in Fig.~\ref{fig:main}, followed by
+interpolation with a given order.
+%
+It illustrates the large gain in accuracy when increasing
+interpolation order.
+%
+For orders of $4$ or higher, the limitation on accuracy is, however,
+no longer just the interpolation order during PDF evaluation, but also
+the orders that appear in the grid representation of the splitting
+functions and of the $Q$ evolution when producing the original
+table.\footnote{Recall that the former can be controlled with the
+  \ttt{order} argument when setting up the grid.
+  % 
+  Currently, the latter is hard-coded as part of the Runge-Kutta
+  evolution routines (cf.\ above).
+}
+%
+The time that is shown in the lower panel corresponds to the
+evaluation of all flavours in one go.
+%
+It ranges from $60\ns$ to $100\ns$ in going from the $(2,2)$ order
+combination to $(5,4)$.
+%
+It is largely independent of \ttt{dy}.
+%
+Calls to evaluate a single flavour are only $2.5{-}3$ times faster,
+because of overheads associated with identifying the grid location and
+calculation interpolation coefficients, which are independent of the
+number of flavours one evaluates.
+
+
+Fig.~\ref{fig:interp-accuracy} also shows results with LHAPDF, calling
+it from its native \CPP to maximise its speed.
+%
+We generate an LHAPDF grid for our standard benchmark initial
+conditions, with a given \ttt{dy} spacing, cf.\
+Section~\ref{sec:lhapdf}, and then examine the difference between the
+LHAPDF evaluation and our high-accuracy reference.
+%
+The upper panel of Fig.~\ref{fig:interp-accuracy} shows the accuracy
+with the same definition as used in our other performance results,
+i.e.\ the worst relative accuracy observed anywhere for $x < 0.7$,
+across any of the g,u,d,s flavours, as in the solid lines of
+Fig.~\ref{fig:main}.
+%
+For most flavours and most of the $x$ region, the accuracy is better
+than shown.
+%
+Interestingly, the LHAPDF accuracy is comparable to \hoppet's
+quadratic interpolation.
+%
+At first sight this might be surprising given that LHAPDF uses cubic
+interpolation: however it is our understanding that in the $x$
+direction it uses a cubic \emph{spline}.
+%
+The spline effectively sacrifices one of the orders of accuracy in
+function evaluation and instead uses it to ensure exact continuity of
+the first derivative.
+%
+In contrast, \hoppet does not enforce continuity of the derivatives
+but relies on the fact that for high interpolation order any
+discontinuity will scale as a high power of the grid spacing.
+%
+Which choice is better may depend on the application. 
+%
+Concerning speed, we find that LHAPDF is somewhere in between our
+$(4,4)$ and $(5,4)$ choices.
+
+For use-cases where PDF evaluation speed is critical, one option is
+to read in a PDF grid with LHAPDF, evaluate it at all \hoppet grid points and
+then use \hoppet for the interpolation, using a fine grid spacing and
+a $(2,2)$ interpolation choice.
+%
+We provide examples how to do this in Fortran, \CPP, and Python:\\[0.2cm]
+\masterlink{example_f90/with-lhapdf/fast_pdf_evaluation.f90}, \\
+\masterlink{example_cpp/with-lhapdf/fast_pdf_evaluation.cc}, \\
+\masterlink{example_py/tabulation_example_lhapdf.py}. \\[0.2cm]
+%
+The Fortran and \CPP examples are virtually identical.
+%
+In each of them, there is a
+routine called \ttt{load\_lhapdf\_assign\_hoppet} that can be directly
+copied over to a user's application.
+%
+The PDF can then be evaluated in the usual
+way through a call to \ttt{hoppetEval} and likewise for the coupling
+through \ttt{hoppetAlphaS}.\footnote{%
+  For the PDF, \hoppet just
+  interpolates its table, which is filled directly from LHAPDF.
+  %
+  For $\as$, \hoppet carries out its own evolution, which may have
+  small differences from the LHAPDF $\as$, notably if the LHAPDF grid
+  provides a coupling that is not an exact solution of the renormalisation
+  group equation.
+  %
+  Another subtlety concerns the top threshold.
+  %
+  The LHAPDF grid files usually quote a physical top mass, and in the
+  examples above, \hoppet reads the top mass and provides $\as$
+  evolution at higher scales with $6$ light flavours.
+  %
+  However in some LHAPDF sets, the top-mass is only intended to
+  indicate the value of the top mass used in the PDF fit, not an $n_f = 5
+  \to 6$ threshold in the evolution.
+  %
+  Users wishing to use the \hoppet $\as$ evaluation may therefore wish
+  to manually communicate a large top mass to \hoppet to avoid a
+  switch to $6$-flavour running.
+}
+%
+All three examples also print the timings to the screen so that users
+can check speed on their hardware.
+
 %
 \begin{table}[htbp]
   \centering
   \begin{tabular}{|c|c|ccc|}
     \hline
-    \ttt{yorder} & \ttt{lnlnQorder} & &Time per call (ns)& \\
+    \ttt{yorder} & \ttt{lnlnQorder} & &Time per \ttt{hoppetEval} call (ns)& \\
      \hline
-    & & Fortran & \CPP{} & Python \\
-    -1 & 4 & 488 & 475 & 850 \\
-    3 & 3 & 180& 218 & 610 \\
-    2 & 2 & 165& 173&  540 \\
+      &                          & Fortran & \CPP{} & Python \\
+    5 & 4                        & 108     & 108    & 295 \\
+    4 & 4                        &  92     &  93    & 278 \\
+    3 & 3                        &  76     &  77    & 258 \\
+    2 & 2                        &  63     &  63    & 244 \\
+  %%hoppet-alphas                &  11     &  13    &  86
     \hline
-    \multicolumn{2}{|c|}{LHAPDF} & 220 & 146 & 2700 \\
+    \multicolumn{2}{|c|}{\rule{0pt}{2.5ex}LHAPDF 6.5.5}
+                                 &520$^\dagger$ &  87    & 1645$^\dagger$ \\
+  %%LHAPDF-alphas                &  28     &  18    &  76
     \hline
+    %% Timings from Gavin on 2025-09-25
+    %%
+    %% Fortran: evaluated by calling build/example_f90/fast_pdf_evaluation
+    %%      manually editing yorder and lnlnQorder
+    %%
+    %% C++: evaluated by calling build/example_cpp/fast_pdf_evaluation,
+    %%      manually editing yorder and lnlnQorder
+    %%
+    %% Python: make install, make sure Python picks up that version
+    %%      then run example_py/tabulation_example_lhapdf.py -pdf PDF4LHC21_40 -yorder 2 -lnlnQorder 2
+    %%
+    %% Zoom was on, and I picked the smallest consistent speed
+    %% (i.e. I needed to see it a couple of times before putting it in) 
   \end{tabular}
-  \caption{Performance of different interpolation orders for a call to
-  \ttt{hoppetEval} with all flavours, and the equivalent call in LHAPDF.  \ak{Gavin to update with M2Pro}}
+  \caption{Time for a call to
+  \ttt{hoppetEval}, which evaluates all flavours at a given $x,Q$
+  point.
+  %
+  The rows show the timings with different
+  interpolation orders.
+  %
+  The table also shows the timing for the equivalent call in LHAPDF~6.5.5.
+  %
+  The results have been obtained with the \ttt{PDF4LHC21\_40} set, on an M2Pro with
+  gfortran-15.1, Apple clang version 17.0.0, O3 optimisation and
+  Python 3.12.7.
+  %
+  The hoppet grid spacings are $\ttt{dy}=0.05$ and
+  $\ttt{dlnlnQ}=\ttt{dy}/4$, with $\ttt{ymax} = 14$. 
+  \\
+  %
+  $^\dagger$\ Note that in its Fortran and Python
+  interfaces,\gps{have we checked Python?} this version of
+  LHAPDF loops over an underlying call to single-flavour evaluation
+  (\ttt{double PDF::xfxQ(int id, double x, double q))}), 
+  which is why it is significantly slower than the \CPP interface,
+  which evaluates all flavours in one go.
+  %
+  A proposed modification for the Fortran interface has been submitted
+  to LHAPDF.
+}
   \label{tab:interp_performance}
 \end{table}
+
+Table~\ref{tab:interp_performance} illustrates those timings for a range of
+interpolation orders and across interfaces in different languages.
 %
-In table~\ref{tab:interp_performance} we show the performance of
-different interpolation orders. The timings were obtained on an
-\texttt{M2Pro} with \texttt{gfortran v15.1} and \texttt{-O3}
-optimisation. We also report the timings found by calling LHAPDF
-directly.\footnote{With the Fortran interface that comes with LHAPDF
-6.5.5, \ttt{LHAGlue.cc}, we actually find that a call to
-\ttt{EvolvePDF} takes about 4 times longer than the quoted number.
-This is due to that function calling the \ttt{LHAPDF::xfxQ} method for
-each flavour. If instead one modifies the routine to access the PDF
-through a \ttt{std::vector} timings are as reported here.} As can be
-seen, with quadratic interpolation, \hoppet{} is as fast, if not
-faster, than LHAPDF. The difference between Fortran and \CPP{} in
-LHAPDF in all likelihood comes from the fact that the \CPP{} interface
-has to allocate a vector upon each call. It is likely that this could
-be optimised in LHAPDF. 
+These tests have been carried out with the \ttt{PDF4LHC21\_40} set.
+%
+Again, they confirm that \hoppet with lower interpolation orders
+can offer a speed gain relative to LHAPDF.
+%
+That speed gain is moderate in \CPP, more significant in Fortran and
+Python.
+%
+As concerns Fortran, there are straightforward modifications to LHAPDF
+that would improve its speed and these have been proposed to the
+LHAPDF authors.
 
-For users who wish to use an existing LHAPDF grid directly with
-\hoppet{}, we provide examples in Fortran, CPP{}, and Python, which
-can be found here \\[0.2cm]
-\repolink{example_f90/with-lhapdf/fast_pdf_evaluation.f90}{example\_f90/with-lhapdf/fast\_pdf\_evaluation.f90}, \\
-\repolink{example_cpp/with-lhapdf/cpp_fast_pdf_evaluation.cc}{example\_cpp/with-lhapdf/cpp\_fast\_pdf\_evaluation.cc}, \\
-\repolink{example_py/tabulation_example_lhapdf.py}{example\_py/tabulation\_example\_lhapdf.py}. \\[0.2cm]
 
-The Fortran and \CPP{} examples are virtually identical, and the
-\ttt{subroutine} respectively \ttt{void}
-\ttt{load\_lhapdf\_assign\_hoppet} can in principle be used in
-applications as they are. The PDF can then be evaluated in the usual
-way through a call to \ttt{hoppetEval} and likewise for the coupling
-through \ttt{hoppetAlphaS}. All three examples will also print the
-above timings to the screen.
+% \comment{continue here}is only
+% interested in fast PDF access, with similar accuracy as can typically
+% be achieved by LHAPDF, then quadratic and cubic interpolation is
+% sufficient, as long as the user sets up a dense enough
+% grid\footnote{In our tests we have been using \ttt{dy = 0.05} with
+% quadratic interpolation, finding agreement with LHAPDF, typically at
+% the level of $\mathcal{O}(0.01\%)$.} 
+
+% In table~\ref{tab:interp_performance} we show the performance of
+% different interpolation orders. The timings were obtained on an
+% \texttt{M2Pro} with \texttt{gfortran v15.1} and \texttt{-O3}
+% optimisation. We also report the timings found by calling LHAPDF
+% directly.\footnote{With the Fortran interface that comes with LHAPDF
+% 6.5.5, \ttt{LHAGlue.cc}, we actually find that a call to
+% \ttt{EvolvePDF} takes about 4 times longer than the quoted number.
+% This is due to that function calling the \ttt{LHAPDF::xfxQ} method for
+% each flavour. If instead one modifies the routine to access the PDF
+% through a \ttt{std::vector} timings are as reported here.} As can be
+% seen, with quadratic interpolation, \hoppet{} is as fast, if not
+% faster, than LHAPDF. The difference between Fortran and \CPP{} in
+% LHAPDF in all likelihood comes from the fact that the \CPP{} interface
+% has to allocate a vector upon each call. It is likely that this could
+% be optimised in LHAPDF. 
+
+
 
 %%% Local Variables:
 %%% TeX-master: "HOPPET-v2.0-release.tex"
