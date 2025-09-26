@@ -189,25 +189,25 @@ jobs:
           ls -la BUILD/pyinterface/ || echo "No pyinterface directory found"
           ls -la BUILD/pyinterface/hoppet/ || echo "No hoppet directory found"
           cd BUILD && PYTHONPATH=./pyinterface python3 -c "
-import sys
-print('Python path:', sys.path)
-print('Testing hoppet import...')
-try:
-    import hoppet as hp
-    print('✅ Import successful!')
-    print('Available functions:', sorted([x for x in dir(hp) if not x.startswith('_')][:10]))
-    if hasattr(hp, 'Start'):
-        print('✅ Start function found!')
-        hp.Start(0.1, 2)
-        print('✅ Start function works!')
-        hp.DeleteAll()
-    else:
-        print('❌ Start function NOT found!')
-        print('Available:', [x for x in dir(hp) if 'start' in x.lower() or 'Start' in x])
-except Exception as e:
-    print(f'❌ Error: {e}')
-    import traceback
-    traceback.print_exc()
-"
+            import sys; 
+            print('Python path:', sys.path); 
+            print('Testing hoppet import...'); 
+            try: 
+                import hoppet as hp; 
+                print('✅ Import successful!'); 
+                print('Available functions:', sorted([x for x in dir(hp) if not x.startswith('_')][:10])); 
+                if hasattr(hp, 'Start'): 
+                    print('✅ Start function found!'); 
+                    hp.Start(0.1, 2); 
+                    print('✅ Start function works!'); 
+                    hp.DeleteAll(); 
+                else: 
+                    print('❌ Start function NOT found!'); 
+                    print('Available:', [x for x in dir(hp) if 'start' in x.lower() or 'Start' in x]); 
+            except Exception as e: 
+                print(f'❌ Error: {e}'); 
+                import traceback; 
+                traceback.print_exc()
+            "
           # now try running the python example with the built module in the path  
           cd BUILD && PYTHONPATH=./pyinterface python3 ../example_py/tabulation_example.py
