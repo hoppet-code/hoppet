@@ -193,4 +193,4 @@ jobs:
           echo "PYTHONPATH will be set to: $(pwd)/BUILD/pyinterface"
           cd BUILD && PYTHONPATH=./pyinterface python3 "$(pwd)/../pyinterface/test-hoppet-import.py"
           # now try running the python example with the built module in the path  
-          cd BUILD && PYTHONPATH=./pyinterface python3 ../example_py/tabulation_example.py
+          PYTHONPATH=./pyinterface python3 ../example_py/tabulation_example.py
