@@ -188,6 +188,6 @@ jobs:
           # Debug: Check if the Python interface was built correctly
           ls -la BUILD/pyinterface/ || echo "No pyinterface directory found"
           ls -la BUILD/pyinterface/hoppet/ || echo "No hoppet directory found"
-          cd BUILD && PYTHONPATH=./pyinterface python3 -c 'try: import sys; print("Python path:", sys.path); print("Testing hoppet import..."); import hoppet as hp; print("Import successful!"); print("Available functions:", sorted([x for x in dir(hp) if not x.startswith("_")][:10])); print("Start function found!" if hasattr(hp, "Start") else "Start function NOT found!"); (hp.Start(0.1, 2), print("Start function works!"), hp.DeleteAll()) if hasattr(hp, "Start") else print("Available:", [x for x in dir(hp) if "start" in x.lower() or "Start" in x]); except Exception as e: print("Error:", e); import traceback; traceback.print_exc()'
+          cd BUILD && PYTHONPATH=./pyinterface python3 ../pyinterface/test-hoppet-import.py
           # now try running the python example with the built module in the path  
           cd BUILD && PYTHONPATH=./pyinterface python3 ../example_py/tabulation_example.py
