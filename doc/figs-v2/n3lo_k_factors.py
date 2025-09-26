@@ -31,6 +31,7 @@ def main():
     parser.add_argument('-Q0', type=float, default=1.41, help='Initial Q0 value (default: Qmin from LHAPDF)')
     parser.add_argument('-yorder', type=int, default=5, help='order for interpolation in y=ln1/x (default of -1 uses same as evolution)')
     parser.add_argument('-lnlnQorder', type=int, default=4, help='order for interpolation in lnlnQ (default=4)')
+    parser.add_argument('-no-vfn3', action='store_true', help='Use VFN3 for N3LO evolution (default: False)')
 
     args = parser.parse_args()
 
@@ -50,7 +51,7 @@ def main():
 
     nnlo_log, nnlo_lin = start_run_hoppet_fill_arrays(args.dy, 3, False, npoints, x_lin, x_log)
     n3lo_novfn3_log, n3lo_novfn3_lin = start_run_hoppet_fill_arrays(args.dy, 4, False, npoints, x_lin, x_log)
-    do_n3lo_thresholds = True
+    do_n3lo_thresholds = not args.no_vfn3
     n3lo_log, n3lo_lin = start_run_hoppet_fill_arrays(args.dy, 4, do_n3lo_thresholds, npoints, x_lin, x_log)
 
 
@@ -82,7 +83,7 @@ def main():
 
     with PdfPages("n3lo_k_factors.pdf") as pdf:
         stdlims = (0.94, 1.08)
-        evol_label = "Evln from $Q_0=\sqrt{2}$ GeV ($<m_c$)\nto $Q=100$ GeV"
+        evol_label = r"Evln from $Q_0=\sqrt{2}$ GeV ($<m_c$)\nto $Q=100$ GeV"
         # Standard benchmark, including VFN3
         ratios, labels = compute_ratios_labels(n3lo_all, nnlo_all, flavour_names)
         plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=stdlims)
@@ -187,7 +188,12 @@ def plot_ratios(xvals, ratios, labels, title, extra_label, evol_label=None, n3lo
          max(np.nanmax(ratio) for ratio in ratios if np.any(~np.isnan(ratio))))
     ax1.set_ylim(*actual_ylim)
     ax2.set_ylim(*actual_ylim)
+    ax1.yaxis.set_major_locator(MultipleLocator(0.02))
     ax1.yaxis.set_minor_locator(MultipleLocator(0.01))
+    # Add horizontal dotted lines at y=1.01 and y=0.99
+    for ax in (ax1, ax2):
+        ax.axhline(1.01, color='grey', linestyle='-', linewidth=1, alpha=0.2)
+        ax.axhline(0.99, color='grey', linestyle='-', linewidth=1, alpha=0.2)
 
     ax2.text(0.95, 0.98, extra_label, color='grey', alpha=0.6,
              fontsize=11, ha='right', va='top', transform=ax2.transAxes)

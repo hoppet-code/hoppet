@@ -596,7 +596,7 @@ Ref.~\cite{Cooper-Sarkar:2024crx}) are closer to ours.
 
 
 
-\begin{table}[ht!]
+\begin{table}[p]
   %  \footnotesize \centering
   \small \centering
   \begin{tabular}{c|cccccccc}
@@ -630,7 +630,7 @@ $0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  
   \label{tab:n3lo-evolve}
 \end{table}
 
-\begin{table}
+\begin{table}[p]
   \small \centering
   \begin{tabular}{c|cccccccc}
     $x$ &  $u-\bar u$ &$d-\bar d$ &$\bar d-\bar u$ &  $ 2(\bar u+\bar d)$  &$s-\bar s$ &$s+\bar s$&$c+\bar c$ &   $g$\\
@@ -667,6 +667,77 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
 %\item As of 2024-04-26 this is the list of all papers on 4-loop splitting functions~\cite{Davies:2016jie,Moch:2017uml,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah,Falcioni:2024xyt} and this is the list of what is actually implemented~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt}
 %\item And this is the list of all papers relating to the 3-loop mass thresholds~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}. The code that we use relies on this set~\cite{Ablinger:2010ty,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt} plus the code from Bluemlein for which we do not yet have a reference.
 %\end{itemize}
+
+\begin{figure}[p]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,page=1]{figs-v2/n3lo_k_factors.pdf}
+    \caption{}
+    \label{fig:n3lok-benchmark-mtm}
+  \end{subfigure}
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,page=2]{figs-v2/n3lo_k_factors.pdf}
+    \caption{}
+    \label{fig:n3lok-benchmark-nomtm}
+  \end{subfigure}
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,page=3]{figs-v2/n3lo_k_factors.pdf}
+    \caption{}
+    \label{fig:n3lok-nnpdf40-mtm}
+  \end{subfigure}
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,page=4]{figs-v2/n3lo_k_factors.pdf}
+    \caption{}
+    \label{fig:n3lok-nnpdf40-nomtm}
+  \end{subfigure}
+  %
+  \caption{Ratio of the PDFs at $100\GeV$ with \ntlo evolution versus
+    NNLO evolution.
+    %
+    The evolution starts from the same initial condition
+    at NNLO and \ntlo, at an initial scale
+    $Q_0\simeq 1.41\GeV$.
+    %
+    In the upper plots, we use the standard benchmark initial
+    condition.
+    %
+    In the lower plots, the initial condition is the
+    NNPDF40\_pch\_nnlo\_as\_01180 PDF at $Q_0$.
+    %
+    The left-hand plots show the ratio with for \ntlo evolution,
+    including \ntlo mass thresholds, while the right-hand plots show
+    the evolution without the \ntlo mass thresholds.
+    %
+    In all cases, the \ntlo evolution uses
+    \ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089}.  }
+  \label{fig:n3lo-v-nnlo-ev}
+\end{figure}
+
+We close this section by illustrating the impact of \ntlo versus NNLO
+evolution, Fig.~\ref{fig:n3lo-v-nnlo-ev}.
+%
+Let us first focus on Fig.~\ref{fig:n3lok-benchmark-mtm}.
+%
+It starts with the benchmark initial condition at the standard low
+scale of $Q_0 = \sqrt{2}\GeV$, just below the charm mass.
+%
+It then evolves the PDF with \ntlo and NNLO evolution, and shows the
+\ntlo/NNLO ratio at $Q = 100\GeV$.
+%
+Each line corresponds to a different flavour.
+%
+For light flavours, in the range that is relevant to the LHC at
+central rapidities $10^{-4} \lesssim x \lesssim 0.5$, the effect of
+\ntlo corrections on the evolution of the light-flavour PDFs is
+generally below a percent, and typically less than or around half a
+percent.
+
+\comment{CONTINUE HERE}
+
 
 
 %======================================================================
