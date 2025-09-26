@@ -69,7 +69,7 @@ evolution code written in modern Fortran,\footnote{This release of
 \hoppet makes use of features introduced in Fortran~2008, for example
 its \ttt{abstract interface}, and hence a Fortran~2008 compliant
 compiler is now needed. The code has been tested to compile and run
-with \texttt{gfortran v9.5.0} and later and the 2025 version of the
+with \texttt{gfortran v10.5.0}\gps{updated to reflect CI} and later, and the 2025 version of the
 Intel compiler \texttt{ifx}.}  with interfaces also for C/\CPP{} and
 earlier dialects of Fortran.
 %
@@ -116,7 +116,8 @@ of the photon density inside a proton and its extension to lepton
 distributions in the
 proton~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf};
 %
-(2) support for QCD evolution at N$^3$LO in the (zero mass) variable
+(2) support for QCD evolution at N$^3$LO in the (zero mass)\gps{isn't
+  evolution always in the ZM scheme?} variable
 flavour number scheme (VFNS)~\cite{Buza:1996wv} (Section~\ref{sec:n3lo-evolution});
 %
 and (3) support for the
@@ -127,7 +128,7 @@ sections~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu,Kar
 
 This release also includes a range of other smaller additions relative
 to the original 1.1.0 release documented in \cite{Salam:2008qg}, in
-particular the addition of a new Python interface
+particular a Python interface
 (Section~\ref{sec:pyinterface}), a CMake-based build system
 (Section~\ref{sec:cmake}), and the ability to write LHAPDF grids
 (Section~\ref{sec:lhapdf}).
@@ -188,7 +189,7 @@ suitable license for its use.
 %
 We also wish to thank Juan Rojo for useful discussions. 
 %
-GPS wishes to acknowledge funding from a Royal Society Research
+GPS acknowledges funding from a Royal Society Research
 Professorship (grant RP$\backslash$R$\backslash$231001) and from the Science and
 Technology Facilities Council (STFC) under grant ST/X000761/1.
 %
