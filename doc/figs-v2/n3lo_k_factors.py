@@ -83,10 +83,11 @@ def main():
 
     with PdfPages("n3lo_k_factors.pdf") as pdf:
         stdlims = (0.94, 1.08)
-        evol_label = r"Evln from $Q_0=\sqrt{2}$ GeV ($<m_c$)\nto $Q=100$ GeV"
+        evol_label = r"Evln from $Q_0=\sqrt{2}$ GeV ($<m_c$)""\nto $Q=100$ GeV"
         # Standard benchmark, including VFN3
         ratios, labels = compute_ratios_labels(n3lo_all, nnlo_all, flavour_names)
         plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=stdlims)
+        plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=(0,1.35))
 
         # Standard benchmark, without VFN3
         ratios, labels = compute_ratios_labels(n3lo_novfn3_all, nnlo_all, flavour_names)
@@ -100,6 +101,7 @@ def main():
             # LHAPDF, including VFN3
             ratios, labels = compute_ratios_labels(lhapdf_n3lo_all, lhapdf_nnlo_all, flavour_names)
             plot_ratios(x_all, ratios, labels, f'{pdf_name} init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=stdlims)
+            plot_ratios(x_all, ratios, labels, f'{pdf_name} init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=(0,1.35))
 
             # LHAPDF, without VFN3
             ratios, labels = compute_ratios_labels(lhapdf_n3lo_novfn3_all, lhapdf_nnlo_all, flavour_names)
@@ -188,8 +190,12 @@ def plot_ratios(xvals, ratios, labels, title, extra_label, evol_label=None, n3lo
          max(np.nanmax(ratio) for ratio in ratios if np.any(~np.isnan(ratio))))
     ax1.set_ylim(*actual_ylim)
     ax2.set_ylim(*actual_ylim)
-    ax1.yaxis.set_major_locator(MultipleLocator(0.02))
-    ax1.yaxis.set_minor_locator(MultipleLocator(0.01))
+    if actual_ylim[1] - actual_ylim[0] < 0.2:
+        ax1.yaxis.set_major_locator(MultipleLocator(0.02))
+        ax1.yaxis.set_minor_locator(MultipleLocator(0.01))
+    else:
+        ax1.yaxis.set_major_locator(MultipleLocator(0.10))
+        ax1.yaxis.set_minor_locator(MultipleLocator(0.02))
     # Add horizontal dotted lines at y=1.01 and y=0.99
     for ax in (ax1, ax2):
         ax.axhline(1.01, color='grey', linestyle='-', linewidth=1, alpha=0.2)
@@ -218,7 +224,6 @@ def plot_ratios(xvals, ratios, labels, title, extra_label, evol_label=None, n3lo
     # cosmetic: hide inner spines
     ax1.spines['right'].set_visible(False)
     ax2.spines['left'].set_visible(False)
-    #ax2.set_yticks([])
 
     ax1.legend(loc='upper left', fontsize='small', ncol=2)
     fig.suptitle(f"N$^3$LO/NNLO: {title}", y=0.94)

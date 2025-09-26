@@ -671,25 +671,25 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
   \centering
   \begin{subfigure}{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth,page=1]{figs-v2/n3lo_k_factors.pdf}
+    \includegraphics[width=\textwidth,page=1]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
     \caption{}
     \label{fig:n3lok-benchmark-mtm}
   \end{subfigure}
   \begin{subfigure}{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth,page=2]{figs-v2/n3lo_k_factors.pdf}
+    \includegraphics[width=\textwidth,page=3]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
     \caption{}
     \label{fig:n3lok-benchmark-nomtm}
-  \end{subfigure}
+  \end{subfigure}\\[1ex]
   \begin{subfigure}{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth,page=3]{figs-v2/n3lo_k_factors.pdf}
+    \includegraphics[width=\textwidth,page=4]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
     \caption{}
     \label{fig:n3lok-nnpdf40-mtm}
   \end{subfigure}
   \begin{subfigure}{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth,page=4]{figs-v2/n3lo_k_factors.pdf}
+    \includegraphics[width=\textwidth,page=6]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
     \caption{}
     \label{fig:n3lok-nnpdf40-nomtm}
   \end{subfigure}
@@ -719,23 +719,46 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
 We close this section by illustrating the impact of \ntlo versus NNLO
 evolution, Fig.~\ref{fig:n3lo-v-nnlo-ev}.
 %
-Let us first focus on Fig.~\ref{fig:n3lok-benchmark-mtm}.
+Let us first focus on the top-left plot,
+Fig.~\ref{fig:n3lok-benchmark-mtm}.
 %
-It starts with the benchmark initial condition at the standard low
+We start with the benchmark initial condition at the standard low
 scale of $Q_0 = \sqrt{2}\GeV$, just below the charm mass.
 %
-It then evolves the PDF with \ntlo and NNLO evolution, and shows the
-\ntlo/NNLO ratio at $Q = 100\GeV$.
+We then evolves the PDF separately with \ntlo and NNLO evolution, and
+show the \ntlo/NNLO ratio at $Q = 100\GeV$.
 %
 Each line corresponds to a different flavour.
 %
 For light flavours, in the range that is relevant to the LHC at
-central rapidities $10^{-4} \lesssim x \lesssim 0.5$, the effect of
+central rapidities, $10^{-4} \lesssim x \lesssim 0.5$, the effect of
 \ntlo corrections on the evolution of the light-flavour PDFs is
 generally below a percent, and typically less than or around half a
 percent.
+%
+For heavy flavour, the effect is much more significant, with a
+$\sim 6\%$ effect on the charm distribution for $0.01 \lesssim x
+\lesssim 0.1$ and about $-15\%$ at $x=0.5$.
 
-\comment{CONTINUE HERE}
+Fig.~\ref{fig:n3lok-benchmark-nomtm} is the analogous plot with the
+\ntlo mass-threshold contributions turned off.
+%
+It illustrates that the large effects on the charm and bottom PDFs are
+a consequence mainly \ntlo mass-thresholds, not the \ntlo evolution.
+%
+Comparing Figs.~\ref{fig:n3lok-benchmark-mtm} and
+\ref{fig:n3lok-benchmark-nomtm} that for light flavours the $0.5\%$
+effects are coming both from the \ntlo splitting functions and the
+\ntlo mass thresholds.
+
+Finally, Figs.~\ref{fig:n3lok-nnpdf40-mtm} and
+\ref{fig:n3lok-nnpdf40-nomtm} show analogous plots with an initial
+condition taken from the NNPDF40\_pch\_nnlo\_as\_01180 PDF
+set~\cite{NNPDF:2021njg} at a similar $Q_0 = 1.41 \GeV$ (again below
+the charm threshold).
+%
+The results are broadly similar, showing the our conclusions about the
+size of \ntlo effects are robust with respect to the choice of PDF.
 
 
 
@@ -1105,8 +1128,11 @@ Ref.~\cite{Bertone:2024dpm}. That reference was presented before the
 full \ntlo evolution had been implemented in \hoppet, and the \ntlo
 structure functions were therefore obtained with NNLO evolution. A
 full update of the tables and plots is beyond the scope of the current
-work, but for illustrative purposes we present an update of Fig. 3
-using the full \ntlo evolution in Fig~\ref{fig:perturbativeconvergence}.
+work, but for illustrative purposes we present here an updated version
+of Fig.~3 of Ref.~\cite{Bertone:2024dpm}.
+%
+The update uses the full \ntlo evolution and is shown as
+Fig.~\ref{fig:perturbativeconvergence}.
 %
 \begin{figure}[tb!]
   \centering\includegraphics[width=0.49\textwidth]{figs-v2/PerturbativeConvergence_Q_2_GeV.pdf}
@@ -1120,12 +1146,18 @@ using the full \ntlo evolution in Fig~\ref{fig:perturbativeconvergence}.
   \label{fig:perturbativeconvergence}
 \end{figure}
 %
-That figure shows the $F_2^{\rm NC}$ structure function at various
+It gives the $F_2^{\rm NC}$ structure function at various
 perturbative orders for two values of $Q$ ($2$ GeV and $10$ GeV). It
 also shows the relative difference of the various orders with respect
-to \ntlo. As can be seen by comparing to the original figures, the
-\ntlo evolution has the effect at low $Q$ of increasing $F_2^{\rm NC}$
+to \ntlo.
+%
+As can be seen by comparing to the original figures, the
+\ntlo evolution has the effect at low $Q$ of increasing the \ntlo $F_2^{\rm NC}$
 slightly, at least for $x$-values in the range $10^{-4}$ to $10^{-1}$. 
+%
+This is most easily seen from the shifts in the LO, NLO and NNLO
+curves in the lower panel, which are all ratios to the \ntlo (with
+\ntlo evolution here, without in Ref.~\cite{Bertone:2024dpm}.)
 
 \section{Python interface}
 \label{sec:pyinterface}
