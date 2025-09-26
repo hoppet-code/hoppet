@@ -70,7 +70,9 @@ jobs:
     - name: Install 
       run: |
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
-           yum -y install pybind11-devel python3-devel python3-numpy
+           yum -y install python3-devel python3-numpy python3-pip
+           # Try system package first, fall back to pip if not available
+           yum -y install pybind11-devel || python3 -m pip install pybind11
     - name: Compile
       run: |
           #cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
@@ -78,8 +80,8 @@ jobs:
           cmake --build BUILD -j
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
-          # now try running the python example
-          python3 example_py/tabulation_example.py
+          # now try running the python example with the built module in the path
+          cd BUILD && PYTHONPATH=./pyinterface python3 ../example_py/tabulation_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT
@@ -90,7 +92,9 @@ jobs:
     - name: Install
       run: |
              dnf -y install findutils procps gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
-             dnf -y install pybind11-devel python3-devel python3-numpy
+             dnf -y install python3-devel python3-numpy python3-pip
+             # Try system package first, fall back to pip if not available
+             dnf -y install pybind11-devel || python3 -m pip install pybind11
              tee > /tmp/oneAPI.repo << EOF
              [oneAPI]
              name=Intel(R) oneAPI repository
