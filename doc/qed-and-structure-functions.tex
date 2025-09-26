@@ -766,7 +766,8 @@ repository and can be found in
 %
 Technical details on the implementation of the structure functions in
 \hoppet can be found in
-Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik,Bertone:2024dpm}.
+Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik,Bertone:2024dpm}, and here
+we mainly focus on the code interface.
 %A small sample program
 %that prints out the structure functions can be found in
 %\masterlink{example\_f90/structure\_functions\_example.f90}.
@@ -774,10 +775,13 @@ Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik,Bertone:2024dpm}.
 The structure functions have been implemented including only QCD
 corrections up to N$^3$LO using both the exact and parametrised
 coefficient functions found in
-Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz,Blumlein:2022gpp},
-and can make use of PDFs evolved at N$^3$LO as described in
-Sec.~\ref{sec:n3lo-evolution}. The structure functions can also be
-computed using PDFs obtained through LHAPDF~\cite{LHAPDF}.
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz,Blumlein:2022gpp},\footnote{Note
+that the piece presented in Ref.~\cite{Davies:2016ruz} has not been
+presented in exact form. Only a parametrised version is available and
+is what is being used in \hoppet.}  and can make use of PDFs evolved
+at N$^3$LO as described in Sec.~\ref{sec:n3lo-evolution}. The
+structure functions can also be computed using PDFs interfaced through
+LHAPDF~\cite{LHAPDF}.
 
 \subsection{Initialisation}
 \label{sec:structure-funcs-init}
@@ -1090,12 +1094,38 @@ Note that in \CPP{} the structure function indices start from 0 and that the \CP
 array that is to be passed to functions such as \ttt{hoppetStrFct}
 would be defined as \ttt{double ff[14]}.
 
-An example of structure function evaluations using the \CPP{} version of
-the streamlined interface is to be found in
-\repolink{example_cpp/structure_functions_example.cc}{example\_cpp/structure\_functions\_example.cc}.
-%
-%\gps{added this link}
+An example of structure function evaluations using the \CPP{} version
+of the streamlined interface is to be found in
+\repolink{example_cpp/structure_functions_example.cc}{example\_cpp/structure\_functions\_example.cc}
+and a Python example is similarly to be found at
+\masterlink{example_py/structure_function_example.py}.
 
+Finally we present a small update on the results presented in
+Ref.~\cite{Bertone:2024dpm}. That reference was presented before the
+full \ntlo evolution had been implemented in \hoppet, and the \ntlo
+structure functions were therefore obtained with NNLO evolution. A
+full update of the tables and plots is beyond the scope of the current
+work, but for illustrative purposes we present an update of Fig. 3
+using the full \ntlo evolution in Fig~\ref{fig:perturbativeconvergence}.
+%
+\begin{figure}[tb!]
+  \centering\includegraphics[width=0.49\textwidth]{figs-v2/PerturbativeConvergence_Q_2_GeV.pdf}
+  \centering\includegraphics[width=0.49\textwidth]{figs-v2/PerturbativeConvergence_Q_10_GeV.pdf}
+  \caption{The structure function $F_2^{\rm NC}$ plotted as a function
+    of $x_{\rm B}$ in the range $[10^{-5}:0.9]$ at $Q=2$~GeV (left)
+    and $Q=10$~GeV (right). Each plot displays the curves at LO, NLO,
+    NNLO, and N$^3$LO with the lower panel showing the ratio to
+    N$^3$LO. Adapted from Ref.~\cite{Bertone:2024dpm} using the full
+    \ntlo evolution.}
+  \label{fig:perturbativeconvergence}
+\end{figure}
+%
+That figure shows the $F_2^{\rm NC}$ structure function at various
+perturbative orders for two values of $Q$ ($2$ GeV and $10$ GeV). It
+also shows the relative difference of the various orders with respect
+to \ntlo. As can be seen by comparing to the original figures, the
+\ntlo evolution has the effect at low $Q$ of increasing $F_2^{\rm NC}$
+slightly, at least for $x$-values in the range $10^{-4}$ to $10^{-1}$. 
 
 \section{Python interface}
 \label{sec:pyinterface}
