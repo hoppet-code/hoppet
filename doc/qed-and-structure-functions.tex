@@ -67,7 +67,7 @@ available, and the well-known 2-loop QED running coupling at order $\alpha \alph
 %at order $\alpha \as^2 L \sim \as^3$ but are currently not
 %available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$, which contributes at order $\alpha^2 \as L^2 \sim \as^3$.}
 % 
-%\comment{Discuss what is needed to go effectively to N3LO? $\alpha^2$
+%\comment{Discuss what is needed to go effectively to \ntlo? $\alpha^2$
 %  splitting exists, $\alpha\as^2$ does not?}
 %
 
@@ -463,7 +463,8 @@ can be found in
 \label{sec:n3lo-evolution}
 In recent years significant progress in determining the perturbative
 components needed for unpolarised QCD evolution at N$^3$LO has been
-made, cf.\ \ref{sec:pqcd} for more details on the evolution at N$^3$LO.
+made (cf.\ \ref{sec:pqcd} for technical details on the evolution at
+N$^3$LO).
 %
 This has now reached the stage that two PDF groups have released fits
 at approximate N$^3$LO (aN$^3$LO)
@@ -487,16 +488,15 @@ Finally the four-loop splitting functions entering the DGLAP equation
 are currently not known exactly, except for certain $n_f$-dependent
 terms~\cite{Gracey:1994nn,Davies:2016jie,Moch:2017uml,Gehrmann:2023cqm,Falcioni:2023tzp,Gehrmann:2023iah}.
 %
-However, enough Mellin-moments have now been computed that together
-with the exact pieces just mentioned and known small- and large-$x$
+However, enough Mellin-moments have been computed that together with
+the exact pieces just mentioned and known small- and large-$x$
 behaviours, approximate splitting functions suitable for phenomenology
 can be reliably
 determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd}.
 %
-We have therefore incorporated the aforementioned pieces, using the
-code that is publicly available with those reference, with the
-intention of updating the splitting functions as they become more
-precisely known. 
+We have therefore incorporated the aforementioned pieces, using code
+that is publicly available with those reference, with the intention of
+updating the splitting functions as they become more precisely known.
 
 For the specific implementation in \hoppet version 2.0.0 we rely on
 the approximations computed in
@@ -513,8 +513,8 @@ were already available in version 1.1.0, very little is needed on the
 side of the user to invoke the evolution.
 %
 Most importantly all routines that take an \ttt{nloop} argument,
-e.g. \ttt{InitDglapHolder}, \ttt{InitRunningCoupling}, and
-\ttt{hoppetStart}, now support \ttt{nloop = 4}.
+e.g. \ttt{InitDglapHolder}, \ttt{InitRunningCoupling},
+\ttt{hoppetStart}, and \ttt{hoppetEval} now support \ttt{nloop = 4}.
 %
 The user also has a few choices they can make in terms of the
 splitting functions used.
@@ -547,9 +547,9 @@ older implementation
 approximations in papers up to and including Ref.~\cite{Moch:2023tdj};
 \ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701} meaning the
 approximations in papers up to and including
-Ref.~\cite{Falcioni:2024xyt} and the default value of
-\ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089} meaning the
-approximations in papers up to and including
+Ref.~\cite{Falcioni:2024xyt} and the default value at the time of
+writing of \ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089}
+meaning the approximations in papers up to and including
 Ref.~\cite{Falcioni:2024qpd}.
 
 Besides the splitting functions, we have also incorporated the
@@ -559,11 +559,10 @@ and kindly supplied to us in the form of Fortran
 code~\cite{BlumleinCode,Fael:2022miw}.
 %
 Note that because many of these contributions are available only in
-exact form (i.e.\ using extensive \texttt{hplog5} evaluations), they
-involve a significant initialisation time, of the order a
+exact form (i.e.\ using extensive \texttt{hplog5}~\cite{FortranPolyLog} evaluations), they
+involve a significant initialisation time, of the order of
 $10{-}30\,\text{s}$.\footnote{As and when faster 
   parametrised versions become available, we will incorporate them.}
-
 
 In Table~\ref{tab:n3lo-evolve} we show the results of the full N$^3$LO
 evolution in the VFNS, using the most up-to-date perturbative input at
@@ -584,7 +583,7 @@ would change the results by a relative amount below $10^{-4}$.
 
 Table~\ref{tab:n3lo-evolve} cannot be directly compared to the
 benchmarking tables of Ref.~\cite{Cooper-Sarkar:2024crx} because they
-do not include the mass thresholds in the N3LO evolution.
+do not include the mass thresholds in the \ntlo evolution.
 %
 To facilitate comparisons we therefore additionally provide
 Table~\ref{tab:n3lo-evolve-nf4}, correspond to fixed-flavour ($n_f=4$)
@@ -624,7 +623,7 @@ $0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  
     %
     The NNLO splitting functions are the parametrised form
     (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
-    facilitate comparisons by other groups, and the N3LO splitting
+    facilitate comparisons by other groups, and the \ntlo splitting
     functions use the
     \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2410\_08089} choice.}
   \label{tab:n3lo-evolve}
@@ -656,7 +655,7 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
     %
     The NNLO splitting functions are the parametrised form
     (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
-    facilitate comparisons by other groups, and the N3LO splitting
+    facilitate comparisons by other groups, and the \ntlo splitting
     functions use the
     \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2310\_05744} choice. This table can be directly compared to tables 1 and 2 in Ref.~\cite{Cooper-Sarkar:2024crx}}
   \label{tab:n3lo-evolve-nf4}
@@ -706,7 +705,7 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
     condition.
     %
     In the lower plots, the initial condition is the
-    NNPDF40\_pch\_nnlo\_as\_01180 PDF at $Q_0$.
+    NNPDF40\_pch\_nnlo\_as\_01180 PDF~\cite{NNPDF:2021njg} at $Q_0$.
     %
     The left-hand plots show the ratio with for \ntlo evolution,
     including \ntlo mass thresholds, while the right-hand plots show
