@@ -34,14 +34,15 @@ void load_lhapdf_assign_hoppet(const string & pdfname, int imem=0) {
   pdf = mkPDF(pdfname, imem);
 
   // Now let's access some basic information about the PDF to set up hoppet
-  double mc = pdf->quarkMass(4);
-  double mb = pdf->quarkMass(5);
-  double mt = pdf->quarkMass(6);
   int nloop = pdf->orderQCD() + 1; // LHAPDF is zero indexed
   double xmin = pdf->xMin();
   double xmax = pdf->xMax();
   double Qmin = pdf->qMin();
   double Qmax = pdf->qMax();
+  double mc = pdf->quarkMass(4);
+  double mb = pdf->quarkMass(5);
+  double mt = pdf->quarkMass(6);
+  if(!pdf->hasFlavor(6)) mt = 2.0*Qmax; // If no top mass defined, use 173 GeV
 
   cout << "LHAPDF set: " << pdfname << " loaded successfully" << endl;
 

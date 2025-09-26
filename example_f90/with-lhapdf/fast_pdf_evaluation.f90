@@ -106,7 +106,7 @@ contains
     end interface
     real(dp) :: mc, mb, mt, Q2minPDF, Q2maxPDF, xmin, xmax, Qmin, QMax, Q0
     real(dp) :: ymax, dy, dlnlnQ
-    integer :: orderPDF, nloop, order, yorder, lnlnQorder
+    integer :: orderPDF, nloop, order, yorder, lnlnQorder,nfmax
 
     ! Load LHAPDF set
     call initPDFSetByName(pdfname)
@@ -123,6 +123,8 @@ contains
     call getthreshold(4,mc)
     call getthreshold(5,mb)
     call getthreshold(6,mt)
+    call getnf(nfmax)
+    if(nfmax .lt. 6) mt = 2.0d0*Qmax ! If no top in PDF set threshold beyond table max
 
     write(*,*) "LHAPDF set: ", pdfname, " loaded successfully"
 
