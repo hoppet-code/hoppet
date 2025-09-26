@@ -26,10 +26,10 @@ def main():
     flavour_names = [r'$\bar{t}$', r'$\bar{b}$', r'$\bar{c}$', r'$\bar{s}$', r'$\bar{u}$', r'$\bar{d}$', r'$g$', r'$d$', r'$u$', r'$s$', r'$c$', r'$b$', r'$t$']
     # Get commandline
     parser = argparse.ArgumentParser(description="Check of an LHAPDF grid against HOPPET evolution.")
-    parser.add_argument('-pdf', default=None, type=str, help='LHAPDF set name (e.g. NNPDF30_nnlo_as_0118)')
+    parser.add_argument('-pdf', default="NNPDF40_nnlo_pch_as_01180", type=str, help='LHAPDF set name (e.g. NNPDF30_nnlo_as_0118)')
     parser.add_argument('-dy', type=float, default=0.05, help='dy for HOPPET evolution (default: 0.05)')
-    parser.add_argument('-Q0', type=float, default=1.0, help='Initial Q0 value (default: Qmin from LHAPDF)')
-    parser.add_argument('-yorder', type=int, default=6, help='order for interpolation in y=ln1/x (default of -1 uses same as evolution)')
+    parser.add_argument('-Q0', type=float, default=1.41, help='Initial Q0 value (default: Qmin from LHAPDF)')
+    parser.add_argument('-yorder', type=int, default=5, help='order for interpolation in y=ln1/x (default of -1 uses same as evolution)')
     parser.add_argument('-lnlnQorder', type=int, default=4, help='order for interpolation in lnlnQ (default=4)')
 
     args = parser.parse_args()
