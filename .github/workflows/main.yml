@@ -181,7 +181,8 @@ jobs:
           ls /opt/homebrew/bin/gfortran*
     - name: Compile
       run: |
-          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-15  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_BUILD_PYINTERFACE=ON
+          INSTALLDIR=$(pwd)/../INSTALL
+          cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_Fortran_COMPILER=gfortran-15  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_BUILD_PYINTERFACE=ON
           cmake --build BUILD -j 2
           cmake --install BUILD
           ctest --test-dir BUILD -j 2 --output-on-failure
@@ -190,7 +191,11 @@ jobs:
           ls -la BUILD/pyinterface/hoppet/ || echo "No hoppet directory found"
           echo "Current working directory: $(pwd)"
           echo "Python executable: $(which python3)"
-          echo "PYTHONPATH will be set to: $(pwd)/BUILD/pyinterface"
-          cd BUILD && PYTHONPATH=./pyinterface python3 "$(pwd)/../pyinterface/test-hoppet-import.py"
+          export PYTHONPATH=$($INSTALLDIR/bin/hoppet-config --pythonpath)
+          echo "PYTHONPATH set to: $PYTHONPATH"
+          echo "Contents of $PYTHONPATH/hoppet:"
+          ls -la $PYTHONPATH/hoppet || echo "No hoppet directory found in PYTHONPATH"
+          #cd BUILD && PYTHONPATH=./pyinterface python3 "$(pwd)/../pyinterface/test-hoppet-import.py"
           # now try running the python example with the built module in the path  
-          PYTHONPATH=./pyinterface python3 ../example_py/tabulation_example.py
+          python3 ../example_py/tabulation_example.py
+          
