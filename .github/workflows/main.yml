@@ -197,5 +197,5 @@ jobs:
           ls -la $PYTHONPATH/hoppet || echo "No hoppet directory found in PYTHONPATH"
           #cd BUILD && PYTHONPATH=./pyinterface python3 "$(pwd)/../pyinterface/test-hoppet-import.py"
           # now try running the python example with the built module in the path  
-          python3 ../example_py/tabulation_example.py
+          python3 example_py/tabulation_example.py
           
