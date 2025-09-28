@@ -16,6 +16,7 @@ using namespace std;
 using namespace hoppet; // To access factscheme_MSbar
 using namespace LHAPDF;
 
+
 // Global PDF pointer
 PDF *pdf = nullptr;
 
@@ -31,7 +32,10 @@ void lhapdf_interface(const double & x, const double & Q, double * res)  {
 /// defined above.
 void load_lhapdf_assign_hoppet(const string & pdfname, int imem=0) {
   // Start by loading a PDF set from LHAPDF
+  auto t1 = chrono::high_resolution_clock::now();
   pdf = mkPDF(pdfname, imem);
+  auto t2 = chrono::high_resolution_clock::now();
+  cout << "Time to load LHAPDF set: " << chrono::duration<double,milli>(t2 - t1).count() << " ms" << endl;
 
   // Now let's access some basic information about the PDF to set up hoppet
   int nloop = pdf->orderQCD() + 1; // LHAPDF is zero indexed
@@ -73,13 +77,19 @@ void load_lhapdf_assign_hoppet(const string & pdfname, int imem=0) {
 
   hoppetSetPoleMassVFN(mc,mb,mt); // set the pole masses
   hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder); // Set the interpolation orders
+  t1 = chrono::high_resolution_clock::now();
   hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, factscheme_MSbar); // Start hoppet
+  t2 = chrono::high_resolution_clock::now();
+  cout << "Time to start hoppet: " << chrono::duration<double,milli>(t2 - t1).count() << " ms" << endl;
 
   // Now we fill the hoppet grid using the LHAPDF grid directly,
   // rather than evolving ourselves
   double Q0 = Qmin;
   hoppetSetCoupling(pdf->alphasQ(Q0), Q0, nloop);
+  t1 = chrono::high_resolution_clock::now();
   hoppetAssign(lhapdf_interface);
+  t2 = chrono::high_resolution_clock::now();
+  cout << "Time to fill hoppet grid from LHAPDF: " << chrono::duration<double,milli>(t2 - t1).count() << " ms" << endl;
 
   // If instead we want to evolve the PDF with hoppet starting from
   // some low scale Q0 (>= Qmin) make a call to hoppetEvolve instead
@@ -112,17 +122,18 @@ int main (int argc, char *argv[]) {
   // Print the two PDFs
   cout << "PDF Evaluation at x = " << x << ", Q = " << Q << " GeV" << endl;
   cout << "LHAPDF(-6,...,6): ";
-  for (const auto & val : lhapdf) {
-    cout << val << " ";
-  }
+  for (const auto & val : lhapdf) cout << val << " ";
   cout << endl;
 
   cout << "Hoppet(-6,...,6): ";
-  for (const auto & val : hoppetpdf) {
-    cout << val << " ";
-  }
+  for (const auto & val : hoppetpdf) cout << val << " ";
   cout << endl;
 
+  cout << "Difference (H-L): ";
+  for (size_t i = 0; i < lhapdf.size(); ++i) {
+      cout << hoppetpdf[i] - lhapdf[i] << " ";
+  }
+  cout << endl;
 
   int npoints = 3000; // or your desired value
   double xmin = 1e-5, xmax = 0.9;
@@ -141,7 +152,13 @@ int main (int argc, char *argv[]) {
       for (double q : qvals)
           hoppetEval(x, q, hoppetpdf); 
   auto t2 = chrono::high_resolution_clock::now();
-  cout << "hoppetEval time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
+  cout << "hoppetEval time: " << chrono::duration<double,nano>(t2 - t1).count()/npoints/npoints << " ns\n";
+  t1 = chrono::high_resolution_clock::now();
+  for (double x : xvals)
+      for (double q : qvals)
+          hoppetpdf[0] = hoppetEvalPID(x, q, 1); // Just one flavour
+  t2 = chrono::high_resolution_clock::now();
+  cout << "hoppetEvalPID time: " << chrono::duration<double,nano>(t2 - t1).count()/npoints/npoints << " ns\n";
 
   // Benchmark xfxq2
   t1 = chrono::high_resolution_clock::now();
@@ -149,7 +166,14 @@ int main (int argc, char *argv[]) {
       for (double q : qvals)
         pdf->xfxQ2(x, q*q, lhapdf);
   t2 = chrono::high_resolution_clock::now();
-  cout << "LHAPDF time: " << chrono::duration<double>(t2 - t1).count()/npoints/npoints*1e9 << " ns\n";
+  cout << "LHAPDF pdf->xfxQ2(x,Q2,vec) time: " << chrono::duration<double,nano>(t2 - t1).count()/npoints/npoints << " ns\n";
+  // Benchmark xfxq2
+  t1 = chrono::high_resolution_clock::now();
+  for (double x : xvals)
+      for (double q : qvals)
+        lhapdf[0] = pdf->xfxQ2(1, x, q*q);
+  t2 = chrono::high_resolution_clock::now();
+  cout << "LHAPDF pdf->xfxQ2(id,x,Q2) time: " << chrono::duration<double,nano>(t2 - t1).count()/npoints/npoints << " ns\n";
 
   // Now check the evaluation time of hoppetAlphaS vs pdf->alphasQ
   // over the range of Q values
@@ -157,13 +181,13 @@ int main (int argc, char *argv[]) {
   for (double q : qvals)
       hoppetAlphaS(q);
   t2 = chrono::high_resolution_clock::now();
-  cout << "hoppetAlphaS time: " << chrono::duration<double>(t2 - t1).count()/npoints*1e9 << " ns\n"; 
+  cout << "hoppetAlphaS time: " << chrono::duration<double,nano>(t2 - t1).count()/npoints << " ns\n";
 
   t1 = chrono::high_resolution_clock::now();
   for (double q : qvals)
       pdf->alphasQ(q);
   t2 = chrono::high_resolution_clock::now();
-  cout << "LHAPDF alphasQ time: " << chrono::duration<double>(t2 - t1).count()/npoints*1e9 << " ns\n";
+  cout << "LHAPDF alphasQ time: " << chrono::duration<double,nano>(t2 - t1).count()/npoints << " ns\n";
 
   hoppetDeleteAll();
 
