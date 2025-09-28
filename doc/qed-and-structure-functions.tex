@@ -1660,22 +1660,25 @@ At N$^3$LO the evolution picture is almost identical to that at NNLO,
 but the initialisation times are significantly larger, in the range
 $4-15\, \mathrm{s}$, rather than a fraction of a second.
 %
-This is dominated by the extra time that it takes
-to initialise the exact mass threshold functions of
-Ref.~\cite{BlumleinCode}.
+\gps{much rephrasing of what follows:}
+This is dominated by the extra time that it takes to initialise the
+preliminary version of the code for the exact mass threshold functions
+of Ref.~\cite{BlumleinCode}.
 %
-In any long-running application where \hoppet{} either
+In any long-running application where \hoppet either
 has to evolve or access the evolved tables many times, this extra
 initialisation is insignificant.
 %
-\gps{added:}
-However the penalty can be noticeable in interactive work. \gps{Say we
-  look forward to forthcoming faster options?}
+However the penalty can be noticeable in interactive work.
 %
-Were parametrised expressions of the mass threshold functions to
-become available, we expect that the initialisation time would be
-substantially reduced and we believe this would be useful for many
-users.
+We understand that the final version of the code of
+Ref.~\cite{BlumleinCode} will be significantly faster, and we hope to
+incorporate it into \hoppet soon after it becomes available.
+
+% Were parametrised expressions of the mass threshold functions to
+% become available, we expect that the initialisation time would be
+% substantially reduced and we believe this would be useful for many
+% users.
 
 % We conclude that \hoppet{} is competitive compared to other evolution
 % codes on the market both in terms of accuracy and speed.
@@ -1968,6 +1971,10 @@ As concerns Fortran, there are straightforward modifications to LHAPDF
 that would improve its speed and these have been proposed to the
 LHAPDF authors.
 
+\gps{added:} The PDF and $\alpha_s$ evaluation routines in \hoppet are
+thread safe.
+%
+Other parts of the code, notably initialisation and evolution are not.
 
 % \comment{continue here}is only
 % interested in fast PDF access, with similar accuracy as can typically
