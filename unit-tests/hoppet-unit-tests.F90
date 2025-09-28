@@ -111,17 +111,21 @@ contains
     ! Add tests that the general table-evaluation routine and the 
     ! order-specific ones agree
     block
-      real(dp) :: xpdf_ord(iflv_min:tables(0)%tab_iflv_max)
+      real(dp) :: xpdf_ord(iflv_min:tables(0)%tab_iflv_max), xpdf1D_ord(iflv_min:tables(0)%tab_iflv_max,1)
       procedure(EvalPdfTable_yQ_interface ), pointer :: EvalPdfTable_yQ_order
       procedure(EvalPdfTable_yQf_interface), pointer :: EvalPdfTable_yQf_order
+      procedure(EvalPdfTable1D_yQ_interface), pointer :: EvalPdfTable1D_yQ_order
       integer, parameter :: orders(*) = [22,33,44,54,64]
       integer            :: iord, order_y, order_Q
 
       do iord = 1, size(orders)
         order_y = orders(iord)/10
         order_Q = mod(orders(iord),10)
-        call PdfTableSetInterpPointers(order_y, order_Q, EvalPdfTable_yQ_order, EvalPdfTable_yQf_order)
-        if (.not. associated(EvalPdfTable_yQ_order) .or. .not.associated(EvalPdfTable_yQf_order)) then
+        call PdfTableSetInterpPointers(order_y, order_Q, &
+                  EvalPdfTable_yQ_order, EvalPdfTable_yQf_order, EvalPdfTable1D_yQ_order)
+        if (     .not. associated(EvalPdfTable_yQ_order) &
+            .or. .not.associated(EvalPdfTable_yQf_order)&
+            .or. .not.associated(EvalPdfTable1D_yQ_order)) then
           call fail("Unsupported order "//trim(to_string(orders(iord)))//" in test_tab_eval")
           cycle
         end if
@@ -142,6 +146,13 @@ contains
             call check_approx_eq("EvalPdfTable_yQ, order="//trim(to_string(orders(iord)))//&
                                  ", x="//trim(to_string(x))//", Q="//trim(to_string(Q)), &
                                  xpdf_ord, xpdf, tol_abs = 1e-10_dp)
+
+            call EvalPdfTable1D_yQ_order(tables(0:0), -log(x), Q, xpdf1D_ord)
+            call check_approx_eq("EvalPdfTable1D_yQ, order="//trim(to_string(orders(iord)))//&
+                                 ", x="//trim(to_string(x))//", Q="//trim(to_string(Q)), &
+                                 xpdf1D_ord(:,1), xpdf, tol_abs = 1e-10_dp)
+
+            ! then flavour-by-flavour
             do iflv = iflv_min, iflv_max
               xpdff = EvalPdfTable_yQf_order(tables(0), -log(x), Q, iflv)
               call check_approx_eq_0d("EvalPdfTable_yQf, order="//trim(to_string(orders(iord)))//&

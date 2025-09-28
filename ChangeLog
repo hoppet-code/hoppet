@@ -1,3 +1,23 @@
+2025-09-28 Gavin
+
+	* src/pdf_tabulate.F90:
+	* src/inc/pdf_tabulate_OrderNNN.F90:
+	* unit-tests/hoppet-unit-tests.F90:
+	* example_f90/with-lhapdf/fast_manypdf_evaluation.f90: *** ADDED ***
+
+	added EvalPdfTable1D_yQ and underlying hard-coded order variants 
+	to allow for fast evaluation of an array of PDF tables. Also added
+	unit-tests and code for examining speed. Note that when a hard-coded
+	order variant is missing, it just loops over a call to the 
+	0D evaluation, which is not optimal.
+
+
+	Open questions include naming (e.g. whether we should overload the
+	0D and 1D variants), whether there are any other array variants we
+	should add, and whether there is any way to get this in a
+	streamlined interface.
+
+
 2025-09-25 Gavin
 
 	* pdf_tabulate.f90:

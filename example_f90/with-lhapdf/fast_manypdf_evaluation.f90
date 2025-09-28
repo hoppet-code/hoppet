@@ -4,7 +4,7 @@
 
 module time_format
   implicit none
-  character(len=*), parameter :: blue = char(27)//'[34m', reset = char(27)//'[0m'
+  character(len=*), parameter :: blue = char(27)//'[34m', bold = char(27)//'[1m', reset = char(27)//'[0m'
   character(len=*), parameter :: tfmt = '("'//blue//'",a,f8.2,a,"'//reset//'")'
 end module time_format
 
@@ -111,7 +111,7 @@ contains
       !call tabulatePDFSet(many_tables(imem), pdfname, imem, xmin, xmax, Qmin, Qmax, dy, dlnlnQ)
     end do
     call cpu_time(ta2)
-    write(*,tfmt) " Time to fill all sets: ", (ta2-ta1)*1e3_dp, " ms"
+    write(*,tfmt) "Time to fill all sets: ", (ta2-ta1)*1e3_dp, " ms"
 
 
     ! If instead we want to evolve the PDF with hoppet starting from
@@ -129,10 +129,12 @@ program fast_manypdf_evaluation
   use time_format
   use new_as
   use pdf_tabulate
+
   implicit none
   character(len=200) :: pdfname
   integer :: imem
   real(dp) :: x, Q, lhapdf(-6:6), hoppetpdf(-6:6)
+  real(dp), allocatable :: hoppetpdf1D(:,:)
   integer, parameter :: npoints = 500
   real(dp), parameter :: xmin = 1d-5, xmax = 0.9_dp, Qmin = 1.5_dp, Qmax = 100000.0_dp
   real(dp), allocatable :: xvals(:), qvals(:)
@@ -150,10 +152,12 @@ program fast_manypdf_evaluation
   Q = 13.0
  
   ! Standard LHAPDF call
+  call initPDF(0) ! load the central member
   call EvolvePDF(x, Q, lhapdf) ! Get the PDF from LHAPDF
 
   ! Equivalent hoppet call
-  call hoppetEval(x, Q, hoppetpdf)
+  call EvalPdfTable_xQ(many_tables(0), x, Q, hoppetpdf)  
+  !call hoppetEval(x, Q, hoppetpdf)
 
   ! Print the two PDFs
   write(*,*) "PDFs at x = ", x, ", Q = ", Q
@@ -171,17 +175,30 @@ program fast_manypdf_evaluation
   ! Benchmark hoppetEval
   ! All flavours at once
   call cpu_time(t1)
-  write(*,*) "Benchmarking all", size(many_tables), " PDF members"
-  do imem = 0, ubound(many_tables,1)
-    call InitPDF(imem) ! load the table into hoppet
-    do i = 1, npoints
-      do j = 1, npoints
+  write(*,'(a,i3,a)') bold//"Benchmarking evaluation of all", size(many_tables), " PDF members with HOPPET"//reset
+  do i = 1, npoints
+    do j = 1, npoints
+      do imem = 0, ubound(many_tables,1)
         call EvalPdfTable_xQ(many_tables(imem), xvals(i), qvals(j), hoppetpdf)
       end do
     end do
   end do
   call cpu_time(t2)
-  write(*,tfmt) blue//"EvalPdfTable_xQ time per mem (all flav): ", (t2-t1)/npoints/npoints*1d9/size(many_tables), " ns"//reset
+  write(*,tfmt) blue//"EvalPdfTable_xQ   time per mem (all flav): ", (t2-t1)/npoints/npoints*1d9/size(many_tables), " ns"//reset
+
+
+  allocate(hoppetpdf1D(-6:6,0:ubound(many_tables,1) ))
+  call cpu_time(t1)
+  !write(*,*) "Benchmarking all", size(many_tables), " PDF members"
+  do i = 1, npoints
+    do j = 1, npoints
+      call EvalPdfTable1D_xQ(many_tables(:), xvals(i), qvals(j), hoppetpdf1D(:,:))
+    end do
+  end do
+  call cpu_time(t2)
+  write(*,tfmt) blue//"EvalPdfTable1D_xQ time per mem (all flav): ", (t2-t1)/npoints/npoints*1d9/size(many_tables), " ns"//reset
+
+
   !! ! One flavour at a time
   !! call cpu_time(t1)
   !! do i = 1, npoints
@@ -195,16 +212,22 @@ program fast_manypdf_evaluation
   !! write(*,tfmt) "hoppetEvalPID time (one flav): ", (t2-t1)/npoints/npoints*1d9, " ns"
 
   ! Benchmark EvolvePDF (LHAPDF)
+  write(*,'(a,i3,a)') bold//"Benchmarking evaluation of all", size(many_tables), " PDF members with LHAPDF"//reset
   call cpu_time(t1)
   do i = 1, npoints
     do j = 1, npoints
-      call EvolvePDF(xvals(i), qvals(j), lhapdf)
+      do imem = 0, ubound(many_tables,1)
+        call InitPDF(imem) ! load the table into hoppet
+        call EvolvePDF(xvals(i), qvals(j), lhapdf)
+      end do
     end do
   end do
   call cpu_time(t2)
-  write(*,tfmt) "LHAPDF EvolvePDF time (all flav): ", (t2-t1)/npoints/npoints*1d9, " ns"
+  write(*,tfmt) "LHAPDF EvolvePDF time per mem (all flav): ", (t2-t1)/npoints/npoints*1d9/size(many_tables), " ns"
 
   ! Now let's check the timing of hoppetAlphaS vs LHAPDF alphaS
+  write(*,'(a)') bold//"Benchmarking alpha_s"//reset
+
   call cpu_time(t1)
   do i = 1, npoints
     do j = 1, npoints
