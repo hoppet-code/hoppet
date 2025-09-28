@@ -77,7 +77,7 @@ program fast_pdf_evaluation
     end do
   end do
   call cpu_time(t2)
-  write(*,tfmt) "LHAPDF time        (all flav): ", (t2-t1)/npoints/npoints*1d9, " ns"
+  write(*,tfmt) "LHAPDF EvolvePDF time (all flav): ", (t2-t1)/npoints/npoints*1d9, " ns"
 
   ! Now let's check the timing of hoppetAlphaS vs LHAPDF alphaS
   call cpu_time(t1)
@@ -124,12 +124,13 @@ contains
     real(dp) :: mc, mb, mt, Q2minPDF, Q2maxPDF, xmin, xmax, Qmin, QMax, Q0
     real(dp) :: ymax, dy, dlnlnQ
     integer :: orderPDF, nloop, order, yorder, lnlnQorder,nfmax
+    real(dp) :: ta1, ta2
 
     ! Load LHAPDF set
-    call cpu_time(t1)
+    call cpu_time(ta1)
     call initPDFSetByName(pdfname)
-    call cpu_time(t2)
-    write(*,tfmt) "Time to load LHAPDF set: ", (t2-t1)*1e3_dp, " ms"
+    call cpu_time(ta2)
+    write(*,tfmt) "Time to load LHAPDF set: ", (ta2-ta1)*1e3_dp, " ms"
 
     call getQ2min(0,Q2minPDF)
     call getQ2max(0,Q2maxPDF)
@@ -171,19 +172,19 @@ contains
 
     call hoppetSetPoleMassVFN(mc,mb,mt) ! set the pole masses
     call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder) ! Set the interpolation orders
-    call cpu_time(t1)
+    call cpu_time(ta1)
     call hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, factscheme_MSbar) ! Start hoppet
-    call cpu_time(t2)
-    write(*,tfmt) "Time to start HOPPET: ", (t2-t1)*1e3_dp, " ms"
+    call cpu_time(ta2)
+    write(*,tfmt) "Time to start HOPPET: ", (ta2-ta1)*1e3_dp, " ms"
 
     ! Now we fill the hoppet grid using the LHAPDF grid directly,
     ! rather than evolving ourselves
     Q0 = Qmin
     call hoppetSetCoupling(alphasPDF(Q0), Q0, nloop)
-    call cpu_time(t1)
+    call cpu_time(ta1)
     call hoppetAssign(EvolvePDF)
-    call cpu_time(t2)
-    write(*,tfmt) "Time to fill HOPPET grid from LHAPDF: ", (t2-t1)*1e3_dp, " ms"
+    call cpu_time(ta2)
+    write(*,tfmt) "Time to fill HOPPET grid from LHAPDF: ", (ta2-ta1)*1e3_dp, " ms"
     write(*,*) ! a blank line for clarity
 
     ! If instead we want to evolve the PDF with hoppet starting from
