@@ -40,9 +40,12 @@ contains
     call cpu_time(ta1)
     call initPDFSetByName(pdfname)
     max_mem = numberpdf() - 1
+    do imem = 1, max_mem
+      call initPDF(imem)
+    end do
     call cpu_time(ta2)
-    write(*,tfmt) "Time to load LHAPDF set: ", (ta2-ta1)*1e3_dp, " ms"
-    write(*,*) "Number of members in set: 1+", max_mem
+    write(*,tfmt) "Time to load LHAPDF sets: ", (ta2-ta1)*1e3_dp, " ms"
+    write(*,'(a,i4,a)') "Number of members in set: 1 + ", max_mem
 
     call getQ2min(0,Q2minPDF)
     call getQ2max(0,Q2maxPDF)
@@ -175,7 +178,7 @@ program fast_manypdf_evaluation
   ! Benchmark hoppetEval
   ! All flavours at once
   call cpu_time(t1)
-  write(*,'(a,i3,a)') bold//"Benchmarking evaluation of all", size(many_tables), " PDF members with HOPPET"//reset
+  write(*,'(a,i4,a)') bold//"Benchmarking evaluation of all", size(many_tables), " PDF members with HOPPET"//reset
   do i = 1, npoints
     do j = 1, npoints
       do imem = 0, ubound(many_tables,1)
@@ -212,7 +215,7 @@ program fast_manypdf_evaluation
   !! write(*,tfmt) "hoppetEvalPID time (one flav): ", (t2-t1)/npoints/npoints*1d9, " ns"
 
   ! Benchmark EvolvePDF (LHAPDF)
-  write(*,'(a,i3,a)') bold//"Benchmarking evaluation of all", size(many_tables), " PDF members with LHAPDF"//reset
+  write(*,'(a,i4,a)') bold//"Benchmarking evaluation of all", size(many_tables), " PDF members with LHAPDF"//reset
   call cpu_time(t1)
   do i = 1, npoints
     do j = 1, npoints
