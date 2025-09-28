@@ -17,14 +17,14 @@ program fast_pdf_evaluation
   real(dp) :: aslhapdf, ashoppet
   integer :: i, j
   real(dp) :: t1, t2
-  character(len=*), parameter :: tfmt = '(a,f8.2,a)'
+  character(len=*), parameter :: blue = char(27)//'[34m', reset = char(27)//'[0m'
+  character(len=*), parameter :: tfmt = '("'//blue//'",a,f8.2,a,"'//reset//'")'
 
   ! Interface to LHAPDF as needed by hoppetAssign
 
   pdfname = "PDF4LHC21_40"
   imem = 0
   call load_lhapdf_assign_hoppet(trim(pdfname), imem)
-
   x = 0.01
   Q = 13.0
  
@@ -36,8 +36,10 @@ program fast_pdf_evaluation
 
   ! Print the two PDFs
   write(*,*) "PDFs at x = ", x, ", Q = ", Q
-  write(*,*) "LHAPDF(-5:5): ", lhapdf(-5:5)
-  write(*,*) "Hoppet(-5:5): ", hoppetpdf(-5:5)
+  write(*,'(a,11f12.8)') "LHAPDF(-5:5): ", lhapdf(-5:5)
+  write(*,'(a,11f12.8)') "Hoppet(-5:5): ", hoppetpdf(-5:5)
+  write(*,'(a,11f12.8)') "Difference  : ", hoppetpdf(-5:5)-lhapdf(-5:5)
+  write(*,*) ! a blank line for clarity
 
   allocate(xvals(npoints), qvals(npoints))
   do i = 1, npoints
@@ -54,7 +56,7 @@ program fast_pdf_evaluation
     end do
   end do
   call cpu_time(t2)
-  write(*,tfmt) "hoppetEval    time (all flav): ", (t2-t1)/npoints/npoints*1d9, " ns"
+  write(*,tfmt) blue//"hoppetEval    time (all flav): ", (t2-t1)/npoints/npoints*1d9, " ns"//reset
   ! One flavour at a time
   call cpu_time(t1)
   do i = 1, npoints
@@ -124,9 +126,11 @@ contains
     integer :: orderPDF, nloop, order, yorder, lnlnQorder,nfmax
 
     ! Load LHAPDF set
+    call cpu_time(t1)
     call initPDFSetByName(pdfname)
+    call cpu_time(t2)
+    write(*,tfmt) "Time to load LHAPDF set: ", (t2-t1)*1e3_dp, " ms"
 
-    call initPDFSetByName(pdfname)
     call getQ2min(0,Q2minPDF)
     call getQ2max(0,Q2maxPDF)
     Qmin = sqrt(Q2minPDF)
@@ -167,13 +171,20 @@ contains
 
     call hoppetSetPoleMassVFN(mc,mb,mt) ! set the pole masses
     call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder) ! Set the interpolation orders
+    call cpu_time(t1)
     call hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, factscheme_MSbar) ! Start hoppet
+    call cpu_time(t2)
+    write(*,tfmt) "Time to start HOPPET: ", (t2-t1)*1e3_dp, " ms"
 
     ! Now we fill the hoppet grid using the LHAPDF grid directly,
     ! rather than evolving ourselves
     Q0 = Qmin
     call hoppetSetCoupling(alphasPDF(Q0), Q0, nloop)
+    call cpu_time(t1)
     call hoppetAssign(EvolvePDF)
+    call cpu_time(t2)
+    write(*,tfmt) "Time to fill HOPPET grid from LHAPDF: ", (t2-t1)*1e3_dp, " ms"
+    write(*,*) ! a blank line for clarity
 
     ! If instead we want to evolve the PDF with hoppet starting from
     ! some low scale Q0 (>= Qmin) make a call to hoppetEvolve instead
