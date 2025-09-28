@@ -173,6 +173,7 @@ jobs:
           brew install wget coreutils gcc gfortran python3 swig numpy
           brew tap davidchall/hep
           brew install lhapdf
+          python3 -m pip install numpy
           ls /opt/homebrew/bin/gfortran*
     - name: Compile
       run: |
