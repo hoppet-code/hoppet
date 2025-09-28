@@ -148,11 +148,14 @@ void free_global_str_fnc() {
 
 // Wrapper function to convert the pdf array to a Python list
 static PyObject* str_fnc_to_array(double *str_fnc) {
-    PyObject *py_list = PyList_New(py_str_fnc_len);
-    for (unsigned int i = 0; i < py_str_fnc_len; i++) {
-        PyList_SetItem(py_list, i, PyFloat_FromDouble(str_fnc[i]));
-    }
-    return py_list;
+    npy_intp dims[1] = {py_str_fnc_len};
+    PyObject *array = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)str_fnc);
+
+    //PyObject *py_list = PyList_New(py_str_fnc_len);
+    //for (unsigned int i = 0; i < py_str_fnc_len; i++) {
+    //    PyList_SetItem(py_list, i, PyFloat_FromDouble(str_fnc[i]));
+    //}
+    return array;
 }
 
 // To setup the QED pdfs we need a small wrapper to SetQED. Needs to

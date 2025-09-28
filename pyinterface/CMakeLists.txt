@@ -16,7 +16,7 @@ set_property(SOURCE hoppet.i PROPERTY SWIG_FLAGS "-I${NUMPY_SWIG_DIR}")
 
 set_property(SOURCE hoppet.i PROPERTY CPLUSPLUS ON)
 # Remove or set to your actual module name, not __init__
-# set_property(SOURCE hoppet.i PROPERTY SWIG_MODULE_NAME hoppet_swig)
+set_property(SOURCE hoppet.i PROPERTY SWIG_MODULE_NAME __init__)
 
 swig_add_library(hoppet_swig LANGUAGE python SOURCES hoppet.i OUTPUT_DIR hoppet_swig)
 set_property(TARGET hoppet_swig PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
@@ -54,6 +54,6 @@ else()
 endif()
 set(pyexecdir "${HOPPET_PYTHON_INSTALL_DIR}" PARENT_SCOPE)
 
-#install(FILES "${CMAKE_CURRENT_BINARY_DIR}/hoppet_swig/__init__.py" DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/hoppet_swig/__init__.py" DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
 install(TARGETS hoppet_swig EXPORT HoppetTargets DESTINATION "${HOPPET_PYTHON_INSTALL_DIR}/${HOPPET_PYTHON_PACKAGE_NAME}")
 set(HOPPET_PYTHON_INSTALL_DIR ${HOPPET_PYTHON_INSTALL_DIR} PARENT_SCOPE)
