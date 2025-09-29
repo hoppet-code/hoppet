@@ -163,7 +163,8 @@ contains
     logical,  intent(in), optional :: use_nah
     real(dp) :: dummy, lower, upper, middle
     real(dp) :: Qloc
-    real(dp), parameter :: mz = 91.2_dp, eps = 1e-8_dp
+    real(dp), parameter :: mz = 91.1880_dp
+    real(dp) :: eps = 1e-8_dp
 
     coupling%use_nah = default_or_opt(.true., use_nah)
     if (coupling%use_nah) then

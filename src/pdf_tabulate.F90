@@ -89,6 +89,7 @@ module pdf_tabulate
     ! are defined below
     procedure(EvalPdfTable_yQ_interface ), pointer, nopass :: EvalPdfTable_yQ_ptr  => null()
     procedure(EvalPdfTable_yQf_interface), pointer, nopass :: EvalPdfTable_yQf_ptr => null()
+    procedure(EvalPdfTable1D_yQ_interface), pointer, nopass :: EvalPdfTable1D_yQ_ptr => null()
   end type pdf_table
   public :: pdf_table
 
@@ -152,7 +153,18 @@ module pdf_tabulate
   public :: AddNfInfoToPdfTable
   public :: EvolvePdfTable, PreEvolvePdfTable, EvolvePdfTableQED
   public :: EvolvePdfTableGen
-  public :: EvalPdfTable_yQ, EvalPdfTable_xQ, EvalPdfTable_Q
+
+  interface EvalPdfTable_yQ
+    module procedure EvalPdfTable0D_yQ, EvalPdfTable1D_yQ
+  end interface
+  interface EvalPdfTable_xQ
+    module procedure EvalPdfTable0D_xQ, EvalPdfTable1D_xQ
+  end interface
+  public :: EvalPdfTable0D_yQ, EvalPdfTable0D_xQ, EvalPdfTable1D_yQ, EvalPdfTable1D_xQ
+  public :: EvalPdfTable_yQ, EvalPdfTable_xQ
+
+  
+  public :: EvalPdfTable_Q
   public :: EvalPdfTable_yQf, EvalPdfTable_xQf
   public :: WriteLHAPDFFromPdfTable
   public :: Delete
@@ -192,10 +204,22 @@ module pdf_tabulate
     end function EvalPdfTable_yQf_interface
   end interface
 
+  abstract interface
+    subroutine EvalPdfTable1D_yQ_interface(tab,y,Q,val)
+      use types
+      import :: pdf_table ! ensures pdf_table is visible
+      implicit none
+      type(pdf_table), intent(in), target  :: tab(:)
+      real(dp),        intent(in)          :: y, Q
+      real(dp),        intent(out)         :: val(:,:)
+    end subroutine EvalPdfTable1D_yQ_interface
+  end interface
+
   procedure(EvalPdfTable_yQ_interface ), pointer :: EvalPdfTable_yQ_ptr  => null()
   procedure(EvalPdfTable_yQf_interface), pointer :: EvalPdfTable_yQf_ptr => null()
+  procedure(EvalPdfTable1D_yQ_interface), pointer :: EvalPdfTable1D_yQ_ptr  => null()
 
-  public :: EvalPdfTable_yQ_interface, EvalPdfTable_yQf_interface
+  public :: EvalPdfTable_yQ_interface, EvalPdfTable_yQf_interface, EvalPdfTable1D_yQ_interface
 
 contains
 
@@ -506,7 +530,7 @@ contains
         ! different per-grid orders not yet supported, so set the
         ! orders to -1, which sets the pointers to null
         call PdfTableSetInterpPointers(-1,-1, &
-                                   tab%EvalPdfTable_yQ_ptr, tab%EvalPdfTable_yQf_ptr)
+                                   tab%EvalPdfTable_yQ_ptr, tab%EvalPdfTable_yQf_ptr, tab%EvalPdfTable1D_yQ_ptr)
       end if
     else
       grid_order = tab%grid%order
@@ -518,7 +542,7 @@ contains
     npnt_y = min(grid_interp_npnt_max, max(grid_interp_npnt_min, abs(grid_order)))
     order_y = npnt_y - 1
     call PdfTableSetInterpPointers(order_y, tab%lnlnQ_order, &
-                                   tab%EvalPdfTable_yQ_ptr, tab%EvalPdfTable_yQf_ptr)
+                                   tab%EvalPdfTable_yQ_ptr, tab%EvalPdfTable_yQf_ptr, tab%EvalPdfTable1D_yQ_ptr)
   end subroutine pdftab_SetupEvalPtrs
 
   !---------------------------------------------------------------
@@ -926,35 +950,42 @@ contains
     ! the override; if either of the overrides <=0, then no pointers
     ! are set, consistent with override_on being .false.
     call PdfTableSetInterpPointers(override_order_y, override_order_Q, &
-                                   EvalPdfTable_yQ_ptr, EvalPdfTable_yQf_ptr)
+                                   EvalPdfTable_yQ_ptr, EvalPdfTable_yQf_ptr, EvalPdfTable1D_yQ_ptr)
   end subroutine PdfTableOverrideInterpOrders
 
   !--------------------------------------------------------------------
   !! Set up the pointers if we have a hard-coded routine for this specific
   !! order_y and order_Q, otherwise set them to null.
-  subroutine PdfTableSetInterpPointers(order_y, order_Q, yQ_ptr, yQf_ptr)
+  subroutine PdfTableSetInterpPointers(order_y, order_Q, yQ_ptr, yQf_ptr, t1D_yQ_ptr)
     integer, intent(in) :: order_y, order_Q
     procedure(EvalPdfTable_yQ_interface ), pointer, intent(out) :: yQ_ptr
     procedure(EvalPdfTable_yQf_interface), pointer, intent(out) :: yQf_ptr
+    procedure(EvalPdfTable1D_yQ_interface), pointer, intent(out) :: t1D_yQ_ptr
 
     if      (order_y == 2 .and. order_Q == 2) then
       yQ_ptr  => EvalPdfTable_yQ_order22
       yQf_ptr => EvalPdfTable_yQf_order22
+      t1D_yQ_ptr => EvalPdfTable1D_yQ_order22
     else if (order_y == 3 .and. order_Q == 3) then
       yQ_ptr  => EvalPdfTable_yQ_order33
       yQf_ptr => EvalPdfTable_yQf_order33
+      t1D_yQ_ptr => EvalPdfTable1D_yQ_order33
     else if (order_y == 4 .and. order_Q == 4) then
       yQ_ptr  => EvalPdfTable_yQ_order44
       yQf_ptr => EvalPdfTable_yQf_order44
+      t1D_yQ_ptr => EvalPdfTable1D_yQ_order44
     else if (order_y == 5 .and. order_Q == 4) then
       yQ_ptr  => EvalPdfTable_yQ_order54
       yQf_ptr => EvalPdfTable_yQf_order54
+      t1D_yQ_ptr => EvalPdfTable1D_yQ_order54
     else if (order_y == 6 .and. order_Q == 4) then
       yQ_ptr  => EvalPdfTable_yQ_order64
       yQf_ptr => EvalPdfTable_yQf_order64
+      t1D_yQ_ptr => EvalPdfTable1D_yQ_order64
     else
       yQ_ptr  => null()
       yQf_ptr => null()
+      t1D_yQ_ptr => null()
     end if
   end subroutine PdfTableSetInterpPointers
 
@@ -969,7 +1000,7 @@ contains
   !! If this is a generalised table, then val(:) should be as big as
   !! the number of flavours in the table and all will get set
   !! (including the "representation" flavour).
-  subroutine EvalPdfTable_yQ(tab,y,Q,val)
+  subroutine EvalPdfTable0D_yQ(tab,y,Q,val)
     type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: y, Q
     real(dp),    intent(out) :: val(iflv_min:)
@@ -992,7 +1023,56 @@ contains
       call EvalPdfTable_yQ_any_order(tab,y,Q,val)      
     end if
     
-  end subroutine EvalPdfTable_yQ
+  end subroutine EvalPdfTable0D_yQ
+
+  subroutine EvalPdfTable1D_xQ(tab,x,Q,val)
+    type(pdf_table), intent(in), target :: tab(:)
+    real(dp),     intent(in) :: x, Q
+    real(dp),    intent(out) :: val(iflv_min:,:)
+    call EvalPdfTable1D_yQ(tab, -log(x), Q, val)
+  end subroutine EvalPdfTable1D_xQ
+    
+  !! Sets the vector val(iflv_min:,:) at this
+  !! y=ln1/x,Q, for a set of tables (e.g. error members of
+  !! a PDF set)
+  subroutine EvalPdfTable1D_yQ(tab,y,Q,val)
+    type(pdf_table), intent(in), target :: tab(:)
+    real(dp),     intent(in) :: y, Q
+    real(dp),    intent(out) :: val(iflv_min:,:)
+    !----------------------------------------
+    !real(dp) :: lnlnQ_wgts(0:max_lnlnQ_order)
+    !real(dp) :: y_wgts(0:WeightGridQuand_npnt_max-1)
+    !real(dp) :: wgts(0:WeightGridQuand_npnt_max-1,0:max_lnlnQ_order)
+    !integer :: ilnlnQ_lo, ilnlnQ_hi, nQ,iylo, iQ, iflv, iflv_max_table, npnt_y
+    integer, save :: warn_id = 4!warn_id_INIT    
+    integer :: itab
+
+    if (ubound(val,dim=1) < tab(1)%tab_iflv_max) call wae_error('pdftab_ValTab',&
+         &'upper bound of val is too low', intval=ubound(val,dim=1))
+    if (size(val,2) < size(tab)) then
+      call wae_error("EvalPdfTable1D_yQ","size of res second dim is smaller than tab array, size(res,2)=",intval=size(val,2))
+    end if
+
+
+    if (associated(EvalPdfTable1D_yQ_ptr)) then
+      call EvalPdfTable1D_yQ_ptr(tab,y,Q,val)
+    else if (associated(tab(1)%EvalPdfTable_yQ_ptr) .and. (.not. override_on)) then
+      do itab = 2, size(tab)
+         if (.not. associated(tab(itab)%EvalPdfTable_yQ_ptr, tab(1)%EvalPdfTable_yQ_ptr)) then
+            call wae_error("EvalPdfTable1D_yQ","not all tables have EvalPdfTable_yQ_ptr associated")
+         end if
+      end do
+      call tab(1)%EvalPdfTable1D_yQ_ptr(tab,y,Q,val)
+    else
+      call wae_warn(warn_id, "EvalPdfTable1D_yQ: y & Q interpolation orders not available hard-coded, reverting to slower routine")
+
+      do itab = 1, size(tab)
+         call EvalPdfTable_yQ_any_order(tab(itab),y,Q,val(:,itab))      
+      end do
+    end if
+    
+  end subroutine EvalPdfTable1D_yQ
+
 
   !! subsidiary routine that handles arbitrary interpolation orders.
   !! Note that this is quite a bit slower than the specialized versions
@@ -1150,12 +1230,12 @@ contains
 
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
-  subroutine EvalPdfTable_xQ(tab,x,Q,val)
+  subroutine EvalPdfTable0D_xQ(tab,x,Q,val)
     type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: x, Q
     real(dp),    intent(out) :: val(iflv_min:)
     call EvalPdfTable_yQ(tab,-log(x),Q,val)
-  end subroutine EvalPdfTable_xQ
+  end subroutine EvalPdfTable0D_xQ
 
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
