@@ -42,6 +42,7 @@
 #define EvalPdfTable_get_weights_orderNNNN CAT3(EvalPdfTable_get_weights_order,__HOPPET_InterpOrderY__,__HOPPET_InterpOrderQ__)
 #define EvalPdfTable_yQ_orderNNNN CAT3(EvalPdfTable_yQ_order,__HOPPET_InterpOrderY__,__HOPPET_InterpOrderQ__)
 #define EvalPdfTable_yQf_orderNNNN CAT3(EvalPdfTable_yQf_order,__HOPPET_InterpOrderY__,__HOPPET_InterpOrderQ__)
+#define EvalPdfTable1D_yQ_orderNNNN CAT3(EvalPdfTable1D_yQ_order,__HOPPET_InterpOrderY__,__HOPPET_InterpOrderQ__)
 
 subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, ilnlnQ)
   use interpolation_coeffs; use convolution
@@ -145,6 +146,46 @@ subroutine EvalPdfTable_yQ_orderNNNN(tab,y,Q,res)
     end do
   end do
 end subroutine EvalPdfTable_yQ_orderNNNN
+
+subroutine EvalPdfTable1D_yQ_orderNNNN(tab,y,Q,res) 
+  use interpolation_coeffs; use convolution
+  type(pdf_table), intent(in), target :: tab(:)
+  real(dp),        intent(in)         :: y, Q
+  real(dp),        intent(out)        :: res(iflv_min:,:)
+  !----------------------------------------
+  integer, parameter :: NNY = __HOPPET_InterpOrderY__
+  integer, parameter :: NNQ = __HOPPET_InterpOrderQ__
+  real(dp) :: y_wgts(0:NNY), lnlnQ_wgts(0:NNQ)
+  integer  :: iylo, ilnlnQ, iQ, iflv, itab
+  integer :: iflv_max
+
+  iflv_max = tab(1)%tab_iflv_max
+
+  call EvalPdfTable_get_weights_orderNNNN(tab(1), y, Q, y_wgts, lnlnQ_wgts, iylo, ilnlnQ)
+
+  do itab = 1, size(tab)
+    ! now do the interpolation.
+    ! first do the flavours we know we will need (this loop is easier to unroll)
+    do iflv = iflv_min, iflv_max
+      res(iflv, itab) = sum(tab(itab)%tab(iylo:iylo+NNY, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0)
+      do iQ = 1, NNQ
+        res(iflv, itab) = res(iflv, itab) + sum(tab(itab)%tab(iylo:iylo+NNY, iflv,ilnlnQ+iQ) * y_wgts) * lnlnQ_wgts(iQ)
+      end do
+      !res(iflv) = sum(tab%tab(iylo:iylo+NNY, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0) &
+      !    + sum(tab%tab(iylo:iylo+NNY, iflv,ilnlnQ+1) * y_wgts) * lnlnQ_wgts(1) &
+      !    + sum(tab%tab(iylo:iylo+NNY, iflv,ilnlnQ+2) * y_wgts) * lnlnQ_wgts(2)
+    end do
+
+    ! and then do any remaining flavours (separating things gains us a couple of ns)
+    do iflv = iflv_max+1, iflv_max
+      res(iflv, itab) = sum(tab(itab)%tab(iylo:iylo+NNY, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0)
+      do iQ = 1, NNQ
+        res(iflv, itab) = res(iflv, itab) + sum(tab(itab)%tab(iylo:iylo+NNY, iflv,ilnlnQ+iQ) * y_wgts) * lnlnQ_wgts(iQ)
+      end do
+    end do
+
+  end do ! itab
+end subroutine EvalPdfTable1D_yQ_orderNNNN
 
 
 function EvalPdfTable_yQf_orderNNNN(tab,y,Q,iflv) result(res)

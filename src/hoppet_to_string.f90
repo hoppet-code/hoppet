@@ -10,22 +10,31 @@ module hoppet_to_string
 
 contains
 
-  function to_string_dp(x) result(str)
+  function to_string_dp(x,fmt) result(str)
     implicit none
     real(dp), intent(in) :: x
-    character(len=100) :: str
+    character(len=*), intent(in), optional :: fmt
+    character(len=:), allocatable :: str 
+    character(len=100) :: tmp
 
-    write(str, *) x
-    str = adjustl(str)
+    if (present(fmt)) then
+       write(tmp, fmt) x
+    else
+       write(tmp, *) x
+    end if
+    tmp = adjustl(tmp)
+    str = tmp(1:len_trim(tmp))
   end function to_string_dp
 
   function to_string_int(x) result(str)
     implicit none
     integer, intent(in) :: x
-    character(len=100) :: str
+    character(len=:), allocatable :: str 
+    character(len=100) :: tmp
 
-    write(str, *) x
-    str = adjustl(str)
+    write(tmp, *) x
+    tmp = adjustl(tmp)
+    str = tmp(1:len_trim(tmp))
   end function to_string_int
 
 end module hoppet_to_string
