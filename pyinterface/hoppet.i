@@ -1,21 +1,21 @@
 /* File: hoppet.i */
 %module hoppet
 %include "std_string.i"
-%header %{
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include <numpy/arrayobject.h>
-%}
-%include "numpy.i"
-
-%init %{
-    import_array();
-%}
+//%header %{
+//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+//#include <numpy/arrayobject.h>
+//%}
+//%include "numpy.i"
+//
+//%init %{
+//    import_array();
+//%}
 
 %{
 #define SWIG_FILE_WITH_INIT
 #include "hoppet.h"
 #include <Python.h>
-#include <numpy/arrayobject.h>
+//#include <numpy/arrayobject.h>
 // Check if the callback is a callable object and set it as a global
 // variable. This routine is used in the Assign, Evolve and
 // CachedEvolve functions, to handle the fact that the pdf_subrpoutine
@@ -115,21 +115,18 @@ void free_global_pdf() {
 }
 
 // Wrapper function to convert the pdf array to a Python list
-static PyObject* pdf_to_array(double *pdf) {
-    npy_intp dims[1] = {py_pdf_len};
-    PyObject *array = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)pdf);
-    // If you want to copy the data (so Python owns it), do:
-    //PyObject *array_copy = PyArray_NewCopy((PyArrayObject*)array, NPY_CORDER);
-    //Py_DECREF(array);
-    return array;
-}
 //static PyObject* pdf_to_array(double *pdf) {
-//    PyObject *py_list = PyList_New(py_pdf_len);
-//    for (unsigned int i = 0; i < py_pdf_len; i++) {
-//        PyList_SetItem(py_list, i, PyFloat_FromDouble(pdf[i]));
-//    }
-//    return py_list;
+//    npy_intp dims[1] = {py_pdf_len};
+//    PyObject *array = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)pdf);
+//    return array;
 //}
+static PyObject* pdf_to_array(double *pdf) {
+    PyObject *py_list = PyList_New(py_pdf_len);
+    for (unsigned int i = 0; i < py_pdf_len; i++) {
+        PyList_SetItem(py_list, i, PyFloat_FromDouble(pdf[i]));
+    }
+    return py_list;
+}
 
 // Initialize the global pdf array
 void init_global_str_fnc() {
@@ -148,14 +145,14 @@ void free_global_str_fnc() {
 
 // Wrapper function to convert the pdf array to a Python list
 static PyObject* str_fnc_to_array(double *str_fnc) {
-    npy_intp dims[1] = {py_str_fnc_len};
-    PyObject *array = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)str_fnc);
+    //npy_intp dims[1] = {py_str_fnc_len};
+    //PyObject *array = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)str_fnc);
 
-    //PyObject *py_list = PyList_New(py_str_fnc_len);
-    //for (unsigned int i = 0; i < py_str_fnc_len; i++) {
-    //    PyList_SetItem(py_list, i, PyFloat_FromDouble(str_fnc[i]));
-    //}
-    return array;
+    PyObject *py_list = PyList_New(py_str_fnc_len);
+    for (unsigned int i = 0; i < py_str_fnc_len; i++) {
+        PyList_SetItem(py_list, i, PyFloat_FromDouble(str_fnc[i]));
+    }
+    return py_list;
 }
 
 // To setup the QED pdfs we need a small wrapper to SetQED. Needs to

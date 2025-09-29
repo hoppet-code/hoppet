@@ -8,14 +8,17 @@ try:
 except ImportError:
     raise ImportError("The 'numpy' package is required for hoppet_lhapdf but is not installed.")
 
-import sys
+try:
+    import math
+except ImportError:
+    raise ImportError("The 'math' package is required for hoppet_lhapdf but is not installed.")
 
 try:
     import hoppet as hp
 except ImportError:
     raise ImportError("The 'hoppet' extension is required for hoppet_lhapdf but is not installed or built.")
 
-def load_lhapdf_assign_hoppet(lhapdfname, imem = 0):
+def load(lhapdfname, imem = 0):
     """
     Loads a PDF from LHAPDF, extracts relevant parameters, and assigns it to HOPPET.
 
@@ -62,17 +65,23 @@ def load_lhapdf_assign_hoppet(lhapdfname, imem = 0):
     
     # Now we start hoppet
     dy = 0.05
-    print(f"Starting Hoppet with dy = {dy} and nloop = {nloop}")
-
+    ymax = float(math.ceil(np.log(1.0/xmin)))
+    if ymax > 15.0:
+        dlnlnQ = dy/8.0
+    else:
+        dlnlnQ = dy/4.0
+    
     hp.SetPoleMassVFN(mc,mb,mt)
     print(f"Using Pole Mass Variable Flavour Number scheme with mc = {mc}, mb = {mb}, mt = {mt}")
 
+    order = -6
     yorder = 2
     lnlnQorder = 2
     hp.SetYLnlnQInterpOrders(yorder, lnlnQorder)
-    print(f"Set yorder = {yorder}, lnlnQorder = {lnlnQorder}")
-    hp.Start(dy, nloop)
+    print(f"Setting interpolation orders yorder = {yorder}, lnlnQorder = {lnlnQorder}")
+    print(f"Starting Hoppet with ymax = {ymax} and dy = {dy} and nloop = {nloop} and dlnlnQ = {dlnlnQ} and order = {order}")
+    hp.StartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, hp.factscheme_MSbar)
     
-    print(f"Assigning PDF using hoppetAssign using Q0 = {Q0} GeV with as(Q0) = {asQ0}")
+    print(f"Assigning PDF using hoppetAssign with a coupling as(Q0 = {Q0}) = {asQ0}")
     hp.SetCoupling(asQ0, Q0, nloop)
     hp.Assign(lhapdf_interface)
