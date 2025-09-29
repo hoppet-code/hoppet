@@ -2,9 +2,10 @@ name: Build Python Wheels
 
 on:
   push:
-    branches: [ 2025-09-python-wheels-new ]
+    branches: [ ]
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   build_wheels:
@@ -132,110 +133,8 @@ jobs:
         name: sdist
         path: dist/*.tar.gz
 
-  upload_test_pypi:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/2025-09-python-wheels-new' || github.ref == 'refs/heads/master'
-    
-    steps:
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: dist
-        merge-multiple: true
-        
-    - name: Publish to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        skip-existing: true
-
-#jobs:
-#  build_linux_wheels:
-#    name: Build Linux wheels
-#    runs-on: ubuntu-latest
-#    
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v4
-#      with:
-#        submodules: recursive
-#    
-#    - name: Build wheels
-#      uses: pypa/cibuildwheel@v2.16.2
-#      env:
-#        # Build for Python 3.8-3.12 on Linux
-#        CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
-#        
-#        # Skip 32-bit and musl builds (you can add them later if needed)
-#        CIBW_SKIP: "*-manylinux_i686 *-musllinux*"
-#        
-#        # Install system dependencies needed for hoppet
-#        CIBW_BEFORE_BUILD_LINUX: |
-#          yum install -y gcc gcc-c++ gcc-gfortran cmake swig
-#          yum install -y lhapdf lhapdf-devel || echo "LHAPDF not available, continuing..."
-#          
-#          # Build the main hoppet library with -fPIC
-#          cmake -S . -B BUILD \
-#            -DHOPPET_ENABLE_FPES=ON \
-#            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-#            -DHOPPET_USE_EXACT_COEF=ON \
-#            -DHOPPET_BUILD_PYINTERFACE=ON \
-#            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-#          cmake --build BUILD -j
-#          cmake --install BUILD
-#          ldconfig
-#        
-#        # Use parallel compilation for the Python wheel build
-#        CIBW_ENVIRONMENT: CMAKE_BUILD_PARALLEL_LEVEL=4
-#        
-#        # Test the built wheels with both import and example
-#        CIBW_TEST_COMMAND: |
-#          python -c "import hoppet; print('Hoppet import successful for {platform}!')"
-#          python {project}/example_py/tabulation_example.py
-#        
-#        # Increase verbosity for debugging
-#        CIBW_BUILD_VERBOSITY: 1
-#        
-#        # Set repair wheel command (bundles shared libraries)
-#        CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair -w {dest_dir} {wheel}"
-#
-#    - name: Upload artifacts
-#      uses: actions/upload-artifact@v4
-#      with:
-#        name: linux-wheels
-#        path: ./wheelhouse/*.whl
-#
-#  build_sdist:
-#    name: Build source distribution
-#    runs-on: ubuntu-latest
-#    
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v4
-#      with:
-#        submodules: recursive
-#        
-#    - name: Set up Python
-#      uses: actions/setup-python@v4
-#      with:
-#        python-version: '3.10'
-#        
-#    - name: Build sdist
-#      run: |
-#        pip install build
-#        python -m build --sdist
-#        
-#    - name: Upload sdist
-#      uses: actions/upload-artifact@v4
-#      with:
-#        name: sdist
-#        path: dist/*.tar.gz
-#
-## Upload to TestPyPI on pushes to main/master
 #  upload_test_pypi:
-#    needs: [build_linux_wheels, build_sdist]
+#    needs: [build_wheels, build_sdist]
 #    runs-on: ubuntu-latest
 #    if: github.ref == 'refs/heads/2025-09-python-wheels-new' || github.ref == 'refs/heads/master'
 #    
@@ -251,21 +150,20 @@ jobs:
 #      with:
 #        repository-url: https://test.pypi.org/legacy/
 #        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-#        skip-existing: true  # Don't fail if version already exists
-#  # Optional: Upload to PyPI on releases
-#  #upload_pypi:
-#  #  needs: [build_linux_wheels, build_sdist]
-#  #  runs-on: ubuntu-latest
-#  #  if: github.event_name == 'release' && github.event.action == 'published'
-#  #  
-#  #  steps:
-#  #  - name: Download all artifacts
-#  #    uses: actions/download-artifact@v4
-#  #    with:
-#  #      path: dist
-#  #      merge-multiple: true
-#  #      
-#  #  - name: Publish to PyPI
-#  #    uses: pypa/gh-action-pypi-publish@release/v1
-#  #    with:
-#  #      password: ${{ secrets.PYPI_API_TOKEN }}
+#        skip-existing: true
+
+  upload_pypi:
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        skip-existing: true
