@@ -1,3 +1,23 @@
+2025-09-29 Gavin + Alexander
+
+	* src/hoppet_term.f90: *** ADDED ***
+	new module with constants for handling colours in terminal output
+
+	* src/hoppet_to_string.f90:
+	automatically return a trimmed string
+
+	* CMakeLists.txt:
+	* example_f90/with-lhapdf/fast_manypdf_evaluation.f90:
+	* example_f90/with-lhapdf/fast_pdf_evaluation.f90:
+	* example_f90/with-lhapdf/hoppet_lhapdf.f90: *** ADDED ***
+	* src/streamlined_interface.f90:
+	new hoppet_lhapdf module takes care of loading an LHAPDF set,
+	mainly based on the code that was previously in fast_pdf_evaluation.f90.
+
+	* src/qcd_coupling.f90:
+	changed mZ to PDG value 91.1880
+
+
 2025-09-28 Gavin
 
 	* src/pdf_tabulate.F90:

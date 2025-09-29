@@ -32,7 +32,8 @@ file(GLOB A_FILES "${PROJECT_SOURCE_DIR}/src/*.a")
 if(EXISTS "${PROJECT_SOURCE_DIR}/src/Makefile"
    OR (NOT "${MOD_FILES}" STREQUAL "")
    OR (NOT "${A_FILES}" STREQUAL ""))
-  message(FATAL_ERROR "HOPPET: Old build system files detected (including potentially ${MOD_FILES} ${A_FILES}). Please start from a fresh clone (you can also try 'make distclean' from the top-level directory, but we do not guarantee this will work)")
+  message(FATAL_ERROR "HOPPET: Old build system files detected (including potentially ${MOD_FILES} ${A_FILES})."
+   " Please remove extraneous files or start from a fresh clone (you can also try 'make distclean' from the top-level directory, but we do not guarantee this will work)")
 endif()
 
 # Add options ==========================================================
@@ -339,11 +340,11 @@ if (HOPPET_BUILD_EXAMPLES)
   if (LHAPDF_FOUND)
     set( f90programs_lhapdf fast_pdf_evaluation fast_manypdf_evaluation)
     foreach ( p ${f90programs_lhapdf})
-      add_executable( ${p}_f90 example_f90/with-lhapdf/${p}.f90)
+      add_executable( ${p}_f90 example_f90/with-lhapdf/${p}.f90 example_f90/with-lhapdf/hoppet_lhapdf.f90)
       target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
       set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
-        Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
+        Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/modules/${p}_modules
         POSITION_INDEPENDENT_CODE TRUE
         )
       if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
@@ -351,6 +352,7 @@ if (HOPPET_BUILD_EXAMPLES)
       endif()     
     endforeach()
   endif()
+
 
   # then the f77 examples
   set( f77programs_f tabulation_example)

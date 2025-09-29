@@ -4,6 +4,9 @@
 program fast_pdf_evaluation
   use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF ! Avoid namespace clashes with LHAPDF
   use streamlined_interface
+  use hoppet_term
+  use hoppet_lhapdf
+  use hoppet_to_string
   use new_as
   use pdf_tabulate
   implicit none
@@ -17,16 +20,17 @@ program fast_pdf_evaluation
   real(dp) :: aslhapdf, ashoppet
   integer :: i, j
   real(dp) :: t1, t2
-  character(len=*), parameter :: blue = char(27)//'[34m', reset = char(27)//'[0m'
   character(len=*), parameter :: tfmt = '("'//blue//'",a,f8.2,a,"'//reset//'")'
+  character(len=*), parameter :: dfmt = '(f10.6)'
 
   ! Interface to LHAPDF as needed by hoppetAssign
 
   pdfname = "PDF4LHC21_40"
   imem = 0
-  call load_lhapdf_assign_hoppet(trim(pdfname), imem)
-  x = 0.01
-  Q = 13.0
+  call LoadLHAPDF(pdfname,imem)
+  !call load_lhapdf_assign_hoppet(trim(pdfname), imem)
+  x = 0.01_dp
+  Q = 13.0_dp
  
   ! Standard LHAPDF call
   call EvolvePDF(x, Q, lhapdf) ! Get the PDF from LHAPDF
@@ -35,12 +39,15 @@ program fast_pdf_evaluation
   call hoppetEval(x, Q, hoppetpdf)
 
   ! Print the two PDFs
-  write(*,*) "PDFs at x = ", x, ", Q = ", Q
+  write(*,'(a)') bold // "PDFs at x = " // to_string(x,dfmt) // ", Q = " // to_string(Q,dfmt) // reset
   write(*,'(a,11f12.8)') "LHAPDF(-5:5): ", lhapdf(-5:5)
   write(*,'(a,11f12.8)') "Hoppet(-5:5): ", hoppetpdf(-5:5)
   write(*,'(a,11f12.8)') "Difference  : ", hoppetpdf(-5:5)-lhapdf(-5:5)
+  write(*,'(a)') 'LHAPDF AlphaS(Q) = ' // to_string(alphasPDF(Q),dfmt)
+  write(*,'(a)') 'Hoppet AlphaS(Q) = ' // to_string(hoppetAlphaS(Q),dfmt)
   write(*,*) ! a blank line for clarity
 
+  write(6,'(a)') bold // "Timing tests for PDF and alphaS evaluations" // reset
   allocate(xvals(npoints), qvals(npoints))
   do i = 1, npoints
     xvals(i) = exp(log(xmin) + (i-1) * (log(xmax) - log(xmin)) / real(npoints-1, dp))
@@ -106,91 +113,5 @@ program fast_pdf_evaluation
   write(*,*) ! a blank line for clarity
 
   call hoppetDeleteAll()
-contains
-  ! Routine that loads an LHAPDF set, extracts some information from
-  ! it and transfers the PDF to hoppet. 
-  subroutine load_lhapdf_assign_hoppet(pdfname, imem)
-    use streamlined_interface
-    character(len=*), intent(in) :: pdfname
-    integer, intent(in) :: imem
-    real(dp), external :: alphasPDF
-    interface
-       subroutine EvolvePDF(x,Q,res)
-         use types; implicit none
-         real(dp), intent(in)  :: x,Q
-         real(dp), intent(out) :: res(*)
-       end subroutine EvolvePDF
-    end interface
-    real(dp) :: mc, mb, mt, Q2minPDF, Q2maxPDF, xmin, xmax, Qmin, QMax, Q0
-    real(dp) :: ymax, dy, dlnlnQ
-    integer :: orderPDF, nloop, order, yorder, lnlnQorder,nfmax
-    real(dp) :: ta1, ta2
 
-    ! Load LHAPDF set
-    call cpu_time(ta1)
-    call initPDFSetByName(pdfname)
-    call cpu_time(ta2)
-    write(*,tfmt) "Time to load LHAPDF set: ", (ta2-ta1)*1e3_dp, " ms"
-
-    call getQ2min(0,Q2minPDF)
-    call getQ2max(0,Q2maxPDF)
-    Qmin = sqrt(Q2minPDF)
-    Qmax = sqrt(Q2maxPDF)
-    call getxmin(0,xmin)
-    call getxmax(0,xmax)
-    call getorderas(orderPDF) ! NB: LHAPDF returns 0 for 1-loop running, 1 for 2-loop etc.
-    nloop = 1 + orderPDF
-    call getthreshold(4,mc)
-    call getthreshold(5,mb)
-    call getthreshold(6,mt)
-    call getnf(nfmax)
-    if(nfmax .lt. 6) mt = 2.0d0*Qmax ! If no top in PDF set threshold beyond table max
-
-    write(*,*) "LHAPDF set: ", pdfname, " loaded successfully"
-
-    ! Now let us define some hoppet specific parameters. These are
-    ! typical values, and should guarantee similar accuracy as can be
-    ! expected from LHAPDF
-    ymax = real(ceiling(log(1.0d0/xmin)), kind=dp) ! To get a nice value of ymax that can contain the full LHAPDF grid
-    dy = 0.05_dp
-    dlnlnQ = dy/4.0_dp
-    if(ymax > 15.0) dlnlnQ = dy/8.0_dp ! for large ymax we need a finer grid in Q
-    order = -6 ! Default
-    yorder = 2 ! Quadratic interpolation in y
-    lnlnQorder = 2 ! Quadratic interpolation in lnlnQ
-
-    write(*,*) "Hoppet starting with:"
-    write(*,*) " ymax:       ", ymax
-    write(*,*) " dy:         ", dy
-    write(*,*) " Qmin:       ", Qmin
-    write(*,*) " Qmax:       ", Qmax
-    write(*,*) " dlnlnQ:     ", dlnlnQ
-    write(*,*) " nloop:      ", nloop
-    write(*,*) " order:      ", order
-    write(*,*) " yorder:     ", yorder
-    write(*,*) " lnlnQorder: ", lnlnQorder
-
-    call hoppetSetPoleMassVFN(mc,mb,mt) ! set the pole masses
-    call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder) ! Set the interpolation orders
-    call cpu_time(ta1)
-    call hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, factscheme_MSbar) ! Start hoppet
-    call cpu_time(ta2)
-    write(*,tfmt) "Time to start HOPPET: ", (ta2-ta1)*1e3_dp, " ms"
-
-    ! Now we fill the hoppet grid using the LHAPDF grid directly,
-    ! rather than evolving ourselves
-    Q0 = Qmin
-    call hoppetSetCoupling(alphasPDF(Q0), Q0, nloop)
-    call cpu_time(ta1)
-    call hoppetAssign(EvolvePDF)
-    call cpu_time(ta2)
-    write(*,tfmt) "Time to fill HOPPET grid from LHAPDF: ", (ta2-ta1)*1e3_dp, " ms"
-    write(*,*) ! a blank line for clarity
-
-    ! If instead we want to evolve the PDF with hoppet starting from
-    ! some low scale Q0 (>= Qmin) make a call to hoppetEvolve instead
-    ! of hoppetAssign
-    ! call hoppetEvolve(alphasPDF(Q0), Q0, nloop, 1.0, EvolvePDF, Q0)
-
-  end subroutine load_lhapdf_assign_hoppet
 end program fast_pdf_evaluation
