@@ -25,7 +25,7 @@ def main():
     xvals = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 0.1, 0.3, 0.5, 0.7, 0.9]
     Q = 100.0
 
-    print("")
+    print("VFNS results with the n3lo_splitting_approximation_up_to_2410_08089 splitting functions")
     print("                                  Evaluating PDFs at Q =",Q, " GeV")
     print("    x      u-ubar      d-dbar    dbar-ubar   2(ubr+dbr)     s+sbar      c+cbar      b+bbar      gluon")
     for ix in range(len(xvals)):
