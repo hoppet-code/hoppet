@@ -1,3 +1,724 @@
+
+%======================================================================
+%======================================================================
+\section{QCD evolution at N$^3$LO}
+\label{sec:n3lo-evolution}
+In recent years significant progress in determining the perturbative
+components needed for unpolarised QCD evolution at N$^3$LO has been
+made (cf.\ \ref{sec:pqcd} for technical details on the evolution at
+N$^3$LO).
+%
+This has now reached the stage that two PDF groups have released fits
+at approximate N$^3$LO (aN$^3$LO)
+accuracy~\cite{McGowan:2022nag,NNPDF:2024nan} along with their
+combination in Ref.~\cite{Cridge:2024icl}.
+%
+Of the three contributions that are needed at full N$^3$LO accuracy
+only two are fully known.
+%
+In particular the four-loop
+$\beta$-function~\cite{vanRitbergen:1997va,Czakon:2004bu} and
+associated mass thresholds~\cite{Chetyrkin:1997sg} have been known for
+a very long time.
+%
+On the other hand the intricate calculations of the three-loop
+matching relations needed for both the single and two mass VFNS were
+only very recently
+completed~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}.
+%
+Finally the four-loop splitting functions entering the DGLAP equation
+are currently not known exactly, except for certain $n_f$-dependent
+terms~\cite{Gracey:1994nn,Davies:2016jie,Moch:2017uml,Gehrmann:2023cqm,Falcioni:2023tzp,Gehrmann:2023iah}.
+%
+However, enough Mellin-moments have been computed that together with
+the exact pieces just mentioned and known small- and large-$x$
+behaviours, approximate splitting functions suitable for phenomenology
+can be reliably
+determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd}.
+%
+We have therefore incorporated the aforementioned pieces, using code
+that is publicly available with those references, with the intention of
+updating the splitting functions as they become more precisely known.
+
+For the specific implementation in \hoppet version 2.0.0 we rely on
+the approximations computed in
+Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd} (FHMPRUVV),
+the implementation of the three-loop (single-mass) VFNS coefficients as found in
+Ref.~\cite{BlumleinCode}, which contains code associated with
+Refs.~\cite{Ablinger:2024xtt,Fael:2022miw} and our own implementation
+of the four-loop running coupling.\footnote{The implementation does
+not allow for non-standard values of the QCD Casimir invariants beyond
+three loops.}
+%
+Since the implementation here extends core features of \hoppet that
+were already available in version 1.1.0, very little is needed on the
+side of the user to invoke the evolution.
+%
+Most importantly all routines that take an \ttt{nloop} argument,
+e.g. \ttt{InitDglapHolder}, \ttt{InitRunningCoupling},
+\ttt{hoppetStart}, and \ttt{hoppetEval} now support \ttt{nloop = 4}.
+%
+The user also has a few choices they can make in terms of the
+splitting functions used.
+%
+The approximate splitting functions can return
+three different
+choices corresponding to upper and lower edges of an uncertainty band and their
+average. 
+%
+The user can control which one to use through the 
+\ttt{n3lo\_splitting\_variant} which takes the values
+\ttt{n3lo\_splitting\_Nfitav} (default),
+\ttt{n3lo\_splitting\_Nfiterr1}, or \ttt{n3lo\_splitting\_Nfiterr2}.
+%
+\gps{Reading this it's not very clear what to do. We should be
+  explicit, e.g.\ set a variable in a given module. Similarly
+  below. Perhaps we also want to put an itemize?}
+%
+When the exact splitting functions become available they will
+correspond to \ttt{n3lo\_splitting\_exact}.
+%
+Similarly if a set of parametrisations of the exact splitting
+functions become available they will correspond to
+\ttt{n3lo\_splitting\_param}.
+
+Since it is expected that more precise approximations will become
+available in the future we have also implemented a flag,\gps{flag=boolean?}
+\ttt{n3lo\_splitting\_approximation}, in
+\masterlink{src/dglap\_choices.f90} that controls which approximations
+to use. By default it uses the most recent set of approximations by
+the FHMPRUVV group. At the time of writing it can take one of three values:
+%
+\begin{itemize}
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310\_05744}, with the
+  approximations in papers up to and including Ref.~\cite{Moch:2023tdj};
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}, with the
+  approximations in papers up to and including
+  Ref.~\cite{Falcioni:2024xyt};
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089}, the default value at the time of
+  writing, with the approximations in papers up to and including
+  Ref.~\cite{Falcioni:2024qpd}.
+\end{itemize}
+Besides the splitting functions, we have also incorporated the
+single-mass thresholds up to N$^3$LO, as calculated in
+Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}
+and kindly supplied to us in the form of Fortran
+code~\cite{BlumleinCode,Fael:2022miw}.
+%
+Note that because many of these contributions are available only in
+exact form (i.e.\ using extensive \texttt{hplog5}~\cite{FortranPolyLog} evaluations), they
+involve a significant initialisation time, of the order of
+$10{-}30\,\text{s}$.\footnote{As and when faster 
+  parametrised versions become available, we will incorporate them.}
+
+In Table~\ref{tab:n3lo-evolve} we show the results of the full N$^3$LO
+evolution in the VFNS, using the most up-to-date perturbative input at
+the time of writing this release note. To assess the evolution we take
+the initial condition of Ref.~\cite{Dittmar:2005ed} at an initial
+scale $\sqrt{2}~\text{GeV}$ and $n_f=3$. We evolve to
+$Q=100~\text{GeV}$. The table can be reproduced by running
+\masterlink{example_f90/tabulation_example_n3lo.f90}. The
+numbers are obtained using parametrised NNLO splitting functions, but
+exact mass thresholds at this order.
+%
+The table has been generated with $\texttt{dy}=0.05$,
+$\texttt{dlnlnQ}=\text{dy/4}$.
+%
+Increasing $\texttt{dy}=0.10$ leaves the results unchanged at the
+precision shown, while going to $\texttt{dy}=0.20$ for higher speed
+would change the results by a relative amount below $10^{-4}$.
+
+Table~\ref{tab:n3lo-evolve} cannot be directly compared to the
+benchmarking tables of Ref.~\cite{Cooper-Sarkar:2024crx} because they
+do not include the mass thresholds in the \ntlo evolution.
+%
+To facilitate comparisons we therefore additionally provide
+Table~\ref{tab:n3lo-evolve-nf4}, correspond to fixed-flavour ($n_f=4$)
+evolution, with the choice of
+\ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}.
+%
+Of the MSHT and NNPDF results, the NNPDF results (Table~2 of
+Ref.~\cite{Cooper-Sarkar:2024crx}) are closer to ours.
+
+
+
+\begin{table}[p]
+  %  \footnotesize \centering
+  \small \centering
+  \begin{tabular}{c|cccccccc}
+    $x$ &  $u-\bar u$ &$d-\bar d$ &$\bar d-\bar u$ &  $ 2(\bar u+\bar d)$  &$s+\bar s$&$c+\bar c$ &$b+\bar b$  &   $g$\\
+    \toprule
+$10^{-7}$ &  $1.0589^{-4}$ &  $4.8664^{-5}$ &  $8.1967^{-6}$ &  $1.6234^{+2}$ &  $8.0100^{+1}$ &  $7.7207^{+1}$ &  $6.5254^{+1}$ &  $1.1238^{+3}$ \\
+$10^{-6}$ &  $5.9691^{-4}$ &  $3.2634^{-4}$ &  $3.3146^{-5}$ &  $7.6786^{+1}$ &  $3.7544^{+1}$ &  $3.5836^{+1}$ &  $2.9889^{+1}$ &  $5.1159^{+2}$ \\
+$10^{-5}$ &  $3.0235^{-3}$ &  $1.7532^{-3}$ &  $1.3081^{-4}$ &  $3.5436^{+1}$ &  $1.7044^{+1}$ &  $1.6106^{+1}$ &  $1.3142^{+1}$ &  $2.2224^{+2}$ \\
+$10^{-4}$ &  $1.4079^{-2}$ &  $8.2354^{-3}$ &  $4.9511^{-4}$ &  $1.5611^{+1}$ &  $7.2731^{+0}$ &  $6.7862^{+0}$ &  $5.3294^{+0}$ &  $8.8594^{+1}$ \\
+$10^{-3}$ &  $6.0849^{-2}$ &  $3.5086^{-2}$ &  $1.7751^{-3}$ &  $6.3823^{+0}$ &  $2.7798^{+0}$ &  $2.5204^{+0}$ &  $1.8516^{+0}$ &  $3.0349^{+1}$ \\
+$10^{-2}$ &  $2.3361^{-1}$ &  $1.3074^{-1}$ &  $5.8324^{-3}$ &  $2.2673^{+0}$ &  $8.5415^{-1}$ &  $7.0444^{-1}$ &  $4.6228^{-1}$ &  $7.7859^{+0}$ \\
+$0.1$    &  $5.4846^{-1}$ &  $2.6950^{-1}$ &  $9.9965^{-3}$ &  $3.8453^{-1}$ &  $1.1248^{-1}$ &  $6.8296^{-2}$ &  $3.7899^{-2}$ &  $8.4964^{-1}$ \\
+$0.3$    &  $3.4441^{-1}$ &  $1.2761^{-1}$ &  $2.9457^{-3}$ &  $3.4575^{-2}$ &  $8.8873^{-3}$ &  $3.9659^{-3}$ &  $2.0846^{-3}$ &  $7.8697^{-2}$ \\
+$0.5$    &  $1.1790^{-1}$ &  $3.0597^{-2}$ &  $3.6526^{-4}$ &  $2.3206^{-3}$ &  $5.6808^{-4}$ &  $2.0185^{-4}$ &  $1.1382^{-4}$ &  $7.6337^{-3}$ \\
+$0.7$    &  $1.9329^{-2}$ &  $2.9648^{-3}$ &  $1.2848^{-5}$ &  $5.2429^{-5}$ &  $1.2662^{-5}$ &  $3.4020^{-6}$ &  $2.4956^{-6}$ &  $3.7094^{-4}$ \\
+$0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  $6.6432^{-9}$ &  $7.6153^{-10}$ &  $1.4323^{-9}$ &  $1.1716^{-6}$ 
+  \end{tabular}
+  \caption{N$^3$LO evolution of the initial condition given in Section
+    4.4 of Ref.~\cite{Dittmar:2005ed}, using the same notation where
+    $a\cdot10^{b} = a^b$. The evolution is performed taking the
+    initial condition at $\sqrt{2}~\text{GeV}$ (just below the charm
+    mass) and evolving in the VFNS up to $Q=100~\text{GeV}$, with a
+    charm-quark pole mass of $(\sqrt{2}+10^{-9})\GeV$ and a bottom-quark
+    pole mass of $4.5\GeV$.
+    %
+    The NNLO splitting functions are the parametrised form
+    (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
+    facilitate comparisons by other groups, and the \ntlo splitting
+    functions use the
+    \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2410\_08089} choice.}
+  \label{tab:n3lo-evolve}
+\end{table}
+
+\begin{table}[p]
+  \small \centering
+  \begin{tabular}{c|cccccccc}
+    $x$ &  $u-\bar u$ &$d-\bar d$ &$\bar d-\bar u$ &  $ 2(\bar u+\bar d)$  &$s-\bar s$ &$s+\bar s$&$c+\bar c$ &   $g$\\
+    \toprule
+$10^{-7}$ &  $9.8370^{-5}$ &  $4.5171^{-5}$ &  $7.5013^{-6}$ &  $1.4888^{+2}$ &  $-2.9105^{-5}$ &             $7.3368^{+1}$ &  $7.2653^{+1}$ &  $1.0851^{+3}$ \\
+$10^{-6}$ &  $5.6405^{-4}$ &  $3.0895^{-4}$ &  $3.0730^{-5}$ &  $7.1925^{+1}$ &  $-4.6739^{-5}$ &             $3.5111^{+1}$ &  $3.4544^{+1}$ &  $5.0392^{+2}$ \\
+$10^{-5}$ &  $2.8946^{-3}$ &  $1.6810^{-3}$ &  $1.2302^{-4}$ &  $3.3868^{+1}$ &  $-3.5766^{-6}$ &             $1.6258^{+1}$ &  $1.5808^{+1}$ &  $2.2292^{+2}$ \\
+$10^{-4}$ &  $1.3633^{-2}$ &  $7.9832^{-3}$ &  $4.7274^{-4}$ &  $1.5188^{+1}$ &  $\phantom{-}2.1123^{-4}$ &   $7.0599^{+0}$ &  $6.7033^{+0}$ &  $9.0268^{+1}$ \\
+$10^{-3}$ &  $5.9567^{-2}$ &  $3.4382^{-2}$ &  $1.7232^{-3}$ &  $6.3028^{+0}$ &  $\phantom{-}3.9314^{-4}$ &   $2.7387^{+0}$ &  $2.4621^{+0}$ &  $3.1350^{+1}$ \\
+$10^{-2}$ &  $2.3130^{-1}$ &  $1.2962^{-1}$ &  $5.7645^{-3}$ &  $2.2675^{+0}$ &  $-1.9644^{-4}$ &             $8.5255^{-1}$ &  $6.6402^{-1}$ &  $8.1568^{+0}$ \\
+$0.1$    &  $5.5131^{-1}$ &  $2.7140^{-1}$ &  $1.0085^{-2}$ &  $3.8980^{-1}$ &  $-3.1812^{-4}$ &             $1.1388^{-1}$ &  $5.9843^{-2}$ &  $9.0615^{-1}$ \\
+$0.3$    &  $3.5044^{-1}$ &  $1.3015^{-1}$ &  $3.0145^{-3}$ &  $3.5426^{-2}$ &  $-3.8409^{-5}$ &             $9.0900^{-3}$ &  $3.3507^{-3}$ &  $8.4431^{-2}$ \\
+$0.5$    &  $1.2112^{-1}$ &  $3.1518^{-2}$ &  $3.7779^{-4}$ &  $2.3973^{-3}$ &  $-3.3053^{-6}$ &             $5.8501^{-4}$ &  $1.7709^{-4}$ &  $8.1568^{-3}$ \\
+$0.7$    &  $2.0078^{-2}$ &  $3.0889^{-3}$ &  $1.3448^{-5}$ &  $5.4598^{-5}$ &  $-1.1810^{-8}$ &             $1.3105^{-5}$ &  $3.6963^{-6}$ &  $3.9248^{-4}$ \\
+$0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  $-1.5848^{-10}$ &            $6.8222^{-9}$ &  $2.6776^{-9}$ &  $1.2262^{-6}$ 
+  \end{tabular}
+  \caption{N$^3$LO evolution of the initial condition given in Section
+    4.4 of Ref.~\cite{Dittmar:2005ed}, using the same notation where
+    $a\cdot10^{b} = a^b$. The evolution is performed taking the
+    initial condition at $\sqrt{2}~\text{GeV}$ (just below the charm
+    mass) and evolving in the FFN scheme ($n_f = 4$) up to
+    $Q=100~\text{GeV}$.
+    %
+    The NNLO splitting functions are the parametrised form
+    (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
+    facilitate comparisons by other groups, and the \ntlo splitting
+    functions use the
+    \ttt{n3lo\_splitting\_approximation =
+      n3lo\_splitting\_approximation\_up\_to\_2310\_05744} choice.
+    \gps{text says 2404}
+    %
+    This table can be directly compared to tables 1 and 2 in Ref.~\cite{Cooper-Sarkar:2024crx}}
+  \label{tab:n3lo-evolve-nf4}
+\end{table}
+
+%\ak{Started collecting some references here as there are many and they are not that easy to find...}
+%\begin{itemize}
+%\item As of 2024-04-26 this is the list of all papers on 4-loop splitting functions~\cite{Davies:2016jie,Moch:2017uml,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah,Falcioni:2024xyt} and this is the list of what is actually implemented~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt}
+%\item And this is the list of all papers relating to the 3-loop mass thresholds~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}. The code that we use relies on this set~\cite{Ablinger:2010ty,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt} plus the code from Bluemlein for which we do not yet have a reference.
+%\end{itemize}
+
+\begin{figure}[p]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,page=1]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
+    \caption{}
+    \label{fig:n3lok-benchmark-mtm}
+  \end{subfigure}
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,page=3]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
+    \caption{}
+    \label{fig:n3lok-benchmark-nomtm}
+  \end{subfigure}\\[1ex]
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,page=4]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
+    \caption{}
+    \label{fig:n3lok-nnpdf40-mtm}
+  \end{subfigure}
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,page=6]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
+    \caption{}
+    \label{fig:n3lok-nnpdf40-nomtm}
+  \end{subfigure}
+  %
+  \caption{Ratio of the PDFs at $100\GeV$ with \ntlo evolution versus
+    NNLO evolution.
+    %
+    The evolution starts from the same initial condition
+    at NNLO and \ntlo, at an initial scale
+    $Q_0\simeq 1.41\GeV$.
+    %
+    In the upper plots, we use the standard benchmark initial
+    condition.
+    %
+    In the lower plots, the initial condition is the
+    \ttt{NNPDF40\_pch\_nnlo\_as\_01180} PDF~\cite{NNPDF:2021njg} at $Q_0$.
+    %
+    The left-hand plots show the ratio with for \ntlo evolution,
+    including \ntlo mass thresholds, while the right-hand plots show
+    the evolution without the \ntlo mass thresholds.
+    %
+    In all cases, the \ntlo evolution uses
+    \ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089}.  }
+  \label{fig:n3lo-v-nnlo-ev}
+\end{figure}
+
+We close this section by illustrating the impact of \ntlo versus NNLO
+evolution, Fig.~\ref{fig:n3lo-v-nnlo-ev}.
+%
+Let us first focus on the top-left plot,
+Fig.~\ref{fig:n3lok-benchmark-mtm}.
+%
+We start with the benchmark initial condition at the standard low
+scale of $Q_0 = \sqrt{2}\GeV$, just below the charm mass.
+%
+We then evolve the PDF separately with \ntlo and NNLO evolution, and
+show the \ntlo/NNLO ratio at $Q = 100\GeV$.
+%
+Each line corresponds to a different flavour.
+%
+For light flavours, in the range that is relevant to the LHC at
+central rapidities, $10^{-4} \lesssim x \lesssim 0.5$, the effect of
+\ntlo corrections on the evolution of the light-flavour PDFs is
+generally below a percent, and typically less than or around half a
+percent.
+%
+For heavy flavour, the effect is much more significant, with a
+$\sim 6\%$ effect on the charm distribution for $0.01 \lesssim x
+\lesssim 0.1$ and about $-15\%$ at $x=0.5$.
+
+Fig.~\ref{fig:n3lok-benchmark-nomtm} is the analogous plot with the
+\ntlo mass-threshold contributions turned off.
+%
+It illustrates that the large effects on the charm and bottom PDFs are
+a consequence mainly \ntlo mass-thresholds, not the \ntlo splitting functions.
+%
+Comparing Figs.~\ref{fig:n3lok-benchmark-mtm} and
+\ref{fig:n3lok-benchmark-nomtm} for light flavours, one sees that the $0.5\%$
+effects are coming both from the \ntlo splitting functions and the
+\ntlo mass thresholds.
+
+Finally, Figs.~\ref{fig:n3lok-nnpdf40-mtm} and
+\ref{fig:n3lok-nnpdf40-nomtm} show analogous plots with an initial
+condition taken from the \ttt{NNPDF40\_pch\_nnlo\_as\_01180} PDF
+set~\cite{NNPDF:2021njg} at a similar $Q_0 = 1.41 \GeV$ (again below
+the charm threshold).
+%
+The results are broadly similar, showing thhat our conclusions about the
+size of \ntlo effects are robust with respect to the choice of PDF.
+
+
+
+%======================================================================
+%======================================================================
+\section{Hadronic Structure Functions}
+\label{sec:structure-funcs}
+As of \hoppet version 2.0.0, the code provides access to the massless
+hadronic structure functions. The structure functions are expressed as
+convolutions of a set of massless hard coefficient functions and PDFs,
+and make use of the tabulated PDFs and streamlined interface.  They
+are provided such that they can be used directly for cross section
+computations in DIS or VBF, as implemented for example in {\tt
+  disorder}~\cite{Karlberg:2024hnl} and the {\tt proVBFH}
+package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
+
+The massless structure functions have been found to be in good
+agreement with those that can be obtained with
+\APFELPP{}~\cite{Bertone:2013vaa,Bertone:2017gds} (at the level of
+$10^{-5}$ relative precision).
+%
+The benchmarks with \APFELPP{} and the code used to carry them out are
+described in detail in Ref.~\cite{Bertone:2024dpm} and at
+\url{https://github.com/alexanderkarlberg/n3lo-structure-function-benchmarks}. A
+simplified version of that benchmark is also included in the \hoppet
+repository and can be found in
+\masterlink{benchmarking/structure\_functions\_benchmark\_checks.f90}.
+%
+Technical details on the implementation of the structure functions in
+\hoppet can be found in
+Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik,Bertone:2024dpm}, and here
+we mainly focus on the code interface.
+%A small sample program
+%that prints out the structure functions can be found in
+%\masterlink{example\_f90/structure\_functions\_example.f90}.
+
+The structure functions have been implemented including only QCD
+corrections up to N$^3$LO using both the exact and parametrised
+coefficient functions found in
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz,Blumlein:2022gpp},\footnote{Note
+that the piece presented in Ref.~\cite{Davies:2016ruz} has not been
+given in exact form. Only a parametrised version is available and
+is what is being used in \hoppet.}  and can make use of PDFs evolved
+at N$^3$LO as described in Sec.~\ref{sec:n3lo-evolution}. The
+structure functions can also be computed using PDFs interfaced through
+LHAPDF~\cite{LHAPDF}.
+
+\subsection{Initialisation}
+\label{sec:structure-funcs-init}
+
+The structure functions can be accessed by using the
+\repolink{src/structure_functions.f90}{structure\_functions} module.
+%
+They can also be accessed through the
+streamlined interface by prefixing \ttt{hoppet}, as described
+later in section~\ref{sec:structure-functions-streamlined}.
+%
+The description here corresponds to an intermediate-level interface, which
+relies on elements such as the \ttt{grid} and splitting functions
+having been initialised in the streamlined interface, through a call
+to \ttt{hoppetStart} or \ttt{hoppetStartExtended}, cf.\
+%
+\ifreleasenote
+Section~8 of Ref.~\cite{Salam:2008qg}.\footnote{Users needing a lower level
+  interface should inspect the code in \masterlink{src/structure\_functions.f90}.}
+\else
+Section~\ref{sec:vanilla}.\footnote{Users needing a lower level
+  interface should inspect the code in \masterlink{src/structure\_functions.f90}.}
+\fi
+%
+After this initialisation has been carried out, one calls
+\begin{lstlisting}
+  call StartStrFct(order_max [, nflav] [, scale_choice] &
+                  & [, constant_mu] [ ,param_coefs] [ ,wmass] [ ,zmass])
+\end{lstlisting}
+specifying as a minimum the perturbative order --- currently
+\ttt{order\_max} $ \le 4$ (\ttt{order\_max} $ =1$ corresponds to LO).
+
+If \ttt{nflav} is not passed as an argument, the structure functions
+are initialised to support a variable flavour-number scheme (the
+masses that are used at any given stage will be those set in the
+streamlined interface).
+%
+Otherwise a fixed number of light flavours is used, as indicated by
+\ttt{nflav}, which speeds up initialisation.
+%
+Note that specifying a variable flavour-number scheme only has an
+impact on the evolution and on $n_f$ terms in the coefficient
+functions.
+%
+The latter, however always assume massless quarks.
+%
+Hence in both the fixed and variable flavour-number scheme the
+structure functions should not be considered phenomenologically
+reliable if $Q$ is comparable to the quark mass.
+%
+%structure functions should only be considered reliable for $Q \gg m$.
+%\commentpn{Actually this is also true in a fixed flavour number
+%  scheme, as long as mass effects are not being included in the
+%  coefficient functions, i.e. for $Q\gg m$ variable flavour is the
+%  same as fixed flavours (including the flavour of mass $m$ as a light
+%  flavour.)}\ak{I added a mentioning of the fixed flavour
+%  limitations as well}
+%\ak{Need to adapt this to what the code acutally does}
+Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
+the renormalisation and factorisation scales and the degree of
+flexibility that will be available in choosing them at later stages.
+%
+Specifically the (integer) \ttt{scale\_choice}
+argument should be one of the following values (defined in the
+\ttt{structure\_functions} module):
+\begin{itemize}
+\item \ttt{scale\_choice\_Q} (default) means that the code will always
+  use $Q$ multiplied by \ttt{xR} or \ttt{xF} as the renormalisation
+  and factorisation scale respectively (with \ttt{xR} or \ttt{xF} as
+  set at initialisation).
+\item \ttt{scale\_choice\_fixed} corresponds to a fixed scale
+  \ttt{constant\_mu}, multiplied by \ttt{xR} or \ttt{xF} as set at
+  initialisation.
+\item \ttt{scale\_choice\_arbitrary} allows the user to choose
+  arbitrary scales at the moment of evaluating the structure
+  functions.
+  %
+  In this last case, the structure functions are saved as separate arrays, 
+  one for each perturbative order, and with dedicated additional arrays
+  for terms proportional to logarithms of $Q/\mu_F$. 
+  % 
+  This makes for a slower evaluation compared to the two other
+  scale choices.
+\end{itemize}
+%
+% The default value for \ttt{scale\_choice} is \ttt{scale\_choice\_Q} which means that $Q$
+% multiplied by \ttt{xR} or \ttt{xF} is used as the renormalisation or
+% factorisation scale respectively.
+% %
+% The choice \ttt{scale\_choice\_fixed} corresponds to a fixed scale
+% \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF}).
+% %
+% Should a user wish to use some arbitrary scale choice,
+% \ttt{scale\_choice} should be set to \ttt{scale\_choice\_arbitrary}.
+% %
+% \gps{Do we want to introduce some constants such as
+%   \ttt{scale\_choice\_Q=1}, \ttt{scale\_choice\_fixed=0}, \ttt{scale\_choice\_arbitrary=2}?} \ak{Yes, and done!}
+% %
+% In this last case, the structure functions are saved as arrays not only in
+% $Q$ but also $\mu_R$ and $\mu_F$.
+% %
+% This makes for a slightly slower evaluation compared to the two other
+% scale choices.
+
+If \ttt{param\_coefs} is set to \ttt{.true.}\ (its default) then the
+structure functions are computed using the NNLO and N$^3$LO
+parametrisations found in
+Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},
+which are stated to have a relative precision of a few permille (order
+by order) except at particularly small or large values of $x$.
+%
+Otherwise
+the exact versions are used.\footnote{The LO and NLO coefficient
+functions are always exact as their expressions are very
+compact.}
+%
+This however means that the initialisation becomes slow (about two
+minutes rather than a few seconds).
+%
+Given the good accuracy of the parametrised coefficient functions,
+they are to be preferred for most applications.
+% 
+% and since the parametrised
+% expressions are good to a relative accuracy of $10^{-4}$ for most
+% values of $x$, it is recommended to use the parametrised option for
+% most applications.
+% 
+Note that the exact expressions also add to compilation time and need
+to be explicitly enabled with the \texttt{-DHOPPET\_USE\_EXACT\_COEF=ON}
+CMake flag (or the \ttt{--enable-exact-coefs} configure
+flag).\footnote{At N$^3$LO they rely on an extended version of
+  \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
+  is able to handle harmonic polylogarithms up to weight 5.}
+
+The masses of the electroweak vector bosons are used only to calculate
+the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$, which
+enters in the neutral-current structure functions.
+
+At this point all the tables that are needed for the structure
+functions have been allocated.
+%
+In order to fill the tables, one first needs to set up the running
+coupling and evolve the initial PDF with \ttt{hoppetEvolve}, as
+described in
+\ifreleasenote
+Section~8.2 of Ref.~\cite{Salam:2008qg}.
+\else
+Section~\ref{sec:vanilla_usage}.
+\fi
+
+%
+% Care should be taken here such that both the coupling and PDF
+% evolution are carried out at the correct perturbative order and with
+% mass thresholds as appropriate.
+%
+With the PDF table filled in the streamlined interface one calls
+\begin{lstlisting}
+  call InitStrFct(order[, separate_orders] [, xR] [, xF] [, flavour_decomposition])
+\end{lstlisting}
+specifying the order at which one would like to compute the structure
+functions.
+%
+The logical flag \ttt{separate\_orders} should be set to \ttt{.true.}\ if one
+wants access to the individual coefficients of the perturbative
+expansion as well as the sum up to some maximum order, \ttt{order}.
+%
+With \ttt{scale\_choice\_Q} and \ttt{scale\_choice\_fixed}, the
+default of \ttt{.false.}\ causes only the sum over perturbative orders
+to be stored.
+%
+This gives faster evaluations of structure functions because it is
+only necessary to interpolate the sum over orders, rather than
+interpolate one table for each order.
+%
+With \texttt{scale\_choice\_arbitrary}, the default is \ttt{.true.},
+which is the only allowed option, because separate tables for each
+order are required for the underlying calculations.
+
+Finally, the optional flag \ttt{flavour\_decomposition} controls an
+experimental feature of giving access to the structure functions
+decomposed into their underlying quark flavours without the associated
+vector boson couplings. It is currently only possible to access the
+structure functions in this way up to NLO, and since the feature is
+not fully mature we invite interested readers to inspect the source
+code directly for more information.
+
+\subsection{Accessing the Structure Functions}
+\label{sec:structure-funcs-access}
+At this point the structure functions can be accessed as in the following example
+\begin{lstlisting}
+  real(dp) :: ff(-6:7), x, Q, muR, muF
+  
+  call StartStrFct(order_max = 4, scale_choice = scale_choice_Q)
+  [...]
+  call InitStrFct(order_max = 4)
+  ff = StrFct(x, Q[, muR] [, muF])
+\end{lstlisting}
+at the value $x$ and $Q$.
+%\gps{Added explicit scale choice arg in init}\ak{Not sure I understand, that's not the signature of the routine}
+%
+With \ttt{scale\_choice\_arbitrary}, the \ttt{muR} and \ttt{muF}
+arguments must be provided.
+%
+With other scale choices, they do not need to be provided, but if they
+are then they should be consistent with the original scale choice.
+%
+The structure functions in this example are stored in the
+array \ttt{ff}. The components of this array can be accessed through
+the indices \gps{are the names obvious enough?}
+\begin{lstlisting}
+  integer, parameter :: iF1Wp = 1   
+  integer, parameter :: iF2Wp = 2   
+  integer, parameter :: iF3Wp = 3   
+  integer, parameter :: iF1Wm =-1   
+  integer, parameter :: iF2Wm =-2   
+  integer, parameter :: iF3Wm =-3   
+  integer, parameter :: iF1Z  = 4   
+  integer, parameter :: iF2Z  = 5   
+  integer, parameter :: iF3Z  = 6   
+  integer, parameter :: iF1EM =-4   
+  integer, parameter :: iF2EM =-5   
+  integer, parameter :: iF1gZ = 0  
+  integer, parameter :: iF2gZ =-6 
+  integer, parameter :: iF3gZ = 7  
+\end{lstlisting}
+For instance one would access the electromagnetic $F_1$ structure
+function through \ttt{ff(iF1EM)}. It is returned at the \ttt{order\_max}
+that was specified in \ttt{InitStrFct}.
+%
+The structure functions can also be accessed order by order if the
+\ttt{separate\_orders} flag was set to \ttt{.true.} when initialising.
+%
+They are then obtained as follows
+\begin{lstlisting}
+  real(dp) :: flo(-6:7), fnlo(-6:7), fnnlo(-6:7), fn3lo(-6:7), x, Q, muR, muF
+  [...]
+  call InitStrFct(4, .true.)
+  flo   = F_LO(x, Q, muR, muF)
+  fnlo  = F_NLO(x, Q, muR, muF)
+  fnnlo = F_NNLO(x, Q, muR, muF)
+  fn3lo = F_N3LO(x, Q, muR, muF)
+\end{lstlisting}
+The functions return the individual contributions at each order in
+$\as$, including the relevant factor of $\as^n$.
+%
+Hence the sum of \ttt{flo}, \ttt{fnlo}, \ttt{fnnlo}, and
+\ttt{fn3lo} would be equal to the full structure function at N$^3$LO as
+contained in \ttt{ff} in the example above.
+%
+Note that in the \ttt{F\_LO} etc.\ calls, the \ttt{muR} and \ttt{muF}
+arguments are not optional and that when a prior scale choice has been
+made (e.g. \ttt{scale\_choice\_Q}) they are assumed to be consistent
+with that prior scale choice.
+
+An example of structure function evaluations using the Fortran~90
+interface is to be found in
+\repolink{example_f90/structure_functions_example.f90}{example\_f90/structure\_functions\_example.f90}. 
+%%
+%\gps{added this link}\ak{It is also at the beginning of the section}
+
+\subsection{Streamlined interface}
+\label{sec:structure-functions-streamlined}
+The structure functions can also be accessed through the streamlined
+interface, so that they may be called for instance from C/\CPP{}. The
+functions to be called are very similar to those described above. In
+particular a user should call either
+\begin{lstlisting}
+  call hoppetStartStrFct(order_max)
+\end{lstlisting}
+with \ttt{order\_max} \gps{is that not \ttt{order\_max}$-1$?}
+%
+the maximal
+order in $\as$ or, alternatively, the extended version of the interface
+\ttt{hoppetStartStrFctExtended} which takes all the same arguments as
+\ttt{StartStrFct} described above. One difference is that in order to
+use a variable flavour scheme the user should set \ttt{nflav} to a
+negative value. After evolving or reading in a PDF, the user then calls
+\begin{lstlisting}
+  call hoppetInitStrFct(order, separate_orders)
+\end{lstlisting}
+to initialise the actual structure functions. The structure functions
+can then be accessed through the subroutines
+\begin{lstlisting}
+  real(dp) :: ff(-6:7), flo(-6:7), fnlo(-6:7), fnnlo(-6:7), fn3lo(-6:7), x, Q, muR, muF
+  [...]
+  call hoppetStrFct(x, Q, muR, muF, ff)        ! Full structure function
+  ! or instead, without muR and muF
+  call hoppetStrFctNoMu(x, Q, ff)              ! Full structure function
+  call hoppetStrFctLO(x, Q, muR, muF, flo)     ! LO term
+  call hoppetStrFctNLO(x, Q, muR, muF, fnlo)   ! NLO term
+  call hoppetStrFctNNLO(x, Q, muR, muF, fnnlo) ! NNLO term
+  call hoppetStrFctN3LO(x, Q, muR, muF, fn3lo) ! N3LO term
+\end{lstlisting}
+The \CPP{} header contains indices for the structure functions and scale
+choices, which are all in the \ttt{hoppet} namespace.
+%
+\begin{lstlisting}
+  const int iF1Wp = 1+6;
+  const int iF2Wp = 2+6;
+  const int iF3Wp = 3+6;
+  const int iF1Wm =-1+6;
+  const int iF2Wm =-2+6;
+  const int iF3Wm =-3+6;
+  const int iF1Z  = 4+6;
+  const int iF2Z  = 5+6;
+  const int iF3Z  = 6+6;
+  const int iF1EM =-4+6;
+  const int iF2EM =-5+6;
+  const int iF1gZ = 0+6;
+  const int iF2gZ =-6+6;
+  const int iF3gZ = 7+6;
+
+  const int scale_choice_fixed     = 0;
+  const int scale_choice_Q         = 1;
+  const int scale_choice_arbitrary = 2;
+\end{lstlisting}
+Note that in \CPP{} the structure function indices start from 0 and that the \CPP{}
+array that is to be passed to functions such as \ttt{hoppetStrFct}
+would be defined as \ttt{double ff[14]}.
+
+An example of structure function evaluations using the \CPP{} version
+of the streamlined interface is to be found in
+\repolink{example_cpp/structure_functions_example.cc}{example\_cpp/structure\_functions\_example.cc}
+and a Python example is similarly to be found at
+\masterlink{example_py/structure_function_example.py}.
+
+Finally we present a small update on the results presented in
+Ref.~\cite{Bertone:2024dpm}. That reference was published before the
+full \ntlo evolution had been implemented in \hoppet, and the \ntlo
+structure functions were therefore obtained with NNLO evolution. A
+full update of the tables and plots is beyond the scope of the current
+work, but for illustrative purposes we present here an updated version
+of Fig.~3 of Ref.~\cite{Bertone:2024dpm}.
+%
+The update uses the full \ntlo evolution and is shown as
+Fig.~\ref{fig:perturbativeconvergence}.
+%
+\begin{figure}[tb!]
+  \centering\includegraphics[width=0.49\textwidth]{figs-v2/PerturbativeConvergence_Q_2_GeV.pdf}
+  \centering\includegraphics[width=0.49\textwidth]{figs-v2/PerturbativeConvergence_Q_10_GeV.pdf}
+  \caption{The structure function $F_2^{\rm NC}$ plotted as a function
+    of $x_{\rm B}$ in the range $[10^{-5}:0.9]$ at $Q=2$~GeV (left)
+    and $Q=10$~GeV (right). Each plot displays the curves at LO, NLO,
+    NNLO, and N$^3$LO with the lower panel showing the ratio to
+    N$^3$LO. Adapted from Ref.~\cite{Bertone:2024dpm} using the full
+    \ntlo evolution.}
+  \label{fig:perturbativeconvergence}
+\end{figure}
+%
+It gives the $F_2^{\rm NC}$ \gps{corresponds to index iF2EM. Confusing?} structure function at various
+perturbative orders for two values of $Q$ ($2$ GeV and $10$ GeV). It
+also shows the relative difference of the various orders with respect
+to \ntlo.
+%
+As can be seen by comparing to the original figures, the
+\ntlo evolution has the effect at low $Q$ of increasing the \ntlo $F_2^{\rm NC}$
+slightly, at least for $x$-values in the range $10^{-4}$ to $10^{-1}$. 
+%
+This is most easily seen from the shifts in the LO, NLO and NNLO
+curves in the lower panel, which are all ratios to the \ntlo (with
+\ntlo evolution here, without in Ref.~\cite{Bertone:2024dpm}.)
+
+
 % ======================================================================
 \section{Evolution including QED contributions}
 \label{sec:qed-evolution}
@@ -462,725 +1183,6 @@ can be found in
 %\gps{added this last paragraph}
 %\gps{NB: to make links work, I've hard-coded them to the current
 %  branch, but we should switch over to the master/main branch}
-
-%======================================================================
-%======================================================================
-\section{QCD evolution at N$^3$LO}
-\label{sec:n3lo-evolution}
-In recent years significant progress in determining the perturbative
-components needed for unpolarised QCD evolution at N$^3$LO has been
-made (cf.\ \ref{sec:pqcd} for technical details on the evolution at
-N$^3$LO).
-%
-This has now reached the stage that two PDF groups have released fits
-at approximate N$^3$LO (aN$^3$LO)
-accuracy~\cite{McGowan:2022nag,NNPDF:2024nan} along with their
-combination in Ref.~\cite{Cridge:2024icl}.
-%
-Of the three contributions that are needed at full N$^3$LO accuracy
-only two are fully known.
-%
-In particular the four-loop
-$\beta$-function~\cite{vanRitbergen:1997va,Czakon:2004bu} and
-associated mass thresholds~\cite{Chetyrkin:1997sg} have been known for
-a very long time.
-%
-On the other hand the intricate calculations of the three-loop
-matching relations needed for both the single and two mass VFNS were
-only very recently
-completed~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}.
-%
-Finally the four-loop splitting functions entering the DGLAP equation
-are currently not known exactly, except for certain $n_f$-dependent
-terms~\cite{Gracey:1994nn,Davies:2016jie,Moch:2017uml,Gehrmann:2023cqm,Falcioni:2023tzp,Gehrmann:2023iah}.
-%
-However, enough Mellin-moments have been computed that together with
-the exact pieces just mentioned and known small- and large-$x$
-behaviours, approximate splitting functions suitable for phenomenology
-can be reliably
-determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd}.
-%
-We have therefore incorporated the aforementioned pieces, using code
-that is publicly available with those references, with the intention of
-updating the splitting functions as they become more precisely known.
-
-For the specific implementation in \hoppet version 2.0.0 we rely on
-the approximations computed in
-Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd} (FHMPRUVV),
-the implementation of the three-loop (single-mass) VFNS coefficients as found in
-Ref.~\cite{BlumleinCode}, which contains code associated with
-Refs.~\cite{Ablinger:2024xtt,Fael:2022miw} and our own implementation
-of the four-loop running coupling.\footnote{The implementation does
-not allow for non-standard values of the QCD Casimir invariants beyond
-three loops.}
-%
-Since the implementation here extends core features of \hoppet that
-were already available in version 1.1.0, very little is needed on the
-side of the user to invoke the evolution.
-%
-Most importantly all routines that take an \ttt{nloop} argument,
-e.g. \ttt{InitDglapHolder}, \ttt{InitRunningCoupling},
-\ttt{hoppetStart}, and \ttt{hoppetEval} now support \ttt{nloop = 4}.
-%
-The user also has a few choices they can make in terms of the
-splitting functions used.
-%
-The approximate splitting functions can return
-three different
-choices corresponding to upper and lower edges of an uncertainty band and their
-average. 
-%
-The user can control which one to use through the 
-\ttt{n3lo\_splitting\_variant} which takes the values
-\ttt{n3lo\_splitting\_Nfitav} (default),
-\ttt{n3lo\_splitting\_Nfiterr1}, or \ttt{n3lo\_splitting\_Nfiterr2}.
-%
-\gps{Reading this it's not very clear what to do. We should be
-  explicit, e.g.\ set a variable in a given module. Similarly
-  below. Perhaps we also want to put an itemize?}
-%
-When the exact splitting functions become available they will
-correspond to \ttt{n3lo\_splitting\_exact}.
-%
-Similarly if a set of parametrisations of the exact splitting
-functions become available they will correspond to
-\ttt{n3lo\_splitting\_param}.
-
-Since it is expected that more precise approximations will become
-available in the future we have also implemented a flag,\gps{flag=boolean?}
-\ttt{n3lo\_splitting\_approximation}, in
-\masterlink{src/dglap\_choices.f90} that controls which approximations
-to use. By default it uses the most recent set of approximations by
-the FHMPRUVV group. At the time of writing it can take one of three values:
-%
-\begin{itemize}
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310\_05744}, with the
-  approximations in papers up to and including Ref.~\cite{Moch:2023tdj};
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}, with the
-  approximations in papers up to and including
-  Ref.~\cite{Falcioni:2024xyt};
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089}, the default value at the time of
-  writing, with the approximations in papers up to and including
-  Ref.~\cite{Falcioni:2024qpd}.
-\end{itemize}
-Besides the splitting functions, we have also incorporated the
-single-mass thresholds up to N$^3$LO, as calculated in
-Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}
-and kindly supplied to us in the form of Fortran
-code~\cite{BlumleinCode,Fael:2022miw}.
-%
-Note that because many of these contributions are available only in
-exact form (i.e.\ using extensive \texttt{hplog5}~\cite{FortranPolyLog} evaluations), they
-involve a significant initialisation time, of the order of
-$10{-}30\,\text{s}$.\footnote{As and when faster 
-  parametrised versions become available, we will incorporate them.}
-
-In Table~\ref{tab:n3lo-evolve} we show the results of the full N$^3$LO
-evolution in the VFNS, using the most up-to-date perturbative input at
-the time of writing this release note. To assess the evolution we take
-the initial condition of Ref.~\cite{Dittmar:2005ed} at an initial
-scale $\sqrt{2}~\text{GeV}$ and $n_f=3$. We evolve to
-$Q=100~\text{GeV}$. The table can be reproduced by running
-\masterlink{example_f90/tabulation_example_n3lo.f90}. The
-numbers are obtained using parametrised NNLO splitting functions, but
-exact mass thresholds at this order.
-%
-The table has been generated with $\texttt{dy}=0.05$,
-$\texttt{dlnlnQ}=\text{dy/4}$.
-%
-Increasing $\texttt{dy}=0.10$ leaves the results unchanged at the
-precision shown, while going to $\texttt{dy}=0.20$ for higher speed
-would change the results by a relative amount below $10^{-4}$.
-
-Table~\ref{tab:n3lo-evolve} cannot be directly compared to the
-benchmarking tables of Ref.~\cite{Cooper-Sarkar:2024crx} because they
-do not include the mass thresholds in the \ntlo evolution.
-%
-To facilitate comparisons we therefore additionally provide
-Table~\ref{tab:n3lo-evolve-nf4}, correspond to fixed-flavour ($n_f=4$)
-evolution, with the choice of
-\ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}.
-%
-Of the MSHT and NNPDF results, the NNPDF results (Table~2 of
-Ref.~\cite{Cooper-Sarkar:2024crx}) are closer to ours.
-
-
-
-\begin{table}[p]
-  %  \footnotesize \centering
-  \small \centering
-  \begin{tabular}{c|cccccccc}
-    $x$ &  $u-\bar u$ &$d-\bar d$ &$\bar d-\bar u$ &  $ 2(\bar u+\bar d)$  &$s+\bar s$&$c+\bar c$ &$b+\bar b$  &   $g$\\
-    \toprule
-$10^{-7}$ &  $1.0589^{-4}$ &  $4.8664^{-5}$ &  $8.1967^{-6}$ &  $1.6234^{+2}$ &  $8.0100^{+1}$ &  $7.7207^{+1}$ &  $6.5254^{+1}$ &  $1.1238^{+3}$ \\
-$10^{-6}$ &  $5.9691^{-4}$ &  $3.2634^{-4}$ &  $3.3146^{-5}$ &  $7.6786^{+1}$ &  $3.7544^{+1}$ &  $3.5836^{+1}$ &  $2.9889^{+1}$ &  $5.1159^{+2}$ \\
-$10^{-5}$ &  $3.0235^{-3}$ &  $1.7532^{-3}$ &  $1.3081^{-4}$ &  $3.5436^{+1}$ &  $1.7044^{+1}$ &  $1.6106^{+1}$ &  $1.3142^{+1}$ &  $2.2224^{+2}$ \\
-$10^{-4}$ &  $1.4079^{-2}$ &  $8.2354^{-3}$ &  $4.9511^{-4}$ &  $1.5611^{+1}$ &  $7.2731^{+0}$ &  $6.7862^{+0}$ &  $5.3294^{+0}$ &  $8.8594^{+1}$ \\
-$10^{-3}$ &  $6.0849^{-2}$ &  $3.5086^{-2}$ &  $1.7751^{-3}$ &  $6.3823^{+0}$ &  $2.7798^{+0}$ &  $2.5204^{+0}$ &  $1.8516^{+0}$ &  $3.0349^{+1}$ \\
-$10^{-2}$ &  $2.3361^{-1}$ &  $1.3074^{-1}$ &  $5.8324^{-3}$ &  $2.2673^{+0}$ &  $8.5415^{-1}$ &  $7.0444^{-1}$ &  $4.6228^{-1}$ &  $7.7859^{+0}$ \\
-$0.1$    &  $5.4846^{-1}$ &  $2.6950^{-1}$ &  $9.9965^{-3}$ &  $3.8453^{-1}$ &  $1.1248^{-1}$ &  $6.8296^{-2}$ &  $3.7899^{-2}$ &  $8.4964^{-1}$ \\
-$0.3$    &  $3.4441^{-1}$ &  $1.2761^{-1}$ &  $2.9457^{-3}$ &  $3.4575^{-2}$ &  $8.8873^{-3}$ &  $3.9659^{-3}$ &  $2.0846^{-3}$ &  $7.8697^{-2}$ \\
-$0.5$    &  $1.1790^{-1}$ &  $3.0597^{-2}$ &  $3.6526^{-4}$ &  $2.3206^{-3}$ &  $5.6808^{-4}$ &  $2.0185^{-4}$ &  $1.1382^{-4}$ &  $7.6337^{-3}$ \\
-$0.7$    &  $1.9329^{-2}$ &  $2.9648^{-3}$ &  $1.2848^{-5}$ &  $5.2429^{-5}$ &  $1.2662^{-5}$ &  $3.4020^{-6}$ &  $2.4956^{-6}$ &  $3.7094^{-4}$ \\
-$0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  $6.6432^{-9}$ &  $7.6153^{-10}$ &  $1.4323^{-9}$ &  $1.1716^{-6}$ 
-  \end{tabular}
-  \caption{N$^3$LO evolution of the initial condition given in Section
-    4.4 of Ref.~\cite{Dittmar:2005ed}, using the same notation where
-    $a\cdot10^{b} = a^b$. The evolution is performed taking the
-    initial condition at $\sqrt{2}~\text{GeV}$ (just below the charm
-    mass) and evolving in the VFNS up to $Q=100~\text{GeV}$, with a
-    charm-quark pole mass of $(\sqrt{2}+10^{-9})\GeV$ and a bottom-quark
-    pole mass of $4.5\GeV$.
-    %
-    The NNLO splitting functions are the parametrised form
-    (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
-    facilitate comparisons by other groups, and the \ntlo splitting
-    functions use the
-    \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2410\_08089} choice.}
-  \label{tab:n3lo-evolve}
-\end{table}
-
-\begin{table}[p]
-  \small \centering
-  \begin{tabular}{c|cccccccc}
-    $x$ &  $u-\bar u$ &$d-\bar d$ &$\bar d-\bar u$ &  $ 2(\bar u+\bar d)$  &$s-\bar s$ &$s+\bar s$&$c+\bar c$ &   $g$\\
-    \toprule
-$10^{-7}$ &  $9.8370^{-5}$ &  $4.5171^{-5}$ &  $7.5013^{-6}$ &  $1.4888^{+2}$ &  $-2.9105^{-5}$ &             $7.3368^{+1}$ &  $7.2653^{+1}$ &  $1.0851^{+3}$ \\
-$10^{-6}$ &  $5.6405^{-4}$ &  $3.0895^{-4}$ &  $3.0730^{-5}$ &  $7.1925^{+1}$ &  $-4.6739^{-5}$ &             $3.5111^{+1}$ &  $3.4544^{+1}$ &  $5.0392^{+2}$ \\
-$10^{-5}$ &  $2.8946^{-3}$ &  $1.6810^{-3}$ &  $1.2302^{-4}$ &  $3.3868^{+1}$ &  $-3.5766^{-6}$ &             $1.6258^{+1}$ &  $1.5808^{+1}$ &  $2.2292^{+2}$ \\
-$10^{-4}$ &  $1.3633^{-2}$ &  $7.9832^{-3}$ &  $4.7274^{-4}$ &  $1.5188^{+1}$ &  $\phantom{-}2.1123^{-4}$ &   $7.0599^{+0}$ &  $6.7033^{+0}$ &  $9.0268^{+1}$ \\
-$10^{-3}$ &  $5.9567^{-2}$ &  $3.4382^{-2}$ &  $1.7232^{-3}$ &  $6.3028^{+0}$ &  $\phantom{-}3.9314^{-4}$ &   $2.7387^{+0}$ &  $2.4621^{+0}$ &  $3.1350^{+1}$ \\
-$10^{-2}$ &  $2.3130^{-1}$ &  $1.2962^{-1}$ &  $5.7645^{-3}$ &  $2.2675^{+0}$ &  $-1.9644^{-4}$ &             $8.5255^{-1}$ &  $6.6402^{-1}$ &  $8.1568^{+0}$ \\
-$0.1$    &  $5.5131^{-1}$ &  $2.7140^{-1}$ &  $1.0085^{-2}$ &  $3.8980^{-1}$ &  $-3.1812^{-4}$ &             $1.1388^{-1}$ &  $5.9843^{-2}$ &  $9.0615^{-1}$ \\
-$0.3$    &  $3.5044^{-1}$ &  $1.3015^{-1}$ &  $3.0145^{-3}$ &  $3.5426^{-2}$ &  $-3.8409^{-5}$ &             $9.0900^{-3}$ &  $3.3507^{-3}$ &  $8.4431^{-2}$ \\
-$0.5$    &  $1.2112^{-1}$ &  $3.1518^{-2}$ &  $3.7779^{-4}$ &  $2.3973^{-3}$ &  $-3.3053^{-6}$ &             $5.8501^{-4}$ &  $1.7709^{-4}$ &  $8.1568^{-3}$ \\
-$0.7$    &  $2.0078^{-2}$ &  $3.0889^{-3}$ &  $1.3448^{-5}$ &  $5.4598^{-5}$ &  $-1.1810^{-8}$ &             $1.3105^{-5}$ &  $3.6963^{-6}$ &  $3.9248^{-4}$ \\
-$0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  $-1.5848^{-10}$ &            $6.8222^{-9}$ &  $2.6776^{-9}$ &  $1.2262^{-6}$ 
-  \end{tabular}
-  \caption{N$^3$LO evolution of the initial condition given in Section
-    4.4 of Ref.~\cite{Dittmar:2005ed}, using the same notation where
-    $a\cdot10^{b} = a^b$. The evolution is performed taking the
-    initial condition at $\sqrt{2}~\text{GeV}$ (just below the charm
-    mass) and evolving in the FFN scheme ($n_f = 4$) up to
-    $Q=100~\text{GeV}$.
-    %
-    The NNLO splitting functions are the parametrised form
-    (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
-    facilitate comparisons by other groups, and the \ntlo splitting
-    functions use the
-    \ttt{n3lo\_splitting\_approximation =
-      n3lo\_splitting\_approximation\_up\_to\_2310\_05744} choice.
-    \gps{text says 2404}
-    %
-    This table can be directly compared to tables 1 and 2 in Ref.~\cite{Cooper-Sarkar:2024crx}}
-  \label{tab:n3lo-evolve-nf4}
-\end{table}
-
-%\ak{Started collecting some references here as there are many and they are not that easy to find...}
-%\begin{itemize}
-%\item As of 2024-04-26 this is the list of all papers on 4-loop splitting functions~\cite{Davies:2016jie,Moch:2017uml,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah,Falcioni:2024xyt} and this is the list of what is actually implemented~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt}
-%\item And this is the list of all papers relating to the 3-loop mass thresholds~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}. The code that we use relies on this set~\cite{Ablinger:2010ty,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt} plus the code from Bluemlein for which we do not yet have a reference.
-%\end{itemize}
-
-\begin{figure}[p]
-  \centering
-  \begin{subfigure}{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,page=1]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
-    \caption{}
-    \label{fig:n3lok-benchmark-mtm}
-  \end{subfigure}
-  \begin{subfigure}{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,page=3]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
-    \caption{}
-    \label{fig:n3lok-benchmark-nomtm}
-  \end{subfigure}\\[1ex]
-  \begin{subfigure}{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,page=4]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
-    \caption{}
-    \label{fig:n3lok-nnpdf40-mtm}
-  \end{subfigure}
-  \begin{subfigure}{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,page=6]{figs-v2/n3lo_k_factors.pdf}\\[-1.5ex]
-    \caption{}
-    \label{fig:n3lok-nnpdf40-nomtm}
-  \end{subfigure}
-  %
-  \caption{Ratio of the PDFs at $100\GeV$ with \ntlo evolution versus
-    NNLO evolution.
-    %
-    The evolution starts from the same initial condition
-    at NNLO and \ntlo, at an initial scale
-    $Q_0\simeq 1.41\GeV$.
-    %
-    In the upper plots, we use the standard benchmark initial
-    condition.
-    %
-    In the lower plots, the initial condition is the
-    \ttt{NNPDF40\_pch\_nnlo\_as\_01180} PDF~\cite{NNPDF:2021njg} at $Q_0$.
-    %
-    The left-hand plots show the ratio with for \ntlo evolution,
-    including \ntlo mass thresholds, while the right-hand plots show
-    the evolution without the \ntlo mass thresholds.
-    %
-    In all cases, the \ntlo evolution uses
-    \ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089}.  }
-  \label{fig:n3lo-v-nnlo-ev}
-\end{figure}
-
-We close this section by illustrating the impact of \ntlo versus NNLO
-evolution, Fig.~\ref{fig:n3lo-v-nnlo-ev}.
-%
-Let us first focus on the top-left plot,
-Fig.~\ref{fig:n3lok-benchmark-mtm}.
-%
-We start with the benchmark initial condition at the standard low
-scale of $Q_0 = \sqrt{2}\GeV$, just below the charm mass.
-%
-We then evolve the PDF separately with \ntlo and NNLO evolution, and
-show the \ntlo/NNLO ratio at $Q = 100\GeV$.
-%
-Each line corresponds to a different flavour.
-%
-For light flavours, in the range that is relevant to the LHC at
-central rapidities, $10^{-4} \lesssim x \lesssim 0.5$, the effect of
-\ntlo corrections on the evolution of the light-flavour PDFs is
-generally below a percent, and typically less than or around half a
-percent.
-%
-For heavy flavour, the effect is much more significant, with a
-$\sim 6\%$ effect on the charm distribution for $0.01 \lesssim x
-\lesssim 0.1$ and about $-15\%$ at $x=0.5$.
-
-Fig.~\ref{fig:n3lok-benchmark-nomtm} is the analogous plot with the
-\ntlo mass-threshold contributions turned off.
-%
-It illustrates that the large effects on the charm and bottom PDFs are
-a consequence mainly \ntlo mass-thresholds, not the \ntlo splitting functions.
-%
-Comparing Figs.~\ref{fig:n3lok-benchmark-mtm} and
-\ref{fig:n3lok-benchmark-nomtm} for light flavours, one sees that the $0.5\%$
-effects are coming both from the \ntlo splitting functions and the
-\ntlo mass thresholds.
-
-Finally, Figs.~\ref{fig:n3lok-nnpdf40-mtm} and
-\ref{fig:n3lok-nnpdf40-nomtm} show analogous plots with an initial
-condition taken from the \ttt{NNPDF40\_pch\_nnlo\_as\_01180} PDF
-set~\cite{NNPDF:2021njg} at a similar $Q_0 = 1.41 \GeV$ (again below
-the charm threshold).
-%
-The results are broadly similar, showing thhat our conclusions about the
-size of \ntlo effects are robust with respect to the choice of PDF.
-
-
-
-%======================================================================
-%======================================================================
-\section{Hadronic Structure Functions}
-\label{sec:structure-funcs}
-As of \hoppet version 2.0.0, the code provides access to the massless
-hadronic structure functions. The structure functions are expressed as
-convolutions of a set of massless hard coefficient functions and PDFs,
-and make use of the tabulated PDFs and streamlined interface.  They
-are provided such that they can be used directly for cross section
-computations in DIS or VBF, as implemented for example in {\tt
-  disorder}~\cite{Karlberg:2024hnl} and the {\tt proVBFH}
-package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
-
-The massless structure functions have been found to be in good
-agreement with those that can be obtained with
-\APFELPP{}~\cite{Bertone:2013vaa,Bertone:2017gds} (at the level of
-$10^{-5}$ relative precision).
-%
-The benchmarks with \APFELPP{} and the code used to carry them out are
-described in detail in Ref.~\cite{Bertone:2024dpm} and at
-\url{https://github.com/alexanderkarlberg/n3lo-structure-function-benchmarks}. A
-simplified version of that benchmark is also included in the \hoppet
-repository and can be found in
-\masterlink{benchmarking/structure\_functions\_benchmark\_checks.f90}.
-%
-Technical details on the implementation of the structure functions in
-\hoppet can be found in
-Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik,Bertone:2024dpm}, and here
-we mainly focus on the code interface.
-%A small sample program
-%that prints out the structure functions can be found in
-%\masterlink{example\_f90/structure\_functions\_example.f90}.
-
-The structure functions have been implemented including only QCD
-corrections up to N$^3$LO using both the exact and parametrised
-coefficient functions found in
-Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz,Blumlein:2022gpp},\footnote{Note
-that the piece presented in Ref.~\cite{Davies:2016ruz} has not been
-given in exact form. Only a parametrised version is available and
-is what is being used in \hoppet.}  and can make use of PDFs evolved
-at N$^3$LO as described in Sec.~\ref{sec:n3lo-evolution}. The
-structure functions can also be computed using PDFs interfaced through
-LHAPDF~\cite{LHAPDF}.
-
-\subsection{Initialisation}
-\label{sec:structure-funcs-init}
-
-The structure functions can be accessed by using 
-\repolink{src/structure_functions.f90}{structure\_functions} module.
-%
-They can also be accessed through the
-streamlined interface by prefixing \ttt{hoppet}, as described
-later in section~\ref{sec:structure-functions-streamlined}.
-%
-The description here corresponds to an intermediate-level interface, which
-relies on elements such as the \ttt{grid} and splitting functions
-having been initialised in the streamlined interface, through a call
-to \ttt{hoppetStart} or \ttt{hoppetStartExtended}, cf.\
-%
-\ifreleasenote
-Section~8 of Ref.~\cite{Salam:2008qg}.\footnote{Users needing a lower level
-  interface should inspect the code in \masterlink{src/structure\_functions.f90}.}
-\else
-Section~\ref{sec:vanilla}.\footnote{Users needing a lower level
-  interface should inspect the code in \masterlink{src/structure\_functions.f90}.}
-\fi
-%
-After this initialisation has been carried out, one calls
-\begin{lstlisting}
-  call StartStrFct(order_max [, nflav] [, scale_choice] &
-                  & [, constant_mu] [ ,param_coefs] [ ,wmass] [ ,zmass])
-\end{lstlisting}
-specifying as a minimum the perturbative order --- currently
-\ttt{order\_max} $ \le 4$ (\ttt{order\_max} $ =1$ corresponds to LO).
-
-If \ttt{nflav} is not passed as an argument, the structure functions
-are initialised to support a variable flavour-number scheme (the
-masses that are used at any given stage will be those set in the
-streamlined interface).
-%
-Otherwise a fixed number of light flavours is used, as indicated by
-\ttt{nflav}, which speeds up initialisation.
-%
-Note that specifying a variable flavour-number scheme only has an
-impact on the evolution and on $n_f$ terms in the coefficient
-functions.
-%
-The latter, however always assume massless quarks.
-%
-Hence in both the fixed and variable flavour-number scheme the
-structure functions should not be considered phenomenologically
-reliable if $Q$ is comparable to the quark mass.
-%
-%structure functions should only be considered reliable for $Q \gg m$.
-%\commentpn{Actually this is also true in a fixed flavour number
-%  scheme, as long as mass effects are not being included in the
-%  coefficient functions, i.e. for $Q\gg m$ variable flavour is the
-%  same as fixed flavours (including the flavour of mass $m$ as a light
-%  flavour.)}\ak{I added a mentioning of the fixed flavour
-%  limitations as well}
-%\ak{Need to adapt this to what the code acutally does}
-Together \ttt{xR}, \ttt{xF}, \ttt{scale\_choice}, and \ttt{constant\_mu} control
-the renormalisation and factorisation scales and the degree of
-flexibility that will be available in choosing them at later stages.
-%
-Specifically the (integer) \ttt{scale\_choice}
-argument should be one of the following values (defined in the
-\ttt{structure\_functions} module):
-\begin{itemize}
-\item \ttt{scale\_choice\_Q} (default) means that the code will always
-  use $Q$ multiplied by \ttt{xR} or \ttt{xF} as the renormalisation
-  and factorisation scale respectively (with \ttt{xR} or \ttt{xF} as
-  set at initialisation).
-\item \ttt{scale\_choice\_fixed} corresponds to a fixed scale
-  \ttt{constant\_mu}, multiplied by \ttt{xR} or \ttt{xF} as set at
-  initialisation.
-\item \ttt{scale\_choice\_arbitrary} allows the user to choose
-  arbitrary scales at the moment of evaluating the structure
-  functions.
-  %
-  In this last case, the structure functions are saved as separate arrays, 
-  one for each perturbative order, and with dedicated additional arrays
-  for terms proportional to logarithms of $Q/\mu_F$. 
-  % 
-  This makes for a slower evaluation compared to the two other
-  scale choices.
-\end{itemize}
-%
-% The default value for \ttt{scale\_choice} is \ttt{scale\_choice\_Q} which means that $Q$
-% multiplied by \ttt{xR} or \ttt{xF} is used as the renormalisation or
-% factorisation scale respectively.
-% %
-% The choice \ttt{scale\_choice\_fixed} corresponds to a fixed scale
-% \ttt{constant\_mu} (multiplied by \ttt{xR} or \ttt{xF}).
-% %
-% Should a user wish to use some arbitrary scale choice,
-% \ttt{scale\_choice} should be set to \ttt{scale\_choice\_arbitrary}.
-% %
-% \gps{Do we want to introduce some constants such as
-%   \ttt{scale\_choice\_Q=1}, \ttt{scale\_choice\_fixed=0}, \ttt{scale\_choice\_arbitrary=2}?} \ak{Yes, and done!}
-% %
-% In this last case, the structure functions are saved as arrays not only in
-% $Q$ but also $\mu_R$ and $\mu_F$.
-% %
-% This makes for a slightly slower evaluation compared to the two other
-% scale choices.
-
-If \ttt{param\_coefs} is set to \ttt{.true.}\ (its default) then the
-structure functions are computed using the NNLO and N$^3$LO
-parametrisations found in
-Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},
-which are stated to have a relative precision of a few permille (order
-by order) except at particularly small or large values of $x$.
-%
-Otherwise
-the exact versions are used.\footnote{The LO and NLO coefficient
-functions are always exact as their expressions are very
-compact.}
-%
-This however means that the initialisation becomes slow (about two
-minutes rather than a few seconds).
-%
-Given the good accuracy of the parametrised coefficient functions,
-they are to be preferred for most applications.
-% 
-% and since the parametrised
-% expressions are good to a relative accuracy of $10^{-4}$ for most
-% values of $x$, it is recommended to use the parametrised option for
-% most applications.
-% 
-Note that the exact expressions also add to compilation time and need
-to be explicitly enabled with the \texttt{-DHOPPET\_USE\_EXACT\_COEF=ON}
-CMake flag (or the \ttt{--enable-exact-coefs} configure
-flag).\footnote{At N$^3$LO they rely on an extended version of
-  \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
-  is able to handle harmonic polylogarithms up to weight 5.}
-
-The masses of the electroweak vector bosons are used only to calculate
-the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$, which
-enters in the neutral-current structure functions.
-
-At this point all the tables that are needed for the structure
-functions have been allocated.
-%
-In order to fill the tables, one first needs to set up the running
-coupling and evolve the initial PDF with \ttt{hoppetEvolve}, as
-described in
-\ifreleasenote
-Section~8.2 of Ref.~\cite{Salam:2008qg}.
-\else
-Section~\ref{sec:vanilla_usage}.
-\fi
-
-%
-% Care should be taken here such that both the coupling and PDF
-% evolution are carried out at the correct perturbative order and with
-% mass thresholds as appropriate.
-%
-With the PDF table filled in the streamlined interface one calls
-\begin{lstlisting}
-  call InitStrFct(order[, separate_orders] [, xR] [, xF] [, flavour_decomposition])
-\end{lstlisting}
-specifying the order at which one would like to compute the structure
-functions.
-%
-The logical flag \ttt{separate\_orders} should be set to \ttt{.true.}\ if one
-wants access to the individual coefficients of the perturbative
-expansion as well as the sum up to some maximum order, \ttt{order}.
-%
-With \ttt{scale\_choice\_Q} and \ttt{scale\_choice\_fixed}, the
-default of \ttt{.false.}\ causes only the sum over perturbative orders
-to be stored.
-%
-This gives faster evaluations of structure functions because it is
-only necessary to interpolate the sum over orders, rather than
-interpolate one table for each order.
-%
-With \texttt{scale\_choice\_arbitrary}, the default is \ttt{.true.},
-which is the only allowed option, because separate tables for each
-order are required for the underlying calculations.
-
-Finally, the optional flag \ttt{flavour\_decomposition} controls an
-experimental feature of giving access to the structure functions
-decomposed into their underlying quark flavours without the associated
-vector boson couplings. It is currently only possible to access the
-structure functions in this way up to NLO, and since the feature is
-not fully mature we invite interested readers to inspect the source
-code directly for more information.
-
-\subsection{Accessing the Structure Functions}
-\label{sec:structure-funcs-access}
-At this point the structure functions can be accessed as in the following example
-\begin{lstlisting}
-  real(dp) :: ff(-6:7), x, Q, muR, muF
-  
-  call StartStrFct(order_max = 4, scale_choice = scale_choice_Q)
-  [...]
-  call InitStrFct(order_max = 4)
-  ff = StrFct(x, Q[, muR] [, muF])
-\end{lstlisting}
-at the value $x$ and $Q$.
-%\gps{Added explicit scale choice arg in init}\ak{Not sure I understand, that's not the signature of the routine}
-%
-With \ttt{scale\_choice\_arbitrary}, the \ttt{muR} and \ttt{muF}
-arguments must be provided.
-%
-With other scale choices, they do not need to be provided, but if they
-are then they should be consistent with the original scale choice.
-%
-The structure functions in this example are stored in the
-array \ttt{ff}. The components of this array can be accessed through
-the indices \gps{are the names obvious enough?}
-\begin{lstlisting}
-  integer, parameter :: iF1Wp = 1   
-  integer, parameter :: iF2Wp = 2   
-  integer, parameter :: iF3Wp = 3   
-  integer, parameter :: iF1Wm =-1   
-  integer, parameter :: iF2Wm =-2   
-  integer, parameter :: iF3Wm =-3   
-  integer, parameter :: iF1Z  = 4   
-  integer, parameter :: iF2Z  = 5   
-  integer, parameter :: iF3Z  = 6   
-  integer, parameter :: iF1EM =-4   
-  integer, parameter :: iF2EM =-5   
-  integer, parameter :: iF1gZ = 0  
-  integer, parameter :: iF2gZ =-6 
-  integer, parameter :: iF3gZ = 7  
-\end{lstlisting}
-For instance one would access the electromagnetic $F_1$ structure
-function through \ttt{ff(iF1EM)}. It is returned at the \ttt{order\_max}
-that was specified in \ttt{InitStrFct}.
-%
-The structure functions can also be accessed order by order if the
-\ttt{separate\_orders} flag was set to \ttt{.true.} when initialising.
-%
-They are then obtained as follows
-\begin{lstlisting}
-  real(dp) :: flo(-6:7), fnlo(-6:7), fnnlo(-6:7), fn3lo(-6:7), x, Q, muR, muF
-  [...]
-  call InitStrFct(4, .true.)
-  flo   = F_LO(x, Q, muR, muF)
-  fnlo  = F_NLO(x, Q, muR, muF)
-  fnnlo = F_NNLO(x, Q, muR, muF)
-  fn3lo = F_N3LO(x, Q, muR, muF)
-\end{lstlisting}
-The functions return the individual contributions at each order in
-$\as$, including the relevant factor of $\as^n$.
-%
-Hence the sum of \ttt{flo}, \ttt{fnlo}, \ttt{fnnlo}, and
-\ttt{fn3lo} would be equal to the full structure function at N$^3$LO as
-contained in \ttt{ff} in the example above.
-%
-Note that in the \ttt{F\_LO} etc.\ calls, the \ttt{muR} and \ttt{muF}
-arguments are not optional and that when a prior scale choice has been
-made (e.g. \ttt{scale\_choice\_Q}) they are assumed to be consistent
-with that prior scale choice.
-
-An example of structure function evaluations using the Fortran~90
-interface is to be found in
-\repolink{example_f90/structure_functions_example.f90}{example\_f90/structure\_functions\_example.f90}. 
-%%
-%\gps{added this link}\ak{It is also at the beginning of the section}
-
-\subsection{Streamlined interface}
-\label{sec:structure-functions-streamlined}
-The structure functions can also be accessed through the streamlined
-interface, so that they may be called for instance from C/\CPP{}. The
-functions to be called are very similar to those described above. In
-particular a user should call either
-\begin{lstlisting}
-  call hoppetStartStrFct(order_max)
-\end{lstlisting}
-with \ttt{order\_max} \gps{is that not \ttt{order\_max}$-1$?}
-%
-the maximal
-order in $\as$ or, alternatively, the extended version of the interface
-\ttt{hoppetStartStrFctExtended} which takes all the same arguments as
-\ttt{StartStrFct} described above. One difference is that in order to
-use a variable flavour scheme the user should set \ttt{nflav} to a
-negative value. After evolving or reading in a PDF, the user then calls
-\begin{lstlisting}
-  call hoppetInitStrFct(order, separate_orders)
-\end{lstlisting}
-to initialise the actual structure functions. The structure functions
-can then be accessed through the subroutines
-\begin{lstlisting}
-  real(dp) :: ff(-6:7), flo(-6:7), fnlo(-6:7), fnnlo(-6:7), fn3lo(-6:7), x, Q, muR, muF
-  [...]
-  call hoppetStrFct(x, Q, muR, muF, ff)        ! Full structure function
-  ! or instead, without muR and muF
-  call hoppetStrFctNoMu(x, Q, ff)              ! Full structure function
-  call hoppetStrFctLO(x, Q, muR, muF, flo)     ! LO term
-  call hoppetStrFctNLO(x, Q, muR, muF, fnlo)   ! NLO term
-  call hoppetStrFctNNLO(x, Q, muR, muF, fnnlo) ! NNLO term
-  call hoppetStrFctN3LO(x, Q, muR, muF, fn3lo) ! N3LO term
-\end{lstlisting}
-The \CPP{} header contains indices for the structure functions and scale
-choices, which are all in the \ttt{hoppet} namespace.
-%
-\begin{lstlisting}
-  const int iF1Wp = 1+6;
-  const int iF2Wp = 2+6;
-  const int iF3Wp = 3+6;
-  const int iF1Wm =-1+6;
-  const int iF2Wm =-2+6;
-  const int iF3Wm =-3+6;
-  const int iF1Z  = 4+6;
-  const int iF2Z  = 5+6;
-  const int iF3Z  = 6+6;
-  const int iF1EM =-4+6;
-  const int iF2EM =-5+6;
-  const int iF1gZ = 0+6;
-  const int iF2gZ =-6+6;
-  const int iF3gZ = 7+6;
-
-  const int scale_choice_fixed     = 0;
-  const int scale_choice_Q         = 1;
-  const int scale_choice_arbitrary = 2;
-\end{lstlisting}
-Note that in \CPP{} the structure function indices start from 0 and that the \CPP{}
-array that is to be passed to functions such as \ttt{hoppetStrFct}
-would be defined as \ttt{double ff[14]}.
-
-An example of structure function evaluations using the \CPP{} version
-of the streamlined interface is to be found in
-\repolink{example_cpp/structure_functions_example.cc}{example\_cpp/structure\_functions\_example.cc}
-and a Python example is similarly to be found at
-\masterlink{example_py/structure_function_example.py}.
-
-Finally we present a small update on the results presented in
-Ref.~\cite{Bertone:2024dpm}. That reference was published before the
-full \ntlo evolution had been implemented in \hoppet, and the \ntlo
-structure functions were therefore obtained with NNLO evolution. A
-full update of the tables and plots is beyond the scope of the current
-work, but for illustrative purposes we present here an updated version
-of Fig.~3 of Ref.~\cite{Bertone:2024dpm}.
-%
-The update uses the full \ntlo evolution and is shown as
-Fig.~\ref{fig:perturbativeconvergence}.
-%
-\begin{figure}[tb!]
-  \centering\includegraphics[width=0.49\textwidth]{figs-v2/PerturbativeConvergence_Q_2_GeV.pdf}
-  \centering\includegraphics[width=0.49\textwidth]{figs-v2/PerturbativeConvergence_Q_10_GeV.pdf}
-  \caption{The structure function $F_2^{\rm NC}$ plotted as a function
-    of $x_{\rm B}$ in the range $[10^{-5}:0.9]$ at $Q=2$~GeV (left)
-    and $Q=10$~GeV (right). Each plot displays the curves at LO, NLO,
-    NNLO, and N$^3$LO with the lower panel showing the ratio to
-    N$^3$LO. Adapted from Ref.~\cite{Bertone:2024dpm} using the full
-    \ntlo evolution.}
-  \label{fig:perturbativeconvergence}
-\end{figure}
-%
-It gives the $F_2^{\rm NC}$ \gps{corresponds to index iF2EM. Confusing?} structure function at various
-perturbative orders for two values of $Q$ ($2$ GeV and $10$ GeV). It
-also shows the relative difference of the various orders with respect
-to \ntlo.
-%
-As can be seen by comparing to the original figures, the
-\ntlo evolution has the effect at low $Q$ of increasing the \ntlo $F_2^{\rm NC}$
-slightly, at least for $x$-values in the range $10^{-4}$ to $10^{-1}$. 
-%
-This is most easily seen from the shifts in the LO, NLO and NNLO
-curves in the lower panel, which are all ratios to the \ntlo (with
-\ntlo evolution here, without in Ref.~\cite{Bertone:2024dpm}.)
 
 \section{Python interface}
 \label{sec:pyinterface}
