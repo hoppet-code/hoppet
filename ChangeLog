@@ -1,3 +1,14 @@
+2025-09-29 gavin
+
+	* src/welcome_message.f90:
+	added a hoppet_version module with a public function
+	HoppetVersion that returns a Fortran string with the version
+	number. 
+	
+	This is now used in the welcome message, which also has
+	some bold added to it and rewording to make things more
+	compact.
+
 2025-09-29 Gavin + Alexander
 
 	* src/hoppet_term.f90: *** ADDED ***
