@@ -66,14 +66,13 @@ three different
 choices corresponding to upper and lower edges of an uncertainty band and their
 average. 
 %
-The user can control which one to use through the 
-\ttt{n3lo\_splitting\_variant} which takes the values
+The user can control which one to use by setting the
+\ttt{n3lo\_splitting\_variant} variable in the
+\repolink{src/dglap_choices.f90}{dglap\_choices} module.
+%
+Allowed values are
 \ttt{n3lo\_splitting\_Nfitav} (default),
 \ttt{n3lo\_splitting\_Nfiterr1}, or \ttt{n3lo\_splitting\_Nfiterr2}.
-%
-\gps{Reading this it's not very clear what to do. We should be
-  explicit, e.g.\ set a variable in a given module. Similarly
-  below. Perhaps we also want to put an itemize?}
 %
 When the exact splitting functions become available they will
 correspond to \ttt{n3lo\_splitting\_exact}.
@@ -82,11 +81,15 @@ Similarly if a set of parametrisations of the exact splitting
 functions become available they will correspond to
 \ttt{n3lo\_splitting\_param}.
 
-Since it is expected that more precise approximations will become
-available in the future we have also implemented a flag,\gps{flag=boolean?}
-\ttt{n3lo\_splitting\_approximation}, in
-\masterlink{src/dglap\_choices.f90} that controls which approximations
-to use. By default it uses the most recent set of approximations by
+It is expected that more precise approximations will become
+available in the future.
+%
+The user can control which series of approximation to use, again by setting
+a variable in \repolink{src/dglap_choices.f90}{dglap\_choices}, called
+\ttt{n3lo\_splitting\_approximation}.\footnote{In the streamlined
+  interface, instead call \ttt{hoppetSetApproximateDGLAPN3LO(splitting\_approx)}.}
+%
+By default it is set to the most recent set of approximations by
 the FHMPRUVV group. At the time of writing it can take one of three values:
 %
 \begin{itemize}
@@ -133,14 +136,16 @@ benchmarking tables of Ref.~\cite{Cooper-Sarkar:2024crx} because they
 do not include the mass thresholds in the \ntlo evolution.
 %
 To facilitate comparisons we therefore additionally provide
-Table~\ref{tab:n3lo-evolve-nf4}, correspond to fixed-flavour ($n_f=4$)
+Table~\ref{tab:n3lo-evolve-nf4}, corresponding to fixed-flavour ($n_f=4$)
 evolution, with the choice of
-\ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}.
+\ttt{n3lo\_splitting\_approximation\_up\_to\_2310\_05744}.
 %
 Of the MSHT and NNPDF results, the NNPDF results (Table~2 of
 Ref.~\cite{Cooper-Sarkar:2024crx}) are closer to ours.
 
-
+The results in these tables can be regenerated with the help of the
+following script, which uses the Python interface of Section~\ref{sec:pyinterface}:
+\masterlink{benchmarking/tabulation_crosscheck_2406_16188.py}.
 
 \begin{table}[p]
   %  \footnotesize \centering
@@ -206,7 +211,6 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
     functions use the
     \ttt{n3lo\_splitting\_approximation =
       n3lo\_splitting\_approximation\_up\_to\_2310\_05744} choice.
-    \gps{text says 2404}
     %
     This table can be directly compared to tables 1 and 2 in Ref.~\cite{Cooper-Sarkar:2024crx}}
   \label{tab:n3lo-evolve-nf4}
@@ -258,7 +262,7 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
     In the lower plots, the initial condition is the
     \ttt{NNPDF40\_pch\_nnlo\_as\_01180} PDF~\cite{NNPDF:2021njg} at $Q_0$.
     %
-    The left-hand plots show the ratio with for \ntlo evolution,
+    The left-hand plots show the ratio with \ntlo evolution
     including \ntlo mass thresholds, while the right-hand plots show
     the evolution without the \ntlo mass thresholds.
     %
@@ -564,22 +568,22 @@ are then they should be consistent with the original scale choice.
 %
 The structure functions in this example are stored in the
 array \ttt{ff}. The components of this array can be accessed through
-the indices \gps{are the names obvious enough?}
+the indices 
 \begin{lstlisting}
-  integer, parameter :: iF1Wp = 1   
-  integer, parameter :: iF2Wp = 2   
-  integer, parameter :: iF3Wp = 3   
-  integer, parameter :: iF1Wm =-1   
-  integer, parameter :: iF2Wm =-2   
-  integer, parameter :: iF3Wm =-3   
-  integer, parameter :: iF1Z  = 4   
-  integer, parameter :: iF2Z  = 5   
-  integer, parameter :: iF3Z  = 6   
-  integer, parameter :: iF1EM =-4   
-  integer, parameter :: iF2EM =-5   
-  integer, parameter :: iF1gZ = 0  
-  integer, parameter :: iF2gZ =-6 
-  integer, parameter :: iF3gZ = 7  
+  integer, parameter :: iF1Wp = 1 !< F1 W+
+  integer, parameter :: iF2Wp = 2 !< F2 W+
+  integer, parameter :: iF3Wp = 3 !< F3 W+
+  integer, parameter :: iF1Wm =-1 !< F1 W-
+  integer, parameter :: iF2Wm =-2 !< F2 W-
+  integer, parameter :: iF3Wm =-3 !< F3 W-
+  integer, parameter :: iF1Z  = 4 !< F1 Z 
+  integer, parameter :: iF2Z  = 5 !< F2 Z
+  integer, parameter :: iF3Z  = 6 !< F3 Z
+  integer, parameter :: iF1EM =-4 !< F1 $\gamma$
+  integer, parameter :: iF2EM =-5 !< F2 $\gamma$
+  integer, parameter :: iF1gZ = 0 !< F1 $\gamma$Z interference
+  integer, parameter :: iF2gZ =-6 !< F2 $\gamma$Z interference
+  integer, parameter :: iF3gZ = 7 !< F3 $\gamma$Z interference
 \end{lstlisting}
 For instance one would access the electromagnetic $F_1$ structure
 function through \ttt{ff(iF1EM)}. It is returned at the \ttt{order\_max}
@@ -620,16 +624,19 @@ interface is to be found in
 \label{sec:structure-functions-streamlined}
 The structure functions can also be accessed through the streamlined
 interface, so that they may be called for instance from C/\CPP{}. The
-functions to be called are very similar to those described above. In
-particular a user should call either
+functions to be called are very similar to those described above.
+%
+For simple usage one can call 
 \begin{lstlisting}
   call hoppetStartStrFct(order_max)
 \end{lstlisting}
-with \ttt{order\_max} \gps{is that not \ttt{order\_max}$-1$?}
+where \ttt{order\_max-1}
 %
-the maximal
-order in $\as$ or, alternatively, the extended version of the interface
-\ttt{hoppetStartStrFctExtended} which takes all the same arguments as
+is the maximal
+power of $\as$.
+%
+Alternatively, the extended version of the interface,
+\ttt{hoppetStartStrFctExtended},  takes all the same arguments as
 \ttt{StartStrFct} described above. One difference is that in order to
 use a variable flavour scheme the user should set \ttt{nflav} to a
 negative value. After evolving or reading in a PDF, the user then calls
@@ -705,8 +712,8 @@ Fig.~\ref{fig:perturbativeconvergence}.
   \label{fig:perturbativeconvergence}
 \end{figure}
 %
-It gives the $F_2^{\rm NC}$ \gps{corresponds to index iF2EM. Confusing?} structure function at various
-perturbative orders for two values of $Q$ ($2$ GeV and $10$ GeV). It
+It shows the full charged-lepton neutral current $F_2$ structure function ($F_2^{\rm NC}$) at various
+perturbative orders, for two values of $Q$ ($2$ GeV and $10$ GeV). It
 also shows the relative difference of the various orders with respect
 to \ntlo.
 %
@@ -782,7 +789,11 @@ accuracy. For instance, if one wished to reach N$^3$LO accuracy in the
 phenomenological counting, one would need to include 3-loop mixed
 QCD-QED splitting functions at order $\alpha \as^2$, which contribute
 at order $\alpha \as^2 L \sim \as^3$ but are currently not
-available, and the well-known 2-loop QED running coupling at order $\alpha \alpha_s$, which contributes at order $\alpha^2 \as L^2 \sim \as^3$.
+available, the full 2-loop pure QED splitting functions~\cite{deFlorian:2016gvk}, 
+%
+and the 2-loop mixed QED-QCD contributions to the running
+of the QED coupling, which contribute at order $\alpha^2 \as L^2 \sim \as^3$
+(see e.g.\ \cite{Cieri:2018sfk}). 
 %\commentpn{I would put the comma differently (as before, Gavin decides):
 %   at order $\alpha \as^2$, which contribute
 %at order $\alpha \as^2 L \sim \as^3$ but are currently not
@@ -792,14 +803,17 @@ available, and the well-known 2-loop QED running coupling at order $\alpha \alph
 %  splitting exists, $\alpha\as^2$ does not?}
 %
 
-
-
-\gps{I found the next section quite hard reading, especially coming so
-  early; options include moving the whole QED section later, or
-  putting the streamlined part first, with the \ttt{iflv\_photon}
-  specified there etc.}
+The rest of this section is structured as follows:
+Section~\ref{sec:qed-implementation} gives a technical discussion of
+the implementation of the QED evolution.
+%
+Some readers may prefer to skip or skim this on a first reading.
+%
+Section~\ref{sec:qed-streamlined} shows how to get QED evolution in
+the streamlined interface, which is relatively straightforward.
 
 \subsection{Implementation of the QED extension}
+\label{sec:qed-implementation}
 
 \myparagraph{QED coupling}
 
@@ -1143,6 +1157,7 @@ evolution is not supported.
 
 
 \subsection{Streamlined interface with QED effects}
+\label{sec:qed-streamlined}
 The streamlined interface including QED effects works as in the case of pure QCD evolution.
 One has to add the following call
 \begin{lstlisting}
@@ -1218,10 +1233,10 @@ for pointers.
 %
 A number of \CPP routines
 fill an array of PDF flavours that is passed as a pointer
-argument\gps{rephrased}.
+argument.
 %
-Instead in Python, those routines return a \gps{sometimes numpy?}
-Python array directly.
+Instead in Python, those routines return a
+Python list directly.
 %
 For instance, where in \CPP{}
 one might have the call
@@ -1246,7 +1261,7 @@ instead in Python one would have
   pdf = hp.Eval(x,Q)
 \end{lstlisting}
 This is relevant not just for evaluation of PDFs, but also in setting
-initial conditions. \gps{tried to be clearer in what comes next}
+initial conditions. 
 %
 For example the \ttt{Assign}, \ttt{CachedEvolve}, and
 \ttt{Evolve} routines should be passed a function
@@ -1255,13 +1270,20 @@ of
 % argument that is a flavour array PDF interface as an input in
 % the streamlined interface, now instead take a function of
 \ttt{x} and
-\ttt{Q} that returns a \gps{numpy?} Python array of flavours (see the
+\ttt{Q} that returns an object that corresponds to array of flavours
+(it can be a \ttt{numpy} array of a Python list; see the
 \ttt{hera\_lhc(x,Q)} function in
 \repolink{example\_py/tabulation_example.py}{tabulation\_example.py}
 for an explicit example).
 
 In addition to the examples provided in
-\repolink{example\_py/}{example\_py/} we have also developed a small tool that loads a grid from LHAPDF at an initial scale and evolves it with \hoppet{} over a large range of $Q$. The resulting grids are then compared between \hoppet{} and LHAPDF to determine the relative accuracy of the LHAPDF grids. The tool, along with some documentation, can be found at \url{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}.
+\repolink{example\_py/}{example\_py/} we have also developed a small
+tool that loads a grid from LHAPDF at an initial scale and evolves it
+with \hoppet{} over a large range of $Q$. The resulting grids are then
+compared between \hoppet{} and LHAPDF to determine the relative
+accuracy of the LHAPDF grids. The tool, along with some documentation,
+can be found at
+\url{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}.
 
 \section{CMake build option}
 \label{sec:cmake}
@@ -1282,17 +1304,22 @@ series, but it is to be considered deprecated and it does not provide
 all functionality, e.g.\ building the Python extension.
 
 For a typical user it will be enough to invoke the following lines
-from the main directory \gps{This or preferred \ttt{cmake --build
-    build} etc?}\gps{also added ctest}
+from the main directory 
 \begin{lstlisting}
-  mkdir build; cd build
-  cmake ..
-  make [-j]
-  ctest [-j8]
-  make install [-j]
+  cmake -S . -B build
+  cmake --build build -j
+  ctest --test-dir build [-j8]
+  cmake --install build
 \end{lstlisting}
-This will compile and install \hoppet, along with both the streamlined
-and Python interfaces.\gps{update if we change Python?}
+% 
+%   mkdir build; cd build
+%   cmake ..
+%   make [-j]
+%   ctest [-j8]
+%   make install [-j]
+% 
+This will compile and install \hoppet, along with the streamlined interface.
+and Python interfaces.
 %
 Note that \ttt{make install} will typically
 install in a location that requires root privileges, unless a user has
@@ -1302,19 +1329,23 @@ be passed to CMake. They are documented in
 \repolink{CMakeLists.txt}{CMakeLists.txt} and can be printed on screen
 by a call to \ttt{cmake -LH ..} from the \ttt{build} directory.
 
-Of particular note to most users are \gps{check Python on/off}
+Of particular note to most users are 
 \begin{lstlisting}
   option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
   option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
   option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
   option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
-  option(HOPPET_BUILD_PYINTERFACE "Build python interface." ON)
+  option(HOPPET_BUILD_PYINTERFACE "Build python interface." OFF)
   option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
   option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
 \end{lstlisting}
 They can be set in the usual \ttt{cmake} way, e.g.\ \ttt{cmake ..\
   -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet with the exact
 coefficient functions.
+%
+Note that the Python interface is not compiled by default, because we
+anticipate that users of Python will prefer to obtain \hoppet through
+\ttt{pip install hoppet}.
 
 \section{Saving LHAPDF grids}
 \label{sec:lhapdf}
@@ -1662,7 +1693,6 @@ At N$^3$LO the evolution picture is almost identical to that at NNLO,
 but the initialisation times are significantly larger, in the range
 $4-15\, \mathrm{s}$, rather than a fraction of a second.
 %
-\gps{much rephrasing of what follows:}
 This is dominated by the extra time that it takes to initialise the
 preliminary version of the code for the exact mass threshold functions
 of Ref.~\cite{BlumleinCode}.
@@ -1785,7 +1815,7 @@ It compares evolution as in Fig.~\ref{fig:main}, followed by
 interpolation with a given order.
 %
 It illustrates the significant loss in accuracy when decreasing
-the interpolation order below $4$.\gps{gain$\to$loss}
+the interpolation order below $4$.
 %
 For orders of $4$ or higher, the limitation on accuracy is, however,
 no longer just the interpolation order during PDF evaluation, but also
@@ -1946,8 +1976,9 @@ can check speed on their hardware.
   $\ttt{dlnlnQ}=\ttt{dy}/4$, with $\ttt{ymax} = 14$. 
   \\
   %
-  $^\dagger\,$Note that in its Fortran (\ttt{EvolvePDF(...)}) and Python (\ttt{pdf.xfxQ(...)})
-  interfaces, \gps{have we checked Python?} this version of
+  $^\dagger\,$Note that in its Fortran (\ttt{EvolvePDF(...)},
+  \ttt{lhapdf\_xfxq(...)}) and Python (\ttt{pdf.xfxQ(...)}) 
+  interfaces, this version of
   LHAPDF loops over an underlying call to single-flavour evaluation
   (\ttt{double PDF::xfxQ(int id, double x, double q))}), 
   which is why it is significantly slower than the \CPP interface,
@@ -1974,10 +2005,10 @@ As concerns Fortran, there are straightforward modifications to LHAPDF
 that would improve its speed and these have been proposed to the
 LHAPDF authors.
 
-\gps{added:} The PDF and $\alpha_s$ evaluation routines in \hoppet are
+The PDF and $\alpha_s$ evaluation routines in \hoppet are
 thread safe.
 %
-Other parts of the code, notably initialisation and evolution are not.
+Other parts of the code, notably initialisation and evolution, are not.
 
 % \comment{continue here}is only
 % interested in fast PDF access, with similar accuracy as can typically

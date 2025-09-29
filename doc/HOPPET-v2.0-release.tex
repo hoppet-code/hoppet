@@ -69,7 +69,7 @@ evolution code written in modern Fortran,\footnote{This release of
 \hoppet makes use of features introduced in Fortran~2008, for example
 its \ttt{abstract interface}, and hence a Fortran~2008 compliant
 compiler is now needed. The code has been tested to compile and run
-with \texttt{gfortran v10.5.0}\gps{updated to reflect CI} and later, and the 2025 version of the
+with \texttt{gfortran v10.5.0} and later, and the 2025 version of the
 Intel compiler \texttt{ifx}.}  with interfaces also for C/\CPP{} and
 earlier dialects of Fortran.
 %
@@ -112,8 +112,7 @@ for the field.
 This release note documents three major additions to \hoppet, made
 available as part of release~2.0.0: 
 %
-(1) support for QCD evolution at N$^3$LO in the (zero mass)\gps{isn't
-  evolution always in the ZM scheme?} variable
+(1) support for QCD evolution at N$^3$LO in the (zero mass) variable
 flavour number scheme (VFNS)~\cite{Buza:1996wv} (Section~\ref{sec:n3lo-evolution});
 %
 (2) support for the
@@ -175,19 +174,19 @@ small set of parameters.
 
 \section*{Acknowledgements}
 
-\comment{Add Valerio}
-
-We gratefully acknowledge Luca Buonocore for his
-implementation of the $P_{lq}$ splitting function in the QED code,
-Andrii Verbitskyi for contributing the initial version of the CMake
-build system,
-%
-and Melissa van Beekveld for collaboration on options for speed
-improvements in the evaluation of tabulated PDFs.
-%
 We are grateful to Johannes Bl\"umlein for providing us with a
 pre-release version of the code in Ref.~\cite{BlumleinCode} and a
 suitable license for its use.
+%
+We also gratefully acknowledge Luca Buonocore for his implementation
+of the $P_{lq}$ splitting function in the QED code, Andrii Verbitskyi
+for contributing the initial version of the CMake build system,
+%
+and Melissa van Beekveld for collaboration on initial options for speed
+improvements in the evaluation of tabulated PDFs.
+%
+We thank Valerio Bertone for cross-checks of the  structure
+functions and PDF evolution with \APFELPP.
 %
 We also wish to thank Juan Rojo for useful discussions. 
 %
