@@ -15,8 +15,6 @@ def main():
     # Get commandline
     parser = argparse.ArgumentParser(description="Check of an LHAPDF grid against HOPPET evolution.")
     parser.add_argument('-pdf', type=str, default="PDF4LHC21_40", help='LHAPDF set name (default PDF4LHC21_40)')
-    parser.add_argument('-dy', type=float, default=0.05, help='dy for HOPPET evolution (default: 0.05)')
-    parser.add_argument('-Q0', type=float, default=1.0, help='Initial Q0 value (default: Qmin from LHAPDF)')
     parser.add_argument('-yorder', type=int, default=2, help='order for interpolation in y=ln1/x (default=2)')
     parser.add_argument('-lnlnQorder', type=int, default=2, help='order for interpolation in lnlnQ (default=2)')
 
