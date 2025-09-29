@@ -11,9 +11,11 @@ def main():
     Qmax = 1000.0
     dlnlnQ = dy/8.0
     order = -6
+
     # Start hoppet
+    # VFNS variant corresponds to table 1 of the HOPPET-v2 update note
+    hp.SetApproximateDGLAPN3LO(hp.n3lo_splitting_approximation_up_to_2410_08089)
     hp.StartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, hp.factscheme_MSbar)
-    
     asQ0 = 0.35
     Q0 = np.sqrt(2.0)
     # Do the evolution. 
