@@ -20,7 +20,8 @@ def main():
 
     args = parser.parse_args()
 
-    hp.lhapdf.load(args.pdf)
+    hlinfo = hp.lhapdf.load(args.pdf)
+    print("Checking that hlinfo is valid:", hlinfo is not None)
 
     # Overwrite the yorder and lnlnQorder interpolation orders
     hp.SetYLnlnQInterpOrders(args.yorder, args.lnlnQorder)
