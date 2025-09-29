@@ -33,7 +33,7 @@ module streamlined_interface
   !!     in future evolution of the code, we should aim to guarantee
   !!     that tables(0) remains the default PDF, even if the other
   !!     entries change
-  type(pdf_table), save :: tables(0:max_table_index)
+  type(pdf_table), save, target :: tables(0:max_table_index)
   logical,         save :: setup_done(0:max_table_index) = .false.
   integer,         save :: setup_nf(max_table_index)     = 0
   logical,         save :: alloc_already_done = .false.

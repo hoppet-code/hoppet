@@ -12,7 +12,7 @@ import argparse
 import sys
 import time
 
-def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_above_mb = False, 
+def load_lhapdf_assign_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_above_mb = False, 
                                     Q0_just_above_mc = False, 
                                     exact_nnlo_nf = False, exact_nnlo_splitting = False, 
                                     n3lo_splitting = '2410', FFN = -1, assign = False,
@@ -39,7 +39,8 @@ def load_lhapdf_start_evolve_hoppet(lhapdfname, Q0in, dy, nloopin = 0, Q0_just_a
     mc = p_lhapdf.quarkThreshold(4)
     mb = p_lhapdf.quarkThreshold(5)
     mt = p_lhapdf.quarkThreshold(6)
-
+    if(p_lhapdf.hasFlavor(6) == False): mt = 2*Qmax# If no top is defined set it to a high value
+    
     # Get alphas at Q0, and check that Q0 is not below lahpdf Qmin
     Q0 = max(Q0in, Qmin)
     eps = 1e-4
@@ -107,12 +108,12 @@ def main():
     parser.add_argument('-pdf', required=True, help='LHAPDF set name (required, ex. NNPDF30_nnlo_as_0118)')
     parser.add_argument('-dy', type=float, default=0.05, help='dy for HOPPET evolution (default: 0.05)')
     parser.add_argument('-Q0', type=float, default=1.0, help='Initial Q0 value (default: Qmin from LHAPDF)')
-    parser.add_argument('-yorder', type=int, default=6, help='order for interpolation in y=ln1/x (default of -1 uses same as evolution)')
-    parser.add_argument('-lnlnQorder', type=int, default=4, help='order for interpolation in lnlnQ (default=4)')
+    parser.add_argument('-yorder', type=int, default=2, help='order for interpolation in y=ln1/x (default=2)')
+    parser.add_argument('-lnlnQorder', type=int, default=2, help='order for interpolation in lnlnQ (default=2)')
 
     args = parser.parse_args()
 
-    load_lhapdf_start_evolve_hoppet(args.pdf, args.Q0, args.dy,yorder=args.yorder, lnlnQorder=args.lnlnQorder)
+    load_lhapdf_assign_hoppet(args.pdf, args.Q0, args.dy, yorder=args.yorder, lnlnQorder=args.lnlnQorder, assign = True)
 
     # Evaluate the PDFs at some x values and print them
     xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]

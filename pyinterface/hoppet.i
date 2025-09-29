@@ -54,7 +54,16 @@ For more examples look at https://github.com/hoppet-code/hoppet/tree/master/exam
 ") hoppet
 
 %module hoppet
-%include "std_string.i"  // This must be included in order to handle c strings
+%include "std_string.i"
+//%header %{
+//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+//#include <numpy/arrayobject.h>
+//%}
+//%include "numpy.i"
+//
+//%init %{
+//    import_array();
+//%}
 
 %pythoncode %{
   __author__ = "Frederic Dreyer, Alexander Karlberg, Paolo Nason, Juan Rojo, Gavin Salam, Giulia Zanderighi"
@@ -64,7 +73,7 @@ For more examples look at https://github.com/hoppet-code/hoppet/tree/master/exam
 #define SWIG_FILE_WITH_INIT
 #include "hoppet.h"
 #include <Python.h>
-
+//#include <numpy/arrayobject.h>
 // Check if the callback is a callable object and set it as a global
 // variable. This routine is used in the Assign, Evolve and
 // CachedEvolve functions, to handle the fact that the pdf_subrpoutine
@@ -82,16 +91,16 @@ For more examples look at https://github.com/hoppet-code/hoppet/tree/master/exam
 // initialized before calling the hoppetEval function. Defined as a
 // macro to avoid boilerplate code.
 # define CHECK_GLOBAL_PDF_INITIALIZED \
-    if (global_pdf == nullptr) { \
-        PyErr_SetString(PyExc_RuntimeError, "Global pdf array is not initialized"); \
-        return nullptr; \
-    }
+//    if (global_pdf == nullptr) { \
+//        PyErr_SetString(PyExc_RuntimeError, "Global pdf array is not initialized"); \
+//        return nullptr; \
+//    }
 
 # define CHECK_GLOBAL_STR_FNC_INITIALIZED \
-    if (global_str_fnc == nullptr) { \
-        PyErr_SetString(PyExc_RuntimeError, "Global structure function array is not initialized"); \
-        return nullptr; \
-    }
+//    if (global_str_fnc == nullptr) { \
+//        PyErr_SetString(PyExc_RuntimeError, "Global structure function array is not initialized"); \
+//        return nullptr; \
+//    }
 const unsigned int pdf_len          = 13; 
 const unsigned int qed_pdf_len      = 18; // 18 to have space for photon and leptons if needed
 const unsigned int str_fnc_len      = 14; // We have 14 structure functions (6 CC, 3 Z, 2 photon, 3 gammaZ)
@@ -164,6 +173,11 @@ void free_global_pdf() {
 }
 
 // Wrapper function to convert the pdf array to a Python list
+//static PyObject* pdf_to_array(double *pdf) {
+//    npy_intp dims[1] = {py_pdf_len};
+//    PyObject *array = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)pdf);
+//    return array;
+//}
 static PyObject* pdf_to_array(double *pdf) {
     PyObject *py_list = PyList_New(py_pdf_len);
     for (unsigned int i = 0; i < py_pdf_len; i++) {
@@ -189,6 +203,9 @@ void free_global_str_fnc() {
 
 // Wrapper function to convert the pdf array to a Python list
 static PyObject* str_fnc_to_array(double *str_fnc) {
+    //npy_intp dims[1] = {py_str_fnc_len};
+    //PyObject *array = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)str_fnc);
+
     PyObject *py_list = PyList_New(py_str_fnc_len);
     for (unsigned int i = 0; i < py_str_fnc_len; i++) {
         PyList_SetItem(py_list, i, PyFloat_FromDouble(str_fnc[i]));

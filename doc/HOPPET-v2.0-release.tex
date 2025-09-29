@@ -45,7 +45,7 @@ CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
   Additionally we describe a new Python interface, CMake build option,
   functionality to save a \hoppet table as an LHAPDF grid and update
   our performance benchmarks, including optimisations in
-  interpolating PDF tables.\gps{added last bit}
+  interpolating PDF tables.
 \end{abstract}
 
 \begin{keyword}
@@ -69,7 +69,7 @@ evolution code written in modern Fortran,\footnote{This release of
 \hoppet makes use of features introduced in Fortran~2008, for example
 its \ttt{abstract interface}, and hence a Fortran~2008 compliant
 compiler is now needed. The code has been tested to compile and run
-with \texttt{gfortran v9.5.0} and later and the 2025 version of the
+with \texttt{gfortran v10.5.0}\gps{updated to reflect CI} and later, and the 2025 version of the
 Intel compiler \texttt{ifx}.}  with interfaces also for C/\CPP{} and
 earlier dialects of Fortran.
 %
@@ -110,24 +110,27 @@ the continued development of tools such as \hoppet remains important
 for the field.
 
 This release note documents three major additions to \hoppet, made
-available as part of release~2.0.0: (1) support for QED evolution (Section~\ref{sec:qed-evolution}),
-originally developed as part of the LuxQED project for the evaluation
-of the photon density inside a proton and its extension to lepton
-distributions in the
-proton~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf};
+available as part of release~2.0.0: 
 %
-(2) support for QCD evolution at N$^3$LO in the (zero mass) variable
+(1) support for QCD evolution at N$^3$LO in the (zero mass)\gps{isn't
+  evolution always in the ZM scheme?} variable
 flavour number scheme (VFNS)~\cite{Buza:1996wv} (Section~\ref{sec:n3lo-evolution});
 %
-and (3) support for the
+(2) support for the
 determination of massless hadronic structure functions, as initially developed
 for calculations of vector-boson fusion, and later deep inelastic scattering, cross
 sections~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu,Karlberg:2024hnl}
 (Section~\ref{sec:structure-funcs}).
+%
+(3) support for QED evolution (Section~\ref{sec:qed-evolution}),
+originally developed as part of the LuxQED project for the evaluation
+of the photon density inside a proton and its extension to lepton
+distributions in the
+proton~\cite{Manohar:2016nzj,Manohar:2017eqh,Buonocore:2020nai,Buonocore:2021bsf};
 
-This release also includes a range of other smaller additions relative
+This release also includes a range of other additions relative
 to the original 1.1.0 release documented in \cite{Salam:2008qg}, in
-particular the addition of a new Python interface
+particular a Python interface
 (Section~\ref{sec:pyinterface}), a CMake-based build system
 (Section~\ref{sec:cmake}), and the ability to write LHAPDF grids
 (Section~\ref{sec:lhapdf}).
@@ -159,9 +162,9 @@ that they link with the new library name.}
 
 Version 2 of \hoppet brings major additions to its functionality.
 %
-These includes evolution up to N$^3$LO, QED evolution, massless
-structure function evaluation, a Python interface, a modern build
-system, functionality for writing LHAPDF grids and significant speed
+These includes evolution up to N$^3$LO, massless structure function
+evaluation, QED evolution, a Python interface, a modern build system,
+functionality for writing LHAPDF grids and significant speed
 improvements in the interpolation of its internal PDF tables.
 %
 \hoppet continues to provide a good combination of flexibility, speed
@@ -171,6 +174,8 @@ small set of parameters.
 
 
 \section*{Acknowledgements}
+
+\comment{Add Valerio}
 
 We gratefully acknowledge Luca Buonocore for his
 implementation of the $P_{lq}$ splitting function in the QED code,
@@ -186,7 +191,7 @@ suitable license for its use.
 %
 We also wish to thank Juan Rojo for useful discussions. 
 %
-GPS wishes to acknowledge funding from a Royal Society Research
+GPS acknowledges funding from a Royal Society Research
 Professorship (grant RP$\backslash$R$\backslash$231001) and from the Science and
 Technology Facilities Council (STFC) under grant ST/X000761/1.
 %
