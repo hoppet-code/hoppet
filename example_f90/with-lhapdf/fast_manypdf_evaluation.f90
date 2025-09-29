@@ -187,7 +187,7 @@ program fast_manypdf_evaluation
     end do
   end do
   call cpu_time(t2)
-  write(*,tfmt) blue//"EvalPdfTable_xQ   time per mem (all flav): ", (t2-t1)/npoints/npoints*1d9/size(many_tables), " ns"//reset
+  write(*,tfmt) blue//"EvalPdfTable_xQ(0D) time per mem (all flav): ", (t2-t1)/npoints/npoints*1d9/size(many_tables), " ns"//reset
 
 
   allocate(hoppetpdf1D(-6:6,0:ubound(many_tables,1) ))
@@ -195,11 +195,11 @@ program fast_manypdf_evaluation
   !write(*,*) "Benchmarking all", size(many_tables), " PDF members"
   do i = 1, npoints
     do j = 1, npoints
-      call EvalPdfTable1D_xQ(many_tables(:), xvals(i), qvals(j), hoppetpdf1D(:,:))
+      call EvalPdfTable_xQ(many_tables(:), xvals(i), qvals(j), hoppetpdf1D(:,:))
     end do
   end do
   call cpu_time(t2)
-  write(*,tfmt) blue//"EvalPdfTable1D_xQ time per mem (all flav): ", (t2-t1)/npoints/npoints*1d9/size(many_tables), " ns"//reset
+  write(*,tfmt) blue//"EvalPdfTable_xQ(1D) time per mem (all flav): ", (t2-t1)/npoints/npoints*1d9/size(many_tables), " ns"//reset
 
 
   !! ! One flavour at a time

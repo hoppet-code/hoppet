@@ -11,9 +11,10 @@
 	order variant is missing, it just loops over a call to the 
 	0D evaluation, which is not optimal.
 
+	renamed the scalar variannts to EvalPdfTable0D_yQ and EvalPdfTable0D_xQ
+	and added interface blocks so that EvalPdfTable_yQ resolves the right one.
 
-	Open questions include naming (e.g. whether we should overload the
-	0D and 1D variants), whether there are any other array variants we
+	Open questions include whether there are any other array variants we
 	should add, and whether there is any way to get this in a
 	streamlined interface.
 

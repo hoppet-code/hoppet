@@ -153,8 +153,17 @@ module pdf_tabulate
   public :: AddNfInfoToPdfTable
   public :: EvolvePdfTable, PreEvolvePdfTable, EvolvePdfTableQED
   public :: EvolvePdfTableGen
+
+  interface EvalPdfTable_yQ
+    module procedure EvalPdfTable0D_yQ, EvalPdfTable1D_yQ
+  end interface
+  interface EvalPdfTable_xQ
+    module procedure EvalPdfTable0D_xQ, EvalPdfTable1D_xQ
+  end interface
+  public :: EvalPdfTable0D_yQ, EvalPdfTable0D_xQ, EvalPdfTable1D_yQ, EvalPdfTable1D_xQ
   public :: EvalPdfTable_yQ, EvalPdfTable_xQ
-  public :: EvalPdfTable1D_yQ, EvalPdfTable1D_xQ
+
+  
   public :: EvalPdfTable_Q
   public :: EvalPdfTable_yQf, EvalPdfTable_xQf
   public :: WriteLHAPDFFromPdfTable
@@ -991,7 +1000,7 @@ contains
   !! If this is a generalised table, then val(:) should be as big as
   !! the number of flavours in the table and all will get set
   !! (including the "representation" flavour).
-  subroutine EvalPdfTable_yQ(tab,y,Q,val)
+  subroutine EvalPdfTable0D_yQ(tab,y,Q,val)
     type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: y, Q
     real(dp),    intent(out) :: val(iflv_min:)
@@ -1014,7 +1023,7 @@ contains
       call EvalPdfTable_yQ_any_order(tab,y,Q,val)      
     end if
     
-  end subroutine EvalPdfTable_yQ
+  end subroutine EvalPdfTable0D_yQ
 
   subroutine EvalPdfTable1D_xQ(tab,x,Q,val)
     type(pdf_table), intent(in), target :: tab(:)
@@ -1221,12 +1230,12 @@ contains
 
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
-  subroutine EvalPdfTable_xQ(tab,x,Q,val)
+  subroutine EvalPdfTable0D_xQ(tab,x,Q,val)
     type(pdf_table), intent(in), target :: tab
     real(dp),     intent(in) :: x, Q
     real(dp),    intent(out) :: val(iflv_min:)
     call EvalPdfTable_yQ(tab,-log(x),Q,val)
-  end subroutine EvalPdfTable_xQ
+  end subroutine EvalPdfTable0D_xQ
 
   !----------------------------------------------------------------
   !! sets the vector val(iflv_min:iflv_max) for the PDF at this x,Q.
