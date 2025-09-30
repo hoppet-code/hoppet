@@ -1269,10 +1269,9 @@ of
 % ets an
 % argument that is a flavour array PDF interface as an input in
 % the streamlined interface, now instead take a function of
-\ttt{x} and
-\ttt{Q} that returns an object that corresponds to array of flavours
-(it can be a \ttt{numpy} array of a Python list; see the
-\ttt{hera\_lhc(x,Q)} function in
+\ttt{x} and \ttt{Q} that returns an object that corresponds to array
+of flavours (it can be a \ttt{numpy}~\cite{Harris:2020xlr} array of a
+Python list; see the \ttt{hera\_lhc(x,Q)} function in
 \repolink{example\_py/tabulation_example.py}{tabulation\_example.py}
 for an explicit example).
 
@@ -1886,16 +1885,32 @@ to read in a PDF grid with LHAPDF, evaluate it at all \hoppet grid points and
 then use \hoppet for the interpolation, using a fine grid spacing and
 a $(2,2)$ interpolation choice.
 %
-We provide examples for how to do this in Fortran, \CPP, and Python:\\[0.2cm]
-\masterlink{example_f90/with-lhapdf/fast_pdf_evaluation.f90}, \\
-\masterlink{example_cpp/with-lhapdf/fast_pdf_evaluation.cc}, \\
-\masterlink{example_py/tabulation_example_lhapdf.py}. \\[0.2cm]
+We provide examples for how to do this in Fortran, \CPP, and Python:
+\begin{itemize}
+ \item \masterlink{example_f90/with-lhapdf/lhapdf_to_hoppet.f90}: it
+   uses the module \ttt{hoppet\_lhapdf} and the associated
+   \ttt{subroutine LoadLHAPDF(name, imem)}. The module is in the same
+   directory and can be copied over to a user's application.
+ \item
+   \masterlink{example_f90/with-lhapdf/lhapdf_to_hoppet_allmembers.f90},
+   same as above but the example shows how to efficiently read in all
+   LHAPDF members, and computes the PDF uncertainty,
+ \item \masterlink{example_cpp/with-lhapdf/lhapdf_to_hoppet.cc}, which
+   includes a routine called \ttt{void load\_lhapdf\_assign\_hoppet(const
+     string \& pdfname, int imem=0)} which can be directly copied over to a
+   user's application directly,
+ \item \masterlink{example_py/lhapdf_to_hoppet.py}, makes use
+   of \ttt{hoppet.lhapdf.load()} which can be
+   made accessible with \ttt{from hoppet import lhapdf}.
+\end{itemize}
 %
-The Fortran and \CPP examples are virtually identical.
+%The Fortran and \CPP examples are virtually identical.
 %
-In each of them, there is a
-routine called \ttt{load\_lhapdf\_assign\_hoppet} that can be directly
-copied over to a user's application.
+%In each of them, there is a routine called
+%\ttt{load\_lhapdf\_assign\_hoppet} that can be directly copied over to
+%a user's application. In Python we instead provide an internal
+%function \ttt{hoppet.lhapdf.load()} which can be made accessible
+%through \ttt{from hoppet import lhapdf}.
 %
 The PDF can then be evaluated in the usual
 way through a call to \ttt{hoppetEval} and likewise for the coupling
@@ -1918,13 +1933,22 @@ through \ttt{hoppetAlphaS}.\footnote{%
   indicate the value of the top mass used in the PDF fit, not an $n_f = 5
   \to 6$ threshold in the evolution.
   %
-  Users wishing to use the \hoppet $\as$ evaluation may therefore wish
-  to manually communicate a large top mass to \hoppet to avoid a
-  switch to $6$-flavour running.
+  The examples above all use a call similar to
+  \ttt{if(!pdf->hasFlavor(6)) mt = 2.0*Qmax;} which manually overrides
+  the top mass to a value outside the grid ranges if there is no top
+  quark present in the set.
+  %
+  %Users wishing to use the \hoppet $\as$ evaluation may therefore wish
+  %to manually communicate a large top mass to \hoppet to avoid a
+  %switch to $6$-flavour running.
 }
 %
 All three examples also print the timings to the screen so that users
-can check speed on their hardware.
+can check speed on their hardware. Note that these examples are not
+fully general, and caution should be exercised when using them. Users
+with more advanced requirements are invited to contact the \hoppet
+authors for assistance.
+
 
 %
 \begin{table}[htbp]
