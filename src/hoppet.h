@@ -426,10 +426,10 @@ extern "C" {
 
 
   /// Take a pointer to an array of C characters and if the version
-  /// string length is < maxlen-1, then fills the C-array with a null
-  /// terminated string with the version, and returns 0. If the version
-  /// string length is >= maxlen-1, then does not fill the C-array,
-  /// and returns the required length (including the null terminator).
+  /// string length is < maxlen-1, fill the C-array with a null
+  /// terminated string with the version, and return 0. If the version
+  /// string length is >= maxlen-1, then do not fill the C-array,
+  /// and return the required length (including the null terminator).
   int hoppetVersionC(char *cchar, int maxlen);
 
 }
