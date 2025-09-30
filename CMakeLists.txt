@@ -110,6 +110,12 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -recursive")
 endif()
 
+# flang (aka flang-new, LLVM) and on macOS
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang" AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  message(WARNING "Using flang (LLVMFlang, v21) on macOS has known issues building dynamic libraries; expect errors. "
+                  "Set -DCMAKE_Fortran_COMPILER=gfortran to force the use of gfortran instead")
+endif()
+
 
 # NVidia
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,NVHPC>:-Minform=warn;>")
