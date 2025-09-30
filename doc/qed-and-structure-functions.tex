@@ -328,7 +328,7 @@ and make use of the tabulated PDFs and streamlined interface.  They
 are provided such that they can be used directly for cross section
 computations in DIS or VBF, as implemented for example in {\tt
   disorder}~\cite{Karlberg:2024hnl} and the {\tt proVBFH}
-package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}.
+package~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu,Dreyer:2020urf,Dreyer:2020xaj}.
 
 The massless structure functions have been found to be in good
 agreement with those that can be obtained with
@@ -471,10 +471,13 @@ Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Mo
 which are stated to have a relative precision of a few permille (order
 by order) except at particularly small or large values of $x$.
 %
-Otherwise
-the exact versions are used.\footnote{The LO and NLO coefficient
-functions are always exact as their expressions are very
-compact.}
+Otherwise the exact versions are used.\footnote{The LO and NLO
+coefficient functions are always exact as their expressions are very
+compact. Note that for very large values of $x$ we switch to a
+large-$x$ expansion for the regular part of non-singlet coefficient
+functions at N$^3$LO, to avoid numerical instabilities in the exact
+expressions as discussed in Appendix A of
+Ref.~\cite{Bertone:2024dpm}.}
 %
 This however means that the initialisation becomes slow (about two
 minutes rather than a few seconds).
@@ -706,24 +709,29 @@ Fig.~\ref{fig:perturbativeconvergence}.
   \caption{The structure function $F_2^{\rm NC}$ plotted as a function
     of $x_{\rm B}$ in the range $[10^{-5}:0.9]$ at $Q=2$~GeV (left)
     and $Q=10$~GeV (right). Each plot displays the curves at LO, NLO,
-    NNLO, and N$^3$LO with the lower panel showing the ratio to
-    N$^3$LO. Adapted from Ref.~\cite{Bertone:2024dpm} using the full
-    \ntlo evolution.}
+    NNLO, and N$^3$LO with the middle panel showing the ratio to
+    N$^3$LO. The lowest panel shows the ratio of the \ntlo with NNLO
+    evolution to the full \ntlo result. Adapted from
+    Ref.~\cite{Bertone:2024dpm} using the full \ntlo evolution.}
   \label{fig:perturbativeconvergence}
 \end{figure}
 %
-It shows the full charged-lepton neutral current $F_2$ structure function ($F_2^{\rm NC}$) at various
-perturbative orders, for two values of $Q$ ($2$ GeV and $10$ GeV). It
-also shows the relative difference of the various orders with respect
-to \ntlo.
+It shows the full charged-lepton neutral current $F_2$ structure
+function ($F_2^{\rm NC}$) at various perturbative orders, for two
+values of $Q$ ($2$ GeV and $10$ GeV). It also shows the relative
+difference of the various orders with respect to \ntlo, and in the
+lower panel the ratio of the \ntlo result of
+Ref.~\cite{Bertone:2024dpm} to that obtained here with the full
+evolution.
 %
-As can be seen by comparing to the original figures, the
-\ntlo evolution has the effect at low $Q$ of increasing the \ntlo $F_2^{\rm NC}$
-slightly, at least for $x$-values in the range $10^{-4}$ to $10^{-1}$. 
+As can be seen by comparing to the original figures and from the lowest
+panel, the \ntlo evolution has the effect at low $Q$ of increasing the
+\ntlo $F_2^{\rm NC}$ by a few percent, at least for $x$-values in the range
+$10^{-4}$ to $10^{-1}$.
 %
-This is most easily seen from the shifts in the LO, NLO and NNLO
-curves in the lower panel, which are all ratios to the \ntlo (with
-\ntlo evolution here, without in Ref.~\cite{Bertone:2024dpm}.)
+%This is most easily seen from the shifts in the LO, NLO and NNLO
+%curves in the lower panel, which are all ratios to the \ntlo (with
+%\ntlo evolution here, without in Ref.~\cite{Bertone:2024dpm}.)
 
 
 % ======================================================================
@@ -1210,7 +1218,7 @@ prefix. The interface can be obtained from \ttt{PyPi} by invoking
 \begin{lstlisting}
   pip install hoppet
 \end{lstlisting}
-Alternatively the interface can be built by \ttt{Cmake} with
+Alternatively the interface can be built by CMake with
 \ttt{-DHOPPET\_BUILD\_PYINTERFACE=ON}. In both cases the interface can
 be imported into a \ttt{Python} instance through \ttt{import
   hoppet}.
@@ -1222,7 +1230,7 @@ at
 of how to use the interface, including in conjunction with
 LHAPDF~\cite{LHAPDF}). The interface uses SWIG (Simplified Wrapper and
 Interface Generator) which therefore needs to be available on the
-system if building with \ttt{Cmake}. It can be installed through most
+system if building with CMake. It can be installed through most
 package managers (e.g.\ \texttt{apt install swig}, \texttt{brew
   install swig}) but can also be obtained from the SWIG GitHub
 \href{https://github.com/swig}{repository}.

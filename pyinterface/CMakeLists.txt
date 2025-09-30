@@ -18,6 +18,8 @@ set_property(SOURCE hoppet.i PROPERTY CPLUSPLUS ON)
 # Remove or set to your actual module name, not __init__
 set_property(SOURCE hoppet.i PROPERTY SWIG_MODULE_NAME __init__)
 
+set(CMAKE_SWIG_FLAGS "-doxygen")
+
 swig_add_library(hoppet_swig LANGUAGE python SOURCES hoppet.i OUTPUT_DIR hoppet_swig)
 set_property(TARGET hoppet_swig PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
 target_include_directories(hoppet_swig PRIVATE ${NUMPY_SWIG_DIR} ${PROJECT_SOURCE_DIR}/src)
