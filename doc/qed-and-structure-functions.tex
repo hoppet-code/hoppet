@@ -1219,8 +1219,9 @@ prefix. The interface can be obtained from \ttt{PyPi} by invoking
   pip install hoppet
 \end{lstlisting}
 Alternatively the interface can be built by CMake with
-\ttt{-DHOPPET\_BUILD\_PYINTERFACE=ON}. In both cases the interface can
-be imported into a \ttt{Python} instance through \ttt{import
+\ttt{-DHOPPET\_BUILD\_PYINTERFACE=ON} (cf.\ Section~\Ref{sec:cmake}
+for details on building with CMake). In both cases the interface
+can be imported into a \ttt{Python} instance through \ttt{import
   hoppet}.
 %
 For a simple tabulation example, the user should take a look
@@ -1308,7 +1309,7 @@ As of v2
 %
 Support for the old build system will be retained at least through the 2.0.x
 series, but it is to be considered deprecated and it does not provide
-all functionality, e.g.\ building the Python extension.
+all functionality, e.g.\ building the Python interface.
 
 For a typical user it will be enough to invoke the following lines
 from the main directory 
@@ -1326,7 +1327,6 @@ from the main directory
 %   make install [-j]
 % 
 This will compile and install \hoppet, along with the streamlined interface.
-and Python interfaces.
 %
 Note that \ttt{make install} will typically
 install in a location that requires root privileges, unless a user has
@@ -1727,7 +1727,7 @@ incorporate it into \hoppet soon after it becomes available.
 \subsection{Fast PDF access}
 \label{sec:fastpdf}
 
-Here we detail updates for fasted PDF access within the
+Here we detail updates for faster PDF access within the
 modern Fortran and streamlined interfaces (including the Python interface).
 % 
 % Outside the streamlined interface this was already
