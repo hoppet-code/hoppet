@@ -130,7 +130,7 @@ program tabulation_example
           &  pdf_at_xQ(0)
   end do
 
-  ! create second tables that will contain our copy of the pdf at 100
+  ! create second table that will contain our copy of the pdf at 100
   ! GeV as well as the convolutions with the pdf.
   call AllocPdfTable(grid, table2, Qmin=1.0_dp, Qmax=10000.0_dp, & 
        & dlnlnQ = dy/4.0_dp, freeze_at_Qmin=.true.)
