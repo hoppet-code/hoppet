@@ -1,3 +1,11 @@
+2025-09-30 Gavin
+
+	* src/structure_functions.f90:
+	* example_f90/structure_functions_example_flavour.f90:
+	added SF_names public array with the names of the structure functions,
+	to help giving meaning to iterations over the indices. Used it in
+	structure_functions_example_flavour.f90 to print a for the output
+
 2025-09-30 gavin + Alexander
 
 	* CMakeLists.txt:
