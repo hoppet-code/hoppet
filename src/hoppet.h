@@ -47,6 +47,7 @@
 #define hoppetStrFctN3LO               hoppetstrfctn3lo_
 
 #include <string>
+#include <iostream>
 
 namespace hoppet {
   /// indices for the different structure functions
@@ -117,7 +118,6 @@ namespace hoppet {
 }
 
 extern "C" {
-
 
   // The following does not work
   // void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
@@ -424,6 +424,33 @@ extern "C" {
 			       const double &Q,
 			       double * xpdf);
 
+
+  /// Take a pointer to an array of C characters and if the version
+  /// string length is < maxlen-1, then fills the C-array with a null
+  /// terminated string with the version, and returns 0. If the version
+  /// string length is >= maxlen-1, then does not fill the C-array,
+  /// and returns the required length (including the null terminator).
+  int hoppetVersionC(char *cchar, int maxlen);
+
 }
+
+/// @brief  Return the version of hoppet as a std::string
+/// @return The version string
+inline std::string hoppetVersion() {
+  const int maxlen = 100; // should be more than enough
+  char cchar[maxlen];
+  int errcode_or_maxlen = hoppetVersionC(cchar, maxlen);
+  if (errcode_or_maxlen == 0) {
+    return std::string(cchar);
+  } else {
+    // we need a longer buffer
+    char * cchar2 = new char[errcode_or_maxlen];
+    errcode_or_maxlen = hoppetVersionC(cchar2, errcode_or_maxlen);
+    std::string result(cchar2);
+    delete[] cchar2;
+    return result;
+  }
+}
+
 
 #endif // __HOPPET__

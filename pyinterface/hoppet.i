@@ -381,6 +381,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 %rename(StartStrFct             )      hoppetstartstrfct_;
 %rename(StartStrFctExtended     )      hoppetstartstrfctextended_;
 %rename(WriteLHAPDFGrid         )      hoppetWriteLHAPDFGrid;
+%rename(version         )      hoppetVersion;
 
 // These are the functions that have an explicit interface defined
 // above, so we make sure not to include the C++ versions

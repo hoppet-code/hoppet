@@ -1,3 +1,13 @@
+2025-09-30 gavin
+
+	* src/welcome_message.f90:
+	* src/hoppet.h:
+	* pyinterface/hoppet.i:
+	added a hoppetVersionC function in hoppet_version module
+	and a hoppetVersion() function in hoppet.h that calls it
+	and does the allocations needed to return a std::string.
+	Also works in Python as hoppet.version().
+
 2025-09-29 gavin
 
 	* src/welcome_message.f90:
