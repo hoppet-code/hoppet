@@ -183,7 +183,7 @@ cmake -S . -B BUILD -Dhoppet_DIR=hoppet/installation/share/hoppet/cmake
 # Documentation
 
 Detailed documentation is available as
-[doc/HOPPET-v1-doc.tex](doc/HOPPET-v1-doc.tex). If you use HOPPET in a
+[doc/HOPPET-doc.tex](doc/HOPPET-doc.tex). If you use HOPPET in a
 scientific publication, please refer to https://arxiv.org/abs/0804.3755
 (original v1 release) and https://arxiv.org/abs/2509.nnnnn (v2 features).
 
@@ -200,11 +200,13 @@ benchmarking, accuracy and precision testing.
 When the hoppet library is being built, on some systems the following
 warnings may be reported 
 
+```
     /usr/bin/ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
     /usr/bin/ranlib: file: libhoppet_v1.a(types.o) has no symbols
     
     ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
     ranlib: file: libhoppet_v1.a(types.o) has no symbols
+```
 
 These warnings do not indicate an actual problem. They are simply a
 consequence of the fact that some of the source (.f90) files contain
@@ -214,7 +216,9 @@ object (.o) files are essentially empty.
 
 ## Branches
 
+- The [dev](https://github.com/hoppet-code/hoppet/tree/dev) branch
+provides the latest development version of HOPPET. 
+- The [master](https://github.com/hoppet-code/hoppet/tree/branch) will
+usually be a little behind the dev branch
 
-The [master](https://github.com/hoppet-code/hoppet/tree/master) branch
-provides the latest development version of HOPPET.
 
