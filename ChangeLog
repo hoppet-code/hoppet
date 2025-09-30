@@ -1,3 +1,14 @@
+2025-09-30 gavin + Alexander
+
+	* CMakeLists.txt:
+	* example_cpp/with-lhapdf/fast_pdf_evaluation.cc -> example_cpp/with-lhapdf/lhapdf_to_hoppet.cc:
+	* example_f90/with-lhapdf/fast_pdf_evaluation.f90 -> example_f90/with-lhapdf/lhapdf_to_hoppet.f90:
+	* example_f90/with-lhapdf/fast_manypdf_evaluation.f90 -> example_f90/with-lhapdf/lhapdf_to_hoppet_allmembers.f90:
+	* example_py/tabulation_example_lhapdf.py -> example_py/lhapdf_to_hoppet.py:
+
+	trying to give more sensible names for examples that read an LHAPDF
+	set into a hoppet grid.
+
 2025-09-30 gavin
 
 	* src/welcome_message.f90:
