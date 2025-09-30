@@ -8,3 +8,4 @@
 benchmarking/structure_functions_benchmark_checks
 example_f90/tabulation_example_qed_streamlined
 src/.vscode
+/build*/
