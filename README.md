@@ -112,7 +112,7 @@ Other features illustrated in the examples include
 - accessing convolutions with splitting functions ([Fortran](example_f77/convolution_example.f))
 - QCD+QED evolution ([Fortran90](example_f90/tabulation_example_qed_streamlined.f90), [C++](example_cpp/tabulation_example_qed.cc), [Python](example_py/tabulation_example_qed.py))
 - massless structure functions ([Fortran90](example_f90/structure_functions_example.f90), [C++](example_cpp/structure_functions_example.cc), [Python](example_py/structure_function_example.py))
-- comparisons with LHAPDF ([Fortran](example_f77/compare_lhapdf_hoppet.f), [Fortran90](example_f90/with-lhapdf/fast_pdf_evaluation.f90), [C++](example_cpp/with-lhapdf/fast_pdf_evaluation.cc), [Python](example_py/tabulation_example_lhapdf.py))
+- comparisons with LHAPDF ([Fortran](example_f77/compare_lhapdf_hoppet.f), [Fortran90](example_f90/with-lhapdf/lhapdf_to_hoppet.f90), [C++](example_cpp/with-lhapdf/lhapdf_to_hoppet.cc), [Python](example_py/lhapdf_to_hoppet.py))
 
 
 ## Full interface  
