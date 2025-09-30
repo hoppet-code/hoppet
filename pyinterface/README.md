@@ -55,7 +55,6 @@ The above example is essentially identical to
 [tabulation_example.py](https://github.com/hoppet-code/hoppet/tree/master/example_py/tabulation_example.py)
 and prints the output of a typical benchmark PDF.
 
-
 ## Citation policy
 
 If you use this program in a scientific publication we ask that you cite
