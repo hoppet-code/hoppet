@@ -2,14 +2,40 @@
 !!
 program structure_functions_example
   use hoppet
+  use hoppet_term
   use pdfs_for_benchmarks
   use streamlined_interface
   use structure_functions
   implicit none
-  character (len=400) :: filename,dirname
+  character (len=:), allocatable :: filename
+  character (len=:), allocatable :: dirname
   real(dp) :: Qmax, Qmin, ymax, Q, mc, mb, mt, asQ, Q0,&
   & muR_Q, dy, dlnlnQ, minQval, maxQval
   integer  :: order, nloop_max = 4
+
+  integer :: nargs, status
+  character(len=256) :: arg
+  logical :: dir_exists
+
+  nargs = command_argument_count()
+  if (nargs /= 1) then
+    write(6,'(a)') bold//'Usage: '//reset//&
+            'structure_functions_example <output_directory>'
+    stop 1
+  end if
+
+  call get_command_argument(1, arg)
+  dirname = trim(arg)
+  if (dirname(len_trim(dirname):len_trim(dirname)) /= '/') then
+    dirname = trim(dirname)//'/'
+  end if
+
+  call execute_command_line("test -d "//trim(dirname), exitstat=status)
+  dir_exists = (status == 0)
+  if (.not. dir_exists) then
+    write(6,'(a)') 'Error: output directory does not exist: '//trim(dirname)
+    stop 1
+  end if
 
   Qmax = 13000.0_dp 
   Qmin = one
@@ -44,7 +70,6 @@ program structure_functions_example
         & scale_choice_Q, param_coefs = .true.)
 
 
-  dirname = 'structure_functions_example_n3lo_tests_results/'
 
   filename = trim(dirname)//'n3lo-coef-xmur-1.0-xmuf-1.0-n3lo-evol-xmur-1.0.dat'
   open(unit = 99, file = trim(filename))
