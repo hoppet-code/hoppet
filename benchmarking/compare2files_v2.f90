@@ -37,7 +37,7 @@ program compare2file_v2
   real(dp) :: yval2, Qval2
   logical  :: do_help
 
-  if (iargc() < 2) then
+  if (COMMAND_ARGUMENT_COUNT() < 2) then
      do_help = .true.
   else
      do_help = trim(string_val_arg(1)) == "-h"
