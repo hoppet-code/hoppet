@@ -47,6 +47,10 @@ module structure_functions
   integer, parameter :: iF2gZ =-6 !< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
   integer, parameter :: iF3gZ = 7 !< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
 
+  character(len=4), parameter, public :: SF_names(-6:7) = &
+          ['F2gZ', 'F2EM', 'F1EM', 'F3Wm', 'F2Wm', 'F1Wm',&
+           'F1gZ', 'F1Wp', 'F2Wp', 'F3Wp', 'F1Z ', 'F2Z ', 'F3Z ', 'F3gZ']
+
   !!
   !! coupling constants and fixed parameters
   !!
