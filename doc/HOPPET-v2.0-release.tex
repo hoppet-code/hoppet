@@ -16,7 +16,9 @@
 \begin{document}
 \begin{frontmatter}
 \begin{flushright}
-CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
+  CERN-TH-2023-237\\
+  MPP-2023-285\\
+  OUTP-23-15P
 \end{flushright}
 \title{\hoppet{} {\tt v2.0.0} release note}
 
@@ -58,7 +60,7 @@ CERN-TH-2023-237,  MPP-2023-285, OUTP-23-15P
 %% or \MSC[2008] code \sep code (2000 is the default)
 
 \end{keyword}
-  \begin{textblock*}{2cm}(0.14\textwidth,0.037\textheight)  % (width)(x,y position)
+  \begin{textblock*}{2cm}(0.11\textwidth,0.096\textheight)  % (width)(x,y position)
     %\includegraphics[width=3cm]{logo/2025-09-logo-cropped.pdf}
     \includegraphics[width=2cm]{logo/2025-09-logo.png}
   \end{textblock*}
@@ -173,11 +175,32 @@ These include evolution up to N$^3$LO, massless structure function
 evaluation, QED evolution, a Python interface, a modern build system,
 functionality for writing LHAPDF grids and significant speed
 improvements in the interpolation of its internal PDF tables.
+
+Overall \hoppet remains highly competitive in terms of speed and
+accuracy.
 %
-\hoppet continues to provide a good combination of flexibility, speed
-and accuracy, including powerful control over the accuracy through a
-small set of parameters.
+For example, repeated filling of a full PDF tabulation takes about a
+millisecond per initial condition, with a relative accuracy of
+$10^{-4}$ or better for $10^{-5} < x<0.9$.
 %
+It offers explicit handles to control the accuracy, allowing users to
+verify the precision of their results and choose the optimal trade-off
+between speed and precision.
+%
+Its modern Fortran interface also offers powerful and flexible access
+to a range of common PDF manipulations such as convolutions with
+arbitrary splitting and coefficient functions, features that are
+useful in a variety of contexts.
+
+We hope that this release of \hoppet can help provide solid
+foundations for a range of groups to contribute to the ongoing
+discussions~\cite{McGowan:2022nag,NNPDF:2024nan,Cooper-Sarkar:2024crx,Cridge:2024icl,Cooper-Sarkar:2025sqw}
+in the field concerning the impact of \ntlo and QED effects in PDF
+fits.
+%
+We also hope that the interfaces across computing languages will
+facilitate the practical aspects of integration with a range of other
+tools.
 
 
 \section*{Acknowledgements}
