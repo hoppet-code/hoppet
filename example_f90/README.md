@@ -14,7 +14,7 @@ in the `build/example_f90/`.
 
 - [tabulation_example_n3lo.f90](tabulation_example_n3lo.f90): similar to `tabulation_example.f90`, with N3LO evolution and internal options for variable-flavour vs. fixed-flavour number schemes
 
-- [tabulation_example_up_and_down.f90](tabulation_example_up_and_down.f90): an example of carrying out evolution up in scale to create a pdf_table and then back down, to demonstrate the code's ability to carry out such operations.
+- [tabulation_example_up_and_down.f90](tabulation_example_up_and_down.f90): an example of carrying out evolution up in scale to create a pdf_table and then back down, to demonstrate the code's ability to carry out such operations
 
 ## QCD+QED evolution
 
@@ -32,8 +32,8 @@ in the `build/example_f90/`.
 
 ## Loading a PDF set from LHAPDF
 
-These are all in the [with-lhapdf/](with-lhapdf/) directory and are only
-compiled with the CMake build system and if LHAPDF has been found. The executables are placed in the `build/example_f90/` directory.
+These examples are all in the [with-lhapdf/](with-lhapdf/) directory and are only
+compiled if using the CMake build system and if LHAPDF has been found. The executables are placed in the `build/example_f90/` directory.
 
 - [with-lhapdf/lhapdf_to_hoppet.f90](with-lhapdf/lhapdf_to_hoppet.f90):
   an example that transfers a single LHAPDF PDF into the HOPPET pdf_table 
@@ -46,4 +46,4 @@ compiled with the CMake build system and if LHAPDF has been found. The executabl
 - [with-lhapdf/hoppet_lhapdf.f90](with-lhapdf/hoppet_lhapdf.f90):
   The module that is used to help with the above tasks. This module is not included
   in the HOPPET library. Instead, currently, a user should copy it to their
-  own project.
+  own project
