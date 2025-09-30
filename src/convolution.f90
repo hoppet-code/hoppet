@@ -180,6 +180,7 @@ module convolution
   public :: AllocGridConv, InitGridConv, Delete
   public :: AddWithCoeff, Multiply, SetToConvolution
   public :: SetToZero, SetToCommutator
+  public :: InitGridDefDefault
 
   !-- REMEMBER: .conv. seems to have a precedence similar to .or., .and.
   !             and so is lower precednece than any arithmetic operation
@@ -240,6 +241,29 @@ module convolution
   public :: HoppetWelcomeMessage
 
 contains
+
+
+  !======================================================================
+  !! create a grid covering ymax and dy, using our default nested grid
+  !! setup (as created originally for the streamlined interface)
+  subroutine InitGridDefDefault(grid, dy, ymax, order)
+    type(grid_def), intent(out) :: grid
+    real(dp),       intent(in)  :: ymax, dy
+    integer, optional, intent(in) :: order
+    !---------------------------------
+    type(grid_def) :: gdarray(4)
+    integer        :: lcl_order
+
+    lcl_order = default_or_opt(-6, order)
+
+    call InitGridDef(gdarray(4),dy/27.0_dp,0.2_dp, order=lcl_order)
+    call InitGridDef(gdarray(3),dy/9.0_dp,0.5_dp,  order=lcl_order)
+    call InitGridDef(gdarray(2),dy/3.0_dp,2.0_dp,  order=lcl_order)
+    call InitGridDef(gdarray(1),dy,       ymax  ,  order=lcl_order)
+    call InitGridDef(grid,gdarray(1:4),locked=.true.)
+
+  end subroutine InitGridDefDefault
+  
 
   !======================================================================
   ! Things just for Grid defs.
