@@ -105,6 +105,8 @@ subroutine EvalPdfTable_get_weights_orderNNNN(tab,y,Q,y_wgts, lnlnQ_wgts, iylo, 
     call wae_error("EvalPdfTable_yQ_orderNNNN","not enough points in Q segment")
   end if
   ilnlnQ = int(lnlnQ_norm) + seginfo%ilnlnQ_lo - halfNNQ
+  ! timing tests 2025-10-01: it seems to be faster to have an if here than
+  ! to use min/max or merge (c. 1ns, M2Pro-gfortran15.1-O3)
   if (ilnlnQ    < seginfo%ilnlnQ_lo) ilnlnQ = seginfo%ilnlnQ_lo
   if (ilnlnQ+NNQ > seginfo%ilnlnQ_hi) ilnlnQ = seginfo%ilnlnQ_hi - NNQ
   call fill_interp_weightsNNQ(lnlnQ_norm - (ilnlnQ-seginfo%ilnlnQ_lo), lnlnQ_wgts)
