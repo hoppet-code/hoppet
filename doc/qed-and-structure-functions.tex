@@ -1800,16 +1800,21 @@ order and still retain good accuracy by reducing \ttt{dy} and
       The timing corresponds to the \ttt{EvalPdfTable\_yQ(table,y,Q,vals)} modern
       Fortran call.
       %
-      Calling \ttt{EvalPdfTable\_xQ(table,x,Q,vals)}, or the corresponding
-      functions in the streamlined interfaces, adds about $5\ns$.
-      %
       The timings have been
       obtained on an \texttt{M2Pro} with \texttt{gfortran v15.1} and
       \texttt{-O3} optimisation.
       %
+      Calling \ttt{EvalPdfTable\_xQ(table,x,Q,vals)}, or the corresponding
+      functions in the streamlined interfaces, adds about $5\ns$.
+      %
       We have further used \texttt{ymax = 12} and
       \texttt{dlnlnQ = dy/4}.
-      }
+      %
+      Note that our accuracy definition is to show the \emph{worst}
+      accuracy across any $[guds]$ flavour and $x$ value in range.
+      %
+      In practice, most points have a significantly higher accuracy.
+    }
         \label{fig:interp-accuracy}
     %\label{fig:interp-accuracy}
 \end{figure}
@@ -1961,22 +1966,26 @@ authors for assistance.
 %
 \begin{table}[htbp]
   \centering
-  \begin{tabular}{|c|c|ccc|}
+  %\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+  \newcolumntype{C}{>{\centering\arraybackslash}p{3cm}}
+  \begin{tabular}{|c|c|CCC|}
     \hline
-    \ttt{yorder} & \ttt{lnlnQorder} & &Time per \ttt{hoppetEval} call (ns)& \\
+    \ttt{yorder} & \ttt{lnlnQorder} & \multicolumn{3}{c|}{Time per \ttt{hoppetEval} or
+                                        LHAPDF \ttt{xfxQ}/\ttt{EvolvePDF} call (ns)} \\
      \hline
       &                          & Fortran & \CPP{} & Python \\
     5 & 4                        & 108     & 108    & 295 \\
     4 & 4                        &  92     &  93    & 278 \\
     3 & 3                        &  76     &  77    & 258 \\
-    2 & 2                        &  63     &  63    & 244 \\
-  %%hoppet-alphas                &  11     &  13    &  86
-  %%hoppet-v1.2                  & 313     &        &
-    \hline
-    \multicolumn{2}{|c|}{\rule{0pt}{2.5ex}LHAPDF 6.5.5}
-                                 &520$^\dagger$ &  87    & 1645$^\dagger$ \\
-    % \multicolumn{2}{|c|}{\rule{0pt}{2.5ex}LHAPDF 6.5.5 + patch}
-    %                            &114$^\dagger$ &  87    & 1645$^\dagger$ \\
+    2 & 2                        &  63     &  63    & 244 \\ \hline\hline
+  %%hoppet-alphas                &  11     &  13    &  86 \\ \hline
+    \multicolumn{2}{|l|}{\rule{0pt}{2.5ex}HOPPET 1.2.0}
+                                 & 313     & 313    &  -- \\ %\hline
+    %\hline
+    \multicolumn{2}{|l|}{\rule{0pt}{2.5ex}LHAPDF 6.5.5}
+                                 &520 &  87    & 1645 \\
+    \multicolumn{2}{|l|}{\rule{0pt}{2.5ex}LHAPDF 6.5.5 + patch}
+                               &114 &  87    & 1028 \\
   %%LHAPDF-alphas                &  28     &  18    &  76
     \hline
     %% Timings from Gavin on 2025-09-25
@@ -2000,8 +2009,6 @@ authors for assistance.
   The rows show the timings with different
   interpolation orders.
   %
-  The table also shows the timing for the equivalent call in LHAPDF~6.5.5.
-  %
   The results have been obtained with the \ttt{PDF4LHC21\_40} set, on an M2Pro with
   gfortran-15.1, Apple clang version 17.0.0, O3 optimisation and
   Python 3.12.7.
@@ -2009,21 +2016,23 @@ authors for assistance.
   The hoppet grid spacings are $\ttt{dy}=0.05$ and
   $\ttt{dlnlnQ}=\ttt{dy}/4$, with $\ttt{ymax} = 14$.
   %
-  For comparison, on the same system, the \hoppet v1.2.0 timing in
-  Fortran is $313\ns$, using
-  $\ttt{yorder}=5$ and $\ttt{lnlnQorder}=4$.
-  \\
+  % For comparison, on the same system, the \hoppet v1.2.0 timing in
+  % Fortran is $313\ns$, using
+  % $\ttt{yorder}=5$ and $\ttt{lnlnQorder}=4$.
+  % \\
+  The table also shows the timings for the equivalent calls in
+  LHAPDF~6.5.5.
   %
-  $^\dagger\,$Note that in its Fortran (\ttt{EvolvePDF(...)},
+  Version 6.5.5 of LHAPDF, in its Fortran (\ttt{EvolvePDF(...)},
   \ttt{lhapdf\_xfxq(...)}) and Python (\ttt{pdf.xfxQ(...)}) 
-  interfaces, this version of
-  LHAPDF loops over an underlying call to single-flavour evaluation
+  interfaces, 
+   loops over an underlying call to single-flavour evaluation
   (\ttt{double PDF::xfxQ(int id, double x, double q))}), 
   which is why it is significantly slower than the \CPP interface,
   which evaluates all flavours in one go.
   %
-  A proposed modification for the Fortran interface has been submitted
-  to LHAPDF.
+  A proposed patch for the Fortran and Python interfaces has been submitted
+  to LHAPDF with corresponding timings also indicated.
 }
   \label{tab:interp_performance}
 \end{table}
