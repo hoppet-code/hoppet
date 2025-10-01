@@ -21,6 +21,8 @@ def main():
     args = parser.parse_args()
 
     hlinfo = hp.lhapdf.load(args.pdf)
+    p_lhapdf = lhapdf.mkPDF(args.pdf, 0)
+
     print("Checking that hlinfo is valid:", hlinfo is not None)
 
     # Overwrite the yorder and lnlnQorder interpolation orders
@@ -32,6 +34,7 @@ def main():
 
     print("")
     print("           Evaluating PDFs at Q =",Q, " GeV")
+    print("-------------- HOPPET ------------------")
     print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon")
     for ix in range(9):
         pdf_array = hp.Eval(xvals[ix], Q)
@@ -43,7 +46,21 @@ def main():
             pdf_array[6 - 4] + pdf_array[6 + 4],
             pdf_array[6 + 0]
         ))
-    print("")
+    print("-------------- LHAPDF ------------------")
+    for ix in range(9):
+        pdf_dict = p_lhapdf.xfxQ(xvals[ix], Q)
+        #print(type(pdf_dict)
+        print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
+            xvals[ix],
+            pdf_dict[2] - pdf_dict[-2], 
+            pdf_dict[1] - pdf_dict[-1], 
+            2 * (pdf_dict[-1] + pdf_dict[-2]),
+            pdf_dict[-4] + pdf_dict[4],
+            pdf_dict[21]
+        ))
+    
+
+
     #hp.WriteLHAPDFGrid("test_python",0)
 
     # Define grids for timing test
@@ -61,11 +78,12 @@ def main():
 
     # Timing LHAPDF
     # Load the PDF from LHAPDF
-    p_lhapdf = lhapdf.mkPDF(args.pdf, 0)
     start_lhapdf = time.perf_counter()
     for Q in Qvals_timing:
         for x in xvals_timing:
-            pdf_dict = p_lhapdf.xfxQ(None, x, Q)
+            pdf_dict = p_lhapdf.xfxQ(x, Q)
+            # The following call is faster but works only with a patch to LHAPDF
+            # pdf_list = p_lhapdf.xfxQv(x, Q)
     end_lhapdf = time.perf_counter()
     print(f"LHAPDF evaluation time {(end_lhapdf - start_lhapdf)/npoints/npoints*1e9:.2f} ns")
 
