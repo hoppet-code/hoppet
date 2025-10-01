@@ -1740,7 +1740,7 @@ interpolation orders up to some hard-coded maximum.
 As of v2.0.0, a number of interpolation-order choices now have
 dedicated code, which makes it easier for the compiler to optimise the
 underlying assembly, e.g.\ with loop unrolling, giving speed gains of
-about a factor two.
+almost a factor of three.
 %
 % 
 Additionally new functionality allows the user to modify
@@ -1975,6 +1975,8 @@ authors for assistance.
     \hline
     \multicolumn{2}{|c|}{\rule{0pt}{2.5ex}LHAPDF 6.5.5}
                                  &520$^\dagger$ &  87    & 1645$^\dagger$ \\
+    % \multicolumn{2}{|c|}{\rule{0pt}{2.5ex}LHAPDF 6.5.5 + patch}
+    %                            &114$^\dagger$ &  87    & 1645$^\dagger$ \\
   %%LHAPDF-alphas                &  28     &  18    &  76
     \hline
     %% Timings from Gavin on 2025-09-25
@@ -2005,7 +2007,11 @@ authors for assistance.
   Python 3.12.7.
   %
   The hoppet grid spacings are $\ttt{dy}=0.05$ and
-  $\ttt{dlnlnQ}=\ttt{dy}/4$, with $\ttt{ymax} = 14$. 
+  $\ttt{dlnlnQ}=\ttt{dy}/4$, with $\ttt{ymax} = 14$.
+  %
+  For comparison, on the same system, the \hoppet v1.2.0 timing in
+  Fortran is $313\ns$, using
+  $\ttt{yorder}=5$ and $\ttt{lnlnQorder}=4$.
   \\
   %
   $^\dagger\,$Note that in its Fortran (\ttt{EvolvePDF(...)},
