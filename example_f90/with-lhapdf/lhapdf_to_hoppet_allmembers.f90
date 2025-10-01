@@ -10,7 +10,7 @@ module time_format
 end module time_format
 
 
-program fast_manypdf_evaluation
+program lhapdf_to_hoppet_allmembers
   use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF ! Avoid namespace clashes with LHAPDF
   use streamlined_interface, InitPDF_hoppet => InitPDF
   use hoppet_lhapdf
@@ -169,8 +169,5 @@ program fast_manypdf_evaluation
   write(*,*) ! a blank line for clarity
 
   call hoppetDeleteAll()
-contains
-  ! Routine that loads an LHAPDF set, extracts some information from
-  ! it and transfers the PDF to hoppet. 
 
-end program fast_manypdf_evaluation
+end program lhapdf_to_hoppet_allmembers
