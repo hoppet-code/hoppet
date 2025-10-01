@@ -904,7 +904,7 @@
 	* src/dglap_choices.f90:
 	* src/dglap_objects.f90:
 	* src/mass_thresholds_n3lo.f90:
-	* example_f90/tabulation_example_n3lo.f90
+	* example_f90/tabulation_example_n3lo.f90:
 	updated to finalise support for N3LO mass thresholds
 
 	* src/exact-coefs/hplog5.f -> src/hplog5.f:
@@ -913,7 +913,7 @@
 	* tests/test-n3lo-mtm.f90:
 	run basic tests of the mass threshold terms
 
-	* tests/with-lhapdf/tabulation_n3lo_v130_paper.f90
+	* tests/with-lhapdf/tabulation_n3lo_v130_paper.f90:
 	for examining the impact of different parts of the n3lo terms
 
 	* .github/workflows/main.yml:
