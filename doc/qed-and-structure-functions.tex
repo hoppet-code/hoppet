@@ -1903,18 +1903,18 @@ We provide examples for how to do this in Fortran, \CPP, and Python:
  \item \masterlink{example_f90/with-lhapdf/lhapdf_to_hoppet.f90}: it
    uses the module \ttt{hoppet\_lhapdf} and the associated
    \ttt{subroutine LoadLHAPDF(name, imem)}. The module is in the same
-   directory and can be copied over to a user's application.
+   directory and can be copied over to a user's application;
  \item
    \masterlink{example_f90/with-lhapdf/lhapdf_to_hoppet_allmembers.f90},
-   same as above but the example shows how to efficiently read in all
-   LHAPDF members, and computes the PDF uncertainty,
+   same as above but the example shows how to read in and efficiently
+   evaluate all
+   LHAPDF members, with an illustration for computing the PDF uncertainty;
  \item \masterlink{example_cpp/with-lhapdf/lhapdf_to_hoppet.cc}, which
    includes a routine called \ttt{void load\_lhapdf\_assign\_hoppet(const
-     string \& pdfname, int imem=0)} which can be directly copied over to a
-   user's application directly,
+     string \& pdfname, int imem=0)} which can be  copied over directly to a
+   user's application;
  \item \masterlink{example_py/lhapdf_to_hoppet.py}, makes use
-   of \ttt{hoppet.lhapdf.load()} which can be
-   made accessible with \ttt{from hoppet import lhapdf}.
+   of \ttt{hoppet.lhapdf.load()}, accessible using ``\ttt{from hoppet import lhapdf}''.
 \end{itemize}
 %
 %The Fortran and \CPP examples are virtually identical.
