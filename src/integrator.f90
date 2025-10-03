@@ -10,6 +10,17 @@ module integrator
 
   public :: ig_LinWeight, ig_LinWeightSing, ig_PolyWeight, ig_PolyWeight_expand
 
+  abstract interface
+    function ig_func(x) result(func)
+      import dp
+      implicit none
+      real(dp), intent(in) :: x
+      real(dp)             :: func
+    end function ig_func
+  end interface
+  public :: ig_func
+
+
 contains
 
   !======================================================================
@@ -26,6 +37,7 @@ contains
   ! functions.
   ! 
   Recursive FUNCTION ig_LinWeight(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
+    procedure(ig_func)   :: F
     real(dp), intent(in) :: A,B,AMult,BMult,EPS
     real(dp), intent(in), optional :: split(:)
     real(dp), allocatable :: edges(:)
@@ -34,13 +46,6 @@ contains
     REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
     real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
     real(dp) :: X(12), W(12)
-    interface
-       function f(x)
-         use types; implicit none
-         real(dp), intent(in) :: x
-         real(dp)             :: f
-       end function f
-    end interface
     CHARACTER(len=*), parameter ::  NAME = 'cgauss64'
     
     DATA X( 1) /9.6028985649753623D-1/, W( 1) /1.0122853629037626D-1/ 
@@ -114,17 +119,11 @@ contains
   ! Try to improve convergence on nasty integrals
   Recursive FUNCTION ig_LinWeightSing(F,A_in,B_in,AMult,BMult,EPS) &
        &result(cgauss64)
+    procedure(ig_func)   :: F
     real(dp), intent(in) :: A_in,B_in,AMult,BMult,EPS
     REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
     real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
     real(dp) :: X(12), W(12), A, B, xp, xm, wp, wm
-    interface
-       function f(x)
-         use types; implicit none
-         real(dp), intent(in) :: x
-         real(dp)             :: f
-       end function f
-    end interface
     integer :: i
     CHARACTER(len=*), parameter ::  NAME = 'cgauss64'
     
@@ -201,6 +200,7 @@ contains
   ! 
   ! If const is present then it is added to the weight function
   Recursive FUNCTION ig_PolyWeight(F,A,B,nodes,inode_one,EPS,wgtadd, split) result(cgauss64)
+    procedure(ig_func)   :: F
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd
@@ -211,13 +211,6 @@ contains
     REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
     real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
     real(dp) :: X(12), W(12)
-    interface
-       function f(x)
-         use types; implicit none
-         real(dp), intent(in) :: x
-         real(dp)             :: f
-       end function f
-    end interface
     CHARACTER(len=*), parameter ::  NAME = 'cgauss64'
     
     DATA X( 1) /9.6028985649753623D-1/, W( 1) /1.0122853629037626D-1/ 
@@ -299,6 +292,7 @@ contains
   ! with convolution of real pieces
   Recursive FUNCTION ig_PolyWeight_expand(F,A,B,nodes,inode_one,EPS,wgtadd) result(cgauss64)
     use warnings_and_errors
+    procedure(ig_func)   :: F
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd
@@ -314,13 +308,6 @@ contains
     ! (we assume nodes have relatively uniform spacing). 
     real(dp), parameter :: expansion_threshold_fraction = 3e-6_dp
     real(dp) :: expansion_threshold
-    interface
-       function f(x)
-         use types; implicit none
-         real(dp), intent(in) :: x
-         real(dp)             :: f
-       end function f
-    end interface
     CHARACTER(len=*), parameter ::  NAME = 'cgauss64'
     
     DATA X( 1) /9.6028985649753623D-1/, W( 1) /1.0122853629037626D-1/ 
