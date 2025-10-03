@@ -5,6 +5,7 @@ set(HELPERS unit_tests.f90
     test_convolution_C.cc
     ../benchmarking/io_utils.f90)
 add_executable(hoppet-unit-tests hoppet-unit-tests.F90 ${HELPERS})
+target_include_directories(hoppet-unit-tests PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(hoppet-unit-tests hoppet_static)
 add_test(NAME hoppet-unit-tests COMMAND hoppet-unit-tests)
 
