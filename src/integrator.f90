@@ -20,6 +20,14 @@ module integrator
   end interface
   public :: ig_func
 
+  abstract interface
+    function ig_func_c(x) result(func) bind(C)
+      use iso_c_binding, only: c_double
+      real(c_double), intent(in) :: x
+      real(c_double)             :: func
+    end function ig_func_c
+  end interface
+  public :: ig_func_c
 
 contains
 
