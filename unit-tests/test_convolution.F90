@@ -54,9 +54,12 @@ contains
       call AllocGridQuant(grid, xq)
       call AllocGridQuant(grid, xq_conv1)
       call AllocGridQuant(grid, xq_conv2)
+      ! set up some simple x distribution on the grid
       xq = ff(yValues(grid))
+      ! convolute with P_qq from the DGLAP holder and from the C++ version
       xq_conv1 = dh%P_LO%NS_plus * xq
       xq_conv2 = pqq_gc * xq
+      ! check the results agree
       call check_approx_eq_1d("test_InitGridConv-conv", xq_conv1, xq_conv2, 1e-10_dp)
       deallocate(xq, xq_conv1, xq_conv2)
       call Delete(pqq_gc)

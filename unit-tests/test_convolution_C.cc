@@ -13,19 +13,15 @@ extern "C" {
 
   double xpqqy_c(const double & y) {
 
-    cout << "xpqqy_c called with y = " << y << " " << hoppet_global_cc_piece << endl;
     double x = exp(-y);
     double result = 0.0;
     constexpr double CF = 4.0/3.0; // CF for QCD
-
-    cout << "result before switch 1: " << result << endl;
     switch (hoppet_global_cc_piece) {
     case hoppet::cc_REAL:
     case hoppet::cc_REALVIRT:
       result = CF * (1.0+x*x)/(1.0-x);
     }
 
-    cout << "result before switch 2: " << result << endl;
     switch (hoppet_global_cc_piece) {
     case hoppet::cc_VIRT:
     case hoppet::cc_REALVIRT:
@@ -33,11 +29,9 @@ extern "C" {
       break;
     case hoppet::cc_DELTA:
       result = CF * 1.5;
-        cout << "in switch 2 DELTA: " << result << endl;
     }
 
     if (hoppet_global_cc_piece != hoppet::cc_DELTA) result *= x;
-    cout << "xpqqy_c returning " << result << endl;
     return result;
   }
 }
