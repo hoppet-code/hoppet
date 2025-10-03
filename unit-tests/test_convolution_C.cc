@@ -11,9 +11,17 @@ extern "C" {
 
   double xpqqy_c(const double y) {
 
+    constexpr double CF = 4.0/3.0; // CF for QCD
+
+    if (hoppet_global_cc_piece == hoppet::cc_DELTA) {
+      //cout << "In xpqqy_c with cc_piece=DELTA" << endl;
+      return CF * 1.5;
+    }
+
     double x = exp(-y);
     double result = 0.0;
-    constexpr double CF = 4.0/3.0; // CF for QCD
+
+
     switch (hoppet_global_cc_piece) {
     case hoppet::cc_REAL:
     case hoppet::cc_REALVIRT:
@@ -24,13 +32,9 @@ extern "C" {
     case hoppet::cc_VIRT:
     case hoppet::cc_REALVIRT:
       result -= CF * 2.0 / (1.0 - x);
-      break;
-    case hoppet::cc_DELTA:
-      //cout << "In pqqy_c with cc_piece=DELTA" << endl;
-      result = CF * 1.5;
     }
 
-    if (hoppet_global_cc_piece != hoppet::cc_DELTA) result *= x;
+    result *= x;
     return result;
   }
 }
