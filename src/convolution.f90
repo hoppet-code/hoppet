@@ -6,13 +6,24 @@
 !! any routine which might supply convolutions
 !======================================================================
 module convolution_communicator
-  use types
-  implicit none
-  private
+   use iso_c_binding
+   use types
+   implicit none
+   private
 
-  integer, public , parameter :: cc_REAL=1,cc_VIRT=2,&
-       & cc_REALVIRT=3,cc_DELTA =4 
-  integer, public, save :: cc_piece
+
+   !! The following variable is set by routines like InitGridConv_func
+   !! to indicate which part of the splitting function should be returned.
+   !! It will be set to one of the cc_X values defined below
+   integer(c_int), public, bind(c, name="hoppet_global_cc_piece") :: cc_piece
+
+   ! if any of the following values are changed, make sure the same
+   ! change is made in the C interface (hoppet.h)
+   integer(c_int), public, parameter :: cc_REAL=1      !< regular + plus 
+   integer(c_int), public, parameter :: cc_VIRT=2      !< -plus
+   integer(c_int), public, parameter :: cc_REALVIRT=3  !< regular
+   integer(c_int), public, parameter :: cc_DELTA=4     !< delta function
+
 end module convolution_communicator
 
 
@@ -66,7 +77,6 @@ module convolution
 
   public :: grid_def, grid_conv
   public :: conv_BestIsub
-
 
   !-- public routines --
   interface InitGridDef

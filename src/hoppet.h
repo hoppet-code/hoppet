@@ -64,7 +64,17 @@ namespace hoppet {
   const int iF2EM =-5+6; //< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up                     
   const int iF1gZ = 0+6; //< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up 
   const int iF2gZ =-6+6; //< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
-  const int iF3gZ = 7+6; //< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up
+  const int iF3gZ = 7+6; //< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up  
+
+  /// The hoppet_global_cc_piece variable is set by routines like InitGridConv_func
+  /// to indicate which part of the splitting function should be returned.
+  /// It will be set to one of the cc_X values defined below
+  extern int hoppet_global_cc_piece;
+  constexpr int cc_REAL=1;      //< regular + plus 
+  constexpr int cc_VIRT=2;      //< -plus
+  constexpr int cc_REALVIRT=3;  //< regular
+  constexpr int cc_DELTA=4;     //< delta function
+
 
   const int scale_choice_fixed     = 0; ///< muR,muF scales
 					///predetermined in the
