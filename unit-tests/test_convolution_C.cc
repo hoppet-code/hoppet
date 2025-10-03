@@ -4,12 +4,12 @@
 using namespace std;
 
 extern "C" {
-  double pqq_c(const double & x) {
+  double pqq_c(const double x) {
     double result = (1.0 + x*x)/(1.0 - x);
     return result;
   }
 
-  double xpqqy_c(const double & y) {
+  double xpqqy_c(const double y) {
 
     double x = exp(-y);
     double result = 0.0;
