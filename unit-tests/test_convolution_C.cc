@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "hoppet.h"
 using namespace std;
 
