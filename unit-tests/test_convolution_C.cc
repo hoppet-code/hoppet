@@ -26,7 +26,7 @@ extern "C" {
       result -= CF * 2.0 / (1.0 - x);
       break;
     case hoppet::cc_DELTA:
-      cout << "In pqqy_c with cc_piece=DELTA" << endl;
+      //cout << "In pqqy_c with cc_piece=DELTA" << endl;
       result = CF * 1.5;
     }
 
