@@ -10,6 +10,12 @@ module integrator
 
   public :: ig_LinWeight, ig_LinWeightSing, ig_PolyWeight, ig_PolyWeight_expand
 
+  interface ig_LinWeight
+     module procedure ig_LinWeight_ffunc, ig_LinWeight_class
+  end interface
+
+
+  !! The abstract interface for a function to be integrated
   abstract interface
     function ig_func(x) result(func)
       import dp
@@ -19,6 +25,41 @@ module integrator
     end function ig_func
   end interface
   public :: ig_func
+
+
+  !! Base class for integrands. 
+  !!
+  !! The only thing a derived class needs to do is implement f(self,x),
+  !! which should have the signature of ig_cfunc below, where "cfunc"
+  !! means "class function"
+  type, abstract :: ig_class
+  contains
+    procedure(ig_cfunc), deferred :: f
+  end type ig_class
+
+  !! The abstract interface for the ig_class%f function
+  abstract interface
+    function ig_cfunc(self, x) result(func)
+      import dp, ig_class
+      implicit none
+      class(ig_class), intent(in) :: self
+      real(dp), intent(in) :: x
+      real(dp)             :: func
+    end function ig_cfunc
+  end interface
+
+  !! A concrete example of a class derived from ig_class, 
+  !! which simply wraps a procedure pointer to a function
+  !! of type ig_func. 
+  !!
+  !! This is a little bit of a roundabout way of doing things, ! but the
+  !! use of the abstract base class means that we ! can also write classes
+  !! that take integrands with additional ! parameters
+  type, extends(ig_class) :: ig_class_func
+    procedure(ig_func), pointer, nopass :: f_ptr => null()
+  contains
+    procedure :: f => ig_cfunc_func
+  end type ig_class_func
 
   abstract interface
     function ig_func_c(x) result(func) bind(C)
@@ -31,6 +72,23 @@ module integrator
 
 contains
 
+
+  real(dp) function ig_cfunc_func(self, x)
+    class(ig_class_func), intent(in) :: self
+    real(dp), intent(in) :: x
+    ig_cfunc_func = self%f_ptr(x)
+  end function ig_cfunc_func
+
+  Recursive FUNCTION ig_LinWeight_ffunc(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
+    procedure(ig_func)   :: F
+    real(dp), intent(in) :: A,B,AMult,BMult,EPS
+    real(dp), intent(in), optional :: split(:)
+    real(dp) :: cgauss64
+    !-----------
+    type(ig_class_func) :: F_class
+    F_class%f_ptr => F
+    cgauss64 = ig_LinWeight_class(F_class,A,B,AMult,BMult,EPS, split)
+  end function ig_LinWeight_ffunc
   !======================================================================
   ! Function which integrates F weighted with the linear function which has
   ! values AMult and BMult at A & B respectively.
@@ -44,7 +102,7 @@ contains
   ! allow the easy generalisation to the case with more complex weight
   ! functions.
   ! 
-  Recursive FUNCTION ig_LinWeight(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
+  Recursive FUNCTION ig_LinWeight_func(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
     procedure(ig_func)   :: F
     real(dp), intent(in) :: A,B,AMult,BMult,EPS
     real(dp), intent(in), optional :: split(:)
@@ -80,7 +138,7 @@ contains
       do i = 1, n
          lmult = ((edges(i  ) - A)/(B-A) * (BMult -AMult) + AMult)
          rmult = ((edges(i+1) - A)/(B-A) * (BMult -AMult) + AMult)
-         cgauss64 = cgauss64 + ig_LinWeight(F,edges(i),edges(i+1),lmult,rmult,EPS)
+         cgauss64 = cgauss64 + ig_LinWeight_func(F,edges(i),edges(i+1),lmult,rmult,EPS)
       end do
       return
     end if
@@ -120,7 +178,86 @@ contains
        GO TO 99 
     END IF
 99  cgauss64=H 
-  end function ig_LinWeight
+  end function ig_LinWeight_func
+
+
+  Recursive FUNCTION ig_LinWeight_class(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
+    class(ig_class), intent(in) :: F
+    real(dp), intent(in) :: A,B,AMult,BMult,EPS
+    real(dp), intent(in), optional :: split(:)
+    real(dp), allocatable :: edges(:)
+    integer               :: i, n
+    real(dp) :: lmult, rmult
+    REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
+    real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
+    real(dp) :: X(12), W(12)
+    CHARACTER(len=*), parameter ::  NAME = 'cgauss64'
+    
+    DATA X( 1) /9.6028985649753623D-1/, W( 1) /1.0122853629037626D-1/ 
+    DATA X( 2) /7.9666647741362674D-1/, W( 2) /2.2238103445337447D-1/ 
+    DATA X( 3) /5.2553240991632899D-1/, W( 3) /3.1370664587788729D-1/ 
+    DATA X( 4) /1.8343464249564980D-1/, W( 4) /3.6268378337836198D-1/ 
+    DATA X( 5) /9.8940093499164993D-1/, W( 5) /2.7152459411754095D-2/ 
+    DATA X( 6) /9.4457502307323258D-1/, W( 6) /6.2253523938647893D-2/ 
+    DATA X( 7) /8.6563120238783174D-1/, W( 7) /9.5158511682492785D-2/ 
+    DATA X( 8) /7.5540440835500303D-1/, W( 8) /1.2462897125553387D-1/ 
+    DATA X( 9) /6.1787624440264375D-1/, W( 9) /1.4959598881657673D-1/ 
+    DATA X(10) /4.5801677765722739D-1/, W(10) /1.6915651939500254D-1/ 
+    DATA X(11) /2.8160355077925891D-1/, W(11) /1.8260341504492359D-1/ 
+    DATA X(12) /9.5012509837637440D-2/, W(12) /1.8945061045506850D-1/ 
+
+    if (present(split)) then
+      ! allocation cost is about 10ns, to be compared to integration
+      ! time for a single simple function of c. 31ns. But without 
+      ! splitting, integration time would be much higher (900ns versus
+      ! a total of 73 ns with splitting), as well as less reliable.
+      allocate(edges(size(split)+2))
+      call split_limits(A,B,split,edges, n)
+      cgauss64 = zero
+      do i = 1, n
+         lmult = ((edges(i  ) - A)/(B-A) * (BMult -AMult) + AMult)
+         rmult = ((edges(i+1) - A)/(B-A) * (BMult -AMult) + AMult)
+         cgauss64 = cgauss64 + ig_LinWeight_class(F,edges(i),edges(i+1),lmult,rmult,EPS)
+      end do
+      return
+    end if
+
+    H=0 
+    IF(B .EQ. A) GO TO 99 
+    CONST=CST/ABS(B-A) 
+    BB=A 
+1   AA=BB 
+    BB=B 
+2   C1=HF*(BB+AA) 
+    C2=HF*(BB-AA) 
+    S8=0 
+    DO I = 1,4 
+       U=C2*X(I) 
+       pmult = ((c1+u) - A)/(B-A) * (BMult -AMult) + AMult
+       mmult = ((c1-u) - A)/(B-A) * (BMult -AMult) + AMult
+       S8=S8+W(I)*(F%f(C1+U)*pmult+F%f(C1-U)*mmult) 
+    END DO
+    S16=0 
+    DO I = 5,12 
+       U=C2*X(I) 
+       pmult = ((c1+u) - A)/(B-A) * (BMult -AMult) + AMult
+       mmult = ((c1-u) - A)/(B-A) * (BMult -AMult) + AMult
+       S16=S16+W(I)*(F%f(C1+U)*pmult+F%f(C1-U)*mmult) 
+    END DO
+    S16=C2*S16 
+    IF(ABS(S16-C2*S8) .LE. EPS*(1+ABS(S16))) THEN 
+       H=H+S16 
+       IF(BB .NE. B) GO TO 1 
+    ELSE 
+       BB=C1 
+       IF(1+CONST*ABS(C2) .NE. 1) GO TO 2 
+       H=0 
+       !CALL MTLPRT(NAME,'D113.1','TOO HIGH ACCURACY REQUIRED') 
+       write(0,*) NAME,'D113.1','TOO HIGH ACCURACY REQUIRED'
+       GO TO 99 
+    END IF
+99  cgauss64=H 
+  end function ig_LinWeight_class
 
 
   !-------------------------------------------------------
