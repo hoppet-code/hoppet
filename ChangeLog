@@ -1,3 +1,12 @@
+2025-10-03 gavin
+
+	* src/integrator.f90:
+	introduced a set of integrators that take a new class(ig_class)
+	object, a polymorphic base class with a deferred procedure 
+	f that returns the integrand. This opens the door to including
+	more information in the integrand object, e.g. info that 
+	previously needed to be global.
+
 2025-09-30 Gavin
 
 	* src/structure_functions.f90:
