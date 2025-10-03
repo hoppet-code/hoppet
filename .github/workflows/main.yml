@@ -185,6 +185,6 @@ jobs:
       run: |
           cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-15  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake --build BUILD -j 4
-          lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests/hoppet-unit-tests
+          lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests/hoppet-unit-tests |& tail -200
           cmake --install BUILD
-          ctest --test-dir BUILD -j 4 --output-on-failure
+          ctest --test-dir BUILD -j 4 --output-on-failure |& tail -200
