@@ -5,9 +5,7 @@ using namespace std;
 
 extern "C" {
   double pqq_c(const double & x) {
-    cout << "pqq_c called with x = " << x << endl;
     double result = (1.0 + x*x)/(1.0 - x);
-    cout << "pqq_c returning " << result << endl;
     return result;
   }
 
@@ -28,6 +26,7 @@ extern "C" {
       result -= CF * 2.0 / (1.0 - x);
       break;
     case hoppet::cc_DELTA:
+      cout << "In pqqy_c with cc_piece=DELTA" << endl;
       result = CF * 1.5;
     }
 
