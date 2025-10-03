@@ -69,7 +69,6 @@ namespace hoppet {
   /// The hoppet_global_cc_piece variable is set by routines like InitGridConv_func
   /// to indicate which part of the splitting function should be returned.
   /// It will be set to one of the cc_X values defined below
-  extern int hoppet_global_cc_piece;
   constexpr int cc_REAL=1;      //< regular + plus 
   constexpr int cc_VIRT=2;      //< -plus
   constexpr int cc_REALVIRT=3;  //< regular
@@ -128,6 +127,8 @@ namespace hoppet {
 }
 
 extern "C" {
+
+  int hoppet_global_cc_piece;
 
   // The following does not work
   // void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
