@@ -95,6 +95,8 @@ contains
     ig_cfunc_func = self%f_ptr(x)
   end function ig_cfunc_func
 
+  !! Wrapper to call ig_LinWeight_class that sets up an if_class_func
+  !! with a procedure pointer to the ig_func F
   Recursive FUNCTION ig_LinWeight_ffunc(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
     procedure(ig_func)   :: F
     real(dp), intent(in) :: A,B,AMult,BMult,EPS
@@ -479,7 +481,7 @@ contains
   !! Integrate F with a polynomial weight function which is zero at all
   !! nodes except that indicated by the index inode_one
   !! 
-  !! If const is present then it is added to the weight function
+  !! If wgtadd is present then it is added to the weight function
   Recursive FUNCTION ig_PolyWeight_func(F,A,B,nodes,inode_one,EPS,wgtadd, split) result(cgauss64)
       procedure(ig_func)   :: F
     real(dp), intent(in) :: A,B,nodes(:),EPS
@@ -560,6 +562,10 @@ contains
 99  cgauss64=H 
   end function ig_PolyWeight_func
 
+  !! Integrate F with a polynomial weight function which is zero at all
+  !! nodes except that indicated by the index inode_one
+  !! 
+  !! If wgtadd is present then it is added to the weight function
   Recursive FUNCTION ig_PolyWeight_class(F,A,B,nodes,inode_one,EPS,wgtadd, split) result(cgauss64)
     class(ig_class), intent(in) :: F
     real(dp), intent(in) :: A,B,nodes(:),EPS
@@ -645,7 +651,7 @@ contains
   !! Integrate F with a polynomial weight function which is zero at all
   !! nodes except that indicated by the index inode_one
   !! 
-  !! If const is present then it is added to the weight function
+  !! If wgtadd is present then it is added to the weight function
   !!
   !! This version expands around the series in powers of
   !! v=(x-nodes(inode_one))~0 when v is small, to avoid numerical issues
@@ -776,6 +782,14 @@ contains
 99  cgauss64=H 
   end function ig_PolyWeight_expand_func
 
+  !! Integrate F with a polynomial weight function which is zero at all
+  !! nodes except that indicated by the index inode_one
+  !! 
+  !! If wgtadd is present then it is added to the weight function
+  !!
+  !! This version expands around the series in powers of
+  !! v=(x-nodes(inode_one))~0 when v is small, to avoid numerical issues
+  !! with convolution of real pieces
   Recursive FUNCTION ig_PolyWeight_expand_class(F,A,B,nodes,inode_one,EPS,wgtadd) result(cgauss64)
     use warnings_and_errors
     class(ig_class), intent(in) :: F
