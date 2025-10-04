@@ -52,6 +52,7 @@ module integrator
   contains
     procedure(ignd_class__f), deferred :: f
   end type ignd_class
+  public :: ignd_class
 
   !! The abstract interface for the ignd_class%f function
   abstract interface
