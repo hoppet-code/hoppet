@@ -45,7 +45,7 @@ module integrator
 
   !! Base class for integrands. 
   !!
-  !! The only thing a derived class needs to do is implement f(self,x),
+  !! The only thing a derived class needs to do is implement f(this,x),
   !! which should have the signature of ig_cfunc below, where "cfunc"
   !! means "class function"
   type, abstract :: ignd_class
@@ -56,10 +56,10 @@ module integrator
 
   !! The abstract interface for the ignd_class%f function
   abstract interface
-    function ignd_class__f(self, x) result(func)
+    function ignd_class__f(this, x) result(func)
       import dp, ignd_class
       implicit none
-      class(ignd_class), intent(in) :: self
+      class(ignd_class), intent(in) :: this
       real(dp), intent(in) :: x
       real(dp)             :: func
     end function ignd_class__f
@@ -82,10 +82,10 @@ module integrator
 contains
 
   !! the funct
-  real(dp) function ignd_class_from_func__f(self, x)
-    class(ignd_class_from_func), intent(in) :: self
+  real(dp) function ignd_class_from_func__f(this, x)
+    class(ignd_class_from_func), intent(in) :: this
     real(dp), intent(in) :: x
-    ignd_class_from_func__f = self%f_ptr(x)
+    ignd_class_from_func__f = this%f_ptr(x)
   end function ignd_class_from_func__f
 
   !! Wrapper to call ig_LinWeight_class that sets up an ignd_class_from_func

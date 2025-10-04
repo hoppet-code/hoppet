@@ -1,21 +1,11 @@
 ! $Id: convolution.f90,v 1.26 2005/07/08 21:19:17 salam Exp $
 
 
-!======================================================================
-!! Module exclusively for communication between convolution and 
-!! any routine which might supply convolutions
-!======================================================================
-module convolution_communicator
-   use iso_c_binding
-   use types
+!! Module defining integers for the different pieces of a splitting function
+module convolution_pieces
+   use iso_c_binding, only: c_int
    implicit none
    private
-
-
-   !! The following variable is set by routines like InitGridConv_func
-   !! to indicate which part of the splitting function should be returned.
-   !! It will be set to one of the cc_X values defined below
-   integer(c_int), public, bind(c, name="hoppet_global_cc_piece") :: cc_piece
 
    ! if any of the following values are changed, make sure the same
    ! change is made in the C interface (hoppet.h)
@@ -23,7 +13,29 @@ module convolution_communicator
    integer(c_int), public, parameter :: cc_VIRT=2      !< -plus
    integer(c_int), public, parameter :: cc_REALVIRT=3  !< regular
    integer(c_int), public, parameter :: cc_DELTA=4     !< delta function
+end module convolution_pieces
 
+!======================================================================
+!! Module exclusively for communication between convolution and 
+!! any routine which might supply convolutions in the v1 interface
+!! where a global variable is used to indicate which piece of the
+!! splitting function is to be returned.
+!======================================================================
+module convolution_communicator
+   use iso_c_binding
+   use types
+   use convolution_pieces
+   implicit none
+   private
+
+   !! The following variable is set by routines like InitGridConv_func
+   !! to indicate which part of the splitting function should be returned.
+   !! It will be set to one of the cc_X values defined below
+   integer(c_int), public, bind(c, name="hoppet_global_cc_piece") :: cc_piece
+
+   ! pass on the public bits of convolution_pieces so that v1 routines
+   ! expecting them in convolution_communicator see them
+   public :: cc_REAL, cc_VIRT, cc_REALVIRT, cc_DELTA
 end module convolution_communicator
 
 
@@ -86,10 +98,10 @@ module convolution
 
   !! The abstract interface for the conv_ignd%f(y, piece) function
   abstract interface
-    function conv_ignd__f(self, y, piece) result(func)
+    function conv_ignd__f(this, y, piece) result(func)
       import dp, conv_ignd
       implicit none
-      class(conv_ignd), intent(in) :: self
+      class(conv_ignd), intent(in) :: this
       real(dp), intent(in) :: y
       integer , intent(in) :: piece
       real(dp)             :: func
@@ -111,7 +123,7 @@ module convolution
   type, extends(conv_ignd) :: conv_ignd_fromfunc    
     procedure(ignd_func), pointer, nopass :: f_ptr => null()
   contains
-    procedure :: f => conv_ignd_fromfunc__f
+    procedure :: f => conv_ignd_fromfunc__f  !< f(y, piece)
   end type conv_ignd_fromfunc
 
   public :: conv_ignd, conv_ignd_fromfunc
@@ -2151,10 +2163,10 @@ contains
   !! for hoppet v1.
   !!
   !! It uses the piece argument to set the global cc_piece 
-  !! and then calls the function pointer self%f_ptr(y)
-  function conv_ignd_fromfunc__f(self,y,piece) result(res)
+  !! and then calls the function pointer this%f_ptr(y)
+  function conv_ignd_fromfunc__f(this,y,piece) result(res)
     use convolution_communicator
-    class(conv_ignd_fromfunc), intent(in) :: self
+    class(conv_ignd_fromfunc), intent(in) :: this
     real(dp),                  intent(in) :: y      !< y=ln(1/x)
     integer,                   intent(in) :: piece  !< which piece of the convolution
     real(dp)                              :: res
@@ -2163,22 +2175,22 @@ contains
     ! of the convolution we are working on
     cc_piece = piece
     ! evaluate a function that uses cc_piece
-    res = self%f_ptr(y)
+    res = this%f_ptr(y)
   end function conv_ignd_fromfunc__f
 
 
   !! implementation of the f function of ignd_class_fromconv,
-  !! i.e. pass through for self%conv_ignd_ptr%f(y,self%piece)
+  !! i.e. pass through for this%conv_ignd_ptr%f(y,this%piece)
   !!
   !! This is the needed for the ignd_class that is passed 
   !! to the basic integrator  
-  function ignd_class_fromconv__f(self,x) result(res)
+  function ignd_class_fromconv__f(this,x) result(res)
     use convolution_communicator
-    class(ignd_class_fromconv), intent(in) :: self
+    class(ignd_class_fromconv), intent(in) :: this
     real(dp), intent(in)                   :: x      !< named x for consistency with ignd_class__f, but is really y=ln(1/x)
     real(dp)                               :: res
     ! evaluate a function that uses cc_piece
-    res = self%conv_ignd_ptr%f(x,self%piece)
+    res = this%conv_ignd_ptr%f(x,this%piece)
   end function ignd_class_fromconv__f
 
 
