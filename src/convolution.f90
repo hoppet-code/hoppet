@@ -40,6 +40,7 @@ end module convolution_communicator
 !======================================================================
 module convolution
   use types; use consts_dp; use assertions; use warnings_and_errors
+  use integrator
   implicit none
   private
 
@@ -74,22 +75,32 @@ module convolution
   ! This must remain zero otherwise inconsistencies will arise
   integer, parameter :: LIN_ORDER=0
 
-  type, abstract :: conv_ignd_class
-  contains
-    procedure(conv_ignd_class__f), deferred :: f
-  end type conv_ignd_class
+  !-------- interfaces and classes for convolution integrand functions --------------
 
-  !! The abstract interface for the conv_ignd_class%f(y, piece) function
+  !! the abstract base class for convolution integrand functions
+  type, abstract :: conv_ignd
+  contains
+    procedure(conv_ignd__f), deferred :: f  !< f(y, piece)
+  end type conv_ignd
+
+  !! The abstract interface for the conv_ignd%f(y, piece) function
   abstract interface
-    function conv_ignd_class__f(self, y, piece) result(func)
-      import dp, conv_ignd_class
+    function conv_ignd__f(self, y, piece) result(func)
+      import dp, conv_ignd
       implicit none
-      class(conv_ignd_class), intent(in) :: self
+      class(conv_ignd), intent(in) :: self
       real(dp), intent(in) :: y
       integer , intent(in) :: piece
       real(dp)             :: func
-    end function conv_ignd_class__f
+    end function conv_ignd__f
   end interface
+
+  !! A conv_ignd class that calls a procedure pointer to an ignd_func
+  type, extends(conv_ignd) :: conv_ignd_fromfunc    
+    procedure(ignd_func), pointer, nopass :: f_ptr => null()
+  contains
+    procedure :: f => conv_ignd_fromfunc__f
+  end type conv_ignd_fromfunc
 
 
   public :: grid_def, grid_conv
@@ -2085,10 +2096,25 @@ contains
     end do
   end subroutine conv_MultGridConv_2d
 
-  
+  !! implementation of the f function of conv_ignd_fromfunc,
+  !! assuming an f_ptr that takes a single argument y and
+  !! a piece indicator passed through the global cc_piece
+  !! variable.
+  function conv_ignd_fromfunc__f(self,y,piece) result(res)
+    use convolution_communicator
+    class(conv_ignd_fromfunc), intent(in) :: self
+    real(dp), intent(in) :: y
+    integer,  intent(in) :: piece
+    real(dp)             :: res
+    ! set the global variable to indicate which piece
+    ! of the convolution we are working on
+    cc_piece = piece
+    ! evaluate a function that uses cc_piece
+    res = self%f_ptr(y)
+  end function conv_ignd_fromfunc__f
 
   !-------------------------------------------------------------
-  ! To gc add a function for convolution
+  !! To gc add a function for convolution
   recursive subroutine conv_AddGridConv_func(gc,func, split)
     use integrator; use convolution_communicator
     type(grid_conv), intent(inout), target :: gc
