@@ -202,7 +202,8 @@ module convolution
      module procedure conv_InitGridConv_zero, conv_InitGridConv_zero_1d,&
           & conv_InitGridConv_zero_2d, conv_InitGridConv_func,&
           & conv_InitGridConv_gc, conv_InitGridConv_gc_1d, &
-          & conv_InitGridConv_gc_2d, conv_InitGridConv_conv
+          & conv_InitGridConv_gc_2d, conv_InitGridConv_conv, &
+          & conv_InitGridConv_ignd
   end interface
   !-- keep following for historical reasons? Not as of 28/12/01
   !interface conv_GridConvAdd
@@ -213,7 +214,8 @@ module convolution
           & conv_ZeroGridConv_2d
   end interface
   interface AddWithCoeff
-     module procedure conv_AddGridConv_func, conv_AddGridConv_gc,&
+     module procedure conv_AddGridConv_func, conv_AddGridConv_ignd,&
+          & conv_AddGridConv_gc,&
           & conv_AddGridConv_gc_1d, conv_AddGridConv_gc_2d
   end interface
   interface Multiply
@@ -1823,7 +1825,7 @@ contains
   
   !--------------------------------------------------------------------
   ! initialise a grid convolution with zero
-  ! Default for alloc is .true.; writing this this way allows
+  ! Default for alloc is .true.; writing it this way allows
   ! in principle the possibility of a more levels of recursion
   ! in the grid def, should one ever want to have the option...
   recursive subroutine conv_InitGridConv_zero(grid,gc,alloc)
@@ -1943,13 +1945,14 @@ contains
   !----------------------------------------------------------------------
   ! Initialise a convoluter with the function to use in the 
   ! convolution. 
-  subroutine conv_InitGridConv_func(grid,gc,func,alloc, split)
+  subroutine conv_InitGridConv_func(grid, gc, func, alloc, split)
     type(grid_def),  intent(in)    :: grid
     type(grid_conv), intent(inout) :: gc
     interface
-       function func(x)
-         use types; implicit none
-         real(dp), intent(in) :: x
+       function func(y)
+         import dp
+         !use types; implicit none
+         real(dp), intent(in) :: y
          real(dp)             :: func
        end function func
     end interface
@@ -1958,11 +1961,26 @@ contains
     !-------------------------------------------
 
     !if (default_or_opt(.not.GridConvAllocated(gc),alloc)) call conv_InitGridConv_zero(grid,gc)
-    call conv_InitGridConv_zero(grid,gc)
+    call conv_InitGridConv_zero(grid,gc,alloc)
     
     call AddWithCoeff(gc,func, split=split)
   end subroutine conv_InitGridConv_func
 
+  !----------------------------------------------------------------------
+  ! Initialise a convoluter with the function to use in the 
+  ! convolution. 
+  subroutine conv_InitGridConv_ignd(grid,gc,gc_ignd,alloc, split)
+    type(grid_def),    intent(in)    :: grid
+    type(grid_conv),   intent(inout) :: gc
+    class(conv_ignd),  intent(in)    :: gc_ignd
+    logical,           intent(in), optional :: alloc
+    real(dp),          intent(in), optional :: split(:)
+
+    !if (default_or_opt(.not.GridConvAllocated(gc),alloc)) call conv_InitGridConv_zero(grid,gc)
+    call conv_InitGridConv_zero(grid,gc)
+    
+    call conv_AddGridConv_ignd(gc, gc_ignd, split=split)
+  end subroutine conv_InitGridConv_ignd
 
   !----------------------------------------------------------------------
   ! Initialise a convoluter with the function to use in the 
@@ -2108,225 +2126,6 @@ contains
     end do
   end subroutine conv_MultGridConv_2d
 
-
-  !-------------------------------------------------------------
-  !! To gc add a function for convolution
-  recursive subroutine conv_AddGridConv_oldfunc(gc,func, split)
-    use integrator; use convolution_communicator
-    type(grid_conv), intent(inout), target :: gc
-    real(dp), intent(in), optional :: split(:)
-    interface
-       function func(x)
-         use types; implicit none
-         real(dp), intent(in) :: x
-         real(dp)             :: func
-       end function func
-    end interface
-    !----------------------------------------------------
-    real(dp), pointer :: dy
-    integer,  pointer :: ny
-    integer  :: order
-    real(dp) :: upper,lower, yl,ym,yh
-    integer  :: i,j, k
-    !------------------------------------------------------
-    real(dp) :: res,eps!, nodes(gc%grid%order+1)
-    integer  :: il, ih, iy, jy
-    real(dp), allocatable :: nodes(:)
-    !------------------------------------------------------
-    integer :: isub
-
-    if (gc%grid%nsub /= 0) then
-       do isub = 1, gc%grid%nsub
-          call conv_AddGridConv_func(gc%subgc(isub),func,split)
-       end do
-       return
-    end if
-    
-    dy => gc%grid%dy
-    ny => gc%grid%ny
-    order = gc%grid%order
-    eps   = gc%grid%eps
-
-    !-- this used to be an automatic, but ran into problems 
-    !   with multi-grid splitting functions because compound holder
-    !   had an undefined value for gc%grid%order
-    allocate(nodes(abs(gc%grid%order)+1))
-
-    cc_piece = cc_REAL
-    if (gc%grid%order == LIN_ORDER) then
-       if (present(split)) call wae_error("conv_AddGridConv_func: split not supported for LIN_ORDER")
-       do i = 1, ny
-          ym = i*dy
-          yl = ym - dy
-          yh = ym + dy
-          lower = ig_LinWeight(func,yl,ym,zero,one,eps) ! specify 0 at yl
-          upper = ig_LinWeight(func,ym,yh,one,zero,eps) ! specify 0 at yh
-          gc%conv(i,FULL) = gc%conv(i,FULL) + lower + upper
-          gc%conv(i,UPPR) = gc%conv(i,UPPR) + upper
-       end do
-       !-- see CCN17-62 ----
-       ym = zero
-       yh = dy
-       cc_piece = cc_REAL
-       upper    = ig_LinWeight(func,ym,yh,zero,-one,eps)
-       cc_piece = cc_REALVIRT
-       upper    = upper + ig_LinWeight(func,ym,yh,one,one,eps) 
-       cc_piece = cc_VIRT
-       upper    = upper + ig_LinWeight(func,yh,-two*log(eps),one,one,eps)
-       cc_piece = cc_DELTA
-       upper    = upper + func(zero)
-       gc%conv(0,FULL) = gc%conv(0,FULL) + upper
-       gc%conv(0,UPPR) = gc%conv(0,UPPR) + upper
-    else if (gc%grid%order < LIN_ORDER) then
-       ! should be similar to Ratcliffes proposal (and the sort of thing
-       ! regularly done in BFKL). NB Not documented in any CCN -- hopefully
-       ! straightforward enough that it can be done in one's head?
-       order = -gc%grid%order
-       ! limit goes to ny+1 to ensure that everything that can contribute
-       ! to entry at ny is covered (otherwise entry at ny is dicontinuous 
-       ! relative to earlier entries)
-       do i = 1, ny+1
-          !-- this is the range of interest
-          yl = (i-1) * dy
-          yh =  i    * dy
-          !-- this is range of nodes for that interval
-          il = i-1
-          ih = il + order
-          nodes = (/ (j,j=il,ih) /) * dy
-          do iy = il, min(ih,ny)
-             res = conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps, split=split)
-             gc%conv(iy,1) = gc%conv(iy,1) + res
-          end do
-       end do
-       !write(0,*) 'conv_AddGridConv_func: Negative orders not yet supported'
-       !stop
-    else
-      if (present(split)) call wae_error("conv_AddGridConv_func: split not supported for order>0")
-
-       !-- CCN19 p.4 -------------
-       ! index 0:          central points
-       ! index 1..order+1: for dealing with last order+1 points
-       !-- first do central points. Do an interval at a time
-       !   i = 1, means interval from 0 to 1
-       !-- the first loop is missing something:: it should also be filling up
-       !   some pieces in the second loop, at least in some cases
-       do i = 1, ny
-          !-- this is the range of interest
-          yl = (i-1) * dy
-          yh =  i    * dy
-          !-- these are the interpolation points to be used
-          il = max(0,i - (order+2)/2)
-          ih = min(ny, il+order)
-          il = ih - order
-          !-- fill things up?
-          nodes = (/ (j,j=il,ih) /) * dy
-          do iy = il, ih
-             res = conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps)
-             gc%conv(iy,0) = gc%conv(iy,0) + res
-             !-- deal properly with special end array --
-             !   try to be clever with limits, but there are no guarantees.
-             !   It does however seem to work!
-             do jy = max(i+order,iy), iy+order
-                if (jy <= ny) then
-                   gc%conv(jy,order+1-(jy-iy)) &
-                        &= gc%conv(jy,order+1-(jy-iy)) + res
-                end if
-             end do
-          end do
-       end do
-       !-- now deal with integrations close to end points
-       ! k represents the end points
-       do k = 1, ny
-          if (k <= order) then
-             yl = max(zero, (k-order)*dy)
-             yh = k*dy
-             !-- the interpolation points & yes, it is normal for them 
-             !   to be negative
-             !   it is related to the way the convolution is done for the case 
-             !   i < order, i.e. effectively conv(0:order)*gq(order:0:-1)
-             !   (actually conv(i, 1:order+1))
-             ih = k
-             il = k - order
-             !-- fill things up
-             nodes = (/ (j,j=il,ih) /) * dy
-             do iy = il, ih
-                res = conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps)
-                gc%conv(k,iy-il+1) = gc%conv(k,iy-il+1) + res
-             end do
-             cycle
-          end if
-          ! now do things region by region
-          !-- i represents the region that we will study
-          do i = max(1,k-order+1), k
-             !-- this is the range of interest
-             yl = (i-1) * dy
-             yh =  i    * dy
-             !-- these are the interpolation points to be used
-             !   note extra min(k,...) compared to above formula
-             il = max(0,i - (order+2)/2)
-             ih = min(k,min(ny, il+order)) !-- could simplify expression
-             il = ih - order
-             nodes = (/ (j,j=il,ih) /) * dy
-             do iy = max(il,k-order), ih
-                res = conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps)
-                gc%conv(k,order+1-(k-iy)) = &
-                     &gc%conv(k,order+1-(k-iy)) + res
-             end do
-          end do
-       end do
-    end if
-    
-    deallocate(nodes)
-
-  end subroutine conv_AddGridConv_oldfunc
-
-
-  !---------------------------------------------------------------------
-  ! look after some repetitive work...
-  !
-  ! Guess that this function may do the following:
-  !   Work out the weight corresponding to the integral, between yl and yh
-  !   of the function func(y) mutiplied by a polynomial which is zero at 
-  !   all the nodes (which start from il) except that indicated by iy.
-  !
-  function conv_GCAf_Helper(func,yl,yh,il,iy,nodes,eps, split) result(res)
-    use integrator; use convolution_communicator
-    interface
-       function func(x)
-         use types; implicit none
-         real(dp), intent(in) :: x
-         real(dp)             :: func
-       end function func
-    end interface
-    real(dp), intent(in) :: yl, yh, nodes(:), eps
-    integer,  intent(in) :: il, iy
-    real(dp), intent(in), optional :: split(:)
-    real(dp)             :: res
-    integer :: inode
-    inode = iy - il + 1
-    res = zero
-    if (yl == zero .and. iy == 0) then
-       cc_piece = cc_VIRT
-       res = res + ig_LinWeight(func, yh,-two*log(eps), one,one, eps, split=split)
-       cc_piece = cc_DELTA
-       res = res + func(zero)
-       cc_piece = cc_REALVIRT
-       res = res + ig_LinWeight(func, yl, yh, one, one, eps, split=split)
-       cc_piece = cc_REAL
-       if (present(split)) then
-         if (size(split) > 0) Then
-            if (split(1) < yh) Then
-               call wae_error("conv_GCAf_Helper: split(1) < yh not supported, with yh = ", dbleval=yh)
-            end if
-         end if 
-       end if
-       res = res + ig_PolyWeight_expand(func, yl, yh, nodes, inode, eps,wgtadd=-one)
-    else
-       cc_piece = cc_REAL
-       res = ig_PolyWeight(func, yl, yh, nodes, inode, eps, split=split)
-    end if
-  end function conv_GCAf_Helper
-
   !-------------------------------------------------------------
   !! To gc add a function for convolution
   recursive subroutine conv_AddGridConv_func(gc,func, split)
@@ -2334,9 +2133,9 @@ contains
     type(grid_conv), intent(inout), target :: gc
     real(dp), intent(in), optional :: split(:)
     interface
-       function func(x)
+       function func(y)
          use types; implicit none
-         real(dp), intent(in) :: x
+         real(dp), intent(in) :: y      !< y=ln(1/x)
          real(dp)             :: func
        end function func
     end interface
@@ -2346,16 +2145,20 @@ contains
     call conv_AddGridConv_ignd(gc,ignd, split)
   end subroutine conv_AddGridConv_func
 
-  !! implementation of the f function of conv_ignd_fromfunc,
-  !! assuming an f_ptr that takes a single argument y and
-  !! a piece indicator passed through the global cc_piece
-  !! variable.
+
+  !! Implements the f(y,piece) function of conv_ignd_fromfunc.
+  !! allowing us to access the splitting functions as written
+  !! for hoppet v1.
+  !!
+  !! It uses the piece argument to set the global cc_piece 
+  !! and then calls the function pointer self%f_ptr(y)
   function conv_ignd_fromfunc__f(self,y,piece) result(res)
     use convolution_communicator
     class(conv_ignd_fromfunc), intent(in) :: self
-    real(dp), intent(in) :: y
-    integer,  intent(in) :: piece
-    real(dp)             :: res
+    real(dp),                  intent(in) :: y      !< y=ln(1/x)
+    integer,                   intent(in) :: piece  !< which piece of the convolution
+    real(dp)                              :: res
+
     ! set the global variable to indicate which piece
     ! of the convolution we are working on
     cc_piece = piece
@@ -2363,8 +2166,12 @@ contains
     res = self%f_ptr(y)
   end function conv_ignd_fromfunc__f
 
+
   !! implementation of the f function of ignd_class_fromconv,
-  !! i.e. pass through for self%conv_ignd_ptr%f(y,self%piece),   
+  !! i.e. pass through for self%conv_ignd_ptr%f(y,self%piece)
+  !!
+  !! This is the needed for the ignd_class that is passed 
+  !! to the basic integrator  
   function ignd_class_fromconv__f(self,x) result(res)
     use convolution_communicator
     class(ignd_class_fromconv), intent(in) :: self
@@ -2373,6 +2180,7 @@ contains
     ! evaluate a function that uses cc_piece
     res = self%conv_ignd_ptr%f(x,self%piece)
   end function ignd_class_fromconv__f
+
 
   !-------------------------------------------------------------
   !! To gc add a function for convolution
