@@ -76,19 +76,19 @@ module convolution
 
   type, abstract :: conv_ignd_class
   contains
-    procedure(conv_ignd_cfunc), deferred :: f
+    procedure(conv_ignd_class__f), deferred :: f
   end type conv_ignd_class
 
-  !! The abstract interface for the conv_ig_class%f(y, piece) function
+  !! The abstract interface for the conv_ignd_class%f(y, piece) function
   abstract interface
-    function conv_ignd_cfunc(self, y, piece) result(func)
+    function conv_ignd_class__f(self, y, piece) result(func)
       import dp, conv_ignd_class
       implicit none
       class(conv_ignd_class), intent(in) :: self
       real(dp), intent(in) :: y
       integer , intent(in) :: piece
       real(dp)             :: func
-    end function conv_ignd_cfunc
+    end function conv_ignd_class__f
   end interface
 
 

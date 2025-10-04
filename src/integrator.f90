@@ -50,18 +50,18 @@ module integrator
   !! means "class function"
   type, abstract :: ignd_class
   contains
-    procedure(ignd_class_f), deferred :: f
+    procedure(ignd_class__f), deferred :: f
   end type ignd_class
 
   !! The abstract interface for the ignd_class%f function
   abstract interface
-    function ignd_class_f(self, x) result(func)
+    function ignd_class__f(self, x) result(func)
       import dp, ignd_class
       implicit none
       class(ignd_class), intent(in) :: self
       real(dp), intent(in) :: x
       real(dp)             :: func
-    end function ignd_class_f
+    end function ignd_class__f
   end interface
 
   !! A concrete example of a class derived from ignd_class, 
@@ -74,18 +74,18 @@ module integrator
   type, extends(ignd_class) :: ignd_class_from_func
     procedure(ignd_func), pointer, nopass :: f_ptr => null()
   contains
-    procedure :: f => ignd_class_from_func_f
+    procedure :: f => ignd_class_from_func__f
   end type ignd_class_from_func
 
 
 contains
 
   !! the funct
-  real(dp) function ignd_class_from_func_f(self, x)
+  real(dp) function ignd_class_from_func__f(self, x)
     class(ignd_class_from_func), intent(in) :: self
     real(dp), intent(in) :: x
-    ignd_class_from_func_f = self%f_ptr(x)
-  end function ignd_class_from_func_f
+    ignd_class_from_func__f = self%f_ptr(x)
+  end function ignd_class_from_func__f
 
   !! Wrapper to call ig_LinWeight_class that sets up an ignd_class_from_func
   !! with a procedure pointer to the ignd_func F
