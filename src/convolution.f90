@@ -2140,9 +2140,9 @@ contains
        end function func
     end interface
     !----------------------------------------------------
-    type(conv_ignd_fromfunc) :: ignd
-    ignd%f_ptr => func
-    call conv_AddGridConv_ignd(gc,ignd, split)
+    type(conv_ignd_fromfunc) :: gc_ignd
+    gc_ignd%f_ptr => func
+    call conv_AddGridConv_ignd(gc, gc_ignd, split)
   end subroutine conv_AddGridConv_func
 
 
