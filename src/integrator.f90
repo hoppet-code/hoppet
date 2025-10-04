@@ -19,28 +19,28 @@ module integrator
   end interface
   
   interface ig_LinWeightSing
-     module procedure ig_LinWeightSing_ffunc, ig_LinWeightSing_class
+    module procedure ig_LinWeightSing_ffunc, ig_LinWeightSing_class
   end interface
 
   interface ig_PolyWeight
-     module procedure ig_PolyWeight_ffunc, ig_PolyWeight_class
+    module procedure ig_PolyWeight_ffunc, ig_PolyWeight_class
   end interface
 
   interface ig_PolyWeight_expand
-     module procedure ig_PolyWeight_expand_ffunc, ig_PolyWeight_expand_class
+    module procedure ig_PolyWeight_expand_ffunc, ig_PolyWeight_expand_class
   end interface
 
 
   !! The abstract interface for a function to be integrated
   abstract interface
-    function ig_func(x) result(func)
+    function ignd_func(x) result(func)
       import dp
       implicit none
       real(dp), intent(in) :: x
       real(dp)             :: func
-    end function ig_func
+    end function ignd_func
   end interface
-  public :: ig_func
+  public :: ignd_func
 
 
   !! Base class for integrands. 
@@ -48,95 +48,87 @@ module integrator
   !! The only thing a derived class needs to do is implement f(self,x),
   !! which should have the signature of ig_cfunc below, where "cfunc"
   !! means "class function"
-  type, abstract :: ig_class
+  type, abstract :: ignd_class
   contains
-    procedure(ig_cfunc), deferred :: f
-  end type ig_class
+    procedure(ignd_class_f), deferred :: f
+  end type ignd_class
 
-  !! The abstract interface for the ig_class%f function
+  !! The abstract interface for the ignd_class%f function
   abstract interface
-    function ig_cfunc(self, x) result(func)
-      import dp, ig_class
+    function ignd_class_f(self, x) result(func)
+      import dp, ignd_class
       implicit none
-      class(ig_class), intent(in) :: self
+      class(ignd_class), intent(in) :: self
       real(dp), intent(in) :: x
       real(dp)             :: func
-    end function ig_cfunc
+    end function ignd_class_f
   end interface
 
-  !! A concrete example of a class derived from ig_class, 
+  !! A concrete example of a class derived from ignd_class, 
   !! which simply wraps a procedure pointer to a function
-  !! of type ig_func. 
+  !! of type ignd_func. 
   !!
-  !! This is a little bit of a roundabout way of doing things, ! but the
-  !! use of the abstract base class means that we ! can also write classes
-  !! that take integrands with additional ! parameters
-  type, extends(ig_class) :: ig_class_func
-    procedure(ig_func), pointer, nopass :: f_ptr => null()
+  !! This is a little bit of a roundabout way of doing things, but the
+  !! use of the abstract base class means that we can also write classes
+  !! that take integrands with additional parameters
+  type, extends(ignd_class) :: ignd_class_from_func
+    procedure(ignd_func), pointer, nopass :: f_ptr => null()
   contains
-    procedure :: f => ig_cfunc_func
-  end type ig_class_func
+    procedure :: f => ignd_class_from_func_f
+  end type ignd_class_from_func
 
-  abstract interface
-    function ig_func_c(x) result(func) bind(C)
-      use iso_c_binding, only: c_double
-      real(c_double), intent(in), value :: x
-      real(c_double)             :: func
-    end function ig_func_c
-  end interface
-  public :: ig_func_c
 
 contains
 
-
-  real(dp) function ig_cfunc_func(self, x)
-    class(ig_class_func), intent(in) :: self
+  !! the funct
+  real(dp) function ignd_class_from_func_f(self, x)
+    class(ignd_class_from_func), intent(in) :: self
     real(dp), intent(in) :: x
-    ig_cfunc_func = self%f_ptr(x)
-  end function ig_cfunc_func
+    ignd_class_from_func_f = self%f_ptr(x)
+  end function ignd_class_from_func_f
 
-  !! Wrapper to call ig_LinWeight_class that sets up an if_class_func
-  !! with a procedure pointer to the ig_func F
+  !! Wrapper to call ig_LinWeight_class that sets up an ignd_class_from_func
+  !! with a procedure pointer to the ignd_func F
   Recursive FUNCTION ig_LinWeight_ffunc(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
-    procedure(ig_func)   :: F
+    procedure(ignd_func)   :: F
     real(dp), intent(in) :: A,B,AMult,BMult,EPS
     real(dp), intent(in), optional :: split(:)
     real(dp) :: cgauss64
     !-----------
-    type(ig_class_func) :: F_class
+    type(ignd_class_from_func) :: F_class
     F_class%f_ptr => F
     cgauss64 = ig_LinWeight_class(F_class,A,B,AMult,BMult,EPS, split)
   end function ig_LinWeight_ffunc
 
    Recursive FUNCTION ig_LinWeightSing_ffunc(F,A_in,B_in,AMult,BMult,EPS) &
           &result(cgauss64)
-      procedure(ig_func)   :: F
+      procedure(ignd_func)   :: F
       real(dp), intent(in) :: A_in,B_in,AMult,BMult,EPS
       real(dp) :: cgauss64
-      type(ig_class_func) :: F_class
+      type(ignd_class_from_func) :: F_class
       F_class%f_ptr => F
       cgauss64 = ig_LinWeightSing_class(F_class,A_in,B_in,AMult,BMult,EPS)
    end function ig_LinWeightSing_ffunc
 
    Recursive FUNCTION ig_PolyWeight_ffunc(F,A,B,nodes,inode_one,EPS,wgtadd, split) result(cgauss64)
-      procedure(ig_func)   :: F
+      procedure(ignd_func)   :: F
       real(dp), intent(in) :: A,B,nodes(:),EPS
       integer,  intent(in) :: inode_one
       real(dp), intent(in), optional :: wgtadd
       real(dp), intent(in), optional :: split(:)
       real(dp) :: cgauss64
-      type(ig_class_func) :: F_class
+      type(ignd_class_from_func) :: F_class
       F_class%f_ptr => F
       cgauss64 = ig_PolyWeight_class(F_class,A,B,nodes,inode_one,EPS,wgtadd, split)
    end function ig_PolyWeight_ffunc
 
    Recursive FUNCTION ig_PolyWeight_expand_ffunc(F,A,B,nodes,inode_one,EPS,wgtadd) result(cgauss64)
-      procedure(ig_func)   :: F
+      procedure(ignd_func)   :: F
       real(dp), intent(in) :: A,B,nodes(:),EPS
       integer,  intent(in) :: inode_one
       real(dp), intent(in), optional :: wgtadd
       real(dp) :: cgauss64
-      type(ig_class_func) :: F_class
+      type(ignd_class_from_func) :: F_class
       F_class%f_ptr => F
       cgauss64 = ig_PolyWeight_expand_class(F_class,A,B,nodes,inode_one,EPS,wgtadd)
    end function ig_PolyWeight_expand_ffunc
@@ -155,7 +147,7 @@ contains
   !! functions.
   !! 
   Recursive FUNCTION ig_LinWeight_func(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
-    procedure(ig_func)   :: F
+    procedure(ignd_func)   :: F
     real(dp), intent(in) :: A,B,AMult,BMult,EPS
     real(dp), intent(in), optional :: split(:)
     real(dp), allocatable :: edges(:)
@@ -246,7 +238,7 @@ contains
   !! functions.
   !! 
   Recursive FUNCTION ig_LinWeight_class(F,A,B,AMult,BMult,EPS, split) result(cgauss64)
-    class(ig_class), intent(in) :: F
+    class(ignd_class), intent(in) :: F
     real(dp), intent(in) :: A,B,AMult,BMult,EPS
     real(dp), intent(in), optional :: split(:)
     real(dp), allocatable :: edges(:)
@@ -328,7 +320,7 @@ contains
   ! Try to improve convergence on nasty integrals
    Recursive FUNCTION ig_LinWeightSing_func(F,A_in,B_in,AMult,BMult,EPS) &
           &result(cgauss64)
-      procedure(ig_func)   :: F
+      procedure(ignd_func)   :: F
       real(dp), intent(in) :: A_in,B_in,AMult,BMult,EPS
       REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
       real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
@@ -403,7 +395,7 @@ contains
 
   Recursive FUNCTION ig_LinWeightSing_class(F,A_in,B_in,AMult,BMult,EPS) &
        &result(cgauss64)
-    class(ig_class), intent(in) :: F
+    class(ignd_class), intent(in) :: F
     real(dp), intent(in) :: A_in,B_in,AMult,BMult,EPS
     REAL(dp) :: AA,BB,U,C1,C2,S8,S16,H, CGAUSS64, pmult,mmult,Const
     real(dp), parameter :: z1 = 1, hf = half*z1, cst = 5*Z1/1000
@@ -483,7 +475,7 @@ contains
   !! 
   !! If wgtadd is present then it is added to the weight function
   Recursive FUNCTION ig_PolyWeight_func(F,A,B,nodes,inode_one,EPS,wgtadd, split) result(cgauss64)
-      procedure(ig_func)   :: F
+      procedure(ignd_func)   :: F
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd
@@ -567,7 +559,7 @@ contains
   !! 
   !! If wgtadd is present then it is added to the weight function
   Recursive FUNCTION ig_PolyWeight_class(F,A,B,nodes,inode_one,EPS,wgtadd, split) result(cgauss64)
-    class(ig_class), intent(in) :: F
+    class(ignd_class), intent(in) :: F
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd
@@ -658,7 +650,7 @@ contains
   !! with convolution of real pieces
   Recursive FUNCTION ig_PolyWeight_expand_func(F,A,B,nodes,inode_one,EPS,wgtadd) result(cgauss64)
     use warnings_and_errors
-    procedure(ig_func)   :: F
+    procedure(ignd_func)   :: F
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd
@@ -792,7 +784,7 @@ contains
   !! with convolution of real pieces
   Recursive FUNCTION ig_PolyWeight_expand_class(F,A,B,nodes,inode_one,EPS,wgtadd) result(cgauss64)
     use warnings_and_errors
-    class(ig_class), intent(in) :: F
+    class(ignd_class), intent(in) :: F
     real(dp), intent(in) :: A,B,nodes(:),EPS
     integer,  intent(in) :: inode_one
     real(dp), intent(in), optional :: wgtadd

@@ -23,6 +23,18 @@ module test_convolution
 !      use iso_c_binding; real(c_double), value :: x; real(c_double) :: func; \
 !    end function; \
 !  end interface; 
+
+  
+  abstract interface
+    function ig_func_c(x) result(func) bind(C)
+      use iso_c_binding, only: c_double
+      real(c_double), intent(in), value :: x
+      real(c_double)             :: func
+    end function ig_func_c
+  end interface
+  public :: ig_func_c
+
+  
   procedure(ig_func_c), bind(C, name="pqq_c") :: pqq_c
   procedure(ig_func_c), bind(C, name="xpqqy_c") :: xpqqy_c
   

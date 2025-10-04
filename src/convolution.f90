@@ -73,7 +73,24 @@ module convolution
   !-- for standard linear approach with proper end-point treatment.
   ! This must remain zero otherwise inconsistencies will arise
   integer, parameter :: LIN_ORDER=0
-  
+
+  type, abstract :: conv_ignd_class
+  contains
+    procedure(conv_ignd_cfunc), deferred :: f
+  end type conv_ignd_class
+
+  !! The abstract interface for the conv_ig_class%f(y, piece) function
+  abstract interface
+    function conv_ignd_cfunc(self, y, piece) result(func)
+      import dp, conv_ignd_class
+      implicit none
+      class(conv_ignd_class), intent(in) :: self
+      real(dp), intent(in) :: y
+      integer , intent(in) :: piece
+      real(dp)             :: func
+    end function conv_ignd_cfunc
+  end interface
+
 
   public :: grid_def, grid_conv
   public :: conv_BestIsub
