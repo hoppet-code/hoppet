@@ -2111,7 +2111,7 @@ contains
 
   !-------------------------------------------------------------
   !! To gc add a function for convolution
-  recursive subroutine conv_AddGridConv_func(gc,func, split)
+  recursive subroutine conv_AddGridConv_oldfunc(gc,func, split)
     use integrator; use convolution_communicator
     type(grid_conv), intent(inout), target :: gc
     real(dp), intent(in), optional :: split(:)
@@ -2278,7 +2278,7 @@ contains
     
     deallocate(nodes)
 
-  end subroutine conv_AddGridConv_func
+  end subroutine conv_AddGridConv_oldfunc
 
 
   !---------------------------------------------------------------------
@@ -2326,7 +2326,26 @@ contains
        res = ig_PolyWeight(func, yl, yh, nodes, inode, eps, split=split)
     end if
   end function conv_GCAf_Helper
-  
+
+  !-------------------------------------------------------------
+  !! To gc add a function for convolution
+  recursive subroutine conv_AddGridConv_func(gc,func, split)
+    use integrator; use convolution_communicator
+    type(grid_conv), intent(inout), target :: gc
+    real(dp), intent(in), optional :: split(:)
+    interface
+       function func(x)
+         use types; implicit none
+         real(dp), intent(in) :: x
+         real(dp)             :: func
+       end function func
+    end interface
+    !----------------------------------------------------
+    type(conv_ignd_fromfunc) :: ignd
+    ignd%f_ptr => func
+    call conv_AddGridConv_ignd(gc,ignd, split)
+  end subroutine conv_AddGridConv_func
+
   !! implementation of the f function of conv_ignd_fromfunc,
   !! assuming an f_ptr that takes a single argument y and
   !! a piece indicator passed through the global cc_piece
