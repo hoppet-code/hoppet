@@ -16,12 +16,14 @@ program hoppet_unit_tests
     print *, "  -time TIMING_NAME   Run timing for the specified test (default: none)"
     print *, "                      (anything whose initial characters match TIMING_NAME will be timed)"
     print *, "  -list-timing        List all available timing names"
+    print *, "  -only TEST_GROUP    Run only the specified test group(s) (substring match)"
     stop 0
   end if
   print '(a)', "Running HOPPET unit tests"
   call hoppet_setup()  
   timing_name = string_val_opt("-time","none") ! get timing name from command line
   list_timing = log_val_opt("-list-timing",.false.)
+  test_only = trim(string_val_opt("-only",""))
   if (.not. CheckAllArgsUsed(0)) stop 1
 
   call test_interpolation_coeffs()
@@ -93,6 +95,8 @@ contains
     !real(dp), parameter :: Qvals(*) = [3.0_dp]
     real(dp) :: x, Q, xpdf(iflv_min:tables(0)%tab_iflv_max), xpdff
     integer  :: iflv, ix, iQ
+
+    if (.not. do_test("test_tab_eval")) return
 
     ! first check that single-flavour evaluation gives the same answer
     ! as all-flavour evaluation
