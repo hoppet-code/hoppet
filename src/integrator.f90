@@ -81,7 +81,10 @@ module integrator
 
 contains
 
-  !! the funct
+  !! Implements ignd_class_from_func%f, evaluating the procedure pointer
+  !! returning this%f_ptr(x) 
+  !!
+  !! \param x the x value at which to evaluate the function
   real(dp) function ignd_class_from_func__f(this, x)
     class(ignd_class_from_func), intent(in) :: this
     real(dp), intent(in) :: x
