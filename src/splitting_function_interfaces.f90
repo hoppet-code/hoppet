@@ -22,7 +22,8 @@ module hoppet_splitting_function_interfaces
   end interface
 
   !! a type that holds pointers to the regular, plus and delta parts
-  !! of an MVV splitting function and implements the conv_ignd%f interface
+  !! of an MVV splitting function and implements the conv_ignd%f(y,piece) 
+  !! interface
   !!
   !! Users would typically create an mvv_splitting_function via the
   !! as 
@@ -31,6 +32,12 @@ module hoppet_splitting_function_interfaces
   !!
   !! where the last argument is the multiplier, e.g. here to convert from
   !! (alpha_s/4pi)**order to (alpha_s/2pi)**order
+  !!
+  !! Where a part is not present, the corresponding argument should be null()
+  !! e.g. 
+  !!
+  !!     mvv_splitting_function(P2QGA, null(), null(), 0.5_dp**3)
+  !!
   type, extends(conv_ignd) :: mvv_splitting_function
     procedure(P_x_nfint), pointer, nopass :: reg   => null()  !< A, regular part 
     procedure(P_x_nfint), pointer, nopass :: plus  => null()  !< B, plus part
