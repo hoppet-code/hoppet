@@ -18,6 +18,7 @@ program hoppet_unit_tests
     print *, "                      (anything whose initial characters match TIMING_NAME will be timed)"
     print *, "  -list-timing        List all available timing names"
     print *, "  -only TEST_GROUP    Run only the specified test group(s) (substring match)"
+    print *, "  -verbose            Print a message for each passed test"
     stop 0
   end if
   print '(a)', "Running HOPPET unit tests"
@@ -25,6 +26,8 @@ program hoppet_unit_tests
   timing_name = string_val_opt("-time","none") ! get timing name from command line
   list_timing = log_val_opt("-list-timing",.false.)
   test_only = trim(string_val_opt("-only",""))
+  verbose   = log_val_opt("-verbose",.false.)
+
   if (.not. CheckAllArgsUsed(0)) stop 1
 
   call test_interpolation_coeffs()
@@ -35,11 +38,11 @@ program hoppet_unit_tests
 
   if (unit_test_failures > 0) then
     ! print a message in red
-    print '(a)', red//trim(to_string(unit_test_failures))//' unit tests failed.'//reset
+    print '(a)', bold//red//trim(to_string(unit_test_failures))//' unit tests failed.'//reset
     stop 1
   else
     ! print a message in green
-    print '(a)', green//'All '//trim(to_string(unit_test_successes))//' unit tests passed.'//reset
+    print '(a)', bold//green//'All '//trim(to_string(unit_test_successes))//' unit tests passed.'//reset
   end if
 
 contains
