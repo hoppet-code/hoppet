@@ -56,9 +56,13 @@ contains
     end if
 
     if (.not. is_equal) then
-      print *, red//"Failed: ", testname,reset
+      print *, ""
+      print '(a)', red//bold//"Failed: "//trim(testname),reset
       print *, "  Expected: ", expected
       print *, "  Actual:   ", answer
+      print *, "  abs tol:  ", tol_abs
+      if (present(tol_rel)) print *, "  rel tol:  ", tol_rel
+      print *, "  difference: ", answer - expected,  ", rel diff: ", (answer - expected)/max(abs(expected), abs(answer))
       unit_test_failures = unit_test_failures + 1
     else
       unit_test_successes = unit_test_successes + 1
