@@ -10,6 +10,8 @@ contains
     use hoppet_libome_interfaces
     use hoppet_term ! for term colours
     use convolution_pieces
+    use convolution
+    use streamlined_interface
     use iso_c_binding
     implicit none
     real(c_double) :: as4pi, LM, NF, x, y
@@ -43,12 +45,14 @@ contains
     call sum_check("AQqPS_reg" ,    91.950981088_dp  , AQqPS_ptr , reg, 3)
     call sum_check("AqqQPS_reg" ,  -38.624316410_dp  , AqqQPS_ptr , reg, 3)
 
-    call sum_check("AQg_reg" ,  310.17900321_dp      , AQg_ptr , reg, 3)
-    call sum_check("AqgQ_reg" ,  -73.710138327_dp    , AqgQ_ptr , reg, 3)
+    call sum_check("AQg_reg" ,    310.17900321_dp    , AQg_ptr , reg, 3)
+    call sum_check("AqgQ_reg" ,   -73.710138327_dp   , AqgQ_ptr , reg, 3)
     call sum_check("AgqQ_reg" ,  -120.75198970_dp    , AgqQ_ptr , reg, 3)
 
-    !call InitGridConv()
-
+    block
+      type(grid_conv) :: A3ggQ
+      call InitGridConv(grid, A3ggQ, conv_OME(AggQ_ptr,order=3))
+    end block
     !! Call the libome functions through the interface
     !res_reg   = ome_AqqQNSEven_reg(as4pi, LM, NF, x)
     !res_plus  = ome_AqqQNSEven_plus(as4pi, LM, NF, x)

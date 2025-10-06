@@ -101,20 +101,34 @@ module hoppet_libome_interfaces
     end function
   end interface
 
-  type, extends(conv_ignd) :: conv_libome
-    type(c_ptr)    :: ptr   !< pointer to one of the A[...]_ptr objects, i.e. an rpd_distribution object
-    integer(c_int) :: order !< the order in alphas    
+  !! Derived type implementing the conv_ignd abstract type
+  !! using the libome library.
+  !!
+  !! Initialise an object as conv_OME(A..._ptr, order). It will use the
+  !! global nf value from the qcd module, and LM=0 unless explicitly
+  !! set
+  !!
+  !! Example usage:
+  !!
+  !!    type(grid_conv) :: A3ggQ
+  !!    call InitGridConv(grid, A3ggQ, conv_OME(AggQ_ptr,order=3))
+  !!
+  type, extends(conv_ignd) :: conv_OME
+    type(c_ptr)    :: ptr                !< pointer to one of the A[...]_ptr objects
+    integer(c_int) :: order              !< the order in alphas    
+    real(c_double) :: LM = 0.0_c_double  !< the LM value to use (mainly for testing)
   contains
-    procedure :: f => conv_libome__f
+    procedure :: f => conv_OME__f !< f(y,piece) function
   end type
 
 contains
   
-  ! The convolution function for the conv_libome type
-  function conv_libome__f(this, y, piece) result(res)
+  !! Implementation of the conv_ignd%f(y,piece) function for the
+  !! conv_OME derived type
+  function conv_OME__f(this, y, piece) result(res)
     use qcd, only: nf
     implicit none
-    class(conv_libome), intent(in) :: this
+    class(conv_OME), intent(in) :: this
     real(dp), intent(in) :: y
     integer , intent(in) :: piece
     real(c_double) :: res, nf_c, lm_c
@@ -124,5 +138,5 @@ contains
 
     ! Call the ome_piece_hoppet function with the stored pointer and order
     res = ome_piece_hoppet(this%ptr, y, piece, this%order, lm_c, nf_c)
-  end function conv_libome__f
+  end function conv_OME__f
 end module hoppet_libome_interfaces
