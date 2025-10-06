@@ -357,6 +357,7 @@ if (HOPPET_BUILD_EXAMPLES)
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
       POSITION_INDEPENDENT_CODE TRUE
+      LINKER_LANGUAGE Fortran
     )
   endforeach()
   if (LHAPDF_FOUND)
@@ -368,6 +369,7 @@ if (HOPPET_BUILD_EXAMPLES)
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
         Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/modules/${p}_modules
         POSITION_INDEPENDENT_CODE TRUE
+	LINKER_LANGUAGE Fortran
         )
       if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
         set_source_files_properties( example_f90/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
@@ -388,6 +390,7 @@ if (HOPPET_BUILD_EXAMPLES)
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
       POSITION_INDEPENDENT_CODE TRUE
+      LINKER_LANGUAGE Fortran
       )
     if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
       set_source_files_properties( example_f77/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
@@ -471,6 +474,7 @@ if (HOPPET_BUILD_BENCHMARK)
       # could in principle be shared (which would require a different CMake setup)
       Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/benchmarking/modules/${b}_modules
       POSITION_INDEPENDENT_CODE TRUE
+      LINKER_LANGUAGE Fortran
      )
   endforeach()
   if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
