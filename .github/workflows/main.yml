@@ -67,6 +67,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        submodules: recursive
     - name: Install 
       run: |
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
@@ -87,6 +89,8 @@ jobs:
     container: fedora:latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
     - name: Install
       run: |
              dnf -y install findutils procps gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
@@ -167,6 +171,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        submodules: recursive
     - name: Install 
       run: |
           uname -a
