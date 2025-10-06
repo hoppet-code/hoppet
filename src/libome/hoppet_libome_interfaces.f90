@@ -1,5 +1,6 @@
 module hoppet_libome_interfaces
   use types
+  use convolution, only: conv_ignd
   use, intrinsic :: iso_c_binding
   implicit none
 
@@ -99,4 +100,29 @@ module hoppet_libome_interfaces
       real(c_double),        intent(in) :: NF      !< number of light flavours
     end function
   end interface
+
+  type, extends(conv_ignd) :: conv_libome
+    type(c_ptr)    :: ptr   !< pointer to one of the A[...]_ptr objects, i.e. an rpd_distribution object
+    integer(c_int) :: order !< the order in alphas    
+  contains
+    procedure :: f => conv_libome__f
+  end type
+
+contains
+  
+  ! The convolution function for the conv_libome type
+  function conv_libome__f(this, y, piece) result(res)
+    use qcd, only: nf
+    implicit none
+    class(conv_libome), intent(in) :: this
+    real(dp), intent(in) :: y
+    integer , intent(in) :: piece
+    real(c_double) :: res, nf_c, lm_c
+
+    nf_c = real(nf, c_double)
+    lm_c = real(0.0_dp, c_double)
+
+    ! Call the ome_piece_hoppet function with the stored pointer and order
+    res = ome_piece_hoppet(this%ptr, y, piece, this%order, lm_c, nf_c)
+  end function conv_libome__f
 end module hoppet_libome_interfaces

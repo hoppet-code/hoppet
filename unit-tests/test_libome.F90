@@ -2,7 +2,6 @@
 
 module test_libome
   use unit_tests
-  use libome_ref_values
 contains
   !! subroutine for testing the hoppet-libome interface
   !! 
@@ -47,6 +46,8 @@ contains
     call sum_check("AQg_reg" ,  310.17900321_dp      , AQg_ptr , reg, 3)
     call sum_check("AqgQ_reg" ,  -73.710138327_dp    , AqgQ_ptr , reg, 3)
     call sum_check("AgqQ_reg" ,  -120.75198970_dp    , AgqQ_ptr , reg, 3)
+
+    !call InitGridConv()
 
     !! Call the libome functions through the interface
     !res_reg   = ome_AqqQNSEven_reg(as4pi, LM, NF, x)

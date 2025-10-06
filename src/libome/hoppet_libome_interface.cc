@@ -17,9 +17,6 @@ namespace ome {
 
 extern "C" {
 
-//const void * ome_AqqQNSEven = &ome::AqqQNSEven;
-//const void * ome_AqqQNSOdd  = &ome::AqqQNSOdd;
-
 const void * ome_AggQ       = & ome::AggQ       ;  
 const void * ome_AgqQ       = & ome::AgqQ       ; 
 const void * ome_AQg        = & ome::AQg        ; 
