@@ -128,7 +128,7 @@ namespace hoppet {
 
 extern "C" {
 
-  int hoppet_global_cc_piece;
+  extern int hoppet_global_cc_piece;
 
   // The following does not work
   // void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
@@ -422,7 +422,7 @@ extern "C" {
   
   /// Write out the contents of tables(0) (assumed to be the PDF) in the
   /// LHAPDF format
-  void hoppetWriteLHAPDFGrid(const std::string& basename, const int& pdf_index) {
+  inline void hoppetWriteLHAPDFGrid(const std::string& basename, const int& pdf_index) {
     // Convert std::string to C-style string and get length
     const char* basename_cstr = basename.c_str();
     int basename_len = basename.length();

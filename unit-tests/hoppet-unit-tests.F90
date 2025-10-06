@@ -7,6 +7,7 @@ program hoppet_unit_tests
   use test_interpolation
   use test_alphas
   use test_convolution
+  use test_libome
   use io_utils
   implicit none
 
@@ -30,6 +31,7 @@ program hoppet_unit_tests
   call test_tab_eval()
   call unit_tests_alphas()
   call test_InitGridConv()
+  call test_libome_interface()
 
   if (unit_test_failures > 0) then
     ! print a message in red

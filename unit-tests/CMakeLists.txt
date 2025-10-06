@@ -1,10 +1,14 @@
-set(HELPERS unit_tests.f90 
-    test_alphas.F90 
-    test_interpolation.F90 
-    test_convolution.F90
-    test_convolution_C.cc
-    ../benchmarking/io_utils.f90)
-add_executable(hoppet-unit-tests hoppet-unit-tests.F90 ${HELPERS})
+file(GLOB UNIT_TEST_SOURCES *.f90 *.F90)
+set(UNIT_TEST_SOURCES ${UNIT_TEST_SOURCES} test_convolution_C.cc)
+#set(HELPERS unit_tests.f90 
+#    test_alphas.F90 
+#    test_interpolation.F90 
+#    test_convolution.F90
+#    test_convolution_C.cc
+#    test_libome.F90
+#    ../benchmarking/io_utils.f90
+#    )
+add_executable(hoppet-unit-tests ${UNIT_TEST_SOURCES} ../benchmarking/io_utils.f90)
 target_include_directories(hoppet-unit-tests PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(hoppet-unit-tests hoppet_static)
 add_test(NAME hoppet-unit-tests COMMAND hoppet-unit-tests)

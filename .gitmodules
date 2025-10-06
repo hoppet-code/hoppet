@@ -1,0 +1,3 @@
+[submodule "submodules/libome-fork"]
+	path = submodules/libome-fork
+	url = https://gitlab.com/hoppet-code/libome-fork
