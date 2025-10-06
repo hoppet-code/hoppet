@@ -75,12 +75,14 @@ jobs:
       run: |
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
            yum -y install swig python3-devel python3-numpy
+           yum -y install valgrind
     - name: Compile
       run: |
           #cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake -S . -B BUILD  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_USE_EXACT_COEF=ON -DHOPPET_BUILD_PYINTERFACE=ON
           cmake --build BUILD -j
           cmake --install BUILD
+          valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
           ctest --test-dir BUILD -j 2 --output-on-failure
           # now try running the python example
           python3 example_py/tabulation_example.py
