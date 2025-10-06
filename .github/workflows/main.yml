@@ -65,6 +65,8 @@ jobs:
     container:
         image: fedora:latest
     steps:
+    - name: Install Git
+      run: dnf -y install git    
     - name: Checkout
       uses: actions/checkout@v5
       with:
