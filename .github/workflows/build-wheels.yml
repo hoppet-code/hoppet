@@ -125,8 +125,7 @@ jobs:
         submodules: recursive
     
     - name: Build wheels
-#      uses: pypa/cibuildwheel@v3.2.0 # Known to work in the past
-      uses: pypa/cibuildwheel@latest
+      uses: pypa/cibuildwheel@v3.2.0 # Known to work in the past
       env:
         # Build for Python 3.13
         CIBW_BUILD: cp313-* cp314-*
