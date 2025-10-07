@@ -11,6 +11,8 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"  # <-- Add this line
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
