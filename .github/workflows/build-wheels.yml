@@ -110,7 +110,7 @@ jobs:
         path: ./wheelhouse/*.whl
 
   build_wheels_modern:
-    name: Build wheels (Python 3.13) on ${{ matrix.os }}
+    name: Build wheels (Python 3.13+) on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     env:
       MACOSX_DEPLOYMENT_TARGET: "15.0"
