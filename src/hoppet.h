@@ -115,6 +115,17 @@ namespace hoppet {
   const int factscheme_PolMSbar = 3;
   const int factscheme_FragMSbar = 4;
 
+  const int iflv_g=0;
+  const int iflv_d = 1, iflv_u = 2, iflv_s = 3, iflv_c = 4;
+  const int iflv_b = 5, iflv_t = 6;
+  const int iflv_dbar = -iflv_d;
+  const int iflv_ubar = -iflv_u;
+  const int iflv_sbar = -iflv_s;
+  const int iflv_cbar = -iflv_c;
+  const int iflv_bbar = -iflv_b;
+  const int iflv_tbar = -iflv_t;
+
+
 }
 
 extern "C" {
