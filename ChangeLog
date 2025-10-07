@@ -1,3 +1,15 @@
+2025-10-07 Gavin
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* doc/HOPPET-doc.tex:
+	changed version to 2.0.0-beta1
+
+	* scripts/set-version.sh: *** ADDED ***
+	new script to set the version number in CMakeLists.txt,
+
+	
 2025-09-30 Gavin
 
 	* src/structure_functions.f90:
