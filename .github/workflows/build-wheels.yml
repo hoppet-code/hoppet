@@ -24,7 +24,7 @@ jobs:
         submodules: recursive
     
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.16.2 # Seems not to work with the most recent version of v2
       env:
         # Build for Python 3.9-3.12
         CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
@@ -125,10 +125,11 @@ jobs:
         submodules: recursive
     
     - name: Build wheels
-      uses: pypa/cibuildwheel@v3.2.0
+#      uses: pypa/cibuildwheel@v3.2.0 # Known to work in the past
+      uses: pypa/cibuildwheel@v3
       env:
         # Build for Python 3.13
-        CIBW_BUILD: cp313-*
+        CIBW_BUILD: cp313-* cp314-*
         
         # Skip 32-bit and musl builds
         CIBW_SKIP: "*-manylinux_i686 *-musllinux* *-win32"
