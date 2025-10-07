@@ -316,8 +316,7 @@ extern "C" {
   void hoppetInitStrFctFlav(const int & order_max,
 			    const int & separate_orders,
 			    const double & xR,
-			    const double & xF,
-			    const int & flavour_decomposition);
+			    const double & xF);
 
 
   /// calculate the structure function at x, Q, muR, muF.
