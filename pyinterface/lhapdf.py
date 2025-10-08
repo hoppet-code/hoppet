@@ -18,7 +18,7 @@ try:
 except ImportError:
     raise ImportError("The 'hoppet' extension is required for the hoppet LHAPDF interface but is not installed or built.")
 
-def load(lhapdfname, imem = 0):
+def load(lhapdfname, imem = 0, dy = 0.05):
     """
     Loads a PDF from LHAPDF, extracts relevant parameters, and assigns
     it to HOPPET.
@@ -45,28 +45,41 @@ def load(lhapdfname, imem = 0):
 
     # Now that we have the PDF we define the interface as needed by hoppet
     def lhapdf_interface(x, Q):
-        pdf = np.zeros(13)
-        lhapdf = hl.pdf.xfxQ(None, x, Q)
-        # Map HOPPET indices to LHAPDF PIDs
-        pid_map = [ -6, -5, -4, -3, -2, -1, 21, 1, 2, 3, 4, 5, 6 ]
-        for i, pid in enumerate(pid_map):
-            pdf[i] = lhapdf.get(pid, 0.0)
-        return pdf
+        if hl.QED == False:
+            pdf = np.zeros(13)
+            lhapdf = hl.pdf.xfxQ(None, x, Q)
+            # Map HOPPET indices to LHAPDF PIDs
+            pid_map = [ -6, -5, -4, -3, -2, -1, 21, 1, 2, 3, 4, 5, 6 ]
+            for i, pid in enumerate(pid_map):
+                pdf[i] = lhapdf.get(pid, 0.0)
+            return pdf
+        else:
+            pdf = np.zeros(18) # Need to include leptons even if they are not there in LHAPDF
+            lhapdf = hl.pdf.xfxQ(None, x, Q)
+            # Map HOPPET indices to LHAPDF PIDs. Note that in hoppet
+            # entry 7 is reserved for structure functions for
+            # historical reasons. We fill a dummy value there.
+            pid_map = [ -6, -5, -4, -3, -2, -1, 21, 1, 2, 3, 4, 5, 6, -123456, 22 ]
+            for i, pid in enumerate(pid_map):
+                if pid >= -6 : pdf[i] = lhapdf.get(pid, 0.0)
+            return pdf
     
     # Print some info to the screen
     print(f"{lhapdfname} read succesfully with the following parameters extracted: \nNumber of loops: {hl.nloop}\nxmin: {hl.xmin}\nxmax: {hl.xmax}\nQmin: {hl.Qmin}\nQmax: {hl.Qmax}\nmc: {hl.thresholds[4]}\nmb: {hl.thresholds[5]}\nmt: {hl.thresholds[6]}")
 
     # Now we start hoppet
-    dy = 0.05
     ymax = float(math.ceil(np.log(1.0/hl.xmin)))
     if ymax > 15.0:
         dlnlnQ = dy/8.0
     else:
         dlnlnQ = dy/4.0
 
-    hp.SetPoleMassVFN(hl.thresholds[4], hl.thresholds[5], hl.thresholds[6])
-    print(f"Using Pole Mass Variable Flavour Number scheme with mc = {hl.thresholds[4]}, mb = {hl.thresholds[5]}, mt = {hl.thresholds[6]}")
-
+    if hl.vfn:
+        hp.SetPoleMassVFN(hl.thresholds[4], hl.thresholds[5], hl.thresholds[6])
+        print(f"Using Pole Mass Variable Flavour Number scheme with mc = {hl.thresholds[4]}, mb = {hl.thresholds[5]}, mt = {hl.thresholds[6]}")
+    else:
+        print("Using Fixed Flavour Number scheme with nf =", hl.nf)
+        hp.SetFFN(hl.nf)
     # Set default interpolation orders, which together with dy=0.05
     # guarantee O(10^-4) accuracy
     order = -6
@@ -74,6 +87,10 @@ def load(lhapdfname, imem = 0):
     lnlnQorder = 2
     print(f"Setting interpolation orders yorder = {yorder}, lnlnQorder = {lnlnQorder}")
     hp.SetYLnlnQInterpOrders(yorder, lnlnQorder)
+
+    if hl.QED: 
+        print("QED evolution is enabled in this LHAPDF set.")
+        hp.SetQED(True, False, False)
 
     print(f"Starting Hoppet with ymax = {ymax} and dy = {dy} and nloop = {hl.nloop} and dlnlnQ = {dlnlnQ} and order = {order}")
     hp.StartExtended(ymax, dy, hl.Qmin, hl.Qmax, dlnlnQ, hl.nloop, order, hp.factscheme_MSbar)
@@ -88,16 +105,21 @@ def load(lhapdfname, imem = 0):
 class hoppet_lhapdf:
     def __init__(self, pdfname, member):
         self.pdf = lhapdf.mkPDF(pdfname, member)
+        self.info = self.pdf.info()
         self.name = pdfname
         self.Qmin = np.sqrt(self.pdf.q2Min)
         self.Qmax = np.sqrt(self.pdf.q2Max)
         self.xmin = self.pdf.xMin
         self.xmax = self.pdf.xMax
         self.nloop = self.pdf.orderQCD + 1 # LHAPDF starts at 0
+        self.vfn = True if self.info.get_entry("FlavorScheme") == "variable" else False
+        self.nf = self.info.get_entry("NumFlavors") if not self.vfn else -1
         self.thresholds = {fl: self.pdf.quarkThreshold(fl) for fl in [1,2,3,4,5,6]}
         if(self.pdf.hasFlavor(6) == False): self.thresholds[6] = 2*self.Qmax # If no top is defined set it to a high value
         self.MZ = 91.188 # Z mass in GeV
+        if self.info.has_key("MZ"): self.MZ = self.info.get_entry("MZ")
         self.asMZ = self.pdf.alphasQ(self.MZ)
+        self.QED = True if self.pdf.hasFlavor(22) else False
 
     def __del__(self):
         # No explicit resource management needed, but method provided for extensibility
@@ -106,4 +128,4 @@ class hoppet_lhapdf:
     def __repr__(self):
         return (f"hoppet_lhapdf(name={self.name}, Qmin={self.Qmin}, Qmax={self.Qmax}, "
                 f"xmin={self.xmin}, xmax={self.xmax}, nloop={self.nloop}, "
-                f"thresholds={self.thresholds}, MZ={self.MZ}, asMZ={self.asMZ})")
+                f"thresholds={self.thresholds}, MZ={self.MZ}, asMZ={self.asMZ}, VFN={self.vfn}, nf={self.nf})")

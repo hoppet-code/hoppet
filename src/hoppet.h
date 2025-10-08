@@ -115,15 +115,19 @@ namespace hoppet {
   const int factscheme_PolMSbar = 3;
   const int factscheme_FragMSbar = 4;
 
-  const int iflv_g=0;
-  const int iflv_d = 1, iflv_u = 2, iflv_s = 3, iflv_c = 4;
-  const int iflv_b = 5, iflv_t = 6;
-  const int iflv_dbar = -iflv_d;
-  const int iflv_ubar = -iflv_u;
-  const int iflv_sbar = -iflv_s;
-  const int iflv_cbar = -iflv_c;
-  const int iflv_bbar = -iflv_b;
-  const int iflv_tbar = -iflv_t;
+  const int iflv_g=0+6;
+  const int iflv_d = 1+6, iflv_u = 2+6, iflv_s = 3+6, iflv_c = 4+6;
+  const int iflv_b = 5+6, iflv_t = 6+6;
+  const int iflv_dbar = -1+6;
+  const int iflv_ubar = -2+6;
+  const int iflv_sbar = -3+6;
+  const int iflv_cbar = -4+6;
+  const int iflv_bbar = -5+6;
+  const int iflv_tbar = -6+6;
+  const int iflv_photon = 8+6;
+  const int iflv_electron = 9+6;
+  const int iflv_muon = 10+6;
+  const int iflv_tau = 11+6;
 
 
 }

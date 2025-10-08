@@ -35,29 +35,54 @@ def main():
     print("")
     print("           Evaluating PDFs at Q =",Q, " GeV")
     print("-------------- HOPPET ------------------")
-    print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon")
-    for ix in range(9):
-        pdf_array = hp.Eval(xvals[ix], Q)
-        print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
-            xvals[ix],
-            pdf_array[6 + 2] - pdf_array[6 - 2], 
-            pdf_array[6 + 1] - pdf_array[6 - 1], 
-            2 * (pdf_array[6 - 1] + pdf_array[6 - 2]),
-            pdf_array[6 - 4] + pdf_array[6 + 4],
-            pdf_array[6 + 0]
-        ))
-    print("-------------- LHAPDF ------------------")
-    for ix in range(9):
-        pdf_dict = p_lhapdf.xfxQ(xvals[ix], Q)
-        #print(type(pdf_dict)
-        print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
-            xvals[ix],
-            pdf_dict[2] - pdf_dict[-2], 
-            pdf_dict[1] - pdf_dict[-1], 
-            2 * (pdf_dict[-1] + pdf_dict[-2]),
-            pdf_dict[-4] + pdf_dict[4],
-            pdf_dict[21]
-        ))
+    if not hlinfo.QED:
+        print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon")
+        for ix in range(9):
+            pdf_array = hp.Eval(xvals[ix], Q)
+            print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
+                xvals[ix],
+                pdf_array[hp.iflv_u] - pdf_array[hp.iflv_ubar], 
+                pdf_array[hp.iflv_d] - pdf_array[hp.iflv_dbar], 
+                2 * (pdf_array[hp.iflv_dbar] + pdf_array[hp.iflv_ubar]),
+                pdf_array[hp.iflv_cbar] + pdf_array[hp.iflv_c],
+                pdf_array[hp.iflv_g]
+            ))
+        print("-------------- LHAPDF ------------------")
+        for ix in range(9):
+            pdf_dict = p_lhapdf.xfxQ(xvals[ix], Q)
+            #print(type(pdf_dict)
+            print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
+                xvals[ix],
+                pdf_dict[2] - pdf_dict[-2], 
+                pdf_dict[1] - pdf_dict[-1], 
+                2 * (pdf_dict[-1] + pdf_dict[-2]),
+                pdf_dict[-4] + pdf_dict[4],
+                pdf_dict[21]
+            ))
+    else:
+        print("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon      photon")
+        for ix in range(9):
+            pdf_array = hp.Eval(xvals[ix], Q)
+            print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
+                xvals[ix],
+                pdf_array[hp.iflv_u] - pdf_array[hp.iflv_ubar], 
+                pdf_array[hp.iflv_d] - pdf_array[hp.iflv_dbar], 
+                2 * (pdf_array[hp.iflv_dbar] + pdf_array[hp.iflv_ubar]),
+                pdf_array[hp.iflv_cbar] + pdf_array[hp.iflv_c],
+                pdf_array[hp.iflv_g], pdf_array[hp.iflv_photon]
+            ))
+        print("-------------- LHAPDF ------------------")
+        for ix in range(9):
+            pdf_dict = p_lhapdf.xfxQ(xvals[ix], Q)
+            #print(type(pdf_dict)
+            print("{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}".format(
+                xvals[ix],
+                pdf_dict[2] - pdf_dict[-2], 
+                pdf_dict[1] - pdf_dict[-1], 
+                2 * (pdf_dict[-1] + pdf_dict[-2]),
+                pdf_dict[-4] + pdf_dict[4],
+                pdf_dict[21], pdf_dict[22]
+            ))
     
 
 
