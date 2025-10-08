@@ -1,3 +1,13 @@
+2025-10-08 Gavin
+
+	* scripts/makef95makefile:
+	added -ffree-line-length-none to F90FLAGS, to help with
+	compilation with gfortran of files with long lines
+
+	* configure:
+	fixed issus with reading version number in new way of handling the
+	version number
+
 2025-10-07 Gavin
 
 	* CMakeLists.txt:

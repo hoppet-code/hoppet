@@ -91,8 +91,11 @@ foreach my $dir (@dirs) {
 }
 
 # get things ready for the hoppet-config script
-my $version=`grep 'Welcome to' src/welcome_message.f90 | sed -e 's/.*v\. //' -e 's/ .*//'`;
+#my $version=`grep 'Welcome to' src/welcome_message.f90 | sed -e 's/.*v\. //' -e 's/ .*//'`;
+my $version=`grep 'private_version_string *=' src/welcome_message.f90`;# | sed -e 's/.*v\. //' -e 's/ .*//'`;
 chomp $version;
+$version =~ s/.*?\"//;
+$version =~ s/\".*//;
 $prefix=`cat src/.makef95.prefix`;
 chomp $prefix;
 (my $escprefix    = $prefix)    =~ s/\//\\\//g;
