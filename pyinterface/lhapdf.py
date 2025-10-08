@@ -115,6 +115,9 @@ class hoppet_lhapdf:
         self.vfn = True if self.info.get_entry("FlavorScheme") == "variable" else False
         self.nf = self.info.get_entry("NumFlavors") if not self.vfn else -1
         self.thresholds = {fl: self.pdf.quarkThreshold(fl) for fl in [1,2,3,4,5,6]}
+        self.mc = self.thresholds[4]
+        self.mb = self.thresholds[5]
+        self.mt = self.thresholds[6]
         if(self.pdf.hasFlavor(6) == False): self.thresholds[6] = 2*self.Qmax # If no top is defined set it to a high value
         self.MZ = 91.188 # Z mass in GeV
         if self.info.has_key("MZ"): self.MZ = self.info.get_entry("MZ")
