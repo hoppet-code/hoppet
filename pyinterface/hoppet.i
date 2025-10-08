@@ -430,7 +430,7 @@ Enable or disable QED evolution with photon and lepton PDFs.
 Parameters:
   withqed (int): 1 to enable QED evolution, 0 to disable
   qcdqed (int): Treatment of QCD-QED coupling (implementation-specific)
-  plq (int): Plus-like quark treatment flag
+  plq (int): 1 to enable lepton splitting function
 
 Note: Must be called before Start() as it modifies global PDF settings.
 ";
