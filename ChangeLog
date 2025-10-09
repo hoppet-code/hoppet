@@ -1,3 +1,10 @@
+2025-10-09 gavin
+
+	* configure:
+	added some statements to catch errors in shell-commands
+	and die with an error message; also added a deprecation
+	message and instructions for moving to CMake
+
 2025-10-08 Gavin
 
 	* scripts/makef95makefile:
