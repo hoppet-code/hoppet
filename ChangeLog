@@ -1,5 +1,14 @@
 2025-10-09 gavin
 
+	* example_f90/tabulation_example_qed.f90:
+	updated MZ to 2025 PDG value, and added printout
+	of effective light-quark mass being used
+
+	* src/qed_coupling.f90:
+	added pdg2023 labels for existing lepton mass values and alpha_EM, 
+	also added 2025 values ("pdg2025_..."), and set the defaults
+	to be the 2023 values, as they were in the past. 
+
 	* configure:
 	added some statements to catch errors in shell-commands
 	and die with an error message; also added a deprecation

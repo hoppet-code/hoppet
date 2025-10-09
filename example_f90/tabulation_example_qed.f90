@@ -117,8 +117,9 @@ program tabulation_example_qed
   write(6,'(a)') "Evolution done!"
 
   ! get the value of the tabulation at some point
-  Q = 91.1876_dp;
+  Q = 91.1880_dp;
   write(6,'(a)')
+  write(6,'(a,f8.3,a)') " Using effective light_quark_masses = ", effective_light_quark_masses," GeV"
   write(6,'(a,f9.4,a,f8.5)') " At Q = ",Q," GeV, QCD coupling is alpha_s     = ", value(coupling, Q)
   write(6,'(a,f9.4,a,f8.3)') " At Q = ",Q," GeV, QED coupling is 1/alpha_qed = ", one/value(coupling_qed, Q)
   write(6,'(a,f6.4,a,f8.3)') " At mtau = ",m_tau," GeV, QED coupling is 1/alpha_qed = ", one/value(coupling_qed, m_tau/1.0000001_dp)

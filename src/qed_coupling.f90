@@ -14,20 +14,38 @@ module qed_coupling_module
   !real(dp), parameter :: m_light_quarks = 0.109_dp ! DECIDE ON THIS
   real(dp), parameter :: m_light_quarks_default = 1.000_dp ! DECIDE ON THIS
 
+
   ! lepton masses from from 2022 PDG (plus 2023 update)
-  real(dp), parameter, public :: m_electron = 0.51099895000e-3_dp ! +-(15) MeV
-  real(dp), parameter, public :: m_muon     = 105.6583755e-3_dp   ! +-(23)
-  real(dp), parameter, public :: m_tau      = 1776.86e-3_dp ! +-0.12
+  real(dp), parameter, public :: pdg2023_m_electron = 0.51099895000e-3_dp ! +-(15) MeV
+  real(dp), parameter, public :: pdg2023_m_muon     = 105.6583755e-3_dp   ! +-(23)
+  real(dp), parameter, public :: pdg2023_m_tau      = 1776.86e-3_dp ! +-0.12
+  ! 2022 PDG: summary table + EW review
+  ! - 1/alpha(0)    = 137.035999180(10)
+  ! - 1/alpha(mtau) = 133.471 ± 0.007
+  ! - 1/alpha(mZ)   = 127.951 ± 0.009
+  real(dp), parameter, public :: pdg2023_alpha_qed_scale_0 = one/137.035999180_dp ! +-(10) is uncertainty
+
+
+  ! lepton masses from from 2025 PDG
+  ! 
+  real(dp), parameter, public :: pdg2025_m_electron = 0.51099895000e-3_dp ! ± 0.00000000015e-3
+  real(dp), parameter, public :: pdg2025_m_muon     = 105.6583755e-3_dp   ! ± 0.0000023e-3_dp
+  real(dp), parameter, public :: pdg2025_m_tau      = 1776.93e-3_dp       ! ± 0.09e-3_dp
+  ! 2024 PDG: EW review, https://pdg.lbl.gov/2025/reviews/rpp2024-rev-standard-model.pdf
+  ! - 1/alpha(0)    = 137.035999178(8) 
+  ! - 1/alpha(mtau) = 133.450 ± 0.006
+  ! - 1/alpha(mZ)   = 127.930 ± 0.008
+  real(dp), parameter, public :: pdg2025_alpha_qed_scale_0 = one/137.035999178  !(8)
+
+
+  real(dp), parameter, public :: m_electron        = pdg2023_m_electron
+  real(dp), parameter, public :: m_muon            = pdg2023_m_muon
+  real(dp), parameter, public :: m_tau             = pdg2023_m_tau
+  real(dp), parameter, public :: alpha_qed_scale_0 = pdg2023_alpha_qed_scale_0
 
   real(dp), parameter, public :: e_dn2 = (one/three)**2
   real(dp), parameter, public :: e_up2 = (two/three)**2
 
-  ! 2022 PDG: summary table + EW review
-  ! - 1/alpha(0) = 137.035999180(10)
-  ! - 1/alpha(mtau) = 1/133.471 ± 0.007
-  ! - 1/alpha(mZ) = 127.951±0.009
-  real(dp), parameter :: alpha_qed_scale_0 = one/137.035999180_dp ! +-(10) is uncertainty
-  public :: alpha_qed_scale_0
   
   integer, parameter :: n_thresholds = 7
 
