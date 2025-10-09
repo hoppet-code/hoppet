@@ -40,6 +40,8 @@ We have therefore incorporated the aforementioned pieces, using code
 that is publicly available with those references, with the intention of
 updating the splitting functions as they become more precisely known.
 
+\subsection{Interface}
+
 For the specific implementation in \hoppet version 2.0.0 we rely on
 the approximations computed in
 Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd} (FHMPRUVV),
@@ -114,6 +116,8 @@ involve a significant initialisation time, of the order of
 $10{-}30\,\text{s}$.\footnote{As and when faster 
   parametrised versions become available, we will incorporate them.}
 
+\subsection{Reference results}
+
 In Table~\ref{tab:n3lo-evolve} we show the results of the full N$^3$LO
 evolution in the VFNS, using the most up-to-date perturbative input at
 the time of writing this release note. To assess the evolution we take
@@ -170,7 +174,7 @@ $0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  
     $a\cdot10^{b} = a^b$. The evolution is performed taking the
     initial condition at $\sqrt{2}~\text{GeV}$ (just below the charm
     mass) and evolving in the VFNS up to $Q=100~\text{GeV}$, with a
-    charm-quark pole mass of $(\sqrt{2}+10^{-9})\GeV$ and a bottom-quark
+    charm-quark pole mass of $1.414213563\GeV$ and a bottom-quark
     pole mass of $4.5\GeV$.
     %
     The NNLO splitting functions are the parametrised form
@@ -278,7 +282,9 @@ Let us first focus on the top-left plot,
 Fig.~\ref{fig:n3lok-benchmark-mtm}.
 %
 We start with the benchmark initial condition at the standard low
-scale of $Q_0 = \sqrt{2}\GeV$, just below the charm mass.
+scale of $Q_0 = \sqrt{2}\GeV$, just below a charm mass of $m_c =
+1.414213563 \GeV$, so as to ensure that the evolution starts with $n_f
+= 3$.
 %
 We then evolve the PDF separately with \ntlo and NNLO evolution, and
 show the \ntlo/NNLO ratio at $Q = 100\GeV$.
@@ -299,7 +305,7 @@ Fig.~\ref{fig:n3lok-benchmark-nomtm} is the analogous plot with the
 \ntlo mass-threshold contributions turned off.
 %
 It illustrates that the large effects on the charm and bottom PDFs are
-a consequence mainly \ntlo mass-thresholds, not the \ntlo splitting functions.
+a consequence mainly of \ntlo mass-thresholds, not the \ntlo splitting functions.
 %
 Comparing Figs.~\ref{fig:n3lok-benchmark-mtm} and
 \ref{fig:n3lok-benchmark-nomtm} for light flavours, one sees that the $0.5\%$
@@ -310,9 +316,9 @@ Finally, Figs.~\ref{fig:n3lok-nnpdf40-mtm} and
 \ref{fig:n3lok-nnpdf40-nomtm} show analogous plots with an initial
 condition taken from the \ttt{NNPDF40\_pch\_nnlo\_as\_01180} PDF
 set~\cite{NNPDF:2021njg} at a similar $Q_0 = 1.41 \GeV$ (again below
-the charm threshold).
+the charm threshold, $m_c = 1.51\GeV$).
 %
-The results are broadly similar, showing thhat our conclusions about the
+The results are broadly similar, showing that our conclusions about the
 size of \ntlo effects are robust with respect to the choice of PDF.
 
 
@@ -614,7 +620,7 @@ contained in \ttt{ff} in the example above.
 %
 Note that in the \ttt{F\_LO} etc.\ calls, the \ttt{muR} and \ttt{muF}
 arguments are not optional and that when a prior scale choice has been
-made (e.g. \ttt{scale\_choice\_Q}) they are assumed to be consistent
+made (e.g. \ttt{scale\_choice\_Q}) they are required to be consistent
 with that prior scale choice.
 
 An example of structure function evaluations using the Fortran~90
@@ -652,8 +658,7 @@ can then be accessed through the subroutines
   real(dp) :: ff(-6:7), flo(-6:7), fnlo(-6:7), fnnlo(-6:7), fn3lo(-6:7), x, Q, muR, muF
   [...]
   call hoppetStrFct(x, Q, muR, muF, ff)        ! Full structure function
-  ! or instead, without muR and muF
-  call hoppetStrFctNoMu(x, Q, ff)              ! Full structure function
+  call hoppetStrFctNoMu(x, Q, ff)              ! Full structure function, muR=muF=Q
   call hoppetStrFctLO(x, Q, muR, muF, flo)     ! LO term
   call hoppetStrFctNLO(x, Q, muR, muF, fnlo)   ! NLO term
   call hoppetStrFctNNLO(x, Q, muR, muF, fnnlo) ! NNLO term
@@ -872,10 +877,14 @@ The common value of the light quark masses is used to mimic the
 physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
 1\GeV$, which involves hadronic states.
 %
-Using a value of $0.109\GeV$ generates QED coupling values at
-the masses of the $\tau$ lepton ($1/133.458$) and $Z$-boson ($1/127.952$) that
-agree with the PDG $\MSbar$  ones ($1/(133.471\pm0.007)$ and $1/(127.951\pm0.009)$)
-with a relative $\sim 10^{-4}$ accuracy.
+Using a value of $0.109\GeV$ generates QED coupling values at the
+masses of the $\tau$ lepton ($1/133.458$) and $Z$-boson ($1/127.952$)
+that agree to within relative $\sim 2\times 10^{-4}$ accuracy with the
+$\MSbar$ values ($1/(133.450 \pm 0.006)$ and $1/(127.930 \pm 0.008)$)
+from the ``Electroweak and constraints on New Physics'' section of the
+2024 Particle Data Group review~\cite{}.\comment{Add ref, decide about
+  updating in qed\_coupling.f90 to 2024, and also the ref above}
+
 %\gps{We don't really have a
 %  QED renormalisation scheme defined and $1/137$ that we use for $\alpha(0)$
 %  is not, I think, an $\MSbar$ value; hence the rephrasing putting
@@ -890,18 +899,25 @@ with a relative $\sim 10^{-4}$ accuracy.
 %non-optional arguments.
 
 The quark and lepton masses are used to set all thresholds where the
-fermion content changes. This information is then used to set
-the array \ttt{nflav(3,0:n\_thresholds)}, where \ttt{nflav(1:3,i)}
-contains an integer array with the number of leptons, down, and up
-quarks at a given $Q^2$ such that \ttt{threshold(i-1)}$<Q^2<$
-\ttt{threshold(i)}.
+fermion content changes.
+%
+The values of the thresholds are contained in an array
+\ttt{threshold(0:8)}.
 %
 The \ttt{threshold(1:7)} entries are active thresholds, while
 \ttt{threshold(0)} is set to zero and \ttt{threshold(8)} to an
 arbitrary large number (currently $10^{200}$).
 %
-The integer array
-\ttt{nflav(1:3,0:n\_thresholds)} is then used to compute the
+For a given $Q$, the code identifies the index \ttt{i} such that
+\ttt{threshold(i-1)}$<Q<$ \ttt{threshold(i)}.
+%
+The flavour content at a given $Q$ is then accessible through the
+integer array \ttt{nflav(3,0:n\_thresholds)}, where the
+\ttt{nflav(1:3,i)} entries indicate respectively the number of
+leptons, down-type, and up-type quarks at a given $Q$.
+%
+%
+The \ttt{nflav(:,:)} array is then used to compute the
 $\beta_{0,\rm QED}$ function \ttt{b0\_values(1:n\_thresholds)} at the
 seven threshold values and this is finally used to compute the value
 of the QED coupling \ttt{alpha\_values(1:n\_thresholds)} at the
@@ -910,7 +926,7 @@ threshold values.
 The function \ttt{Delete(qed\_coupling)} is also provided for
 consistency with general \hoppet conventions, although in this case it does nothing.
 %
-After this initialization, the function \ttt{Value(qed\_coupling,mu)} returns the QED coupling at
+After this initialisation, the function \ttt{Value(qed\_coupling,mu)} returns the QED coupling at
 scale $\mu$.
 
 \myparagraph{QED splitting matrices}
@@ -1696,8 +1712,20 @@ which were obtained with 2008 hardware and compilers, we see a
 speed-up of roughly a factor 10, which we attribute mainly to
 improvements in the hardware.
 
-At N$^3$LO the evolution picture is almost identical to that at NNLO,
-but the initialisation times are significantly larger, in the range
+At \ntlo the evolution picture is almost identical to that at NNLO.
+%
+The evolution times ($t_i$ and $t_c$) are essentially identical to the
+NNLO case: for $t_i$ the only extra operation that is needed is the
+addition of the \ntlo splitting function to the lower-order ones and
+at each $Q$ value, this involves $\order{N}$ operations for a $y$-grid
+of size $N$, while the convolution itself involves $\order{N^2}$
+operations.
+%
+For the cached evolution, there is no additional penalty because the
+\ntlo contributions are already included in the cached evolution
+operators.
+%
+The initialisation times are, however, significantly larger, in the range
 $4-15\, \mathrm{s}$, rather than a fraction of a second.
 %
 This is dominated by the extra time that it takes to initialise the
@@ -1711,8 +1739,8 @@ initialisation is insignificant.
 However the penalty can be noticeable in interactive work.
 %
 We understand that the final version of the code of
-Ref.~\cite{BlumleinCode} will be significantly faster, and we hope to
-incorporate it into \hoppet soon after it becomes available.
+Ref.~\cite{BlumleinCode} is significantly faster, and we hope to
+incorporate it into \hoppet in the near future.
 
 % Were parametrised expressions of the mass threshold functions to
 % become available, we expect that the initialisation time would be
@@ -1911,7 +1939,7 @@ We provide examples for how to do this in Fortran, \CPP, and Python:
    LHAPDF members, with an illustration for computing the PDF uncertainty;
  \item \masterlink{example_cpp/with-lhapdf/lhapdf_to_hoppet.cc}, which
    includes a routine called \ttt{void load\_lhapdf\_assign\_hoppet(const
-     string \& pdfname, int imem=0)} which can be  copied over directly to a
+     string \& pdfname, int imem=0)} which can be included directly in a
    user's application;
  \item \masterlink{example_py/lhapdf_to_hoppet.py}, makes use
    of \ttt{hoppet.lhapdf.load()}, accessible using ``\ttt{from hoppet import lhapdf}''.
