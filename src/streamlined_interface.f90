@@ -516,6 +516,7 @@ subroutine hoppetSetFFN(fixed_nf)
   integer,  intent(in) :: fixed_nf
 
   ffn_nf = fixed_nf
+  call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_off)
 end subroutine hoppetSetFFN
 
 
