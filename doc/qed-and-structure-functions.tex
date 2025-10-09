@@ -123,10 +123,8 @@ evolution in the VFNS, using the most up-to-date perturbative input at
 the time of writing this release note. To assess the evolution we take
 the initial condition of Ref.~\cite{Dittmar:2005ed} at an initial
 scale $\sqrt{2}~\text{GeV}$ and $n_f=3$. We evolve to
-$Q=100~\text{GeV}$. The table can be reproduced by running
-\masterlink{example_f90/tabulation_example_n3lo.f90}. The
-numbers are obtained using parametrised NNLO splitting functions, but
-exact mass thresholds at this order.
+$Q=100~\text{GeV}$. The numbers are obtained using parametrised NNLO
+splitting functions, but exact mass thresholds at this order.
 %
 The table has been generated with $\texttt{dy}=0.05$,
 $\texttt{dlnlnQ}=\text{dy/4}$.
@@ -147,8 +145,9 @@ evolution, with the choice of
 Of the MSHT and NNPDF results, the NNPDF results (Table~2 of
 Ref.~\cite{Cooper-Sarkar:2024crx}) are closer to ours.
 
-The results in these tables can be regenerated with the help of the
-following script, which uses the Python interface of Section~\ref{sec:pyinterface}:
+The results in both tables can be regenerated with the help
+of the following script, which uses the Python interface of
+Section~\ref{sec:pyinterface}:
 \masterlink{benchmarking/tabulation_crosscheck_2406_16188.py}.
 
 \begin{table}[p]
