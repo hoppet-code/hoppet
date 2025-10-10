@@ -865,10 +865,10 @@ latter is taken.
 %argument \ttt{value\_at\_scale\_0} is provided, in which case the
 %latter is used.}
 
-The running is performed at leading order level using seven
+The running is performed at leading order level, using seven
 thresholds: a common effective mass for the three light quarks
 (\ttt{m\_light\_quarks}), the three lepton masses (hard-coded to their
-PDG values~\cite{ParticleDataGroup:2022pth} in the
+2025 PDG values~\cite{ParticleDataGroup:2024cfk} in the
 \ttt{src/qed\_coupling.f90} file), and the three masses of the heavy
 quarks (\ttt{m\_heavy\_quarks(4:6)}).
 %
@@ -876,13 +876,12 @@ The common value of the light quark masses is used to mimic the
 physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
 1\GeV$, which involves hadronic states.
 %
-Using a value of $0.109\GeV$ generates QED coupling values at the
-masses of the $\tau$ lepton ($1/133.458$) and $Z$-boson ($1/127.952$)
-that agree to within relative $\sim 2\times 10^{-4}$ accuracy with the
-$\MSbar$ values ($1/(133.450 \pm 0.006)$ and $1/(127.930 \pm 0.008)$)
+Using a value of $0.1055\GeV$ generates QED coupling values at the
+masses of the $\tau$ lepton ($1/133.444$) and $Z$-boson ($1/127.938$)
+that agree to within relative $\sim 1\times 10^{-4}$ (and $1\sigma$) accuracy with the
+$\MSbar$ values ($1/(133.450 \pm 0.008)$ and $1/(127.930 \pm 0.006)$)
 from the ``Electroweak and constraints on New Physics'' section of the
-2024 Particle Data Group review~\cite{}.\comment{Add ref, decide about
-  updating in qed\_coupling.f90 to 2024, and also the ref above}
+2024 Particle Data Group review~\cite{ParticleDataGroup:2024cfk}.
 
 %\gps{We don't really have a
 %  QED renormalisation scheme defined and $1/137$ that we use for $\alpha(0)$
