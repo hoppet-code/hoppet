@@ -1,3 +1,13 @@
+2025-10-10 Gavin + Alexander
+
+	* src/qed_evolution.f90:
+	added missing line to set the global ev_PN3LO pointer with 4-loop
+	QCD evolution + a protection in case the number of loops is > 4
+
+	* src/evolution.f90:
+	when setting the ev_P... pointers, added protection in case 
+	nloop > 4
+
 2025-10-10 Gavin + Giulia
 
 	* src/qed_coupling.f90:
