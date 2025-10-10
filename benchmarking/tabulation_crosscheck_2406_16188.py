@@ -45,6 +45,7 @@ def main():
     
     # Fixed flavour variant for comparion with 2406.16188
     hp.SetFFN(4)
+    hp.SetN3LOnfthresholds(hp.n3lo_nfthreshold_off)
     hp.SetApproximateDGLAPN3LO(hp.n3lo_splitting_approximation_up_to_2310_05744)
     hp.StartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order, hp.factscheme_MSbar)
     hp.Evolve(asQ0, Q0, nloop, 1.0, hp.BenchmarkPDFunpol, Q0)
