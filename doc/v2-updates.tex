@@ -111,10 +111,13 @@ and kindly supplied to us in the form of Fortran
 code~\cite{BlumleinCode,Fael:2022miw}.
 %
 Note that because many of these contributions are available only in
-exact form (i.e.\ using extensive \texttt{hplog5}~\cite{FortranPolyLog} evaluations), they
-involve a significant initialisation time, of the order of
-$10{-}30\,\text{s}$.\footnote{As and when faster 
-  parametrised versions become available, we will incorporate them.}
+exact form (i.e.\ using extensive
+\texttt{hplog5}~\cite{FortranPolyLog} evaluations), they involve a
+significant initialisation time, of the order of
+$10{-}30\,\text{s}$.\footnote{As \hoppet v2.0.0 was being finalised,
+  Ref.~\cite{BlumleinCode} was publicly released, notably
+  including faster, parametrised versions. We expect to update \hoppet
+  to include these in the near future.}
 
 \subsection{Reference results}
 
@@ -123,10 +126,8 @@ evolution in the VFNS, using the most up-to-date perturbative input at
 the time of writing this release note. To assess the evolution we take
 the initial condition of Ref.~\cite{Dittmar:2005ed} at an initial
 scale $\sqrt{2}~\text{GeV}$ and $n_f=3$. We evolve to
-$Q=100~\text{GeV}$. The table can be reproduced by running
-\masterlink{example_f90/tabulation_example_n3lo.f90}. The
-numbers are obtained using parametrised NNLO splitting functions, but
-exact mass thresholds at this order.
+$Q=100~\text{GeV}$. The numbers are obtained using parametrised NNLO
+splitting functions, but exact mass thresholds at this order.
 %
 The table has been generated with $\texttt{dy}=0.05$,
 $\texttt{dlnlnQ}=\text{dy/4}$.
@@ -147,8 +148,9 @@ evolution, with the choice of
 Of the MSHT and NNPDF results, the NNPDF results (Table~2 of
 Ref.~\cite{Cooper-Sarkar:2024crx}) are closer to ours.
 
-The results in these tables can be regenerated with the help of the
-following script, which uses the Python interface of Section~\ref{sec:pyinterface}:
+The results in both tables can be regenerated with the help
+of the following script, which uses the Python interface of
+Section~\ref{sec:pyinterface}:
 \masterlink{benchmarking/tabulation_crosscheck_2406_16188.py}.
 
 \begin{table}[p]
@@ -866,10 +868,10 @@ latter is taken.
 %argument \ttt{value\_at\_scale\_0} is provided, in which case the
 %latter is used.}
 
-The running is performed at leading order level using seven
+The running is performed at leading order level, using seven
 thresholds: a common effective mass for the three light quarks
 (\ttt{m\_light\_quarks}), the three lepton masses (hard-coded to their
-PDG values~\cite{ParticleDataGroup:2022pth} in the
+2025 PDG values~\cite{ParticleDataGroup:2024cfk} in the
 \ttt{src/qed\_coupling.f90} file), and the three masses of the heavy
 quarks (\ttt{m\_heavy\_quarks(4:6)}).
 %
@@ -877,13 +879,12 @@ The common value of the light quark masses is used to mimic the
 physical evolution in the region $0.1\GeV \lesssim \mu \lesssim
 1\GeV$, which involves hadronic states.
 %
-Using a value of $0.109\GeV$ generates QED coupling values at the
-masses of the $\tau$ lepton ($1/133.458$) and $Z$-boson ($1/127.952$)
-that agree to within relative $\sim 2\times 10^{-4}$ accuracy with the
-$\MSbar$ values ($1/(133.450 \pm 0.006)$ and $1/(127.930 \pm 0.008)$)
+Using a value of $0.1055\GeV$ generates QED coupling values at the
+masses of the $\tau$ lepton ($1/133.444$) and $Z$-boson ($1/127.938$)
+that agree to within relative $\sim 1\times 10^{-4}$ (and $1\sigma$) accuracy with the
+$\MSbar$ values ($1/(133.450 \pm 0.008)$ and $1/(127.930 \pm 0.006)$)
 from the ``Electroweak and constraints on New Physics'' section of the
-2024 Particle Data Group review~\cite{}.\comment{Add ref, decide about
-  updating in qed\_coupling.f90 to 2024, and also the ref above}
+2024 Particle Data Group review~\cite{ParticleDataGroup:2024cfk}.
 
 %\gps{We don't really have a
 %  QED renormalisation scheme defined and $1/137$ that we use for $\alpha(0)$

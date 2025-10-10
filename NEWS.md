@@ -1,6 +1,6 @@
 # NEWS for HOPPET
 
-# Release 2.0.0, XX October 2025
+# Release 2.0.0, 10 October 2025
 
 ## Major new features:
 
@@ -8,7 +8,7 @@
   FHMPRUVV group (arXiv:2410.08089 and refs therein)
 
 * inclusion of mass threshold matrices for VFNS N3LO evolution, including
-  code from ABBFMSS group (DESY 24-037 and refs therein)
+  code from ABBFMSS group (arXiv:2510.02175 and refs therein)
 
 * inclusion of structure function calculations, including code from (D)MVV
   group, (arXiv:1606.08907 and refs therein)
@@ -33,6 +33,8 @@ The updates are documented in https://arxiv.org/abs/2510.xxxxx.
 
 * hoppet_v1 now renamed hoppet (in library name, module name, C++
   include name, etc.)
+* some QED defaults (lepton masses, effective light quark masses)  
+  have been updated to 2024/25 values
 
 ## Authorship update: 
 
@@ -41,10 +43,17 @@ The updates are documented in https://arxiv.org/abs/2510.xxxxx.
 
 ## Other changes:
 
+* A compiler with support for Fortran 2008 is now required, and HOPPET relies
+  on extensions for long-lines (part of the Fortran 2023 standard). Compilers
+  also need to be able to run the preprocessor. All features are widely supported.
+
 * access to a single flavour x,Q point of a pdf_table, with
   `EvalPdfTable_yQf` (and `_xQf` variant) and speed-up of
   `EvalPdfTable_yQ` by about a factor of three (300ns to 100 ns on an
-  M2Pro). Also addition of a variant of `EvalPdfTable_yQ` that can take
+  M2Pro). In the streamlined/C++ interface, use hoppetEvalIFlv(x,Q,iflv),
+  with the predefined iflv_g, iflv_d, etc. symbols to get the right index. 
+  
+* Also addition of a variant of `EvalPdfTable_yQ` that can take
   an array of tables, e.g. for speed in evaluating the same x,Q point
   for error sets.
 
@@ -63,10 +72,6 @@ The updates are documented in https://arxiv.org/abs/2510.xxxxx.
 
 * the streamlined interface now has `hoppetDeleteAll()` function for cleaning up
   all memory it allocated.
-
-* A compiler with support for Fortran 2008 is now required, and HOPPET relies
-  on extensions for long-lines (part of the Fortran 2023 standard). Compilers
-  also need to be able to run the preprocessor. All features are widely supported.
 
 * Implementation of continuous integration and a wider range of checks, including 
   a new `unit-tests/` directory

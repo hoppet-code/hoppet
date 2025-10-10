@@ -118,6 +118,9 @@ contains
        ev_PLO  => dhcopy%P_LO
        if (ev_nloop >= 2) ev_PNLO => dhcopy%P_NLO
        if (ev_nloop >= 3) ev_PNNLO => dhcopy%P_NNLO
+       if (ev_nloop >= 4) ev_PN3LO => dhcopy%P_N3LO
+       if (ev_nloop >= 5) call wae_error('ev_evolve: nloop(QCD) > 4 not yet supported in QED evolution')
+
        ev_nqcdloop_qed = nqcdloop_qed
        ev_with_Plq_nnloqed = default_or_opt(.false., with_Plq_nnloqed)
        if (nqcdloop_qed > 1) call wae_error("QEDQCDEvolvePDF", "No support currently for nqcdloop_qed > 1")

@@ -94,11 +94,13 @@ program tabulation_example_qed
   call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop_qcd,&
        &                   quark_masses = quark_masses)
 
-  ! Initialises coupling_qed object, including thresholds. All
-  ! light quarks turn on simultaneously at some specified effective scale;
-  ! the choice of 0.109 GeV results in a fairly accurate value of alpha(mZ)
-  ! and alpha(m_tau).
-  effective_light_quark_masses = 0.109_dp
+  ! Initialises coupling_qed object, including thresholds. All light
+  ! quarks turn on simultaneously at some specified effective scale; the
+  ! choice of m_light_quarks_default (defined in qed_coupling_module, to
+  ! be 0.1055 GeV, as of 2025-10-10) results in values of 
+  ! alpha(mZ) and alpha(m_tau) and that are within 1 sigma of the PDG
+  ! MSbar value
+  effective_light_quark_masses = m_light_quarks_default
   call InitQEDCoupling(coupling_qed, effective_light_quark_masses, quark_masses(4:6))
 
   ! create the table object that will contain the values of the parton
@@ -117,8 +119,9 @@ program tabulation_example_qed
   write(6,'(a)') "Evolution done!"
 
   ! get the value of the tabulation at some point
-  Q = 91.1876_dp;
+  Q = 91.1880_dp;
   write(6,'(a)')
+  write(6,'(a,f8.3,a)') " Using effective light_quark_masses = ", effective_light_quark_masses," GeV"
   write(6,'(a,f9.4,a,f8.5)') " At Q = ",Q," GeV, QCD coupling is alpha_s     = ", value(coupling, Q)
   write(6,'(a,f9.4,a,f8.3)') " At Q = ",Q," GeV, QED coupling is 1/alpha_qed = ", one/value(coupling_qed, Q)
   write(6,'(a,f6.4,a,f8.3)') " At mtau = ",m_tau," GeV, QED coupling is 1/alpha_qed = ", one/value(coupling_qed, m_tau/1.0000001_dp)

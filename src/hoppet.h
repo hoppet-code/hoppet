@@ -23,7 +23,7 @@
 #define hoppetSetN3LOnfthresholds      hoppetsetn3lonfthresholds_
 #define hoppetSetYLnlnQInterpOrders    hoppetsetylnlnqinterporders_
 #define hoppetEval                     hoppeteval_          
-#define hoppetEvalPID                  hoppetevalpid_          
+#define hoppetEvalFortranIFlv          hoppetevaliflv_          
 #define hoppetEvalSplit                hoppetevalsplit_
 #define hoppetSetQED                   hoppetsetqed_
 #define hoppetDeleteAll                hoppetdeleteall_
@@ -125,9 +125,9 @@ namespace hoppet {
   const int iflv_bbar = -5+6;
   const int iflv_tbar = -6+6;
   const int iflv_photon = 8+6;
-  const int iflv_electron = 9+6;
-  const int iflv_muon = 10+6;
-  const int iflv_tau = 11+6;
+  const int iflv_electron = 9+6; //< note this is the sum of e- and e+
+  const int iflv_muon = 10+6;    //< note this is the sum of mu- and mu+
+  const int iflv_tau = 11+6;     //< note this is the sum of tau- and tau+
 
 
 }
@@ -252,20 +252,35 @@ extern "C" {
   /// Return the coupling at scale Q
   double hoppetAlphaS(const double & Q);
 
-  /// Return in f[0..12+5] the value of the internally stored pdf at
-  /// the given x,Q, with the usual LHApdf meanings for the indices
-  /// -6:6 + photon and lepton.
+  /// Return in f[0..N] the value of the internally stored pdf at
+  /// the given x,Q. The indices of f correspond to the iflv
+  /// constants defined above, e.g. f[iflv_g] is the gluon, etc.
+  ///
+  /// The array f should be of size at least:
+  ///
+  /// - 13 for QCD only
+  /// - 18 for QCD+photon+leptons (the lepton indices give the sum of lepton and antilepton)
+  ///
   void hoppetEval(const double & x,
                   const double & Q,
                   double * f);
 
+  /// the interface to get a single flavour, which takes iflv
+  /// starting from -6. This is the direct Fortran interface.
+  /// The C++ interface is hoppetEvalIFlv below, which takes the
+  /// hoppet iflv constants, which have been shifted by +6
+  /// to make them non-negative and match the indices to be used
+  /// with hoppetEval
+  double hoppetEvalFortranIFlv(const double & x,
+           const double & Q,
+           const int & iflv_starts_minus6);
 
-  /// Return in f the value of the internally stored pdf at the given
-  /// x,Q, and pid with the usual LHApdf meanings for the indices
-  /// -6:6.
-  double hoppetEvalPID(const double & x,
+  /// Return xf(x,Q) for the flavour indicated by iflv, which should
+  /// be one of the hoppet iflv_* constants (iflv_g, iflv_d,
+  /// iflv_ubar, etc.)
+  inline double hoppetEvalIFlv(const double & x,
 		       const double & Q,
-		       const int & pid);
+		       const int & iflv) {return hoppetEvalFortranIFlv(x,Q,iflv-6);}
 
 
   /// Return in f[0..12] the value of 

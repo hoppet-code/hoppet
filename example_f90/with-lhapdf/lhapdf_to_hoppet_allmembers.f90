@@ -28,7 +28,7 @@ program lhapdf_to_hoppet_allmembers
   real(dp), parameter :: xmin = 1d-5, xmax = 0.9_dp, Qmin = 1.5_dp, Qmax = 100000.0_dp
   real(dp) :: central, err_up, err_down, err_symm
   real(dp), allocatable :: xvals(:), qvals(:)
-  real(dp), external :: hoppetAlphaS, alphasPDF, hoppetEvalPID
+  real(dp), external :: hoppetAlphaS, alphasPDF, hoppetEvalIFlv
   real(dp) :: aslhapdf, ashoppet
   integer :: i, j
   character(len=*), parameter :: dfmt = '(f10.6)'
@@ -118,13 +118,13 @@ program lhapdf_to_hoppet_allmembers
   !! call cpu_time(t1)
   !! do i = 1, npoints
   !!   do j = 1, npoints
-  !!     hoppetpdf(0) = hoppetEvalPID(xvals(i), qvals(j), mod(j,6))
+  !!     hoppetpdf(0) = hoppetEvalIFlv(xvals(i), qvals(j), mod(j,6))
   !!     ! if pdf_tabulate is "use"d, this is slightly faster
   !!     !hoppetpdf(0) = EvalPdfTable_xQf(tables(0),xvals(i),qvals(j),mod(j,6))
   !!   end do
   !! end do
   !! call cpu_time(t2)
-  !! write(*,tfmt) "hoppetEvalPID time (one flav): ", (t2-t1)/npoints/npoints*1d9, " ns"
+  !! write(*,tfmt) "hoppetEvalIFlv time (one flav): ", (t2-t1)/npoints/npoints*1d9, " ns"
 
   ! Benchmark EvolvePDF (LHAPDF)
   write(*,'(a,i4,a)') bold//"Timing evaluation of all", size(lhapdf_set%tables), " PDF members with LHAPDF"//reset

@@ -156,9 +156,9 @@ int main (int argc, char *argv[]) {
   t1 = chrono::high_resolution_clock::now();
   for (double x : xvals)
       for (double q : qvals)
-          hoppetpdf[0] = hoppetEvalPID(x, q, 1); // Just one flavour
+          hoppetpdf[0] = hoppetEvalIFlv(x, q, hoppet::iflv_d); // Just one flavour
   t2 = chrono::high_resolution_clock::now();
-  cout << "hoppetEvalPID time: " << chrono::duration<double,nano>(t2 - t1).count()/npoints/npoints << " ns\n";
+  cout << "hoppetEvalIFlv time: " << chrono::duration<double,nano>(t2 - t1).count()/npoints/npoints << " ns\n";
 
   // Benchmark xfxq2
   t1 = chrono::high_resolution_clock::now();
