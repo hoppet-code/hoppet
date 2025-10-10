@@ -690,16 +690,16 @@ end subroutine hoppetEval
 !======================================================================
 !! Assuming this is called with an array starting at index -6, return in f(-6:6) 
 !! the value of the internally stored pdf at the
-!! given x,Q, and for the hoppet PID
-function hoppetEvalPID(x,Q,pid) 
+!! given x,Q, and for the hoppet iflv (iflv_glu, etc. as defined in pdf_representation.f90)
+function hoppetEvalIFlv(x,Q,iflv) 
   use streamlined_interface; use pdf_representation
   implicit none
   real(dp), intent(in)  :: x, Q
-  integer, intent(in) :: pid
-  real(dp) :: hoppetEvalPID
+  integer, intent(in) :: iflv
+  real(dp) :: hoppetEvalIFlv
 
-  hoppetEvalPID = EvalPdfTable_xQf(tables(0),x,Q,pid)
-end function hoppetEvalPID
+  hoppetEvalIFlv = EvalPdfTable_xQf(tables(0),x,Q,iflv)
+end function hoppetEvalIFlv
 
 
 

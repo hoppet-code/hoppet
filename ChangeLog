@@ -1,5 +1,27 @@
 2025-10-10 Gavin + Alexander
 
+	* src/streamlined_interface.f90:
+	renamed HoppetEvalPID -> HoppetEvalIFlv, to reflect the fact
+	that one doesn't pass a PID but rather a hoppet iflv (i.e.
+	0 for the gluon rather than 21)
+
+	* src/hoppet.h:
+	* pyinterface/hoppet.i:
+	renamed hoppetEvalPID -> hoppetEvalIFlv which take the
+	C++/Python iflv constants (starting from 0 for tbar); 
+	there is also hoppetEvalFortranIFlv, which takes iflv
+	as in Fortran, starting from -6 for tbar.
+
+	* example_*/with-lhapdf/*.f90:
+	updated these to use the hoppetEvalIFlv naming
+
+	renamed hoppetEvalPID -> hoppetEvalIFlv, but with the important
+	caveat that one must use the iflv_ values defined in hoppet.h or
+	hoppet.i (starting from 0 rather than -6) to make the indexing
+	consistent with the hoppetEval return, which uses indexing starting
+	from 0. In the C++ interface there is the option of using
+	hoppetEvalFortranIFlv, which has indexing starting from -6.
+
 	* src/qed_evolution.f90:
 	added missing line to set the global ev_PN3LO pointer with 4-loop
 	QCD evolution + a protection in case the number of loops is > 4

@@ -64,7 +64,7 @@ public:
       double x = xmin * exp(i * log(xmax/xmin) / nxQ);
       double Q = Qval(i);
       double pdf[13];
-      results.push_back(hoppetEvalPID(x, Q, i%5));
+      results.push_back(hoppetEvalIFlv(x, Q, hoppet::iflv_g + i%5));
     }
   }
   string name() const { return "PDFOneFlavThreadTask"; }

@@ -2,7 +2,7 @@
 %module(docstring="
 A Higher Order Perturbative Parton Evolution Toolkit
 
-HOPPET is a Fortran 95 package for carrying out DGLAP evolution and other 
+HOPPET is a Fortran package for carrying out DGLAP evolution and other 
 common manipulations of parton distribution functions (PDFs).
 
 Citation:
@@ -11,7 +11,7 @@ Comput. Phys. Commun. 180 (2009) 120-156, arXiv:0804.3755
 
 and                                                       
 
-A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer (arXiv:2509.XXXXX). 
+A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer (arXiv:2510.XXXXX). 
 
 Example:
 
@@ -377,7 +377,8 @@ Parameters:
   nloop (int): Number of loops for alpha_s running
 ";
 %rename(SetCoupling             )      hoppetsetcoupling_;       
-%rename(EvalPID                 )      hoppetevalpid_; 
+%rename(EvalIFlv                )      hoppetEvalIFlv; 
+%rename(EvalFortranIFlv         )      hoppetevaliflv_; 
 %rename(SetFFN                  )      hoppetsetffn_;       
 %rename(SetVFN                  )      hoppetsetvfn_;       
 %rename(SetPoleMassVFN          )      hoppetsetpolemassvfn_;       
