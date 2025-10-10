@@ -49,7 +49,7 @@ module streamlined_interface
   type(qed_coupling),  save :: coupling_qed
   type(qed_split_mat), save :: qed_split
   logical,  save :: with_qed = .false.
-  real(dp), save :: effective_light_quark_masses = 0.109_dp
+  real(dp), save :: effective_light_quark_masses = m_light_quarks_default ! from qed_coupling_module
   integer,  save :: with_nqcdloop_qed = 0
   logical,  save :: with_Plq_nnloqed = .false.
 

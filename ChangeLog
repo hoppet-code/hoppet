@@ -1,4 +1,30 @@
-2025-10-09 gavin
+2025-10-10 Gavin + Giulia
+
+	* src/qed_coupling.f90:
+
+	- lepton masses moved to PDG 2025 values
+
+	- different effective light-quark mass choices now available,
+  	  labelled _2023 and _2025 with the new default set to
+	  m_light_quarks_default_2025 = 0.1055 GeV, which reproduces
+	  the 2025 PDG alpha(mtau,mZ) values to within 1 sigma. The
+	  corresponding variables are now public
+
+    - since this value is below the muon mass, the code that sets up the
+	  thresholds and nflav(:,:) values now has logic to deal with
+	  m_light < or > m_muon
+
+	* example_f90/tabulation_example_qed.f90:
+	* src/streamlined_interface.f90:
+	* example_f90/tabulation_example_qed.default_output:
+
+	Both f90 files had 0.109 GeV hard-coded, now replaced with
+	m_light_quarks_default, and the example_f90 output has been
+	updated accordingly
+
+
+
+2025-10-09 Gavin
 
 	* example_f90/tabulation_example_qed.f90:
 	updated MZ to 2025 PDG value, and added printout

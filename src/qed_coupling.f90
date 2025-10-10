@@ -10,15 +10,22 @@ module qed_coupling_module
   implicit none
   private
 
-  ! use 0.109 to get alpha(mZ) = 1/127.95
-  !real(dp), parameter :: m_light_quarks = 0.109_dp ! DECIDE ON THIS
-  real(dp), parameter :: m_light_quarks_default = 1.000_dp ! DECIDE ON THIS
+  !! use 0.109 to get alpha(mZ) = 1/127.952 at mZ=91.1880 GeV,
+  !! which is close to the 2022/23 PDG value of 1/127.951 +- 0.009
+  real(dp), parameter, public :: m_light_quarks_default_2023 = 0.109_dp 
 
+  !! use 0.1055 to get alpha(mZ) = 1/127.938 at mZ=91.1880 GeV,
+  !! which is within 1 sigma of the 2025 PDG value of 1/127.930 +- 0.008
+  !! (see comments below for more details)
+  real(dp), parameter, public :: m_light_quarks_default_2025 = 0.1055_dp 
+
+  !! the global defaullt, which as of 2025-10-10 is set to the 2025 value
+  real(dp), parameter, public :: m_light_quarks_default = m_light_quarks_default_2025
 
   ! lepton masses from from 2022 PDG (plus 2023 update)
   real(dp), parameter, public :: pdg2023_m_electron = 0.51099895000e-3_dp ! +-(15) MeV
   real(dp), parameter, public :: pdg2023_m_muon     = 105.6583755e-3_dp   ! +-(23)
-  real(dp), parameter, public :: pdg2023_m_tau      = 1776.86e-3_dp ! +-0.12
+  real(dp), parameter, public :: pdg2023_m_tau      = 1776.86e-3_dp ! +-0.12e-3_dp
   ! 2022 PDG: summary table + EW review
   ! - 1/alpha(0)    = 137.035999180(10)
   ! - 1/alpha(mtau) = 133.471 ± 0.007
@@ -31,17 +38,17 @@ module qed_coupling_module
   real(dp), parameter, public :: pdg2025_m_electron = 0.51099895000e-3_dp ! ± 0.00000000015e-3
   real(dp), parameter, public :: pdg2025_m_muon     = 105.6583755e-3_dp   ! ± 0.0000023e-3_dp
   real(dp), parameter, public :: pdg2025_m_tau      = 1776.93e-3_dp       ! ± 0.09e-3_dp
-  ! 2024 PDG: EW review, https://pdg.lbl.gov/2025/reviews/rpp2024-rev-standard-model.pdf
+  ! 2024/25 PDG: EW review, https://pdg.lbl.gov/2025/reviews/rpp2024-rev-standard-model.pdf
   ! - 1/alpha(0)    = 137.035999178(8) 
-  ! - 1/alpha(mtau) = 133.450 ± 0.006
-  ! - 1/alpha(mZ)   = 127.930 ± 0.008
+  ! - 1/alpha(mtau) = 133.450 ± 0.006  [MSbar scheme]
+  ! - 1/alpha(mZ)   = 127.930 ± 0.008  [MSbar scheme]
   real(dp), parameter, public :: pdg2025_alpha_qed_scale_0 = one/137.035999178  !(8)
 
 
-  real(dp), parameter, public :: m_electron        = pdg2023_m_electron
-  real(dp), parameter, public :: m_muon            = pdg2023_m_muon
-  real(dp), parameter, public :: m_tau             = pdg2023_m_tau
-  real(dp), parameter, public :: alpha_qed_scale_0 = pdg2023_alpha_qed_scale_0
+  real(dp), parameter, public :: m_electron        = pdg2025_m_electron
+  real(dp), parameter, public :: m_muon            = pdg2025_m_muon
+  real(dp), parameter, public :: m_tau             = pdg2025_m_tau
+  real(dp), parameter, public :: alpha_qed_scale_0 = pdg2025_alpha_qed_scale_0
 
   real(dp), parameter, public :: e_dn2 = (one/three)**2
   real(dp), parameter, public :: e_up2 = (two/three)**2
@@ -102,7 +109,7 @@ subroutine InitQEDCoupling_new(coupling, m_light_quarks, m_heavy_quarks, value_a
     mt = m_heavy_quarks(6)
     
     if (mc > m_tau) call wae_error("InitQEDCoupling", "mc > m_tau, but that is not currently supported")
-    if (m_light_quarks < m_muon) call wae_error("InitQEDCoupling", "m_light_quarks < m_muon, but that is not currently supported")
+    !if (m_light_quarks < m_muon) call wae_error("InitQEDCoupling", "m_light_quarks < m_muon, but that is not currently supported")
     if (m_light_quarks > mc) call wae_error("InitQEDCoupling", "m_light_quarks > mc, but that is not physical (or supported)")
 
     coupling%n_thresholds = n_thresholds
@@ -110,8 +117,13 @@ subroutine InitQEDCoupling_new(coupling, m_light_quarks, m_heavy_quarks, value_a
     ! set up the thresholds
     coupling%thresholds(0) = zero
     coupling%thresholds(1) = m_electron
-    coupling%thresholds(2) = m_muon
-    coupling%thresholds(3) = m_light_quarks
+    if (m_light_quarks >= m_muon) then
+      coupling%thresholds(2) = m_muon
+      coupling%thresholds(3) = m_light_quarks
+    else
+      coupling%thresholds(2) = m_light_quarks
+      coupling%thresholds(3) = m_muon
+    end if
     coupling%thresholds(4) = mc
     coupling%thresholds(5) = m_tau
     coupling%thresholds(6) = mb
@@ -122,8 +134,13 @@ subroutine InitQEDCoupling_new(coupling, m_light_quarks, m_heavy_quarks, value_a
     !                       nlept  ndown  nup
     coupling%nflav(:,0) = (/   0,    0,    0 /)
     coupling%nflav(:,1) = (/   1,    0,    0 /)
-    coupling%nflav(:,2) = (/   2,    0,    0 /)
-    coupling%nflav(:,3) = (/   2,    2,    1 /)
+    if (m_light_quarks >= m_muon) then
+      coupling%nflav(:,2) = (/   2,    0,    0 /)
+      coupling%nflav(:,3) = (/   2,    2,    1 /)
+    else
+      coupling%nflav(:,2) = (/   1,    2,    1 /)
+      coupling%nflav(:,3) = (/   2,    2,    1 /)
+    end if
     coupling%nflav(:,4) = (/   2,    2,    2 /)
     coupling%nflav(:,5) = (/   3,    2,    2 /)
     coupling%nflav(:,6) = (/   3,    3,    2 /)
