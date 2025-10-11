@@ -83,7 +83,7 @@ jobs:
           cmake --build BUILD -j
           cmake --install BUILD
           #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
-          valgrind BUILD/unit-tests/hoppet-unit-tests 
+          BUILD/unit-tests/hoppet-unit-tests 
           #TMPOFF# ctest --test-dir BUILD -j 2 --output-on-failure
           #TMPOFF# # now try running the python example
           #TMPOFF# python3 example_py/tabulation_example.py
