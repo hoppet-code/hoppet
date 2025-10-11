@@ -19,6 +19,8 @@ contains
     real(dp) :: weights1(0:nhi), weights2(0:nhi)
     real(dp), parameter :: xvals(*) = [0.2_dp,1.5_dp,3.4_dp, 1.0_dp]
 
+    if (.not. do_test("test_interpolation_coeffs")) return
+
     do ix = 1, size(xvals)
       x = xvals(ix)
       do i = nlo, nhi

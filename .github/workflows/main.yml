@@ -65,28 +65,39 @@ jobs:
     container:
         image: fedora:latest
     steps:
+    - name: Install Git
+      run: dnf -y install git    
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v5
+      with:
+        submodules: recursive
     - name: Install 
       run: |
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
            yum -y install swig python3-devel python3-numpy
+           yum -y install valgrind
     - name: Compile
       run: |
           #cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake -S . -B BUILD  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_USE_EXACT_COEF=ON -DHOPPET_BUILD_PYINTERFACE=ON
           cmake --build BUILD -j
           cmake --install BUILD
-          ctest --test-dir BUILD -j 2 --output-on-failure
-          # now try running the python example
-          python3 example_py/tabulation_example.py
+          #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
+          BUILD/unit-tests/hoppet-unit-tests 
+          #TMPOFF# ctest --test-dir BUILD -j 2 --output-on-failure
+          #TMPOFF# # now try running the python example
+          #TMPOFF# python3 example_py/tabulation_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT
     runs-on: ubuntu-latest
     container: fedora:latest
     steps:
-    - uses: actions/checkout@v3
+    - name: Install Git
+      run: dnf -y install git    
+    - uses: actions/checkout@v5
+      with:
+        submodules: recursive
     - name: Install
       run: |
              dnf -y install findutils procps gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
@@ -166,7 +177,9 @@ jobs:
     name: MacOS-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v5
+      with:
+        submodules: recursive
     - name: Install 
       run: |
           uname -a
@@ -184,6 +197,7 @@ jobs:
     - name: Compile
       run: |
           cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-15  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          cmake --build BUILD -j 2
+          cmake --build BUILD -j 4
+          # lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests/hoppet-unit-tests 2>&1
           cmake --install BUILD
-          ctest --test-dir BUILD -j 2 --output-on-failure
+          ctest --test-dir BUILD -j 4 --output-on-failure

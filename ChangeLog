@@ -1,3 +1,34 @@
+------------- libome-pre changes --------------------------
+2025-10-03 gavin
+
+	* src/integrator.f90:
+	introduced a set of integrators that take a new class(ig_class)
+	object, a polymorphic base class with a deferred procedure 
+	f that returns the integrand. This opens the door to including
+	more information in the integrand object, e.g. info that 
+	previously needed to be global.
+
+	* src/convolution.f90: (convolution module)
+	introduced a new abstract base class conv_ignd with conv_ignd%f(y,piece). 
+	The old interfaces for creating grid_conv objects are still there,
+	but conv_InitGridConv_func and conv_AddGridConv_func now create
+	an intermediate conv_ignd_fromfunc that basically holds the pointer
+	to the function.
+
+	* src/convolution.f90: (convolution_pieces module)
+	moved the definitions of cc_REAL etc. to this new module
+	while keeping the global cc_piece in convolution_communicator. 
+	Also changed their type to c_int, with a view to facilitating
+	intercommunication with C/C++/Python.
+	
+	* src/hoppet.h:
+	exposed cc_REAL etc. and hoppet_global_cc_piece
+
+	* unit_tests/:
+	FILL THIS IN AND DECIDE WHAT TO DO WITH C tests
+
+------------- end of libome-pre changes --------------------------
+
 2025-10-10 Gavin + Alexander
 
 	* NEWS.md:

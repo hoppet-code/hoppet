@@ -6,6 +6,8 @@ program hoppet_unit_tests
   use unit_tests
   use test_interpolation
   use test_alphas
+  use test_convolution
+  use test_libome
   use io_utils
   implicit none
 
@@ -15,25 +17,32 @@ program hoppet_unit_tests
     print *, "  -time TIMING_NAME   Run timing for the specified test (default: none)"
     print *, "                      (anything whose initial characters match TIMING_NAME will be timed)"
     print *, "  -list-timing        List all available timing names"
+    print *, "  -only TEST_GROUP    Run only the specified test group(s) (substring match)"
+    print *, "  -verbose            Print a message for each passed test"
     stop 0
   end if
   print '(a)', "Running HOPPET unit tests"
   call hoppet_setup()  
   timing_name = string_val_opt("-time","none") ! get timing name from command line
   list_timing = log_val_opt("-list-timing",.false.)
+  test_only = trim(string_val_opt("-only",""))
+  verbose   = log_val_opt("-verbose",.false.)
+
   if (.not. CheckAllArgsUsed(0)) stop 1
 
   call test_interpolation_coeffs()
   call test_tab_eval()
   call unit_tests_alphas()
+  call test_InitGridConv()
+  call test_libome_interface()
 
   if (unit_test_failures > 0) then
     ! print a message in red
-    print '(a)', red//trim(to_string(unit_test_failures))//' unit tests failed.'//reset
+    print '(a)', bold//red//trim(to_string(unit_test_failures))//' unit tests failed.'//reset
     stop 1
   else
     ! print a message in green
-    print '(a)', green//'All '//trim(to_string(unit_test_successes))//' unit tests passed.'//reset
+    print '(a)', bold//green//'All '//trim(to_string(unit_test_successes))//' unit tests passed.'//reset
   end if
 
 contains
@@ -91,6 +100,8 @@ contains
     !real(dp), parameter :: Qvals(*) = [3.0_dp]
     real(dp) :: x, Q, xpdf(iflv_min:tables(0)%tab_iflv_max), xpdff
     integer  :: iflv, ix, iQ
+
+    if (.not. do_test("test_tab_eval")) return
 
     ! first check that single-flavour evaluation gives the same answer
     ! as all-flavour evaluation
