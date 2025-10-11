@@ -2298,14 +2298,14 @@ end subroutine hoppetInitStrFct
 !! @param[opt]     xR             factor to multiply renormalisation scale
 !! @param[opt]     xF             factor to multiply factorisation scale
 !!
-subroutine hoppetInitStrFctFlav(order, separate_orders, xR, xF, flavour_decomposition)
+subroutine hoppetInitStrFctFlav(order, separate_orders, xR, xF)
   use streamlined_interface; use structure_functions
   implicit none
   integer, intent(in) :: order
-  logical, intent(in) :: separate_orders, flavour_decomposition
+  logical, intent(in) :: separate_orders
   real(dp), intent(in) :: xR, xF
   
-  call InitStrFct(order, separate_orders, xR, xF, flavour_decomposition)
+  call InitStrFct(order, separate_orders, xR, xF, .true.)
 
 end subroutine hoppetInitStrFctFlav
 

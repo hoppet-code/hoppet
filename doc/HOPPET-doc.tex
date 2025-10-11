@@ -12,14 +12,20 @@
 %\releasenotetrue % comment out to hide answers
 
 \input{preamble.tex}
+\hypersetup{
+  colorlinks = true,
+  linkcolor  = blue,
+  citecolor  = blue,
+  urlcolor   = blue,
+ }
 \usepackage[sort&compress,numbers]{natbib}
 
 
 %-----------------------------------------
 \title{A Higher Order Perturbative Parton Evolution Toolkit \\
 (\hoppet)\\
-
-version 2.0.0
+%% DO NOT EDIT the next line -- it is modified automatically by scripts/set-version.sh
+version 2.0.1-devel%% VERSION-NUMBER 
 %  a.k.a.\ HOPPETv1
 }
 \author{%
@@ -2641,6 +2647,13 @@ This is the combination that we shall use as standard.
 \subsection{Timing}
 \label{sec:Timing}
 
+\noindent \fbox{\parbox{\textwidth}{%
+    NOTE: the timings shown here date from 2008 and have been
+    kept for historical reasons.
+    %
+    Updated timings as of 2025 are to be found in
+    Section~\ref{sec:v2-performance}.
+}}\medskip
 
 The time spent in \hoppet for a given analysis can be expressed as
 follows, according to whether or not one carries out pre-evolution:
@@ -2683,7 +2696,11 @@ been performed.
   \caption{Contributions to the run time in eqs.~(\ref{eq:timing})
  for    $\dy=0.2$ and 
     $\dlnlnQ=0.05$ and standard values for the other parameters 
-    (on a 3.4GHz Pentium IV (D) with 2~MB cache).}
+    (on a 3.4GHz Pentium IV (D) with 2~MB cache).
+    %
+    These are timings from 2008, see Section~\ref{sec:v2-performance}
+    for 2025 timings.
+  }
   \label{tab:timings}
 \end{table}
 
@@ -2710,7 +2727,11 @@ compilers.\footnote{As this article was going to press, a development
   \includegraphics[width=0.7\textwidth]{figs-v1/acc-v-time}%
   \caption{relative accuracy obtained as a function of the time taken
     to perform the evolution (lf95, 3.4GHz Pentium IV (D) with 2~MB
-    cache).}
+    cache).
+    %
+    The timings are from 2008. See Section~\ref{sec:v2-performance}
+    for 2025 timings.
+  }
   \label{fig:acc-v-time}
 \end{figure}
 
@@ -2778,7 +2799,7 @@ of a tabulated evolution. Default values shown in square
 The following sections detail additions in \hoppet{} that appeared in
 v2.0.0. 
 
-\input{qed-and-structure-functions.tex}
+\input{v2-updates.tex}
 
 
 %======================================================================
@@ -3221,11 +3242,13 @@ program tabulation_example_qed
   call InitRunningCoupling(coupling,alfas=0.35_dp,Q=Q0,nloop=nloop_qcd,&
        &                   quark_masses = quark_masses)
 
-  ! Initialises coupling_qed object, including thresholds. All
-  ! light quarks turn on simultaneously at some specified effective scale;
-  ! the choice of 0.109 GeV results in a fairly accurate value of alpha(mZ)
-  !  and alpha(m_tau).
-  effective_light_quark_masses = 0.109_dp
+  ! Initialises coupling_qed object, including thresholds. All light
+  ! quarks turn on simultaneously at some specified effective scale; the
+  ! choice of m_light_quarks_default (defined in qed_coupling_module, to
+  ! be 0.1055 GeV, as of 2025-10-10) results in values of 
+  ! alpha(mZ) and alpha(m_tau) and that are within 1 sigma of the PDG
+  ! MSbar value
+  effective_light_quark_masses = m_light_quarks_default
   call InitQEDCoupling(coupling_qed, effective_light_quark_masses, quark_masses(4:6))
 
   ! create the table object that will contain the values of the parton

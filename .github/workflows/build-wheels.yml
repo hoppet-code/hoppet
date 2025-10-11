@@ -8,9 +8,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+  build_wheels_legacy:
+    name: Build wheels (Python 3.9-3.12) on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -22,11 +24,10 @@ jobs:
         submodules: recursive
     
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.16.2 # Seems not to work with the most recent version of v2
       env:
-        # Build for Python 3.9-3.13
-        CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-* 
-        #CIBW_BUILD: cp312-*
+        # Build for Python 3.9-3.12
+        CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
         
         # Skip 32-bit and musl builds
         CIBW_SKIP: "*-manylinux_i686 *-musllinux* *-win32"
@@ -52,7 +53,8 @@ jobs:
         
         # macOS dependencies and build
         CIBW_BEFORE_BUILD_MACOS: |
-          brew install gcc gfortran swig cmake make
+          brew install swig cmake make
+          HOMEBREW_BUILD_FROM_SOURCE=1 brew install gcc gfortran
           brew tap davidchall/hep
           brew install lhapdf || echo "LHAPDF install failed, continuing..."
           #ls /opt/homebrew/bin/g*
@@ -104,7 +106,108 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: wheels-${{ matrix.os }}
+        name: wheels-legacy-${{ matrix.os }}
+        path: ./wheelhouse/*.whl
+
+  build_wheels_modern:
+    name: Build wheels (Python 3.13+) on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "15.0"
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Build wheels
+      uses: pypa/cibuildwheel@v3.2.0 # Known to work in the past
+      env:
+        # Build for Python 3.13
+        CIBW_BUILD: cp313-* cp314-*
+        
+        # Skip 32-bit and musl builds
+        CIBW_SKIP: "*-manylinux_i686 *-musllinux* *-win32"
+        
+        # Linux dependencies
+        CIBW_BEFORE_BUILD_LINUX: |
+          yum install -y gcc gcc-c++ gcc-gfortran cmake swig
+          yum install -y lhapdf lhapdf-devel || echo "LHAPDF not available, continuing..."
+          
+          cmake -S . -B BUILD \
+            -DHOPPET_ENABLE_FPES=ON \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DHOPPET_USE_EXACT_COEF=ON \
+            -DHOPPET_BUILD_PYWHEELS=ON \
+            -DHOPPET_BUILD_PYINTERFACE=OFF \
+            -DHOPPET_BUILD_BENCHMARK=OFF \
+            -DHOPPET_BUILD_EXAMPLES=OFF \
+            -DHOPPET_ENABLE_TESTING=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+          cmake --build BUILD -j
+          cmake --install BUILD
+          ldconfig
+        
+        # macOS dependencies and build
+        CIBW_BEFORE_BUILD_MACOS: |
+          brew install swig cmake make
+          HOMEBREW_BUILD_FROM_SOURCE=1 brew install gcc gfortran
+          brew tap davidchall/hep
+          brew install lhapdf || echo "LHAPDF install failed, continuing..."
+          #ls /opt/homebrew/bin/g*
+
+          # Remove ninja to force make
+          brew uninstall ninja || echo "ninja not installed"
+
+          cmake -S . -B BUILD \
+            -DCMAKE_Fortran_COMPILER=gfortran-15 \
+            -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL \
+            -DHOPPET_ENABLE_FPES=ON \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DHOPPET_USE_EXACT_COEF=ON \
+            -DHOPPET_BUILD_PYWHEELS=ON \
+            -DHOPPET_BUILD_PYINTERFACE=OFF \
+            -DHOPPET_BUILD_BENCHMARK=OFF \
+            -DHOPPET_BUILD_EXAMPLES=OFF \
+            -DHOPPET_ENABLE_TESTING=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+          cmake --build BUILD -j 2
+          cmake --install BUILD
+
+        # Simplified environment variables for macOS
+        CIBW_ENVIRONMENT_MACOS: >
+          CMAKE_BUILD_PARALLEL_LEVEL=2
+          CMAKE_GENERATOR="Unix Makefiles"
+          FC=/opt/homebrew/bin/gfortran-15
+          CMAKE_Fortran_COMPILER=/opt/homebrew/bin/gfortran-15
+          CC=/opt/homebrew/bin/gcc-15
+          CXX=/opt/homebrew/bin/g++-15
+
+        CIBW_ENVIRONMENT_LINUX: CMAKE_BUILD_PARALLEL_LEVEL=4
+        
+        # Use parallel compilation
+        CIBW_ENVIRONMENT: CMAKE_BUILD_PARALLEL_LEVEL=4
+        
+        # Test the built wheels
+        CIBW_TEST_COMMAND: |
+          python -c "import hoppet; print('Hoppet import successful for {platform}!')"
+          python {project}/example_py/tabulation_example.py
+        
+        CIBW_TEST_REQUIRES: numpy
+        CIBW_BUILD_VERBOSITY: 1
+        
+        # Repair wheels (different tools for different platforms)
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair -w {dest_dir} {wheel}"
+        CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel -w {dest_dir} {wheel}"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheels-modern-${{ matrix.os }}
         path: ./wheelhouse/*.whl
 
   build_sdist:
@@ -153,7 +256,7 @@ jobs:
 #        skip-existing: true
 
   upload_pypi:
-    needs: [build_wheels, build_sdist]
+    needs: [build_wheels_legacy, build_wheels_modern, build_sdist]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:

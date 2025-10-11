@@ -49,7 +49,7 @@ module streamlined_interface
   type(qed_coupling),  save :: coupling_qed
   type(qed_split_mat), save :: qed_split
   logical,  save :: with_qed = .false.
-  real(dp), save :: effective_light_quark_masses = 0.109_dp
+  real(dp), save :: effective_light_quark_masses = m_light_quarks_default ! from qed_coupling_module
   integer,  save :: with_nqcdloop_qed = 0
   logical,  save :: with_Plq_nnloqed = .false.
 
@@ -690,16 +690,16 @@ end subroutine hoppetEval
 !======================================================================
 !! Assuming this is called with an array starting at index -6, return in f(-6:6) 
 !! the value of the internally stored pdf at the
-!! given x,Q, and for the hoppet PID
-function hoppetEvalPID(x,Q,pid) 
+!! given x,Q, and for the hoppet iflv (iflv_glu, etc. as defined in pdf_representation.f90)
+function hoppetEvalIFlv(x,Q,iflv) 
   use streamlined_interface; use pdf_representation
   implicit none
   real(dp), intent(in)  :: x, Q
-  integer, intent(in) :: pid
-  real(dp) :: hoppetEvalPID
+  integer, intent(in) :: iflv
+  real(dp) :: hoppetEvalIFlv
 
-  hoppetEvalPID = EvalPdfTable_xQf(tables(0),x,Q,pid)
-end function hoppetEvalPID
+  hoppetEvalIFlv = EvalPdfTable_xQf(tables(0),x,Q,iflv)
+end function hoppetEvalIFlv
 
 
 
