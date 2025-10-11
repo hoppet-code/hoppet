@@ -23,7 +23,7 @@
       SUBROUTINE SET_C3SOFT(NF)
       IMPLICIT REAL*8 (A - Z)
       INTEGER NF
-      COMMON / C3SOFT / A0, A1, A2, A3
+      COMMON / C3SOFT / A0, A1, A2, A3, A4, A5
       PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0,
      ,     Z3 = 1.2020 56903 15959 42854 D0 )
 *     
@@ -77,7 +77,7 @@
 *
 * ..The soft coefficients for use in X2NP2B and X2NP2C
 *
-       COMMON / C3SOFT / A0, A1, A2, A3
+       COMMON / C3SOFT / A0, A1, A2, A3, A4, A5
 *
 * ...Colour factors
 *
@@ -182,7 +182,7 @@ c     c3qq2 = nf*cf * (  - 116.D0/27.D0 - 302.D0/27.D0*x + 247.D
        IMPLICIT REAL*8 (A - Z)
        INTEGER NF
 *
-       COMMON / C3SOFT / A0, A1, A2, A3
+       COMMON / C3SOFT / A0, A1, A2, A3, A4, A5
 *
        DL1 = LOG (1.D0-Y)
        DM  = 1.D0/(1.D0-Y)
@@ -204,7 +204,7 @@ c     c3qq2 = nf*cf * (  - 116.D0/27.D0 - 302.D0/27.D0*x + 247.D
        PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0,
      ,             Z3 = 1.2020 56903 15959 42854 D0 )
 *
-       COMMON / C3SOFT / A0, A1, A2, A3
+       COMMON / C3SOFT / A0, A1, A2, A3, A4, A5
 *
 * ...Colour factors
 *
