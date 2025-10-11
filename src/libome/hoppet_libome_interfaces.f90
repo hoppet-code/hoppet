@@ -92,7 +92,7 @@ module hoppet_libome_interfaces
     function ome_piece_hoppet(ptr,y,piece,order,LM,NF) bind(C, name="ome_piece_hoppet") result(res)
       use, intrinsic :: iso_c_binding
       real(c_double)                    :: res     !< return value: coefficient of (as/2pi)**order for xP(x), for given hoppet piece
-      type(c_ptr)   ,        intent(in) :: ptr     !< pointer to one of the A[...] objects, i.e. an rpd_distribution object
+      type(c_ptr)   , value, intent(in) :: ptr     !< pointer to one of the A[...] objects, i.e. an rpd_distribution object
       real(c_double),        intent(in) :: y       !< y = ln(1/x)
       integer(c_int),        intent(in) :: piece   !< which piece (cc_REAL, cc_REALVIRT, cc_PLUS, cc_DELTA)
       integer(c_int),        intent(in) :: order   !< order in as (0,1,2,3); returns a coefficient of (as/2pi)**order

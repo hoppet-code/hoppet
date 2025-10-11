@@ -15,16 +15,31 @@ namespace ome {
   
 }} // namespace hoppet::ome
 
+namespace ome {
+  typedef const rpd_distribution<ome_as_view<double>, ome_as_plus_view<double>, ome_as_const_view<double>> ome_rpd;  
+}
+
+
 extern "C" {
 
-const void * ome_AggQ       = & ome::AggQ       ;  
-const void * ome_AgqQ       = & ome::AgqQ       ; 
-const void * ome_AQg        = & ome::AQg        ; 
-const void * ome_AqgQ       = & ome::AqgQ       ; 
-const void * ome_AQqPS      = & ome::AQqPS      ;  
-const void * ome_AqqQNSEven = & ome::AqqQNSEven ; 
-const void * ome_AqqQNSOdd  = & ome::AqqQNSOdd  ;  
-const void * ome_AqqQPS     = & ome::AqqQPS     ; 
+
+//const void * ome_AggQ       = & ome::AggQ       ;  
+//const void * ome_AgqQ       = & ome::AgqQ       ; 
+//const void * ome_AQg        = & ome::AQg        ; 
+//const void * ome_AqgQ       = & ome::AqgQ       ; 
+//const void * ome_AQqPS      = & ome::AQqPS      ;  
+//const void * ome_AqqQNSEven = & ome::AqqQNSEven ; 
+//const void * ome_AqqQNSOdd  = & ome::AqqQNSOdd  ;  
+//const void * ome_AqqQPS     = & ome::AqqQPS     ; 
+
+const ome::ome_rpd * ome_AggQ       = & ome::AggQ       ;  
+const ome::ome_rpd * ome_AgqQ       = & ome::AgqQ       ; 
+const ome::ome_rpd * ome_AQg        = & ome::AQg        ; 
+const ome::ome_rpd * ome_AqgQ       = & ome::AqgQ       ; 
+const ome::ome_rpd * ome_AQqPS      = & ome::AQqPS      ;  
+const ome::ome_rpd * ome_AqqQNSEven = & ome::AqqQNSEven ; 
+const ome::ome_rpd * ome_AqqQNSOdd  = & ome::AqqQNSOdd  ;  
+const ome::ome_rpd * ome_AqqQPS     = & ome::AqqQPS     ; 
 
 
 /// @brief Evaluate a piece of an OME in a way suitable for HOPPET's standard integrator
@@ -35,14 +50,15 @@ const void * ome_AqqQPS     = & ome::AqqQPS     ;
 /// @param LM     value of LM = log(m^2/mu^2) (double)
 /// @param NF     value of NF (double)
 /// @return       result of the evaluation
-double ome_piece_hoppet(void ** ptr, 
+//double ome_piece_hoppet(void * ptr, 
+double ome_piece_hoppet(const ome::ome_rpd & rpd, 
                         const double & y, 
                         const int & piece, 
                         const int & order, 
                         const double & LM, 
                         const double & NF) {
   //std::cout << "ome_piece_hoppet called with ptr=" << *ptr << ", y=" << y << ", piece=" << piece << ", order=" << order << ", LM=" << LM << ", NF=" << NF << std::endl;
-  const auto & rpd = *static_cast<const ome::rpd_distribution<ome::ome_as_view<double>, ome::ome_as_plus_view<double>, ome::ome_as_const_view<double>>*>(*ptr);
+  //const auto & rpd = *static_cast<const ome::rpd_distribution<ome::ome_as_view<double>, ome::ome_as_plus_view<double>, ome::ome_as_const_view<double>>*>(ptr);
   //const auto & rpd = ome::AqqQNSEven;
   //double NF = iNF;
 
