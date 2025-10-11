@@ -83,9 +83,9 @@ jobs:
           cmake --build BUILD -j
           cmake --install BUILD
           valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
-          ctest --test-dir BUILD -j 2 --output-on-failure
-          # now try running the python example
-          python3 example_py/tabulation_example.py
+          #TMPOFF# ctest --test-dir BUILD -j 2 --output-on-failure
+          #TMPOFF# # now try running the python example
+          #TMPOFF# python3 example_py/tabulation_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT

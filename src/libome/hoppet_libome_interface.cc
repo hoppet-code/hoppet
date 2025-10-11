@@ -58,7 +58,7 @@ std::string ome_name(const ome::ome_rpd & rpd) {
 }
 
 extern "C" {
-  
+
 /// @brief Evaluate a piece of an OME in a way suitable for HOPPET's standard integrator
 /// @param ptr    pointer to the OME object 
 /// @param y      value of y = ln(1/x)
@@ -79,13 +79,14 @@ double ome_piece_hoppet(const ome::ome_rpd & rpd,
   //const auto & rpd = ome::AqqQNSEven;
   //double NF = iNF;
 
+  std::cout.precision(20);
   std::cout << "ome_piece_hoppet called for OME " << ome_name(rpd) 
             << " with y=" << y 
             << ", piece=" << piece 
             << ", order=" << order 
             << ", LM=" << LM 
             << ", NF=" << NF 
-            << std::endl;                      
+            << std::flush;                      
 
   double x = exp(-y);
 
@@ -143,7 +144,7 @@ double ome_piece_hoppet(const ome::ome_rpd & rpd,
     return 0.0;
   }
 
-  //std::cout << "  result = " << result << std::endl;
+  std::cout << "  result = " << result << std::endl;
   if (piece != hoppet::cc_DELTA) {
     result *= x;
   }
