@@ -266,7 +266,7 @@ contains
 
     res = res / 8.0_dp   ! compensate (as/4pi)^3 -> (as/2pi)^3
     if (cc_piece /= cc_DELTA) res = res * x
-  end function sf_P2gg
+   end function sf_P2gg
 
   ! ..This is the (regular) pure-singlet splitting functions P_ps^(2).    
   !    P_qq^(2) is obtained by adding the non-singlet quantity P_NS^(2)+. 

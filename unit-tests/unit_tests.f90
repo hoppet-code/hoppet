@@ -1,6 +1,7 @@
 module unit_tests
   use types
   use hoppet_to_string
+  use hoppet_term
   use io_utils
   implicit none
 
@@ -12,15 +13,33 @@ module unit_tests
      module procedure check_approx_eq_0d, check_approx_eq_1d
   end interface
 
-  character(len=*), parameter :: red = achar(27)//'[31m'
-  character(len=*), parameter :: green = achar(27)//'[32m'
-  character(len=*), parameter :: blue = achar(27)//'[34m'
-  character(len=*), parameter :: reset = achar(27)//'[0m'
-
   integer :: unit_test_failures = 0
   integer :: unit_test_successes = 0
 
+  character(len=:), allocatable :: current_test_group
+  character(len=:), allocatable :: test_only
+
 contains
+
+  logical function do_test(test_group)
+    character(len=*), intent(in) :: test_group
+    current_test_group = test_group
+    if (allocated(test_only)) then
+      if (len_trim(test_only) == 0) then
+        do_test = .true.
+      else
+        do_test = (index(test_group, trim(test_only)) > 0)
+      end if
+    else
+      do_test = .true.
+    end if
+    if (do_test) then
+      print '(a)', blue//bold//"Running test group: "//trim(test_group)//reset
+    else
+      print '(a)', yellow//bold//"Skipping test group: "//trim(test_group)//reset//" (not in -only)"
+    end if
+
+  end function do_test
 
   subroutine check_approx_eq_0d(testname, answer, expected, tol_abs, tol_rel)
     implicit none
