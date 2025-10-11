@@ -2386,9 +2386,10 @@ end subroutine hoppetStrFctNoMu
 !! @param[in]       iflav      parton flavour
 !! @return          an array of all structure functions summed over orders decomposed in flavour
 !!
-subroutine hoppetStrFctNoMuFlav(x, Q, res) 
+subroutine hoppetStrFctNoMuFlav(x, Q, iflav, res)
   use streamlined_interface; use structure_functions
   real(dp) :: x, Q
+  integer :: iflav
   real(dp) :: res(1:3)
   
   res = StrFct_flav(x, Q, iflav = iflav)
