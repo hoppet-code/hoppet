@@ -1,11 +1,10 @@
 module hoppet_version
   implicit none
   private
-  !! when updating the version number, remember to do this also in 
-  !! CMakeLists.txt and in the documentation.
-  character(len=*), parameter :: private_version_string = "2.0.0-devel"
+  ! DO NOT EDIT the next line -- it is modified automatically by scripts/set-version.sh
+  character(len=*), parameter :: private_version_string = "2.0.1-devel"
 
-  public :: HoppetVersion
+public :: HoppetVersion
 
 contains  
 

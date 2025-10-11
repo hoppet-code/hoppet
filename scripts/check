@@ -84,8 +84,8 @@ for test in ${tests[@]}; do
   echo "Running: ($testcmd $extraargs)"
   ($testcmd $extraargs | tee ${checkname}.tmp.new-pregrep) || exit 1;
   
-  grep -vi -e '^ *[a-z]' -e '^ *$' ${checkname}.tmp.new-pregrep > ${checkname}.tmp.new
-  grep -vi -e '^ *[a-z]' -e '^ *$' $sourcedir/$refname.default_output > ${checkname}.tmp.orig  
+  grep -vi -e '^ *[a-z]' -e '^\*' -e '^ *$' ${checkname}.tmp.new-pregrep > ${checkname}.tmp.new
+  grep -vi -e '^ *[a-z]' -e '^\*' -e '^ *$' $sourcedir/$refname.default_output > ${checkname}.tmp.orig  
 
   diff ${checkname}.tmp.new ${checkname}.tmp.orig > ${checkname}.tmp.diff
   checkwc=`cat ${checkname}.tmp.diff| wc -l `

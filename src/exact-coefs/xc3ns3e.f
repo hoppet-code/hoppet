@@ -34,7 +34,7 @@
 *
 * ..The soft-gluon coefficients for use in X3NS3B and X3NS3C
 *
-       COMMON / C3SOFT / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5 
+       COMMON / C3SOFTN3LO / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5 
 
        CF  = 4./3.D0
        CA  = 3.D0
@@ -150,7 +150,7 @@
 *
 * ..The soft-gluon coefficients for use in X3NS3B and X3NS3C
 *
-       COMMON / C3SOFT / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5 
+       COMMON / C3SOFTN3LO / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5 
 *
 * ...Colour factors
 *
@@ -1570,7 +1570,7 @@ c    ,                         -223./4800.d0)
        IMPLICIT REAL*8 (A - Z)
        INTEGER NF
 *
-       COMMON / C3SOFT / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5
+       COMMON / C3SOFTN3LO / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5
 *
        DL1 = DL1VAL(Y, DL) !LOG (1.D0-Y)
        DM  = DMVAL(Y, DL) !1.D0/(1.D0-Y)
@@ -1595,7 +1595,7 @@ c    ,                         -223./4800.d0)
      ,             Z4 = 1.0823 23233 71113 81916 D0, 
      ,             Z5 = 1.0369 27755 14336 99263 D0 )
 *
-       COMMON / C3SOFT / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5
+       COMMON / C3SOFTN3LO / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5
 *
 * ...Colour factors
 *

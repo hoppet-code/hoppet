@@ -72,6 +72,7 @@ foreach my $dir (@dirs) {
   print "Creating makefile in ".getcwd."\n";
   # find out what we're already up to
   my $mkmk=`grep -v '^#' mkmk | grep makef95makefile`;
+  $? == 0 or die "Error Could not find makef95makefile line in $dir/mkmk";
   chomp($mkmk);
   $mkmk =~ s/\$[^ ]+//g;
   $mkmk =~ s/-remake.*//;
@@ -91,18 +92,47 @@ foreach my $dir (@dirs) {
 }
 
 # get things ready for the hoppet-config script
-my $version=`grep 'Welcome to' src/welcome_message.f90 | sed -e 's/.*v\. //' -e 's/ .*//'`;
+#my $version=`grep 'Welcome to' src/welcome_message.f90 | sed -e 's/.*v\. //' -e 's/ .*//'`;
+my $version=`grep 'private_version_string *=' src/welcome_message.f90`;# | sed -e 's/.*v\. //' -e 's/ .*//'`;
+$? == 0 or die "ERROR: Could not find version line in src/welcome_message.f90";
 chomp $version;
+$version =~ s/.*?\"//;
+$version =~ s/\".*//;
 $prefix=`cat src/.makef95.prefix`;
+$? == 0 or die "ERROR: Could not find prefix in src/.makef95.prefix";
 chomp $prefix;
 (my $escprefix    = $prefix)    =~ s/\//\\\//g;
 (my $escmodprefix = $modPrefix) =~ s/\//\\\//g;
 system("sed -e 's/\@prefix\@/$escprefix/' -e 's/\@modprefix\@/$escmodprefix/' -e 's/\@VERSION\@/$version/'  scripts/hoppet-config.in > hoppet-config");
+$? == 0 or die "ERROR: Could not create hoppet-config script";
 system("chmod +x hoppet-config");
+$? == 0 or die "ERROR: Could not make hoppet-config executable";
 
 # write a file config.log
-open (LOG,">config.log") || die "Could not open config.log";
+open (LOG,">config.log") || die "ERROR: Could not open config.log";
 print LOG "# the last configure that was run was\n";
 print LOG "$configline\n";
 print LOG "prefix=$prefix\n";
 close LOG;
+
+print "\nHOPPET has been configured for installation in $prefix\n";
+print "You can now type 'make' to compile, and 'make install' to install\n";
+print "You can use the script hoppet-config to find out where things are\n";
+print "You can reconfigure by running this script again\n";
+
+
+my $yellow="\033[0;33m";
+my $grey="\033[1;30m";
+my $blue="\033[0;34m";
+my $nocolor="\033[0m";
+print "${yellow}\n";
+print "WARNING:$nocolor this configure script is DEPRECATED as of version 2.0.0\n";
+print "and will be removed in a future version of HOPPET.\n";
+print "It is provided for backward compatibility only.\n";
+print "You should prefer cmake instead:\n\n";
+print "    make distclean  ${blue}# only if you've already run configure$nocolor\n";
+print "    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/install/path $blue<+optional flags>$nocolor\n";
+print "    cmake build -LH  $blue# to see what extra options are available (e.g. -D...=ON/OFF)$nocolor\n";
+print "    cmake --build  build -j \n";
+print "    ctest --test-dir build  -j4\n";
+print "    cmake --install build\n";

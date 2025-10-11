@@ -43,7 +43,8 @@ program compare2file_v2
      do_help = trim(string_val_arg(1)) == "-h"
   end if
   if (do_help) then
-       write(6,"(a)") "Usage: " // trim(command_line()) // " file1 file2 {-summary | -channel ic [-minerr val] [-maxerr val]} [-protect]"
+       write(6,"(a)") "Usage: " // trim(command_line()) // &
+                      " file1 file2 {-summary | -channel ic [-minerr val] [-maxerr val]} [-protect]"
        write(6,"(a)") ""
        write(6,"(a)") "Arguments:"
        write(6,"(a)") ""

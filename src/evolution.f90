@@ -820,6 +820,7 @@ contains
     if (ev_nloop >= 2) ev_PNLO => dh%P_NLO
     if (ev_nloop >= 3) ev_PNNLO => dh%P_NNLO
     if (ev_nloop >= 4) ev_PN3LO => dh%P_N3LO
+    if (ev_nloop >= 5) call wae_error('ev_evolve: nloop > 4 not yet supported')
 
     call ev_evolveLocal(pdf_ev, Q_init, Q_end, ev_conv)
 
