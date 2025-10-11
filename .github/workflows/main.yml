@@ -82,7 +82,8 @@ jobs:
           cmake -S . -B BUILD  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_USE_EXACT_COEF=ON -DHOPPET_BUILD_PYINTERFACE=ON
           cmake --build BUILD -j
           cmake --install BUILD
-          valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
+          #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
+          valgrind BUILD/unit-tests/hoppet-unit-tests 
           #TMPOFF# ctest --test-dir BUILD -j 2 --output-on-failure
           #TMPOFF# # now try running the python example
           #TMPOFF# python3 example_py/tabulation_example.py
