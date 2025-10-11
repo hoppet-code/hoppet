@@ -400,7 +400,7 @@ extern "C" {
 			const double & Q,
 			const double & muR_in,
 			const double & muF_in,
-			const double & iflav,
+			const int & iflav,
 			double * F);
 
   /// calculate the structure function at x, Q, with muR and muF as
