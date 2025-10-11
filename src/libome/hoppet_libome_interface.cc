@@ -20,6 +20,9 @@ namespace ome {
 }
 
 
+
+
+
 extern "C" {
 
 
@@ -40,8 +43,22 @@ const ome::ome_rpd * ome_AQqPS      = & ome::AQqPS      ;
 const ome::ome_rpd * ome_AqqQNSEven = & ome::AqqQNSEven ; 
 const ome::ome_rpd * ome_AqqQNSOdd  = & ome::AqqQNSOdd  ;  
 const ome::ome_rpd * ome_AqqQPS     = & ome::AqqQPS     ; 
+}
 
+std::string ome_name(const ome::ome_rpd & rpd) {
+  if      (&rpd == ome_AggQ      ) return "AggQ";
+  else if (&rpd == ome_AgqQ      ) return "AgqQ";
+  else if (&rpd == ome_AQg       ) return "AQg";
+  else if (&rpd == ome_AqgQ      ) return "AqgQ";
+  else if (&rpd == ome_AQqPS     ) return "AQqPS";
+  else if (&rpd == ome_AqqQNSEven) return "AqqQNSEven";
+  else if (&rpd == ome_AqqQNSOdd ) return "AqqQNSOdd";
+  else if (&rpd == ome_AqqQPS    ) return "AqqQPS";
+  else return "unknown";
+}
 
+extern "C" {
+  
 /// @brief Evaluate a piece of an OME in a way suitable for HOPPET's standard integrator
 /// @param ptr    pointer to the OME object 
 /// @param y      value of y = ln(1/x)
@@ -61,6 +78,14 @@ double ome_piece_hoppet(const ome::ome_rpd & rpd,
   //const auto & rpd = *static_cast<const ome::rpd_distribution<ome::ome_as_view<double>, ome::ome_as_plus_view<double>, ome::ome_as_const_view<double>>*>(ptr);
   //const auto & rpd = ome::AqqQNSEven;
   //double NF = iNF;
+
+  std::cout << "ome_piece_hoppet called for OME " << ome_name(rpd) 
+            << " with y=" << y 
+            << ", piece=" << piece 
+            << ", order=" << order 
+            << ", LM=" << LM 
+            << ", NF=" << NF 
+            << std::endl;                      
 
   double x = exp(-y);
 
