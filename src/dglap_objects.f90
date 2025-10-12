@@ -956,6 +956,7 @@ contains
     MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
 
+  
   !! Initialise an MTM object using the libome routines of arXiv:2510.02175
   !!
   !! \param grid    The grid to use
@@ -964,6 +965,11 @@ contains
   !! \param LM      log(m^2/mu^2) where m is the heavy quark mass and mu the factorisation scale
   !!
   !! The number of light flavours is the global nf_int-1
+  !!
+  !! The expected relative accuracy on the underlying libOME is at least
+  !! as good as (2048 * epsilon(1.0_dp))~4.5e-13,  which will usually be
+  !! significantly better than the standard global integration precision
+  !! (convolution's DefaultConvolutionEps(), which defaults to 1e-7)
   subroutine InitMTMLibOME(grid, MTM, nloop, LM)
     use iso_c_binding, only: c_double, c_int
     use hoppet_libome_interfaces
