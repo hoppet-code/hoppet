@@ -79,16 +79,21 @@ double ome_piece_hoppet(const ome::ome_rpd & rpd,
   //const auto & rpd = ome::AqqQNSEven;
   //double NF = iNF;
 
-  std::cout.precision(20);
-  std::cout << "ome_piece_hoppet called for OME " << ome_name(rpd) 
-            << " with y=" << y 
-            << ", piece=" << piece 
-            << ", order=" << order 
-            << ", LM=" << LM 
-            << ", NF=" << NF 
-            << std::flush;                      
+  //std::cout.precision(20);
+  //std::cout << "ome_piece_hoppet called for OME " << ome_name(rpd) 
+  //          << " with y=" << y 
+  //          << ", piece=" << piece 
+  //          << ", order=" << order 
+  //          << ", LM=" << LM 
+  //          << ", NF=" << NF 
+  //          << std::flush;                      
 
   double x = exp(-y);
+  // std::cout << ", x=" << x << std::endl;
+  //double res = ome::AggQ_reg[3](0.0, 5.0, 0.62029682477532022133);
+  //double res = ome::AggQ_reg[3][0][0](0.62029682477532022133);
+  //double res = ome::AggQ_reg[3](LM, NF, x);
+  //std::cout << "  test eval res = " << res << std::endl;
 
   //auto regular = [&]()->double {return rpd.has_regular() ? rpd.get_regular().value()(order, LM, NF, x) : 0.0;};
   //auto plus    = [&]()->double {return rpd.has_plus()    ? rpd.get_plus().value()(order, LM, NF, x) : 0.0;};
@@ -144,7 +149,7 @@ double ome_piece_hoppet(const ome::ome_rpd & rpd,
     return 0.0;
   }
 
-  std::cout << "  result = " << result << std::endl;
+  //std::cout << "  result = " << result << std::endl;
   if (piece != hoppet::cc_DELTA) {
     result *= x;
   }

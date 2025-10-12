@@ -23,6 +23,11 @@ contains
 
     if (.not. do_test("test_libome_interface")) return
 
+    ! !y=0.46058326383423536798_dp, piece=1, order=3, LM=0, NF=5, NF=3
+    ! res_reg = ome_piece_hoppet(AggQ_ptr, y=0.4775571658694307553_dp, piece=1, order=3, LM=0.0_dp, NF=5.0_dp)
+    ! write(6,*) "res reg = ", res_reg
+    ! return
+
     ! Example values for testing
     as4pi = 0.1_dp
     LM    = 10._dp
@@ -30,12 +35,12 @@ contains
     x     = 0.1_dp
 
     ! check all 3rd order entries from table2 of https://arxiv.org/pdf/2510.02175
-    call sum_check("AqqQNSEven_reg" ,    6.4686126472_dp , AqqQNSEven_ptr , reg, 3)
-    call sum_check("AqqQNSEven_plus" ,  -4.7428175642_dp , AqqQNSEven_ptr , plus, 3)
+    call sum_check("AqqQNSEven_reg" ,    6.4686126472_dp , AqqQNSEven_ptr , reg,   3)
+    call sum_check("AqqQNSEven_plus" ,  -4.7428175642_dp , AqqQNSEven_ptr , plus,  3)
     call sum_check("AqqQNSEven_delta" , -2.6422012017_dp , AqqQNSEven_ptr , delta, 3)
 
-    call sum_check("AqqQNSOdd_reg" ,    6.6927772815_dp  , AqqQNSOdd_ptr , reg, 3)
-    call sum_check("AqqQNSOdd_plus" ,  -4.7428175642_dp  , AqqQNSOdd_ptr , plus, 3)
+    call sum_check("AqqQNSOdd_reg" ,    6.6927772815_dp  , AqqQNSOdd_ptr , reg,   3)
+    call sum_check("AqqQNSOdd_plus" ,  -4.7428175642_dp  , AqqQNSOdd_ptr , plus,  3)
     call sum_check("AqqQNSOdd_delta" , -2.6422012017_dp  , AqqQNSOdd_ptr , delta, 3)
 
     call sum_check("AggQ_reg" ,   -262.65714922_dp   , AggQ_ptr , reg, 3)
