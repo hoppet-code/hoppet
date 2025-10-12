@@ -104,9 +104,13 @@ module hoppet_libome_interfaces
   !! Derived type implementing the conv_ignd abstract type
   !! using the libome library.
   !!
-  !! Initialise an object as conv_OME(A..._ptr, order). It will use the
-  !! global nf value from the qcd module, and LM=0 unless explicitly
-  !! set
+  !! Initialise an object as conv_OME(A..._ptr, order, ...) with
+  !! parameters as follows
+  !!
+  !! \param ptr      pointer to one of the A..._ptr objects above
+  !! \param order    the order in alphas to use (0,1,2,3)
+  !! \param nf_light if >0, use this number of light flavours, otherwise the global nf-1 (defaults to global)
+  !! \param LM       the LM value to use (default 0.0)  
   !!
   !! Example usage:
   !!
@@ -116,6 +120,7 @@ module hoppet_libome_interfaces
   type, extends(conv_ignd) :: conv_OME
     type(c_ptr)    :: ptr                !< pointer to one of the A[...]_ptr objects
     integer(c_int) :: order              !< the order in alphas    
+    real(c_double) :: nf_light = -1.0_c_double !< if >0, use this nf instead of the one from qcd module
     real(c_double) :: LM = 0.0_c_double  !< the LM value to use (mainly for testing)
   contains
     procedure :: f => conv_OME__f !< f(y,piece) function
@@ -133,7 +138,11 @@ contains
     integer , intent(in) :: piece
     real(c_double) :: res, nf_c, lm_c
 
-    nf_c = real(nf, c_double)
+    if (this%nf_light > 0.0_c_double) then
+      nf_c = this%nf_light
+    else
+      nf_c = real(nf, c_double) - 1.0_c_double ! subtract 1 to get number of light flavours, as per hoppet convention
+    end if
     lm_c = real(0.0_dp, c_double)
 
     ! Call the ome_piece_hoppet function with the stored pointer and order

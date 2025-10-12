@@ -133,6 +133,7 @@ module dglap_objects
     module procedure InitMTM_from_MTM
   end interface
   public :: InitMTM, InitMTMNNLO, InitMTMN3LO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
+  public :: InitMTMLibOME
   public :: SetMassSchemeMTM
   
   !-------- things for splitting functions --------------------
@@ -954,6 +955,59 @@ contains
     !-- by default 
     MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
+
+  !! Initialise an MTM object using the libome routines of arXiv:2510.02175
+  !!
+  !! \param grid    The grid to use
+  !! \param MTM     The MTM object to initialise
+  !! \param nloop   The perturbative nloops; libOME order = nloop-1 = # of powers of alpha_s
+  !! \param LM      log(m^2/mu^2) where m is the heavy quark mass and mu the factorisation scale
+  !!
+  !! The number of light flavours is the global nf_int-1
+  subroutine InitMTMLibOME(grid, MTM, nloop, LM)
+    use iso_c_binding, only: c_double, c_int
+    use hoppet_libome_interfaces
+    type(grid_def),           intent(in)  :: grid
+    type(mass_threshold_mat), intent(out) :: MTM
+    integer,                  intent(in)  :: nloop
+    real(dp),  optional,      intent(in)  :: LM
+    !-----------
+    real(c_double) :: LM_c, nf_light_d
+    integer(c_int) :: order_c
+    logical, save :: first_time = .true.
+
+    if (first_time) then
+      first_time = .false.
+      write(6,'(a)') 'Initialisation of Mass Threshold Matrices with code from libOME'
+      write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
+      write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
+      write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
+      write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
+    end if
+
+    nf_light_d = real(nf_int-1,c_double)
+    if (present(LM)) then
+       LM_c = real(LM,c_double)
+    else
+       LM_c = zero
+    end if
+    order_c = nloop - 1
+
+    call InitGridConv(grid, MTM%PShq   , conv_OME(AQqPS_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%PShg   , conv_OME(AQg_ptr       , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%PSqq_H , conv_OME(AqqQPS_ptr    , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%NSqq_H , conv_OME(AqqQNSEven_ptr, order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%NSmqq_H, conv_OME(AqqQNSOdd_ptr , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%Sgg_H  , conv_OME(AggQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%Sgq_H  , conv_OME(AgqQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%Sqg_H  , conv_OME(AqgQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+
+    MTM%masses_are_MSbar = .false.
+    MTM%Sgg_H_extra_MSbar_delta = zero
+
+    MTM%loops  = nloop
+    MTM%nf_int = nf_int
+  end subroutine InitMTMLibOME
 
   subroutine InitMTMN3LO(grid,MTM_N3LO)
     type(grid_def),           intent(in)  :: grid

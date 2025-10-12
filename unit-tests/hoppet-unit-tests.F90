@@ -19,6 +19,7 @@ program hoppet_unit_tests
     print *, "  -list-timing        List all available timing names"
     print *, "  -only TEST_GROUP    Run only the specified test group(s) (substring match)"
     print *, "  -verbose            Print a message for each passed test"
+    print *, "  -nloop N            Set the number of loops for hoppet startup (default: 3)"
     stop 0
   end if
   print '(a)', "Running HOPPET unit tests"
@@ -49,6 +50,7 @@ contains
 
   subroutine hoppet_setup()
     use streamlined_interface
+    use dglap_choices
     use pdfs_for_benchmarks
 
     real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
@@ -64,7 +66,8 @@ contains
     Qmax=28000.0_dp
     dlnlnQ = dy/4.0_dp
     ! and number of loops to initialise!
-    nloop = 3
+    nloop = int_val_opt("-nloop", 3)
+    nnlo_nfthreshold_variant = nnlo_nfthreshold_exact
     call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,&
        &         order,factscheme_MSbar)
 
