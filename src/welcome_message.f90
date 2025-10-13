@@ -78,7 +78,7 @@ subroutine HoppetWelcomeMessage
   write(0,'(a)') ' If using it for scientific work, please cite              '
   write(0,'(a)') ' G.P. Salam & J. Rojo, CPC 180(2009)120 (arXiv:0804.3755). '
   write(0,'(a)') ' and A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi      '
-  write(0,'(a)') ' & F. Dreyer (arXiv:2510.XXXXX).                           '
+  write(0,'(a)') ' & F. Dreyer (arXiv:2510.09310).                           '
   write(0,'(a)') ' '
   write(0,'(a)') ' You are also encouraged to cite the original references,  '
   write(0,'(a)') ' for LO, NLO, NNLO, and N3LO splitting functions, the QCD  '
