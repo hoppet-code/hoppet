@@ -961,7 +961,7 @@ contains
   !!
   !! \param grid    The grid to use
   !! \param MTM     The MTM object to initialise
-  !! \param nloop   The perturbative nloops; libOME order = nloop-1 = # of powers of alpha_s
+  !! \param nloop   The perturbative (hoppet) nloops; libOME order = nloop-1 = # of powers of alpha_s
   !! \param LM      log(m^2/mu^2) where m is the heavy quark mass and mu the factorisation scale
   !!
   !! The number of light flavours is the global nf_int-1
@@ -982,37 +982,47 @@ contains
     integer(c_int) :: order_c
     logical, save :: first_time = .true.
 
-    if (first_time) then
-      first_time = .false.
-      write(6,'(a)') 'Initialisation of Mass Threshold Matrices with code from libOME'
-      write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
-      write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
-      write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
-      write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
-    end if
+    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_on) then
 
-    nf_light_d = real(nf_int-1,c_double)
-    if (present(LM)) then
-       LM_c = real(LM,c_double)
-    else
-       LM_c = zero
-    end if
-    order_c = nloop - 1
+       if (first_time) then
+          first_time = .false.
+          write(6,'(a)') 'Initialisation of Mass Threshold Matrices with code from libOME'
+          write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
+          write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
+          write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
+          write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
+       end if
 
-    call InitGridConv(grid, MTM%PShq   , conv_OME(AQqPS_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%PShg   , conv_OME(AQg_ptr       , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%PSqq_H , conv_OME(AqqQPS_ptr    , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%NSqq_H , conv_OME(AqqQNSEven_ptr, order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%NSmqq_H, conv_OME(AqqQNSOdd_ptr , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%Sgg_H  , conv_OME(AggQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%Sgq_H  , conv_OME(AgqQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%Sqg_H  , conv_OME(AqgQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+       write(6,'(a,i1,a,i1)') 'Initialising N3LO mass threshold matrices for nf = ', nf_int-1,' -> ', nf_int
 
-    MTM%masses_are_MSbar = .false.
-    MTM%Sgg_H_extra_MSbar_delta = zero
+       nf_light_d = real(nf_int-1,c_double)
+       if (present(LM)) then
+          LM_c = real(LM,c_double)
+       else
+          LM_c = zero
+       end if
+       order_c = nloop - 1
 
-    MTM%loops  = nloop
-    MTM%nf_int = nf_int
+       call InitGridConv(grid, MTM%PShq   , conv_OME(AQqPS_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
+       call InitGridConv(grid, MTM%PShg   , conv_OME(AQg_ptr       , order=order_c, nf_light=nf_light_d, LM=LM_c))
+       call InitGridConv(grid, MTM%PSqq_H , conv_OME(AqqQPS_ptr    , order=order_c, nf_light=nf_light_d, LM=LM_c))
+       call InitGridConv(grid, MTM%NSqq_H , conv_OME(AqqQNSEven_ptr, order=order_c, nf_light=nf_light_d, LM=LM_c))
+       call InitGridConv(grid, MTM%NSmqq_H, conv_OME(AqqQNSOdd_ptr , order=order_c, nf_light=nf_light_d, LM=LM_c))
+       call InitGridConv(grid, MTM%Sgg_H  , conv_OME(AggQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+       call InitGridConv(grid, MTM%Sgq_H  , conv_OME(AgqQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+       call InitGridConv(grid, MTM%Sqg_H  , conv_OME(AqgQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+
+       MTM%masses_are_MSbar = .false.
+       MTM%Sgg_H_extra_MSbar_delta = zero
+
+       MTM%loops  = nloop
+       MTM%nf_int = nf_int
+
+    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
+       call InitMTMNNLO(grid,MTM) !! dummy initialisation to NNLO, just to get started
+       MTM%loops = 4
+       call Multiply(MTM, zero)
+    endif
   end subroutine InitMTMLibOME
 
   subroutine InitMTMN3LO(grid,MTM_N3LO)
