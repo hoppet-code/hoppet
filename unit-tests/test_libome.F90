@@ -173,14 +173,16 @@ contains
       write(6,*) "Sgq_H    ", gc_moment(dh%allMTM(3,nf_int)%Sgq_H, moment_N), gc_moment(mtm2%Sgq_H, moment_N)
       write(6,*) "Sqg_H    ", gc_moment(dh%allMTM(3,nf_int)%Sqg_H, moment_N), gc_moment(mtm2%Sqg_H, moment_N)
 
-      write(6,*) "PShq     ", gc_moment(dh%allMTM(4,nf_int)%PShq, moment_N), gc_moment(mtm3%PShq, moment_N)
-      write(6,*) "PShg     ", gc_moment(dh%allMTM(4,nf_int)%PShg, moment_N), gc_moment(mtm3%PShg, moment_N)
-      write(6,*) "PSqq_H   ", gc_moment(dh%allMTM(4,nf_int)%PSqq_H, moment_N), gc_moment(mtm3%PSqq_H, moment_N)
-      write(6,*) "NSqq_H   ", gc_moment(dh%allMTM(4,nf_int)%NSqq_H, moment_N), gc_moment(mtm3%NSqq_H, moment_N)
-      write(6,*) "NSmqq_H  ", gc_moment(dh%allMTM(4,nf_int)%NSmqq_H, moment_N), gc_moment(mtm3%NSmqq_H, moment_N)      
-      write(6,*) "Sgg_H    ", gc_moment(dh%allMTM(4,nf_int)%Sgg_H, moment_N), gc_moment(mtm3%Sgg_H, moment_N)
-      write(6,*) "Sgq_H    ", gc_moment(dh%allMTM(4,nf_int)%Sgq_H, moment_N), gc_moment(mtm3%Sgq_H, moment_N)
-      write(6,*) "Sqg_H    ", gc_moment(dh%allMTM(4,nf_int)%Sqg_H, moment_N), gc_moment(mtm3%Sqg_H, moment_N)
+      if (dh%nloop >= 4) then
+        write(6,*) "PShq     ", gc_moment(dh%allMTM(4,nf_int)%PShq, moment_N), gc_moment(mtm3%PShq, moment_N)
+        write(6,*) "PShg     ", gc_moment(dh%allMTM(4,nf_int)%PShg, moment_N), gc_moment(mtm3%PShg, moment_N)
+        write(6,*) "PSqq_H   ", gc_moment(dh%allMTM(4,nf_int)%PSqq_H, moment_N), gc_moment(mtm3%PSqq_H, moment_N)
+        write(6,*) "NSqq_H   ", gc_moment(dh%allMTM(4,nf_int)%NSqq_H, moment_N), gc_moment(mtm3%NSqq_H, moment_N)
+        write(6,*) "NSmqq_H  ", gc_moment(dh%allMTM(4,nf_int)%NSmqq_H, moment_N), gc_moment(mtm3%NSmqq_H, moment_N)      
+        write(6,*) "Sgg_H    ", gc_moment(dh%allMTM(4,nf_int)%Sgg_H, moment_N), gc_moment(mtm3%Sgg_H, moment_N)
+        write(6,*) "Sgq_H    ", gc_moment(dh%allMTM(4,nf_int)%Sgq_H, moment_N), gc_moment(mtm3%Sgq_H, moment_N)
+        write(6,*) "Sqg_H    ", gc_moment(dh%allMTM(4,nf_int)%Sqg_H, moment_N), gc_moment(mtm3%Sqg_H, moment_N)
+      end if
 
       call check_moment("nloop=3, PShq     ", moment_N,   mtm2%PShq   , dh%allMTM(3,nf_int)%PShq   )
       call check_moment("nloop=3, PShg     ", moment_N,   mtm2%PShg   , dh%allMTM(3,nf_int)%PShg   )
