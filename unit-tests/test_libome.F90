@@ -87,12 +87,8 @@ contains
       integer(c_int) :: order
       real(dp) :: as2pi
 
-      ! integer(c_intptr_t) :: addr
-      ! addr = transfer(ptr, addr)
-      ! print '(a,I0)', "Pointer address: ", addr
       as2pi = as4pi * 2.0_dp
       res = 0.0_dp
-      !print '(a)', "Computing sum for ", trim(name), "ptr = ", addr, " piece=", piece
       do order = 0, max_order
         res = res + (as2pi**order) * ome_piece_hoppet(ptr, log(1.0_dp/x), piece, order, LM, nf_light_cdouble)
       end do
@@ -125,20 +121,22 @@ contains
       call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=0, nf_light = nf_light_cdouble, LM=LM)) 
       call AddWithCoeff(A3ggQ, A3piece, as2pi**0)
 
-!      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=1, nf_light = nf_light_cdouble, LM=LM)) 
-!      call AddWithCoeff(A3ggQ, A3piece, as2pi**1)
-!
-!      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=2, nf_light = nf_light_cdouble, LM=LM)) 
-!      call AddWithCoeff(A3ggQ, A3piece, as2pi**2)
-!
-!      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=3, nf_light = nf_light_cdouble, LM=LM)) 
-!      call AddWithCoeff(A3ggQ, A3piece, as2pi**3)
+      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=1, nf_light = nf_light_cdouble, LM=LM)) 
+      call AddWithCoeff(A3ggQ, A3piece, as2pi**1)
+
+      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=2, nf_light = nf_light_cdouble, LM=LM)) 
+      call AddWithCoeff(A3ggQ, A3piece, as2pi**2)
+
+      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=3, nf_light = nf_light_cdouble, LM=LM)) 
+      call AddWithCoeff(A3ggQ, A3piece, as2pi**3)
+
+      moment_N = 2.0_dp
+      moment_res = gc_moment(A3ggQ, moment_N)
+      write(6,*) red//"Moment N=", moment_N, " of 3rd order AggQ OME = ", moment_res,reset
 
       call AllocGridQuant(grid,xfx)
       call AllocGridQuant(grid,res)
 
-      moment_N = 2.0_dp
-      moment_res = gc_moment(A3ggQ, moment_N)
       
       xfx = exp(moment_N*yValues(grid))
       res = A3ggQ * xfx
@@ -149,16 +147,16 @@ contains
       moment_res = gc_moment(A2ggQ, moment_N)
       moment_res2 = gc_moment(dh%allMTM(3,4)%Sgg_H, moment_N)
       write(6,*) "Moment N=", moment_N, " of 2nd order"
-      write(6,*) "  AggQ OME = ", moment_res
-      write(6,*) "  Sgg DGLAP = ", moment_res2
+      write(6,*) "  AggQ OME        = ", moment_res
+      write(6,*) "  dh%allMTM%Sgg_H = ", moment_res2
 
       if (dh%nloop >= 4) then
         call InitGridConv(grid, A3ggQ, conv_OME(AggQ_ptr,order=3, nf_light = nf_light_cdouble, LM=zero))
         moment_res = gc_moment(A3ggQ, moment_N)
         moment_res2 = gc_moment(dh%allMTM(4,4)%Sgg_H, moment_N)
         write(6,*) "Moment N=", moment_N, " of 3rd order"
-        write(6,*) "  AggQ OME = ", moment_res
-        write(6,*) "  Sgg DGLAP = ", moment_res2
+        write(6,*) "  AggQ OME        = ", moment_res
+        write(6,*) "  dh%allMTM%Sgg_H = ", moment_res2
       end if
 
 

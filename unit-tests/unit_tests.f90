@@ -77,8 +77,8 @@ contains
       unit_test_failures = unit_test_failures + 1
     else
       unit_test_successes = unit_test_successes + 1
-      if (verbose) print '(a)', green//"Passed: "//testname//reset//" ans="//&
-                          trim(to_string(answer))//" matches expected="//trim(to_string(expected))//reset
+      if (verbose) print '(a)', green//"Passed: "//testname//reset//" ans = "//&
+                          trim(to_string(answer))//" matches expected = "//trim(to_string(expected))//reset
     end if
   end subroutine check_approx_eq_0d
 

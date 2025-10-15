@@ -143,9 +143,9 @@ contains
     else
       nf_c = real(nf, c_double) - 1.0_c_double ! subtract 1 to get number of light flavours, as per hoppet convention
     end if
-    lm_c = real(0.0_dp, c_double)
+    !lm_c = real(0.0_dp, c_double)
 
     ! Call the ome_piece_hoppet function with the stored pointer and order
-    res = ome_piece_hoppet(this%ptr, y, piece, this%order, lm_c, nf_c)
+    res = ome_piece_hoppet(this%ptr, y, piece, this%order, this%LM, nf_c)
   end function conv_OME__f
 end module hoppet_libome_interfaces
