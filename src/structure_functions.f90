@@ -2246,14 +2246,18 @@ end subroutine hoppetStartStrFct
 subroutine hoppetStartStrFctExtended(order_max, nflav, scale_choice,&
      & constant_mu, param_coefs, wmass, zmass)
   use streamlined_interface; use structure_functions
+  use iso_c_binding
   implicit none
   real(dp), intent(in) :: constant_mu, wmass, zmass
   integer, intent(in)  :: order_max, nflav, scale_choice
-  logical , intent(in) :: param_coefs
+  logical(c_bool) , intent(in) :: param_coefs
+  logical :: param_coefs_f77
   !----------------------------------------------------------------------
 
-call StartStrFct(order_max, nflav, scale_choice, constant_mu,&
-     & param_coefs, wmass, zmass)
+  ! Need to convert the c_bool to a fortran bool before passing it
+  param_coefs_f77 = merge(.true._1, .false._1, param_coefs)
+  call StartStrFct(order_max, nflav, scale_choice, constant_mu,&
+     & param_coefs_f77, wmass, zmass)
   
 end subroutine hoppetStartStrFctExtended
 
@@ -2274,12 +2278,16 @@ end subroutine hoppetStartStrFctExtended
 !!
 subroutine hoppetInitStrFct(order, separate_orders, xR, xF)
   use streamlined_interface; use structure_functions
+  use iso_c_binding
   implicit none
   integer, intent(in) :: order
-  logical, intent(in) :: separate_orders
+  logical(c_bool), intent(in) :: separate_orders
+  logical :: separate_orders_f77
   real(dp), intent(in) :: xR, xF
-  
-  call InitStrFct(order, separate_orders, xR, xF, .false.)
+
+  ! Need to convert the c_bool to a fortran bool before passing it
+  separate_orders_f77 = merge(.true._1, .false._1, separate_orders)
+  call InitStrFct(order, separate_orders_f77, xR, xF, .false.)
 
 end subroutine hoppetInitStrFct
 
@@ -2300,12 +2308,16 @@ end subroutine hoppetInitStrFct
 !!
 subroutine hoppetInitStrFctFlav(order, separate_orders, xR, xF)
   use streamlined_interface; use structure_functions
+  use iso_c_binding
   implicit none
   integer, intent(in) :: order
-  logical, intent(in) :: separate_orders
+  logical(c_bool), intent(in) :: separate_orders
+  logical :: separate_orders_f77
   real(dp), intent(in) :: xR, xF
   
-  call InitStrFct(order, separate_orders, xR, xF, .true.)
+  ! Need to convert the c_bool to a fortran bool before passing it
+  separate_orders_f77 = merge(.true._1, .false._1, separate_orders)
+  call InitStrFct(order, separate_orders_f77, xR, xF, .true.)
 
 end subroutine hoppetInitStrFctFlav
 
