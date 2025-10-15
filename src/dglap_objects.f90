@@ -133,7 +133,7 @@ module dglap_objects
     module procedure InitMTM_from_MTM
   end interface
   public :: InitMTM, InitMTMNNLO, InitMTMN3LO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
-  public :: InitMTMLibOME
+  public :: InitMTMLibOME, InitMTMN3LOExactFortran
   public :: SetMassSchemeMTM
   
   !-------- things for splitting functions --------------------
@@ -956,6 +956,33 @@ contains
     MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
 
+  !! Initialise an N3LO MTM object based on the choice in 
+  !! the global variable n3lo_nfthreshold
+  subroutine InitMTMN3LO(grid,MTM_N3LO)
+    type(grid_def),           intent(in)  :: grid
+    type(mass_threshold_mat), intent(out) :: MTM_N3LO
+    integer, save :: nwarn_n3lo_nfthreshold = 1
+
+    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME) then
+      call InitMTMLibOME(grid,MTM_N3LO,nloop=4)
+
+    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_exact_fortran) then
+      call InitMTMN3LOExactFortran(grid,MTM_N3LO)
+
+    else if (n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
+      call InitMTMNNLO(grid,MTM_N3LO) !! dummy initialisation to NNLO, just to get started
+      MTM_N3LO%loops = 4
+      call Multiply(MTM_N3LO, zero)
+
+      call wae_warn(nwarn_n3lo_nfthreshold, 'InitMTMN3LO: n3lo_nfthreshold = off not recommended for nloop=4')
+
+    else
+      call wae_error('InitMTMN3LO', 'Unknown n3lo_threshold_variant',&
+           &intval=n3lo_nfthreshold)
+    end if
+
+  end subroutine InitMTMN3LO
+
 
   !! Initialise an MTM object using the libome routines of arXiv:2510.02175
   !!
@@ -982,50 +1009,45 @@ contains
     integer(c_int) :: order_c
     logical, save :: first_time = .true.
 
-    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_on) then
+    if (first_time) then
+      first_time = .false.
+      write(6,'(a)') 'Initialisation of Mass Threshold Matrices with code from libOME'
+      write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
+      write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
+      write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
+      write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037), https://gitlab.com/libome/libome'
+    end if
 
-       if (first_time) then
-          first_time = .false.
-          write(6,'(a)') 'Initialisation of Mass Threshold Matrices with code from libOME'
-          write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
-          write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
-          write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
-          write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
-       end if
+    nf_light_d = real(nf_int-1,c_double)
+    if (present(LM)) then
+      LM_c = real(LM,c_double)
+    else
+      LM_c = zero
+    end if
+    order_c = nloop - 1
 
-       write(6,'(a,i1,a,i1)') 'Initialising N3LO mass threshold matrices for nf = ', nf_int-1,' -> ', nf_int
+    call InitGridConv(grid, MTM%PShq   , conv_OME(AQqPS_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%PShg   , conv_OME(AQg_ptr       , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%PSqq_H , conv_OME(AqqQPS_ptr    , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%NSqq_H , conv_OME(AqqQNSEven_ptr, order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%NSmqq_H, conv_OME(AqqQNSOdd_ptr , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%Sgg_H  , conv_OME(AggQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%Sgq_H  , conv_OME(AgqQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%Sqg_H  , conv_OME(AqgQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
 
-       nf_light_d = real(nf_int-1,c_double)
-       if (present(LM)) then
-          LM_c = real(LM,c_double)
-       else
-          LM_c = zero
-       end if
-       order_c = nloop - 1
+    ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
+    ! to be there to avoid errors in the code.
+    call InitGridConv(grid, MTM%PShg_MSbar)
+    MTM%masses_are_MSbar = .false.
+    MTM%Sgg_H_extra_MSbar_delta = zero
 
-       call InitGridConv(grid, MTM%PShq   , conv_OME(AQqPS_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
-       call InitGridConv(grid, MTM%PShg   , conv_OME(AQg_ptr       , order=order_c, nf_light=nf_light_d, LM=LM_c))
-       call InitGridConv(grid, MTM%PSqq_H , conv_OME(AqqQPS_ptr    , order=order_c, nf_light=nf_light_d, LM=LM_c))
-       call InitGridConv(grid, MTM%NSqq_H , conv_OME(AqqQNSEven_ptr, order=order_c, nf_light=nf_light_d, LM=LM_c))
-       call InitGridConv(grid, MTM%NSmqq_H, conv_OME(AqqQNSOdd_ptr , order=order_c, nf_light=nf_light_d, LM=LM_c))
-       call InitGridConv(grid, MTM%Sgg_H  , conv_OME(AggQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
-       call InitGridConv(grid, MTM%Sgq_H  , conv_OME(AgqQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
-       call InitGridConv(grid, MTM%Sqg_H  , conv_OME(AqgQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    MTM%loops  = nloop
+    MTM%nf_int = nf_int
 
-       MTM%masses_are_MSbar = .false.
-       MTM%Sgg_H_extra_MSbar_delta = zero
-
-       MTM%loops  = nloop
-       MTM%nf_int = nf_int
-
-    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
-       call InitMTMNNLO(grid,MTM) !! dummy initialisation to NNLO, just to get started
-       MTM%loops = 4
-       call Multiply(MTM, zero)
-    endif
   end subroutine InitMTMLibOME
 
-  subroutine InitMTMN3LO(grid,MTM_N3LO)
+
+  subroutine InitMTMN3LOExactFortran(grid,MTM_N3LO)
     type(grid_def),           intent(in)  :: grid
     type(mass_threshold_mat), intent(out) :: MTM_N3LO
     logical, save :: first_time = .true.
@@ -1033,63 +1055,56 @@ contains
     !! 203 uses just one extreme one and is faster while giving consistent results
     integer, parameter :: ord3 = 203 
     
-    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_on) then
-      
-      if (first_time) then
-         write(6,'(a)') 'Initialisation of Mass Threshold Matrices at N3LO. The paper'
-         write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
-         write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
-         write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
-         write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
-         write(6,'(a)') '* shall be cited at any use. Corresponding code from J. Bluemlein, March 19 2024 and '
-         write(6,'(a)') '* K. Schönwald, March 15 2024, including results from arXiv:2207.00027, arXiv:2403.00513'
-         write(6,'(a)') '*'
-         write(6,'(a)') "The initialisation could take up to a minute, depending on the machine."
-         first_time = .false.
-      end if
-      
-      write(6,'(a,i1,a,i1)') 'Initialising N3LO mass threshold matrices for nf = ', nf_int-1,' -> ', nf_int
-      call InitGridConv(grid, MTM_N3LO%PShq  , JB( PS, null(), null(), order=ord3))
-      call AddWithCoeff(      MTM_N3LO%PShq  , JB(APS, null(), null(), order=  3))
-      
-      call InitGridConv(grid, MTM_N3LO%PShg  , JB( QG, null(), null(), order=ord3))
-      call AddWithCoeff(      MTM_N3LO%PShg  , JB(AQGtotal, null(), null(), order=  3)) ! The full thing
-      !
-      call InitGridConv(grid, MTM_N3LO%PSqq_H, JB(PSL, null(), null(), order=ord3))
-      !! there is no APSL, all is included in PSL
+    if (first_time) then
+        write(6,'(a)') 'Initialisation of Mass Threshold Matrices at N3LO. The paper'
+        write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
+        write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
+        write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
+        write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
+        write(6,'(a)') '* shall be cited at any use. Corresponding code from J. Bluemlein, March 19 2024 and '
+        write(6,'(a)') '* K. Schönwald, March 15 2024, including results from arXiv:2207.00027, arXiv:2403.00513'
+        write(6,'(a)') '*'
+        write(6,'(a)') "The initialisation could take up to a minute, depending on the machine."
+        first_time = .false.
+    end if
+    
+    write(6,'(a,i1,a,i1)') 'Initialising N3LO mass (exact Fortran) threshold matrices for nf = ', nf_int-1,' -> ', nf_int
+    call InitGridConv(grid, MTM_N3LO%PShq  , JB( PS, null(), null(), order=ord3))
+    call AddWithCoeff(      MTM_N3LO%PShq  , JB(APS, null(), null(), order=  3))
+    
+    call InitGridConv(grid, MTM_N3LO%PShg  , JB( QG, null(), null(), order=ord3))
+    call AddWithCoeff(      MTM_N3LO%PShg  , JB(AQGtotal, null(), null(), order=  3)) ! The full thing
+    !
+    call InitGridConv(grid, MTM_N3LO%PSqq_H, JB(PSL, null(), null(), order=ord3))
+    !! there is no APSL, all is included in PSL
 
-      !
-      call InitGridConv(grid, MTM_N3LO%NSqq_H, JB( NSREG,  NSPLU,  NSDEL, order=ord3))
-      call AddWithCoeff(      MTM_N3LO%NSqq_H, JB(ANSREG, ANSPLU, ANSDEL, order=  3))
+    !
+    call InitGridConv(grid, MTM_N3LO%NSqq_H, JB( NSREG,  NSPLU,  NSDEL, order=ord3))
+    call AddWithCoeff(      MTM_N3LO%NSqq_H, JB(ANSREG, ANSPLU, ANSDEL, order=  3))
 
-      
-      call InitGridConv(grid, MTM_N3LO%NSmqq_H, JB(OREG_znfasLL, OPLUS_znfasLL, ODEL_znfasLL, ord3))
+    
+    call InitGridConv(grid, MTM_N3LO%NSmqq_H, JB(OREG_znfasLL, OPLUS_znfasLL, ODEL_znfasLL, ord3))
 
-      !
-      call InitGridConv(grid, MTM_N3LO%Sgg_H, JB( GGREG,  GGPLU,  GGDEL, order=ord3))
-      call AddWithCoeff(      MTM_N3LO%Sgg_H, JB(AGGREG, AGGPLU, AGGDEL, order=  3))
-      !
-      call InitGridConv(grid, MTM_N3LO%Sgq_H  , JB( GQ, null(), null(), order=ord3))
-      call AddWithCoeff(      MTM_N3LO%Sgq_H  , JB(AGQ, null(), null(), order=  3))
-      !
-      call InitGridConv(grid, MTM_N3LO%Sqg_H  , JB(QGL, null(), null(), order=ord3))
-      ! there is no AQGL, all is included in QGL
-      
-      ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
-      ! to be there to avoid errors in the code.
-      call InitGridConv(grid, MTM_N3LO%PShg_MSbar)
-      MTM_N3LO%masses_are_MSbar = .false.
-      MTM_N3LO%Sgg_H_extra_MSbar_delta = zero
+    !
+    call InitGridConv(grid, MTM_N3LO%Sgg_H, JB( GGREG,  GGPLU,  GGDEL, order=ord3))
+    call AddWithCoeff(      MTM_N3LO%Sgg_H, JB(AGGREG, AGGPLU, AGGDEL, order=  3))
+    !
+    call InitGridConv(grid, MTM_N3LO%Sgq_H  , JB( GQ, null(), null(), order=ord3))
+    call AddWithCoeff(      MTM_N3LO%Sgq_H  , JB(AGQ, null(), null(), order=  3))
+    !
+    call InitGridConv(grid, MTM_N3LO%Sqg_H  , JB(QGL, null(), null(), order=ord3))
+    ! there is no AQGL, all is included in QGL
+    
+    ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
+    ! to be there to avoid errors in the code.
+    call InitGridConv(grid, MTM_N3LO%PShg_MSbar)
+    MTM_N3LO%masses_are_MSbar = .false.
+    MTM_N3LO%Sgg_H_extra_MSbar_delta = zero
 
-      MTM_N3LO%loops = 4
-      MTM_N3LO%nf_int = nf_int
+    MTM_N3LO%loops = 4
+    MTM_N3LO%nf_int = nf_int
 
-    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
-      call InitMTMNNLO(grid,MTM_N3LO) !! dummy initialisation to NNLO, just to get started
-      MTM_N3LO%loops = 4
-      call Multiply(MTM_N3LO, zero)
-    endif
-  end subroutine InitMTMN3LO
+  end subroutine InitMTMN3LOExactFortran
 
   subroutine InitMTM_from_MTM(MTM, MTM_in)
     type(mass_threshold_mat), intent(inout) :: MTM

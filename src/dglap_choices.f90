@@ -42,9 +42,16 @@ module dglap_choices
   integer, parameter, public :: nnlo_nfthreshold_param = -11
   integer, public :: nnlo_nfthreshold_variant = nnlo_nfthreshold_param
 
-  integer, parameter, public :: n3lo_nfthreshold_on  = 1
+  integer, parameter, public :: n3lo_nfthreshold_exact_fortran = 2 !< exact except AQg
+  integer, parameter, public :: n3lo_nfthreshold_libOME = 1        !< C++ expansions, good to 2048*epsilon, https://gitlab.com/libome/libome 
   integer, parameter, public :: n3lo_nfthreshold_off = 0
-  integer, public :: n3lo_nfthreshold = n3lo_nfthreshold_on
+  integer, public :: n3lo_nfthreshold = n3lo_nfthreshold_libOME
+
+  ! define n3lo_nfthreshold_on for compatibility with v2.0.x, split across two
+  ! lines to avoid being caught by NameSelect.pl
+  integer, parameter,&
+        & public :: n3lo_nfthreshold_on = n3lo_nfthreshold_libOME   
+
 
   integer, parameter, public :: factscheme_MSbar    = 1
   integer, parameter, public :: factscheme_DIS      = 2
