@@ -70,7 +70,7 @@ def main(pdf,nloop):
     ax2.yaxis.set_major_formatter(FuncFormatter(h.log_formatter_fn))
 
 
-    ax1.text(0.03,0.93, f"Hoppet v2.0.0, {nloop_names[nloop]} evolution\nymax = 12, dlnlnQ = dy/4", va='top', transform=ax1.transAxes)
+    ax1.text(0.03,0.93, f"Hoppet v2.1.0, {nloop_names[nloop]} evolution\nymax = 12, dlnlnQ = dy/4", va='top', transform=ax1.transAxes)
     #ax1.text(0.03,0.86, "", va='top', transform=ax1.transAxes)
 
     # ax.set_xlim(0,2.5)
@@ -120,7 +120,7 @@ def main(pdf,nloop):
 
     mask = run_stats_oQ2_oY2.dy > 0.035
 
-    ax1.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .acc_guds_xlt07[mask], label='LHAPDF', **styles[4], ls="-")
+    ax1.plot(run_stats_LHAPDF .dy[mask], run_stats_LHAPDF .acc_guds_xlt07[mask], label='LHAPDF v6.5.5', **styles[4], ls="-")
     ax1.plot(run_stats_oQ2_oY2.dy[mask], run_stats_oQ2_oY2.acc_guds_xlt07[mask], label='oY=2, oQ=2', **styles[3], ls="-")
     ax1.plot(run_stats_oQ3_oY3.dy[mask], run_stats_oQ3_oY3.acc_guds_xlt07[mask], label='oY=3, oQ=3', **styles[1], ls="-")
     ax1.plot(run_stats_oQ4_oY4.dy[mask], run_stats_oQ4_oY4.acc_guds_xlt07[mask], label='oY=4, oQ=4', **styles[2], ls="-")
@@ -158,7 +158,7 @@ def main(pdf,nloop):
     ax2.text(0.95,0.95,"M2Pro, gfortran 15.1 (-O3)", va='top',ha='right', transform=ax2.transAxes)
 
     #ax2.yaxis.set_major_formatter(FuncFormatter(h.log_formatter_fn))
-    ax1.text(0.03,0.95, f"Hoppet v2.0.0, {nloop_names[nloop]} evolution\n" +
+    ax1.text(0.03,0.95, f"Hoppet v2.1.0, {nloop_names[nloop]} evolution\n" +
              "ymax = 12, dlnlnQ = dy/4\n[guds, $x<0.7$]", va='top', transform=ax1.transAxes)
     ax1.legend(loc='lower right',markerfirst=False)
     standard_ticks(ax1,ax2)
