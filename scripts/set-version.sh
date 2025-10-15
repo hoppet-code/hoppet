@@ -10,7 +10,7 @@ then
  echo "Usage: scripts/set-version.sh version-number"
  exit
 fi
-
+t
 version=$1
 versionNumber=`echo $version | sed 's/-.*//'`
 # if there is a dash in the version number, take everything afterwards
@@ -34,7 +34,7 @@ checkChanged() {
 bold=$(tput bold)
 normal=$(tput sgr0)
 
-echo ${bold}"------------ Will set FastJet version to $version -----------"${normal}
+echo ${bold}"------------ Will set HOPPET version to $version -----------"${normal}
 echo "versionNumber = $versionNumber"
 echo "versionPreRelease = $versionPreRelease"
 

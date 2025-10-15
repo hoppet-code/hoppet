@@ -1,11 +1,35 @@
 ------------- libome changes --------------------------
 2025-10-15 Gavin + Alexander
 
-	A bunch of changes to enable the use of libOME for the 
-	N3LO mass thresholds
+	A number of changes to enable the use of libOME for the 
+	N3LO mass thresholds. Note this currently breaks the
+	old (./configure) build system, and hoppet must
+	now be linked also with the C++ libraries.
 
 	* submodules/libome-fork: *** ADDED *** 
+	added this fork of https://gitlab.com/libome/libome for the
+	C++ N3LO mass thresholds, provided as high order expansions
+	in x/logx/etc. (2510.02175)
 
+	* src/libome/CMakeLists.txt:            *** ADDED ***
+	* src/libome/hoppet_libome_cxx.cc:      *** ADDED ***
+	* src/libome/hoppet_libome_fortran.f90: *** ADDED ***
+	added fortran and C++ file to interface hoppet to libOME.
+
+	* src/dglap_choices.f90:
+	* src/dglap_objects.f90:
+	added code to to use libOME for the N3LO mass thresholds.
+	That is now the default, and can be controlled with 
+	n3lo_nfthreshold_exact_fortran and n3lo_nfthreshold_libOME
+	settings.
+
+	* unit-tests/CMakeLists.txt:
+	* unit-tests/unit_tests.f90:
+	* unit-tests/hoppet-unit-tests.F90:
+	* unit-tests/test_libome.F90: *** ADDED ***
+	added unit tests to check that libOME agrees with tables
+	2 & 4 from 2510.02175 and that the libOME and exact_fortran
+	N3LO mass thresholds have the same second moment.
 
 	* CMakeLists.txt:
 	* src/welcome_message.f90:
