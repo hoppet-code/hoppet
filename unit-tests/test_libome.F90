@@ -145,8 +145,13 @@ contains
       call check_moment("nloop=3, Sgq_H    ", moment_N,   mtm2%Sgq_H  , dh%allMTM(3,nf_int)%Sgq_H  )
       call check_moment("nloop=3, Sqg_H    ", moment_N,   mtm2%Sqg_H  , dh%allMTM(3,nf_int)%Sqg_H  )
 
+      ! AQg can differ at the 6e-6 relative level; in the fortran OME code, it is the only
+      ! only one that is not exact. It appears to use expansions and, depending on the
+      ! system and optimisation level, one can trigger differences, perhaps because of
+      ! a combination of rounding errors and how they induce adaptive integration fluctuations
+      call check_moment("nloop=4, PShg     ", moment_N,   mtm3%PShg   , mtm3_fortran%PShg, override_tol=1e-5_dp ) 
+      ! all others should be precise.
       call check_moment("nloop=4, PShq     ", moment_N,   mtm3%PShq   , mtm3_fortran%PShq   )
-      call check_moment("nloop=4, PShg     ", moment_N,   mtm3%PShg   , mtm3_fortran%PShg   )
       call check_moment("nloop=4, PSqq_H   ", moment_N,   mtm3%PSqq_H , mtm3_fortran%PSqq_H )
       call check_moment("nloop=4, NSqq_H   ", moment_N,   mtm3%NSqq_H , mtm3_fortran%NSqq_H )
       call check_moment("nloop=4, NSmqq_H  ", moment_N,   mtm3%NSmqq_H, mtm3_fortran%NSmqq_H)      
@@ -156,17 +161,23 @@ contains
 
     end subroutine moment_check
 
-    subroutine check_moment(name, momN, gc_test, gc_ref)
+    subroutine check_moment(name, momN, gc_test, gc_ref, override_tol)
+      use assertions, only : default_or_opt
       use mass_thresholds_n3lo, only : gc_moment
-      character(len=*), intent(in) :: name
-      real(dp), intent(in) :: momN
-      type(grid_conv), intent(in) :: gc_test, gc_ref
+      character(len=*),   intent(in) :: name
+      real(dp),           intent(in) :: momN
+      type(grid_conv),    intent(in) :: gc_test, gc_ref
+      real(dp), optional, intent(in) :: override_tol
+      !--
       real(dp) :: res_test, res_ref
+      real(dp) :: tol
+
+      tol = default_or_opt(1e-7_dp, override_tol)
 
       res_test = gc_moment(gc_test, momN)
       res_ref  = gc_moment(gc_ref, momN)
-      call check_approx_eq(name, answer=res_test, expected = res_ref,&
-                                 tol_abs = 1e-7_dp, tol_rel = 1e-7_dp, tol_choice_or = .true.)
+      call check_approx_eq(name, answer=res_test, expected = res_ref, &
+                                 tol_abs = tol, tol_rel = tol, tol_choice_or = .true.)
     end subroutine check_moment
 
   end subroutine test_libome_interface    
