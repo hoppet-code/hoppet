@@ -956,7 +956,7 @@ contains
     MTM%masses_are_MSbar = .false.
   end subroutine InitMTMNNLO
 
-  
+
   !! Initialise an MTM object using the libome routines of arXiv:2510.02175
   !!
   !! \param grid    The grid to use
@@ -972,7 +972,7 @@ contains
   !! (convolution's DefaultConvolutionEps(), which defaults to 1e-7)
   subroutine InitMTMLibOME(grid, MTM, nloop, LM)
     use iso_c_binding, only: c_double, c_int
-    use hoppet_libome_interfaces
+    use hoppet_libome_fortran
     type(grid_def),           intent(in)  :: grid
     type(mass_threshold_mat), intent(out) :: MTM
     integer,                  intent(in)  :: nloop
