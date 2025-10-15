@@ -27,7 +27,7 @@
 We are grateful to the authors of the N3LO coefficient functions,
 splitting functions and mass threshold terms for providing their code. 
 
-The updates are documented in https://arxiv.org/abs/2510.xxxxx.
+The updates are documented in https://arxiv.org/abs/2510.09310.
 
 ## Backwards incompatible changes
 

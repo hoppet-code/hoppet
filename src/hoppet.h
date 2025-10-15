@@ -400,14 +400,14 @@ extern "C" {
 			const double & Q,
 			const double & muR_in,
 			const double & muF_in,
-			const double & iflav,
+			const int & iflav,
 			double * F);
 
   /// calculate the structure function at x, Q, with muR and muF as
   /// requested in hoppetStartStrFct. This is the sum over all orders
   void hoppetStrFctNoMuFlav(const double & x,
 			    const double & Q,
-			    const double & iflav,
+			    const int & iflav,
 			    double * F);
 
   /// F_LO
