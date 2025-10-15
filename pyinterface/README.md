@@ -64,11 +64,5 @@ Comput. Phys. Commun. 180 (2009) 120-156, [arXiv:0804.3755](https://arxiv.org/ab
 
 and                                                       
 
-A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer [arXiv:2509.XXXXX](https://arxiv.org/abs/2509.XXXXX). 
+A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer [arXiv:2510.09310](https://arxiv.org/abs/2510.09310). 
 
-## Version numbering
-
-A version number `X.Y.Z.a` means that the interface uses hoppet version
-`X.Y.Z`. The `.a` part of the version number gets incremented when the
-Python pip package and/or wheels are updated, but the underlying hoppet
-code stays the same. 
