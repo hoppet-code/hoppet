@@ -25,18 +25,13 @@ contains
 
     if (.not. do_test("test_libome_interface")) return
 
-    ! !y=0.46058326383423536798_dp, piece=1, order=3, LM=0, NF=5, NF=3
-    ! res_reg = ome_piece_hoppet(AggQ_ptr, y=0.4775571658694307553_dp, piece=1, order=3, LM=0.0_dp, NF=5.0_dp)
-    ! write(6,*) "res reg = ", res_reg
-    ! return
-
     ! Example values for testing
     as4pi = 0.1_dp
     LM    = 10._dp
     nf_light_cdouble    = 3.0_dp
     x     = 0.1_dp
 
-    ! check all 3rd order entries from table2 of https://arxiv.org/pdf/2510.02175
+    ! check all 3rd order entries from table 2 of https://arxiv.org/pdf/2510.02175
     call sum_check("AqqQNSEven_reg" ,    6.4686126472_dp , AqqQNSEven_ptr , reg,   3)
     call sum_check("AqqQNSEven_plus" ,  -4.7428175642_dp , AqqQNSEven_ptr , plus,  3)
     call sum_check("AqqQNSEven_delta" , -2.6422012017_dp , AqqQNSEven_ptr , delta, 3)
@@ -132,80 +127,14 @@ contains
       use convolution
       use streamlined_interface
       use mass_thresholds_n3lo
-      type(grid_conv) :: A2ggQ, A3ggQ, A3piece
-      real(dp), pointer :: xfx(:), res(:)
-      real(dp) :: moment_N, moment_res, moment_res2
+      real(dp) :: moment_N
       type(mass_threshold_mat) :: mtm2, mtm3
-
-      real(dp) :: as2pi
-      call qcd_SetNf(int(nf_light_cdouble)+1)
-      call SetNfDglapHolder(dh,int(nf_light_cdouble)+1)
-      as2pi = as4pi * 2.0_dp
-      call InitGridConv(grid, A3ggQ) ! initialises to zero
-
-      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=0, nf_light = nf_light_cdouble, LM=LM)) 
-      call AddWithCoeff(A3ggQ, A3piece, as2pi**0)
-
-      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=1, nf_light = nf_light_cdouble, LM=LM)) 
-      call AddWithCoeff(A3ggQ, A3piece, as2pi**1)
-
-      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=2, nf_light = nf_light_cdouble, LM=LM)) 
-      call AddWithCoeff(A3ggQ, A3piece, as2pi**2)
-
-      call InitGridConv(grid, A3piece, conv_OME(AggQ_ptr,order=3, nf_light = nf_light_cdouble, LM=LM)) 
-      call AddWithCoeff(A3ggQ, A3piece, as2pi**3)
-
-      moment_N = 2.0_dp
-      moment_res = gc_moment(A3ggQ, moment_N)
-      write(6,*) "Moment N=", moment_N, " of 3rd order AggQ OME = ", moment_res
-
-      call AllocGridQuant(grid,xfx)
-      call AllocGridQuant(grid,res)
-
-      
-      xfx = exp(moment_N*yValues(grid))
-      res = A3ggQ * xfx
-      moment_res = res(grid%ny) / xfx(grid%ny)
-      write(6,*) "Moment N=", moment_N, " of 3rd order AggQ OME = ", moment_res
-
-      call InitGridConv(grid, A2ggQ, conv_OME(AggQ_ptr,order=2, LM=zero))
-      moment_res = gc_moment(A2ggQ, moment_N)
-      moment_res2 = gc_moment(dh%allMTM(3,4)%Sgg_H, moment_N)
-      write(6,*) "Moment N=", moment_N, " of 2nd order"
-      write(6,*) "  AggQ OME        = ", moment_res
-      write(6,*) "  dh%allMTM%Sgg_H = ", moment_res2
-
-      if (dh%nloop >= 4) then
-        call InitGridConv(grid, A3ggQ, conv_OME(AggQ_ptr,order=3, nf_light = nf_light_cdouble, LM=zero))
-        moment_res = gc_moment(A3ggQ, moment_N)
-        moment_res2 = gc_moment(dh%allMTM(4,4)%Sgg_H, moment_N)
-        write(6,*) "Moment N=", moment_N, " of 3rd order"
-        write(6,*) "  AggQ OME        = ", moment_res
-        write(6,*) "  dh%allMTM%Sgg_H = ", moment_res2
-      end if
 
 
       call InitMTMLibOME(grid, mtm2, nloop=3)
       call InitMTMLibOME(grid, mtm3, nloop=4)
-      write(6,*) "PShq     ", gc_moment(dh%allMTM(3,nf_int)%PShq, moment_N), gc_moment(mtm2%PShq, moment_N)
-      write(6,*) "PShg     ", gc_moment(dh%allMTM(3,nf_int)%PShg, moment_N), gc_moment(mtm2%PShg, moment_N)
-      write(6,*) "PSqq_H   ", gc_moment(dh%allMTM(3,nf_int)%PSqq_H, moment_N), gc_moment(mtm2%PSqq_H, moment_N)
-      write(6,*) "NSqq_H   ", gc_moment(dh%allMTM(3,nf_int)%NSqq_H, moment_N), gc_moment(mtm2%NSqq_H, moment_N)
-      write(6,*) "NSmqq_H  ", gc_moment(dh%allMTM(3,nf_int)%NSmqq_H, moment_N), gc_moment(mtm2%NSmqq_H, moment_N)      
-      write(6,*) "Sgg_H    ", gc_moment(dh%allMTM(3,nf_int)%Sgg_H, moment_N), gc_moment(mtm2%Sgg_H, moment_N)
-      write(6,*) "Sgq_H    ", gc_moment(dh%allMTM(3,nf_int)%Sgq_H, moment_N), gc_moment(mtm2%Sgq_H, moment_N)
-      write(6,*) "Sqg_H    ", gc_moment(dh%allMTM(3,nf_int)%Sqg_H, moment_N), gc_moment(mtm2%Sqg_H, moment_N)
 
-      if (dh%nloop >= 4) then
-        write(6,*) "PShq     ", gc_moment(dh%allMTM(4,nf_int)%PShq, moment_N), gc_moment(mtm3%PShq, moment_N)
-        write(6,*) "PShg     ", gc_moment(dh%allMTM(4,nf_int)%PShg, moment_N), gc_moment(mtm3%PShg, moment_N)
-        write(6,*) "PSqq_H   ", gc_moment(dh%allMTM(4,nf_int)%PSqq_H, moment_N), gc_moment(mtm3%PSqq_H, moment_N)
-        write(6,*) "NSqq_H   ", gc_moment(dh%allMTM(4,nf_int)%NSqq_H, moment_N), gc_moment(mtm3%NSqq_H, moment_N)
-        write(6,*) "NSmqq_H  ", gc_moment(dh%allMTM(4,nf_int)%NSmqq_H, moment_N), gc_moment(mtm3%NSmqq_H, moment_N)      
-        write(6,*) "Sgg_H    ", gc_moment(dh%allMTM(4,nf_int)%Sgg_H, moment_N), gc_moment(mtm3%Sgg_H, moment_N)
-        write(6,*) "Sgq_H    ", gc_moment(dh%allMTM(4,nf_int)%Sgq_H, moment_N), gc_moment(mtm3%Sgq_H, moment_N)
-        write(6,*) "Sqg_H    ", gc_moment(dh%allMTM(4,nf_int)%Sqg_H, moment_N), gc_moment(mtm3%Sqg_H, moment_N)
-      end if
+      moment_N = 2.0_dp
 
       call check_moment("nloop=3, PShq     ", moment_N,   mtm2%PShq   , dh%allMTM(3,nf_int)%PShq   )
       call check_moment("nloop=3, PShg     ", moment_N,   mtm2%PShg   , dh%allMTM(3,nf_int)%PShg   )
@@ -264,7 +193,9 @@ contains
     call qcd_SetNf(int(nf_light_cdouble)+1)
     as2pi = as4pi * 2.0_dp
 
-    call InitGridDef(grid_bigy, dy=0.02_dp, ymax=24.0_dp, order=-6) ! big y range to get good accuracy for low moments
+    ! set up a grid with a big y range to get good accuracy for low moments
+    ! and with a small dy to get good accuracy for high moments
+    call InitGridDef(grid_bigy, dy=0.02_dp, ymax=24.0_dp, order=-6)
 
     call check_moment_sum("AqqQNSEven", AqqQNSEven_ptr, &
                           moment_Ns=[2,4,6], &
