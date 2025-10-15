@@ -6,27 +6,11 @@ module test_convolution
   use unit_tests  
   implicit none
 
-  !procedure(ig_func), bind(C, name="pqq_c") :: pqq_c
-
-  !interface
-  !  function pqq_c(x) bind(C, name="pqq_c") result(res)
-  !    use iso_c_binding, only: c_double
-  !    real(c_double), intent(in) :: x
-  !    real(c_double) :: res
-  !  end function pqq_c
-  !end interface
-  !procedure(ig_func), bind(C, name="pqq_c") :: pqq_c
-  !procedure(ig_func), bind(C, name="xpqqy_c") :: xpqqy_c
-
-!  interface; \
-!    function CAT(NAME,_c)(x) result(func) bind(C, name=CAT(NAME,_c)) \
-!      use iso_c_binding; real(c_double), value :: x; real(c_double) :: func; \
-!    end function; \
-!  end interface; 
-
+  ! common objects that will be allocated once and then
+  ! reused in the various tests
   real(dp), pointer :: xq(:), xq_conv1(:), xq_conv2(:)
 
-      
+  ! interface to the C functions we want to test
   abstract interface
     function ig_func_c(x) result(func) bind(C)
       use iso_c_binding, only: c_double
@@ -36,20 +20,28 @@ module test_convolution
   end interface
   public :: ig_func_c
 
-
-  procedure(ig_func_c), bind(C, name="pqq_c") :: pqq_c
+  procedure(ig_func_c), bind(C, name="pqq_c"  ) :: pqq_c
   procedure(ig_func_c), bind(C, name="xpqqy_c") :: xpqqy_c
   
+  ! a wrapper that converts from dp to c_double and back;
+  ! on most systems this is a redundant copy, but it is the
+  ! recommended way to work when interfacing with C
+  !
+  ! (actual use is below in the "contains" section)
 #define MAKE_WRAPPER(NAME) \
   function CAT(NAME,_wrapper)(x) result(func); \
     use iso_c_binding, only: c_double; \
-    real(dp), intent(in) :: x; real(dp) :: func; \
+    real(dp), intent(in) :: x; \
+    real(dp) :: func; \
     func = real(CAT(NAME,_c)(real(x,c_double)),dp); \
   end function
 
-  !MAKE_WRAPPER(xpqqy)
 
 contains
+
+  MAKE_WRAPPER(pqq)
+  MAKE_WRAPPER(xpqqy)
+
 
   subroutine test_InitGridConv()
     real(dp) :: res
@@ -63,6 +55,7 @@ contains
     call test_mvv_interfaces()
 
     if (.not. do_test("test_InitGridConv")) return
+
     ! first a test that the integrating a simple function works fine
     block
       real(dp) :: aa= 0.1_dp, bb= 0.8_dp
@@ -70,6 +63,8 @@ contains
       call check_approx_eq("test_InitGridConv-pqq_c-int", res, pqq_int_res(aa,bb), 1e-10_dp)
     end block
 
+    ! now a test of InitGridConv with a simple C++ function for Pqq,
+    ! comparing to the standard LO result that we have in the DGLAP holder
     block
       type(grid_conv) :: pqq_gc
       call InitGridConv(grid, pqq_gc, xpqqy_wrapper)
@@ -100,8 +95,6 @@ contains
 
   end subroutine test_InitGridConv
 
-  MAKE_WRAPPER(pqq)
-  MAKE_WRAPPER(xpqqy)
 
 
   !! Routines to test the mvv_splitting_function type

@@ -11,7 +11,7 @@ set(UNIT_TEST_SOURCES ${UNIT_TEST_SOURCES} test_convolution_C.cc)
 add_executable(hoppet-unit-tests ${UNIT_TEST_SOURCES} ../benchmarking/io_utils.f90)
 target_include_directories(hoppet-unit-tests PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(hoppet-unit-tests hoppet_static)
-add_test(NAME hoppet-unit-tests COMMAND hoppet-unit-tests)
+add_test(NAME hoppet-unit-tests-takes-up-to-10s COMMAND hoppet-unit-tests)
 
 # Ensure the Fortran linker is used when this target contains C++ sources
 # (so the Fortran runtime/main are properly linked). Without this CMake may
