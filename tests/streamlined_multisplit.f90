@@ -3,7 +3,7 @@
 ! with multiple splitting functions
 program streamlined_multisplit
   use streamlined_interface
-  use dummy_pdfs
+  use pdfs_for_benchmarks
   implicit none
   real(dp) :: dy
   integer  :: nloop
@@ -114,7 +114,7 @@ contains
     Q0alphas = sqrt(2.0_dp)
     muR_Q = 1.0_dp
     Q0pdf = Q0alphas
-    call hoppetEvolve(asQ, Q0alphas, nloop, muR_Q, lha_unpolarized_dummy_pdf, Q0pdf)
+    call hoppetEvolve(asQ, Q0alphas, nloop, muR_Q, benchmark_pdf_unpolarized_lha, Q0pdf)
 
     call AllocPDF(grid, pdf)
     call AllocPDF(grid, pdfconv)

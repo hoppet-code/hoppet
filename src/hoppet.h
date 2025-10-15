@@ -407,7 +407,7 @@ extern "C" {
   /// requested in hoppetStartStrFct. This is the sum over all orders
   void hoppetStrFctNoMuFlav(const double & x,
 			    const double & Q,
-			    const double & iflav,
+			    const int & iflav,
 			    double * F);
 
   /// F_LO
