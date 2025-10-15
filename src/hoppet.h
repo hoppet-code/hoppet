@@ -48,6 +48,7 @@
 
 #include <string>
 #include <iostream>
+#include <stdbool.h>
 
 namespace hoppet {
   /// indices for the different structure functions
@@ -149,7 +150,8 @@ extern "C" {
   // void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
   // There must be a problem in passing boolean from c++ to fortran. Passing them
   // as integer works, but is it safe? (TBD)
-  void hoppetSetQED(const int & withqed, const int & qcdqed, const int & plq);
+  //  void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
+  void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
 
   /// initialise the underlying grid, splitting functions and pdf-table
   /// objects, using the dy grid spacing and splitting functions up to
@@ -191,7 +193,7 @@ extern "C" {
   
   /// Arrange for the use of exact NNLO splitting and mass-threshold
   /// functions.
-  void hoppetSetExactDGLAP(const int & exact_nfthreshold, const int & exact_splitting);
+  void hoppetSetExactDGLAP(const bool & exact_nfthreshold, const bool & exact_splitting);
 
   /// Arrange for the use of various approximate N3LO splitting functions.
   void hoppetSetApproximateDGLAPN3LO(const int & splitting_variant);
@@ -341,21 +343,21 @@ extern "C" {
 				 const int & nflav,
 				 const int & scale_choice,
 				 const double & constant_mu,
-				 const int & param_coefs,
+				 const bool & param_coefs,
 				 const double & wmass,
 				 const double & zmass);
   
   /// Initialize the structure functions up to specified order
   /// this requires the PDF to have been set up beforehand, and filled in tables(0)
   void hoppetInitStrFct(const int & order_max,
-			const int & separate_orders,
+			const bool & separate_orders,
 			const double & xR,
 			const double & xF);
 
   /// Initialize the structure functions up to specified order
   /// this requires the PDF to have been set up beforehand, and filled in tables(0)
   void hoppetInitStrFctFlav(const int & order_max,
-			    const int & separate_orders,
+			    const bool & separate_orders,
 			    const double & xR,
 			    const double & xF);
 
@@ -445,19 +447,25 @@ extern "C" {
 			const double & muF_in,
 			double * F);
   
-  void hoppetwritelhapdfwithlen_(int & basename_len,
-				 const char* basename,
-				 const int & pdf_index);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Proper C prototype for direct Fortran call (see bind(C) in Fortran)
+void hoppetwritelhapdfgrid_(const char* basename, const int* basename_len, const int* pdf_index);
+
+#ifdef __cplusplus
+}
+#endif
   
   /// Write out the contents of tables(0) (assumed to be the PDF) in the
   /// LHAPDF format
   inline void hoppetWriteLHAPDFGrid(const std::string& basename, const int& pdf_index) {
-    // Convert std::string to C-style string and get length
+    // Fortran expects a char array, its length, and the index (all as pointers)
     const char* basename_cstr = basename.c_str();
     int basename_len = basename.length();
-    
-    // Call Fortran subroutine (pass integers by reference)
-    hoppetwritelhapdfwithlen_(basename_len, basename_cstr, pdf_index);
+    hoppetwritelhapdfgrid_(basename_cstr, &basename_len, &pdf_index);
   }
 
   void hoppetBenchmarkPDFunpol(const double & x,

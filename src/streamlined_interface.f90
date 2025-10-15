@@ -134,9 +134,10 @@ end module streamlined_interface
 subroutine hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
   use streamlined_interface
   use qed_evolution
+  use iso_c_binding
   implicit none
-  logical, intent(in)  :: use_qed
-  logical, intent(in)  :: use_qcd_qed, use_Plq_nnlo
+  logical(c_bool), intent(in)  :: use_qed
+  logical(c_bool), intent(in)  :: use_qcd_qed, use_Plq_nnlo
   write(*,*) 'hoppetSetQED: use_qed, use_qcd_qed, use_Plq_nnlo=', &
        & use_qed, use_qcd_qed, use_Plq_nnlo
   with_qed = use_qed
@@ -568,8 +569,9 @@ end subroutine hoppetSetMSbarMassVFN
 !! functions.
 subroutine hoppetSetExactDGLAP(exact_nfthreshold, exact_splitting)
   use streamlined_interface ! this module which provides access to the array of tables
+  use iso_c_binding
   implicit none
-  logical :: exact_nfthreshold, exact_splitting
+  logical(c_bool) :: exact_nfthreshold, exact_splitting
 
   if(exact_nfthreshold) call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
   if(exact_splitting) call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
@@ -773,15 +775,24 @@ subroutine hoppetWriteLHAPDFGrid(basename, pdf_index)
 end subroutine hoppetWriteLHAPDFGrid
 
 
-subroutine hoppetWriteLHAPDFWithLen(basename_len, basename, pdf_index)
+subroutine hoppetWriteLHAPDFWithLen(basename_len, basename, pdf_index) bind(C, name="hoppetwritelhapdfwithlen_")
   use streamlined_interface; use warnings_and_errors
+  use iso_c_binding
   implicit none
-  integer,                     intent(in) :: basename_len
-  character(len=basename_len), intent(in) :: basename
-  integer,                     intent(in) :: pdf_index
+  integer(c_int), value :: basename_len
+  character(kind=c_char), dimension(*), intent(in) :: basename
+  integer(c_int), value :: pdf_index
+  character(len=:), allocatable :: f_basename
+  integer :: i
 
-  call hoppetWriteLHAPDFGrid(basename, pdf_index)
+  ! Convert C string to Fortran string
+  allocate(character(len=basename_len) :: f_basename)
+  do i = 1, basename_len
+    f_basename(i:i) = basename(i)
+  end do
 
+  call hoppetWriteLHAPDFGrid(f_basename, pdf_index)
+  deallocate(f_basename)
 end subroutine hoppetWriteLHAPDFWithLen
 
 !======================================================================
