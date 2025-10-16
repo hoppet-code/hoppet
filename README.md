@@ -26,7 +26,7 @@ Key features include:
 
 The latest version can always be obtained from
 
-    git clone https://github.com/hoppet-code/hoppet
+    git clone --recursive https://github.com/hoppet-code/hoppet
 
 Summaries of main new features in each release are in
 [NEWS.md](NEWS.md). More detailed lists of changes are in the
