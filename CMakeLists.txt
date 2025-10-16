@@ -325,6 +325,7 @@ add_library(hoppet::hoppet_static ALIAS hoppet_static)
 if (HOPPET_ENABLE_TESTING)
   ENABLE_TESTING()
   add_subdirectory(unit-tests)
+  add_subdirectory(unit-tests-cxx)
 endif()
 
 # Examples =============================================================
