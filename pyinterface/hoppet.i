@@ -417,9 +417,15 @@ Parameters:
 %ignore hoppetstrfctn3lo_;
 %ignore hoppetwritelhapdfwithlen_;
 %ignore hoppetsetqed_;
+%ignore hoppetSetQED_c;
 %ignore hoppetinitstrfct_;
 %ignore hoppetinitstrfctflav_;
 %ignore hoppetVersionC;
+%ignore hoppetSetExactDGLAP_c;
+%ignore hoppetStartStrFctExtended_c;
+%ignore hoppetInitStrFct_c;
+%ignore hoppetInitStrFctFlav_c;
+%ignore hoppetwritelhapdfgrid_;
 
 
 %include "hoppet.h"

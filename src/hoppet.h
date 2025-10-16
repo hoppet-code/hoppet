@@ -31,10 +31,10 @@
 
 /// The fortran subroutines pertaining to the below structure function 
 /// interfaces can be found at the end of structure_functions.f90
-#define hoppetStartStrFct              hoppetStartStrFct_c
+#define hoppetStartStrFct              hoppetstartstrfct_
 #define hoppetStartStrFctExtended      hoppetStartStrFctExtended_c
 #define hoppetInitStrFct               hoppetInitStrFct_c
-#define hoppetInitStrFctFlav           hoppetinitstrfctflav_
+#define hoppetInitStrFctFlav           hoppetInitStrFctFlav_c
 #define hoppetStrFct                   hoppetstrfct_
 #define hoppetStrFctNoMu               hoppetstrfctnomu_
 #define hoppetStrFctLO                 hoppetstrfctlo_
