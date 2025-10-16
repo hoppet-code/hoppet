@@ -2246,20 +2246,43 @@ end subroutine hoppetStartStrFct
 subroutine hoppetStartStrFctExtended(order_max, nflav, scale_choice,&
      & constant_mu, param_coefs, wmass, zmass)
   use streamlined_interface; use structure_functions
-  use iso_c_binding
   implicit none
   real(dp), intent(in) :: constant_mu, wmass, zmass
   integer, intent(in)  :: order_max, nflav, scale_choice
+  logical, intent(in) :: param_coefs
+  !----------------------------------------------------------------------
+
+  call StartStrFct(order_max, nflav, scale_choice, constant_mu, &
+     & param_coefs, wmass, zmass)
+
+  
+end subroutine hoppetStartStrFctExtended
+
+subroutine hoppetStartStrFctExtended_c(order_max, nflav, scale_choice,&
+     & constant_mu, param_coefs, wmass, zmass) bind(C, name="hoppetStartStrFctExtended_c")
+  use streamlined_interface; use structure_functions
+  use iso_c_binding
+  implicit none
+  real(c_double), intent(in) :: constant_mu, wmass, zmass
+  integer(c_int), intent(in)  :: order_max, nflav, scale_choice
   logical(c_bool) , intent(in) :: param_coefs
-  logical :: param_coefs_f77
+  real(dp) :: constant_mu_f, wmass_f, zmass_f
+  integer :: order_max_f, nflav_f, scale_choice_f
+  logical :: param_coefs_f
   !----------------------------------------------------------------------
 
   ! Need to convert the c_bool to a fortran bool before passing it
-  param_coefs_f77 = merge(.true._1, .false._1, param_coefs)
-  call StartStrFct(order_max, nflav, scale_choice, constant_mu,&
-     & param_coefs_f77, wmass, zmass)
-  
-end subroutine hoppetStartStrFctExtended
+  constant_mu_f = constant_mu
+  wmass_f = wmass
+  zmass_f = zmass
+  order_max_f = order_max
+  nflav_f = nflav
+  scale_choice_f = scale_choice
+  param_coefs_f = merge(.true._1, .false._1, param_coefs)
+  call StartStrFct(order_max_f, nflav_f, scale_choice_f, constant_mu_f, &
+     & param_coefs_f, wmass_f, zmass_f)
+
+end subroutine hoppetStartStrFctExtended_c
 
 !> @brief Initialize the structure functions up to specified order
 !!
@@ -2278,18 +2301,35 @@ end subroutine hoppetStartStrFctExtended
 !!
 subroutine hoppetInitStrFct(order, separate_orders, xR, xF)
   use streamlined_interface; use structure_functions
-  use iso_c_binding
   implicit none
   integer, intent(in) :: order
-  logical(c_bool), intent(in) :: separate_orders
-  logical :: separate_orders_f77
+  logical, intent(in) :: separate_orders
   real(dp), intent(in) :: xR, xF
 
-  ! Need to convert the c_bool to a fortran bool before passing it
-  separate_orders_f77 = merge(.true._1, .false._1, separate_orders)
-  call InitStrFct(order, separate_orders_f77, xR, xF, .false.)
+  call InitStrFct(order, separate_orders, xR, xF, .false.)
 
 end subroutine hoppetInitStrFct
+
+subroutine hoppetInitStrFct_c(order, separate_orders, xR, xF) bind(C, name="hoppetInitStrFct_c")
+  use streamlined_interface; use structure_functions
+  use iso_c_binding
+  implicit none
+  integer(c_int), intent(in) :: order
+  logical(c_bool), intent(in) :: separate_orders
+  logical :: separate_orders_f
+  real(c_double), intent(in) :: xR, xF
+  real(dp) :: xR_f, xF_f
+  integer :: order_f
+  !----------------------------------------------------------------------
+
+  ! Need to convert the c_bool to a fortran bool before passing it
+  xR_f = xR
+  xF_f = xF
+  order_f = order
+  separate_orders_f = merge(.true._1, .false._1, separate_orders)
+  call InitStrFct(order_f, separate_orders_f, xR_f, xF_f, .false.)
+
+end subroutine hoppetInitStrFct_c
 
 !> @brief Initialize the structure functions up to specified order
 !!
@@ -2308,18 +2348,34 @@ end subroutine hoppetInitStrFct
 !!
 subroutine hoppetInitStrFctFlav(order, separate_orders, xR, xF)
   use streamlined_interface; use structure_functions
-  use iso_c_binding
   implicit none
   integer, intent(in) :: order
-  logical(c_bool), intent(in) :: separate_orders
-  logical :: separate_orders_f77
+  logical, intent(in) :: separate_orders
   real(dp), intent(in) :: xR, xF
-  
-  ! Need to convert the c_bool to a fortran bool before passing it
-  separate_orders_f77 = merge(.true._1, .false._1, separate_orders)
-  call InitStrFct(order, separate_orders_f77, xR, xF, .true.)
+
+  call InitStrFct(order, separate_orders, xR, xF, .true.)
 
 end subroutine hoppetInitStrFctFlav
+
+subroutine hoppetInitStrFctFlav_c(order, separate_orders, xR, xF) bind(C, name="hoppetInitStrFctFlav_c")
+  use streamlined_interface; use structure_functions
+  use iso_c_binding
+  implicit none
+  integer(c_int), intent(in) :: order
+  logical(c_bool), intent(in) :: separate_orders
+  logical :: separate_orders_f
+  real(c_double), intent(in) :: xR, xF
+  real(dp) :: xR_f, xF_f
+  integer :: order_f
+
+  ! Need to convert the c_bool to a fortran bool before passing it
+  xR_f = xR
+  xF_f = xF
+  order_f = order
+  separate_orders_f = merge(.true._1, .false._1, separate_orders)
+  call InitStrFct(order_f, separate_orders_f, xR_f, xF_f, .true.)
+
+end subroutine hoppetInitStrFctFlav_c
 
 !> @brief calculate the structure function at x, Q, muR, muF summed over all orders
 !!
