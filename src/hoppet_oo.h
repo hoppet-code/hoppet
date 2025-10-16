@@ -1,6 +1,7 @@
 #ifndef __HOPPET_OO__
 #define __HOPPET_OO__
 #include "hoppet.h"
+#include <vector>
 
 extern "C" {
   void * hoppet_cxx__grid_def__new(double dy, double ymax, int order, double eps);
