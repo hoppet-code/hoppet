@@ -1,3 +1,35 @@
+2025-10-17  Alexander Karlberg  <karlberg@Latitude-E7470>
+
+	* src/hoppet.h:
+	* src/streamlined_interface.f90:
+	* src/structure_functions.f90:
+	* pyinterface/hoppet.i:
+	Moved to using proper c bindings for functions that take logical
+	arguments. Although the C/C++ interface was working fine with
+	gfortran and clang a warning was triggered when trying to build
+	with Link Time Optimisation. This issue was reported by Alexander
+	Puck Neuwirth
+
+	* CITATION.cff:
+	Updated citation with arXiv number
+
+	* src/structure_functions.f90:
+	A few interface functions had wrong or missing arguments. Probably
+	not picked up because they weren't used anywhere. Issue reported
+	Alexander Puck Neuwirth in PR 36 and 38
+
+	* src/exact-coefs:
+	Fixed mismatch between two common blocks. No impact on results
+	since the common block had the same name at n3lo and nnlo, but
+	different size, but the missing components were not used at
+	nnlo. This issue was reported by Alexander Puck Neuwirth
+
+	* scripts/set-version.sh:
+	* pyinterface/hoppet.i:
+	Removed some comments about FastJet and added version to
+	pyinterface/hoppet.i __version__ string. Now using PEP compliant
+	X.Y.Z-devN for development versions
+
 2025-10-10 Gavin + Alexander
 
 	* NEWS.md:

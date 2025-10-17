@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 # This script sets all necessary version-number information across
-# FastJet (including doxygen and manual). It should be run from the
-# top-level fastjet-release directory.
+# Hoppet (including manual). It should be run from the
+# top-level Hoppet directory.
 #
 
 if [ $# -ne 1 ]
@@ -34,7 +34,7 @@ checkChanged() {
 bold=$(tput bold)
 normal=$(tput sgr0)
 
-echo ${bold}"------------ Will set FastJet version to $version -----------"${normal}
+echo ${bold}"------------ Will set Hoppet version to $version -----------"${normal}
 echo "versionNumber = $versionNumber"
 echo "versionPreRelease = $versionPreRelease"
 
@@ -54,6 +54,10 @@ checkChanged src/welcome_message.f90
 echo ${bold}"------------ Setting it in pyproject.toml ---------------------"${normal}
 sed -i.bak 's/version = .*/version = "'$version'"/' pyproject.toml
 checkChanged pyproject.toml
+
+echo ${bold}"------------ Setting it in pyinterface/hoppet.i ---------------------"${normal}
+sed -i.bak 's/__version__ = .*/__version__ = "'$version'"/' pyinterface/hoppet.i
+checkChanged pyinterface/hoppet.i
 
 
 # echo
