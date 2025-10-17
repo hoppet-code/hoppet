@@ -1,6 +1,7 @@
 # CITATION.cff
 cff-version: 1.2.0
-message: "HOPPET is made  available under the GNU public license. 
+message: >
+  HOPPET is made  available under the GNU public license. 
   If using it for scientific work, please cite G.P. Salam & J. Rojo, CPC 180(2009)120 (arXiv:0804.3755). 
   and A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi      
   & F. Dreyer (arXiv:2510.09310).                           
@@ -8,7 +9,7 @@ message: "HOPPET is made  available under the GNU public license.
   for LO, NLO, NNLO, and N3LO splitting functions, the QCD  
   1, 2, 3, and 4 loop beta functions and the PDF and        
   coupling mass threshold matching functions. Additionally  
-  the DIS coefficient functions should be cited when used."
+  the DIS coefficient functions should be cited when used.
 title: "HOPPET"
 authors:
   - family-names: Salam
