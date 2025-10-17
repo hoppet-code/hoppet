@@ -43,20 +43,20 @@ keywords:
   - "perturbative QCD"
 preferred-citation:
   type: unpublished
-    authors:
-      - family-names: Karlberg
-        given-names: Alexander
-      - family-names: Nason
-        given-names: Paolo
-      - family-names: Salam
-        given-names: Gavin
-      - family-names: Zanderighi
-        given-names: Giulia
-      - family-names: Dreyer
-        given-names: Frédéric
-    title: "Hoppet v2.0.0 release note"
-    url: "https://arxiv.org/abs/2510.09310"
-    notes: "CERN-TH-2023-237, MPP-2023-285, OUTP-23-15P"
+  authors:
+    - family-names: Karlberg
+      given-names: Alexander
+    - family-names: Nason
+      given-names: Paolo
+    - family-names: Salam
+      given-names: Gavin
+    - family-names: Zanderighi
+      given-names: Giulia
+    - family-names: Dreyer
+      given-names: Frédéric
+  title: "Hoppet v2.0.0 release note"
+  url: "https://arxiv.org/abs/2510.09310"
+  notes: "CERN-TH-2023-237, MPP-2023-285, OUTP-23-15P"
 references:
   - type: article
     authors:
