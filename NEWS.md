@@ -1,5 +1,17 @@
 # NEWS for HOPPET
 
+# Release 2.0.1 (unreleased)
+
+## Bug fixes
+
+* resolved issues with Fortran-C interfaces for routines that 
+  take logical arguments, affecting structure function and QED 
+  components.
+  
+* other small fixes for issues picked up with link-time optimization
+  (thanks to Alexander Puck Neuwirth for reporting)
+
+
 # Release 2.0.0, 10 October 2025
 
 ## Major new features:
