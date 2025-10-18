@@ -134,10 +134,9 @@ end module streamlined_interface
 subroutine hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
   use streamlined_interface
   use qed_evolution
-  use iso_c_binding
   implicit none
-  logical(c_bool), intent(in)  :: use_qed
-  logical(c_bool), intent(in)  :: use_qcd_qed, use_Plq_nnlo
+  logical, intent(in)  :: use_qed
+  logical, intent(in)  :: use_qcd_qed, use_Plq_nnlo
   write(*,*) 'hoppetSetQED: use_qed, use_qcd_qed, use_Plq_nnlo=', &
        & use_qed, use_qcd_qed, use_Plq_nnlo
   with_qed = use_qed
@@ -148,6 +147,22 @@ subroutine hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
   end if
   with_Plq_nnloqed = use_Plq_nnlo
 end subroutine hoppetSetQED
+
+subroutine hoppetSetQED_c(use_qed, use_qcd_qed, use_Plq_nnlo) bind(C,name="hoppetSetQED_c")
+  use streamlined_interface
+  use qed_evolution
+  use iso_c_binding
+  implicit none
+  logical(c_bool), intent(in)  :: use_qed
+  logical(c_bool), intent(in)  :: use_qcd_qed, use_Plq_nnlo
+  logical :: use_qed_f
+  logical :: use_qcd_qed_f, use_Plq_nnlo_f
+
+  use_qed_f = merge(.true._1, .false._1, use_qed)
+  use_qcd_qed_f = merge(.true._1, .false._1, use_qcd_qed)
+  use_Plq_nnlo_f = merge(.true._1, .false._1, use_Plq_nnlo)
+  call hoppetSetQED(use_qed_f, use_qcd_qed_f, use_Plq_nnlo_f)
+end subroutine hoppetSetQED_c
 
 !======================================================================
 !! initialise the underlying grid, splitting functions and pdf-table
@@ -569,14 +584,27 @@ end subroutine hoppetSetMSbarMassVFN
 !! functions.
 subroutine hoppetSetExactDGLAP(exact_nfthreshold, exact_splitting)
   use streamlined_interface ! this module which provides access to the array of tables
-  use iso_c_binding
   implicit none
-  logical(c_bool) :: exact_nfthreshold, exact_splitting
+  logical :: exact_nfthreshold, exact_splitting
 
   if(exact_nfthreshold) call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
   if(exact_splitting) call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
 
 end subroutine hoppetSetExactDGLAP
+
+subroutine hoppetSetExactDGLAP_c(exact_nfthreshold, exact_splitting) bind(C,name="hoppetSetExactDGLAP_c")
+  use streamlined_interface ! this module which provides access to the array of tables
+  use iso_c_binding
+  implicit none
+  logical(c_bool) :: exact_nfthreshold, exact_splitting
+  logical :: exact_nfthreshold_f, exact_splitting_f
+
+  exact_nfthreshold_f = merge(.true._1,.false._1,exact_nfthreshold)
+  exact_splitting_f = merge(.true._1,.false._1,exact_splitting)
+
+  call hoppetSetExactDGLAP(exact_nfthreshold_f, exact_splitting_f)
+
+end subroutine hoppetSetExactDGLAP_c
 
 !======================================================================
 !! Arrange for the use of various approximate N3LO splitting functions.

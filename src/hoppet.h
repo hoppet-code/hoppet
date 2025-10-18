@@ -16,7 +16,7 @@
 #define hoppetSetVFN                   hoppetsetvfn_       
 #define hoppetSetPoleMassVFN           hoppetsetpolemassvfn_       
 #define hoppetSetMSbarMassVFN          hoppetsetmsbarmassvfn_       
-#define hoppetSetExactDGLAP            hoppetsetexactdglap_
+#define hoppetSetExactDGLAP            hoppetSetExactDGLAP_c
 #define hoppetSetApproximateDGLAPN3LO  hoppetsetapproximatedglapn3lo_
 #define hoppetSetSplittingNNLO         hoppetsetsplittingnnlo_
 #define hoppetSetSplittingN3LO         hoppetsetsplittingn3lo_
@@ -25,16 +25,16 @@
 #define hoppetEval                     hoppeteval_          
 #define hoppetEvalFortranIFlv          hoppetevaliflv_          
 #define hoppetEvalSplit                hoppetevalsplit_
-#define hoppetSetQED                   hoppetsetqed_
+#define hoppetSetQED                   hoppetSetQED_c
 #define hoppetDeleteAll                hoppetdeleteall_
 #define hoppetBenchmarkPDFunpol        hoppetbenchmarkpdfunpol_
 
 /// The fortran subroutines pertaining to the below structure function 
 /// interfaces can be found at the end of structure_functions.f90
 #define hoppetStartStrFct              hoppetstartstrfct_
-#define hoppetStartStrFctExtended      hoppetstartstrfctextended_
-#define hoppetInitStrFct               hoppetinitstrfct_
-#define hoppetInitStrFctFlav           hoppetinitstrfctflav_
+#define hoppetStartStrFctExtended      hoppetStartStrFctExtended_c
+#define hoppetInitStrFct               hoppetInitStrFct_c
+#define hoppetInitStrFctFlav           hoppetInitStrFctFlav_c
 #define hoppetStrFct                   hoppetstrfct_
 #define hoppetStrFctNoMu               hoppetstrfctnomu_
 #define hoppetStrFctLO                 hoppetstrfctlo_
