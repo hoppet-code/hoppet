@@ -62,8 +62,16 @@
 	* src/hoppet.h:
 	exposed cc_REAL etc. and hoppet_global_cc_piece
 
-	* unit_tests/:
-	FILL THIS IN AND DECIDE WHAT TO DO WITH C tests
+	* src/hoppet_splitting_function_interfaces.f90: *** ADDED ***
+	added mvv_splitting_function type that extends conv_ignd, 
+	to illustrate use of new conv_ignd mechanism and to provide
+	an efficient way of interfacing functions with the interface
+	from the Moch-Vermaseren-Vogt papers and follow-ups.
+
+	* unit_tests/test_convolution.F90: *** ADDED ***
+	added test of mvv_splitting_function type and a check of interfacing
+	to a C++ function for a splitting-function integrand.
+
 
 ------------- end of libome changes --------------------------
 
