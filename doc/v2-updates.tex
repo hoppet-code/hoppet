@@ -106,18 +106,55 @@ the FHMPRUVV group. At the time of writing it can take one of three values:
 \end{itemize}
 Besides the splitting functions, we have also incorporated the
 single-mass thresholds up to N$^3$LO, as calculated in
-Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}
-and kindly supplied to us in the form of Fortran
-code~\cite{BlumleinCode,Fael:2022miw}.
+Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}.
 %
-Note that because many of these contributions are available only in
-exact form (i.e.\ using extensive
-\texttt{hplog5}~\cite{FortranPolyLog} evaluations), they involve a
-significant initialisation time, of the order of
-$10{-}30\,\text{s}$.\footnote{As \hoppet v2.0.0 was being finalised,
-  Ref.~\cite{BlumleinCode} was publicly released, notably
-  including faster, parametrised versions. We expect to update \hoppet
-  to include these in the near future.}
+As of version 2.1.0, the \ntlo thresholds are available in two forms,
+using code from Refs.~\cite{BlumleinCode,Fael:2022miw}.
+%
+One can choose which form to use by setting the
+\ttt{n3lo\_nfthreshold} variable\footnote{%
+  In the streamlined interface, call
+  \ttt{hoppetSetN3LOnfthresholds(n3lo\_threshold\_choice)}. In \CPP,
+  the constants are in the \ttt{hoppet} namespace.} to one of
+\begin{itemize}
+\item \ttt{n3lo\_nfthreshold\_libOME}:
+  %
+  this uses piecewise high-order Laurent-series expansions in different
+  regions of $x$, with a stated accuracy of at least $2048\epsilon$
+  where $\epsilon$ is the precision of a 64-bit real variable.
+  % 
+  It relies on the
+  \ttt{libome} \CPP library from \url{https://gitlab.com/libome/libome}.
+  %
+  Initialisation time is below $1\,\text{s}$.
+  %
+  This is the default choice.
+  
+\item \ttt{n3lo\_nfthreshold\_exact\_fortran}: all contributions are
+  exact, except for the $A_\text{hg}^\text{S}$ term in
+  Eq.~(\ref{eq:hp-nf1}), which is based on piecewise expansions.
+  %
+  The exact contributions make extensive use of
+  \texttt{hplog5}~\cite{FortranPolyLog} calls and lead to an
+  initialisation time of $10{-}30\,\text{s}$.
+  %
+  The piecewise expansions for $A_\text{hg}^\text{S}$ are less
+  accurate than with the \ttt{n3lo\_nfthreshold\_libOME} choice.
+\end{itemize}
+
+%   
+% 
+% and kindly supplied to us in the form of Fortran
+% code~\cite{BlumleinCode,Fael:2022miw}.
+% %
+% Note that because many of these contributions are available only in
+% exact form (i.e.\ using extensive
+% \texttt{hplog5}~\cite{FortranPolyLog} evaluations), they involve a
+% significant initialisation time, of the order of
+% $10{-}30\,\text{s}$.\footnote{As \hoppet v2.0.0 was being finalised,
+%   Ref.~\cite{BlumleinCode} was publicly released, notably
+%   including faster, parametrised versions. We expect to update \hoppet
+%   to include these in the near future.}
 
 \subsection{Reference results}
 
@@ -1511,7 +1548,7 @@ it includes comparisons to LHAPDF.
         \label{fig:main-sub2}
     \end{subfigure}
     \caption{Accuracy (top) and timing (bottom) versus \texttt{dy} at
-      (a) NNLO and (b) N$^3$LO in \hoppet{} v2.0.0.
+      (a) NNLO and (b) N$^3$LO in \hoppet{} v2.1.0.
       %
       The accuracy corresponds to the worst fractional accuracy for any flavour,
       at any $x$ value below the corresponding limit, as described in
@@ -1610,25 +1647,27 @@ by a factor of $5$ from $0.2$ to $0.04$.
 The precise scaling depends on whether it is Runge-Kutta or the
 splitting function grid representation that dominates the error.
 %
-At N$^3$LO we observe a similar level of accuracy as at
-NNLO.\footnote{Note that at N$^3$LO we have omitted the 
-  all-flav, $x<0.9$ line.
-  %
-  For that case, we have observed issues affecting the accuracy at the
-  level of up to relative $10^{-5}$ accuracy.
-  %
-  The deterioration is there only when the N$^3$LO mass thresholds are
-  used and we suspect that it may be connected with difficulties in the
-  integration over the $x \to 1$ region of the mass-threshold
-  functions.
-  %
-  Given that the corresponding preliminary code has been kindly
-  provided to us ahead of publication~\cite{BlumleinCode}, we defer
-  more detailed study of this matter until the final code is ready.
-  %
-  We anticipate that it may be possible to address the problem by
-  switching to an expansion in powers (and logarithms) of $(1-x)$ for
-  $x \to 1$.  }
+At N$^3$LO we observe a similar level of accuracy as at NNLO, except
+for a slight worsening associated with the heavy-flavour components.
+
+%\footnote{Note that at N$^3$LO we have omitted the 
+%  all-flav, $x<0.9$ line.
+%  %
+%  For that case, we have observed issues affecting the accuracy at the
+%  level of up to relative $10^{-5}$ accuracy.
+%  %
+%  The deterioration is there only when the N$^3$LO mass thresholds are
+%  used and we suspect that it may be connected with difficulties in the
+%  integration over the $x \to 1$ region of the mass-threshold
+%  functions.
+%  %
+%  Given that the corresponding preliminary code has been kindly
+%  provided to us ahead of publication~\cite{BlumleinCode}, we defer
+%  more detailed study of this matter until the final code is ready.
+%  %
+%  We anticipate that it may be possible to address the problem by
+%  switching to an expansion in powers (and logarithms) of $(1-x)$ for
+%  $x \to 1$.  }
 
 
 % for the all-flav, $x<0.9$ case with \texttt{dy} below \texttt{0.1}. We
@@ -1713,35 +1752,36 @@ which were obtained with 2008 hardware and compilers, we see a
 speed-up of roughly a factor 10, which we attribute mainly to
 improvements in the hardware.
 
-At \ntlo the evolution picture is almost identical to that at NNLO.
-%
-The evolution times ($t_i$ and $t_c$) are essentially identical to the
+At \ntlo  evolution times ($t_i$ and $t_c$) are essentially identical to the
 NNLO case: for $t_i$ the only extra operation that is needed is the
 addition of the \ntlo splitting function to the lower-order ones and
 at each $Q$ value, this involves $\order{N}$ operations for a $y$-grid
 of size $N$, while the convolution itself involves $\order{N^2}$
 operations.
 %
-For the cached evolution, there is no additional penalty because the
+For the cached evolution, there is no additional penalty, because the
 \ntlo contributions are already included in the cached evolution
 operators.
 %
-The initialisation times are, however, significantly larger, in the range
-$4-15\, \mathrm{s}$, rather than a fraction of a second.
+The initialisation times are somewhat larger, in a range from 250\,ms
+to 1\,s.
 %
-This is dominated by the extra time that it takes to initialise the
-preliminary version of the code for the exact mass threshold functions
-of Ref.~\cite{BlumleinCode}.
+The longer time is associated both with the approximate \ntlo
+splitting functions and the mass threshold functions of
+Ref.~\cite{BlumleinCode}, using the \ttt{n3lo\_nfthreshold\_libOME} option.
 %
-In any long-running application where \hoppet either
-has to evolve or access the evolved tables many times, this extra
-initialisation is insignificant.
+In practice the initialisation time remains adequate for most
+interactive work.
 %
-However the penalty can be noticeable in interactive work.
+In any long-running application where \hoppet either has to evolve or
+access the evolved tables many times, the initialisation time is
+insignificant.
 %
-We understand that the final version of the code of
-Ref.~\cite{BlumleinCode} is significantly faster, and we hope to
-incorporate it into \hoppet in the near future.
+% However the penalty can be noticeable in interactive work.
+% %
+% We understand that the final version of the code of
+% Ref.~\cite{BlumleinCode} is significantly faster, and we hope to
+% incorporate it into \hoppet in the near future.
 
 % Were parametrised expressions of the mass threshold functions to
 % become available, we expect that the initialisation time would be
