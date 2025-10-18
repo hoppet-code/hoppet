@@ -66,6 +66,7 @@ For more examples look at https://github.com/hoppet-code/hoppet/tree/master/exam
 //%}
 
 %pythoncode %{
+  __version__ = "2.0.2-dev0"
   __author__ = "Frederic Dreyer, Alexander Karlberg, Paolo Nason, Juan Rojo, Gavin Salam, Giulia Zanderighi"
 %}
 
@@ -417,9 +418,15 @@ Parameters:
 %ignore hoppetstrfctn3lo_;
 %ignore hoppetwritelhapdfwithlen_;
 %ignore hoppetsetqed_;
+%ignore hoppetSetQED_c;
 %ignore hoppetinitstrfct_;
 %ignore hoppetinitstrfctflav_;
 %ignore hoppetVersionC;
+%ignore hoppetSetExactDGLAP_c;
+%ignore hoppetStartStrFctExtended_c;
+%ignore hoppetInitStrFct_c;
+%ignore hoppetInitStrFctFlav_c;
+%ignore hoppetwritelhapdfgrid_;
 
 
 %include "hoppet.h"

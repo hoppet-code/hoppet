@@ -75,7 +75,6 @@ program tabulation_example_qed_streamlined
   !! if using LHAPDF, rename a couple of hoppet functions which
   !! would otherwise conflict with LHAPDF 
   !use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
-  use iso_c_binding
   implicit none
   real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
   real(dp) :: asQ, Q0alphas, Q0pdf
@@ -86,7 +85,7 @@ program tabulation_example_qed_streamlined
   real(dp), parameter :: heralhc_xvals(9) = &
        & (/1e-5_dp,1e-4_dp,1e-3_dp,1e-2_dp,0.1_dp,0.3_dp,0.5_dp,0.7_dp,0.9_dp/)
   integer  :: ix
-  logical(c_bool)  :: use_qed, use_qcd_qed, use_Plq_nnlo
+  logical  :: use_qed, use_qcd_qed, use_Plq_nnlo
   !! define the interfaces for LHA pdf (by default not used)
   !! (NB: unfortunately this conflicts with an internal hoppet name,
   !! so make sure that you "redefine" the internal hoppet name,

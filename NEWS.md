@@ -1,5 +1,24 @@
 # NEWS for HOPPET
 
+# Release 2.0.1, 18 October 2025
+
+## Bug fixes
+
+* resolved issues with Fortran-C interfaces for routines that take
+  logical arguments, affecting structure function and QED
+  components. Fixed a couple of structure function interface functions
+  which had the wrong signature.
+  
+* other small fixes for issues picked up with link-time optimization
+  (thanks to Alexander Puck Neuwirth for reporting both of the
+  above). As a consequence the code can be compiled with LTO by adding
+  the following flags.
+
+```
+cmake -DCMAKE_C_FLAGS="-flto" -DCMAKE_CXX_FLAGS="-flto" -DCMAKE_Fortran_FLAGS="-flto"
+```
+
+
 # Release 2.0.0, 10 October 2025
 
 ## Major new features:
