@@ -531,9 +531,9 @@ if (HOPPET_BUILD_TESTDIR)
       target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
       target_link_libraries(${b} PUBLIC LHAPDF::LHAPDF)
       set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
-	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
-	Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/${b}_modules
-	POSITION_INDEPENDENT_CODE TRUE
+      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/${b}_modules
+      POSITION_INDEPENDENT_CODE TRUE
 	)
     endforeach()
   endif()
