@@ -537,8 +537,7 @@ they are to be preferred for most applications.
 % 
 Note that the exact expressions also add to compilation time and need
 to be explicitly enabled with the \texttt{-DHOPPET\_USE\_EXACT\_COEF=ON}
-CMake flag (or the \ttt{--enable-exact-coefs} configure
-flag).\footnote{At N$^3$LO they rely on an extended version of
+CMake flag.\footnote{At N$^3$LO they rely on an extended version of
   \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
   is able to handle harmonic polylogarithms up to weight 5.}
 
@@ -1347,7 +1346,7 @@ accuracy of the LHAPDF grids. The tool, along with some documentation,
 can be found at
 \url{https://github.com/hoppet-code/hoppet-lhapdf-grid-checker}.
 
-\section{CMake build option}
+\section{CMake build system}
 \label{sec:cmake}
 
 In v1.x, \hoppet used a hand-crafted \ttt{./configure} script followed
@@ -1356,14 +1355,13 @@ by \ttt{make [install]}.
 %
 As of v2
 % 
-% In addition to the standard build option through \ttt{./configure} and
-% \ttt{make [install]}
-\hoppet supports the use of CMake, which is now the preferred option.\footnote{We thank Andrii Verbitskyi
-  for providing much of this system.}
-%
-Support for the old build system will be retained at least through the 2.0.x
-series, but it is to be considered deprecated and it does not provide
-all functionality, e.g.\ building the Python interface.
+\hoppet uses CMake.\footnote{We thank Andrii Verbitskyi
+  for providing much of this system.
+  %
+  Support for the old build system was retained in the briefly lived
+  2.0.x series, but was retired in version 2.1.0 owing to the need to
+  support compilation with both Fortran and \CPP, the latter for the
+  \ttt{libome} library.}
 
 For a typical user it will be enough to invoke the following lines
 from the main directory 
@@ -1400,9 +1398,11 @@ Of particular note to most users are
   option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
   option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
 \end{lstlisting}
-They can be set in the usual \ttt{cmake} way, e.g.\ \ttt{cmake ..\
-  -DHOPPET\_USE\_EXACT\_COEF=ON} to compile \hoppet with the exact
-coefficient functions.
+They can be set in the usual \ttt{cmake} way, e.g.\
+\begin{lstlisting}
+  cmake -S . -B build -DHOPPET_USE_EXACT_COEF=ON
+\end{lstlisting}
+to compile \hoppet with the exact coefficient functions.
 %
 Note that the Python interface is not compiled by default, because we
 anticipate that users of Python will prefer to obtain \hoppet through
