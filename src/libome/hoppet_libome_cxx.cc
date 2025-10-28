@@ -60,7 +60,7 @@ double ome_piece_hoppet(const ome::ome_rpd & rpd,
                         const int & order, 
                         const double & LM, 
                         const double & NF) {
-  //std::cout << "ome_piece_hoppet called with ptr=" << *ptr << ", y=" << y << ", piece=" << piece << ", order=" << order << ", LM=" << LM << ", NF=" << NF << std::endl;
+  //std::cout << "ome_piece_hoppet called with ptr=" << ome_name(rpd) << ", y=" << y << ", piece=" << piece << ", order=" << order << ", LM=" << LM << ", NF=" << NF << std::endl;
 
   double x = exp(-y);
 
