@@ -7,7 +7,7 @@ on:
     - cron:  "0 0 1/600 * *"
 
 jobs:
-   Build:
+  matrix-build:
      runs-on: ${{ matrix.os }}
      strategy:
        fail-fast: false
@@ -54,8 +54,6 @@ jobs:
          #lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests/hoppet-unit-tests 2>&1
          cmake --install BUILD
          ctest --test-dir BUILD -j 4 --output-on-failure
-
-
          # gfortran-${{matrix.gcc_v}} --version
          # ./configure FC=gfortran-${{matrix.gcc_v}}
          # make -j4 check
@@ -63,8 +61,6 @@ jobs:
          # make clean
          # ./configure FC=gfortran-${{matrix.gcc_v}} --enable-exact-coefs
          # make -j4 check
-
-
 
   compilejobFedorax86_64_GNU:
     name: Fedorax86_64_GNU
