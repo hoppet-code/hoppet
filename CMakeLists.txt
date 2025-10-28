@@ -292,8 +292,8 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(src/libome)
-message(WARNING "SOURCESCXX is ${SOURCESCXX}\n")
-message(WARNING "CXXINCLUDE is ${CXXINCLUDE}\n")
+#message(WARNING "SOURCESCXX is ${SOURCESCXX}\n")
+#message(WARNING "CXXINCLUDE is ${CXXINCLUDE}\n")
 
 #  Libraries ===========================================================
 add_library(hoppet SHARED ${SOURCESf90} ${SOURCESf} ${SOURCESCXX})
