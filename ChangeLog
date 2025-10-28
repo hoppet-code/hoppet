@@ -2,7 +2,9 @@
 2025-10-28 Gavin
 
 	* configure:
-	this now prints out a message telling users to use CMake.
+	this now prints out an error message telling users to use CMake,
+	officially ending support for the old (./configure) build system
+	as of v 2.1.0.
 
 2025-10-15 Gavin + Alexander
 
