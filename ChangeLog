@@ -1,4 +1,9 @@
 ------------- libome changes --------------------------
+2025-10-28 Gavin
+
+	* configure:
+	this now prints out a message telling users to use CMake.
+
 2025-10-15 Gavin + Alexander
 
 	A number of changes to enable the use of libOME for the 
