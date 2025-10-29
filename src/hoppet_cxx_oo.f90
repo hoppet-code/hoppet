@@ -1,8 +1,14 @@
 module hoppet_cxx_oo
   use types, only: dp
   use, intrinsic :: iso_c_binding
+  use convolution
   implicit none
   
+  type grid_quant
+    real(dp), pointer :: data(:) => null()
+    type(grid_def)    :: grid
+  end type grid_quant
+
 contains
 
 
@@ -36,7 +42,7 @@ contains
     type(grid_def), pointer :: f_ptr
 
     call c_f_pointer(ptr, f_ptr)
-    print * , associated(f_ptr)
+    !print * , associated(f_ptr)
     deallocate(f_ptr)
     ptr = c_null_ptr
   end subroutine hoppet_cxx__grid_def__delete
@@ -73,4 +79,60 @@ contains
     call c_f_pointer(ptr, grid)
     xvals(1:grid%ny+1) = xValues(grid)
   end subroutine
+
+
+  function hoppet_cxx__grid_quant__new(grid_def_ptr) bind(C) result(ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: grid_def_ptr
+    type(c_ptr) :: ptr
+    !--
+    type(grid_quant), pointer :: f_ptr
+    type(grid_def), pointer :: grid
+
+    allocate(f_ptr)
+    call c_f_pointer(grid_def_ptr, grid)
+    call AllocGridQuant(grid, f_ptr%data)
+    f_ptr%grid = grid
+    ptr = c_loc(f_ptr)
+  end function hoppet_cxx__grid_quant__new
+
+  subroutine hoppet_cxx__grid_quant__delete(ptr) bind(C)
+    implicit none
+    type(c_ptr), intent(inout) :: ptr
+    !--
+    type(grid_quant), pointer :: f_ptr
+
+    call c_f_pointer(ptr, f_ptr)
+    if (associated(f_ptr%data)) then
+      deallocate(f_ptr%data)
+    end if
+    !print * , associated(f_ptr)
+    deallocate(f_ptr)
+    ptr = c_null_ptr
+  end subroutine hoppet_cxx__grid_quant__delete
+
+  function hoppet_cxx__grid_quant__at_y(ptr, y) bind(C) result(res)
+    implicit none
+    type(c_ptr), intent(in), value :: ptr
+    real(c_double), intent(in), value :: y
+    real(c_double) :: res
+    !--
+    type(grid_quant), pointer :: f_ptr
+
+    call c_f_pointer(ptr, f_ptr)
+    res = EvalGridQuant(f_ptr%grid, f_ptr%data, y)
+  end function hoppet_cxx__grid_quant__at_y
+
+  function hoppet_cxx__grid_quant__data_ptr(ptr) bind(C) result(data_ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: ptr
+    type(c_ptr) :: data_ptr
+    !--
+    type(grid_quant), pointer :: f_ptr
+
+    call c_f_pointer(ptr, f_ptr)
+    data_ptr = c_loc(f_ptr%data(0))
+  end function hoppet_cxx__grid_quant__data_ptr
+
+
 end module hoppet_cxx_oo
