@@ -1,5 +1,8 @@
 # This is the checklist for making releases
 
+Typically one copies this over to the release section of the private repo
+and then ticks off the items.
+
 - [ ] start on dev branch, make sure everything relevant is merged in
 - [ ] run ctest
 - [ ] check/update NEWS.md, including release date; commit
