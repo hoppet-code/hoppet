@@ -1,0 +1,174 @@
+The analytic results on which this implementation is based were obtained in
+the references listed below, which should be cited when using these results
+directly or indirectly.
+
+BibTeX entries for the references can be found in the file CITATION.bib.
+
+
+If you use the unpolarised operator matrix elements please cite:
+
+%-------------------------------------------------------------------------------
+%[1] AqqQPS3, AqgQ3 (and O(NF) terms of all unpolarised OMEs)
+\bibitem{Ablinger:2010ty}
+  J.~Ablinger, J.~Bl\"umlein, S.~Klein, C.~Schneider and F.~Wi\ss{}brock,
+  \textit{The $O(\alpha_s^3)$ Massive Operator Matrix Elements of $O(N_F)$ for
+  the Structure Function $F_2(x,Q^2)$ and Transversity},
+  Nucl.\ Phys.\ B \textbf{844} (2011) 26--54
+  [arXiv:1008.3347 [hep-ph]].
+  %%CITATION = doi:10.1016/j.nuclphysb.2010.10.021;%%
+%-------------------------------------------------------------------------------
+%[2] Logarithmic Terms of all OMEs
+\bibitem{Behring:2014eya}
+  A.~Behring, I.~Bierenbaum, J.~Bl\"umlein, A.~De Freitas, S.~Klein and
+  F.~Wi\ss{}brock,
+  \textit{The logarithmic contributions to the $O(\alpha^3_s)$ asymptotic
+  massive Wilson coefficients and operator matrix elements in deeply inelastic
+  scattering},
+  Eur.\ Phys.\ J.\ C \textbf{74} (2014) 9, 3033
+  [arXiv:1403.6356 [hep-ph]].
+  %%CITATION = ARXIV:1403.6356;%%
+%-------------------------------------------------------------------------------
+%[3] AgqQ3
+\bibitem{Ablinger:2014lka}
+  J.~Ablinger, J.~Bl\"umlein, A.~De Freitas, A.~Hasselhuhn, A.~von Manteuffel,
+  M.~Round, C.~Schneider and F.~Wi\ss{}brock,
+  \textit{The Transition Matrix Element $A_{gq}(N)$ of the Variable Flavor
+  Number Scheme at $O(\alpha_s^3)$},
+  Nucl.\ Phys.\ B \textbf{882} (2014) 263--288
+  [arXiv:1402.0359 [hep-ph]].
+  %%CITATION = ARXIV:1402.0359;%%
+%-------------------------------------------------------------------------------
+%[4] AqqQNS3
+\bibitem{Ablinger:2014vwa}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~Hasselhuhn,
+  A.~von Manteuffel, M.~Round, C.~Schneider, and F.~Wi\ss{}brock,
+  \textit{The 3-Loop Non-Singlet Heavy Flavor Contributions and Anomalous
+  Dimensions for the Structure Function $F_2(x,Q^2)$ and Transversity},
+  Nucl.\ Phys.\ B \textbf{886} (2014) 733--823
+  [arXiv:1406.4654 [hep-ph]].
+  %%CITATION = ARXIV:1406.4654;%%
+%-------------------------------------------------------------------------------
+%[5] AQqPS3
+\bibitem{Ablinger:2014nga}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel and
+  C.~Schneider,
+  \textit{The 3-loop pure singlet heavy flavor contributions to the structure
+  function $F_2(x,Q^2)$ and the anomalous dimension},
+  Nucl.\ Phys.\ B \textbf{890} (2014) 48--151
+  [arXiv:1409.1135 [hep-ph]].
+  %%CITATION = ARXIV:1409.1135;%%
+%-------------------------------------------------------------------------------
+%[6] AggQ3
+\bibitem{Ablinger:2022wbb}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~Goedicke,
+  A.~von Manteuffel, C.~Schneider and K.~Sch\"onwald,
+  \textit{The unpolarized and polarized single-mass three-loop heavy flavor
+  operator matrix elements $A_{gg,Q}$ and  $\Delta A_{gg,Q}$},
+  JHEP \textbf{12} (2022) 134
+  [arXiv:2211.05462 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[7] AQg3 (first-order-factorisable contributions)
+\bibitem{Ablinger:2023ahe}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel,
+  C.~Schneider and K.~Sch\"onwald,
+  \textit{The first-order factorizable contributions to the three-loop massive
+  operator matrix elements $A_{Qg}^{(3)}$ and $\Delta A_{Qg}^{(3)}$},
+  Nucl. Phys. B \textbf{999} (2024) 116427
+  %doi:10.1016/j.nuclphysb.2023.116427
+  [arXiv:2311.00644 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[8] AQg3 (non-first-order-factorisable contributions)
+\bibitem{Ablinger:2024xtt} 
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel,
+  C.~Schneider and K.~Sch\"onwald,
+  \textit{The non-first-order-factorizable contributions to the three-loop
+  single-mass operator matrix elements $A_{Qg}^{(3)}$ and
+  $\Delta A_{Qg}^{(3)}$.}
+  Phys. Lett. B \textbf{854} (2024) 138713
+  %doi:10.1016/j.physletb.2024.138713
+  [arXiv:2403.00513 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[9] Implementation
+\bibitem{Ablinger:2025joi}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel,
+  C.~Schneider and K.~Sch\"onwald,
+  \textit{The Single-Mass Variable Flavor Number Scheme at Three-Loop Order},
+  arXiv:2510.02175 [hep-ph].
+%-------------------------------------------------------------------------------
+
+
+If you use the polarised operator matrix elements please cite:
+
+%-------------------------------------------------------------------------------
+%[1] Logarithmic terms of all polarised OMEs
+\bibitem{Blumlein:2021xlc}
+  J.~Bl\"umlein, A.~De Freitas, M.~Saragnese, C.~Schneider and K.~Sch\"onwald,
+  \textit{Logarithmic contributions to the polarized $O(\alpha_s^3)$ asymptotic
+  massive Wilson coefficients and operator matrix elements in deeply inelastic
+  scattering},
+  Phys. Rev. D \textbf{104} (2021) no.3, 034030
+  [arXiv:2105.09572 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[2] polAqqQNS3
+\bibitem{Ablinger:2014vwa}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~Hasselhuhn,
+  A.~von Manteuffel, M.~Round, C.~Schneider, and F.~Wi\ss{}brock,
+  \textit{The 3-Loop Non-Singlet Heavy Flavor Contributions and Anomalous
+  Dimensions for the Structure Function $F_2(x,Q^2)$ and Transversity},
+  Nucl.\ Phys.\ B {\bf 886} (2014) 733--823
+  [arXiv:1406.4654 [hep-ph]].
+  %%CITATION = ARXIV:1406.4654;%%
+%------------------------------------------------------------------------------
+%[3] polAQqPS3
+\bibitem{Ablinger:2019etw}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel,
+  C.~Schneider and K.~Sch\"onwald,
+  \textit{The three-loop single mass polarized pure singlet operator matrix
+  element},
+  Nucl. Phys. B \textbf{953} (2020) 114945
+  [arXiv:1912.02536 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[4] polAgqQ3
+\bibitem{Behring:2021asx}
+  A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel, K.~Sch\"onwald
+  and C.~Schneider,
+  \textit{The polarized transition matrix element $A_{gq}(N)$ of the variable
+  flavor number scheme at $O(\alpha^3_s)$},
+  Nucl. Phys. B \textbf{964} (2021) 115331
+  [arXiv:2101.05733 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[5] polAggQ3
+\bibitem{Ablinger:2022wbb}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~Goedicke,
+  A.~von Manteuffel, C.~Schneider and K.~Sch\"onwald,
+  \textit{The unpolarized and polarized single-mass three-loop heavy flavor
+  operator matrix elements $A_{gg,Q}$ and  $\Delta A_{gg,Q}$},
+  JHEP \textbf{12} (2022) 134
+  [arXiv:2211.05462 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[6] polAQg3 (first-order-factorisable contributions)
+\bibitem{Ablinger:2023ahe}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel,
+  C.~Schneider and K.~Sch\"onwald, 
+  \textit{The first-order factorizable contributions to the three-loop massive
+  operator matrix elements $A_{Qg}^{(3)}$ and $\Delta A_{Qg}^{(3)}$},
+  Nucl. Phys. B \textbf{999} (2024) 116427
+  [arXiv:2311.00644 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[7] polAQg3 (non-first-order-factorisable contributions)
+\bibitem{Ablinger:2024xtt} 
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel,
+  C.~Schneider and K.~Sch\"onwald,
+  \textit{The non-first-order-factorizable contributions to the three-loop
+  single-mass operator matrix elements $A_{Qg}^{(3)}$ and
+  $\Delta A_{Qg}^{(3)}$.}
+  Phys. Lett. B \textbf{854} (2024) 138713
+  [arXiv:2403.00513 [hep-ph]].
+%-------------------------------------------------------------------------------
+%[8] Implementation
+\bibitem{Ablinger:2025joi}
+  J.~Ablinger, A.~Behring, J.~Bl\"umlein, A.~De Freitas, A.~von Manteuffel,
+  C.~Schneider and K.~Sch\"onwald,
+  \textit{The Single-Mass Variable Flavor Number Scheme at Three-Loop Order},
+  arXiv:2510.02175 [hep-ph].
+%-------------------------------------------------------------------------------

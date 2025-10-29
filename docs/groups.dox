@@ -1,0 +1,17 @@
+/**
+ * \defgroup ome-data OME data
+ * \brief Constant global objects that implement the OMEs
+ *
+ * \details
+ * The OMEs are implemented as constant global objects that can be evaluated as
+ * a callable by simply passing \f$a_s\f$, \f$L_M\f$ and \f$N_F\f$ as arguments
+ * to the evaluation operator.
+ * 
+ * The structure of the data types used in the implementation is documented at
+ * \ref ome-data-types
+ */
+
+/**
+ * \defgroup c-interface C interface
+ * \brief Interface to access the OME data from C
+ */
