@@ -117,8 +117,10 @@ namespace hoppet {
   const int nnlo_nfthreshold_exact = -12;
   const int nnlo_nfthreshold_param = -11;
 
-  const int n3lo_nfthreshold_on  = 1;
-  const int n3lo_nfthreshold_off = 0;
+  constexpr int n3lo_nfthreshold_libOME        = 1;
+  constexpr int n3lo_nfthreshold_exact_fortran = 2;
+  constexpr int n3lo_nfthreshold_off = 0;
+  constexpr int n3lo_nfthreshold_on = n3lo_nfthreshold_libOME;
 
   const int factscheme_MSbar    = 1;
   const int factscheme_DIS      = 2;

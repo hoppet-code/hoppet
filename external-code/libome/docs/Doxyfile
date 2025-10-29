@@ -1,0 +1,42 @@
+PROJECT_NAME           = libome
+
+QUIET                  = YES
+
+# Unfortunately, we have to list all files explicitly to ensure that they are
+# processed in the right order. If the A*.h and polA*.h files are processed
+# before the type definitions are read from ome_type_aliases.h, the constant
+# documentation for the global objects would not be generated correctly.
+INPUT                  = groups.dox \
+                         main.md \
+                         ../src/ome/ome.h \
+                         ../src/ome/ome_type_aliases.h \
+                         ../src/ome/laurent_polynomial.h \
+                         ../src/ome/piecewise.h \
+                         ../src/ome/functions.h \
+                         ../src/ome/rpd_distribution.h \
+                         ../src/ome/traits.h \
+                         ../src/ome/mellin.h \
+                         ../src/ome/integration_engine.h \
+                         ../src/ome/integration_engine_gsl.h \
+                         ../src/ome/AggQ.h \
+                         ../src/ome/AQg.h \
+                         ../src/ome/AqgQ.h \
+                         ../src/ome/AgqQ.h \
+                         ../src/ome/AqqQNSEven.h \
+                         ../src/ome/AqqQNSOdd.h \
+                         ../src/ome/AqqQPS.h \
+                         ../src/ome/AQqPS.h \
+                         ../src/ome/polAggQ.h \
+                         ../src/ome/polAQg.h \
+                         ../src/ome/polAqgQ.h \
+                         ../src/ome/polAgqQ.h \
+                         ../src/ome/polAqqQNSEven.h \
+                         ../src/ome/polAqqQNSOdd.h \
+                         ../src/ome/polAqqQPS.h \
+                         ../src/ome/polAQqPS.h
+
+# The formulas in the documentation use amsmath commands such as \text
+EXTRA_PACKAGES         = amsmath
+
+# Ensure that documentation from headers with both C++ and C parts is extracted
+PREDEFINED             = __cplusplus

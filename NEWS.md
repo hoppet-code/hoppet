@@ -1,5 +1,33 @@
 # NEWS for HOPPET
 
+# Release 2.1.0, 29 October 2025
+
+## Major new features:
+
+* added C++ code from https://gitlab.com/libome/libome for the 
+  N3LO mass thresholds. This is now the default choice, rather than
+  the exact Fortran code. It brings N3LO initialisation time down
+  to below a second on an M2Pro. 
+
+* for initialising splitting functions, it is now possible to pass
+  any class derived from conv_ignd rather than a function. The class
+  should implement conf_ignd%f(y,piece) method to return the value of
+  the splitting function at y for the given piece. See section 4.3 of the
+  main documentation for details.
+  
+## Other changes
+
+* hoppet.h exposes hoppet::cc_REAL, etc. constants to allow splitting
+  functions to be implemented in C++ code
+
+* hoppet now requires a C++-17 compiler as well as a Fortran 2008
+  compiler.
+
+## Removal of deprecated features
+
+* the old build system (./configure, make, etc) has been removed.
+  Users must now use CMake to build HOPPET.
+
 # Release 2.0.1, 18 October 2025
 
 ## Bug fixes

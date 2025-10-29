@@ -9,6 +9,27 @@
 use Cwd;
 use strict;
 
+my $red="\033[0;31m";
+my $yellow="\033[0;33m";
+my $grey="\033[1;30m";
+my $blue="\033[0;34m";
+my $nocolor="\033[0m";
+print "${red}\n";
+print "ERROR:$nocolor the hoppet configure script is no longer support as of version 2.1.0\n";
+print "You should use cmake instead:\n\n";
+print "    make distclean  ${blue}# only if you've already run configure$nocolor\n";
+print "    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/install/path $blue<+optional flags>$nocolor\n";
+print "    cmake build -LH  $blue# to see what extra options are available (e.g. -D...=ON/OFF)$nocolor\n";
+print "    cmake --build  build -j \n";
+print "    ctest --test-dir build  -j4\n";
+print "    cmake --install build\n";
+print "\n";
+print "Standard CMake options include:\n";
+print "    -DCMAKE_Fortran_COMPILER=... \n";
+print "    -DCMAKE_CXX_COMPILER=... \n";
+
+exit 0;
+
 my $usage="
 Usage: 
   ./configure [--prefix=...] [FC='...'] [FFLAGS='...'] [LDFLAGS='...']
@@ -121,10 +142,6 @@ print "You can use the script hoppet-config to find out where things are\n";
 print "You can reconfigure by running this script again\n";
 
 
-my $yellow="\033[0;33m";
-my $grey="\033[1;30m";
-my $blue="\033[0;34m";
-my $nocolor="\033[0m";
 print "${yellow}\n";
 print "WARNING:$nocolor this configure script is DEPRECATED as of version 2.0.0\n";
 print "and will be removed in a future version of HOPPET.\n";

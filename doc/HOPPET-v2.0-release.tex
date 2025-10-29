@@ -20,7 +20,7 @@
   MPP-2023-285\\
   OUTP-23-15P
 \end{flushright}
-\title{\hoppet{} {\tt v2.0.0} release note}
+\title{\hoppet{} {\tt v2} release note}
 
 \author[1]{Alexander Karlberg}\ead{alexander.karlberg@cern.ch}
 \author[2]{Paolo Nason}\ead{paolo.nason@mib.infn.it}
@@ -37,7 +37,7 @@
 \affiliation[7]{organization={Prescient Design, Genentech, 149 5th Avenue},city={New York}, postcode={NY 10010}, country={USA}}
 
 \begin{abstract}
-  We document the three main new features in release 2.0.0 of the
+  We document the three main new features in the v2 release series of the
   \hoppet parton distribution function evolution code, specifically
   support for N$^3$LO QCD evolution in the variable flavour number
   scheme, for the determination of hadronic structure functions for
@@ -148,16 +148,22 @@ particular a Python interface
 We have also updated the performance benchmarks and improved the speed
 for interpolating PDF tables also when loaded from LHAPDF (Section~\ref{sec:v2-performance}).
 %
+\hoppet can be obtained by executing
+\begin{lstlisting}
+          git clone https://github.com/hoppet-code/hoppet.git
+\end{lstlisting}
 Unified documentation of the whole \hoppet package is part of the
 distribution at \url{https://github.com/hoppet-code/hoppet} in the
 \masterlink{doc/} directory.
 %
 Details of the other changes since release 1.1.0 can be found in the
 \masterlink{NEWS.md} and \masterlink{ChangeLog} files from the
-repository.\medskip
+repository.
+%
+\medskip
 
 \noindent \fbox{\parbox{\textwidth}{
-\textbf{Note that for this 2.0.0 release, \hoppet's library name has been renamed
+\textbf{Note that as of the 2.0.0 release, \hoppet's library name has been renamed
 from \texttt{hoppet\_v1} to \texttt{hoppet}, and similarly for the main
 module and \CPP include file.
 %
@@ -207,8 +213,9 @@ tools.
 \section*{Acknowledgements}
 
 We are grateful to Johannes Bl\"umlein for providing us with a
-pre-release version of the code in Ref.~\cite{BlumleinCode} and a
-suitable license for its use.
+pre-release version of an exact Fortran code corresponding
+Ref.~\cite{BlumleinCode} as well as a suitable license for its use,
+and to Arnd Behring for assistance with \ttt{libome}.
 %
 We also gratefully acknowledge Luca Buonocore for his implementation
 of the $P_{lq}$ splitting function in the QED code, Andrii Verbitskyi

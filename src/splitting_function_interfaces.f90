@@ -6,7 +6,7 @@ module hoppet_splitting_function_interfaces
   private
   
 
-  !! the interface for MVV functions like X2NSPA etc in xpns2e
+  !! the interface for MVV functions like X2NSPA etc in xpns2e etc.
   !! 
   !! Note that the arguments are const in practice, but not
   !! declared as such, so to ensure we match the exact form
@@ -17,7 +17,7 @@ module hoppet_splitting_function_interfaces
       import dp
       implicit none
       real(dp) :: x   !< x value
-      integer  :: nf  !< number of light flavours flavours
+      integer  :: nf  !< number of light flavours
     end function P_x_nfint
   end interface
 

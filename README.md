@@ -26,16 +26,14 @@ Key features include:
 
 The latest version can always be obtained from
 
-    git clone --recursive https://github.com/hoppet-code/hoppet
+    git clone https://github.com/hoppet-code/hoppet
 
 Summaries of main new features in each release are in
 [NEWS.md](NEWS.md). More detailed lists of changes are in the
 [ChangeLog](ChangeLog) file.
 
 
-
-## Note on changes in v2.0.0
-
+## Note on changes in v2 series
 
 Starting from v2.0.0, backwards compatibility with the v1 series of
 HOPPET has been broken in one significant way: `hoppet_v1`
@@ -44,17 +42,21 @@ applies to `libhoppet_v1` which is now `libhoppet`, `module hoppet_v1`
 which is now `module hoppet` and the C++ namespace `hoppetv1` which
 is now `hoppet`.
 
-Besides this change most users should be able to start using the v2
+As of v2.1.0 the old hand-coded `./configure` script is no longer
+supported, one must instead use CMake to build HOPPET.
+
+Besides these changes most users should be able to start using the v2
 series without any difficulties.
+
 
 ## Note on Fortran compilers
 
 HOPPET requires support for Fortran 2008. It is developed and tested
-with recent versions of the gfortran compiler (v12 and later) on Linux
+with recent versions of the gfortran compiler (v10 and later) on Linux
 and Mac, and also also gets tested with the Intel (ifx) compiler, as
 part of the CI.
 
-# Build with `CMake`
+# Build
 
 
 ```bash
@@ -73,27 +75,6 @@ Key `<extra flags>` include:
   * `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`, to see the exact compilation commands as a json file
 - flags pointing to the dependencies, `-DLHAPDF_DIR=/where/the/LHAPDF/is`,
 - `-DHOPPET_USE_EXACT_COEF=ON`:    Compile-in exact coefficient functions.
-
-
-
-# Build with the configure script
-
-This is the v1.x build system which will be supported to some extent
-through the v2.0.x releases, but not necessarily beyond. It does not
-support all features (e.g. the Python interface).
-
-For details see the INSTALL file. To get moving quickly, just specify
-an installation prefix and, optionally, a fortran compiler (FC), and then do
-
-    ./configure --prefix="..."  FC="..."
-    make 
-    make check
-    make install      [if you're interested]
-    make install-mod  [if you want the f90 module files installed too]
-
-This is not autotools based: if you're used to more advanced usage of
-autotools scripts, you'll be disappointed here...
-
 
 # Example programs
 
@@ -127,27 +108,15 @@ evolution spread across different subroutines is given as
 
 ## Building the examples
 
-For the CMake-based builds, the Fortran and C++ examples are all
+The Fortran and C++ examples are all
 compiled by default (unless `-DHOPPET_BUILD_EXAMPLES=OFF`) and
-executables are to be found in `build/example_*/` directories. Python
-examples require HOPPET to be installed and for the HOPPET Python module
-to be in the PYTHONPATH. Assuming `hoppet-config` is in your path, you
-can view the correct path with `hoppet-config --pythonpath`. 
+executables are to be found in `build/example_*/` directories. 
 
-
-For the old build system (configure) only the Fortran 90 examples are
-built. For other languages, go into the relevant directory, look inside
-the supplied Makefile and if need be edit it manually.
-
-```bash
-cd example_f77
-# <edit the Makefile directly>
-# compile
-make tabulation_example
-# run the program. Should give output identical to that from
-# example_f90/tabulation_example
-./tabulation_example
-```
+Python examples require a build with `-DHOPPET_BUILD_PYINTERFACE=ON`,
+HOPPET to be installed and for the HOPPET Python module to be in the
+PYTHONPATH. Assuming `hoppet-config` is in your path, you can view the
+correct path with `hoppet-config --pythonpath`.  Alternatively you can 
+simply `pip install hoppet` and then run the Python examples.
 
 # Compilation within your own projects
 

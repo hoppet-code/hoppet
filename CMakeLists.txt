@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.15)
 
 # set the project name and version, including a pre-release label
 ## DO NOT EDIT THIS: set it instead with `scripts/set-version.sh version number`
-project(hoppet VERSION 2.1.0 LANGUAGES C CXX Fortran)
+project(hoppet VERSION 2.1.1 LANGUAGES C CXX Fortran)
 set(PROJECT_VERSION_PRERELEASE "-dev0")
 
 set(HOPPET_VERSION "${PROJECT_VERSION}${PROJECT_VERSION_PRERELEASE}")
@@ -292,8 +292,8 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(src/libome)
-message(WARNING "SOURCESCXX is ${SOURCESCXX}\n")
-message(WARNING "CXXINCLUDE is ${CXXINCLUDE}\n")
+#message(WARNING "SOURCESCXX is ${SOURCESCXX}\n")
+#message(WARNING "CXXINCLUDE is ${CXXINCLUDE}\n")
 
 #  Libraries ===========================================================
 add_library(hoppet SHARED ${SOURCESf90} ${SOURCESf} ${SOURCESCXX})
@@ -532,9 +532,9 @@ if (HOPPET_BUILD_TESTDIR)
       target_link_libraries(${b} PUBLIC hoppet::hoppet_static)
       target_link_libraries(${b} PUBLIC LHAPDF::LHAPDF)
       set_target_properties(${b} PROPERTIES  OUTPUT_NAME ${b}
-	RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
-	Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/${b}_modules
-	POSITION_INDEPENDENT_CODE TRUE
+      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tests/
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/${b}_modules
+      POSITION_INDEPENDENT_CODE TRUE
 	)
     endforeach()
   endif()
