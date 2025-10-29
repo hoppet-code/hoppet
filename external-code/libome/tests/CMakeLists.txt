@@ -1,0 +1,33 @@
+# Unit tests
+add_test_executable(laurent_polynomial_test laurent_polynomial.test.cpp)
+add_test_executable(functions_test functions.test.cpp)
+add_test_executable(piecewise_test piecewise.test.cpp)
+add_test_executable(rpd_distribution_test rpd_distribution.test.cpp)
+add_test_executable(integration_engine_gsl_test integration_engine_gsl.test.cpp)
+target_include_directories(integration_engine_gsl_test PRIVATE ${GSL_INCLUDE_DIRS})
+target_link_directories(integration_engine_gsl_test PRIVATE ${GSL_LIBRARY_DIRS})
+target_link_libraries(integration_engine_gsl_test PRIVATE ${GSL_LIBRARIES})
+add_test_executable(mellin_test mellin.test.cpp)
+target_include_directories(mellin_test PRIVATE ${GSL_INCLUDE_DIRS})
+target_link_directories(mellin_test PRIVATE ${GSL_LIBRARY_DIRS})
+target_link_libraries(mellin_test PRIVATE ${GSL_LIBRARIES})
+
+
+# Integration tests
+add_test_executable(AqqQNSEven_test AqqQNSEven.test.cpp)
+add_test_executable(AqqQNSOdd_test AqqQNSOdd.test.cpp)
+add_test_executable(AQqPS_test AQqPS.test.cpp)
+add_test_executable(AgqQ_test AgqQ.test.cpp)
+add_test_executable(AggQ_test AggQ.test.cpp)
+add_test_executable(AqgQ_test AqgQ.test.cpp)
+add_test_executable(AqqQPS_test AqqQPS.test.cpp)
+add_test_executable(AQg_test AQg.test.cpp)
+
+add_test_executable(polAqqQNSEven_test polAqqQNSEven.test.cpp)
+add_test_executable(polAqqQNSOdd_test polAqqQNSOdd.test.cpp)
+add_test_executable(polAQqPS_test polAQqPS.test.cpp)
+add_test_executable(polAgqQ_test polAgqQ.test.cpp)
+add_test_executable(polAggQ_test polAggQ.test.cpp)
+add_test_executable(polAqgQ_test polAqgQ.test.cpp)
+add_test_executable(polAqqQPS_test polAqqQPS.test.cpp)
+add_test_executable(polAQg_test polAQg.test.cpp)
