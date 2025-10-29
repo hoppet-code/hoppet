@@ -1,4 +1,13 @@
 ------------- libome changes --------------------------
+2025-10-29 Alexander + Gavin
+
+	* external-code/README.md: *** ADDED ***
+	* external-code/libome/:   *** ADDED ***
+	created a a new external-code directory, and added libome
+	(git@gitlab.com:hoppet-code/libome-fork.git libome-func_copy_and_log-quietnan.patch)
+	as a subtree there.
+
+        * src/libome/CMakeLists.txt:
 2025-10-28 Gavin
 
 	* configure:

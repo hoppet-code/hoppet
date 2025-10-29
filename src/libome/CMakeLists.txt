@@ -1,4 +1,4 @@
-set(LIBOME_DIR ${PROJECT_SOURCE_DIR}/submodules/libome-fork/src)
+set(LIBOME_DIR ${PROJECT_SOURCE_DIR}/external-code/libome/src)
 set(CXXINCLUDE ${CXXINCLUDE} ${LIBOME_DIR} PARENT_SCOPE)
 
 file(GLOB LIBOME_SOURCES_CXX ${LIBOME_DIR}/ome/A*.cpp)
