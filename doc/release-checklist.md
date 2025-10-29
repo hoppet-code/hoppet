@@ -1,9 +1,10 @@
 # This is the checklist for making releases
 
+- [ ] start on dev branch, make sure everything relevant is merged in
 - [ ] run ctest
 - [ ] check/update NEWS.md, including release date; commit
 - [ ] run `scripts/set-version.sh X.Y.Z`
-- [ ] update ChangeLog as per suggestion, adding "Release 2.0.0"
+- [ ] update ChangeLog as per suggestion, adding "Release X.Y.Z"
 - [ ] commit and push (on dev branch)
 - [ ] check that wheels work, by going to actions, "Build Python Wheels"
       and selecting the dev branch (takes c. 15 minutes)
