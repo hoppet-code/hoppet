@@ -12,7 +12,8 @@
 * for initialising splitting functions, it is now possible to pass
   any class derived from conv_ignd rather than a function. The class
   should implement conf_ignd%f(y,piece) method to return the value of
-  the splitting function at y for the given piece.
+  the splitting function at y for the given piece. See section 4.3 of the
+  main documentation for details.
   
 ## Other changes
 

@@ -855,6 +855,47 @@ appears between a splitting function and a PDF) instead of
 Note that, for brevity, from now on we will drop the explicit use of
 $x$ in front of names PDF and convolution operator variables.
 
+As of version 2.1.0, it is also possible to initialise a
+\ttt{grid\_def} with a class rather than a function.
+%
+In the \ttt{convolution} module, there is a \ttt{cong\_ignd} abstract
+base class, with a procedure \ttt{f} that should be implemented in the
+user's derived class:
+\begin{lstlisting}
+  type, extends(conv_ignd) :: my_splifn_class
+    ! [...]
+  contains
+    procedure :: f => my_splitfn_f !< f(y,piece) function
+  end type
+\end{lstlisting}
+The function takes two arguments: \ttt{y} as in the example above, and
+also the \ttt{piece}, which is passed as an argument rather than using
+the global \ttt{cc\_piece} variable.
+%
+This is intended to facilitate a path towards potential thread-safe
+initialisation.
+%
+For an illustration of how one might use the class interface, users
+can examine the \ttt{mvv\_splitting\_function} class in
+\masterlink{src/splitting_function_interfaces.f90}, which makes it
+possible to use functions with the standard MVV~\cite{NNLO-NS} interface as
+\begin{lstlisting}
+ call InitGridConv(grid, pgg2, mvv_splitting_function(P2GGA, P2GGB , P2GGC , 0.5_dp**3))
+ call InitGridConv(grid, pqg2, mvv_splitting_function(P2QGA, null(), null(), 0.5_dp**3))
+\end{lstlisting}
+In this particular interface, the \ttt{A}, \ttt{B} and \ttt{C}
+arguments are the regular, plus and delta-function functions, which
+may be left as \ttt{null()} where the function is absent.
+%
+The last argument is a normalisation factor to convert from the $(\as/(4\pi))^3$
+normalisation of the MVV functions to the $(\as/(2\pi))^3$
+normalisation used in \hoppet.
+%
+It currently uses \hoppet's global $n_f$.
+%
+Note that as of v.2.1.0, this specific interface is not widely used
+inside \hoppet and accordingly its details may evolve in future
+releases.
 
 %......................................................................
 \subsubsection{Other operations on \texttt{grid\_conv} objects}
