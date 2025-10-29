@@ -1,43 +1,32 @@
-------------- libome changes --------------------------
-2025-10-29 Alexander + Gavin
-
-	* external-code/README.md: *** ADDED ***
-	* external-code/libome/:   *** ADDED ***
-	created a a new external-code directory, and added libome
-	(git@gitlab.com:hoppet-code/libome-fork.git libome-func_copy_and_log-quietnan.patch)
-	as a subtree there.
-
-	We have switched to a subtree because it reduces the chance of a user
-	getting into trouble after forgetting --recursive. It also 
-	avoids the issues of the github release producing tarballs without
-	the submodules.
-
-	* src/libome/CMakeLists.txt:
-	updated this to reflect new location of libome
-
-	* submodules/libome-fork: *** REMOVED *** 
-	no longer needed since we have things as a subtree.
-
-2025-10-28 Gavin
-
-	* configure:
-	this now prints out an error message telling users to use CMake,
-	officially ending support for the old (./configure) build system
-	as of v 2.1.0.
-
-2025-10-15 Gavin + Alexander
+2025-10-29 Alexander + Gavin (consolidation of 2025-10-libome branch, started 2025-10-03)
 
 	A number of changes to enable the use of libOME for the 
 	N3LO mass thresholds. Note this currently breaks the
 	old (./configure) build system, and hoppet must
 	now be linked also with the C++ libraries.
 
-	* submodules/libome-fork: *** ADDED *** 
-	added this fork of https://gitlab.com/libome/libome for the
+	* external-code/README.md: *** ADDED ***
+	* external-code/libome/:   *** ADDED ***
+	created a a new external-code directory, and added libome
+	(git@gitlab.com:hoppet-code/libome-fork.git libome-func_copy_and_log-quietnan.patch)
+	as a subtree there. The code implements the
 	C++ N3LO mass thresholds, provided as high order expansions
 	in x/logx/etc. (2510.02175)
 
-	* src/libome/CMakeLists.txt:            *** ADDED ***
+	We have switched to a subtree because it reduces the chance of a user
+	getting into trouble after forgetting --recursive. It also 
+	avoids the issues of the github release producing tarballs without
+	the submodules.
+
+	* src/libome/CMakeLists.txt: *** ADDED ***
+	updated this to reflect new location of libome
+
+	* configure:
+	this now prints out an error message telling users to use CMake,
+	officially ending support for the old (./configure) build system
+	as of v 2.1.0.
+
+
 	* src/libome/hoppet_libome_cxx.cc:      *** ADDED ***
 	* src/libome/hoppet_libome_fortran.f90: *** ADDED ***
 	added fortran and C++ file to interface hoppet to libOME.
@@ -62,8 +51,6 @@
 	* pyproject.toml:
 	* doc/HOPPET-doc.tex:
 	changed version to 2.1.0-dev0
-
-2025-10-03 Gavin
 
 	* src/integrator.f90:
 	introduced a set of integrators that take a new class(ig_class)
@@ -98,8 +85,6 @@
 	added test of mvv_splitting_function type and a check of interfacing
 	to a C++ function for a splitting-function integrand.
 
-
-------------- end of libome changes --------------------------
 
 2025-10-18 Sat  <gavin.salam@physics.ox.ac.uk>
 
@@ -157,7 +142,6 @@
 	Removed some comments about FastJet and added version to
 	pyinterface/hoppet.i __version__ string. Now using PEP compliant
 	X.Y.Z-devN for development versions
->>>>>>> dev
 
 2025-10-10 Gavin + Alexander
 
