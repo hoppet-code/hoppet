@@ -7,7 +7,17 @@
 	(git@gitlab.com:hoppet-code/libome-fork.git libome-func_copy_and_log-quietnan.patch)
 	as a subtree there.
 
-        * src/libome/CMakeLists.txt:
+	We have switched to a subtree because it reduces the chance of a user
+	getting into trouble after forgetting --recursive. It also 
+	avoids the issues of the github release producing tarballs without
+	the submodules.
+
+	* src/libome/CMakeLists.txt:
+	updated this to reflect new location of libome
+
+	* submodules/libome-fork: *** REMOVED *** 
+	no longer needed since we have things as a subtree.
+
 2025-10-28 Gavin
 
 	* configure:
