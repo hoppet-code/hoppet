@@ -15,4 +15,5 @@ and then ticks off the items.
 - [ ] once merged, make a release from https://github.com/hoppet-code/hoppet/releases/new
       tagging it as hoppet-X.Y.Z; as text, include the NEWS.md text
 - [ ] go to on github actions and press "Build Python Wheels"
+- [ ] build and upload HOPPET-doc.pdf to the release page
 - [ ] run `scripts/set-version.sh X.Y.(Z+1)-dev0` and update ChangeLog
