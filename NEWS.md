@@ -1,6 +1,6 @@
 # NEWS for HOPPET
 
-# Release 2.1.0, XX October 2025
+# Release 2.1.0, 29 October 2025
 
 ## Major new features:
 

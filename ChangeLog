@@ -1,3 +1,15 @@
+2025-10-29 Alexander + Gavin
+
+	* NEWS.md:
+	Release 2.1.0
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* doc/HOPPET-doc.tex:
+	changed version to 2.1.0
+	
 2025-10-29 Alexander + Gavin (consolidation of 2025-10-libome branch, started 2025-10-03)
 
 	A number of changes to enable the use of libOME for the 
