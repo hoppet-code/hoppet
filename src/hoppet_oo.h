@@ -24,10 +24,10 @@ extern "C" {
 }
 
 extern "C" {
-  void * hoppet_cxx__grid_quant__new(grid_def_f * griddef);
-  void   hoppet_cxx__grid_quant__delete(void ** gridquant);
-  double hoppet_cxx__grid_quant__at_y(void * gridquant, double y);
-  double * hoppet_cxx__grid_quant__data_ptr(void * gridquant);
+  grid_quant_f * hoppet_cxx__grid_quant__new(grid_def_f * griddef);
+  void   hoppet_cxx__grid_quant__delete(grid_quant_f ** gridquant);
+  double hoppet_cxx__grid_quant__at_y(grid_quant_f * gridquant, double y);
+  double * hoppet_cxx__grid_quant__data_ptr(grid_quant_f * gridquant);
 
   //void   hoppet_cxx__grid_quant__set_zero(void * gridquant);
   //void   hoppet_cxx__grid_quant__copy_from(void * gridquant, void * other);
@@ -91,6 +91,35 @@ public:
 };  
 
 
+
+class grid_quant_view {
+public:
+  grid_quant_view() {}
+
+  grid_quant_view(const grid_quant_view & other) : _ptr(other._ptr) {}
+
+  double at_y(double y) const {
+    return hoppet_cxx__grid_quant__at_y(_ptr, y);
+  }
+
+  double at_x(double x) const {
+    double y = std::log(1.0/x);
+    return at_y(y);
+  }
+
+  const double * data() const {
+    return hoppet_cxx__grid_quant__data_ptr(_ptr);
+  }
+
+  double * data() {
+    return hoppet_cxx__grid_quant__data_ptr(_ptr);
+  }
+
+protected:
+  /// @brief pointer to the underlying Fortran grid_quant object
+  grid_def_view _grid;
+  grid_quant_f * _ptr = nullptr;
+};
 
 //-----------------------------------------------------------------------------
 class grid_quant {
@@ -239,21 +268,6 @@ public:
 
   ///@}
 
-  /// binary arithmetic operators
-  ///@{
-//  grid_quant operator+(const grid_quant & other) const {
-//    grid_quant new_gq(_grid);    
-//    double * new_gq_data = new_gq.data();
-//    const double * this_data = data();
-//    const double * other_data = other.data();
-//    std::size_t sz = size();
-//    //auto [sz, new_grid, new_grid_data, this_data, other_data] = prepare_binary(other);
-//    for (std::size_t iy=0; iy<sz; ++iy) new_gq_data[iy] = this_data[iy] + other_data[iy];
-//    return new_gq;
-//  }
-  ///@}
-
-
 
 protected:  
 
@@ -264,20 +278,15 @@ protected:
     return std::make_tuple(size(), this_data, other_data);
   }
 
-  /// copy the data from other, assuming *this is initialised
+  /// copy the data from other, assuming *this is initialised and of the correct size, etc.
   grid_quant & copy_data(const grid_quant & other) {
-    int ny = _grid.ny();
-    const double * src_data = other.data();
-    double * dst_data = data();
-    for (int iy=0; iy<=ny; ++iy) {
-      dst_data[iy] = src_data[iy];
-    }
+    auto [sz, this_data, other_data] = prepare_compound(other);
+    std::copy(other_data, other_data + sz, this_data);
     return *this;
   }
 
-
   grid_def_view _grid;
-  void * _ptr = nullptr;
+  grid_quant_f * _ptr = nullptr;
 };
 
 /// binary arithmetic operators
