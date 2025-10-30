@@ -2,6 +2,7 @@
 #define __HOPPET_OO__
 #include "hoppet.h"
 #include <vector>
+#include <cmath>
 
 /// "forward" declaration of the Fortran grid_def type;
 /// note that we only ever use pointers to it, so we do not
@@ -160,7 +161,7 @@ public:
     return hoppet_cxx__grid_quant__at_y(_ptr, y);
   }
   double at_x(double x) const {
-    double y = log(1.0/x);
+    double y = std::log(1.0/x);
     return hoppet_cxx__grid_quant__at_y(_ptr, y);
   }
 
