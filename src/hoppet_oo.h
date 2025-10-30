@@ -264,17 +264,6 @@ protected:
     return std::make_tuple(size(), this_data, other_data);
   }
 
-  //inline std::tuple<std::size_t, grid_quant, double *, const double *, const double *> prepare_binary(const grid_quant & other) const {
-  //  assert( _grid.ptr() == other._grid.ptr() && "grid_quant binary op with another grid_quant: grids do not match");
-  //  grid_quant new_gq(_grid);
-  //  new_gq._is_tmp = true;
-  //  double * new_gq_data = new_gq.data();
-  //  const double * this_data = data();
-  //  const double * other_data = other.data();
-  //  return std::make_tuple(size(), new_gq, new_gq_data, this_data, other_data);
-  //}
-
-
   /// copy the data from other, assuming *this is initialised
   grid_quant & copy_data(const grid_quant & other) {
     int ny = _grid.ny();
