@@ -1,3 +1,14 @@
+2025-10-30 Gavin
+
+	* CMakeLists.txt:
+	with FPEs on, added -ffp-exception-behavior=maytrap option with clang, 
+	which resolves FPEs libOME in logs associated with speculative optimisations
+	(logs that are not supposed to evaluated when the arg is -ve but still were on the 
+	speculative path). Suggested by Arnd Behring.
+
+	* .github/workflows/main.yml:
+	restored use of FPEs in CI builds, following fix in CMakeLists.txt
+
 2025-10-29 Alexander + Gavin
 
 	* CMakeLists.txt:

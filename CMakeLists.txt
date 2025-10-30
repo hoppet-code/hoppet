@@ -170,6 +170,12 @@ if (HOPPET_ENABLE_FPES)
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,XL>:-qflttrap=overflow:underflow:invalid:zerodivide:enable>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,Flang>:-ffp-exception-behavior=strict>")
   add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,ARM>:-ffp-contract=on>")
+  # with "maytrap" compiler avoids transformations that may raise
+  # exceptions that would not have been raised by the original code.
+  # https://clang.llvm.org/docs/UsersManual.html#controlling-floating-point-behavior
+  # Added 2025-10-30 following suggestion from Arnd Behring for libOME with FPEs turned on
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:CXX,Clang>:-ffp-exception-behavior=maytrap>")
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:CXX,AppleClang>:-ffp-exception-behavior=maytrap>")
 endif()
 
 # test for the array bound bug
