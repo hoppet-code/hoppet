@@ -1,3 +1,31 @@
+--------- 2025-10-cxx-OO branch ---------
+
+2025-10-29 Gavin
+
+	* unit-tests-cxx/unit-tests.cc:
+	added test of grid_quant construction with function
+
+	* src/hoppet_cxx_oo.f90:
+	added grid_quant type + some interface functions
+	- hoppet_cxx__grid_quant__new
+	- hoppet_cxx__grid_quant__delete
+	- hoppet_cxx__grid_quant__at_y
+	- hoppet_cxx__grid_quant__data_ptr
+
+	* src/hoppet_oo.h:
+	added grid_quant class wrapping the corresponding Fortran type
+
+2025-10-16 Gavin
+
+	* src/hoppet_cxx_oo.f90:          *** ADDED ***
+	* src/hoppet_oo.h:                *** ADDED ***
+	* unit-tests-cxx/unit-tests.cc:   *** ADDED ***
+	started experimentation on an OO C++ interface wrapping
+	Fortran objects. At this stage only for the grid_def
+	class.
+
+--------- end 2025-10-cxx-OO branch ---------
+
 2025-10-29 Alexander + Gavin
 
 	* CMakeLists.txt:
