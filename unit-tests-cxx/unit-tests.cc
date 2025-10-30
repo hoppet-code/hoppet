@@ -2,9 +2,19 @@
 #include <iostream>
 #include <cmath>
 
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+// define a shorthand for Catch::Matchers::WithinAbs
+using Catch::Matchers::WithinAbs;
+using Catch::Matchers::WithinRel;
+
+
+//#include "catch_amalgamated.hpp"
+
 using namespace std;
 
-void example() {
+TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   hoppet::grid_def grid(0.1, 10.0);
   std::cout << "grid.ny(): "  << grid.ny() << std::endl;
   std::cout << "grid.ptr(): " << grid.ptr() << std::endl;
@@ -23,13 +33,14 @@ void example() {
 
   hoppet::grid_quant q2 = q; // copy constructor
   cout << "q.at_y(5.0): " << q.at_y(5.0) << endl;
-
+  REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
   int iy = grid.ny() / 2;
-  cout << "q[" << iy << "] = " << q[iy] << " " << pow(yvals[iy],2) <<  endl;
+  REQUIRE( q[iy] == q2[iy] );
+  //cout << "q[" << iy << "] = " << q[iy] << " " << pow(yvals[iy],2) <<  endl;
 
 }
 
-int main() {
-  example();
-  return 0;
-}
+//int main() {
+//  example();
+//  return 0;
+//}

@@ -159,6 +159,10 @@ public:
   double at_y(double y) const {
     return hoppet_cxx__grid_quant__at_y(_ptr, y);
   }
+  double at_x(double x) const {
+    double y = log(1.0/x);
+    return hoppet_cxx__grid_quant__at_y(_ptr, y);
+  }
 
   void * ptr() const { return _ptr; }
 
