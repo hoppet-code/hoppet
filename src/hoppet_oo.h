@@ -296,11 +296,11 @@ protected:
 
 // these all use a copy-and-modify strategy, exploiting the move semantics
 // for copy elision
-grid_quant operator+(grid_quant a, const grid_quant & b) {a += b; return a;}
-grid_quant operator-(grid_quant a, const grid_quant & b) {a -= b; return a;}
-grid_quant operator*(grid_quant a, double b) {a *= b; return a;}
-grid_quant operator*(double b, grid_quant a) {a *= b; return a;}
-grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
+inline grid_quant operator+(grid_quant a, const grid_quant & b) {a += b; return a;}
+inline grid_quant operator-(grid_quant a, const grid_quant & b) {a -= b; return a;}
+inline grid_quant operator*(grid_quant a, double b) {a *= b; return a;}
+inline grid_quant operator*(double b, grid_quant a) {a *= b; return a;}
+inline grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
 
 ///@}
 
