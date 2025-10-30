@@ -34,10 +34,10 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   // check value is OK (approx, in case we change the grid definition)
   REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
 
-  // make sure we can copy things OK
+  // make sure we can copy things OK and that we get a genuine copy
   hoppet::grid_quant q2 = q; // copy constructor
   REQUIRE ( q.ptr() != q2.ptr() ); // different underlying pointers
-  REQUIRE ( q[iy] == q2[iy] );
+  REQUIRE ( q[iy] == q2[iy] );     // same values
 
   hoppet::grid_quant q3(grid);
   q3.copy(q); // copy 
@@ -50,44 +50,27 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   q3.move(q2); // move
   REQUIRE ( q3.ptr() == q2_ptr ); // q3 has taken ownership of q2's pointer
 
-  // test move via copy constructor and assignment operator
+  // test move via explicit std::move
   q2 = q;
   q2_ptr = q2.ptr();
-  q2.mk_tmp(); // mark as temporary
-  REQUIRE(q2.is_tmp());
-  q3 = q2; // assignment operator, should go via a move
-  REQUIRE (!q3.is_tmp());
+  q3 = std::move(q2); // assignment operator, should go via a move
   REQUIRE ( q3.ptr() == q2_ptr ); // q3 has taken ownership of q2's pointer
-  
-  q2 = q;
-  q2_ptr = q2.ptr();
-  q2.mk_tmp(); // mark as temporary
-  hoppet::grid_quant q33(q2); // copy constructor, should go via a move
-  REQUIRE ( q33.ptr() == q2_ptr ); // q33 has taken ownership of
-
+  REQUIRE ( q2.ptr() == nullptr ); // q2 has been nulled
 
   //------- compound operations ------------------------
-  q3 += q;
-  REQUIRE ( q3[iy] == 2.0 * q[iy] );
-
-  q3 *= 2.0;
-  REQUIRE ( q3[iy] == 4.0 * q[iy] );
-
-  q3 /= 2.0;
-  REQUIRE ( q3[iy] == 2.0 * q[iy] );
-
-  q3 -= q;
-  REQUIRE ( q3[iy] == q[iy] );
+  q3 += q;    REQUIRE ( q3[iy] == 2.0 * q[iy] );
+  q3 *= 2.0;  REQUIRE ( q3[iy] == 4.0 * q[iy] );
+  q3 /= 2.0;  REQUIRE ( q3[iy] == 2.0 * q[iy] );
+  q3 -= q;    REQUIRE ( q3[iy] == q[iy] );
 
 
   //------- binary operations ------------------------
-  cout << "testing binary + operator\n";
-  hoppet::grid_quant q4(q + q);
-  cout << "q4 is_tmp(): " << q4.is_tmp() << "\n";
-  REQUIRE ( q4[iy] == 2.0 * q[iy] );
-  cout << "testing binary + operator\n";
-  q4 = q + q;
-  cout << "q4 is_tmp(): " << q4.is_tmp() << "\n";
-  REQUIRE ( q4[iy] == 2.0 * q[iy] );
+  hoppet::grid_quant q4;
+  q4 = q+q;   REQUIRE ( q4[iy] == 2.0 * q[iy] );
+  q4 = q4-q;  REQUIRE ( q4[iy] ==       q[iy] );
+  q4 = q+q4;  REQUIRE ( q4[iy] == 2.0 * q[iy] );
+  q4 = q*2.0; REQUIRE ( q4[iy] == 2.0 * q[iy] );
+  q4 = 2.0*q; REQUIRE ( q4[iy] == 2.0 * q[iy] );
+  q4 = q/2.0; REQUIRE ( q4[iy] == 0.5 * q[iy] );
 }
 

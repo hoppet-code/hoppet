@@ -95,86 +95,74 @@ public:
 //-----------------------------------------------------------------------------
 class grid_quant {
 public:
+
+  grid_quant() : _ptr(nullptr) {}
+
   /// construct and allocate a grid_quant for the given grid
   grid_quant(const grid_def_view & grid)
     : _ptr(hoppet_cxx__grid_quant__new(grid.ptr())), 
-      _grid(grid), _owns_ptr(true) {}
+      _grid(grid) {}
 
   /// construct and allocate a grid_quant for the given grid, and fill it
   /// with the specified function
   template<class T>
-  grid_quant(const grid_def_view & grid, const T & fn)
-    : grid_quant(grid) {
+  grid_quant(const grid_def_view & grid, const T & fn) : grid_quant(grid) {
     *this = fn;
   }
 
   /// copy constructor
   grid_quant(const grid_quant & other) {
-    std::cout << "copy constructing\n";
-    if (other._is_tmp && other._owns_ptr) move(other);
-    else                     copy(other);
+    //std::cout << "copy constructing\n";
+    copy(other);
   }
 
-  grid_quant(grid_quant && other) {
-    std::cout << "move constructing\n";
+  /// move constructor
+  grid_quant(grid_quant && other) noexcept {
+    //std::cout << "move constructing\n";
     move(other);
   }
 
   /// @brief delete the underlying Fortran object if allocated and owned
-  void del() {if (_ptr && _owns_ptr) hoppet_cxx__grid_quant__delete(&_ptr); _ptr=nullptr;}
+  void del() {if (_ptr) hoppet_cxx__grid_quant__delete(&_ptr); _ptr=nullptr;}
 
   /// @brief destructor
   ~grid_quant() {del();}
 
   std::size_t size() const { return _grid.ny()+1; }
 
-// move assignment
+  // move assignment
   grid_quant& operator=(grid_quant&& other) noexcept {
-  std::cout << "move assigning\n";
-  if (this != &other) {
-    del();
-    _grid = std::move(other._grid);
-    _ptr = other._ptr;
-    _owns_ptr = other._owns_ptr;
-    _is_tmp = false;
-
-    other._ptr = nullptr;
-    other._owns_ptr = false;
-    other._is_tmp = false;
-  }
-  return *this;
+    //std::cout << "move assigning\n";
+    if (this != &other) {
+      del();
+      move(other);
+    }
+    return *this;
   }
 
-  grid_quant & move(const grid_quant & other) {
-    std::cout << "moving " << other.ptr() << "\n"; 
-    del();
+  grid_quant & move(grid_quant & other) noexcept {
+    //std::cout << "actually moving " << other.ptr() << "\n"; 
     // move the semantics
     _ptr = other._ptr;
     _grid = other._grid;
-    _owns_ptr = other._owns_ptr;
-    _is_tmp = false;
     other._ptr = nullptr;
-    other._owns_ptr = false;
     return *this;
   }
   
 
   grid_quant & copy(const grid_quant & other) {
-    std::cout << "copying " << other.ptr() << "\n";
-    if (_ptr && grid().ptr() == other.grid().ptr()) return copy_data(other);
+    //std::cout << "copying " << other.ptr() << "\n";
+    if (_ptr && grid().ny() == other.grid().ny()) return copy_data(other);
     else {
       del();
       _ptr = hoppet_cxx__grid_quant__new(other._grid.ptr());
       _grid = other.grid();
-      _owns_ptr = true;
-      _is_tmp = false;
       return copy_data(other);
     }
   }
 
   grid_quant & operator=(const grid_quant & other) {
     if (_ptr == other._ptr) return *this; // self-assignment check
-    if (other._is_tmp)      return move(other);
     return copy(other);
   }
 
@@ -213,16 +201,11 @@ public:
   double at_y(double y) const {
     return hoppet_cxx__grid_quant__at_y(_ptr, y);
   }
+
   double at_x(double x) const {
     double y = std::log(1.0/x);
     return hoppet_cxx__grid_quant__at_y(_ptr, y);
   }
-
-  grid_quant & mk_tmp() {
-    _is_tmp = true;
-    return *this;
-  }
-  bool is_tmp() const { return _is_tmp; }
 
   void * ptr() const { return _ptr; }
   
@@ -258,17 +241,16 @@ public:
 
   /// binary arithmetic operators
   ///@{
-  grid_quant operator+(const grid_quant & other) const {
-    grid_quant new_gq(_grid);    
-    new_gq.mk_tmp();
-    double * new_gq_data = new_gq.data();
-    const double * this_data = data();
-    const double * other_data = other.data();
-    std::size_t sz = size();
-    //auto [sz, new_grid, new_grid_data, this_data, other_data] = prepare_binary(other);
-    for (std::size_t iy=0; iy<sz; ++iy) new_gq_data[iy] = this_data[iy] + other_data[iy];
-    return new_gq;
-  }
+//  grid_quant operator+(const grid_quant & other) const {
+//    grid_quant new_gq(_grid);    
+//    double * new_gq_data = new_gq.data();
+//    const double * this_data = data();
+//    const double * other_data = other.data();
+//    std::size_t sz = size();
+//    //auto [sz, new_grid, new_grid_data, this_data, other_data] = prepare_binary(other);
+//    for (std::size_t iy=0; iy<sz; ++iy) new_gq_data[iy] = this_data[iy] + other_data[iy];
+//    return new_gq;
+//  }
   ///@}
 
 
@@ -306,10 +288,23 @@ protected:
 
 
   grid_def_view _grid;
-  mutable void * _ptr = nullptr;
-  mutable bool _owns_ptr = false;
-  mutable bool _is_tmp = false;
+  void * _ptr = nullptr;
 };
+
+/// binary arithmetic operators
+///@{
+
+// these all use a copy-and-modify strategy, exploiting the move semantics
+// for copy elision
+grid_quant operator+(grid_quant a, const grid_quant & b) {a += b; return a;}
+grid_quant operator-(grid_quant a, const grid_quant & b) {a -= b; return a;}
+grid_quant operator*(grid_quant a, double b) {a *= b; return a;}
+grid_quant operator*(double b, grid_quant a) {a *= b; return a;}
+grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
+
+///@}
+
+
 
 } // end namespace hoppet
 #endif // __HOPPET_OO__
