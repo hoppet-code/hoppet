@@ -154,6 +154,12 @@ public:
     return hoppet_cxx__grid_quant__data_ptr(_ptr);
   }
 
+  template<typename T>
+  double & operator[](T i) {return data()[i];}
+
+  template<typename T>
+  const double & operator[](T i) const {return data()[i];}
+    
   /// return a ref to the associated grid definition
   const grid_def & grid() const {return _grid;}
 
