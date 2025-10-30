@@ -3,17 +3,24 @@
 #include "hoppet.h"
 #include <vector>
 
-extern "C" {
-  void * hoppet_cxx__grid_def__new(double dy, double ymax, int order, double eps);
-  void   hoppet_cxx__grid_def__delete(void ** griddef);
+/// "forward" declaration of the Fortran grid_def type;
+/// note that we only ever use pointers to it, so we do not
+/// need to know anything about its actual structure, which
+/// is hidden in the Fortran code.
+class grid_def_f;
+class grid_quant_f;
 
-  int    hoppet_cxx__grid_def__ny(void * griddef);
-  void   hoppet_cxx__grid_def__y_values(void * griddef, double * yvals);
-  void   hoppet_cxx__grid_def__x_values(void * griddef, double * xvals);
+extern "C" {
+  grid_def_f * hoppet_cxx__grid_def__new(double dy, double ymax, int order, double eps);
+  void   hoppet_cxx__grid_def__delete(grid_def_f ** griddef);
+
+  int    hoppet_cxx__grid_def__ny(grid_def_f * griddef);
+  void   hoppet_cxx__grid_def__y_values(grid_def_f * griddef, double * yvals);
+  void   hoppet_cxx__grid_def__x_values(grid_def_f * griddef, double * xvals);
 }
 
 extern "C" {
-  void * hoppet_cxx__grid_quant__new(void * griddef);
+  void * hoppet_cxx__grid_quant__new(grid_def_f * griddef);
   void   hoppet_cxx__grid_quant__delete(void ** gridquant);
   double hoppet_cxx__grid_quant__at_y(void * gridquant, double y);
   double * hoppet_cxx__grid_quant__data_ptr(void * gridquant);
@@ -39,7 +46,7 @@ public:
   grid_def(double dy, double ymax, int order=-5, double eps=1e-7)
     : _ptr(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
 
-  grid_def(void * ptr, bool owns_ptr=false)
+  grid_def(grid_def_f * ptr, bool owns_ptr=false)
     : _ptr(ptr), _owns_ptr(owns_ptr) {}
 
   ~grid_def() {if (_ptr && _owns_ptr) hoppet_cxx__grid_def__delete(&_ptr); }
@@ -57,9 +64,9 @@ public:
     return xvals;
   }
 
-  void * ptr() const { return _ptr; }
+  grid_def_f * ptr() const { return _ptr; }
 private:
-  void * _ptr = nullptr;
+  grid_def_f * _ptr = nullptr;
   bool _owns_ptr = true;
 };  
 
