@@ -1,5 +1,5 @@
 #ifndef __HOPPET_OO__
-#define __HOPPET_OO__
+#define __HOPPET_ OO__
 #include "hoppet.h"
 #include <vector>
 #include <cmath>
@@ -12,6 +12,7 @@
 /// is hidden in the Fortran code.
 class grid_def_f;
 class grid_quant_f;
+
 
 extern "C" {
   grid_def_f * hoppet_cxx__grid_def__new(double dy, double ymax, int order, double eps);
@@ -36,23 +37,17 @@ namespace hoppet {
 
 
 //-----------------------------------------------------------------------------
-/// @brief Object-oriented wrapper around the grid_def Fortran type
+/// @brief Object-oriented wrapper around the grid_def Fortran type, non-owning
 ///
-/// @todo allow for nested grids
-/// @todo 
-class grid_def {
+/// This version provides a "view" onto an existing Fortran grid_def object,
+/// without taking ownership of it.
+class grid_def_view {
 public:
 
+  grid_def_view() {}
 
-  grid_def() {};
-
-  grid_def(double dy, double ymax, int order=-5, double eps=1e-7)
-    : _ptr(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
-
-  grid_def(grid_def_f * ptr, bool owns_ptr=false)
-    : _ptr(ptr), _owns_ptr(owns_ptr) {}
-
-  ~grid_def() {if (_ptr && _owns_ptr) hoppet_cxx__grid_def__delete(&_ptr); }
+  grid_def_view(grid_def_f * ptr) : _ptr(ptr) {}
+  grid_def_view(const grid_def_view & other) : _ptr(other._ptr) {}
 
   int ny() const {return hoppet_cxx__grid_def__ny(_ptr); }
 
@@ -68,23 +63,47 @@ public:
   }
 
   grid_def_f * ptr() const { return _ptr; }
-private:
+protected:
+  /// @brief pointer to the underlying Fortran grid_def object
   grid_def_f * _ptr = nullptr;
-  bool _owns_ptr = true;
+};
+
+
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the grid_def Fortran type, with ownership
+///
+/// This version takes ownership of the underlying Fortran grid_def object
+class grid_def : public grid_def_view {
+public:
+
+  grid_def() {};
+
+  grid_def(double dy, double ymax, int order=-5, double eps=1e-7)
+    : grid_def_view(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
+
+  grid_def(grid_def_f * ptr) : grid_def_view(ptr) {}
+
+  /// for now, disable copy construction to avoid double deletions
+  grid_def(const grid_def & other) = delete;
+
+  ~grid_def() {if (_ptr) hoppet_cxx__grid_def__delete(&_ptr); }
+
 };  
+
+
 
 //-----------------------------------------------------------------------------
 class grid_quant {
 public:
   /// construct and allocate a grid_quant for the given grid
-  grid_quant(const grid_def & grid)
+  grid_quant(const grid_def_view & grid)
     : _ptr(hoppet_cxx__grid_quant__new(grid.ptr())), 
-      _grid(grid.ptr(),false), _owns_ptr(true) {}
+      _grid(grid), _owns_ptr(true) {}
 
   /// construct and allocate a grid_quant for the given grid, and fill it
   /// with the specified function
   template<class T>
-  grid_quant(const grid_def & grid, const T & fn)
+  grid_quant(const grid_def_view & grid, const T & fn)
     : grid_quant(grid) {
     *this = fn;
   }
@@ -110,7 +129,7 @@ public:
   std::size_t size() const { return _grid.ny()+1; }
 
 // move assignment
-grid_quant& operator=(grid_quant&& other) noexcept {
+  grid_quant& operator=(grid_quant&& other) noexcept {
   std::cout << "move assigning\n";
   if (this != &other) {
     del();
@@ -124,7 +143,7 @@ grid_quant& operator=(grid_quant&& other) noexcept {
     other._is_tmp = false;
   }
   return *this;
-}
+  }
 
   grid_quant & move(const grid_quant & other) {
     std::cout << "moving " << other.ptr() << "\n"; 
@@ -146,7 +165,7 @@ grid_quant& operator=(grid_quant&& other) noexcept {
     else {
       del();
       _ptr = hoppet_cxx__grid_quant__new(other._grid.ptr());
-      _grid = grid_def(other._grid.ptr(), false);
+      _grid = other.grid();
       _owns_ptr = true;
       _is_tmp = false;
       return copy_data(other);
@@ -189,7 +208,7 @@ grid_quant& operator=(grid_quant&& other) noexcept {
   const double & operator[](T i) const {return data()[i];}
 
   /// return a ref to the associated grid definition
-  const grid_def & grid() const {return _grid;}
+  const grid_def_view & grid() const {return _grid;}
 
   double at_y(double y) const {
     return hoppet_cxx__grid_quant__at_y(_ptr, y);
@@ -286,7 +305,7 @@ protected:
   }
 
 
-  grid_def _grid;
+  grid_def_view _grid;
   mutable void * _ptr = nullptr;
   mutable bool _owns_ptr = false;
   mutable bool _is_tmp = false;
