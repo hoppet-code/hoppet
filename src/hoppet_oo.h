@@ -86,10 +86,13 @@ public:
     *this = fn;
   }
 
-
+  /// copy constructor
   grid_quant(const grid_quant & other) {copy(other);}
 
+  /// @brief delete the underlying Fortran object if allocated and owned
   void del() {if (_ptr && _owns_ptr) hoppet_cxx__grid_quant__delete(&_ptr); _ptr=nullptr;}
+
+  /// @brief destructor
   ~grid_quant() {del();}
 
   grid_quant & move(const grid_quant & other) {
@@ -103,16 +106,6 @@ public:
     return *this;
   }
 
-  // copy the data, assuming this is initialised
-  grid_quant & copy_data(const grid_quant & other) {
-    int ny = _grid.ny();
-    const double * src_data = other.data();
-    double * dst_data = data();
-    for (int iy=0; iy<=ny; ++iy) {
-      dst_data[iy] = src_data[iy];
-    }
-    return *this;
-  }
 
   grid_quant & copy(const grid_quant & other) {
     if (_ptr && grid().ptr() == other.grid().ptr()) return copy_data(other);
@@ -159,7 +152,7 @@ public:
 
   template<typename T>
   const double & operator[](T i) const {return data()[i];}
-    
+
   /// return a ref to the associated grid definition
   const grid_def & grid() const {return _grid;}
 
@@ -169,8 +162,20 @@ public:
 
   void * ptr() const { return _ptr; }
 
+protected:  
 
-private:
+  /// copy the data from other, assuming *this is initialised
+  grid_quant & copy_data(const grid_quant & other) {
+    int ny = _grid.ny();
+    const double * src_data = other.data();
+    double * dst_data = data();
+    for (int iy=0; iy<=ny; ++iy) {
+      dst_data[iy] = src_data[iy];
+    }
+    return *this;
+  }
+
+
   grid_def _grid;
   mutable void * _ptr = nullptr;
   mutable bool _owns_ptr = false;
