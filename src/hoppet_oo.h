@@ -138,6 +138,7 @@ inline grid_def grid_def_default(double dy, double ymax, int order) {
   return grid_def(hoppet_cxx__grid_def__new_default(dy, ymax, order));
 }
 
+class grid_quant; // forward declaration
 
 class grid_quant_view {
 public:
@@ -146,6 +147,10 @@ public:
   grid_quant_view(const grid_def_view & grid, grid_quant_f * ptr)
     : _grid(grid), _ptr(ptr) {}
 
+  grid_quant_view operator=(const grid_quant & other) = delete; // prevent assignment
+  //grid_quant_view(const grid_quant & other) = delete; // prevent copying from owning class
+
+  //grid_quant_view view(const grid_quant_view & other) {} 
 
   std::size_t size() const { return _grid.ny()+1; }
 

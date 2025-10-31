@@ -108,13 +108,14 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
   q4 = q/2.0; REQUIRE ( q4[iy] == 0.5 * q[iy] );
 
   //-- test operations with views ------------------------
-  hoppet::grid_quant_view qv = q; // "view" copy constructor (effectively a reference)
+  hoppet::grid_quant_view qv(q); // "view" copy constructor (effectively a reference)
   REQUIRE( q.ptr() == qv.ptr() ); 
   q4 += qv;   REQUIRE ( q4[iy] == 1.5 * q[iy] );
   q2 = q;
-  qv = q2;
-  qv += q2;   REQUIRE ( qv[iy] == 2.0 * q[iy] );
-  qv += 2*q;  REQUIRE ( qv[iy] == 4.0 * q[iy] );
-  q3 = qv + q; REQUIRE ( q3[iy] == 5.0 * q[iy] );
+  hoppet::grid_quant_view qv2(q2); // "view" copy constructor (effectively a reference)
+  qv2 += q2;   REQUIRE ( qv2[iy] == 2.0 * q[iy] );
+  qv2 += 2*q;  REQUIRE ( qv2[iy] == 4.0 * q[iy] );
+  q3 = qv2 + q; REQUIRE ( q3[iy] == 5.0 * q[iy] );
+  //qv = q + q4; REQUIRE ( qv[iy] == 5.0 * q[iy] );
 }
 
