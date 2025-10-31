@@ -589,5 +589,5 @@ set(libdir "${CMAKE_INSTALL_LIBDIR}")
 configure_file("${PROJECT_SOURCE_DIR}/scripts/hoppet-config.in" "${PROJECT_BINARY_DIR}/bin/hoppet-config")
 
 # Banner to print after install
-install(CODE "execute_process(COMMAND bash \"${CMAKE_SOURCE_DIR}/scripts/print_banner.sh\" ${PROJECT_VERSION})")
+install(CODE "execute_process(COMMAND bash \"${CMAKE_SOURCE_DIR}/scripts/print_banner.sh\" ${PROJECT_VERSION}${PROJECT_VERSION_PRERELEASE})")
 
