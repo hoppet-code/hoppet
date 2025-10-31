@@ -1,3 +1,9 @@
+2025-10-31 Gavin
+
+	* CMakeLists.txt:
+	arranged for print_banner.sh call to use the full version number including any 
+	prerelease tag, and to have it centred correctly.
+
 2025-10-30 Gavin
 
 	* CMakeLists.txt:
