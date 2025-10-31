@@ -91,6 +91,7 @@ jobs:
           cmake --build BUILD -j
           cmake --install BUILD
           #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
+          valgrind --leak-check=full BUILD/unit-tests-cxx/hoppet-unit-tests-cxx -s
           #BUILD/unit-tests/hoppet-unit-tests 
           ctest --test-dir BUILD -j 2 --output-on-failure
           # now try running the python example
