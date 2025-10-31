@@ -81,8 +81,29 @@ public:
 
   grid_def() {};
 
+  /// @brief construct and allocate a new grid_def object
+  ///
+  /// @param dy      grid spacing
+  /// @param ymax    maximum y value
+  /// @param order   usual interpolation order parameter
+  /// @param eps     accuracy for the adaptive integration
+  //
   grid_def(double dy, double ymax, int order=-5, double eps=1e-7)
     : grid_def_view(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
+
+  /// @brief construct a grid_def from multiple grid_def objects
+  ///
+  /// @param grids   vector of grid_def objects
+  /// @param locked  whether the new grid should be "locked"
+  grid_def(const std::vector<grid_def> & grids, bool locked=false) {
+    int ngrids = static_cast<int>(grids.size());
+    std::vector<grid_def_f *> grid_ptrs(ngrids);
+    for (int i=0; i<ngrids; ++i) {
+      grid_ptrs[i] = grids[i].ptr();
+    }
+    _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
+  }
+
 
   grid_def(const grid_def & other)
     : grid_def_view(hoppet_cxx__grid_def__copy(other.ptr())) {}
@@ -101,15 +122,6 @@ public:
     return *this;
   }
     
-  grid_def(const std::vector<grid_def_view> & grids, bool locked=false) {
-    int ngrids = static_cast<int>(grids.size());
-    std::vector<grid_def_f *> grid_ptrs(ngrids);
-    for (int i=0; i<ngrids; ++i) {
-      grid_ptrs[i] = grids[i].ptr();
-    }
-    _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
-  }
-
   ~grid_def() {if (_ptr) hoppet_cxx__grid_def__delete(&_ptr); }
 
 protected:
