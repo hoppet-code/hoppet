@@ -212,7 +212,6 @@ jobs:
           #lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests/hoppet-unit-tests 2>&1
     - name: Debug
       run: |
-          echo "Running lldb tests
           lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests-cxx/hoppet-unit-tests-cxx 
     - name: Install_and_test
       run: |
