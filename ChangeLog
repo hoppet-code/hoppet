@@ -1,5 +1,11 @@
 --------- 2025-10-cxx-OO branch ---------
 
+Summary of classes
+	- grid_def_view
+	- grid_def
+	- grid_quant
+	- [grid_quant_view] to be written
+
 2025-10-29 Gavin
 
 	* unit-tests-cxx/unit-tests.cc:
