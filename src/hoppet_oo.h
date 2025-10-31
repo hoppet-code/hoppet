@@ -17,6 +17,7 @@ class grid_quant_f;
 extern "C" {
   grid_def_f * hoppet_cxx__grid_def__new(double dy, double ymax, int order, double eps);
   grid_def_f * hoppet_cxx__grid_def__new_from_grids(grid_def_f ** griddefs, int ngrids, bool locked);
+  grid_def_f * hoppet_cxx__grid_def__new_default(double dy, double ymax, int order = -6);
   grid_def_f * hoppet_cxx__grid_def__copy(grid_def_f * griddef);
   void   hoppet_cxx__grid_def__delete(grid_def_f ** griddef);
 
@@ -86,6 +87,12 @@ public:
   grid_def(const grid_def & other)
     : grid_def_view(hoppet_cxx__grid_def__copy(other.ptr())) {}
 
+  grid_def(grid_def && other) noexcept
+    : grid_def_view(other.ptr()) {
+    // null out the other pointer to avoid double deletion
+    other._ptr = nullptr;
+  }
+
   grid_def & operator=(const grid_def & other) {
     if (this != &other) {
       if (_ptr) hoppet_cxx__grid_def__delete(&_ptr);
@@ -103,13 +110,21 @@ public:
     _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
   }
 
-  //grid_def(grid_def_f * ptr) : grid_def_view(ptr) {}
-
-
   ~grid_def() {if (_ptr) hoppet_cxx__grid_def__delete(&_ptr); }
 
+protected:
+  grid_def(grid_def_f * ptr) : grid_def_view(ptr) {}
+  friend grid_def grid_def_default(double dy, double ymax, int order);
 };  
 
+/// @brief  create a grid_def object with the default choice of nested, locked grids
+/// @param dy      spacing of the coarsest grid
+/// @param ymax    maximum y value for the coarsest grid
+/// @param order   usual interpolation order parameter
+/// @return 
+inline grid_def grid_def_default(double dy, double ymax, int order) {
+  return grid_def(hoppet_cxx__grid_def__new_default(dy, ymax, order));
+}
 
 
 class grid_quant_view {
@@ -167,8 +182,7 @@ public:
 
   /// move constructor
   grid_quant(grid_quant && other) noexcept {
-    //std::cout << "move constructing\n";
-    move(other);
+    move_no_del(other);
   }
 
   /// @brief delete the underlying Fortran object if allocated
@@ -184,20 +198,11 @@ public:
     //std::cout << "move assigning\n";
     if (this != &other) {
       del();
-      move(other);
+      move_no_del(other);
     }
     return *this;
   }
 
-  grid_quant & move(grid_quant & other) noexcept {
-    //std::cout << "actually moving " << other.ptr() << "\n"; 
-    // move the semantics
-    _ptr = other._ptr;
-    _grid = other._grid;
-    other._ptr = nullptr;
-    return *this;
-  }
-  
 
   grid_quant & copy(const grid_quant & other) {
     //std::cout << "copying " << other.ptr() << "\n";
@@ -304,6 +309,22 @@ protected:
     std::copy(other_data, other_data + sz, this_data);
     return *this;
   }
+
+  /// @brief  move the contents from other into this, without deleting existing data
+  /// @param  other the other grid_quant to move from
+  /// @return a reference to the current object
+  ///
+  /// Note that this does not delete any existing data in *this, so be careful to call del() 
+  /// first if needed.
+  grid_quant & move_no_del(grid_quant & other) noexcept {
+    //std::cout << "actually moving " << other.ptr() << "\n"; 
+    // move the semantics
+    _ptr = other._ptr;
+    _grid = other._grid;
+    other._ptr = nullptr;
+    return *this;
+  }
+  
 
   grid_def_view _grid;
   grid_quant_f * _ptr = nullptr;

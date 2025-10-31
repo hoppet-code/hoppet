@@ -32,6 +32,8 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   hoppet::grid_def grid3({grid, hoppet::grid_def(0.03,0.3)}, true);
   hoppet::grid_def grid4;
   grid4 = grid3;
+
+  auto grid5 = hoppet::grid_def_default(0.2, 12.0, -5);
 }
 
 
@@ -56,21 +58,14 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
   REQUIRE ( q[iy] == q2[iy] );     // same values
 
   hoppet::grid_quant q3(grid);
-  q3.del();
-  cout << "After del, q3.ptr(): " << q3.ptr() << "\n";
   q3.copy(q); // copy 
   REQUIRE ( q.ptr()  != q3.ptr() ); // different underlying pointers
   REQUIRE ( q.data() != q3.data() ); // different underlying data
   REQUIRE ( q[iy] == q3[iy] );
  
-  // test explicit move
-  auto q2_ptr = q2.ptr();
-  q3.move(q2); // move
-  REQUIRE ( q3.ptr() == q2_ptr ); // q3 has taken ownership of q2's pointer
-
   // test move via explicit std::move
   q2 = q;
-  q2_ptr = q2.ptr();
+  auto q2_ptr = q2.ptr();
   q3 = std::move(q2); // assignment operator, should go via a move
   REQUIRE ( q3.ptr() == q2_ptr ); // q3 has taken ownership of q2's pointer
   REQUIRE ( q2.ptr() == nullptr ); // q2 has been nulled

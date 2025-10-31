@@ -83,6 +83,24 @@ contains
     ptr = c_loc(f_ptr)
   end function hoppet_cxx__grid_def__new_from_grids
 
+  function hoppet_cxx__grid_def__new_default(dy, ymax, order) bind(C) result(ptr)
+    use convolution
+    implicit none
+    real(c_double), intent(in), value :: dy, ymax
+    integer(c_int), intent(in), value :: order
+    type(c_ptr) :: ptr
+    !--
+    real(dp)  :: f_dy, f_ymax
+    integer   :: f_order
+    type(grid_def), pointer :: f_ptr
+
+    allocate(f_ptr)
+    f_dy   = dy
+    f_ymax = ymax
+    f_order= order
+    call InitGridDefDefault(f_ptr, f_dy, f_ymax, f_order)
+    ptr = c_loc(f_ptr)
+  end function hoppet_cxx__grid_def__new_default
 
   subroutine hoppet_cxx__grid_def__delete(ptr) bind(C)
     use convolution
