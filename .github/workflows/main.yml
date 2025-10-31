@@ -209,6 +209,7 @@ jobs:
           # GPS tmp 2025-10-12: commenting out the FPE part, because of libome FPE issues
           # cmake -S . -B BUILD -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL -DCMAKE_Fortran_COMPILER=gfortran-15 -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake --build BUILD -j 4
-          lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests/hoppet-unit-tests 2>&1
+          #lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests/hoppet-unit-tests 2>&1
+          lldb --batch -o run -k "bt all" -k "quit" -- BUILD/unit-tests-cxx/hoppet-unit-tests-cxx -s
           cmake --install BUILD
           ctest --test-dir BUILD -j 4 --output-on-failure
