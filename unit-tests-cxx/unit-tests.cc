@@ -12,8 +12,10 @@ using Catch::Matchers::WithinRel;
 
 using namespace std;
 
+hoppet::grid_def grid;
+
 TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
-  hoppet::grid_def grid(0.1, 10.0);
+  grid = hoppet::grid_def(0.1, 10.0);
   std::cout << "grid.ny(): "  << grid.ny() << std::endl;
   std::cout << "grid.ptr(): " << grid.ptr() << std::endl;
   std::vector<double> xvals = grid.x_values();
@@ -23,7 +25,20 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   REQUIRE_THAT( yvals[iy], WithinRel(5.0, 1e-12) );
   REQUIRE_THAT( xvals[iy], WithinRel(exp(-5.0), 1e-12) );
 
+  hoppet::grid_def grid2 = grid; // copy constructor
+  REQUIRE( grid.ptr() != grid2.ptr() ); // different underlying pointers
+  REQUIRE_THAT( grid.y_values()[iy], WithinRel( grid2.y_values()[iy], 1e-12) );
+
+  hoppet::grid_def grid3({grid, hoppet::grid_def(0.03,0.3)}, true);
+  hoppet::grid_def grid4;
+  grid4 = grid3;
+}
+
+
+TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
+
   hoppet::grid_quant q(grid);
+
   std::cout << "grid_quant.ptr(): " << q.ptr() << std::endl;
   q = [](double y) { return y*y; };
 
@@ -35,13 +50,16 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
 
   // make sure we can copy things OK and that we get a genuine copy
+  int iy = grid.ny() / 2;
   hoppet::grid_quant q2 = q; // copy constructor
   REQUIRE ( q.ptr() != q2.ptr() ); // different underlying pointers
   REQUIRE ( q[iy] == q2[iy] );     // same values
 
   hoppet::grid_quant q3(grid);
+  q3.del();
+  cout << "After del, q3.ptr(): " << q3.ptr() << "\n";
   q3.copy(q); // copy 
-  REQUIRE ( q.ptr() != q3.ptr() ); // different underlying pointers
+  REQUIRE ( q.ptr()  != q3.ptr() ); // different underlying pointers
   REQUIRE ( q.data() != q3.data() ); // different underlying data
   REQUIRE ( q[iy] == q3[iy] );
  

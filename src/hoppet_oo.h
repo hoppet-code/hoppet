@@ -16,6 +16,8 @@ class grid_quant_f;
 
 extern "C" {
   grid_def_f * hoppet_cxx__grid_def__new(double dy, double ymax, int order, double eps);
+  grid_def_f * hoppet_cxx__grid_def__new_from_grids(grid_def_f ** griddefs, int ngrids, bool locked);
+  grid_def_f * hoppet_cxx__grid_def__copy(grid_def_f * griddef);
   void   hoppet_cxx__grid_def__delete(grid_def_f ** griddef);
 
   int    hoppet_cxx__grid_def__ny(grid_def_f * griddef);
@@ -81,10 +83,28 @@ public:
   grid_def(double dy, double ymax, int order=-5, double eps=1e-7)
     : grid_def_view(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
 
-  grid_def(grid_def_f * ptr) : grid_def_view(ptr) {}
+  grid_def(const grid_def & other)
+    : grid_def_view(hoppet_cxx__grid_def__copy(other.ptr())) {}
 
-  /// for now, disable copy construction to avoid double deletions
-  grid_def(const grid_def & other) = delete;
+  grid_def & operator=(const grid_def & other) {
+    if (this != &other) {
+      if (_ptr) hoppet_cxx__grid_def__delete(&_ptr);
+      _ptr = hoppet_cxx__grid_def__copy(other.ptr());
+    }
+    return *this;
+  }
+    
+  grid_def(const std::vector<grid_def_view> & grids, bool locked=false) {
+    int ngrids = static_cast<int>(grids.size());
+    std::vector<grid_def_f *> grid_ptrs(ngrids);
+    for (int i=0; i<ngrids; ++i) {
+      grid_ptrs[i] = grids[i].ptr();
+    }
+    _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
+  }
+
+  //grid_def(grid_def_f * ptr) : grid_def_view(ptr) {}
+
 
   ~grid_def() {if (_ptr) hoppet_cxx__grid_def__delete(&_ptr); }
 
@@ -151,7 +171,7 @@ public:
     move(other);
   }
 
-  /// @brief delete the underlying Fortran object if allocated and owned
+  /// @brief delete the underlying Fortran object if allocated
   void del() {if (_ptr) hoppet_cxx__grid_quant__delete(&_ptr); _ptr=nullptr;}
 
   /// @brief destructor

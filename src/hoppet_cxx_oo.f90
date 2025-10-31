@@ -12,6 +12,7 @@ module hoppet_cxx_oo
 contains
 
 
+  !! return a c pointer to a new grid_def
   function hoppet_cxx__grid_def__new(dy,ymax,order,eps) bind(C) result(ptr)
     use convolution
     implicit none
@@ -34,6 +35,55 @@ contains
     ptr = c_loc(f_ptr)
   end function hoppet_cxx__grid_def__new
 
+  !! return a c pointer to a copy of the (grid_c_ptr) grid_def
+  function hoppet_cxx__grid_def__copy(grid_c_ptr) bind(C) result(ptr)
+    use convolution
+    implicit none
+    type(c_ptr),  intent(in), value :: grid_c_ptr
+    type(c_ptr) :: ptr
+    !----------------------
+    type(grid_def), pointer :: grid_ptr
+    type(grid_def), pointer :: f_ptr
+
+    ! prepare fortran objects
+    call c_f_pointer(grid_c_ptr, grid_ptr)
+    allocate(f_ptr)
+
+    if (associated(grid_ptr%subgd)) then
+      call InitGridDef(f_ptr, grid_ptr%subgd, grid_ptr%locked)
+    else
+      f_ptr = grid_ptr
+    end if
+    ptr = c_loc(f_ptr)
+  end function hoppet_cxx__grid_def__copy
+
+  function hoppet_cxx__grid_def__new_from_grids(grid_c_ptrs, ngrids, locked) bind(C) result(ptr)
+    use convolution
+    implicit none
+    type(c_ptr),     intent(in)        :: grid_c_ptrs(*)
+    integer(c_int),  intent(in), value :: ngrids
+    logical(c_bool), intent(in), value :: locked
+    type(c_ptr) :: ptr
+    !----------------------
+    type(grid_def) :: grids(ngrids)
+    type(grid_def), pointer :: grid_ptr
+    type(grid_def), pointer :: f_ptr
+    logical :: f_locked
+    integer :: i
+
+    ! Create a Fortran grid_def object for each grid
+    do i = 1, ngrids
+      call c_f_pointer(grid_c_ptrs(i), grid_ptr)
+      grids(i) = grid_ptr
+    end do
+    f_locked = merge(.true., .false., locked)
+
+    allocate(f_ptr)
+    call InitGridDef(f_ptr, grids, f_locked)
+    ptr = c_loc(f_ptr)
+  end function hoppet_cxx__grid_def__new_from_grids
+
+
   subroutine hoppet_cxx__grid_def__delete(ptr) bind(C)
     use convolution
     implicit none
@@ -43,6 +93,7 @@ contains
 
     call c_f_pointer(ptr, f_ptr)
     !print * , associated(f_ptr)
+    call delete(f_ptr)
     deallocate(f_ptr)
     ptr = c_null_ptr
   end subroutine hoppet_cxx__grid_def__delete
