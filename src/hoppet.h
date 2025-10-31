@@ -169,7 +169,7 @@ extern "C" {
        const double & dlnlnQ, //< internal table spacing in lnlnQ (e.g. dy/4)
        const int & nloop,     //< the maximum number of loops we'll want (<=3)
        const int & order,     //< order of numerical interpolation (e.g. -6)
-       const int & factscheme //< one of the factschemes defined above
+       const int & factscheme = hoppet::factscheme_MSbar //< one of the factschemes defined above
        );
 
 

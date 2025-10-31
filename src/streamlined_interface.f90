@@ -10,10 +10,14 @@ module streamlined_interface
   use qcd, only: quark_masses_def
   use pdfs_for_benchmarks
   use warnings_and_errors
+  use, intrinsic :: iso_c_binding, only : c_ptr
+
   implicit none
 
+  private :: c_ptr
+
   !! holds information about the grid
-  type(grid_def),     save :: grid, gdarray(4)
+  type(grid_def),     save, target :: grid, gdarray(4)
 
   !! holds the splitting functions
   type(dglap_holder), save :: dh
@@ -52,6 +56,12 @@ module streamlined_interface
   real(dp), save :: effective_light_quark_masses = m_light_quarks_default ! from qed_coupling_module
   integer,  save :: with_nqcdloop_qed = 0
   logical,  save :: with_Plq_nnloqed = .false.
+
+  type(c_ptr), bind(C, name="hoppet_sl_grid_ptr") :: grid_cptr
+  interface
+    subroutine hoppetStartCXX() bind(C, name="hoppetStartCXX")
+    end subroutine hoppetStartCXX
+  end interface
 
 contains
   
@@ -190,6 +200,7 @@ end subroutine hoppetStart
 !! objects, using an extended set of parameters, as described below
 subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   use streamlined_interface
+  use, intrinsic :: iso_c_binding
   implicit none
   real(dp), intent(in) :: ymax   !! highest value of ln1/x user wants to access
   real(dp), intent(in) :: dy     !! internal grid spacing: 0.1 is a sensible value
@@ -268,6 +279,10 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   
   ! choose a sensible default number of flavours.
   call SetNfDglapHolder(dh,nflcl=5)
+
+  ! set up a range of C-pointers
+  grid_cptr = c_loc(grid)
+  call hoppetStartCXX()
 
   ! indicate that allocations have already been done,
   ! to allow for cleanup if hoppetStartExtended is

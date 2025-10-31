@@ -6,6 +6,21 @@ Summary of classes
 	- grid_quant
 	- [grid_quant_view] to be written
 
+2025-10-31 Gavin
+
+	* src/hoppet.h:
+	made the factscheme argument optional in the C++ hoppetStartExtended.
+
+	* src/streamlined_interface.f90:
+	in hoppetStartExtended, added pieces to set up C++ access
+	to the streamlined objects.
+
+	* src/hoppet_oo.cc: *** ADDED ***
+	needed for packaging pieces of the C++ interface to the 
+	streamlined objects. Includes the hoppetStartCXX() function,
+	intended to construct the C++ OO "views" from the pointers
+	to the Fortran objects.
+
 2025-10-29 Gavin
 
 	* unit-tests-cxx/unit-tests.cc:

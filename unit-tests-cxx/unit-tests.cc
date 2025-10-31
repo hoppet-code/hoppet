@@ -15,41 +15,48 @@ using Catch::Matchers::WithinRel;
 
 using namespace std;
 
-hoppet::grid_def grid;
+hoppet::grid_def grid100;
 
 /// We supply the main routine, to make sure that we can 
 /// do any global-object initialisation that's needed
 int main(int argc, char* argv[]) {
   // Global setup
-  grid = hoppet::grid_def(0.1, 10.0);
+  // make a simple grid for use in the tests
+  grid100 = hoppet::grid_def(0.1, 10.0);
+  // and also set up the objects in the hoppet streamlined interface
+  double ymax = 12.0, dy = 0.2, Qmin = 1.0, Qmax = 1e4;
+  double dlnlnQ = dy/4.0;
+  int nloop = 1, order = -6;
+  hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order);
 
+  // then run the tests
   int result = Catch::Session().run(argc, argv);
 
   // Global teardown (if any)
-
+  hoppetDeleteAll();
   return result;
 }
 
 
 TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
-  REQUIRE(grid.ptr() != nullptr);
-  REQUIRE(grid.ny() == 100);
+  REQUIRE(grid100.ptr() != nullptr);
+  REQUIRE(grid100.ny() == 100);
 
-  //std::cout << "grid.ny(): "  << grid.ny() << std::endl;
-  //std::cout << "grid.ptr(): " << grid.ptr() << std::endl;
+  //std::cout << "grid100.ny(): "  << grid100.ny() << std::endl;
+  //std::cout << "grid100.ptr(): " << grid100.ptr() << std::endl;
 
-  std::vector<double> xvals = grid.x_values();
-  std::vector<double> yvals = grid.y_values();
+  std::vector<double> xvals = grid100.x_values();
+  std::vector<double> yvals = grid100.y_values();
 
-  int iy = grid.ny() / 2;
+  int iy = grid100.ny() / 2;
   REQUIRE_THAT( yvals[iy], WithinRel(5.0, 1e-12) );
   REQUIRE_THAT( xvals[iy], WithinRel(exp(-5.0), 1e-12) );
 
-  hoppet::grid_def grid2 = grid; // copy constructor
-  REQUIRE( grid.ptr() != grid2.ptr() ); // different underlying pointers
-  REQUIRE_THAT( grid.y_values()[iy], WithinRel( grid2.y_values()[iy], 1e-12) );
+  hoppet::grid_def grid2 = grid100; // copy constructor
+  REQUIRE( grid100.ptr() != grid2.ptr() ); // different underlying pointers
+  REQUIRE_THAT( grid100.y_values()[iy], WithinRel( grid2.y_values()[iy], 1e-12) );
 
-  hoppet::grid_def grid3({grid, hoppet::grid_def(0.03,0.3)}, true);
+  hoppet::grid_def grid3({grid100, hoppet::grid_def(0.03,0.3)}, true);
   hoppet::grid_def grid4;
   grid4 = grid3;
 
@@ -59,9 +66,9 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
 
 TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
 
-  REQUIRE( grid.ptr() != nullptr );
-  cout << "Defining grid_quant on grid_def, with grid.ptr(): " << grid.ptr() << endl;
-  hoppet::grid_quant q(grid);
+  REQUIRE( grid100.ptr() != nullptr );
+  cout << "Defining grid_quant on grid_def, with grid100.ptr(): " << grid100.ptr() << endl;
+  hoppet::grid_quant q(grid100);
 
   std::cout << "grid_quant.ptr(): " << q.ptr() << std::endl;
   q = [](double y) { return y*y; };
@@ -69,16 +76,16 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
   // test the self-assignment operator
   q = q;
 
-  // check value is OK (approx, in case we change the grid definition)
+  // check value is OK (approx, in case we change the grid100 definition)
   REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
 
   // make sure we can copy things OK and that we get a genuine copy
-  int iy = grid.ny() / 2;
+  int iy = grid100.ny() / 2;
   hoppet::grid_quant q2 = q; // copy constructor
   REQUIRE ( q.ptr() != q2.ptr() ); // different underlying pointers
   REQUIRE ( q[iy] == q2[iy] );     // same values
 
-  hoppet::grid_quant q3(grid);
+  hoppet::grid_quant q3(grid100);
   q3.copy(q); // copy 
   REQUIRE ( q.ptr()  != q3.ptr() ); // different underlying pointers
   REQUIRE ( q.data() != q3.data() ); // different underlying data
@@ -119,3 +126,9 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
   //qv = q + q4; REQUIRE ( qv[iy] == 5.0 * q[iy] );
 }
 
+TEST_CASE( "hoppet streamlined objects", "[hoppet]" ) {
+  hoppet::grid_quant q(hoppet::sl::grid);
+  //hoppet::grid_quant q(hoppet_sl_grid_ptr);
+  q = [](double y) { return y*y; };
+  REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
+}

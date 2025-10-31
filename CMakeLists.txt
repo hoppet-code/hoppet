@@ -245,6 +245,8 @@ endif()
 file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds/*.f90)
 file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/mass-thresholds/*.f src/param-coefs/*.f)
 
+file(GLOB SOURCESCXX src/*.cc)
+
 #------------------------------------------------------------------------- 
 # Define the two required variables before including
 # the source code for watching a git repository.
