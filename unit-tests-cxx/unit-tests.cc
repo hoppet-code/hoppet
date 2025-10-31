@@ -9,15 +9,35 @@
 using Catch::Matchers::WithinAbs;
 using Catch::Matchers::WithinRel;
 
+// need these to be able to provide our own main
+#define CATCH_CONFIG_RUNNER
+#include <catch2/catch_session.hpp>
 
 using namespace std;
 
 hoppet::grid_def grid;
 
-TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
+/// We supply the main routine, to make sure that we can 
+/// do any global-object initialisation that's needed
+int main(int argc, char* argv[]) {
+  // Global setup
   grid = hoppet::grid_def(0.1, 10.0);
-  std::cout << "grid.ny(): "  << grid.ny() << std::endl;
-  std::cout << "grid.ptr(): " << grid.ptr() << std::endl;
+
+  int result = Catch::Session().run(argc, argv);
+
+  // Global teardown (if any)
+  
+  return result;
+}
+
+
+TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
+  REQUIRE(grid.ptr() != nullptr);
+  REQUIRE(grid.ny() == 100);
+
+  //std::cout << "grid.ny(): "  << grid.ny() << std::endl;
+  //std::cout << "grid.ptr(): " << grid.ptr() << std::endl;
+
   std::vector<double> xvals = grid.x_values();
   std::vector<double> yvals = grid.y_values();
 
@@ -39,6 +59,8 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
 
 TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
 
+  REQUIRE( grid.ptr() != nullptr );
+  cout << "Defining grid_quant on grid_def, with grid.ptr(): " << grid.ptr() << endl;
   hoppet::grid_quant q(grid);
 
   std::cout << "grid_quant.ptr(): " << q.ptr() << std::endl;
