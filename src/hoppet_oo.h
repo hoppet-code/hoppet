@@ -27,9 +27,9 @@ extern "C" {
 }
 
 extern "C" {
-  grid_quant_f * hoppet_cxx__grid_quant__new(grid_def_f * griddef);
+  grid_quant_f * hoppet_cxx__grid_quant__new(const grid_def_f * griddef);
   void   hoppet_cxx__grid_quant__delete(grid_quant_f ** gridquant);
-  double hoppet_cxx__grid_quant__at_y(grid_quant_f * gridquant, double y);
+  double hoppet_cxx__grid_quant__at_y(const grid_quant_f * gridquant, double y);
   double * hoppet_cxx__grid_quant__data_ptr(grid_quant_f * gridquant);
 
   //void   hoppet_cxx__grid_quant__set_zero(void * gridquant);
@@ -235,8 +235,15 @@ public:
     *this = fn;
   }
 
+  //grid_quant_view & view() {return *this;} // is this needed?
+
   /// copy constructor
   grid_quant(const grid_quant & other) {
+    //std::cout << "copy constructing\n";
+    copy(other);
+  }
+
+  grid_quant(const grid_quant_view & other) {
     //std::cout << "copy constructing\n";
     copy(other);
   }
@@ -263,12 +270,13 @@ public:
   }
 
 
-  grid_quant & copy(const grid_quant & other) {
-    //std::cout << "copying " << other.ptr() << "\n";
-    if (_ptr && grid().ny() == other.grid().ny()) return copy_data(other);
+  grid_quant & copy(const grid_quant_view & other) {
+    if (_ptr && grid().ny() == other.grid().ny()) {
+      return copy_data(other);
+    }
     else {
       del();
-      _ptr = hoppet_cxx__grid_quant__new(other._grid.ptr());
+      _ptr = hoppet_cxx__grid_quant__new(other.grid().ptr());
       _grid = other.grid();
       return copy_data(other);
     }
@@ -304,7 +312,7 @@ public:
 protected:  
 
   /// copy the data from other, assuming *this is initialised and of the correct size, etc.
-  grid_quant & copy_data(const grid_quant & other) {
+  grid_quant & copy_data(const grid_quant_view & other) {
     auto [sz, this_data, other_data] = prepare_compound(other);
     std::copy(other_data, other_data + sz, this_data);
     return *this;
@@ -335,8 +343,8 @@ protected:
 
 // these all use a copy-and-modify strategy, exploiting the move semantics
 // for copy elision
-inline grid_quant operator+(grid_quant a, const grid_quant & b) {a += b; return a;}
-inline grid_quant operator-(grid_quant a, const grid_quant & b) {a -= b; return a;}
+inline grid_quant operator+(grid_quant a, const grid_quant_view & b) {a += b; return a;}
+inline grid_quant operator-(grid_quant a, const grid_quant_view & b) {a -= b; return a;}
 inline grid_quant operator*(grid_quant a, double b) {a *= b; return a;}
 inline grid_quant operator*(double b, grid_quant a) {a *= b; return a;}
 inline grid_quant operator/(grid_quant a, double b) {a /= b; return a;}

@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
   int result = Catch::Session().run(argc, argv);
 
   // Global teardown (if any)
-  
+
   return result;
 }
 
@@ -69,7 +69,6 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
   // test the self-assignment operator
   q = q;
 
-
   // check value is OK (approx, in case we change the grid definition)
   REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
 
@@ -107,5 +106,15 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
   q4 = q*2.0; REQUIRE ( q4[iy] == 2.0 * q[iy] );
   q4 = 2.0*q; REQUIRE ( q4[iy] == 2.0 * q[iy] );
   q4 = q/2.0; REQUIRE ( q4[iy] == 0.5 * q[iy] );
+
+  //-- test operations with views ------------------------
+  hoppet::grid_quant_view qv = q; // "view" copy constructor (effectively a reference)
+  REQUIRE( q.ptr() == qv.ptr() ); 
+  q4 += qv;   REQUIRE ( q4[iy] == 1.5 * q[iy] );
+  q2 = q;
+  qv = q2;
+  qv += q2;   REQUIRE ( qv[iy] == 2.0 * q[iy] );
+  qv += 2*q;  REQUIRE ( qv[iy] == 4.0 * q[iy] );
+  q3 = qv + q; REQUIRE ( q3[iy] == 5.0 * q[iy] );
 }
 
