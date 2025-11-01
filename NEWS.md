@@ -1,5 +1,11 @@
 # NEWS for HOPPET
 
+# Release 2.1.1 (unreleased)
+
+## Small changes
+* updated external-code/libome to correspond to v1.0.2 (matching
+  changes already incorporated as a patch)  
+
 # Release 2.1.0, 29 October 2025
 
 ## Major new features:
