@@ -233,7 +233,8 @@ namespace ome
       numeric_type operator()(numeric_type x, Trest... rest) const
       {
         using std::log;
-        return(target_function_(x > 0 ? log(x) : std::numeric_limits<numeric_type>::quiet_NaN(), x, rest...));
+        return(target_function_(x > static_cast<numeric_type>(0) ? log(x)
+          : std::numeric_limits<numeric_type>::quiet_NaN(), x, rest...));
       };
 
     private:
