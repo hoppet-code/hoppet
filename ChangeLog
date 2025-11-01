@@ -4,7 +4,10 @@ Summary of classes
 	- grid_def_view
 	- grid_def
 	- grid_quant
-	- [grid_quant_view] to be written
+	- grid_quant_view is in place, but some aspects not clear (e.g. what = should do)
+
+Access to streamlined interface objects
+	- hoppet::sl::grid
 
 2025-10-31 Gavin
 

@@ -10,11 +10,8 @@ module streamlined_interface
   use qcd, only: quark_masses_def
   use pdfs_for_benchmarks
   use warnings_and_errors
-  use, intrinsic :: iso_c_binding, only : c_ptr
 
   implicit none
-
-  private :: c_ptr
 
   !! holds information about the grid
   type(grid_def),     save, target :: grid, gdarray(4)
@@ -57,9 +54,10 @@ module streamlined_interface
   integer,  save :: with_nqcdloop_qed = 0
   logical,  save :: with_Plq_nnloqed = .false.
 
-  type(c_ptr), bind(C, name="hoppet_sl_grid_ptr") :: grid_cptr
   interface
-    subroutine hoppetStartCXX() bind(C, name="hoppetStartCXX")
+    subroutine hoppetStartCXX(grid_cptr) bind(C, name="hoppetStartCXX")
+      use, intrinsic :: iso_c_binding, only : c_ptr
+      type(c_ptr), value :: grid_cptr
     end subroutine hoppetStartCXX
   end interface
 
@@ -280,9 +278,9 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
   ! choose a sensible default number of flavours.
   call SetNfDglapHolder(dh,nflcl=5)
 
-  ! set up a range of C-pointers
-  grid_cptr = c_loc(grid)
-  call hoppetStartCXX()
+  ! set up a range of C-pointers, so that C++ can access the objects
+  ! (for now, just one pointer, will expand later as needed)
+  call hoppetStartCXX(c_loc(grid))
 
   ! indicate that allocations have already been done,
   ! to allow for cleanup if hoppetStartExtended is

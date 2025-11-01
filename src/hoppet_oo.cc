@@ -8,7 +8,7 @@ namespace sl {
 }
 
 extern "C" {
-void hoppetStartCXX() {
-  hoppet::sl::grid = hoppet::grid_def_view(hoppet_sl_grid_ptr);
+void hoppetStartCXX(grid_def_f * grid_ptr) {
+  hoppet::sl::grid = hoppet::grid_def_view(grid_ptr);
 }
 } // extern "C"

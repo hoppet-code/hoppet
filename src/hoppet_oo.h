@@ -361,7 +361,6 @@ inline grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
 
 
 /// objects globally defined in the streamlined interface
-extern grid_def_f * hoppet_sl_grid_ptr;
 namespace hoppet {
 namespace sl {
   /// a view of the grid_def object being used in the streamlined interface
