@@ -91,6 +91,10 @@ using `-D...` command line options. The most important ones are
 - `-DBUILD_SHARED_LIBS=Off`
   By default, the library is compiled as a shared library. If you use this
   option, a static library is built instead.
+- `-DENABLE_FPES=On`
+  If you plan to rely on floating point exceptions (FPEs) in your code, enable
+  this to ensure that the code does not raise spurious FPEs due to compiler
+  optimisation steps.
 
 ## Usage
 
