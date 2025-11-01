@@ -7,7 +7,8 @@
   changes already incorporated as a patch) and for clang with FPE
   enabled, added -ffp-exception-behavior=maytrap to avoid
   optimisations that can trigger unjustified FPE exceptions
-  
+
+
 # Release 2.1.0, 29 October 2025
 
 ## Major new features:
