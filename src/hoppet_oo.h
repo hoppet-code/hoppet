@@ -31,7 +31,7 @@ extern "C" {
 extern "C" {
   grid_quant_f * hoppet_cxx__grid_quant__new(const grid_def_f * griddef);
   void   hoppet_cxx__grid_quant__delete(grid_quant_f ** gridquant);
-  double hoppet_cxx__grid_quant__at_y(const grid_quant_f * gridquant, double y);
+  double hoppet_cxx__grid_quant__at_y(const grid_def_f * griddef, const double * gq_data, double y);
   double * hoppet_cxx__grid_quant__data_ptr(grid_quant_f * gridquant);
 
   //void   hoppet_cxx__grid_quant__set_zero(void * gridquant);
@@ -157,8 +157,8 @@ class grid_quant_view {
 public:
 
   grid_quant_view() {}
-  grid_quant_view(const grid_def_view & grid, grid_quant_f * ptr)
-    : _grid(grid), _ptr(ptr) {}
+  //grid_quant_view(const grid_def_view & grid, grid_quant_f * ptr)
+  //  : _grid(grid), _data(hoppet_cxx__grid_quant__data_ptr(ptr)) {}
 
   grid_quant_view operator=(const grid_quant & other) = delete; // prevent assignment
   //grid_quant_view(const grid_quant & other) = delete; // prevent copying from owning class
@@ -167,8 +167,8 @@ public:
 
   std::size_t size() const { return _grid.ny()+1; }
 
-  const double * data() const {return hoppet_cxx__grid_quant__data_ptr(_ptr);}
-  double       * data()       {return hoppet_cxx__grid_quant__data_ptr(_ptr);}
+  const double * data() const {return _data;}
+  double       * data()       {return _data;}
 
   template<typename T>
   double & operator[](T i) {return data()[i];}
@@ -180,16 +180,14 @@ public:
   const grid_def_view & grid() const {return _grid;}
 
   double at_y(double y) const {
-    return hoppet_cxx__grid_quant__at_y(_ptr, y);
+    return hoppet_cxx__grid_quant__at_y(_grid.ptr(), _data, y);
   }
 
   double at_x(double x) const {
     double y = std::log(1.0/x);
-    return hoppet_cxx__grid_quant__at_y(_ptr, y);
+    return hoppet_cxx__grid_quant__at_y(_grid.ptr(), _data, y);
   }
 
-  const grid_quant_f* ptr() const { return _ptr; }
-  grid_quant_f* ptr()  { return _ptr; }
 
   /// unary arithmetic operators
   ///@{
@@ -225,7 +223,7 @@ public:
 protected:
   /// @brief pointer to the underlying Fortran grid_quant object
   grid_def_view _grid;
-  grid_quant_f * _ptr = nullptr;
+  double * _data = nullptr;
 
   inline std::tuple<std::size_t, double *, const double *> prepare_compound(const grid_quant_view & other) {
     assert( _grid.ptr() == other._grid.ptr() && "grid_quant unary op with another grid_quant: grids do not match");
@@ -244,8 +242,12 @@ public:
   grid_quant() {}
 
   /// construct and allocate a grid_quant for the given grid
-  grid_quant(const grid_def_view & grid) : 
-      grid_quant_view(grid, hoppet_cxx__grid_quant__new(grid.ptr())) {}
+  grid_quant(const grid_def_view & grid) {
+    _grid = grid;
+    _ptr  = hoppet_cxx__grid_quant__new(grid.ptr());
+    _data = hoppet_cxx__grid_quant__data_ptr(_ptr);
+  }
+  //    grid_quant_view(grid, hoppet_cxx__grid_quant__new(grid.ptr())) {}
 
   /// construct and allocate a grid_quant for the given grid, and fill it
   /// with the specified function
@@ -278,6 +280,9 @@ public:
   /// @brief destructor
   ~grid_quant() {del();}
 
+  const grid_quant_f* ptr() const { return _ptr; }
+  grid_quant_f* ptr()  { return _ptr; }
+
   /// move assignment
   grid_quant& operator=(grid_quant&& other) noexcept {
     //std::cout << "move assigning\n";
@@ -298,6 +303,7 @@ public:
     else {
       del();
       _ptr = hoppet_cxx__grid_quant__new(other.grid().ptr());
+      _data = hoppet_cxx__grid_quant__data_ptr(_ptr);
       _grid = other.grid();
       return copy_data(other);
     }
@@ -352,10 +358,14 @@ protected:
     //std::cout << "actually moving " << other.ptr() << "\n"; 
     // move the semantics
     _ptr = other._ptr;
+    _data = other._data;
     _grid = other._grid;
+    other._data = nullptr;
     other._ptr = nullptr;
     return *this;
   }
+
+  grid_quant_f * _ptr = nullptr;
   
 
   //xgrid_def_view _grid;

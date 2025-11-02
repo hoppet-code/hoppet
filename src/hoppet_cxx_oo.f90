@@ -205,16 +205,18 @@ contains
     ptr = c_null_ptr
   end subroutine hoppet_cxx__grid_quant__delete
 
-  function hoppet_cxx__grid_quant__at_y(ptr, y) bind(C) result(res)
+  function hoppet_cxx__grid_quant__at_y(grid_ptr, data_ptr, y) bind(C) result(res)
     implicit none
-    type(c_ptr), intent(in), value :: ptr
+    type(c_ptr), intent(in), value :: grid_ptr, data_ptr
     real(c_double), intent(in), value :: y
     real(c_double) :: res
     !--
-    type(grid_quant), pointer :: f_ptr
+    type(grid_def), pointer :: grid
+    real(dp), pointer :: gq(:)
 
-    call c_f_pointer(ptr, f_ptr)
-    res = EvalGridQuant(f_ptr%grid, f_ptr%data, y)
+    call c_f_pointer(grid_ptr, grid)
+    call c_f_pointer(data_ptr, gq, [grid%ny+1])
+    res = EvalGridQuant(grid, gq, y)
   end function hoppet_cxx__grid_quant__at_y
 
   function hoppet_cxx__grid_quant__data_ptr(ptr) bind(C) result(data_ptr)

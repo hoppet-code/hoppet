@@ -117,7 +117,7 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
 
   //-- test operations with views ------------------------
   hoppet::grid_quant_view qv(q); // "view" copy constructor (effectively a reference)
-  REQUIRE( q.ptr() == qv.ptr() ); 
+  REQUIRE( q.data() == qv.data() ); 
   q4 += qv;   REQUIRE ( q4[iy] == 1.5 * q[iy] );
   q2 = q;
   hoppet::grid_quant_view qv2(q2); // "view" copy constructor (effectively a reference)
