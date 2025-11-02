@@ -273,21 +273,21 @@ contains
     ptr = c_null_ptr
   end subroutine hoppet_cxx_grid_conv__delete
 
-  subroutine hoppet_cxx_grid_conv_times_grid_quant(conv_ptr, q_ptr, result_ptr) bind(C)
+  subroutine hoppet_cxx_grid_conv__times_grid_quant(conv_ptr, q_data, result_data) bind(C)
     implicit none
     type(c_ptr), intent(in), value :: conv_ptr
-    type(c_ptr), intent(in), value :: q_ptr
-    type(c_ptr), intent(in), value :: result_ptr
+    type(c_ptr), intent(in), value :: q_data
+    type(c_ptr), intent(in), value :: result_data
     !--
     type(grid_conv), pointer :: gc
-    type(grid_quant), pointer :: q
-    type(grid_quant), pointer :: result
+    real(dp), pointer :: q(:)
+    real(dp), pointer :: result(:)
 
     call c_f_pointer(conv_ptr, gc)
-    call c_f_pointer(q_ptr, q)
-    call c_f_pointer(result_ptr, result)
+    call c_f_pointer(q_data, q, shape=[gc%grid%ny+1])
+    call c_f_pointer(result_data, result, shape=[gc%grid%ny+1])
 
-    result%data = gc * q%data
-  end subroutine hoppet_cxx_grid_conv_times_grid_quant
+    result = gc * q
+  end subroutine hoppet_cxx_grid_conv__times_grid_quant
 
 end module hoppet_cxx_oo

@@ -155,13 +155,4 @@ TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
   cout << "After convolution, result.at_y(10.0): " << result.at_y(10.0) << endl;
   result = conv * power(4.0);
   cout << "After convolution, result.at_y(10.0): " << result.at_y(10.0) << endl;
-//  double val1 = conv.at_y_piece(0.0, 0);
-//  double val2 = conv.at_y_piece(0.0, 1);
-//  REQUIRE_THAT( val1, WithinAbs(1.0, 1e-12) );
-//  REQUIRE_THAT( val2, WithinAbs(1.0, 1e-12) );
-//
-//  val1 = conv.at_x_piece(1.0, 0);
-//  val2 = conv.at_x_piece(1.0, 1);
-//  REQUIRE_THAT( val1, WithinAbs(1.0, 1e-12) );
-//  REQUIRE_THAT( val2, WithinAbs(1.0, 1e-12) );
 }

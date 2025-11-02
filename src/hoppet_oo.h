@@ -41,9 +41,8 @@ extern "C" {
 extern "C" {
   grid_conv_f * hoppet_cxx_grid_conv__new(grid_def_f * grid_ptr, void * conv_ignd_c_fn_obj);
   void  hoppet_cxx_grid_conv__delete(grid_conv_f ** gridconv);
-  void  hoppet_cxx_grid_conv_times_grid_quant(const grid_conv_f * conv,
-                   const grid_quant_f * q_in,
-                   grid_quant_f * q_out);
+  void  hoppet_cxx_grid_conv__times_grid_quant(const grid_conv_f * conv,
+                   const double * q_in_data, double * q_out_data);
 }
 
 namespace hoppet {
@@ -442,11 +441,7 @@ inline grid_quant operator*(const grid_conv_view & conv, const grid_quant_view &
   }
   grid_quant result(q.grid());
 
-  hoppet_cxx_grid_conv_times_grid_quant(conv.ptr(), q.ptr(), result.ptr());
-
-  // perform the convolution
-  // ...
-
+  hoppet_cxx_grid_conv__times_grid_quant(conv.ptr(), q.data(), result.data());
   return result;
 }
 
