@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cassert>
 #include <tuple>
+#include <functional>
 
 /// "forward" declaration of the Fortran grid_def type;
 /// note that we only ever use pointers to it, so we do not
@@ -12,6 +13,7 @@
 /// is hidden in the Fortran code.
 class grid_def_f;
 class grid_quant_f;
+class grid_conv_f;
 
 
 extern "C" {
@@ -34,6 +36,14 @@ extern "C" {
 
   //void   hoppet_cxx__grid_quant__set_zero(void * gridquant);
   //void   hoppet_cxx__grid_quant__copy_from(void * gridquant, void * other);
+}
+
+extern "C" {
+  grid_conv_f * hoppet_cxx_grid_conv__new(grid_def_f * grid_ptr, void * conv_ignd_c_fn_obj);
+  void  hoppet_cxx_grid_conv__delete(grid_conv_f ** gridconv);
+  void  hoppet_cxx_grid_conv_times_grid_quant(const grid_conv_f * conv,
+                   const grid_quant_f * q_in,
+                   grid_quant_f * q_out);
 }
 
 namespace hoppet {
@@ -140,6 +150,10 @@ inline grid_def grid_def_default(double dy, double ymax, int order) {
 
 class grid_quant; // forward declaration
 
+/// @brief Object-oriented wrapper around the grid_quant Fortran type, non-owning
+///
+/// This version provides a "view" onto an existing Fortran grid_quant object,
+/// without taking ownership of it.
 class grid_quant_view {
 public:
 
@@ -175,8 +189,9 @@ public:
     return hoppet_cxx__grid_quant__at_y(_ptr, y);
   }
 
-  void * ptr() const { return _ptr; }
-  
+  const grid_quant_f* ptr() const { return _ptr; }
+  grid_quant_f* ptr()  { return _ptr; }
+
   /// unary arithmetic operators
   ///@{
 
@@ -264,7 +279,7 @@ public:
   /// @brief destructor
   ~grid_quant() {del();}
 
-  // move assignment
+  /// move assignment
   grid_quant& operator=(grid_quant&& other) noexcept {
     //std::cout << "move assigning\n";
     if (this != &other) {
@@ -274,7 +289,9 @@ public:
     return *this;
   }
 
-
+  /// @brief  make a copy of other, including allocating new storage if needed
+  /// @param  other the other grid_quant to copy from
+  /// @return a reference to the current object
   grid_quant & copy(const grid_quant_view & other) {
     if (_ptr && grid().ny() == other.grid().ny()) {
       return copy_data(other);
@@ -296,8 +313,11 @@ public:
   /// @tparam T generic function type
   /// @param  fn any double(double) callable
   /// @return a reference to the current object
-  template<class T>
-  grid_quant & operator=(const T & fn) {
+  template<typename F>
+  grid_quant & operator=(const F & fn) {
+    if (!_ptr) {
+      throw std::runtime_error("grid_quant::operator=: grid_quant object not allocated");
+    }
     // there is a design choice here: do we package whatever function
     // we have received into a Fortran-callable function, or do we
     // just do the filling on the C++ side? The latter is simpler
@@ -354,8 +374,81 @@ inline grid_quant operator*(grid_quant a, double b) {a *= b; return a;}
 inline grid_quant operator*(double b, grid_quant a) {a *= b; return a;}
 inline grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
 
+template<typename F> 
+inline grid_quant operator*(const grid_def_view & grid, F && fn) {
+  // create an output grid_quant
+  grid_quant result(grid);
+  result = fn;
+  return result;
+}
+
 ///@}
 
+
+class grid_conv_view {
+public:
+  grid_conv_view() {}
+  grid_conv_view(const grid_def_view & grid) : _grid(grid) {}
+  //grid_conv_view(grid_conv_f * ptr) : _ptr(ptr) {}
+  const grid_def_view & grid() const {return _grid;}
+  grid_conv_f * ptr() const { return _ptr; }
+protected:
+  grid_def_view  _grid;
+  grid_conv_f *  _ptr = nullptr;
+};
+
+class grid_conv : public grid_conv_view {
+public:
+  grid_conv() {}
+
+  /// construct a grid_conv object and initialise it with the given function
+  ///
+  /// @tparam Func  any callable type matching double(double y, int piece)
+  /// @param grid   the grid definition
+  /// @param conv_ignd_fn  the convolution integrand function
+  ///
+  template<typename Func>
+  grid_conv(const grid_def_view & grid, Func && conv_ignd_fn) : grid_conv_view(grid) {
+
+    // under the hood, the fortran call hoppet_grid_conv_f__wrapper with a pointer
+    // to the function object
+    std::function<double(double,int)> fn_ptr = std::forward<Func>(conv_ignd_fn);
+    _ptr = hoppet_cxx_grid_conv__new(grid.ptr(), &fn_ptr);
+  }
+
+  grid_conv(grid_conv && other) noexcept
+    : grid_conv_view(other) {
+    other._ptr = nullptr;
+  }
+
+
+  void del() {if (_ptr) {hoppet_cxx_grid_conv__delete(&_ptr);}}
+  ~grid_conv() {del();}
+
+  grid_conv & operator=(grid_conv && other) noexcept {
+    if (this != &other) {
+      del();
+      _ptr = other._ptr;
+      other._ptr = nullptr;
+    }
+    return *this;
+  }
+};
+
+inline grid_quant operator*(const grid_conv_view & conv, const grid_quant_view & q) {
+  // create an output grid_quant
+  if (conv.grid().ptr() != q.grid().ptr()) {
+    throw std::runtime_error("grid_conv * grid_quant: grids do not match");
+  }
+  grid_quant result(q.grid());
+
+  hoppet_cxx_grid_conv_times_grid_quant(conv.ptr(), q.ptr(), result.ptr());
+
+  // perform the convolution
+  // ...
+
+  return result;
+}
 
 } // end namespace hoppet
 

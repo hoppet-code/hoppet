@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
   // Global setup
   // make a simple grid for use in the tests
   grid100 = hoppet::grid_def(0.1, 10.0);
+
   // and also set up the objects in the hoppet streamlined interface
   double ymax = 12.0, dy = 0.2, Qmin = 1.0, Qmax = 1e4;
   double dlnlnQ = dy/4.0;
@@ -131,4 +132,36 @@ TEST_CASE( "hoppet streamlined objects", "[hoppet]" ) {
   //hoppet::grid_quant q(hoppet_sl_grid_ptr);
   q = [](double y) { return y*y; };
   REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
+}
+
+TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
+  hoppet::grid_conv conv(grid100, 
+    [](double y, int piece) {
+      double x = exp(-y);
+      double res;
+      if      (piece == hoppet::cc_REAL) res =  (1+x*x)/(1-x);
+      else if (piece == hoppet::cc_VIRT) res = -(1+x*x)/(1-x);
+      else                               res = 0.0;
+      return x*res;
+    });
+
+  auto power = [](double powval) { return grid100 * [powval](double y) { return exp(-powval*y); }; };
+
+  //hoppet::grid_quant q = grid100 * power(1.0);
+  hoppet::grid_quant result = conv * power(1.0);
+  cout << "After convolution, result.at_y(10.0): " << result.at_y(10.0) << endl;
+  //q = power(0.0);
+  result = conv * power(0.0);
+  cout << "After convolution, result.at_y(10.0): " << result.at_y(10.0) << endl;
+  result = conv * power(4.0);
+  cout << "After convolution, result.at_y(10.0): " << result.at_y(10.0) << endl;
+//  double val1 = conv.at_y_piece(0.0, 0);
+//  double val2 = conv.at_y_piece(0.0, 1);
+//  REQUIRE_THAT( val1, WithinAbs(1.0, 1e-12) );
+//  REQUIRE_THAT( val2, WithinAbs(1.0, 1e-12) );
+//
+//  val1 = conv.at_x_piece(1.0, 0);
+//  val2 = conv.at_x_piece(1.0, 1);
+//  REQUIRE_THAT( val1, WithinAbs(1.0, 1e-12) );
+//  REQUIRE_THAT( val2, WithinAbs(1.0, 1e-12) );
 }

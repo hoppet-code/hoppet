@@ -9,6 +9,31 @@ module hoppet_cxx_oo
     type(grid_def)    :: grid
   end type grid_quant
 
+  abstract interface
+    function conv_ignd_c_interface(y, piece) bind(C) result(res)
+      import :: c_double, c_int
+      real(c_double), intent(in), value :: y
+      integer(c_int), intent(in), value :: piece
+      real(c_double) :: res
+    end function conv_ignd_c_interface
+  end interface
+
+  type, extends(conv_ignd) :: conv_ignd_from_c
+    !type(c_funptr) :: fptr  = c_null_funptr
+    type(c_ptr)    :: ctx   = c_null_ptr  
+  contains
+    procedure :: f => conv_ignd_from_c__f! f(this, y, piece)
+  end type conv_ignd_from_c
+  interface
+    function hoppet_grid_conv_f__wrapper(y, piece, ctx) bind(C)
+      use, intrinsic :: iso_c_binding
+      real(c_double), intent(in), value :: y
+      integer(c_int), intent(in), value :: piece
+      type(c_ptr),    intent(in), value :: ctx
+      real(c_double) :: hoppet_grid_conv_f__wrapper
+    end function hoppet_grid_conv_f__wrapper
+  end interface
+
 contains
 
 
@@ -203,5 +228,66 @@ contains
     data_ptr = c_loc(f_ptr%data(0))
   end function hoppet_cxx__grid_quant__data_ptr
 
+
+  function hoppet_cxx_grid_conv__new(grid_ptr, conv_ignd_c_fn_obj) bind(C, name="hoppet_cxx_grid_conv__new") result(ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: grid_ptr
+    type(c_ptr), intent(in), value :: conv_ignd_c_fn_obj
+    !type(c_ptr), intent(in) :: split_array_ptr
+    !integer(c_int), intent(in), value :: nsplit
+    type(c_ptr) :: ptr
+    !--
+    type(grid_conv), pointer :: gc
+    type(grid_def), pointer :: grid
+    procedure(conv_ignd_c_interface), pointer :: conv_ignd_f_fn
+    type(conv_ignd_from_c) :: lcl_conv_ignd
+
+    call c_f_pointer(grid_ptr, grid)
+    lcl_conv_ignd%ctx = conv_ignd_c_fn_obj
+
+    allocate(gc)
+    call InitGridConv(grid, gc, lcl_conv_ignd, alloc=.true.)
+    ptr = c_loc(gc)
+  end function hoppet_cxx_grid_conv__new
+
+  !! implementation of conv_ignd_from_c%f
+  function conv_ignd_from_c__f(this, y, piece) result(res)
+    class(conv_ignd_from_c), intent(in) :: this
+    real(dp), intent(in) :: y
+    integer,  intent(in) :: piece
+    real(dp) :: res
+
+    res = hoppet_grid_conv_f__wrapper(y, piece, this%ctx)
+  end function conv_ignd_from_c__f
+
+
+  subroutine hoppet_cxx_grid_conv__delete(ptr) bind(C)
+    implicit none
+    type(c_ptr), intent(inout) :: ptr
+    !--
+    type(grid_conv), pointer :: gc
+
+    call c_f_pointer(ptr, gc)
+    call delete(gc)
+    deallocate(gc)
+    ptr = c_null_ptr
+  end subroutine hoppet_cxx_grid_conv__delete
+
+  subroutine hoppet_cxx_grid_conv_times_grid_quant(conv_ptr, q_ptr, result_ptr) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: conv_ptr
+    type(c_ptr), intent(in), value :: q_ptr
+    type(c_ptr), intent(in), value :: result_ptr
+    !--
+    type(grid_conv), pointer :: gc
+    type(grid_quant), pointer :: q
+    type(grid_quant), pointer :: result
+
+    call c_f_pointer(conv_ptr, gc)
+    call c_f_pointer(q_ptr, q)
+    call c_f_pointer(result_ptr, result)
+
+    result%data = gc * q%data
+  end subroutine hoppet_cxx_grid_conv_times_grid_quant
 
 end module hoppet_cxx_oo
