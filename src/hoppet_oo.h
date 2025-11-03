@@ -324,6 +324,12 @@ public:
     return *this;
   }
 
+  // copy constructor: perform a deep copy using the `copy` helper
+  data_owner(const data_owner & other) {
+    _ptr = nullptr;
+    copy(other);
+  }
+
   data_owner(data_owner && other) noexcept  {move_no_del(other);}
 
   data_owner & operator=(data_owner && other) noexcept {
@@ -467,6 +473,8 @@ public:
   // (they tend to get removed if other allocators are present, but we just want
   // them to do the default thing, since the move support etc is already in the
   // data_owner<...> base class.)
+  grid_quant(const grid_quant & other)      {copy(other);}
+  grid_quant(const grid_quant_view & other) {copy(other);}
   grid_quant(grid_quant && other) noexcept = default;
   grid_quant & operator=(grid_quant && other) noexcept = default;
   grid_quant & operator=(const grid_quant & other) noexcept = default;
@@ -493,9 +501,6 @@ public:
   //grid_quant_view & view() {return *this;} // is this needed?
 
   /// copy constructor
-  grid_quant(const grid_quant & other) {copy(other);}
-
-  grid_quant(const grid_quant_view & other) {copy(other);}
 
   /// move constructor
   //grid_quant(grid_quant && other) noexcept {move_no_del(other);
@@ -553,6 +558,14 @@ struct gq2d_extras {
   gq2d_extras() : grid(), stride(0), dim1_sz(0) {}
   gq2d_extras(const gq2d_extras & other) : grid(other.grid), stride(other.stride), dim1_sz(other.dim1_sz) {}
   gq2d_extras(const grid_def_view & grid, std::size_t dim1_sz) : grid(grid), stride(grid.ny() + 1), dim1_sz(dim1_sz) {}
+  void ensure_compatible(const gq2d_extras & other) const {
+    if (dim1_sz != other.dim1_sz) throw std::runtime_error("hoppet::gq2d_extras::ensure_compatible: incompatible grid_quant_2d dim1_sz");
+    grid.ensure_compatible(other.grid);
+  }
+  bool operator==(const gq2d_extras & other) const {
+    return stride == other.stride && dim1_sz == other.dim1_sz && grid == other.grid;
+  }
+  bool operator!=(const gq2d_extras & other) const { return !(*this == other); }
 };
 //-----------------------------------------------------------------------------
 class grid_quant_2d_view : public data_view<gq2d_extras> {
@@ -579,9 +592,12 @@ public:
   }
 
   // make sure we have the move constructor, move assignment and copy assignment
+  // explicit copy constructor to perform a deep copy
+  grid_quant_2d(const grid_quant_2d & other) {copy(other); }
+  grid_quant_2d(const grid_quant_2d_view & other) {copy(other); }
+  grid_quant_2d & operator=(const grid_quant_2d &  other) noexcept = default;
   grid_quant_2d            (      grid_quant_2d && other) noexcept = default;
   grid_quant_2d & operator=(      grid_quant_2d && other) noexcept = default;
-  grid_quant_2d & operator=(const grid_quant_2d &  other) noexcept = default;
 
   void alloc(gq2d_extras extras_in) {
     _extras = extras_in;
@@ -590,6 +606,12 @@ public:
     _size   = _extras.stride * extras_in.dim1_sz;
   }
 };
+
+inline grid_quant_2d operator+(grid_quant_2d a, const grid_quant_2d_view & b) {a += b; return a;}
+inline grid_quant_2d operator-(grid_quant_2d a, const grid_quant_2d_view & b) {a -= b; return a;}
+inline grid_quant_2d operator*(grid_quant_2d a, double b) {a *= b; return a;}
+inline grid_quant_2d operator*(double b, grid_quant_2d a) {a *= b; return a;}
+inline grid_quant_2d operator/(grid_quant_2d a, double b) {a /= b; return a;}
 
 
 //-----------------------------------------------------------------------------

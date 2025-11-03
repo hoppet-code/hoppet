@@ -163,6 +163,9 @@ TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
   pdf[hoppet::iflv_dbar] =            [](double y) { return pow(y,3); };
   REQUIRE_THAT( pdf[hoppet::iflv_g   ].at_y(5.0), WithinAbs(25.0, 1e-6));
   REQUIRE_THAT( pdf[hoppet::iflv_dbar].at_y(5.0), WithinAbs(125.0, 1e-6));
+
+  hoppet::grid_quant_2d pdf2 = pdf; // copy constructor
+  auto pdf3 = pdf + pdf2;
 }
 
 
