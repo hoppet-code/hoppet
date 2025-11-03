@@ -186,7 +186,6 @@ inline grid_def grid_def_default(double dy, double ymax, int order) {
   return grid_def(hoppet_cxx__grid_def__new_default(dy, ymax, order));
 }
 
-class grid_quant; // forward declaration
 
 /// @brief Object-oriented wrapper around the grid_quant Fortran type, non-owning
 ///
@@ -516,8 +515,8 @@ public:
   template<typename Func>
   grid_conv(const grid_def_view & grid, Func && conv_ignd_fn) : grid_conv_view(grid) {
 
-    // under the hood, the fortran call hoppet_grid_conv_f__wrapper with a pointer
-    // to the function object
+    // under the hood, the fortran calls hoppet_grid_conv_f__wrapper
+    // (defined in hoppet_oo.cc), with a pointer to the function object
     std::function<double(double,int)> fn_ptr = std::forward<Func>(conv_ignd_fn);
     _ptr = hoppet_cxx_grid_conv__new_from_fn(grid.ptr(), &fn_ptr);
   }
