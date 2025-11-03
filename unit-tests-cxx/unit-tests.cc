@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
   // Global setup
   // make a simple grid for use in the tests
   grid100  = hoppet::grid_def(0.1, 10.0);
-  big_grid = hoppet::grid_def_default(0.1, 14.0, -6);
+  big_grid = hoppet::grid_def_default(0.1, 16.0, -6);
 
   // and also set up the objects in the hoppet streamlined interface
   double ymax = 12.0, dy = 0.2, Qmin = 1.0, Qmax = 1e4;
@@ -142,7 +142,7 @@ TEST_CASE( "hoppet streamlined objects", "[hoppet]" ) {
 }
 
 TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
-  hoppet::grid_conv conv(grid100, 
+  hoppet::grid_conv pqq(big_grid, 
     [](double y, int piece) {
       double x = exp(-y);
       double res;
@@ -152,14 +152,21 @@ TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
       return x*res;
     });
 
+  hoppet::grid_conv pgq(big_grid, [](double y, int piece) {
+      double x = exp(-y);
+      double res;
+      if      (piece == hoppet::cc_REAL
+            || piece == hoppet::cc_REALVIRT) res = (1+pow(1-x,2))/x;
+      else                               res = 0.0;
+      return x*res;
+    });
+
   auto power = [](double powval) { return grid100 * [powval](double y) { return exp(-powval*y); }; };
 
-  //hoppet::grid_quant q = grid100 * power(1.0);
-  hoppet::grid_quant result = conv * power(1.0);
-  cout << "After convolution, result.at_y(10.0): " << result.at_y(10.0) << endl;
-  //q = power(0.0);
-  result = conv * power(0.0);
-  cout << "After convolution, result.at_y(10.0): " << result.at_y(10.0) << endl;
-  result = conv * power(4.0);
-  cout << "After convolution, result.at_y(10.0): " << result.at_y(10.0) << endl;
+  auto q = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
+  auto pqq_q = pqq * q;
+  auto pgq_q = pgq * q;
+  REQUIRE_THAT(          pqq_q.truncated_moment(0.0), WithinAbs(0.0, 1e-5)); //< check quark number conserved
+  REQUIRE_THAT((pqq_q + pgq_q).truncated_moment(1.0), WithinAbs(0.0, 1e-6)); //< check momentum conserved
+  REQUIRE_THAT(pqq_q.truncated_moment(1.0), WithinAbs(-2.0/9, 1e-6)); //< check momentum conserved
 }
