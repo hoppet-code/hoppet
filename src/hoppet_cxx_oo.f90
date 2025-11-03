@@ -1,38 +1,11 @@
-module hoppet_cxx_oo
+!=====================================================================
+!! wrappers for C++ OO interface to grid_def
+module hoppet_cxx_oo_grid_def
   use types, only: dp
   use, intrinsic :: iso_c_binding
   use convolution
   implicit none
   
-  type grid_quant
-    real(dp), pointer :: data(:) => null()
-    type(grid_def)    :: grid
-  end type grid_quant
-
-  abstract interface
-    function conv_ignd_c_interface(y, piece) bind(C) result(res)
-      import :: c_double, c_int
-      real(c_double), intent(in), value :: y
-      integer(c_int), intent(in), value :: piece
-      real(c_double) :: res
-    end function conv_ignd_c_interface
-  end interface
-
-  type, extends(conv_ignd) :: conv_ignd_from_c
-    !type(c_funptr) :: fptr  = c_null_funptr
-    type(c_ptr)    :: ctx   = c_null_ptr  
-  contains
-    procedure :: f => conv_ignd_from_c__f! f(this, y, piece)
-  end type conv_ignd_from_c
-  interface
-    function hoppet_grid_conv_f__wrapper(y, piece, ctx) bind(C)
-      use, intrinsic :: iso_c_binding
-      real(c_double), intent(in), value :: y
-      integer(c_int), intent(in), value :: piece
-      type(c_ptr),    intent(in), value :: ctx
-      real(c_double) :: hoppet_grid_conv_f__wrapper
-    end function hoppet_grid_conv_f__wrapper
-  end interface
 
 contains
 
@@ -175,6 +148,25 @@ contains
   end subroutine
 
 
+
+end module hoppet_cxx_oo_grid_def
+
+!=====================================================================
+!! wrappers for C++ OO interface to grid quantities, with an intermediate
+!! grid_quant type holds both the data and the grid_def
+module hoppet_cxx_oo_grid_quant
+  use types, only: dp
+  use, intrinsic :: iso_c_binding
+  use hoppet_cxx_oo_grid_def
+  implicit none
+
+  type grid_quant
+    real(dp), pointer :: data(:) => null()
+    type(grid_def)    :: grid
+  end type grid_quant
+
+contains
+
   function hoppet_cxx__grid_quant__new(grid_def_ptr) bind(C) result(ptr)
     implicit none
     type(c_ptr), intent(in), value :: grid_def_ptr
@@ -230,6 +222,47 @@ contains
     data_ptr = c_loc(f_ptr%data(0))
   end function hoppet_cxx__grid_quant__data_ptr
 
+
+end module hoppet_cxx_oo_grid_quant
+
+
+!=====================================================================
+!! wrappers for C++ OO interface to grid_conv objects
+module hoppet_cxx_oo_grid_conv
+  use types, only: dp
+  use, intrinsic :: iso_c_binding
+  use hoppet_cxx_oo_grid_def
+  use hoppet_cxx_oo_grid_quant
+  implicit none
+
+
+  abstract interface
+    function conv_ignd_c_interface(y, piece) bind(C) result(res)
+      import :: c_double, c_int
+      real(c_double), intent(in), value :: y
+      integer(c_int), intent(in), value :: piece
+      real(c_double) :: res
+    end function conv_ignd_c_interface
+  end interface
+
+
+  type, extends(conv_ignd) :: conv_ignd_from_c
+    !type(c_funptr) :: fptr  = c_null_funptr
+    type(c_ptr)    :: ctx   = c_null_ptr  
+  contains
+    procedure :: f => conv_ignd_from_c__f! f(this, y, piece)
+  end type conv_ignd_from_c
+  interface
+    function hoppet_grid_conv_f__wrapper(y, piece, ctx) bind(C)
+      use, intrinsic :: iso_c_binding
+      real(c_double), intent(in), value :: y
+      integer(c_int), intent(in), value :: piece
+      type(c_ptr),    intent(in), value :: ctx
+      real(c_double) :: hoppet_grid_conv_f__wrapper
+    end function hoppet_grid_conv_f__wrapper
+  end interface
+
+contains
 
   function hoppet_cxx_grid_conv__new(grid_ptr, conv_ignd_c_fn_obj) bind(C, name="hoppet_cxx_grid_conv__new") result(ptr)
     implicit none
@@ -292,4 +325,5 @@ contains
     result = gc * q
   end subroutine hoppet_cxx_grid_conv__times_grid_quant
 
-end module hoppet_cxx_oo
+
+end module hoppet_cxx_oo_grid_conv
