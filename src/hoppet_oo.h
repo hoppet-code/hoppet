@@ -51,6 +51,7 @@ extern "C" {
   //void   hoppet_cxx__grid_quant__set_zero(void * gridquant);
   //void   hoppet_cxx__grid_quant__copy_from(void * gridquant, void * other);
 }
+inline void generic_delete(grid_quant_f * ptr) {if (ptr)hoppet_cxx__grid_quant__delete(&ptr);}
 
 /// grid_conv function wrappers
 extern "C" {
@@ -76,9 +77,9 @@ namespace hoppet {
 class grid_def_view {
 public:
 
-  grid_def_view() {}
+  grid_def_view() noexcept {}
 
-  grid_def_view(grid_def_f * ptr) : _ptr(ptr) {}
+  grid_def_view(grid_def_f * ptr) noexcept : _ptr(ptr) {}
   //grid_def_view(const grid_def_view & other) : _ptr(other._ptr) {}
 
   int ny() const {ensure_valid(); return hoppet_cxx__grid_def__ny(_ptr); }
@@ -186,24 +187,22 @@ inline grid_def grid_def_default(double dy, double ymax, int order) {
   return grid_def(hoppet_cxx__grid_def__new_default(dy, ymax, order));
 }
 
+/// @brief Base class for views of objects with an associated data pointer
 template<typename T>
 class data_view {
 public:
+
+  typedef T extras_type;
+
   double       * data()       {return _data;}
   const double * data() const {return _data;}
   std::size_t    size() const {return _size;}
 
-  void take_view(const data_view<T> & other) {
+  void take_view(const data_view<T> & other) noexcept {
     _data = other._data;
     _size = other._size;
     _extras = other._extras;
   }
-  //// this must be implemented in any derived class (not virtual)
-  //void ensure_compatible(const data_view & other) const {
-  //  if (data() == nullptr || other.data() == nullptr || size() != other.size()) {
-  //    throw std::runtime_error("hoppet::data_view::ensure_compatible: data sizes do not match");
-  //  }
-  //}
 
   /// compound assignment arithmetic operators
   ///@{
@@ -257,10 +256,75 @@ protected:
     extras().ensure_compatible(b.extras());
     return std::make_tuple(size(), data(), b.data());
   }
-
-
 };
 
+
+template<typename V, typename P>
+class data_owner : public V {
+public:
+  data_owner() {}
+  virtual ~data_owner() {del();}
+  void del() {generic_delete(_ptr); reset();}
+
+  virtual void alloc_virtual(const typename V::extras_type & extras) = 0;
+  void reset() {
+    V::reset();
+    _ptr = nullptr;
+  }
+
+  data_owner & operator=(const data_owner & other) {
+    if (_ptr == other._ptr) return *this; // self-assignment check
+    copy(other);
+    return *this;
+  }
+
+  data_owner(data_owner && other) noexcept  {move_no_del(other);}
+
+  data_owner & operator=(data_owner && other) noexcept {
+    if (this != &other) {
+      del();
+      move_no_del(other);
+    }
+    return *this;
+  }
+
+  /// @brief  make a copy of other, including allocating new storage if needed
+  /// @param  other the other grid_quant to copy from
+  /// @return a reference to the current object
+  void copy(const V & other) {
+    if (_ptr && this->extras() == other.extras()) {
+      //std::cout << " reusing existing storage in grid_quant::copy\n";
+      this->copy_data(other);
+    } else {
+      //std::cout << " allocating new storage in grid_quant::copy, size = " << other.size() << "\n";
+      del();
+      alloc_virtual(other.extras());
+      this->copy_data(other);
+      //std::cout << " data[50] = " << data()[50] << " v " << other.data()[50] << "\n";
+    }
+  }
+
+  const P* ptr() const { return _ptr; }
+  P* ptr()  { return _ptr; }
+
+protected:
+
+  /// @brief  move the contents from other into this, without deleting existing data
+  /// @param  other: the other grid_quant to move from
+  /// @return a reference to the current object
+  ///
+  /// Note that this does not delete any existing data in *this, so be careful to call del() 
+  /// first if needed.
+  void move_no_del(data_owner & other) noexcept {
+    //std::cout << "actually moving " << other.ptr() << "\n"; 
+    // move the semantics
+    this->take_view(other);
+    _ptr = other._ptr;
+    other.reset();
+  }
+
+  P * _ptr = nullptr;
+};
 
 /// @brief Object-oriented wrapper around the grid_quant Fortran type, non-owning
 ///
@@ -277,7 +341,7 @@ public:
   /// @param other 
   /// @return 
   grid_quant_view & operator=(const grid_quant_view & other) {
-    copy_data(other);
+    this->copy_data(other);
     return *this;
   }
 
@@ -318,19 +382,27 @@ public:
 
 
 //-----------------------------------------------------------------------------
-class grid_quant : public grid_quant_view {
+class grid_quant : public data_owner<grid_quant_view, grid_quant_f> {
 public:
 
   grid_quant() {}
 
   /// construct and allocate a grid_quant for the given grid
-  grid_quant(const grid_def_view & grid) {
+  grid_quant(const grid_def_view & grid) {alloc(grid);}
+
+  // make sure we have the move constructor and move assignment
+  grid_quant(grid_quant && other) noexcept = default;
+  grid_quant & operator=(grid_quant && other) noexcept = default;
+  grid_quant & operator=(const grid_quant & other) noexcept = default;
+
+  void alloc(const grid_def_view & grid) {
     _extras = grid;
     _ptr    = hoppet_cxx__grid_quant__new(grid.ptr());
     _data   = hoppet_cxx__grid_quant__data_ptr(_ptr);
     _size   = static_cast<std::size_t>(grid.ny()+1);
   }
-  //    grid_quant_view(grid, hoppet_cxx__grid_quant__new(grid.ptr())) {}
+  void alloc_virtual(const grid_def_view & grid) override {alloc(grid);}
+  
 
   /// construct and allocate a grid_quant for the given grid, and fill it
   /// with the specified function
@@ -347,53 +419,8 @@ public:
   grid_quant(const grid_quant_view & other) {copy(other);}
 
   /// move constructor
-  grid_quant(grid_quant && other) noexcept {
-    move_no_del(other);
-  }
+  //grid_quant(grid_quant && other) noexcept {move_no_del(other);
 
-  /// @brief delete the underlying Fortran object if allocated
-  void del() {if (_ptr) hoppet_cxx__grid_quant__delete(&_ptr); reset();}
-
-  /// @brief destructor
-  ~grid_quant() {del();}
-
-  const grid_quant_f* ptr() const { return _ptr; }
-  grid_quant_f* ptr()  { return _ptr; }
-
-  /// move assignment
-  grid_quant& operator=(grid_quant&& other) noexcept {
-    //std::cout << "move assigning\n";
-    if (this != &other) {
-      del();
-      move_no_del(other);
-    }
-    return *this;
-  }
-
-  /// @brief  make a copy of other, including allocating new storage if needed
-  /// @param  other the other grid_quant to copy from
-  /// @return a reference to the current object
-  void copy(const grid_quant_view & other) {
-    if (_ptr && grid() == other.grid()) {
-      //std::cout << " reusing existing storage in grid_quant::copy\n";
-      copy_data(other);
-    } else {
-      //std::cout << " allocating new storage in grid_quant::copy, size = " << other.size() << "\n";
-      del();
-      _ptr    = hoppet_cxx__grid_quant__new(other.grid().ptr());
-      _data   = hoppet_cxx__grid_quant__data_ptr(_ptr);
-      _size   = other.size();
-      _extras = other.extras();
-      copy_data(other);
-      //std::cout << " data[50] = " << data()[50] << " v " << other.data()[50] << "\n";
-    }
-  }
-
-  grid_quant & operator=(const grid_quant & other) {
-    if (_ptr == other._ptr) return *this; // self-assignment check
-    copy(other);
-    return *this;
-  }
 
   /// @brief  assign from a function 
   /// @tparam T generic function type
@@ -417,27 +444,6 @@ public:
     return *this;
   }
 
-
-protected:  
-
-
-  /// @brief  move the contents from other into this, without deleting existing data
-  /// @param  other: the other grid_quant to move from
-  /// @return a reference to the current object
-  ///
-  /// Note that this does not delete any existing data in *this, so be careful to call del() 
-  /// first if needed.
-  grid_quant & move_no_del(grid_quant & other) noexcept {
-    //std::cout << "actually moving " << other.ptr() << "\n"; 
-    // move the semantics
-    take_view(other);
-    _ptr = other._ptr;
-    other.reset();
-    other._ptr = nullptr;
-    return *this;
-  }
-
-  grid_quant_f * _ptr = nullptr;
   
 };
 
