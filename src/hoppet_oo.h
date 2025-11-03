@@ -534,6 +534,9 @@ public:
   grid_quant_2d(const grid_def_view & grid, std::size_t dim1_size) {
     alloc(gq2d_extras(grid, dim1_size));
   }
+  void alloc_virtual(const gq2d_extras & extras_in) override {
+    alloc(extras_in);
+  }
 
   // make sure we have the move constructor, move assignment and copy assignment
   grid_quant_2d            (      grid_quant_2d && other) noexcept = default;

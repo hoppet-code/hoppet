@@ -140,7 +140,11 @@ namespace hoppet {
   const int iflv_electron = 9+6; //< note this is the sum of e- and e+
   const int iflv_muon = 10+6;    //< note this is the sum of mu- and mu+
   const int iflv_tau = 11+6;     //< note this is the sum of tau- and tau+
-
+  const int iflv_min = iflv_tbar;
+  const int iflv_max = iflv_t; //< this is for QCD-only evolution
+  const int iflv_info = iflv_max + 1;   //< this is for QCD+QED evolution
+  const int ncompmin = iflv_min;
+  const int ncompmax = iflv_info; //< this is for QCD-only evolution
 
 }
 
