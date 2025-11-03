@@ -166,7 +166,22 @@ TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
   auto q = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
   auto pqq_q = pqq * q;
   auto pgq_q = pgq * q;
+  double pqq_q_mom1 = pqq_q.truncated_moment(1.0);
+  REQUIRE_THAT(pqq_q_mom1, WithinAbs(-2.0/9, 1e-6)); //< check momentum moment (1/6 * (-4/3))
   REQUIRE_THAT(          pqq_q.truncated_moment(0.0), WithinAbs(0.0, 1e-5));    //< check quark number conserved
-  REQUIRE_THAT(          pqq_q.truncated_moment(1.0), WithinAbs(-2.0/9, 1e-6)); //< check momentum moment (1/6 * (-4/3))
   REQUIRE_THAT((pqq_q + pgq_q).truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved
+
+  //------- compound operations ------------------------
+  hoppet::grid_conv p2 = pqq;
+  REQUIRE(p2.ptr() != nullptr);
+  REQUIRE(p2.ptr() != pqq.ptr());
+  p2 += pgq;
+  REQUIRE_THAT( (p2 * q) .truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved
+  p2 -= pgq;
+  REQUIRE_THAT( (p2 * q) .truncated_moment(1.0), WithinAbs( pqq_q_mom1, 1e-6)); //< check back to pqq alone
+  p2 *= 2.0;
+  REQUIRE_THAT( (p2 * q) .truncated_moment(1.0), WithinAbs( 2.0 * pqq_q_mom1, 1e-6)); //< check back to pqq alone
+  p2 /= 2.0;
+  REQUIRE_THAT( (p2 * q) .truncated_moment(1.0), WithinAbs( pqq_q_mom1, 1e-6)); //< check back to pqq alone
+
 }

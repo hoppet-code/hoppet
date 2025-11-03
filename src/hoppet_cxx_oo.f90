@@ -277,7 +277,7 @@ module hoppet_cxx_oo_grid_conv
 
 contains
 
-  function hoppet_cxx_grid_conv__new(grid_ptr, conv_ignd_c_fn_obj) bind(C, name="hoppet_cxx_grid_conv__new") result(ptr)
+  function hoppet_cxx_grid_conv__new_from_fn(grid_ptr, conv_ignd_c_fn_obj) bind(C) result(ptr)
     implicit none
     type(c_ptr), intent(in), value :: grid_ptr
     type(c_ptr), intent(in), value :: conv_ignd_c_fn_obj
@@ -296,7 +296,22 @@ contains
     allocate(gc)
     call InitGridConv(grid, gc, lcl_conv_ignd, alloc=.true.)
     ptr = c_loc(gc)
-  end function hoppet_cxx_grid_conv__new
+  end function hoppet_cxx_grid_conv__new_from_fn
+
+  function hoppet_cxx_grid_conv__new_from_gc(gc_other) bind(C) result(ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: gc_other
+    type(c_ptr) :: ptr
+    !--
+    type(grid_conv), pointer :: gc
+    type(grid_conv), pointer :: gc_other_f
+
+    call c_f_pointer(gc_other, gc_other_f)
+    allocate(gc)
+    call InitGridConv(gc, gc_other_f, alloc=.true.)
+    ptr = c_loc(gc)
+  end function hoppet_cxx_grid_conv__new_from_gc
+
 
   !! implementation of conv_ignd_from_c%f
   function conv_ignd_from_c__f(this, y, piece) result(res)
@@ -337,6 +352,28 @@ contains
 
     result = gc * q
   end subroutine hoppet_cxx_grid_conv__times_grid_quant
+
+
+  !! conv1 += conv2
+  subroutine hoppet_cxx_grid_conv__add(conv1, conv2, factor) bind(C)
+    implicit none
+    type(c_ptr),    intent(in), value    :: conv1, conv2
+    real(c_double), intent(in), optional :: factor
+    type(grid_conv), pointer :: conv1_f, conv2_f
+    call c_f_pointer(conv1, conv1_f)
+    call c_f_pointer(conv2, conv2_f)
+    call AddWithCoeff(conv1_f,conv2_f,fact=factor)
+  end subroutine hoppet_cxx_grid_conv__add
+
+  !! conv1 *=factor
+  subroutine hoppet_cxx_grid_conv__multiply(conv1, factor) bind(C)
+    implicit none
+    type(c_ptr),    intent(in), value :: conv1
+    real(c_double), intent(in), value :: factor
+    type(grid_conv), pointer :: conv1_f
+    call c_f_pointer(conv1, conv1_f)
+    call Multiply(conv1_f,factor)
+  end subroutine hoppet_cxx_grid_conv__multiply
 
 
 end module hoppet_cxx_oo_grid_conv

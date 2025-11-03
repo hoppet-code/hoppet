@@ -15,7 +15,7 @@ class grid_def_f;
 class grid_quant_f;
 class grid_conv_f;
 
-
+/// grid_def function wrappers
 extern "C" {
   grid_def_f * hoppet_cxx__grid_def__new(double dy, double ymax, int order, double eps);
   grid_def_f * hoppet_cxx__grid_def__new_from_grids(grid_def_f ** griddefs, int ngrids, bool locked);
@@ -28,6 +28,7 @@ extern "C" {
   void   hoppet_cxx__grid_def__x_values(grid_def_f * griddef, double * xvals);
 }
 
+/// grid_quant function wrappers
 extern "C" {
   grid_quant_f * hoppet_cxx__grid_quant__new(const grid_def_f * griddef);
   void   hoppet_cxx__grid_quant__delete(grid_quant_f ** gridquant);
@@ -39,11 +40,16 @@ extern "C" {
   //void   hoppet_cxx__grid_quant__copy_from(void * gridquant, void * other);
 }
 
+/// grid_conv function wrappers
 extern "C" {
-  grid_conv_f * hoppet_cxx_grid_conv__new(grid_def_f * grid_ptr, void * conv_ignd_c_fn_obj);
+  grid_conv_f * hoppet_cxx_grid_conv__new_from_fn(grid_def_f * grid_ptr, void * conv_ignd_c_fn_obj);
+  grid_conv_f * hoppet_cxx_grid_conv__new_from_gc(const grid_conv_f * gc_other);
   void  hoppet_cxx_grid_conv__delete(grid_conv_f ** gridconv);
   void  hoppet_cxx_grid_conv__times_grid_quant(const grid_conv_f * conv,
                    const double * q_in_data, double * q_out_data);
+
+  void hoppet_cxx_grid_conv__add(grid_conv_f * conv, const grid_conv_f * other, const double * factor = nullptr);
+  void hoppet_cxx_grid_conv__multiply(grid_conv_f * conv, const double factor);
 }
 
 namespace hoppet {
@@ -204,7 +210,7 @@ public:
     return hoppet_cxx__grid_quant__trunc_mom(_grid.ptr(), data(), n, &y);
   }
 
-  /// unary arithmetic operators
+  /// compound assignment arithmetic operators
   ///@{
 
   grid_quant_view & operator+=(const grid_quant_view & other) {
@@ -415,7 +421,30 @@ public:
   grid_conv_view(const grid_def_view & grid) : _grid(grid) {}
   //grid_conv_view(grid_conv_f * ptr) : _ptr(ptr) {}
   const grid_def_view & grid() const {return _grid;}
-  grid_conv_f * ptr() const { return _ptr; }
+  const grid_conv_f * ptr() const { return _ptr; }
+  grid_conv_f * ptr() { return _ptr; }
+
+  /// compound assignment arithmetic operators
+  ///@{
+  grid_conv_view & operator+=(const grid_conv_view & other) {
+    hoppet_cxx_grid_conv__add(_ptr, other.ptr());
+    return *this;
+  }
+  grid_conv_view & operator-=(const grid_conv_view & other) {
+    double minus_one = -1.0;
+    hoppet_cxx_grid_conv__add(_ptr, other.ptr(), &minus_one);
+    return *this;
+  }
+  grid_conv_view & operator*=(double factor) {
+    hoppet_cxx_grid_conv__multiply(_ptr, factor);
+    return *this;
+  }
+  grid_conv_view & operator/=(double factor) {
+    hoppet_cxx_grid_conv__multiply(_ptr, 1.0/factor);
+    return *this;
+  }
+  ///@}
+
 protected:
   grid_def_view  _grid;
   grid_conv_f *  _ptr = nullptr;
@@ -437,7 +466,13 @@ public:
     // under the hood, the fortran call hoppet_grid_conv_f__wrapper with a pointer
     // to the function object
     std::function<double(double,int)> fn_ptr = std::forward<Func>(conv_ignd_fn);
-    _ptr = hoppet_cxx_grid_conv__new(grid.ptr(), &fn_ptr);
+    _ptr = hoppet_cxx_grid_conv__new_from_fn(grid.ptr(), &fn_ptr);
+  }
+
+  grid_conv(const grid_conv & other) {
+    _ptr  = hoppet_cxx_grid_conv__new_from_gc(other.ptr());
+    _grid = other.grid();
+    std::cout << "copy constructing grid_conv, _ptr = " << _ptr << "\n";
   }
 
   grid_conv(grid_conv && other) noexcept
