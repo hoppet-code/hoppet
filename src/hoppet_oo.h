@@ -24,6 +24,7 @@
 /// is hidden in the Fortran code.
 class grid_def_f;
 class grid_quant_f;
+class grid_quant_2d_f;
 class grid_conv_f;
 
 /// grid_def function wrappers
@@ -53,6 +54,18 @@ extern "C" {
 }
 inline void generic_delete(grid_quant_f * ptr) {if (ptr)hoppet_cxx__grid_quant__delete(&ptr);}
 
+/// grid_quant_2d function wrappers
+extern "C" {
+  grid_quant_2d_f * hoppet_cxx__grid_quant_2d__new(const grid_def_f * griddef, int size);
+  void   hoppet_cxx__grid_quant_2d__delete(grid_quant_2d_f ** gridquant);
+  double * hoppet_cxx__grid_quant_2d__data_ptr(grid_quant_2d_f * gridquant);
+
+  //void   hoppet_cxx__grid_quant__set_zero(void * gridquant);
+  //void   hoppet_cxx__grid_quant__copy_from(void * gridquant, void * other);
+}
+inline void generic_delete(grid_quant_2d_f * ptr) {if (ptr) hoppet_cxx__grid_quant_2d__delete(&ptr);}
+
+
 /// grid_conv function wrappers
 extern "C" {
   grid_conv_f * hoppet_cxx_grid_conv__new_from_fn(const grid_def_f * grid_ptr, void * conv_ignd_c_fn_obj);
@@ -68,6 +81,7 @@ extern "C" {
 
 namespace hoppet {
 
+typedef std::size_t size_type;
 
 //-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the grid_def Fortran type, non-owning
@@ -80,7 +94,11 @@ public:
   grid_def_view() noexcept {}
 
   grid_def_view(grid_def_f * ptr) noexcept : _ptr(ptr) {}
-  //grid_def_view(const grid_def_view & other) : _ptr(other._ptr) {}
+  //grid_def_view(const grid_def_view & other) noexcept : _ptr(other._ptr) {}
+  //grid_def_view & operator= (const grid_def_view & other) noexcept {
+  //  _ptr = other._ptr;
+  //  return *this;
+  //}
 
   int ny() const {ensure_valid(); return hoppet_cxx__grid_def__ny(_ptr); }
 
@@ -194,9 +212,19 @@ public:
 
   typedef T extras_type;
 
-  double       * data()       {return _data;}
-  const double * data() const {return _data;}
-  std::size_t    size() const {return _size;}
+  data_view() noexcept {}
+
+  data_view(double * data_ptr, std::size_t size, const T & extras) noexcept
+    : _data(data_ptr), _size(size), _extras(extras) {}
+
+  explicit data_view(const data_view<T> & other) noexcept {
+    take_view(other);
+  }
+
+  data_view<T> & operator=(const data_view<T> & other) {
+    this->copy_data(other);
+    return *this;
+  }
 
   void take_view(const data_view<T> & other) noexcept {
     _data = other._data;
@@ -204,6 +232,13 @@ public:
     _extras = other._extras;
   }
 
+  double       * data()       {return _data;}
+  const double * data() const {return _data;}
+  std::size_t    size() const {return _size;}
+
+  data_view & set_data_ptr(double * data_in) noexcept {_data = data_in; return *this;}
+  data_view & set_size(std::size_t size_in) noexcept {_size = size_in; return *this;}
+  data_view & set_extras(const T & extras_in) noexcept {_extras = extras_in; return *this;}
   /// compound assignment arithmetic operators
   ///@{
   data_view<T> & operator+=(const data_view<T> & other) {
@@ -334,17 +369,19 @@ class grid_quant_view : public data_view<grid_def_view> {
 public:
 
   grid_quant_view() {}
+  grid_quant_view(double * data_ptr, std::size_t size, const grid_def_view & grid) 
+    : data_view<grid_def_view>(data_ptr, size, grid) {}
 
-  explicit grid_quant_view (const grid_quant_view & other) {take_view(other);}    
-
-  /// @brief assignment operator, where the data from other is copied into this
-  /// @param other 
-  /// @return 
-  grid_quant_view & operator=(const grid_quant_view & other) {
-    this->copy_data(other);
-    return *this;
-  }
-
+  //explicit grid_quant_view (const grid_quant_view & other) noexcept : data_view<grid_def_view>(other) {}   
+//
+//  /// @brief assignment operator, where the data from other is copied into this
+//  /// @param other 
+//  /// @return 
+//  grid_quant_view & operator=(const grid_quant_view & other) {
+//    this->copy_data(other);
+//    return *this;
+//  }
+//
   template<typename T>
   double & operator[](T i) {return data()[i];}
 
@@ -385,12 +422,14 @@ public:
 class grid_quant : public data_owner<grid_quant_view, grid_quant_f> {
 public:
 
+  typedef grid_quant_view view_type;
+
   grid_quant() {}
 
   /// construct and allocate a grid_quant for the given grid
   grid_quant(const grid_def_view & grid) {alloc(grid);}
 
-  // make sure we have the move constructor and move assignment
+  // make sure we have the move constructor, move assignment and copy assignment
   grid_quant(grid_quant && other) noexcept = default;
   grid_quant & operator=(grid_quant && other) noexcept = default;
   grid_quant & operator=(const grid_quant & other) noexcept = default;
@@ -442,9 +481,7 @@ public:
       my_data[iy] = fn(yvals[iy]);
     }
     return *this;
-  }
-
-  
+  }  
 };
 
 /// binary arithmetic operators
@@ -468,7 +505,52 @@ inline grid_quant operator*(const grid_def_view & grid, F && fn) {
 
 ///@}
 
+//-----------------------------------------------------------------------------
+struct gq2d_extras {
+  grid_def_view grid;
+  std::size_t   stride;
+  std::size_t   dim1_sz;
+  gq2d_extras() : grid(), stride(0), dim1_sz(0) {}
+  gq2d_extras(const gq2d_extras & other) : grid(other.grid), stride(other.stride), dim1_sz(other.dim1_sz) {}
+  gq2d_extras(const grid_def_view & grid, std::size_t dim1_sz) : grid(grid), stride(grid.ny() + 1), dim1_sz(dim1_sz) {}
+};
+//-----------------------------------------------------------------------------
+class grid_quant_2d_view : public data_view<gq2d_extras> {
+public:  
+  grid_quant_2d_view() {}
+  grid_def_view grid() const {return extras().grid;}
+  grid_quant_view operator[](std::size_t i) {
+    grid_quant_view result(this->data() + i * extras().stride, extras().stride, extras().grid);
+    return result;
+  }
+};
 
+
+//-----------------------------------------------------------------------------
+class grid_quant_2d : public data_owner<grid_quant_2d_view, grid_quant_2d_f> {
+
+public:
+  grid_quant_2d() {}
+  grid_quant_2d(const grid_def_view & grid, std::size_t dim1_size) {
+    alloc(gq2d_extras(grid, dim1_size));
+  }
+
+  // make sure we have the move constructor, move assignment and copy assignment
+  grid_quant_2d            (      grid_quant_2d && other) noexcept = default;
+  grid_quant_2d & operator=(      grid_quant_2d && other) noexcept = default;
+  grid_quant_2d & operator=(const grid_quant_2d &  other) noexcept = default;
+
+  void alloc(gq2d_extras extras_in) {
+    _extras = extras_in;
+    _ptr    = hoppet_cxx__grid_quant_2d__new(extras_in.grid.ptr(), static_cast<int>(extras_in.dim1_sz));
+    _data   = hoppet_cxx__grid_quant_2d__data_ptr(_ptr);
+    _size   = _extras.stride * extras_in.dim1_sz;
+  }
+};
+
+
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the grid_conv Fortran type, non-owning
 class grid_conv_view {
 public:
   grid_conv_view() {}

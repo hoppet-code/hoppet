@@ -250,6 +250,93 @@ contains
   end function hoppet_cxx__grid_quant__trunc_mom
 end module hoppet_cxx_oo_grid_quant
 
+!=====================================================================
+!! wrappers for C++ OO interface to grid quantities, with an intermediate
+!! grid_quant type holds both the data and the grid_def
+module hoppet_cxx_oo_grid_quant_2d
+  use types, only: dp
+  use, intrinsic :: iso_c_binding
+  use hoppet_cxx_oo_grid_def
+  implicit none
+
+  type grid_quant_2d
+    real(dp), pointer :: data(:,:) => null()
+    type(grid_def)    :: grid
+  end type grid_quant_2d
+
+contains
+
+  function hoppet_cxx__grid_quant_2d__new(grid_def_ptr, size) bind(C) result(ptr)
+    implicit none
+    type(c_ptr),    intent(in), value :: grid_def_ptr
+    integer(c_int), intent(in), value :: size
+    type(c_ptr) :: ptr
+    !--
+    type(grid_quant_2d), pointer :: f_ptr
+    type(grid_def), pointer :: grid
+
+    allocate(f_ptr)
+    call c_f_pointer(grid_def_ptr, grid)
+    call AllocGridQuant(grid, f_ptr%data, 0, size-1)
+    f_ptr%grid = grid
+    ptr = c_loc(f_ptr)
+  end function hoppet_cxx__grid_quant_2d__new
+
+  subroutine hoppet_cxx__grid_quant_2d__delete(ptr) bind(C)
+    implicit none
+    type(c_ptr), intent(inout) :: ptr
+    !--
+    type(grid_quant_2d), pointer :: f_ptr
+
+    call c_f_pointer(ptr, f_ptr)
+    if (associated(f_ptr%data)) then
+      deallocate(f_ptr%data)
+    end if
+    !print * , associated(f_ptr)
+    deallocate(f_ptr)
+    ptr = c_null_ptr
+  end subroutine hoppet_cxx__grid_quant_2d__delete
+
+!  function hoppet_cxx__grid_quant__at_y(grid_ptr, data_ptr, y) bind(C) result(res)
+!    implicit none
+!    type(c_ptr), intent(in), value :: grid_ptr, data_ptr
+!    real(c_double), intent(in), value :: y
+!    real(c_double) :: res
+!    !--
+!    type(grid_def), pointer :: grid
+!    real(dp), pointer :: gq(:)
+!
+!    call c_f_pointer(grid_ptr, grid)
+!    call c_f_pointer(data_ptr, gq, [grid%ny+1])
+!    res = EvalGridQuant(grid, gq, y)
+!  end function hoppet_cxx__grid_quant__at_y
+
+  function hoppet_cxx__grid_quant_2d__data_ptr(ptr) bind(C) result(data_ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: ptr
+    type(c_ptr) :: data_ptr
+    !--
+    type(grid_quant_2d), pointer :: f_ptr
+
+    call c_f_pointer(ptr, f_ptr)
+    data_ptr = c_loc(f_ptr%data(0, 0))
+  end function hoppet_cxx__grid_quant_2d__data_ptr
+
+!  function hoppet_cxx__grid_quant__trunc_mom(grid, data, n, ymax) bind(C) result(res)
+!    implicit none
+!    type(c_ptr),    intent(in), value :: grid, data  
+!    real(c_double), intent(in), value :: n
+!    real(c_double), intent(in)        :: ymax
+!    real(c_double) :: res
+!    !--
+!    type(grid_def),   pointer :: grid_ptr
+!    real(dp),         pointer :: data_ptr(:)
+!
+!    call c_f_pointer(grid, grid_ptr)
+!    call c_f_pointer(data, data_ptr, shape=[grid_ptr%ny+1])
+!    res = TruncatedMoment(grid_ptr, data_ptr, n, ymax)
+!  end function hoppet_cxx__grid_quant__trunc_mom
+end module hoppet_cxx_oo_grid_quant_2d
 
 !=====================================================================
 !! wrappers for C++ OO interface to grid_conv objects
