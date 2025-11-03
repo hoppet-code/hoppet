@@ -160,7 +160,7 @@ TEST_CASE( "grid_quant", "[hoppet]" ) {
 TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
   hoppet::grid_quant_2d pdf(grid100, 14); // 14 is size of 2nd dimension
   pdf[hoppet::iflv_g   ] =  grid100 * [](double y) { return y*y; };
-  pdf[hoppet::iflv_dbar] =  grid100 * [](double y) { return pow(y,3); };
+  pdf[hoppet::iflv_dbar] =            [](double y) { return pow(y,3); };
   REQUIRE_THAT( pdf[hoppet::iflv_g   ].at_y(5.0), WithinAbs(25.0, 1e-6));
   REQUIRE_THAT( pdf[hoppet::iflv_dbar].at_y(5.0), WithinAbs(125.0, 1e-6));
 }

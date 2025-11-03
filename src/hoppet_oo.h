@@ -6,6 +6,7 @@
 #include <cassert>
 #include <tuple>
 #include <functional>
+//#include <concepts>
 
 // Elements to think about
 // - do we separate things out into different files
@@ -82,6 +83,16 @@ extern "C" {
 namespace hoppet {
 
 typedef std::size_t size_type;
+
+
+template <typename F>
+using IsDoubleFunction = std::enable_if_t<
+    std::is_invocable_r_v<double, F, double>, int
+>;
+//template <typename F>
+//concept DoubleFunction =
+//    std::is_invocable<F, double> &&
+//    std::same_as<std::invoke_result_t<F, double>, double>;
 
 //-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the grid_def Fortran type, non-owning
@@ -372,6 +383,29 @@ public:
   grid_quant_view(double * data_ptr, std::size_t size, const grid_def_view & grid) 
     : data_view<grid_def_view>(data_ptr, size, grid) {}
 
+  template<typename F, IsDoubleFunction<F> = 0>
+  void assign(const F & fn) {
+    if (!data()) {
+      throw std::runtime_error("grid_quant_view::assign(fn): grid_quant_view object not associated");
+    }
+    // there is a design choice here: do we package whatever function
+    // we have received into a Fortran-callable function, or do we
+    // just do the filling on the C++ side? The latter is simpler
+    // to implement, so let's do that for now, though it implies an extra allocation
+    std::vector<double> yvals = grid().y_values();
+    double * my_data = data();
+    for (std::size_t iy=0; iy<size(); ++iy) {
+      my_data[iy] = fn(yvals[iy]);
+    }
+  } 
+
+  template<typename F, IsDoubleFunction<F> = 0>
+  grid_quant_view & operator=(const F & fn) {assign(fn); return *this;}
+
+  //template<> 
+  grid_quant_view & operator=(const grid_quant_view & other) = default;// {copy_data(other); return *this;}
+
+ 
   //explicit grid_quant_view (const grid_quant_view & other) noexcept : data_view<grid_def_view>(other) {}   
 //
 //  /// @brief assignment operator, where the data from other is copied into this
@@ -430,6 +464,9 @@ public:
   grid_quant(const grid_def_view & grid) {alloc(grid);}
 
   // make sure we have the move constructor, move assignment and copy assignment
+  // (they tend to get removed if other allocators are present, but we just want
+  // them to do the default thing, since the move support etc is already in the
+  // data_owner<...> base class.)
   grid_quant(grid_quant && other) noexcept = default;
   grid_quant & operator=(grid_quant && other) noexcept = default;
   grid_quant & operator=(const grid_quant & other) noexcept = default;
@@ -445,10 +482,13 @@ public:
 
   /// construct and allocate a grid_quant for the given grid, and fill it
   /// with the specified function
-  template<class T>
-  grid_quant(const grid_def_view & grid, const T & fn) : grid_quant(grid) {
-    *this = fn;
+  template<class F>
+  grid_quant(const grid_def_view & grid, const F & fn) : grid_quant(grid) {
+    assign(fn);
   }
+
+  template<typename F>
+  grid_quant & operator=(const F & fn) {assign(fn); return *this;}
 
   //grid_quant_view & view() {return *this;} // is this needed?
 
@@ -461,27 +501,27 @@ public:
   //grid_quant(grid_quant && other) noexcept {move_no_del(other);
 
 
-  /// @brief  assign from a function 
-  /// @tparam T generic function type
-  /// @param  fn any double(double) callable
-  /// @return a reference to the current object
-  template<typename F>
-  grid_quant & operator=(const F & fn) {
-    if (!_ptr) {
-      throw std::runtime_error("grid_quant::operator=(fn): grid_quant object not allocated");
-    }
-    // there is a design choice here: do we package whatever function
-    // we have received into a Fortran-callable function, or do we
-    // just do the filling on the C++ side? The latter is simpler
-    // to implement, so let's do that for now.
-    int ny = grid().ny();
-    std::vector<double> yvals = grid().y_values();
-    double * my_data = data();
-    for (std::size_t iy=0; iy<size(); ++iy) {
-      my_data[iy] = fn(yvals[iy]);
-    }
-    return *this;
-  }  
+//  /// @brief  assign from a function 
+//  /// @tparam T generic function type
+//  /// @param  fn any double(double) callable
+//  /// @return a reference to the current object
+//  template<typename F>
+//  grid_quant & operator=(const F & fn) {
+//    if (!_ptr) {
+//      throw std::runtime_error("grid_quant::operator=(fn): grid_quant object not allocated");
+//    }
+//    // there is a design choice here: do we package whatever function
+//    // we have received into a Fortran-callable function, or do we
+//    // just do the filling on the C++ side? The latter is simpler
+//    // to implement, so let's do that for now.
+//    int ny = grid().ny();
+//    std::vector<double> yvals = grid().y_values();
+//    double * my_data = data();
+//    for (std::size_t iy=0; iy<size(); ++iy) {
+//      my_data[iy] = fn(yvals[iy]);
+//    }
+//    return *this;
+//  }  
 };
 
 /// binary arithmetic operators
