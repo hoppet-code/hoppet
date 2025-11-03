@@ -222,7 +222,20 @@ contains
     data_ptr = c_loc(f_ptr%data(0))
   end function hoppet_cxx__grid_quant__data_ptr
 
+  function hoppet_cxx__grid_quant__trunc_mom(grid, data, n, ymax) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: grid, data  
+    real(c_double), intent(in), value :: n
+    real(c_double), intent(in)        :: ymax
+    real(c_double) :: res
+    !--
+    type(grid_def),   pointer :: grid_ptr
+    real(dp),         pointer :: data_ptr(:)
 
+    call c_f_pointer(grid, grid_ptr)
+    call c_f_pointer(data, data_ptr, shape=[grid_ptr%ny+1])
+    res = TruncatedMoment(grid_ptr, data_ptr, n, ymax)
+  end function hoppet_cxx__grid_quant__trunc_mom
 end module hoppet_cxx_oo_grid_quant
 
 

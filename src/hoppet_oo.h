@@ -32,6 +32,7 @@ extern "C" {
   grid_quant_f * hoppet_cxx__grid_quant__new(const grid_def_f * griddef);
   void   hoppet_cxx__grid_quant__delete(grid_quant_f ** gridquant);
   double hoppet_cxx__grid_quant__at_y(const grid_def_f * griddef, const double * gq_data, double y);
+  double   hoppet_cxx__grid_quant__trunc_mom(grid_def_f * griddef, const double * data, double n, const double * ymax = 0);
   double * hoppet_cxx__grid_quant__data_ptr(grid_quant_f * gridquant);
 
   //void   hoppet_cxx__grid_quant__set_zero(void * gridquant);
@@ -188,6 +189,20 @@ public:
     return hoppet_cxx__grid_quant__at_y(_grid.ptr(), _data, y);
   }
 
+  /// @brief  compute the truncated moment up to grid's ymax
+  /// @param n the moment index, where n=1 corresponds to momentum, n=0 to number
+  /// @return the moment
+  double truncated_moment(double n) const {
+    return hoppet_cxx__grid_quant__trunc_mom(_grid.ptr(), data(), n);
+  }
+
+  /// @brief  compute the truncated moment up to the specified y
+  /// @param n the moment index, where n=1 corresponds to momentum, n=0 to number
+  /// @param y the y value up to which to compute the moment
+  /// @return the moment
+  double truncated_moment(double n, double y) const {
+    return hoppet_cxx__grid_quant__trunc_mom(_grid.ptr(), data(), n, &y);
+  }
 
   /// unary arithmetic operators
   ///@{
@@ -321,7 +336,7 @@ public:
   template<typename F>
   grid_quant & operator=(const F & fn) {
     if (!_ptr) {
-      throw std::runtime_error("grid_quant::operator=: grid_quant object not allocated");
+      throw std::runtime_error("grid_quant::operator=(fn): grid_quant object not allocated");
     }
     // there is a design choice here: do we package whatever function
     // we have received into a Fortran-callable function, or do we
@@ -329,9 +344,9 @@ public:
     // to implement, so let's do that for now.
     int ny = _grid.ny();
     std::vector<double> yvals = _grid.y_values();
-    double * data = hoppet_cxx__grid_quant__data_ptr(_ptr); // hack to get data pointer
+    double * my_data = data();
     for (int iy=0; iy<=ny; ++iy) {
-      data[iy] = fn(yvals[iy]);
+      my_data[iy] = fn(yvals[iy]);
     }
     return *this;
   }

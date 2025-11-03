@@ -16,13 +16,15 @@ using Catch::Matchers::WithinRel;
 using namespace std;
 
 hoppet::grid_def grid100;
+hoppet::grid_def big_grid;
 
 /// We supply the main routine, to make sure that we can 
 /// do any global-object initialisation that's needed
 int main(int argc, char* argv[]) {
   // Global setup
   // make a simple grid for use in the tests
-  grid100 = hoppet::grid_def(0.1, 10.0);
+  grid100  = hoppet::grid_def(0.1, 10.0);
+  big_grid = hoppet::grid_def_default(0.1, 14.0, -6);
 
   // and also set up the objects in the hoppet streamlined interface
   double ymax = 12.0, dy = 0.2, Qmin = 1.0, Qmax = 1e4;
@@ -61,7 +63,10 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   hoppet::grid_def grid4;
   grid4 = grid3;
 
-  auto grid5 = hoppet::grid_def_default(0.2, 12.0, -5);
+  auto qdist = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
+  REQUIRE_THAT(qdist.truncated_moment(0.0), WithinAbs(1.0, 1e-5));
+  REQUIRE_THAT(qdist.truncated_moment(1.0), WithinAbs(1/6.0, 1e-7));
+  double ytrunc = 5.0; REQUIRE(qdist.truncated_moment(0.0, ytrunc) < qdist.truncated_moment(0.0));
 }
 
 
