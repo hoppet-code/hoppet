@@ -63,10 +63,6 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   hoppet::grid_def grid4;
   grid4 = grid3;
 
-  auto qdist = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
-  REQUIRE_THAT(qdist.truncated_moment(0.0), WithinAbs(1.0, 1e-5));
-  REQUIRE_THAT(qdist.truncated_moment(1.0), WithinAbs(1/6.0, 1e-7));
-  double ytrunc = 5.0; REQUIRE(qdist.truncated_moment(0.0, ytrunc) < qdist.truncated_moment(0.0));
 }
 
 
@@ -130,6 +126,12 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
   qv2 += 2*q;  REQUIRE ( qv2[iy] == 4.0 * q[iy] );
   q3 = qv2 + q; REQUIRE ( q3[iy] == 5.0 * q[iy] );
   //qv = q + q4; REQUIRE ( qv[iy] == 5.0 * q[iy] );
+
+  auto qdist = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
+  REQUIRE_THAT(qdist.truncated_moment(0.0), WithinAbs(1.0, 1e-5));
+  REQUIRE_THAT(qdist.truncated_moment(1.0), WithinAbs(1/6.0, 1e-7));
+  double ytrunc = 5.0; REQUIRE(qdist.truncated_moment(0.0, ytrunc) < qdist.truncated_moment(0.0));
+
 }
 
 TEST_CASE( "hoppet streamlined objects", "[hoppet]" ) {
