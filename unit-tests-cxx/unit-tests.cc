@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 }
 
 
-TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
+TEST_CASE( "grid_def", "[hoppet]" ) {
   REQUIRE(grid100.ptr() != nullptr);
   REQUIRE(grid100.ny() == 100);
 
@@ -72,12 +72,12 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
   REQUIRE(null_grid != null_grid);
   REQUIRE(grid100 != null_grid);
   // enforcement tests
-  REQUIRE_THROWS_AS(null_grid.enforce_valid(), std::runtime_error);
-  REQUIRE_THROWS_AS(grid100.enforce_equiv(big_grid), std::runtime_error);
+  REQUIRE_THROWS_AS(null_grid.ensure_valid(), std::runtime_error);
+  REQUIRE_THROWS_AS(grid100.ensure_compatible(big_grid), std::runtime_error);
 }
 
 
-TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
+TEST_CASE( "grid_quant", "[hoppet]" ) {
 
   REQUIRE( grid100.ptr() != nullptr );
   cout << "Defining grid_quant on grid_def, with grid100.ptr(): " << grid100.ptr() << endl;
@@ -154,14 +154,14 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
 
 }
 
-TEST_CASE( "hoppet streamlined objects", "[hoppet]" ) {
+TEST_CASE( "streamlined-objects", "[hoppet]" ) {
   hoppet::grid_quant q(hoppet::sl::grid);
   //hoppet::grid_quant q(hoppet_sl_grid_ptr);
   q = [](double y) { return y*y; };
   REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
 }
 
-TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
+TEST_CASE( "grid_conv", "[hoppet]" ) {
   auto pqq_fn = [](double y, int piece) {
       double x = exp(-y);
       double res;
