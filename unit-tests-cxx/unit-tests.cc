@@ -166,7 +166,7 @@ TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
   auto q = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
   auto pqq_q = pqq * q;
   auto pgq_q = pgq * q;
-  REQUIRE_THAT(          pqq_q.truncated_moment(0.0), WithinAbs(0.0, 1e-5)); //< check quark number conserved
-  REQUIRE_THAT((pqq_q + pgq_q).truncated_moment(1.0), WithinAbs(0.0, 1e-6)); //< check momentum conserved
-  REQUIRE_THAT(pqq_q.truncated_moment(1.0), WithinAbs(-2.0/9, 1e-6)); //< check momentum conserved
+  REQUIRE_THAT(          pqq_q.truncated_moment(0.0), WithinAbs(0.0, 1e-5));    //< check quark number conserved
+  REQUIRE_THAT(          pqq_q.truncated_moment(1.0), WithinAbs(-2.0/9, 1e-6)); //< check momentum moment (1/6 * (-4/3))
+  REQUIRE_THAT((pqq_q + pgq_q).truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved
 }
