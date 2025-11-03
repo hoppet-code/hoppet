@@ -147,6 +147,18 @@ contains
     xvals(1:grid%ny+1) = xValues(grid)
   end subroutine
 
+  function hoppet_cxx__grid_def__equiv(grid1, grid2) bind(C) result(res)
+    use convolution
+    implicit none
+    type(c_ptr), intent(in), value :: grid1, grid2
+    logical(c_bool) :: res
+    type(grid_def), pointer :: grid1_f, grid2_f
+
+    call c_f_pointer(grid1, grid1_f)
+    call c_f_pointer(grid2, grid2_f)
+
+    res = (grid1_f == grid2_f)
+  end function hoppet_cxx__grid_def__equiv
 
 
 end module hoppet_cxx_oo_grid_def
@@ -277,6 +289,7 @@ module hoppet_cxx_oo_grid_conv
 
 contains
 
+  !! return a c pointer to a new grid_conv constructed from a conv_ignd_c_interface object
   function hoppet_cxx_grid_conv__new_from_fn(grid_ptr, conv_ignd_c_fn_obj) bind(C) result(ptr)
     implicit none
     type(c_ptr), intent(in), value :: grid_ptr
@@ -298,6 +311,7 @@ contains
     ptr = c_loc(gc)
   end function hoppet_cxx_grid_conv__new_from_fn
 
+  !! return a c pointer to a new grid_conv that is a copy of gc_other
   function hoppet_cxx_grid_conv__new_from_gc(gc_other) bind(C) result(ptr)
     implicit none
     type(c_ptr), intent(in), value :: gc_other
@@ -323,7 +337,7 @@ contains
     res = hoppet_grid_conv_f__wrapper(y, piece, this%ctx)
   end function conv_ignd_from_c__f
 
-
+  !! delete a grid_conv object (and the the associated fortran object)
   subroutine hoppet_cxx_grid_conv__delete(ptr) bind(C)
     implicit none
     type(c_ptr), intent(inout) :: ptr
@@ -336,6 +350,7 @@ contains
     ptr = c_null_ptr
   end subroutine hoppet_cxx_grid_conv__delete
 
+  !! result_data = conv * q_data
   subroutine hoppet_cxx_grid_conv__times_grid_quant(conv_ptr, q_data, result_data) bind(C)
     implicit none
     type(c_ptr), intent(in), value :: conv_ptr
@@ -375,5 +390,18 @@ contains
     call Multiply(conv1_f,factor)
   end subroutine hoppet_cxx_grid_conv__multiply
 
+  !! allocate a new grid_conv that is the convolution of conv1 and conv2
+  function hoppet_cxx_grid_conv__alloc_and_conv(conv1, conv2) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: conv1, conv2
+    type(c_ptr) :: res
+    type(grid_conv), pointer :: conv1_f, conv2_f, res_f
 
+    call c_f_pointer(conv1, conv1_f)
+    call c_f_pointer(conv2, conv2_f)
+    allocate(res_f)
+    call AllocGridConv(conv1_f%grid, res_f)
+    call SetToConvolution(res_f, conv1_f, conv2_f)
+    res = c_loc(res_f)
+  end function hoppet_cxx_grid_conv__alloc_and_conv
 end module hoppet_cxx_oo_grid_conv

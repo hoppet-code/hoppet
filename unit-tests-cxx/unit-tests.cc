@@ -57,12 +57,23 @@ TEST_CASE( "hoppet grid_def and grid_quant basic functionality", "[hoppet]" ) {
 
   hoppet::grid_def grid2 = grid100; // copy constructor
   REQUIRE( grid100.ptr() != grid2.ptr() ); // different underlying pointers
+  REQUIRE( grid100 == grid2);              // copy should still be equivalent
   REQUIRE_THAT( grid100.y_values()[iy], WithinRel( grid2.y_values()[iy], 1e-12) );
 
   hoppet::grid_def grid3({grid100, hoppet::grid_def(0.03,0.3)}, true);
   hoppet::grid_def grid4;
   grid4 = grid3;
 
+  // tests of (in)equality
+  REQUIRE(!(grid100 == big_grid));
+  REQUIRE(grid100 != big_grid);
+  hoppet::grid_def null_grid;
+  REQUIRE(null_grid != grid100);
+  REQUIRE(null_grid != null_grid);
+  REQUIRE(grid100 != null_grid);
+  // enforcement tests
+  REQUIRE_THROWS_AS(null_grid.enforce_valid(), std::runtime_error);
+  REQUIRE_THROWS_AS(grid100.enforce_equiv(big_grid), std::runtime_error);
 }
 
 
@@ -127,6 +138,15 @@ TEST_CASE( "hoppet grid_quant basic functionality", "[hoppet]" ) {
   q3 = qv2 + q; REQUIRE ( q3[iy] == 5.0 * q[iy] );
   //qv = q + q4; REQUIRE ( qv[iy] == 5.0 * q[iy] );
 
+  /// this should assign the contents of qv2 into qv
+  qv = qv2;
+  REQUIRE (qv.data() != qv2.data() ); // different underlying data
+  REQUIRE (qv[iy] == qv2[iy] );
+  qv.take_view(qv2);
+  REQUIRE (qv.data() == qv2.data() ); // same underlying data
+  hoppet::grid_quant_view qv3 (q);
+
+  //------- moments ------------------------
   auto qdist = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
   REQUIRE_THAT(qdist.truncated_moment(0.0), WithinAbs(1.0, 1e-5));
   REQUIRE_THAT(qdist.truncated_moment(1.0), WithinAbs(1/6.0, 1e-7));
@@ -142,15 +162,15 @@ TEST_CASE( "hoppet streamlined objects", "[hoppet]" ) {
 }
 
 TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
-  hoppet::grid_conv pqq(big_grid, 
-    [](double y, int piece) {
+  auto pqq_fn = [](double y, int piece) {
       double x = exp(-y);
       double res;
       if      (piece == hoppet::cc_REAL) res =  (1+x*x)/(1-x);
       else if (piece == hoppet::cc_VIRT) res = -(1+x*x)/(1-x);
       else                               res = 0.0;
       return x*res;
-    });
+    };  
+  hoppet::grid_conv pqq(big_grid, pqq_fn);
 
   hoppet::grid_conv pgq(big_grid, [](double y, int piece) {
       double x = exp(-y);
@@ -167,7 +187,9 @@ TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
   auto pqq_q = pqq * q;
   auto pgq_q = pgq * q;
   double pqq_q_mom1 = pqq_q.truncated_moment(1.0);
-  REQUIRE_THAT(pqq_q_mom1, WithinAbs(-2.0/9, 1e-6)); //< check momentum moment (1/6 * (-4/3))
+  double q_mom1 = 1.0/6.0;
+  double pqq_mom1 = -4.0/3.0;
+  REQUIRE_THAT(pqq_q_mom1, WithinAbs(pqq_mom1 * q_mom1, 1e-6)); //< check momentum moment (1/6 * (-4/3))
   REQUIRE_THAT(          pqq_q.truncated_moment(0.0), WithinAbs(0.0, 1e-5));    //< check quark number conserved
   REQUIRE_THAT((pqq_q + pgq_q).truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved
 
@@ -183,5 +205,30 @@ TEST_CASE( "hoppet grid_conv basic functionality", "[hoppet]" ) {
   REQUIRE_THAT( (p2 * q) .truncated_moment(1.0), WithinAbs( 2.0 * pqq_q_mom1, 1e-6)); //< check back to pqq alone
   p2 /= 2.0;
   REQUIRE_THAT( (p2 * q) .truncated_moment(1.0), WithinAbs( pqq_q_mom1, 1e-6)); //< check back to pqq alone
+
+  //------- binary operations ------------------------
+  hoppet::grid_conv p3 = pqq + pgq;
+  REQUIRE_THAT( (p3 * q) .truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved
+  p3 = p3 - pgq;
+  REQUIRE_THAT( (p3 * q) .truncated_moment(1.0), WithinAbs( pqq_q_mom1, 1e-6)); //< check back to pqq alone
+  p3 = p3 * 2.0;
+  REQUIRE_THAT( (p3 * q) .truncated_moment(1.0), WithinAbs( 2.0 * pqq_q_mom1, 1e-6)); //< check back to pqq alone
+  p3 = 2.0 * p3;
+  REQUIRE_THAT( (p3 * q) .truncated_moment(1.0), WithinAbs( 4.0 * pqq_q_mom1, 1e-6)); //< check back to pqq alone
+  p3 = p3 / 4.0;
+  REQUIRE_THAT( (p3 * q) .truncated_moment(1.0), WithinAbs( pqq_q_mom1, 1e-6)); //< check back to pqq alone
+
+  auto pqq_pqq = pqq * pqq;
+  auto pqq_pqq_q = pqq_pqq * q;
+  REQUIRE_THAT( (pqq_pqq_q).truncated_moment(1.0), WithinAbs(pqq_mom1 * pqq_mom1 * q_mom1, 1e-6));
+  REQUIRE_THAT( (pqq_pqq_q).at_x(0.3), WithinAbs( (pqq * (pqq * q)).at_x(0.3), 1e-6) );
+
+
+
+  //------- checking throw on incompatible grids ------------------------
+  hoppet::grid_conv pqq_100(grid100, pqq_fn);
+  REQUIRE_THROWS(pqq_100 += pqq); // self-add, should give an error because of incompatible grid
+
+
 
 }

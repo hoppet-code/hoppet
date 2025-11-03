@@ -7,7 +7,6 @@ extern "C" double hoppet_grid_conv_f__wrapper(double y, int piece, void*ctx) {
   return (*func)(y, piece);
 }
 
-
 namespace hoppet {
 namespace sl {
   grid_def_view grid;
