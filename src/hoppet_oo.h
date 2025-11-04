@@ -766,6 +766,7 @@ public:
   ///@}
 };
 
+/// @brief Object-oriented wrapper around the grid_conv Fortran type, with ownership
 class grid_conv : public obj_owner<grid_conv_view> {
 public:
 
@@ -815,15 +816,30 @@ inline grid_conv operator*(grid_conv_view const & a, grid_conv_view const & b) {
   return grid_conv(ptr, a.grid());
 }
 
+typedef grid_conv split_mat;
+typedef grid_conv_view split_mat_view;
+
 
 //-----------------------------------------------------------------------------
-/// @brief Object-oriented wrapper around the grid_conv Fortran type, non-owning
+/// @brief Object-oriented wrapper around the split_mat Fortran type, non-owning
 class split_mat_view : public obj_view<split_mat_f, grid_def_view> {
 public:
+
+  typedef obj_view<split_mat_f, grid_def_view> base_type;
+  typedef grid_def_view extra_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  split_mat_view & operator=(const split_mat_view & other) {
+    if (!ptr()) throw std::runtime_error("split_mat_view::operator=: split_mat_view object not associated");
+    hoppet_cxx__split_mat__copy_contents(ptr(), other.ptr());
+    return *this;
+  }
+
   const grid_def_view & grid() const { return extra(); }
   grid_conv_view gg() const { return grid_conv_view(hoppet_cxx__split_mat__gg(ptr()), grid()); }
 };
 
+class split_mat : public obj_owner<split_mat_view> {
 
 } // end namespace hoppet
 

@@ -173,6 +173,7 @@ TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
   //cout << "ubar " << pdf4[hoppet::iflv_ubar].at_y(5.0) << endl;
 }
 
+//-----------------------------------------------------------------------------
 TEST_CASE( "pdf_qcd", "[hoppet]" ) {
   hoppet::pdf pdf = pdf_qcd(big_grid);
   double dummy_Q = 0.0;
@@ -290,4 +291,8 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   REQUIRE_THAT( (pgen  * q) .truncated_moment(1.0), WithinAbs(pgq_q_mom1, 1e-6)); // since pview was a view of pgen, pgen should also now be pgq
   pview += pgq;
   REQUIRE_THAT( (pgen * q) .truncated_moment(1.0), WithinAbs(2*pgq_q_mom1, 1e-6)); // pgen should be equal to 2*pgq
+}
+
+//-----------------------------------------------------------------------------
+TEST_CASE( "split_mat", "[hoppet]" ) {
 }
