@@ -214,6 +214,7 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   hoppet::grid_conv p2 = pqq;
   REQUIRE(p2.ptr() != nullptr);
   REQUIRE(p2.ptr() != pqq.ptr());
+  REQUIRE(p2.grid().ptr() == pqq.grid().ptr());
   p2 += pgq;
   REQUIRE_THAT( (p2 * q) .truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved
   p2 -= pgq;

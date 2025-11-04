@@ -43,8 +43,7 @@ extern "C" {
   bool   hoppet_cxx__grid_def__equiv(const grid_def_f * griddef1, const grid_def_f * griddef2);
 }
 inline void generic_delete(grid_def_f * ptr) {if (ptr) hoppet_cxx__grid_def__delete(&ptr);}
-inline grid_def_f * generic_copy(const grid_def_f * ptr) {
-  return hoppet_cxx__grid_def__copy(ptr);}
+inline grid_def_f * generic_copy(const grid_def_f * ptr) {  return hoppet_cxx__grid_def__copy(ptr);}
 
 /// grid_quant function wrappers
 extern "C" {
@@ -83,6 +82,9 @@ extern "C" {
   void hoppet_cxx_grid_conv__multiply(grid_conv_f * conv, const double factor);
   grid_conv_f * hoppet_cxx_grid_conv__alloc_and_conv(const grid_conv_f * conv1, const grid_conv_f * conv2);
 }
+inline void generic_delete(grid_conv_f * ptr) {if (ptr)hoppet_cxx_grid_conv__delete(&ptr);}
+inline grid_conv_f * generic_copy(const grid_conv_f * ptr) {return hoppet_cxx_grid_conv__new_from_gc(ptr);}
+//  if (ptr)  return hoppet_cxx_grid_conv__new_from_gc(ptr); else return nullptr;}
 
 namespace hoppet {
 
@@ -107,46 +109,60 @@ concept DoubleFnDoubleInt =
     std::invocable<F, double, int> &&
     std::same_as<std::invoke_result_t<F, double, int>, double>;
 
+/// an empty class as a default for template parameters    
+struct Empty {};
+
 //-----------------------------------------------------------------------------
 /// @brief Generic object view class
-template<typename T>
+template<typename T, typename E = Empty>
 class obj_view {
 public:
   typedef T ptr_type;
+  typedef E extra_type;
 
   //obj_view() noexcept {}
   obj_view() noexcept = default; 
   obj_view(T * ptr) noexcept : _ptr(ptr) {}
-  obj_view(const obj_view & other) noexcept : _ptr(other._ptr) {}
+  obj_view(T * ptr, const E & extra) noexcept : _ptr(ptr), _extra(extra) {}
+  obj_view(const E & extra) noexcept : _ptr(nullptr), _extra(extra) {}
+  obj_view(const obj_view & other) noexcept : _ptr(other._ptr), _extra(other._extra) {}
   obj_view & operator= (const obj_view & other) noexcept {
-    _ptr = other._ptr;
+    _ptr   = other._ptr;
+    _extra = other._extra;
     return *this;
-  }  
+  }
+
+  const E & extra() const { return _extra; }
+  E & extra() { return _extra; }
 
   const T * ptr() const { return _ptr; }
   T * ptr() { return _ptr; }
 protected:
   /// @brief pointer to the underlying Fortran grid_def object
   T * _ptr = nullptr;
+  E _extra;
 };
 
 //-----------------------------------------------------------------------------
 /// @brief Generic object-owning class
 template<typename V>
-//requires (requires { typename V::ptr_type; } && std::derived_from<V, obj_view<typename V::ptr_type>>)
+//requires (requires { typename V::ptr_type; } && std::derived_from<V, obj_view<typename V::ptr_type, typename V::extra_type>>)
 class obj_owner : public V {
 public:
-  typedef V::ptr_type ptr_type;
-  typedef V           view_type;
+  typedef V             view_type;
+  typedef V::ptr_type   ptr_type;
+  typedef V::extra_type extra_type;
 
   obj_owner() noexcept = default;
   obj_owner(ptr_type * ptr) noexcept : V(ptr) {}
-  obj_owner(const view_type & obj) : view_type(generic_copy(obj.ptr())) {}
-  obj_owner(const obj_owner & obj) : view_type(generic_copy(obj.ptr())) {}
+  obj_owner(ptr_type * ptr, extra_type extras) noexcept : view_type(ptr, extras) {}
+  obj_owner(const view_type & obj) : view_type(generic_copy(obj.ptr()),obj.extra()) {}
+  obj_owner(const obj_owner & obj) : view_type(generic_copy(obj.ptr()),obj.extra()) {}
   obj_owner & operator= (const view_type & obj) {
     if (this != &obj) {
       generic_delete(this->_ptr);
       this->_ptr = generic_copy(obj.ptr());
+      this->_extra = obj._extra;
     }
     return *this;
   }
@@ -154,11 +170,12 @@ public:
     if (this != &obj) {
       generic_delete(this->_ptr);
       this->_ptr = generic_copy(obj.ptr());
+      this->_extra = obj._extra;
     }
     return *this;
   }
 
-  obj_owner(obj_owner && other) noexcept : view_type(other.ptr()) {
+  obj_owner(obj_owner && other) noexcept : view_type(other.ptr(), other.extra()) {
     // null out the other pointer to avoid double deletion
     other._ptr = nullptr;
   }
@@ -166,11 +183,12 @@ public:
     if (this != &other) {
       generic_delete(this->_ptr);
       this->_ptr = other.ptr();
+      this->_extra = other._extra;
       other._ptr = nullptr;
     }
     return *this;
   }
-  virtual ~obj_owner() {generic_delete(this->_ptr);}
+  virtual ~obj_owner() {generic_delete(V::ptr());}
 };
 
 //-----------------------------------------------------------------------------
@@ -182,7 +200,7 @@ class grid_def_view : public obj_view<grid_def_f> {
 public:
 
   typedef obj_view<grid_def_f> base_type;
-  using base_type::base_type;
+  using base_type::base_type; // ensures that constructors are inherited
 
   int ny() const {ensure_valid(); return hoppet_cxx__grid_def__ny(ptr()); }
 
@@ -226,8 +244,7 @@ class grid_def : public obj_owner<grid_def_view> {
 public:
 
   typedef obj_owner<grid_def_view> base_type;
-  using base_type::base_type;
-
+  using base_type::base_type; // ensures that constructors are inherited
 
   /// @brief construct and allocate a new grid_def object
   ///
@@ -663,15 +680,18 @@ inline grid_quant_2d operator/(grid_quant_2d a, double b) {a /= b; return a;}
 
 //-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the grid_conv Fortran type, non-owning
-class grid_conv_view {
+class grid_conv_view : public obj_view<grid_conv_f, grid_def_view> {
 public:
-  grid_conv_view() {}
-  grid_conv_view(const grid_def_view & grid) : _grid(grid) {}
-  grid_conv_view(const grid_def_view & grid, grid_conv_f * ptr) : _grid(grid), _ptr(ptr) {}
+  typedef obj_view<grid_conv_f, grid_def_view> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  grid_conv_view() = default;
+  grid_conv_view(const grid_def_view & grid) :  base_type(nullptr, grid) {}
+  grid_conv_view(const grid_def_view & grid, grid_conv_f * ptr) : base_type(ptr, grid) {}
   //grid_conv_view(grid_conv_f * ptr) : _ptr(ptr) {}
-  const grid_def_view & grid() const {return _grid;}
-  const grid_conv_f * ptr() const { return _ptr; }
-  grid_conv_f * ptr() { return _ptr; }
+  const grid_def_view & grid() const {return extra();}
+  //const grid_conv_f * ptr() const { return _ptr; }
+  //grid_conv_f * ptr() { return _ptr; }
 
   /// compound assignment arithmetic operators
   ///@{
@@ -698,13 +718,17 @@ public:
   }
   ///@}
 
-protected:
-  grid_def_view  _grid;
-  grid_conv_f *  _ptr = nullptr;
+//protected:
+//  grid_def_view  _grid;
+//  grid_conv_f *  _ptr = nullptr;
 };
 
-class grid_conv : public grid_conv_view {
+class grid_conv : public obj_owner<grid_conv_view> {
 public:
+
+  typedef obj_owner<grid_conv_view> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
   grid_conv() {}
 
   /// construct a grid_conv object and initialise it with the given function
@@ -712,8 +736,9 @@ public:
   /// @param grid          the grid definition
   /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)
   ///
-  grid_conv(const grid_def_view & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : grid_conv_view(grid) {
+  grid_conv(const grid_def_view & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : base_type(nullptr, grid) {
 
+    //std::cout << "grid_conv: constructing from function object, grid = " << grid.ptr() <<" " << this->grid().ptr() << "\n";
     using FuncType = decltype(conv_ignd_fn);
     // under the hood, the fortran calls hoppet_grid_conv_f__wrapper
     // (defined in hoppet_oo.cc), with a pointer to the function object
@@ -721,31 +746,28 @@ public:
     _ptr = hoppet_cxx_grid_conv__new_from_fn(grid.ptr(), &fn_ptr);
   }
 
-  grid_conv(const grid_def_view & grid, grid_conv_f * ptr) : grid_conv_view(grid, ptr) {}
+  //grid_conv(const grid_def_view & grid, grid_conv_f * ptr) : base_type(ptr, grid) {}
 
-  grid_conv(const grid_conv & other) {
-    _ptr  = hoppet_cxx_grid_conv__new_from_gc(other.ptr());
-    _grid = other.grid();
-    //std::cout << "copy constructing grid_conv, _ptr = " << _ptr << "\n";
-  }
-
-  grid_conv(grid_conv && other) noexcept
-    : grid_conv_view(other) {
-    other._ptr = nullptr;
-  }
+//  grid_conv(const grid_conv & other) : 
+//        grid_conv(other.grid(), hoppet_cxx_grid_conv__new_from_gc(other.ptr())) {};
+//
+//  grid_conv(grid_conv && other) noexcept
+//    : grid_conv_view(other) {
+//    other._ptr = nullptr;
+//  }
 
 
-  void del() {if (_ptr) {hoppet_cxx_grid_conv__delete(&_ptr);}}
-  ~grid_conv() {del();}
+//  void del() {if (_ptr) {hoppet_cxx_grid_conv__delete(&_ptr);}}
+//  ~grid_conv() {del();}
 
-  grid_conv & operator=(grid_conv && other) noexcept {
-    if (this != &other) {
-      del();
-      _ptr = other._ptr;
-      other._ptr = nullptr;
-    }
-    return *this;
-  }
+//  grid_conv & operator=(grid_conv && other) noexcept {
+//    if (this != &other) {
+//      del();
+//      _ptr = other._ptr;
+//      other._ptr = nullptr;
+//    }
+//    return *this;
+//  }
 };
 
 inline grid_quant operator*(const grid_conv_view & conv, const grid_quant_view & q) {
@@ -762,15 +784,15 @@ inline grid_quant operator*(const grid_conv_view & conv, const grid_quant_view &
 // these all use a copy-and-modify strategy, exploiting the move semantics
 // for copy elision
 inline grid_conv operator+(grid_conv a, const grid_conv_view & b) {a += b; return a;}
-inline grid_conv operator-(grid_conv  a, const grid_conv_view & b) {a -= b; return a;}
+inline grid_conv operator-(grid_conv a, const grid_conv_view & b) {a -= b; return a;}
 inline grid_conv operator*(grid_conv a, double b) {a *= b; return a;}
 inline grid_conv operator*(double b, grid_conv a) {a *= b; return a;}
 inline grid_conv operator/(grid_conv a, double b) {a /= b; return a;}
 
 inline grid_conv operator*(grid_conv_view const & a, grid_conv_view const & b) {
   a.grid().ensure_compatible(b.grid());
-  grid_conv_f * res = hoppet_cxx_grid_conv__alloc_and_conv(a.ptr(), b.ptr());
-  return grid_conv(a.grid(), res);
+  grid_conv_f * ptr = hoppet_cxx_grid_conv__alloc_and_conv(a.ptr(), b.ptr());
+  return grid_conv(ptr, a.grid());
 }
 
 } // end namespace hoppet
