@@ -9,6 +9,11 @@ Summary of classes
 Access to streamlined interface objects
 	- hoppet::sl::grid
 
+2025-11-04 Gavin
+	* CMakeLists.txt:
+	* src/hoppet_oo.h:
+	switched to C++ 20 and started using concepts for function types
+
 2025-10-31 Gavin
 
 	* src/hoppet.h:
@@ -49,6 +54,13 @@ Access to streamlined interface objects
 	class.
 
 --------- end 2025-10-cxx-OO branch ---------
+
+2025-11-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* external-code/libome:
+	* external-code/README.md
+	* NEWS.md
+	updated libome to 1.0.2 from git@gitlab.com:libome/libome.git
 
 2025-10-31 Gavin
 

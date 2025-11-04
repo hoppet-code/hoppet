@@ -5,7 +5,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
 endif()
 
 project(libome
-  VERSION 1.0.1
+  VERSION 1.0.2
   DESCRIPTION "Implementation of massive operator matrix elements (OMEs) of the QCD twist-2 operators in x-space"
 )
 set(CMAKE_CXX_STANDARD 17)
@@ -19,6 +19,19 @@ endif()
 
 # External dependencies
 find_package(GSL REQUIRED)
+
+# Floating point exceptions (FPEs)
+# Note: enabling this changes nothing in the code, but if you want to rely on
+# FPEs in your code, we have to make sure that the compiler does not make
+# optimisations that would raise FPEs that the original code would not have
+# raised. So far, this has turned out to be an issue with clang when compiling
+# for Apple arm64 CPUs. See
+# https://clang.llvm.org/docs/UsersManual.html#controlling-floating-point-behavior
+option(ENABLE_FPES "Enable floating point exceptions")
+if(ENABLE_FPES)
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:CXX,Clang>:-ffp-exception-behavior=maytrap>")
+  add_compile_options("$<$<COMPILE_LANG_AND_ID:CXX,AppleClang>:-ffp-exception-behavior=maytrap>")
+endif()
 
 # Unit and integration test suite
 option(BUILD_TESTS "Build the test suite" OFF)
