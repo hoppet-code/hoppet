@@ -508,6 +508,7 @@ contains
   end function hoppet_cxx__grid_conv__alloc_and_conv
 end module hoppet_cxx_oo_grid_conv
 
+
 !=====================================================================
 !! wrappers for C++ OO interface to split_mat objects
 module hoppet_cxx_oo_split_mat
@@ -560,6 +561,76 @@ contains
     call InitSplitMat(dest_f, src_f)
   end subroutine hoppet_cxx__split_mat__copy_contents
 
+  !! sm1 += sm2
+  subroutine hoppet_cxx__split_mat__add(sm1, sm2, factor) bind(C)
+    implicit none
+    type(c_ptr),    intent(in), value    :: sm1, sm2
+    real(c_double), intent(in), optional :: factor
+    type(split_mat), pointer :: sm1_f, sm2_f
+    call c_f_pointer(sm1, sm1_f)
+    call c_f_pointer(sm2, sm2_f)
+    call AddWithCoeff(sm1_f,sm2_f,factor)
+  end subroutine hoppet_cxx__split_mat__add
+
+  !! sm1 *=factor
+  subroutine hoppet_cxx__split_mat__multiply(sm1, factor) bind(C)
+    implicit none
+    type(c_ptr),    intent(in), value :: sm1
+    real(c_double), intent(in), value :: factor
+    type(split_mat), pointer :: sm1_f
+    call c_f_pointer(sm1, sm1_f)
+    call Multiply(sm1_f,factor)
+  end subroutine hoppet_cxx__split_mat__multiply
+
+  !! allocate a new split_mat that is the convolution of sm1 and sm2 and return a pointer to it
+  function hoppet_cxx__split_mat__alloc_and_conv(sm1, sm2) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: sm1, sm2
+    type(c_ptr) :: res
+    type(split_mat), pointer :: sm1_f, sm2_f, res_f
+
+    call c_f_pointer(sm1, sm1_f)
+    call c_f_pointer(sm2, sm2_f)
+    allocate(res_f)
+    call AllocSplitMat(sm1_f%qq%grid, res_f, sm1_f%nf_int)
+    call SetToConvolution(res_f, sm1_f, sm2_f)
+    res = c_loc(res_f)
+  end function hoppet_cxx__split_mat__alloc_and_conv
+
+  !! allocate a new split_mat that is the convolution of sm1 and sm2 and return a pointer to it
+  function hoppet_cxx__split_mat__alloc_and_commutate(sm1, sm2) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: sm1, sm2
+    type(c_ptr) :: res
+    type(split_mat), pointer :: sm1_f, sm2_f, res_f
+
+    call c_f_pointer(sm1, sm1_f)
+    call c_f_pointer(sm2, sm2_f)
+    allocate(res_f)
+    call AllocSplitMat(sm1_f%qq%grid, res_f, sm1_f%nf_int)
+    call SetToCommutator(res_f, sm1_f, sm2_f)
+    res = c_loc(res_f)
+  end function hoppet_cxx__split_mat__alloc_and_commutate
+
+
+  !! result_data = conv * q_data
+  subroutine hoppet_cxx__split_mat__times_grid_quant_2d(split_max_ptr, q_data, result_data) bind(C)
+    use pdf_representation
+    implicit none    
+    type(c_ptr), intent(in), value :: split_max_ptr
+    type(c_ptr), intent(in), value :: q_data
+    type(c_ptr), intent(in), value :: result_data
+    !--
+    type(split_mat), pointer :: split_mat_f
+    real(dp), pointer :: q(:,:)
+    real(dp), pointer :: result(:,:)
+
+    call c_f_pointer(split_max_ptr, split_mat_f)
+    call c_f_pointer(q_data, q, shape=[split_mat_f%qq%grid%ny+1, ncompmax-ncompmin+1])
+    call c_f_pointer(result_data, result, shape=[split_mat_f%qq%grid%ny+1, ncompmax-ncompmin+1])
+
+    result = split_mat_f * q
+  end subroutine hoppet_cxx__split_mat__times_grid_quant_2d
 
   !! return the nf value of the split_mat
   function hoppet_cxx__split_mat__nf(other) bind(C) result(lcl_nf)
@@ -609,24 +680,6 @@ contains
 
 #undef HOPPET_CXX__SPLIT_MAT__REF
 
-  !! result_data = conv * q_data
-  subroutine hoppet_cxx__split_mat__times_grid_quant_2d(split_max_ptr, q_data, result_data) bind(C)
-    use pdf_representation
-    implicit none    
-    type(c_ptr), intent(in), value :: split_max_ptr
-    type(c_ptr), intent(in), value :: q_data
-    type(c_ptr), intent(in), value :: result_data
-    !--
-    type(split_mat), pointer :: split_mat_f
-    real(dp), pointer :: q(:,:)
-    real(dp), pointer :: result(:,:)
-
-    call c_f_pointer(split_max_ptr, split_mat_f)
-    call c_f_pointer(q_data, q, shape=[split_mat_f%qq%grid%ny+1, ncompmax-ncompmin+1])
-    call c_f_pointer(result_data, result, shape=[split_mat_f%qq%grid%ny+1, ncompmax-ncompmin+1])
-
-    result = split_mat_f * q
-  end subroutine hoppet_cxx__split_mat__times_grid_quant_2d
 
 
 end module hoppet_cxx_oo_split_mat

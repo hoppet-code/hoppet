@@ -87,6 +87,7 @@ inline void generic_delete(grid_conv_f * ptr) {if (ptr)hoppet_cxx__grid_conv__de
 inline grid_conv_f * generic_copy(const grid_conv_f * ptr) {return hoppet_cxx__grid_conv__new_from_gc(ptr);}
 //  if (ptr)  return hoppet_cxx__grid_conv__new_from_gc(ptr); else return nullptr;}
 
+
 /// split_mat function wrappers
 extern "C" {
   split_mat_f * hoppet_cxx__split_mat__new(int nf);
@@ -94,8 +95,11 @@ extern "C" {
   void hoppet_cxx__split_mat__copy_contents(split_mat_f * dest, const split_mat_f * src); //< src copied into dest
   void hoppet_cxx__split_mat__delete(split_mat_f ** splitmat);
 
+  void hoppet_cxx__split_mat__add(split_mat_f * conv, const split_mat_f * other, const double * factor = nullptr);
+  void hoppet_cxx__split_mat__multiply(split_mat_f * conv, const double factor);
   split_mat_f * hoppet_cxx__split_mat__times_grid_quant_2d (const split_mat_f * splitmat, const double * q_in_data, double * q_out_data);
-
+  split_mat_f * hoppet_cxx__split_mat__alloc_and_conv(const split_mat_f * a, const split_mat_f * b);
+  split_mat_f * hoppet_cxx__split_mat__alloc_and_commutate(const split_mat_f * a, const split_mat_f * b);
 
   int hoppet_cxx__split_mat__nf(const split_mat_f * splitmat);
   grid_conv_f * hoppet_cxx__split_mat__qq      (const split_mat_f * splitmat);
@@ -631,6 +635,7 @@ inline grid_quant operator-(grid_quant a, const grid_quant_view & b) {a -= b; re
 inline grid_quant operator*(grid_quant a, double b) {a *= b; return a;}
 inline grid_quant operator*(double b, grid_quant a) {a *= b; return a;}
 inline grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
+inline grid_quant operator-(const grid_quant_view & a) {return -1.0 * a;}
 
 //template<typename F> 
 inline grid_quant operator*(const grid_def_view & grid, DoubleFnDouble auto && fn) {
@@ -725,6 +730,8 @@ inline grid_quant_2d operator-(grid_quant_2d a, const grid_quant_2d_view & b) {a
 inline grid_quant_2d operator*(grid_quant_2d a, double b) {a *= b; return a;}
 inline grid_quant_2d operator*(double b, grid_quant_2d a) {a *= b; return a;}
 inline grid_quant_2d operator/(grid_quant_2d a, double b) {a /= b; return a;}
+inline grid_quant_2d operator-(const grid_quant_2d_view & a) {return -1.0 * a;}
+
 
 typedef grid_quant_2d_view pdf_view;
 typedef grid_quant_2d      pdf;
@@ -821,6 +828,8 @@ inline grid_conv operator-(grid_conv a, const grid_conv_view & b) {a -= b; retur
 inline grid_conv operator*(grid_conv a, double b) {a *= b; return a;}
 inline grid_conv operator*(double b, grid_conv a) {a *= b; return a;}
 inline grid_conv operator/(grid_conv a, double b) {a /= b; return a;}
+inline grid_conv operator-(const grid_conv_view & a) {return -1.0 * a;}
+
 
 inline grid_conv operator*(grid_conv_view const & a, grid_conv_view const & b) {
   a.grid().ensure_compatible(b.grid());
@@ -860,6 +869,41 @@ public:
   grid_conv_view ns_minus() const { return grid_conv_view(hoppet_cxx__split_mat__ns_minus(ptr()), grid()); }
   grid_conv_view ns_v    () const { return grid_conv_view(hoppet_cxx__split_mat__ns_v    (ptr()), grid()); }
   ///@}
+
+
+  /// compound assignment arithmetic operators
+  ///@{
+  split_mat_view & operator+=(const split_mat_view & other) {
+    ensure_compatible(other);
+    hoppet_cxx__split_mat__add(_ptr, other.ptr());
+    return *this;
+  }
+  split_mat_view & operator-=(const split_mat_view & other) {
+    ensure_compatible(other);
+    double minus_one = -1.0;
+    hoppet_cxx__split_mat__add(_ptr, other.ptr(), &minus_one);
+    return *this;
+  }
+  split_mat_view & operator*=(double factor) {
+    grid().ensure_valid();
+    hoppet_cxx__split_mat__multiply(_ptr, factor);
+    return *this;
+  }
+  split_mat_view & operator/=(double factor) {
+    grid().ensure_valid();
+    hoppet_cxx__split_mat__multiply(_ptr, 1.0/factor);
+    return *this;
+  }
+  ///@}
+
+  /// throws an exception if other is not compatible with *this
+  void ensure_compatible(const split_mat_view & other) const {
+    if (nf() != other.nf()) {
+      throw std::runtime_error("hoppet::split_mat_view::ensure_compatible: incompatible split_mat nf");
+    }
+    grid().ensure_compatible(other.grid());
+  }
+
 };
 
 //-----------------------------------------------------------------------------
@@ -880,6 +924,31 @@ public:
   }
 }; 
 
+// these all use a copy-and-modify strategy, exploiting the move semantics
+// for copy elision
+inline split_mat operator+(split_mat a, const split_mat_view & b) {a += b; return a;}
+inline split_mat operator-(split_mat a, const split_mat_view & b) {a -= b; return a;}
+inline split_mat operator*(split_mat a, double b) {a *= b; return a;}
+inline split_mat operator*(double b, split_mat a) {a *= b; return a;}
+inline split_mat operator/(split_mat a, double b) {a /= b; return a;}
+inline split_mat operator-(const split_mat_view & a) {return -1.0 * a;}
+
+inline split_mat operator*(split_mat_view const & a, split_mat_view const & b) {
+  a.grid().ensure_compatible(b.grid());
+  split_mat_f * ptr = hoppet_cxx__split_mat__alloc_and_conv(a.ptr(), b.ptr());
+  return split_mat(ptr, a.grid());
+}
+
+/// Return commutator of two splitting matrices, i.e. [a,b] = a*b - b*a.
+/// Note that this make use of the underlying structure of the splitting matrices
+/// and is better than explicitly writing a*b - b*a
+inline split_mat commutator(split_mat_view const & a, split_mat_view const & b) {
+  a.grid().ensure_compatible(b.grid());
+  split_mat_f * ptr = hoppet_cxx__split_mat__alloc_and_commutate(a.ptr(), b.ptr());
+  return split_mat(ptr, a.grid());
+}
+
+
 inline grid_quant_2d operator*(const split_mat_view & split, const grid_quant_2d_view & q) {
   split.grid().ensure_compatible(q.grid());
   if (q.extras().dim1_sz <= ncompmax) throw std::runtime_error("split_fn * grid_quant_2d: grid_quant_2d dim1_sz too small");
@@ -887,6 +956,8 @@ inline grid_quant_2d operator*(const split_mat_view & split, const grid_quant_2d
   hoppet_cxx__split_mat__times_grid_quant_2d(split.ptr(), q.data(), result.data());
   return result;
 }
+
+
 
 }// end namespace hoppet
 

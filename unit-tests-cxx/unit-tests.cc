@@ -366,6 +366,8 @@ TEST_CASE( "split_mat", "[hoppet]" ) {
   hoppet::split_mat p_lo(big_grid, nf);
   REQUIRE(p_lo.nf() == nf);
 
+  using hoppet::iflv_g;
+
   // assign the various components
   p_lo.qq() = hoppet::grid_conv(big_grid, pqq_fn);
   p_lo.gq() = hoppet::grid_conv(big_grid, pgq_fn);
@@ -403,4 +405,28 @@ TEST_CASE( "split_mat", "[hoppet]" ) {
   }
   REQUIRE_THAT( mom1(d_all_quarks + dpdf_lo[hoppet::iflv_g]), WithinAbs(0.0, 1e-4) );
 
+  //--- test addition of two split_mats
+  auto pp = p_lo;
+  pp += p_lo;             // compound add
+  auto pp2 = pp + 2*p_lo; // binary add
+  REQUIRE_THAT( mom1((pp *pdf)[iflv_g]), WithinAbs(2*mom1(dpdf_lo[iflv_g]), 1e-6) );
+  REQUIRE_THAT( mom1((pp2*pdf)[iflv_g]), WithinAbs(4*mom1(dpdf_lo[iflv_g]), 1e-6) );
+  pp2 = -pp2 - p_lo/2;      // binary subtract
+  REQUIRE_THAT( mom1((pp2*pdf)[iflv_g]), WithinAbs(-4.5*mom1(dpdf_lo[iflv_g]), 1e-6) );
+
+  // test multiplication of two split_mats
+  auto ppp = p_lo * p_lo;
+  auto ppp_pdf = ppp * pdf;
+  REQUIRE_THAT( mom1(ppp_pdf[iflv_g]), WithinAbs(mom1((p_lo * dpdf_lo)[iflv_g]), 3e-5) );
+
+  //------- test commutator of two split_mats
+  hoppet::split_mat p_lo_swapped = p_lo;
+  // change some components to make it different
+  p_lo_swapped.qg() = p_lo.gq();
+  p_lo_swapped.gq() = p_lo.qg();
+  // get comm
+  auto p_comm = hoppet::commutator(p_lo, p_lo_swapped);
+  auto p_comm_pdf = p_comm * pdf;
+  auto p_comm_pdf_direct = (p_lo * (p_lo_swapped * pdf)) - (p_lo_swapped * (p_lo * pdf));
+  REQUIRE_THAT( mom1(p_comm_pdf[iflv_g]), WithinAbs(mom1(p_comm_pdf_direct[iflv_g]), 3e-5) );
 }
