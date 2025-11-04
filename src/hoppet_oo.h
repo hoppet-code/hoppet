@@ -6,7 +6,7 @@
 #include <cassert>
 #include <tuple>
 #include <functional>
-//#include <concepts>
+#include <concepts>
 
 // Elements to think about
 // - do we separate things out into different files
@@ -27,6 +27,7 @@ class grid_def_f;
 class grid_quant_f;
 class grid_quant_2d_f;
 class grid_conv_f;
+
 
 /// grid_def function wrappers
 extern "C" {
@@ -85,14 +86,23 @@ namespace hoppet {
 typedef std::size_t size_type;
 
 
-template <typename F>
-using IsDoubleFunction = std::enable_if_t<
-    std::is_invocable_r_v<double, F, double>, int
->;
+//template <typename F>
+//using IsDoubleFunction = std::enable_if_t<
+//    std::is_invocable_r_v<double, F, double>, int
+//>;
 //template <typename F>
 //concept DoubleFunction =
 //    std::is_invocable<F, double> &&
 //    std::same_as<std::invoke_result_t<F, double>, double>;
+template <typename F>
+concept DoubleFnDouble =
+    std::invocable<F, double> &&
+    std::same_as<std::invoke_result_t<F, double>, double>;
+
+    template <typename F>
+concept DoubleFnDoubleInt =
+    std::invocable<F, double, int> &&
+    std::same_as<std::invoke_result_t<F, double, int>, double>;
 
 //-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the grid_def Fortran type, non-owning
@@ -389,8 +399,8 @@ public:
   grid_quant_view(double * data_ptr, std::size_t size, const grid_def_view & grid) 
     : data_view<grid_def_view>(data_ptr, size, grid) {}
 
-  template<typename F, IsDoubleFunction<F> = 0>
-  void assign(const F & fn) {
+  //template<typename F, IsDoubleFunction<F> = 0>
+  void assign(const DoubleFnDouble auto & fn) {
     if (!data()) {
       throw std::runtime_error("grid_quant_view::assign(fn): grid_quant_view object not associated");
     }
@@ -405,8 +415,8 @@ public:
     }
   } 
 
-  template<typename F, IsDoubleFunction<F> = 0>
-  grid_quant_view & operator=(const F & fn) {assign(fn); return *this;}
+  //template<typename F, IsDoubleFunction<F> = 0>
+  grid_quant_view & operator=(const DoubleFnDouble auto & fn) {assign(fn); return *this;}
 
   //template<> 
   grid_quant_view & operator=(const grid_quant_view & other) = default;// {copy_data(other); return *this;}
@@ -490,13 +500,13 @@ public:
 
   /// construct and allocate a grid_quant for the given grid, and fill it
   /// with the specified function
-  template<class F>
-  grid_quant(const grid_def_view & grid, const F & fn) : grid_quant(grid) {
+  //template<class F>
+  grid_quant(const grid_def_view & grid, const DoubleFnDouble auto & fn) : grid_quant(grid) {
     assign(fn);
   }
 
-  template<typename F>
-  grid_quant & operator=(const F & fn) {assign(fn); return *this;}
+  //template<typename F>
+  grid_quant & operator=(const DoubleFnDouble auto & fn) {assign(fn); return *this;}
 
   //grid_quant_view & view() {return *this;} // is this needed?
 
@@ -540,8 +550,8 @@ inline grid_quant operator*(grid_quant a, double b) {a *= b; return a;}
 inline grid_quant operator*(double b, grid_quant a) {a *= b; return a;}
 inline grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
 
-template<typename F> 
-inline grid_quant operator*(const grid_def_view & grid, F && fn) {
+//template<typename F> 
+inline grid_quant operator*(const grid_def_view & grid, DoubleFnDouble auto && fn) {
   // create an output grid_quant
   grid_quant result(grid);
   result = fn;
@@ -662,16 +672,15 @@ public:
 
   /// construct a grid_conv object and initialise it with the given function
   ///
-  /// @tparam Func  any callable type matching double(double y, int piece)
-  /// @param grid   the grid definition
-  /// @param conv_ignd_fn  the convolution integrand function
+  /// @param grid          the grid definition
+  /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)
   ///
-  template<typename Func>
-  grid_conv(const grid_def_view & grid, Func && conv_ignd_fn) : grid_conv_view(grid) {
+  grid_conv(const grid_def_view & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : grid_conv_view(grid) {
 
+    using FuncType = decltype(conv_ignd_fn);
     // under the hood, the fortran calls hoppet_grid_conv_f__wrapper
     // (defined in hoppet_oo.cc), with a pointer to the function object
-    std::function<double(double,int)> fn_ptr = std::forward<Func>(conv_ignd_fn);
+    std::function<double(double,int)> fn_ptr = std::forward<FuncType>(conv_ignd_fn);
     _ptr = hoppet_cxx_grid_conv__new_from_fn(grid.ptr(), &fn_ptr);
   }
 
