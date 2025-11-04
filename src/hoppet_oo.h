@@ -99,7 +99,7 @@ concept DoubleFnDouble =
     std::invocable<F, double> &&
     std::same_as<std::invoke_result_t<F, double>, double>;
 
-template <typename F>
+    template <typename F>
 concept DoubleFnDoubleInt =
     std::invocable<F, double, int> &&
     std::same_as<std::invoke_result_t<F, double, int>, double>;
@@ -673,7 +673,7 @@ public:
   /// construct a grid_conv object and initialise it with the given function
   ///
   /// @param grid          the grid definition
-  /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)
+  /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)->double
   ///
   grid_conv(const grid_def_view & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : grid_conv_view(grid) {
 
