@@ -75,9 +75,9 @@ inline void generic_delete(grid_quant_2d_f * ptr) {if (ptr) hoppet_cxx__grid_qua
 extern "C" {
   grid_conv_f * hoppet_cxx__grid_conv__new_from_fn(const grid_def_f * grid_ptr, void * conv_ignd_c_fn_obj);
   grid_conv_f * hoppet_cxx__grid_conv__new_from_gc(const grid_conv_f * gc_other);
+  void  hoppet_cxx__grid_conv__copy_contents(grid_conv_f * dest, const grid_conv_f * src); //< src copied into dest
   void  hoppet_cxx__grid_conv__delete(grid_conv_f ** gridconv);
-  void  hoppet_cxx__grid_conv__times_grid_quant(const grid_conv_f * conv,
-                   const double * q_in_data, double * q_out_data);
+  void  hoppet_cxx__grid_conv__times_grid_quant(const grid_conv_f * conv, const double * q_in_data, double * q_out_data);
 
   void hoppet_cxx__grid_conv__add(grid_conv_f * conv, const grid_conv_f * other, const double * factor = nullptr);
   void hoppet_cxx__grid_conv__multiply(grid_conv_f * conv, const double factor);
@@ -91,6 +91,7 @@ inline grid_conv_f * generic_copy(const grid_conv_f * ptr) {return hoppet_cxx__g
 extern "C" {
   split_mat_f * hoppet_cxx__split_mat__new(int nf);
   split_mat_f * hoppet_cxx__split_mat__copy(const split_mat_f * splitmat);
+  void hoppet_cxx__split_mat__copy_contents(split_mat_f * dest, const split_mat_f * src); //< src copied into dest
   void hoppet_cxx__split_mat__delete(split_mat_f ** splitmat);
 
   grid_conv_f * hoppet_cxx__split_mat__gg(const split_mat_f * splitmat);
@@ -708,34 +709,15 @@ public:
   }
 };
 
-inline grid_quant_2d operator+(grid_quant_2d a, const grid_quant_2d_view & b) {std::cout << a.ptr() << "=a.ptr()\n"; a += b; return a;}
+inline grid_quant_2d operator+(grid_quant_2d a, const grid_quant_2d_view & b) {a += b; return a;}
 inline grid_quant_2d operator-(grid_quant_2d a, const grid_quant_2d_view & b) {a -= b; return a;}
 inline grid_quant_2d operator*(grid_quant_2d a, double b) {a *= b; return a;}
 inline grid_quant_2d operator*(double b, grid_quant_2d a) {a *= b; return a;}
 inline grid_quant_2d operator/(grid_quant_2d a, double b) {a /= b; return a;}
 
-/// @brief wrapper around grid_quant_2d for PDFs with just QCD partons, fixed size for the second dimension
-class pdf_qcd : public grid_quant_2d {
-public:
-  typedef grid_quant_2d base_type;
-  typedef base_type::view_type view_type;
-
-  using base_type::base_type; // ensures that constructors are inherited
-  explicit pdf_qcd(const grid_def_view & grid) : grid_quant_2d(grid, ncompmax+1) {
-    std::fill(data(), data()+size(), 0.0);
-  }
-};
-typedef pdf_qcd::view_type pdf_qcd_view;
-// redefine the binary operators explicitly for pdf_qcd so as to get the right return type
-// and allow copy elision
-inline pdf_qcd operator+(pdf_qcd a, const grid_quant_2d_view & b) {a += b; return a;}
-inline pdf_qcd operator-(pdf_qcd a, const grid_quant_2d_view & b) {a -= b; return a;}
-inline pdf_qcd operator*(pdf_qcd a, double b) {a *= b; return a;}
-inline pdf_qcd operator*(double b, pdf_qcd a) {a *= b; return a;}
-inline pdf_qcd operator/(pdf_qcd a, double b) {a /= b; return a;}
-
-
-
+typedef grid_quant_2d_view pdf_view;
+typedef grid_quant_2d      pdf;
+inline  grid_quant_2d pdf_qcd(grid_def_view const & grid) {return grid_quant_2d(grid, ncompmax+1);}
 
 
 
@@ -751,6 +733,12 @@ public:
   grid_conv_view(const grid_def_view & grid) :  base_type(nullptr, grid) {}
   grid_conv_view(const grid_def_view & grid, grid_conv_f * ptr) : base_type(ptr, grid) {}
   const grid_def_view & grid() const {return extra();}
+
+  grid_conv_view & operator=(const grid_conv_view & other) {
+    if (!ptr()) throw std::runtime_error("grid_conv_view::operator=: grid_conv_view object not associated");
+    hoppet_cxx__grid_conv__copy_contents(ptr(), other.ptr());
+    return *this;
+  }
 
   /// compound assignment arithmetic operators
   ///@{

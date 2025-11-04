@@ -415,6 +415,19 @@ contains
     ptr = c_loc(gc)
   end function hoppet_cxx__grid_conv__new_from_gc
 
+  !! copy the contents of gc_src into gc_dest
+  subroutine hoppet_cxx__grid_conv__copy_contents(gc_dest, gc_src) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: gc_dest, gc_src
+    !--
+    type(grid_conv), pointer :: gc_dest_f, gc_src_f
+
+    call c_f_pointer(gc_dest, gc_dest_f)
+    call c_f_pointer(gc_src, gc_src_f)
+
+    call InitGridConv(gc_dest_f, gc_src_f)
+  end subroutine hoppet_cxx__grid_conv__copy_contents
+
 
   !! implementation of conv_ignd_from_c%f
   function conv_ignd_from_c__f(this, y, piece) result(res)
@@ -534,6 +547,18 @@ contains
     split_mat_ptr = c_loc(f_ptr)
   end function hoppet_cxx__split_mat__copy
 
+  !! copy the contents of the split mat 'src' into 'dest'
+  subroutine hoppet_cxx__split_mat__copy_contents(dest, src) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: dest
+    type(c_ptr), intent(in), value :: src
+    !--
+    type(split_mat), pointer :: dest_f, src_f
+
+    call c_f_pointer(dest, dest_f)
+    call c_f_pointer(src, src_f)
+    call InitSplitMat(dest_f, src_f)
+  end subroutine hoppet_cxx__split_mat__copy_contents
 
   subroutine hoppet_cxx__split_mat__delete(split_mat_c_ptr) bind(C)
     implicit none

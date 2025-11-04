@@ -174,7 +174,7 @@ TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
 }
 
 TEST_CASE( "pdf_qcd", "[hoppet]" ) {
-  hoppet::pdf_qcd pdf(big_grid);
+  hoppet::pdf pdf = pdf_qcd(big_grid);
   double dummy_Q = 0.0;
   pdf.assign(hoppetBenchmarkPDFunpol, dummy_Q);
   // hard-coded values from the benchmark function
@@ -192,7 +192,7 @@ TEST_CASE( "pdf_qcd", "[hoppet]" ) {
   }
   REQUIRE(allzero);
 
-  hoppet::pdf_qcd pdf2 = pdf + pdf;
+  hoppet::pdf pdf2 = pdf + pdf;
   for (double x : xvals) {
     REQUIRE_THAT( pdf2[hoppet::iflv_g   ].at_x(x), WithinAbs(2*fn_g(x), 1e-5));
   }
@@ -234,6 +234,7 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   auto pqq_q = pqq * q;
   auto pgq_q = pgq * q;
   double pqq_q_mom1 = pqq_q.truncated_moment(1.0);
+  double pgq_q_mom1 = pgq_q.truncated_moment(1.0);
   double q_mom1 = 1.0/6.0;
   double pqq_mom1 = -4.0/3.0;
   REQUIRE_THAT(pqq_q_mom1, WithinAbs(pqq_mom1 * q_mom1, 1e-6)); //< check momentum moment (1/6 * (-4/3))
@@ -278,5 +279,15 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   REQUIRE_THROWS(pqq_100 += pqq); // self-add, should give an error because of incompatible grid
 
 
-
+  //-------- view tests ------------------------
+  hoppet::grid_conv pgen = pqq; // general copy
+  REQUIRE_THAT( (pgen  * q) .truncated_moment(1.0), WithinAbs(pqq_q_mom1, 1e-6)); // since pview was a view of pqq, pqq should also now be pgq
+  hoppet::grid_conv_view pview(pgen); // view of general copy
+  auto pgen_ptr = pgen.ptr();
+  pview = pgq;
+  CHECK( pview.ptr() == pgen_ptr ); // pview should still point to pgen's data
+  REQUIRE_THAT( (pview * q) .truncated_moment(1.0), WithinAbs(pgq_q_mom1, 1e-6)); // pview should be equal to pgq
+  REQUIRE_THAT( (pgen  * q) .truncated_moment(1.0), WithinAbs(pgq_q_mom1, 1e-6)); // since pview was a view of pgen, pgen should also now be pgq
+  pview += pgq;
+  REQUIRE_THAT( (pgen * q) .truncated_moment(1.0), WithinAbs(2*pgq_q_mom1, 1e-6)); // pview should be
 }
