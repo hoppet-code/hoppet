@@ -427,7 +427,7 @@ protected:
 /// of Fortran objects that provide a view of the underlying double-precision data
 ///
 /// @tparam V  the data_view type from which this derives
-/// @tparam P  the pointer type to the underlying Fortran object
+/// @tparam P  the pointer type to the underlying Fortran object that owns the data
 ///
 template<typename V, typename P>
 class data_owner : public V {
