@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 }
 
 
-TEST_CASE( "grid_def", "[hoppet]" ) {
+TEST_CASE( "grid_def", "[hoppet]" ) {  
   REQUIRE(grid100.ptr() != nullptr);
   REQUIRE(grid100.ny() == 100);
 

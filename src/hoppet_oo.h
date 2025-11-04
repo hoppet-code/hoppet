@@ -42,6 +42,9 @@ extern "C" {
   void   hoppet_cxx__grid_def__x_values(const grid_def_f * griddef, double * xvals);
   bool   hoppet_cxx__grid_def__equiv(const grid_def_f * griddef1, const grid_def_f * griddef2);
 }
+inline void generic_delete(grid_def_f * ptr) {if (ptr) hoppet_cxx__grid_def__delete(&ptr);}
+inline grid_def_f * generic_copy(const grid_def_f * ptr) {
+  return hoppet_cxx__grid_def__copy(ptr);}
 
 /// grid_quant function wrappers
 extern "C" {
@@ -105,32 +108,92 @@ concept DoubleFnDoubleInt =
     std::same_as<std::invoke_result_t<F, double, int>, double>;
 
 //-----------------------------------------------------------------------------
+/// @brief Generic object view class
+template<typename T>
+class obj_view {
+public:
+  typedef T ptr_type;
+
+  //obj_view() noexcept {}
+  obj_view() noexcept = default; 
+  obj_view(T * ptr) noexcept : _ptr(ptr) {}
+  obj_view(const obj_view & other) noexcept : _ptr(other._ptr) {}
+  obj_view & operator= (const obj_view & other) noexcept {
+    _ptr = other._ptr;
+    return *this;
+  }  
+
+  const T * ptr() const { return _ptr; }
+  T * ptr() { return _ptr; }
+protected:
+  /// @brief pointer to the underlying Fortran grid_def object
+  T * _ptr = nullptr;
+};
+
+//-----------------------------------------------------------------------------
+/// @brief Generic object-owning class
+template<typename V>
+//requires (requires { typename V::ptr_type; } && std::derived_from<V, obj_view<typename V::ptr_type>>)
+class obj_owner : public V {
+public:
+  typedef V::ptr_type ptr_type;
+  typedef V           view_type;
+
+  obj_owner() noexcept = default;
+  obj_owner(ptr_type * ptr) noexcept : V(ptr) {}
+  obj_owner(const view_type & obj) : view_type(generic_copy(obj.ptr())) {}
+  obj_owner(const obj_owner & obj) : view_type(generic_copy(obj.ptr())) {}
+  obj_owner & operator= (const view_type & obj) {
+    if (this != &obj) {
+      generic_delete(this->_ptr);
+      this->_ptr = generic_copy(obj.ptr());
+    }
+    return *this;
+  }
+  obj_owner & operator= (const obj_owner & obj) {
+    if (this != &obj) {
+      generic_delete(this->_ptr);
+      this->_ptr = generic_copy(obj.ptr());
+    }
+    return *this;
+  }
+
+  obj_owner(obj_owner && other) noexcept : view_type(other.ptr()) {
+    // null out the other pointer to avoid double deletion
+    other._ptr = nullptr;
+  }
+  obj_owner & operator= (obj_owner && other) noexcept {
+    if (this != &other) {
+      generic_delete(this->_ptr);
+      this->_ptr = other.ptr();
+      other._ptr = nullptr;
+    }
+    return *this;
+  }
+  virtual ~obj_owner() {generic_delete(this->_ptr);}
+};
+
+//-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the grid_def Fortran type, non-owning
 ///
 /// This version provides a "view" onto an existing Fortran grid_def object,
 /// without taking ownership of it.
-class grid_def_view {
+class grid_def_view : public obj_view<grid_def_f> {
 public:
 
-  grid_def_view() noexcept {}
+  typedef obj_view<grid_def_f> base_type;
+  using base_type::base_type;
 
-  grid_def_view(grid_def_f * ptr) noexcept : _ptr(ptr) {}
-  //grid_def_view(const grid_def_view & other) noexcept : _ptr(other._ptr) {}
-  //grid_def_view & operator= (const grid_def_view & other) noexcept {
-  //  _ptr = other._ptr;
-  //  return *this;
-  //}
-
-  int ny() const {ensure_valid(); return hoppet_cxx__grid_def__ny(_ptr); }
+  int ny() const {ensure_valid(); return hoppet_cxx__grid_def__ny(ptr()); }
 
   std::vector<double> y_values() const {
     std::vector<double> yvals(ny()+1);
-    hoppet_cxx__grid_def__y_values(_ptr, yvals.data());
+    hoppet_cxx__grid_def__y_values(ptr(), yvals.data());
     return yvals;
   }
   std::vector<double> x_values() const {
     std::vector<double> xvals(ny()+1);
-    hoppet_cxx__grid_def__x_values(_ptr, xvals.data());
+    hoppet_cxx__grid_def__x_values(ptr(), xvals.data());
     return xvals;
   }
 
@@ -138,7 +201,7 @@ public:
     // equivalence is only true if both pointers are non-null
     // they are either the same pointer or equivalent grids
     return ptr() && other.ptr() && (
-      _ptr == other._ptr || hoppet_cxx__grid_def__equiv(ptr(), other.ptr())
+      ptr() == other.ptr() || hoppet_cxx__grid_def__equiv(ptr(), other.ptr())
     );
   }
   inline bool operator!=(const grid_def_view & other) const noexcept {
@@ -152,11 +215,6 @@ public:
     }
   }
 
-  const grid_def_f * ptr() const { return _ptr; }
-  grid_def_f * ptr() { return _ptr; }
-protected:
-  /// @brief pointer to the underlying Fortran grid_def object
-  grid_def_f * _ptr = nullptr;
 };
 
 
@@ -164,10 +222,12 @@ protected:
 /// @brief Object-oriented wrapper around the grid_def Fortran type, with ownership
 ///
 /// This version takes ownership of the underlying Fortran grid_def object
-class grid_def : public grid_def_view {
+class grid_def : public obj_owner<grid_def_view> {
 public:
 
-  grid_def() {};
+  typedef obj_owner<grid_def_view> base_type;
+  using base_type::base_type;
+
 
   /// @brief construct and allocate a new grid_def object
   ///
@@ -176,14 +236,14 @@ public:
   /// @param order   usual interpolation order parameter
   /// @param eps     accuracy for the adaptive integration
   //
-  grid_def(double dy, double ymax, int order=-5, double eps=1e-7)
-    : grid_def_view(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
+  explicit grid_def(double dy, double ymax, int order=-5, double eps=1e-7)
+    : grid_def(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
 
   /// @brief construct a grid_def from multiple grid_def objects
   ///
   /// @param grids   vector of grid_def objects
   /// @param locked  whether the new grid should be "locked"
-  grid_def(const std::vector<grid_def> & grids, bool locked=false) {
+  explicit grid_def(const std::vector<grid_def> & grids, bool locked=false) {
     int ngrids = static_cast<int>(grids.size());
     std::vector<const grid_def_f *> grid_ptrs(ngrids);
     for (int i=0; i<ngrids; ++i) {
@@ -192,28 +252,8 @@ public:
     _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
   }
 
-
-  grid_def(const grid_def & other)
-    : grid_def_view(hoppet_cxx__grid_def__copy(other.ptr())) {}
-
-  grid_def(grid_def && other) noexcept
-    : grid_def_view(other.ptr()) {
-    // null out the other pointer to avoid double deletion
-    other._ptr = nullptr;
-  }
-
-  grid_def & operator=(const grid_def & other) {
-    if (this != &other) {
-      if (_ptr) hoppet_cxx__grid_def__delete(&_ptr);
-      _ptr = hoppet_cxx__grid_def__copy(other.ptr());
-    }
-    return *this;
-  }
-    
-  ~grid_def() {if (_ptr) hoppet_cxx__grid_def__delete(&_ptr); }
-
 protected:
-  grid_def(grid_def_f * ptr) : grid_def_view(ptr) {}
+  //grid_def(grid_def_f * ptr) : grid_def_view(ptr) {}
   friend grid_def grid_def_default(double dy, double ymax, int order);
 };  
 
@@ -673,7 +713,7 @@ public:
   /// construct a grid_conv object and initialise it with the given function
   ///
   /// @param grid          the grid definition
-  /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)->double
+  /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)
   ///
   grid_conv(const grid_def_view & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : grid_conv_view(grid) {
 
