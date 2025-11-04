@@ -10,12 +10,22 @@
 
 // Elements to think about
 // - do we separate things out into different files
-// - do we provide "physics" aliases: e.g. grid_quant -> pdf, grid_conv -> split_fn
-// - do we 
+// - do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
+
+// Next steps:
+// - [ ] add the running_coupling class
+// - [ ] add the dglap_holder
+// - [ ] add the tabulation class
+// - [ ] add the mass thresholds (or wait until more mature?)
+// - [ ] add streamlined interface functions
+// - [ ] add qed support
+// - [ ] add access to things like the beta function coefficients, qcd group constants, etc.
+// - [ ] add structure function support
+// - [ ] add documentation
 
 // Things to perhaps add
-// - [ ] decide take_view, etc., operator=
-// - [ ] basic checks of grid compatibility, so as to get C++ errors rather than Fortran errors
+// - [ ] add take_view to the obj_view class
+// - [x] basic checks of grid compatibility, so as to get C++ errors rather than Fortran errors
 // - [ ] mvv interface for splitting functions?
 
 
@@ -145,7 +155,11 @@ concept VoidFnDoubleDoubleDoubleptr =
 struct Empty {};
 
 //-----------------------------------------------------------------------------
-/// @brief Generic object view class
+/// @brief Generic object view class, to be used as a base for non-owning wrappers
+/// of Fortran objects that do not provide a view of the underlying data
+///
+/// @tparam T  the pointer type to the underlying Fortran object
+/// @tparam E  an extra type to hold additional information
 template<typename T, typename E = Empty>
 class obj_view {
 public:
@@ -176,7 +190,10 @@ protected:
 };
 
 //-----------------------------------------------------------------------------
-/// @brief Generic object-owning class
+/// @brief Generic object-owning class, to be used as a base for owning wrappers
+/// of Fortran objects that do not provide a view of the underlying data
+///
+/// @tparam V  the obj_view type to be wrapped
 template<typename V>
 //requires (requires { typename V::ptr_type; } && std::derived_from<V, obj_view<typename V::ptr_type, typename V::extra_type>>)
 class obj_owner : public V {
@@ -312,28 +329,32 @@ inline grid_def grid_def_default(double dy, double ymax, int order) {
   return grid_def(hoppet_cxx__grid_def__new_default(dy, ymax, order));
 }
 
-/// @brief Base class for views of objects with an associated data pointer
-template<typename T>
+//-----------------------------------------------------------------------------
+/// @brief Generic object view class, to be used as a base for non-owning wrappers
+/// of Fortran objects that provide a view of the underlying double-precision data
+///
+/// @tparam E  a type for holding extra information
+template<typename E>
 class data_view {
 public:
 
-  typedef T extras_type;
+  typedef E extras_type;
 
   data_view() noexcept {}
 
-  data_view(double * data_ptr, std::size_t size, const T & extras) noexcept
+  data_view(double * data_ptr, std::size_t size, const extras_type & extras) noexcept
     : _data(data_ptr), _size(size), _extras(extras) {}
 
-  explicit data_view(const data_view<T> & other) noexcept {
+  explicit data_view(const data_view<E> & other) noexcept {
     take_view(other);
   }
 
-  data_view<T> & operator=(const data_view<T> & other) {
+  data_view<E> & operator=(const data_view<E> & other) {
     this->copy_data(other);
     return *this;
   }
 
-  void take_view(const data_view<T> & other) noexcept {
+  void take_view(const data_view<E> & other) noexcept {
     _data = other._data;
     _size = other._size;
     _extras = other._extras;
@@ -345,28 +366,28 @@ public:
 
   data_view & set_data_ptr(double * data_in) noexcept {_data = data_in; return *this;}
   data_view & set_size(std::size_t size_in) noexcept {_size = size_in; return *this;}
-  data_view & set_extras(const T & extras_in) noexcept {_extras = extras_in; return *this;}
+  data_view & set_extras(const E & extras_in) noexcept {_extras = extras_in; return *this;}
   /// compound assignment arithmetic operators
   ///@{
-  data_view<T> & operator+=(const data_view<T> & other) {
+  data_view<E> & operator+=(const data_view<E> & other) {
     auto [sz, this_data, other_data] = prepare_compound(other);
     for (std::size_t iy=0; iy<sz; ++iy) this_data[iy] += other_data[iy];
     return *this;
   }
 
-  data_view<T> & operator-=(const data_view<T> & other) {
+  data_view<E> & operator-=(const data_view<E> & other) {
     auto [sz, this_data, other_data] = prepare_compound(other);
     for (std::size_t iy=0; iy<sz; ++iy) this_data[iy] -= other_data[iy];
     return *this;
   }
 
-  data_view<T> & operator*=(double val) {
+  data_view<E> & operator*=(double val) {
     std::size_t sz = size();
     double * this_data = data();
     for (std::size_t iy=0; iy<sz; ++iy) this_data[iy] *= val;
     return *this;
   }
-  data_view<T> & operator/=(double val) {
+  data_view<E> & operator/=(double val) {
     std::size_t sz = size();
     double * this_data = data();
     for (std::size_t iy=0; iy<sz; ++iy) this_data[iy] /= val;
@@ -375,32 +396,39 @@ public:
   ///@}
 
   /// copy the data from other, assuming *this is initialised and of the correct size, etc.
-  void copy_data(const data_view<T> & other) {
+  void copy_data(const data_view<E> & other) {
     auto [sz, this_data, other_data] = prepare_compound(other);
     std::copy(other_data, other_data + sz, this_data);
   }
 
-  const T & extras() const {return _extras;}
-  T & extras() {return _extras;}
+  const E & extras() const {return _extras;}
+  E & extras() {return _extras;}
 
   void reset() {
     _data = nullptr;
     _size = 0;
-    _extras = T();
+    _extras = E();
   }
 
 protected:
   double *      _data = nullptr;
   std::size_t   _size = 0;
-  T _extras = T();
+  E _extras = E();
 
-  inline std::tuple<std::size_t, double *, const double *> prepare_compound(const data_view<T> & b ) {
+  inline std::tuple<std::size_t, double *, const double *> prepare_compound(const data_view<E> & b ) {
     extras().ensure_compatible(b.extras());
     return std::make_tuple(size(), data(), b.data());
   }
 };
 
 
+//-----------------------------------------------------------------------------
+/// @brief Generic object view class, to be used as a base for owning wrappers
+/// of Fortran objects that provide a view of the underlying double-precision data
+///
+/// @tparam V  the data_view type from which this derives
+/// @tparam P  the pointer type to the underlying Fortran object
+///
 template<typename V, typename P>
 class data_owner : public V {
 public:
@@ -474,17 +502,33 @@ protected:
   P * _ptr = nullptr;
 };
 
+//-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the grid_quant Fortran type, non-owning
 ///
 /// This version provides a "view" onto an existing Fortran grid_quant object,
 /// without taking ownership of it.
+///
+/// Note hoppet doesn't have grid_quant objects by default, instead it just
+/// uses `real(dp) :: gq(0:ny)` arrays. The c++ wrapper instead explicitly
+/// goes via a fortran grid_quant object, which manages the data array internally.
 class grid_quant_view : public data_view<grid_def_view> {
 public:
 
   grid_quant_view() {}
+
+  /// @brief  construct a grid_quant_view from existing data and grid (internal use only)
+  ///
+  /// @param data_ptr pointer to the data array
+  /// @param size     size of the data array
+  /// @param grid     associated grid definition
   grid_quant_view(double * data_ptr, std::size_t size, const grid_def_view & grid) 
     : data_view<grid_def_view>(data_ptr, size, grid) {}
 
+
+  /// @brief  assuming the grid_quant_view's storage has been set up, assign from a function 
+  /// @tparam T generic function type
+  /// @param  fn any double(double) callable
+  ///
   //template<typename F, IsDoubleFunction<F> = 0>
   void assign(const DoubleFnDouble auto & fn) {
     if (!data()) {
@@ -501,36 +545,41 @@ public:
     }
   } 
 
+  /// @brief  assign from a function, similar to assign()
   //template<typename F, IsDoubleFunction<F> = 0>
   grid_quant_view & operator=(const DoubleFnDouble auto & fn) {assign(fn); return *this;}
 
+  /// @brief  copy assignment operator, which copies data from other, assuming
+  ///         that this is already allocated and of the correct size, etc.
+  ///
+  /// @param other the other grid_quant_view to copy from
   //template<> 
   grid_quant_view & operator=(const grid_quant_view & other) = default;// {copy_data(other); return *this;}
 
- 
-  //explicit grid_quant_view (const grid_quant_view & other) noexcept : data_view<grid_def_view>(other) {}   
-//
-//  /// @brief assignment operator, where the data from other is copied into this
-//  /// @param other 
-//  /// @return 
-//  grid_quant_view & operator=(const grid_quant_view & other) {
-//    this->copy_data(other);
-//    return *this;
-//  }
-//
-  template<typename T>
-  double & operator[](T i) {return data()[i];}
 
-  template<typename T>
-  const double & operator[](T i) const {return data()[i];}
+  /// @brief  indexing operator
+  /// @param i index of the element to access
+  /// @return reference to the element at index i
+  ///
+  /// Note that y =log(1/x) do _not_ monotonically increase with i, because
+  /// of hoppet's nested grid structure.
+  double & operator[](std::size_t i) {return data()[i];}
+
+  const double & operator[](std::size_t i) const {return data()[i];}
 
   /// return a ref to the associated grid definition
   const grid_def_view & grid() const {return _extras;}
 
+  /// @brief    return the interpolated value at the specified y=ln(1/x)
+  /// @param y  the y value to interpolate
+  /// @return   the interpolated value
   double at_y(double y) const {
     return hoppet_cxx__grid_quant__at_y(grid().ptr(), _data, y);
   }
 
+  /// @brief    return the interpolated value at the specified x
+  /// @param x  the x value to interpolate
+  /// @return   the interpolated value
   double at_x(double x) const {
     double y = std::log(1.0/x);
     return hoppet_cxx__grid_quant__at_y(grid().ptr(), _data, y);
