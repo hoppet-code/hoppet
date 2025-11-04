@@ -492,3 +492,11 @@ contains
     res = c_loc(res_f)
   end function hoppet_cxx_grid_conv__alloc_and_conv
 end module hoppet_cxx_oo_grid_conv
+
+module hoppet_cxx_oo_split_mat
+  use types, only: dp
+  use, intrinsic :: iso_c_binding
+  use hoppet_cxx_oo_grid_def
+  use hoppet_cxx_oo_grid_quant
+  implicit none
+end module hoppet_cxx_oo_split_mat

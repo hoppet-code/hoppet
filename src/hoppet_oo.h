@@ -104,10 +104,14 @@ concept DoubleFnDouble =
     std::invocable<F, double> &&
     std::same_as<std::invoke_result_t<F, double>, double>;
 
-    template <typename F>
+template <typename F>
 concept DoubleFnDoubleInt =
     std::invocable<F, double, int> &&
     std::same_as<std::invoke_result_t<F, double, int>, double>;
+template <typename F>
+concept VoidFnDoubleDoubleDoubleptr =
+    std::invocable<F, double, double, double *> &&
+    std::same_as<std::invoke_result_t<F, double, double, double *>, void >;
 
 /// an empty class as a default for template parameters    
 struct Empty {};
@@ -640,6 +644,24 @@ public:
     grid_quant_view result(this->data() + i * extras().stride, extras().stride, extras().grid);
     return result;
   }
+  void assign(const VoidFnDoubleDoubleDoubleptr auto & fn, double Q) {
+  //void assign(void (*fn)(double,double,double*), double Q) {
+    if (!data()) {
+      throw std::runtime_error("grid_quant_2d_view::assign(fn): grid_quant_2d_view object not associated");
+    }
+    if (extras().dim1_sz < iflv_max+1) {
+      throw std::runtime_error("grid_quant_2d_view::assign(fn): grid_quant_2d_view dim1_sz = " 
+                  + std::to_string(extras().dim1_sz) + " < iflv_max+1 = " + std::to_string(iflv_max+1));
+    }
+    std::vector<double> xvals = grid().x_values();
+    std::vector<double> xpdf (extras().dim1_sz);
+    for (std::size_t iy=0; iy < grid().ny()+1; ++iy) {
+      fn(xvals[iy], Q, xpdf.data());
+      for (std::size_t i=0; i < extras().dim1_sz; ++i) {
+        this->data()[i*extras().stride + iy] = i <= iflv_max ? xpdf[i] : 0.0;
+      }
+    }
+  }
 };
 
 
@@ -647,6 +669,9 @@ public:
 class grid_quant_2d : public data_owner<grid_quant_2d_view, grid_quant_2d_f> {
 
 public:
+
+  typedef grid_quant_2d_view view_type;
+
   grid_quant_2d() {}
   grid_quant_2d(const grid_def_view & grid, std::size_t dim1_size) {
     alloc(gq2d_extras(grid, dim1_size));
@@ -657,7 +682,7 @@ public:
 
   // make sure we have the move constructor, move assignment and copy assignment
   // explicit copy constructor to perform a deep copy
-  grid_quant_2d(const grid_quant_2d & other) {copy(other); }
+  grid_quant_2d(const grid_quant_2d      & other) {copy(other); }
   grid_quant_2d(const grid_quant_2d_view & other) {copy(other); }
   grid_quant_2d & operator=(const grid_quant_2d &  other) noexcept = default;
   grid_quant_2d            (      grid_quant_2d && other) noexcept = default;
@@ -671,11 +696,36 @@ public:
   }
 };
 
-inline grid_quant_2d operator+(grid_quant_2d a, const grid_quant_2d_view & b) {a += b; return a;}
+inline grid_quant_2d operator+(grid_quant_2d a, const grid_quant_2d_view & b) {std::cout << a.ptr() << "=a.ptr()\n"; a += b; return a;}
 inline grid_quant_2d operator-(grid_quant_2d a, const grid_quant_2d_view & b) {a -= b; return a;}
 inline grid_quant_2d operator*(grid_quant_2d a, double b) {a *= b; return a;}
 inline grid_quant_2d operator*(double b, grid_quant_2d a) {a *= b; return a;}
 inline grid_quant_2d operator/(grid_quant_2d a, double b) {a /= b; return a;}
+
+/// @brief wrapper around grid_quant_2d for PDFs with just QCD partons, fixed size for the second dimension
+class pdf_qcd : public grid_quant_2d {
+public:
+  typedef grid_quant_2d base_type;
+  typedef base_type::view_type view_type;
+
+  using base_type::base_type; // ensures that constructors are inherited
+  explicit pdf_qcd(const grid_def_view & grid) : grid_quant_2d(grid, ncompmax+1) {
+    std::fill(data(), data()+size(), 0.0);
+  }
+};
+typedef pdf_qcd::view_type pdf_qcd_view;
+// redefine the binary operators explicitly for pdf_qcd so as to get the right return type
+// and allow copy elision
+inline pdf_qcd operator+(pdf_qcd a, const grid_quant_2d_view & b) {a += b; return a;}
+inline pdf_qcd operator-(pdf_qcd a, const grid_quant_2d_view & b) {a -= b; return a;}
+inline pdf_qcd operator*(pdf_qcd a, double b) {a *= b; return a;}
+inline pdf_qcd operator*(double b, pdf_qcd a) {a *= b; return a;}
+inline pdf_qcd operator/(pdf_qcd a, double b) {a /= b; return a;}
+
+
+
+
+
 
 
 //-----------------------------------------------------------------------------
@@ -717,10 +767,6 @@ public:
     return *this;
   }
   ///@}
-
-//protected:
-//  grid_def_view  _grid;
-//  grid_conv_f *  _ptr = nullptr;
 };
 
 class grid_conv : public obj_owner<grid_conv_view> {
@@ -745,29 +791,6 @@ public:
     std::function<double(double,int)> fn_ptr = std::forward<FuncType>(conv_ignd_fn);
     _ptr = hoppet_cxx_grid_conv__new_from_fn(grid.ptr(), &fn_ptr);
   }
-
-  //grid_conv(const grid_def_view & grid, grid_conv_f * ptr) : base_type(ptr, grid) {}
-
-//  grid_conv(const grid_conv & other) : 
-//        grid_conv(other.grid(), hoppet_cxx_grid_conv__new_from_gc(other.ptr())) {};
-//
-//  grid_conv(grid_conv && other) noexcept
-//    : grid_conv_view(other) {
-//    other._ptr = nullptr;
-//  }
-
-
-//  void del() {if (_ptr) {hoppet_cxx_grid_conv__delete(&_ptr);}}
-//  ~grid_conv() {del();}
-
-//  grid_conv & operator=(grid_conv && other) noexcept {
-//    if (this != &other) {
-//      del();
-//      _ptr = other._ptr;
-//      other._ptr = nullptr;
-//    }
-//    return *this;
-//  }
 };
 
 inline grid_quant operator*(const grid_conv_view & conv, const grid_quant_view & q) {
@@ -796,6 +819,12 @@ inline grid_conv operator*(grid_conv_view const & a, grid_conv_view const & b) {
 }
 
 } // end namespace hoppet
+
+
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the grid_conv Fortran type, non-owning
+//class split_max_view : public obj_view<split_mat_f, grid_def_view> {
+//};
 
 
 /// objects globally defined in the streamlined interface

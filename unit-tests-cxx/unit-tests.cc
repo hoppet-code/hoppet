@@ -166,8 +166,38 @@ TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
 
   hoppet::grid_quant_2d pdf2 = pdf; // copy constructor
   auto pdf3 = pdf + pdf2;
+
+  hoppet::grid_quant_2d pdf4(grid100, 14);
+  //pdf4.assign(hoppetBenchmarkPDFunpol, 10.0);
+  //cout << "g    " << pdf4[hoppet::iflv_g   ].at_y(5.0) << endl;
+  //cout << "ubar " << pdf4[hoppet::iflv_ubar].at_y(5.0) << endl;
 }
 
+TEST_CASE( "pdf_qcd", "[hoppet]" ) {
+  hoppet::pdf_qcd pdf(big_grid);
+  double dummy_Q = 0.0;
+  pdf.assign(hoppetBenchmarkPDFunpol, dummy_Q);
+  // hard-coded values from the benchmark function
+  auto fn_g    = [](double x) { return 1.7*pow(x,-0.1) * pow(1-x,5); };
+  auto fn_ubar = [](double x) { return 0.387975*0.5*pow(x,-0.1)*pow(1-x,7); };
+  auto xvals = {1e-4, 1e-2, 0.1, 0.5};
+  for (double x : xvals) {
+    REQUIRE_THAT( pdf[hoppet::iflv_g   ].at_x(x), WithinAbs(fn_g(x), 1e-5));
+    REQUIRE_THAT( pdf[hoppet::iflv_ubar].at_x(x), WithinAbs(fn_ubar(x), 1e-6));
+  }
+  auto control = pdf[hoppet::ncompmax];
+  bool allzero = true;
+  for (int i = 0; i <= pdf.grid().ny(); ++i) {
+    if (control[i] != 0.0) allzero = false;
+  }
+  REQUIRE(allzero);
+
+  hoppet::pdf_qcd pdf2 = pdf + pdf;
+  for (double x : xvals) {
+    REQUIRE_THAT( pdf2[hoppet::iflv_g   ].at_x(x), WithinAbs(2*fn_g(x), 1e-5));
+  }
+  //cout << pdf2.ptr() << "=pdf2.ptr()\n";
+}
 
 //-----------------------------------------------------------------------------
 TEST_CASE( "streamlined-objects", "[hoppet]" ) {
