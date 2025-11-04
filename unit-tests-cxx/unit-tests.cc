@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
   // Global setup
   // make a simple grid for use in the tests
   grid100  = hoppet::grid_def(0.1, 10.0);
-  big_grid = hoppet::grid_def_default(0.1, 16.0, -6);
+  big_grid = hoppet::grid_def_default(0.1, 18.0, -6);
 
   // and also set up the objects in the hoppet streamlined interface
   double ymax = 12.0, dy = 0.2, Qmin = 1.0, Qmax = 1e4;
@@ -208,23 +208,90 @@ TEST_CASE( "streamlined-objects", "[hoppet]" ) {
   REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
 }
 
+constexpr double cf = 4.0/3.0;
+inline double pqq_fn(double y, int piece) {
+  double x = exp(-y);
+  double offset = -cf; // the result should be independent of the offset value
+
+//  double res = 0.0;
+//  if      (piece == hoppet::cc_REAL    ) res =   cf * (1+x*x)/(1-x);
+//  else if (piece == hoppet::cc_VIRT    ) res = - cf * (1+x*x)/(1-x) + offset*(1+x);
+//  else if (piece == hoppet::cc_REALVIRT) res = offset*(1+x);
+//  else if (piece == hoppet::cc_DELTA   ) res = -offset*3.0/2.0;
+//
+//  if (piece != hoppet::cc_DELTA) res *= x;
+//  //return res;
+//  
+//  double res1 = 0.0;
+//  if (piece == hoppet::cc_REAL)     res1   = cf * (1.0 + x*x)/ (1.0-x);
+//  if (piece == hoppet::cc_VIRT)     res1   = -2*cf/(1.0-x);
+//  if (piece == hoppet::cc_REALVIRT) res1   = -cf*(1.0+x);
+//  if (piece == hoppet::cc_DELTA)    res1 = cf * (3.0/2.0);
+//  if (piece != hoppet::cc_DELTA) res1 *= x;
+
+
+//  if (abs(res-res1) > 1e-8) cout << "pqq_fn: piece=" << piece << ", res=" << res << ", res1=" << res1 << ", x=" << x << endl;
+  //return res1;
+
+
+  double res2 = 0.0;
+  if (piece == hoppet::cc_REAL
+   || piece == hoppet::cc_REALVIRT) res2 = cf * (1.0 + x*x)/ (1.0-x);
+
+  if (piece == hoppet::cc_VIRT 
+   || piece == hoppet::cc_REALVIRT) res2 -= cf * 2.0/(1.0-x);
+
+  if (piece == hoppet::cc_DELTA) res2 = cf * (3.0/2.0);
+
+  if (piece != hoppet::cc_DELTA) res2 *= x;
+//  if (abs(res-res2) > 1e-8) cout << "pqq_fn: piece=" << piece << ", res=" << res << ", res2=" << res2 << ", x=" << x << endl;
+
+  return res2;
+}
+
+inline double pgq_fn(double y, int piece) {
+  double x = exp(-y);
+  double res;
+  if      (piece == hoppet::cc_REAL
+        || piece == hoppet::cc_REALVIRT) res = cf * (1+pow(1-x,2))/x;
+  else                               res = 0.0;
+  return x*res;
+}
+
+inline double pgg_fn(double y, int piece, double nf) {
+  double x = exp(-y);
+  constexpr double ca = 3.0;
+  double res = 0.0;
+  if (piece == hoppet::cc_REAL
+   || piece == hoppet::cc_REALVIRT) res = 2.0*ca*(x/(1.0-x) + (1.0-x)/x + x*(1.0-x));
+
+  if (piece == hoppet::cc_VIRT 
+   || piece == hoppet::cc_REALVIRT) res -= 2.0*ca/(1.0-x);
+
+  if (piece == hoppet::cc_DELTA) res = (11.0*ca - 2.0*nf)/6.0;
+
+  if (piece != hoppet::cc_DELTA) res *= x;
+  return res;
+
+}
+
+inline double pqg_fn(double y, int piece, double nf) {
+  double x = exp(-y);
+  double res = 0.0;
+  if      (piece == hoppet::cc_REAL
+        || piece == hoppet::cc_REALVIRT) res = nf*(x*x + (1-x)*(1-x));
+  return x*res;
+}
+
 //-----------------------------------------------------------------------------
 TEST_CASE( "grid_conv", "[hoppet]" ) {
-  auto pqq_fn = [](double y, int piece) {
-      double x = exp(-y);
-      double res;
-      if      (piece == hoppet::cc_REAL) res =  (1+x*x)/(1-x);
-      else if (piece == hoppet::cc_VIRT) res = -(1+x*x)/(1-x);
-      else                               res = 0.0;
-      return x*res;
-    };  
   hoppet::grid_conv pqq(big_grid, pqq_fn);
 
   hoppet::grid_conv pgq(big_grid, [](double y, int piece) {
       double x = exp(-y);
       double res;
       if      (piece == hoppet::cc_REAL
-            || piece == hoppet::cc_REALVIRT) res = (1+pow(1-x,2))/x;
+            || piece == hoppet::cc_REALVIRT) res = cf * (1+pow(1-x,2))/x;
       else                               res = 0.0;
       return x*res;
     });
@@ -237,8 +304,8 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   double pqq_q_mom1 = pqq_q.truncated_moment(1.0);
   double pgq_q_mom1 = pgq_q.truncated_moment(1.0);
   double q_mom1 = 1.0/6.0;
-  double pqq_mom1 = -4.0/3.0;
-  REQUIRE_THAT(pqq_q_mom1, WithinAbs(pqq_mom1 * q_mom1, 1e-6)); //< check momentum moment (1/6 * (-4/3))
+  double pqq_mom1 = -cf * 4.0/3.0;
+  REQUIRE_THAT(pqq_q_mom1/q_mom1, WithinAbs(pqq_mom1, 1e-6)); //< check momentum moment (1/6 * (-4/3))
   REQUIRE_THAT(          pqq_q.truncated_moment(0.0), WithinAbs(0.0, 1e-5));    //< check quark number conserved
   REQUIRE_THAT((pqq_q + pgq_q).truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved
 
@@ -295,4 +362,45 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
 
 //-----------------------------------------------------------------------------
 TEST_CASE( "split_mat", "[hoppet]" ) {
+  int nf = 5;
+  hoppet::split_mat p_lo(big_grid, nf);
+  REQUIRE(p_lo.nf() == nf);
+
+  // assign the various components
+  p_lo.qq() = hoppet::grid_conv(big_grid, pqq_fn);
+  p_lo.gq() = hoppet::grid_conv(big_grid, pgq_fn);
+  p_lo.gg() = hoppet::grid_conv(big_grid, [nf](double y, int piece) { return pgg_fn(y, piece, nf); });
+  p_lo.qg() = hoppet::grid_conv(big_grid, [nf](double y, int piece) { return pqg_fn(y, piece, nf); });
+  p_lo.ns_minus() = p_lo.qq(); 
+  p_lo.ns_plus()  = p_lo.qq();
+  p_lo.ns_v()     = p_lo.qq();
+  REQUIRE( p_lo.qq().ptr() != p_lo.ns_v().ptr() ); // different underlying pointers
+
+  auto p_copy = p_lo; // copy constructor
+
+  hoppet::pdf pdf = pdf_qcd(big_grid);  
+  double dummy_Q = 0.0;
+  pdf.assign(hoppetBenchmarkPDFunpol, dummy_Q);
+  //  pdf[hoppet::iflv_g] *= 0.0; // zero gluon to make life simpler
+  //pdf *= 0.0; // zero everything to make life simpler
+  //pdf[hoppet::iflv_g ] = big_grid * [](double y) { double x = exp(-y); return 2*pow(1-x,4)*x; };
+  //pdf[hoppet::iflv_ubar] = big_grid * [](double y)
+
+
+  hoppet::pdf dpdf_lo = p_lo * pdf;
+
+  auto mom0 = [](const auto & qv) { return qv.truncated_moment(0.0); };
+  auto mom1 = [](const auto & qv) { return qv.truncated_moment(1.0); };
+
+  // check u-ubar number sum rule
+  REQUIRE_THAT( mom0(dpdf_lo[hoppet::iflv_u ]-dpdf_lo[hoppet::iflv_ubar]), WithinAbs(0.0, 1e-4) );
+
+  // check momentum sum rule
+  hoppet::grid_quant d_all_quarks = dpdf_lo[hoppet::iflv_tbar];
+  for (int i = hoppet::iflv_tbar+1; i < hoppet::ncompmax; ++i) {
+    if (i != hoppet::iflv_g) d_all_quarks += dpdf_lo[i];
+    //cout << "i=" << i << " mom1=" << mom1(dpdf_lo[i]) << endl;
+  }
+  REQUIRE_THAT( mom1(d_all_quarks + dpdf_lo[hoppet::iflv_g]), WithinAbs(0.0, 1e-4) );
+
 }

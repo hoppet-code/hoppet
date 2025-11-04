@@ -87,16 +87,27 @@ inline void generic_delete(grid_conv_f * ptr) {if (ptr)hoppet_cxx__grid_conv__de
 inline grid_conv_f * generic_copy(const grid_conv_f * ptr) {return hoppet_cxx__grid_conv__new_from_gc(ptr);}
 //  if (ptr)  return hoppet_cxx__grid_conv__new_from_gc(ptr); else return nullptr;}
 
-
+/// split_mat function wrappers
 extern "C" {
   split_mat_f * hoppet_cxx__split_mat__new(int nf);
   split_mat_f * hoppet_cxx__split_mat__copy(const split_mat_f * splitmat);
   void hoppet_cxx__split_mat__copy_contents(split_mat_f * dest, const split_mat_f * src); //< src copied into dest
   void hoppet_cxx__split_mat__delete(split_mat_f ** splitmat);
 
-  grid_conv_f * hoppet_cxx__split_mat__gg(const split_mat_f * splitmat);
+  split_mat_f * hoppet_cxx__split_mat__times_grid_quant_2d (const split_mat_f * splitmat, const double * q_in_data, double * q_out_data);
+
+
+  int hoppet_cxx__split_mat__nf(const split_mat_f * splitmat);
+  grid_conv_f * hoppet_cxx__split_mat__qq      (const split_mat_f * splitmat);
+  grid_conv_f * hoppet_cxx__split_mat__qg      (const split_mat_f * splitmat);
+  grid_conv_f * hoppet_cxx__split_mat__gq      (const split_mat_f * splitmat);
+  grid_conv_f * hoppet_cxx__split_mat__gg      (const split_mat_f * splitmat);
+  grid_conv_f * hoppet_cxx__split_mat__ns_plus (const split_mat_f * splitmat);
+  grid_conv_f * hoppet_cxx__split_mat__ns_minus(const split_mat_f * splitmat);
+  grid_conv_f * hoppet_cxx__split_mat__ns_v    (const split_mat_f * splitmat);
 }
 inline void generic_delete(split_mat_f * ptr) {if (ptr) hoppet_cxx__split_mat__delete(&ptr);}
+inline split_mat_f * generic_copy(const split_mat_f * ptr) {return hoppet_cxx__split_mat__copy(ptr);}
 
 
 namespace hoppet {
@@ -766,6 +777,7 @@ public:
   ///@}
 };
 
+//-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the grid_conv Fortran type, with ownership
 class grid_conv : public obj_owner<grid_conv_view> {
 public:
@@ -816,8 +828,8 @@ inline grid_conv operator*(grid_conv_view const & a, grid_conv_view const & b) {
   return grid_conv(ptr, a.grid());
 }
 
-typedef grid_conv split_mat;
-typedef grid_conv_view split_mat_view;
+typedef grid_conv split_fn;
+typedef grid_conv_view split_fn_view;
 
 
 //-----------------------------------------------------------------------------
@@ -836,12 +848,47 @@ public:
   }
 
   const grid_def_view & grid() const { return extra(); }
-  grid_conv_view gg() const { return grid_conv_view(hoppet_cxx__split_mat__gg(ptr()), grid()); }
+  int nf() const { return hoppet_cxx__split_mat__nf(ptr()); }
+
+  /// views of the individual components of the splitting matrix
+  ///@{
+  grid_conv_view qq      () const { return grid_conv_view(hoppet_cxx__split_mat__qq      (ptr()), grid()); }
+  grid_conv_view qg      () const { return grid_conv_view(hoppet_cxx__split_mat__qg      (ptr()), grid()); }
+  grid_conv_view gq      () const { return grid_conv_view(hoppet_cxx__split_mat__gq      (ptr()), grid()); }
+  grid_conv_view gg      () const { return grid_conv_view(hoppet_cxx__split_mat__gg      (ptr()), grid()); }
+  grid_conv_view ns_plus () const { return grid_conv_view(hoppet_cxx__split_mat__ns_plus (ptr()), grid()); }
+  grid_conv_view ns_minus() const { return grid_conv_view(hoppet_cxx__split_mat__ns_minus(ptr()), grid()); }
+  grid_conv_view ns_v    () const { return grid_conv_view(hoppet_cxx__split_mat__ns_v    (ptr()), grid()); }
+  ///@}
 };
 
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the split_mat Fortran type, owning
 class split_mat : public obj_owner<split_mat_view> {
 
-} // end namespace hoppet
+public:
+
+  typedef obj_owner<split_mat_view> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  split_mat() {}
+
+  /// construct and allocate a split_mat object for the given number of flavours
+  split_mat(grid_def_view & grid, int nf) {
+    _extra = grid;
+    _ptr = hoppet_cxx__split_mat__new(nf);
+  }
+}; 
+
+inline grid_quant_2d operator*(const split_mat_view & split, const grid_quant_2d_view & q) {
+  split.grid().ensure_compatible(q.grid());
+  if (q.extras().dim1_sz <= ncompmax) throw std::runtime_error("split_fn * grid_quant_2d: grid_quant_2d dim1_sz too small");
+  grid_quant_2d result(q.grid(), q.extras().dim1_sz);
+  hoppet_cxx__split_mat__times_grid_quant_2d(split.ptr(), q.data(), result.data());
+  return result;
+}
+
+}// end namespace hoppet
 
 
 

@@ -416,16 +416,16 @@ contains
   end function hoppet_cxx__grid_conv__new_from_gc
 
   !! copy the contents of gc_src into gc_dest
-  subroutine hoppet_cxx__grid_conv__copy_contents(gc_dest, gc_src) bind(C)
+  subroutine hoppet_cxx__grid_conv__copy_contents(dest, src) bind(C)
     implicit none
-    type(c_ptr), intent(in), value :: gc_dest, gc_src
+    type(c_ptr), intent(in), value :: dest, src
     !--
-    type(grid_conv), pointer :: gc_dest_f, gc_src_f
+    type(grid_conv), pointer :: dest_f, src_f
 
-    call c_f_pointer(gc_dest, gc_dest_f)
-    call c_f_pointer(gc_src, gc_src_f)
+    call c_f_pointer(dest, dest_f)
+    call c_f_pointer(src, src_f)
 
-    call InitGridConv(gc_dest_f, gc_src_f)
+    call InitGridConv(dest_f, src_f)
   end subroutine hoppet_cxx__grid_conv__copy_contents
 
 
@@ -560,6 +560,20 @@ contains
     call InitSplitMat(dest_f, src_f)
   end subroutine hoppet_cxx__split_mat__copy_contents
 
+
+  !! return the nf value of the split_mat
+  function hoppet_cxx__split_mat__nf(other) bind(C) result(lcl_nf)
+    implicit none
+    type(c_ptr), intent(in), value :: other
+    integer(c_int) :: lcl_nf
+    !--
+    type(split_mat), pointer :: other_f_ptr
+
+    call c_f_pointer(other, other_f_ptr)
+    lcl_nf = other_f_ptr%nf_int
+  end function hoppet_cxx__split_mat__nf
+
+  !! delete a split_mat object (and its associated fortran storage)
   subroutine hoppet_cxx__split_mat__delete(split_mat_c_ptr) bind(C)
     implicit none
     type(c_ptr), intent(inout) :: split_mat_c_ptr
@@ -573,15 +587,46 @@ contains
   end subroutine hoppet_cxx__split_mat__delete
 
 
-  function hoppet_cxx__split_mat__gg(split_mat_c_ptr) bind(C) result(grid_conv_c_ptr)
-    implicit none
-    type(c_ptr), intent(in), value :: split_mat_c_ptr
-    type(c_ptr) :: grid_conv_c_ptr
+  ! define a macro to generate the functions that return references to the grid_conv members
+#define HOPPET_CXX__SPLIT_MAT__REF(NAME) \
+  function CAT(hoppet_cxx__split_mat__,NAME)(split_mat_c_ptr) bind(C) result(grid_conv_c_ptr);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: split_mat_c_ptr;\
+    type(c_ptr) :: grid_conv_c_ptr;\
+    type(split_mat), pointer :: f_ptr;\
+    type(grid_conv), pointer :: gg_ptr;\
+    call c_f_pointer(split_mat_c_ptr, f_ptr);\
+    grid_conv_c_ptr = c_loc(CAT(f_ptr%,NAME));\
+  end function CAT(hoppet_cxx__split_mat__,NAME)
+
+  HOPPET_CXX__SPLIT_MAT__REF(qq      )
+  HOPPET_CXX__SPLIT_MAT__REF(qg      )
+  HOPPET_CXX__SPLIT_MAT__REF(gq      )
+  HOPPET_CXX__SPLIT_MAT__REF(gg      )
+  HOPPET_CXX__SPLIT_MAT__REF(ns_plus )
+  HOPPET_CXX__SPLIT_MAT__REF(ns_minus)
+  HOPPET_CXX__SPLIT_MAT__REF(ns_v    )
+
+#undef HOPPET_CXX__SPLIT_MAT__REF
+
+  !! result_data = conv * q_data
+  subroutine hoppet_cxx__split_mat__times_grid_quant_2d(split_max_ptr, q_data, result_data) bind(C)
+    use pdf_representation
+    implicit none    
+    type(c_ptr), intent(in), value :: split_max_ptr
+    type(c_ptr), intent(in), value :: q_data
+    type(c_ptr), intent(in), value :: result_data
     !--
-    type(split_mat), pointer :: f_ptr
-    type(grid_conv), pointer :: gg_ptr
-    call c_f_pointer(split_mat_c_ptr, f_ptr)
-    grid_conv_c_ptr = c_loc(f_ptr%gg)
-  end function hoppet_cxx__split_mat__gg
+    type(split_mat), pointer :: split_mat_f
+    real(dp), pointer :: q(:,:)
+    real(dp), pointer :: result(:,:)
+
+    call c_f_pointer(split_max_ptr, split_mat_f)
+    call c_f_pointer(q_data, q, shape=[split_mat_f%qq%grid%ny+1, ncompmax-ncompmin+1])
+    call c_f_pointer(result_data, result, shape=[split_mat_f%qq%grid%ny+1, ncompmax-ncompmin+1])
+
+    result = split_mat_f * q
+  end subroutine hoppet_cxx__split_mat__times_grid_quant_2d
+
 
 end module hoppet_cxx_oo_split_mat
