@@ -252,9 +252,6 @@ public:
     _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
   }
 
-protected:
-  //grid_def(grid_def_f * ptr) : grid_def_view(ptr) {}
-  friend grid_def grid_def_default(double dy, double ymax, int order);
 };  
 
 /// @brief  create a grid_def object with the default choice of nested, locked grids
