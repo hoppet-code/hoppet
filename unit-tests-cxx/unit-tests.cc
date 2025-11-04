@@ -289,5 +289,5 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   REQUIRE_THAT( (pview * q) .truncated_moment(1.0), WithinAbs(pgq_q_mom1, 1e-6)); // pview should be equal to pgq
   REQUIRE_THAT( (pgen  * q) .truncated_moment(1.0), WithinAbs(pgq_q_mom1, 1e-6)); // since pview was a view of pgen, pgen should also now be pgq
   pview += pgq;
-  REQUIRE_THAT( (pgen * q) .truncated_moment(1.0), WithinAbs(2*pgq_q_mom1, 1e-6)); // pview should be
+  REQUIRE_THAT( (pgen * q) .truncated_moment(1.0), WithinAbs(2*pgq_q_mom1, 1e-6)); // pgen should be equal to 2*pgq
 }
