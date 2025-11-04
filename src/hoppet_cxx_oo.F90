@@ -1,3 +1,5 @@
+
+#include "inc/ftlMacros.inc"
 !=====================================================================
 !! wrappers for C++ OO interface to grid_def
 module hoppet_cxx_oo_grid_def
