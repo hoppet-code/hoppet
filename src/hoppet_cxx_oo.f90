@@ -377,7 +377,7 @@ module hoppet_cxx_oo_grid_conv
 contains
 
   !! return a c pointer to a new grid_conv constructed from a conv_ignd_c_interface object
-  function hoppet_cxx_grid_conv__new_from_fn(grid_ptr, conv_ignd_c_fn_obj) bind(C) result(ptr)
+  function hoppet_cxx__grid_conv__new_from_fn(grid_ptr, conv_ignd_c_fn_obj) bind(C) result(ptr)
     implicit none
     type(c_ptr), intent(in), value :: grid_ptr
     type(c_ptr), intent(in), value :: conv_ignd_c_fn_obj
@@ -396,10 +396,10 @@ contains
     allocate(gc)
     call InitGridConv(grid, gc, lcl_conv_ignd, alloc=.true.)
     ptr = c_loc(gc)
-  end function hoppet_cxx_grid_conv__new_from_fn
+  end function hoppet_cxx__grid_conv__new_from_fn
 
   !! return a c pointer to a new grid_conv that is a copy of gc_other
-  function hoppet_cxx_grid_conv__new_from_gc(gc_other) bind(C) result(ptr)
+  function hoppet_cxx__grid_conv__new_from_gc(gc_other) bind(C) result(ptr)
     implicit none
     type(c_ptr), intent(in), value :: gc_other
     type(c_ptr) :: ptr
@@ -411,7 +411,7 @@ contains
     allocate(gc)
     call InitGridConv(gc, gc_other_f, alloc=.true.)
     ptr = c_loc(gc)
-  end function hoppet_cxx_grid_conv__new_from_gc
+  end function hoppet_cxx__grid_conv__new_from_gc
 
 
   !! implementation of conv_ignd_from_c%f
@@ -425,7 +425,7 @@ contains
   end function conv_ignd_from_c__f
 
   !! delete a grid_conv object (and the the associated fortran object)
-  subroutine hoppet_cxx_grid_conv__delete(ptr) bind(C)
+  subroutine hoppet_cxx__grid_conv__delete(ptr) bind(C)
     implicit none
     type(c_ptr), intent(inout) :: ptr
     !--
@@ -435,10 +435,10 @@ contains
     call delete(gc)
     deallocate(gc)
     ptr = c_null_ptr
-  end subroutine hoppet_cxx_grid_conv__delete
+  end subroutine hoppet_cxx__grid_conv__delete
 
   !! result_data = conv * q_data
-  subroutine hoppet_cxx_grid_conv__times_grid_quant(conv_ptr, q_data, result_data) bind(C)
+  subroutine hoppet_cxx__grid_conv__times_grid_quant(conv_ptr, q_data, result_data) bind(C)
     implicit none
     type(c_ptr), intent(in), value :: conv_ptr
     type(c_ptr), intent(in), value :: q_data
@@ -453,11 +453,11 @@ contains
     call c_f_pointer(result_data, result, shape=[gc%grid%ny+1])
 
     result = gc * q
-  end subroutine hoppet_cxx_grid_conv__times_grid_quant
+  end subroutine hoppet_cxx__grid_conv__times_grid_quant
 
 
   !! conv1 += conv2
-  subroutine hoppet_cxx_grid_conv__add(conv1, conv2, factor) bind(C)
+  subroutine hoppet_cxx__grid_conv__add(conv1, conv2, factor) bind(C)
     implicit none
     type(c_ptr),    intent(in), value    :: conv1, conv2
     real(c_double), intent(in), optional :: factor
@@ -465,20 +465,20 @@ contains
     call c_f_pointer(conv1, conv1_f)
     call c_f_pointer(conv2, conv2_f)
     call AddWithCoeff(conv1_f,conv2_f,fact=factor)
-  end subroutine hoppet_cxx_grid_conv__add
+  end subroutine hoppet_cxx__grid_conv__add
 
   !! conv1 *=factor
-  subroutine hoppet_cxx_grid_conv__multiply(conv1, factor) bind(C)
+  subroutine hoppet_cxx__grid_conv__multiply(conv1, factor) bind(C)
     implicit none
     type(c_ptr),    intent(in), value :: conv1
     real(c_double), intent(in), value :: factor
     type(grid_conv), pointer :: conv1_f
     call c_f_pointer(conv1, conv1_f)
     call Multiply(conv1_f,factor)
-  end subroutine hoppet_cxx_grid_conv__multiply
+  end subroutine hoppet_cxx__grid_conv__multiply
 
   !! allocate a new grid_conv that is the convolution of conv1 and conv2
-  function hoppet_cxx_grid_conv__alloc_and_conv(conv1, conv2) bind(C) result(res)
+  function hoppet_cxx__grid_conv__alloc_and_conv(conv1, conv2) bind(C) result(res)
     implicit none
     type(c_ptr),    intent(in), value :: conv1, conv2
     type(c_ptr) :: res
@@ -490,13 +490,71 @@ contains
     call AllocGridConv(conv1_f%grid, res_f)
     call SetToConvolution(res_f, conv1_f, conv2_f)
     res = c_loc(res_f)
-  end function hoppet_cxx_grid_conv__alloc_and_conv
+  end function hoppet_cxx__grid_conv__alloc_and_conv
 end module hoppet_cxx_oo_grid_conv
 
+!=====================================================================
+!! wrappers for C++ OO interface to split_mat objects
 module hoppet_cxx_oo_split_mat
   use types, only: dp
   use, intrinsic :: iso_c_binding
   use hoppet_cxx_oo_grid_def
   use hoppet_cxx_oo_grid_quant
+  use dglap_objects
   implicit none
+
+contains
+  !! return a c pointer to a new split_mat with the given lcl_nf
+  function hoppet_cxx__split_mat__new(lcl_nf) bind(C) result(split_mat_ptr)
+    implicit none
+    integer(c_int), intent(in), value :: lcl_nf
+    type(c_ptr) :: split_mat_ptr
+    !--
+    type(split_mat), pointer :: f_ptr
+
+    allocate(f_ptr)
+    call cobj_InitSplitLinks(f_ptr)
+    f_ptr%nf_int = lcl_nf
+    split_mat_ptr = c_loc(f_ptr)
+  end function hoppet_cxx__split_mat__new
+
+  !! return a c pointer to a copy of the (split_mat_c_ptr) split_mat
+  function hoppet_cxx__split_mat__copy(other) bind(C) result(split_mat_ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: other
+    type(c_ptr) :: split_mat_ptr
+    !--
+    type(split_mat), pointer :: f_ptr, other_f_ptr
+
+    call c_f_pointer(other, other_f_ptr)
+    allocate(f_ptr)
+    call InitSplitMat(f_ptr, other_f_ptr)
+    split_mat_ptr = c_loc(f_ptr)
+  end function hoppet_cxx__split_mat__copy
+
+
+  subroutine hoppet_cxx__split_mat__delete(split_mat_c_ptr) bind(C)
+    implicit none
+    type(c_ptr), intent(inout) :: split_mat_c_ptr
+    !--
+    type(split_mat), pointer :: f_ptr
+
+    call c_f_pointer(split_mat_c_ptr, f_ptr)
+    call Delete(f_ptr)
+    deallocate(f_ptr)
+    split_mat_c_ptr = c_null_ptr
+  end subroutine hoppet_cxx__split_mat__delete
+
+
+  function hoppet_cxx__split_mat__gg(split_mat_c_ptr) bind(C) result(grid_conv_c_ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: split_mat_c_ptr
+    type(c_ptr) :: grid_conv_c_ptr
+    !--
+    type(split_mat), pointer :: f_ptr
+    type(grid_conv), pointer :: gg_ptr
+    call c_f_pointer(split_mat_c_ptr, f_ptr)
+    grid_conv_c_ptr = c_loc(f_ptr%gg)
+  end function hoppet_cxx__split_mat__gg
+
 end module hoppet_cxx_oo_split_mat
