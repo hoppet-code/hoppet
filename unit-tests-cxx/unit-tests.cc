@@ -446,5 +446,12 @@ TEST_CASE( "qcd", "[hoppet]" ) {
   REQUIRE(hoppet::qcd::nf_d   == 2);
   REQUIRE(hoppet::qcd::nf     == 3.0);
 
+  hoppet::qcd::set_group(4.0, 1.0, 0.25);
+  REQUIRE(hoppet::qcd::ca == 4.0);
+  REQUIRE(hoppet::qcd::cf == 1.0);
+  REQUIRE(hoppet::qcd::tr == 0.25);
+
+  // restore standard QCD values
+  hoppet::qcd::set_group(3.0, 4.0/3.0, 0.5);
   hoppet::qcd::set_nf(nf_store);
 }

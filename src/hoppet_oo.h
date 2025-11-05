@@ -9,8 +9,9 @@
 #include <concepts>
 
 // Elements to think about
-// - do we separate things out into different files
-// - do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
+// - [ ] do we separate things out into different files
+// - [ ] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
+// - [ ] make sure hoppet/qcd.h (etc) gets installed properly
 
 // Next steps:
 // - [ ] add the running_coupling class
