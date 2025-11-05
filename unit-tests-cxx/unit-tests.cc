@@ -455,3 +455,22 @@ TEST_CASE( "qcd", "[hoppet]" ) {
   hoppet::qcd::set_group(3.0, 4.0/3.0, 0.5);
   hoppet::qcd::set_nf(nf_store);
 }
+
+//-----------------------------------------------------------------------------
+TEST_CASE( "running_coupling", "[hoppet]" ) {
+  int nloop = 3;
+  double asmz = 0.118;
+  double mz = 91.1880;
+  hoppet::running_coupling alphaS(asmz, mz, nloop, 5);
+  hoppet::running_coupling alphaS2;
+  alphaS2 = hoppet::running_coupling(asmz, mz, nloop, 5); // test move assignment operator
+
+  REQUIRE_THAT(alphaS(mz), WithinAbs(asmz, 1e-6));
+  REQUIRE(alphaS2(mz) == alphaS(mz));
+
+  hoppet::running_coupling_view alphaS_view(alphaS);
+  REQUIRE(alphaS_view(mz) == alphaS(mz));
+  REQUIRE(alphaS_view.ptr() == alphaS.ptr());
+
+  cout << "alphaS(10.0) = " << alphaS(10.0) << endl;
+}

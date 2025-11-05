@@ -15,14 +15,13 @@
 // - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
 
 // Next steps:
-// - [~] add the qcd module
 // - [ ] add the running_coupling class
 // - [ ] add the dglap_holder
 // - [ ] add the tabulation class
 // - [ ] add the mass thresholds (or wait until more mature?)
 // - [ ] add streamlined interface functions
 // - [ ] add qed support
-// - [ ] add access to things like the beta function coefficients, qcd group constants, etc.
+// - [x] add access to things like the beta function coefficients, qcd group constants, etc.
 // - [ ] add structure function support
 // - [ ] add documentation
 
@@ -41,6 +40,7 @@ class grid_quant_f;
 class grid_quant_2d_f;
 class grid_conv_f;
 class split_mat_f;
+class running_coupling_f;
 
 
 /// grid_def function wrappers
@@ -127,6 +127,14 @@ inline void generic_delete(split_mat_f * ptr) {if (ptr) hoppet_cxx__split_mat__d
 inline split_mat_f * generic_copy(const split_mat_f * ptr) {return hoppet_cxx__split_mat__copy(ptr);}
 
 
+/// running_coupling function wrappers
+extern "C" {
+  running_coupling_f * hoppet_cxx__running_coupling__new_fixnf(double alphaS, double Q, int nloop, int fixnf);
+  void hoppet_cxx__running_coupling__delete(running_coupling_f ** rc);
+  double hoppet_cxx__running_coupling__value(const running_coupling_f * rc, double Q, int * fixnf = 0);
+}
+inline void generic_delete(running_coupling_f * ptr) {if (ptr) hoppet_cxx__running_coupling__delete(&ptr);}
+
 namespace hoppet {
 
 typedef std::size_t size_type;
@@ -186,6 +194,11 @@ public:
 
   const T * ptr() const { return _ptr; }
   T * ptr() { return _ptr; }
+
+  const T * valid_ptr() const { ensure_valid(); return _ptr; }
+  T * valid_ptr() { ensure_valid(); return _ptr; }
+
+  void ensure_valid() const {if (!_ptr) throw std::runtime_error("hoppet::obj_view::ensure_valid: object pointer is null");}
 protected:
   /// @brief pointer to the underlying Fortran grid_def object
   T * _ptr = nullptr;
@@ -254,16 +267,16 @@ public:
   typedef obj_view<grid_def_f> base_type;
   using base_type::base_type; // ensures that constructors are inherited
 
-  int ny() const {ensure_valid(); return hoppet_cxx__grid_def__ny(ptr()); }
+  int ny() const {return hoppet_cxx__grid_def__ny(valid_ptr()); }
 
   std::vector<double> y_values() const {
     std::vector<double> yvals(ny()+1);
-    hoppet_cxx__grid_def__y_values(ptr(), yvals.data());
+    hoppet_cxx__grid_def__y_values(valid_ptr(), yvals.data());
     return yvals;
   }
   std::vector<double> x_values() const {
     std::vector<double> xvals(ny()+1);
-    hoppet_cxx__grid_def__x_values(ptr(), xvals.data());
+    hoppet_cxx__grid_def__x_values(valid_ptr(), xvals.data());
     return xvals;
   }
 
@@ -278,7 +291,6 @@ public:
     return !(*this == other);
   }
 
-  void ensure_valid() const {if (!_ptr) throw std::runtime_error("hoppet::grid_def_view::ensure_valid: grid pointer is null");}
   void ensure_compatible(const grid_def_view & other) const {
     if (*this != other) {
       throw std::runtime_error("hoppet::grid_def_view::ensure_compatible: grids are not equivalent");
@@ -1009,7 +1021,33 @@ inline grid_quant_2d operator*(const split_mat_view & split, const grid_quant_2d
   return result;
 }
 
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the running_coupling Fortran type, non-owning
+///
+class running_coupling_view : public obj_view<running_coupling_f> {
+public:
+  typedef obj_view<running_coupling_f> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
 
+  double operator()(double Q) const {return hoppet_cxx__running_coupling__value(valid_ptr(), Q);}
+  double operator()(double Q, int fixnf) const {return hoppet_cxx__running_coupling__value(valid_ptr(), Q, &fixnf);}
+
+};
+
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the running_coupling Fortran type, owning
+///
+class running_coupling : public obj_owner<running_coupling_view> {
+public:
+  typedef obj_owner<running_coupling_view> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  running_coupling() {}
+
+  running_coupling(double alphas_at_Q, double Q, int nloop, int fixnf) {
+    _ptr = hoppet_cxx__running_coupling__new_fixnf(alphas_at_Q, Q, nloop, fixnf);
+  }
+};
 
 }// end namespace hoppet
 

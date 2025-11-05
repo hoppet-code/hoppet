@@ -680,6 +680,49 @@ contains
 
 #undef HOPPET_CXX__SPLIT_MAT__REF
 
-
-
 end module hoppet_cxx_oo_split_mat
+
+!! module for the wrapping a running_coupling object
+module hoppet_cxx_oo_running_coupling
+  use, intrinsic :: iso_c_binding
+  use qcd_coupling
+  implicit none
+contains
+
+  function hoppet_cxx__running_coupling__new_fixnf(alphas_at_Q, Q, nloop, fixnf) bind(C) result(res)
+    real(c_double), intent(in), value :: alphas_at_Q, Q
+    integer(c_int), intent(in), value :: nloop, fixnf
+    type(c_ptr) :: res
+    !--
+    type(running_coupling), pointer :: rc_f
+    allocate(rc_f)
+    call InitRunningCoupling(rc_f, alphas_at_Q, Q, nloop, fixnf=fixnf)
+    res = c_loc(rc_f)
+  end function hoppet_cxx__running_coupling__new_fixnf
+
+  subroutine hoppet_cxx__running_coupling__delete(rc) bind(C)
+    implicit none
+    type(c_ptr), intent(inout) :: rc
+    !--
+    type(running_coupling), pointer :: f_ptr
+    call c_f_pointer(rc, f_ptr)
+    call Delete(f_ptr)
+    deallocate(f_ptr)
+    rc = c_null_ptr
+  end subroutine hoppet_cxx__running_coupling__delete
+
+
+  function hoppet_cxx__running_coupling__value(rc, Q, fixnf) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value    :: rc
+    real(c_double), intent(in), value    :: Q
+    integer(c_int), intent(in), optional :: fixnf
+    real(c_double) :: res
+    !--
+    type(running_coupling), pointer :: rc_f
+
+    call c_f_pointer(rc, rc_f)
+    res = Value(rc_f, Q, fixnf=fixnf)
+  end function hoppet_cxx__running_coupling__value
+
+end module hoppet_cxx_oo_running_coupling
