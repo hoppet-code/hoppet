@@ -12,8 +12,10 @@
 // - [ ] do we separate things out into different files
 // - [ ] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
 // - [ ] make sure hoppet/qcd.h (etc) gets installed properly
+// - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
 
 // Next steps:
+// - [~] add the qcd module
 // - [ ] add the running_coupling class
 // - [ ] add the dglap_holder
 // - [ ] add the tabulation class
