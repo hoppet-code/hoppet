@@ -384,14 +384,14 @@ Parameters:
 %rename(SetVFN                  )      hoppetsetvfn_;       
 %rename(SetPoleMassVFN          )      hoppetsetpolemassvfn_;       
 %rename(SetMSbarMassVFN         )      hoppetsetmsbarmassvfn_;       
-%rename(SetExactDGLAP           )      hoppetsetexactdglap_;
+%rename(SetExactDGLAP           )      hoppetSetExactDGLAP_c;
 %rename(SetYLnlnQInterpOrders   )      hoppetsetylnlnqinterporders_;
 %rename(SetApproximateDGLAPN3LO )      hoppetsetapproximatedglapn3lo_;
 %rename(SetSplittingNNLO        )      hoppetsetsplittingnnlo_;
 %rename(SetSplittingN3LO        )      hoppetsetsplittingn3lo_;
 %rename(SetN3LOnfthresholds     )      hoppetsetn3lonfthresholds_;
 %rename(StartStrFct             )      hoppetstartstrfct_;
-%rename(StartStrFctExtended     )      hoppetstartstrfctextended_;
+%rename(StartStrFctExtended     )      hoppetStartStrFctExtended_c;
 %rename(WriteLHAPDFGrid         )      hoppetWriteLHAPDFGrid;
 %rename(version                 )      hoppetVersion;
 
@@ -422,8 +422,6 @@ Parameters:
 %ignore hoppetinitstrfct_;
 %ignore hoppetinitstrfctflav_;
 %ignore hoppetVersionC;
-%ignore hoppetSetExactDGLAP_c;
-%ignore hoppetStartStrFctExtended_c;
 %ignore hoppetInitStrFct_c;
 %ignore hoppetInitStrFctFlav_c;
 %ignore hoppetwritelhapdfgrid_;
