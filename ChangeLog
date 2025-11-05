@@ -1,3 +1,4 @@
+
 --------- 2025-10-cxx-OO branch ---------
 
 Summary of classes
@@ -52,6 +53,20 @@ Access to streamlined interface objects
 	started experimentation on an OO C++ interface wrapping
 	Fortran objects. At this stage only for the grid_def
 	class.
+
+--------- core code changes on 2025-10-cxx-OO branch ---------
+
+2025-11-05  Gavin Salam 
+
+	* src/qcd.f90:
+	added bind(C) attributes to all variables here and to SetNf and
+	SetGroup, with suitable names (hoppet__qcd__set_group, etc.)
+
+	* src/splitting-functions/xpns2e.f:
+	* src/splitting-functions/xpij2e.f:
+	turned off renaming A3G => mvv_A3G and A3 => mvv_A3, which was
+	causing trouble with ifx (2024) now that we have a bind(C)
+	attribute for the original symbols
 
 --------- end 2025-10-cxx-OO branch ---------
 

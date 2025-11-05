@@ -2,7 +2,7 @@
 !  Automatically generated from f77 file, with inclusion of modules
 !  and the placement inside a module (and some other stuff).
       module xpns2e
-      use qcd, only: cf, ca, A3 => mvv_A3
+      use qcd, only: cf, ca, mvv_A3
       character(len=*), parameter :: name_xpns2 = "xpns2e"
       contains
 !                                                                       
@@ -314,7 +314,7 @@
 !     &    + ca*cf*nf * ( - 836./27.D0 + 160./9.D0*z2 - 112./3.D0*z3 )   &
 !     &    + cf**2*nf * ( - 110./3.D0 + 32.*z3 ) - cf*nf2 * 16./27.D0    
 !                                                                       
-       GQQ2L = DM * A3 
+       GQQ2L = DM * mvv_A3 
 !                                                                       
 ! ...The regular piece of the splitting function                        
 !                                                                       
@@ -611,7 +611,7 @@
 !     &    + ca*cf*nf * ( - 836./27.D0 + 160./9.D0*z2 - 112./3.D0*z3 )   &
 !     &    + cf**2*nf * ( - 110./3.D0 + 32.*z3 ) - cf*nf2 * 16./27.D0    
 !                                                                       
-       GQQ2L = DM * A3 
+       GQQ2L = DM * mvv_A3 
 !                                                                       
 ! ...The regular piece of the splitting function                        
 !                                                                       
@@ -631,7 +631,7 @@
 !                                                                       
 !       COMMON / P2SOFT / A3 
 !                                                                       
-       X2NSB  = A3/(1.D0-Y) 
+       X2NSB  = mvv_A3/(1.D0-Y) 
 !                                                                       
        RETURN 
       END FUNCTION
@@ -690,7 +690,7 @@
      &     - 17.D0/9.D0*cf*nf2                                          
 !                                                                       
 !                                                                       
-       X2NSC = LOG (1.D0-Y) * A3 + P2DELT 
+       X2NSC = LOG (1.D0-Y) * mvv_A3 + P2DELT 
 !                                                                       
        RETURN 
       END FUNCTION

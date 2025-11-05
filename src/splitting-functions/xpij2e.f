@@ -2,7 +2,7 @@
 !  Automatically generated from f77 file, with inclusion of modules
 !  and the placement inside a module (and some other stuff).
       module xpij2e
-      use qcd, only: cf, ca, A3G => mvv_A3G
+      use qcd, only: cf, ca, mvv_A3G
       character(len=*), parameter :: name_xpij2 = "xpij2e"
       contains
 !                                                                       
@@ -1107,7 +1107,7 @@
 !     &    + ca**2*nf * ( - 836./27.D0 + 160./9.D0*z2 - 112./3.D0*z3 )   &
 !     &    + ca*cf*nf * ( - 110./3.D0 + 32.*z3 ) - ca*nf2 * 16./27.D0    
 !                                                                       
-       GGG2L = DM * A3G 
+       GGG2L = DM * mvv_A3G 
 !                                                                       
 ! ...The regular piece of the splitting function                        
 !                                                                       
@@ -1127,7 +1127,7 @@
 !                                                                       
 !       COMMON / P2GSOFT / A3G 
 !                                                                       
-       X2GGB  = A3G/(1.D0-Y) 
+       X2GGB  = mvv_A3G/(1.D0-Y) 
 !                                                                       
        RETURN 
       END FUNCTION
@@ -1171,7 +1171,7 @@
      &    + 29.D0/18.D0*ca*nf2                                          &
      &    + 11.D0/9.D0*cf*nf2                                           
 !                                                                       
-       X2GGC = LOG (1.D0-Y) * A3G + P2GDELT 
+       X2GGC = LOG (1.D0-Y) * mvv_A3G + P2GDELT 
 !                                                                       
        RETURN 
       END FUNCTION
