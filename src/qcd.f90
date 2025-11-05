@@ -24,17 +24,18 @@ module qcd
 
   ! beta2 is from Tarasov JINR P2-82-900 (Dubna 1982)
   ! Larin & Vermaseren NIKHEF-H/92-17 hep-ph/9302208
-  real(dp), public :: beta0 = (11*ca_def - four*tf_def)/(12*pi)
-  real(dp), public :: twopi_beta0 = (11*ca_def - four*tf_def)/6.0_dp
-  real(dp), public :: beta1 = (17*ca_def**2 - tf_def*(10*ca_def + 6*cf_def))&
+  real(c_double), bind(C, name="hoppet__qcd__beta0"), public :: beta0 = (11*ca_def - four*tf_def)/(12*pi)
+  real(c_double), bind(C, name="hoppet__qcd__twopi_beta0"), public :: twopi_beta0 = (11*ca_def - four*tf_def)/6.0_dp
+  real(c_double), bind(C, name="hoppet__qcd__beta1"), public :: beta1 = (17*ca_def**2 - tf_def*(10*ca_def + 6*cf_def))&
        &                        / (24*pisq)
-  real(dp), public :: beta2 = (2857*ca_def**3  &
+  real(c_double), bind(C, name="hoppet__qcd__beta2"), public :: beta2 = (2857*ca_def**3  &
        & + (54*cf_def**2-615*cf_def*ca_def-1415*ca_def**2)*two*tf_def&
        & + (66*cf_def + 79*ca_def)*(two*tf_def)**2)/(3456*pi**3)
 
   ! beta3 taken from RunDec paper (hep-ph/0004189v1). Note that there is
   ! no control over the colour factors in this expression
-  real(dp), public :: beta3 =  (149753._dp/6._dp + 3564._dp*zeta3 + &
+
+  real(c_double), bind(C, name="hoppet__qcd__beta3"), public :: beta3 =  (149753._dp/6._dp + 3564._dp*zeta3 + &
        &        (-1078361._dp/162._dp-6508._dp/27._dp*zeta3) * nf_def + &
        &        (50065._dp/162._dp+6472._dp/81._dp*zeta3) * nf_def**2 + &
        &        1093._dp/729._dp * nf_def**3)/256._dp/pi**4
@@ -54,52 +55,52 @@ module qcd
   ! taken from hep-ph/9411260; should also refer to 
   ! Bernreuther, Wetzel, NPB197 (1982) 228
   ! Bernreuther, Annals of Phys. 151 (1983) 127
-  real(dp), public :: alphastep11 = four*tr_def/(12*pi)
-  real(dp), public :: alphastep22 = (four*tr_def/(12*pi))**2
-  real(dp), public :: alphastep21 = tr_def*(10*ca_def + 6*cf_def)/(24*pisq)
-  real(dp), public :: alphastep20_msbar=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep11"), public :: alphastep11 = four*tr_def/(12*pi)
+  real(c_double), bind(C, name="hoppet__qcd__alphastep22"), public :: alphastep22 = (four*tr_def/(12*pi))**2
+  real(c_double), bind(C, name="hoppet__qcd__alphastep21"), public :: alphastep21 = tr_def*(10*ca_def + 6*cf_def)/(24*pisq)
+  real(c_double), bind(C, name="hoppet__qcd__alphastep20_msbar"), public :: alphastep20_msbar=&
        &(13.0_dp/48.0_dp*cf_def-two/9.0_dp*ca_def) *tr_def/pisq
   !-- for the pole mass, take this from hep-ph/9706430 
   !   (Chetyrkin, Kniehl and Steinhauser), PRL 79 (1997) 2184
   !   though it is not the original referece, just a "container"
   !-- expression not known for variable colour factors?
   !   NB: they express nf-1 in terms of nf...
-  real(dp), public :: alphastep20_pole  = &
+  real(c_double), bind(C, name="hoppet__qcd__alphastep20_pole"), public :: alphastep20_pole  = &
        &(15.0_dp/16.0_dp*cf_def-two/9.0_dp*ca_def) * tr_def/pisq
   !--All taken from RunDec paper (SI and OS). Full colour dependence
   ! not known. At 3-loop order we also need separate coefficients
   ! for the inverted expressions. cf. Eq 23-25 in the RunDec paper.
-  real(dp), public :: alphastep33=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep33"), public :: alphastep33=&
        &1._dp/216._dp/picb
-  real(dp), public :: alphastep32=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep32"), public :: alphastep32=&
        &131._dp/576._dp/picb
-  real(dp), public :: alphastep32_inv=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep32_inv"), public :: alphastep32_inv=&
        &511._dp/576._dp/picb ! For the inverted expression
   ! SI scheme (MSbar)
-  real(dp), public :: alphastep31_msbar=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep31_msbar"), public :: alphastep31_msbar=&
        &6793._dp/1728._dp/picb
-  real(dp), public :: alphastep31_msbar_inv=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep31_msbar_inv"), public :: alphastep31_msbar_inv=&
        &2191._dp/1728._dp/picb ! For the inverted expression
-  real(dp), public :: alphastep31_msbar_nl=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep31_msbar_nl"), public :: alphastep31_msbar_nl=&
        &281._dp/1728._dp/picb !Multiplies the number of light flavours (nl)
-  real(dp), public :: alphastep30_msbar=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep30_msbar"), public :: alphastep30_msbar=&
        &(-82043._dp/27648._dp*zeta3 + 564731._dp/124416._dp)/picb
-  real(dp), public :: alphastep30_msbar_nl=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep30_msbar_nl"), public :: alphastep30_msbar_nl=&
        &-2633._dp/31104._dp/picb !Multiplies the number of light flavours (nl)
   ! OS scheme (pole)  
-  real(dp), public :: alphastep31_pole=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep31_pole"), public :: alphastep31_pole=&
        &8521._dp/1728._dp/picb
-  real(dp), public :: alphastep31_pole_inv=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep31_pole_inv"), public :: alphastep31_pole_inv=&
        &8941._dp/1728._dp/picb ! For the inverted expression
-  real(dp), public :: alphastep31_pole_nl=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep31_pole_nl"), public :: alphastep31_pole_nl=&
        &409._dp/1728._dp/picb !Multiplies the number of light flavours (nl)
-  real(dp), public :: alphastep30_pole=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep30_pole"), public :: alphastep30_pole=&
        &(-80507._dp/27648._dp*zeta3 - 58933._dp/124416._dp&
        &-two/three*zeta2 * (one + one/three*log(two)))/picb
-  real(dp), public :: alphastep30_pole_nl=&
+  real(c_double), bind(C, name="hoppet__qcd__alphastep30_pole_nl"), public :: alphastep30_pole_nl=&
        &(2479._dp/31104._dp + zeta2/9._dp)/picb !Multiplies the number of light flavours (nl)
   
-  real(dp), public :: cmw_K = ca_def*(67.0_dp/18.0_dp - pisq/6.0_dp) &
+  real(c_double), bind(C, name="hoppet__qcd__cmw_K"), public :: cmw_K = ca_def*(67.0_dp/18.0_dp - pisq/6.0_dp) &
        &                      - tf_def * 10.0_dp/9.0_dp
   
   !!!! Taken from Moch, Vermaseren & Vogt: NB TR dependence not in...
@@ -110,9 +111,9 @@ module qcd
        &+ two*ca_def*tf_def * (-209._dp/108._dp + 10._dp/9._dp*zeta2 &
        &                   - 7._dp/3._dp * zeta3)&
        &- four*tf_def**2 /27._dp
-  real(dp), public :: cmw_K2  = cmw_K2_def
-  real(dp), public :: mvv_A3  = 16*cf_def*cmw_K2_def
-  real(dp), public :: mvv_A3G = 16*ca_def*cmw_K2_def
+     real(c_double), bind(C, name="hoppet__qcd__cmw_K2"), public :: cmw_K2  = cmw_K2_def
+     real(c_double), bind(C, name="hoppet__qcd__mvv_A3"), public :: mvv_A3  = 16*cf_def*cmw_K2_def
+     real(c_double), bind(C, name="hoppet__qcd__mvv_A3G"), public :: mvv_A3G = 16*ca_def*cmw_K2_def
 
 
   !--- is it useful to have a fake upper entry?
