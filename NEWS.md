@@ -2,7 +2,13 @@
 
 # Release 2.1.1 (unreleased)
 
+## Bug fixes
+
+* Fixed SetExactDGLAP and StartStrFctExtended in Python interface,
+  which were not working.
+
 ## Small changes
+
 * updated external-code/libome to correspond to v1.0.2 (matching
   changes already incorporated as a patch) and for clang with FPE
   enabled, added -ffp-exception-behavior=maytrap to avoid

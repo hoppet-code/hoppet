@@ -1,3 +1,8 @@
+2025-11-05  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* pyinterface/hoppet.i:
+	Fixed broken SetExactDGLAP and StartStrFctExtended
+
 2025-11-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
 
 	* external-code/libome:
