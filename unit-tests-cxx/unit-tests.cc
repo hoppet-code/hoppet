@@ -1,4 +1,5 @@
 #include "hoppet_oo.h"
+#include "hoppet/qcd.h"
 #include <iostream>
 #include <cmath>
 
@@ -429,4 +430,21 @@ TEST_CASE( "split_mat", "[hoppet]" ) {
   auto p_comm_pdf = p_comm * pdf;
   auto p_comm_pdf_direct = (p_lo * (p_lo_swapped * pdf)) - (p_lo_swapped * (p_lo * pdf));
   REQUIRE_THAT( mom1(p_comm_pdf[iflv_g]), WithinAbs(mom1(p_comm_pdf_direct[iflv_g]), 3e-5) );
+}
+
+//-----------------------------------------------------------------------------
+TEST_CASE( "qcd", "[hoppet]" ) {
+  int nf_store = hoppet::qcd::nf_int;
+
+  REQUIRE(hoppet::qcd::ca == 3.0);
+  REQUIRE(hoppet::qcd::tr == 0.5);
+  REQUIRE_THAT(hoppet::qcd::cf, WithinAbs(4.0/3.0, 1e-14));
+
+  hoppet::qcd::set_nf(3);
+  REQUIRE(hoppet::qcd::nf_int == 3);
+  REQUIRE(hoppet::qcd::nf_u   == 1);
+  REQUIRE(hoppet::qcd::nf_d   == 2);
+  REQUIRE(hoppet::qcd::nf     == 3.0);
+
+  hoppet::qcd::set_nf(nf_store);
 }

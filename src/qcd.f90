@@ -1,20 +1,23 @@
 ! $Id: qcd.f90,v 1.13 2004/09/18 14:39:29 salam Exp $
 module qcd
   use types; use consts_dp
+  use iso_c_binding, only: c_double, c_int
 
   integer,  parameter :: nf_def = 5
   real(dp), parameter :: ca_def = 3, cf_def = four/three, tr_def = half
   real(dp), parameter :: tf_def = tr_def * nf_def
 
   !-- the following are all modifiable, but have default values
-  real(dp), public :: ca = ca_def
-  real(dp), public :: cf = cf_def
-  real(dp), public :: tr = tr_def
+  real(c_double), bind(C, name="hoppet_global_qcd_ca"), public :: ca = ca_def
+  real(c_double), bind(C, name="hoppet_global_qcd_cf"), public :: cf = cf_def
+  real(c_double), bind(C, name="hoppet_global_qcd_tr"), public :: tr = tr_def
 
-  integer,  public :: nf_int = nf_def
-  integer,  public :: nf_u = nf_def/2
-  integer,  public :: nf_d = (nf_def+1)/2
-  real(dp), public :: nf = nf_def, tf = tf_def
+  integer(c_int), bind(C, name="hoppet_global_qcd_nf_int"), public :: nf_int = nf_def
+  integer(c_int), bind(C, name="hoppet_global_qcd_nf_u"  ), public :: nf_u = nf_def/2
+  integer(c_int), bind(C, name="hoppet_global_qcd_nf_d"  ), public :: nf_d = (nf_def+1)/2
+  real(c_double), bind(C, name="hoppet_global_qcd_nf"),     public :: nf = nf_def
+  real(c_double), bind(C, name="hoppet_global_qcd_tf"),     public :: tf = tf_def
+
   ! HACK TO GET GLUON + SINGLET EVOLUTION in 0 & 1
   ! For it to work, quark component in 2 must be zero.
   !integer, parameter, public :: nf_u = nf_def, nf_d = 0
@@ -124,8 +127,8 @@ module qcd
 contains
 
   !----------------------------------------------------------------------
-  subroutine qcd_SetNf(nf_in)
-    integer :: nf_in
+  subroutine qcd_SetNf(nf_in) bind(C, name="hoppet_qcd_set_nf")
+    integer(c_int), intent(in) :: nf_in
     nf_int = nf_in
     nf     = nf_int
     nf_u   = nf_int/2
