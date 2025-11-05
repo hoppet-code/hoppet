@@ -1052,6 +1052,7 @@ public:
   running_coupling(double alphas_at_Q, double Q, int nloop, int fixnf) {
     _ptr = hoppet_cxx__running_coupling__new_fixnf(alphas_at_Q, Q, nloop, fixnf);
   }
+
 };
 
 }// end namespace hoppet

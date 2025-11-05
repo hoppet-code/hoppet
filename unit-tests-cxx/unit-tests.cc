@@ -458,24 +458,30 @@ TEST_CASE( "qcd", "[hoppet]" ) {
 
 //-----------------------------------------------------------------------------
 TEST_CASE( "running_coupling", "[hoppet]" ) {
-  int nloop = 3;
   double asmz = 0.118;
   double mz = 91.1880;
-  hoppet::running_coupling alphaS(asmz, mz, nloop, 5);
+  int nloop = 3;
+  int nf = 5;
+  hoppet::running_coupling alphaS(asmz, mz, nloop, nf);
 
   // deferred assignment
   hoppet::running_coupling alphaS2;
   REQUIRE_THROWS_AS(alphaS2(mz), std::runtime_error);
-
-  alphaS2 = hoppet::running_coupling(asmz, mz, nloop, 5); // test move assignment operator
+  alphaS2 = hoppet::running_coupling(asmz, mz, nloop, 5); // move assignment?
 
   REQUIRE_THAT(alphaS(mz), WithinAbs(asmz, 1e-6));
   REQUIRE(alphaS2(mz) == alphaS(mz));
+
+  //alphaS2 = alphaS; // test copy assignment operator
+  //auto alphas3(alphaS); // test copy constructor
+
+  hoppet::running_coupling alphas3 = std::move(alphaS2); // test move via std::move
+  REQUIRE(alphas3.ptr() != nullptr);
+  REQUIRE(alphaS2.ptr() == nullptr);
 
   hoppet::running_coupling::view_type alphaS_view;
   alphaS_view.take_view(alphaS);
   REQUIRE(alphaS_view(mz) == alphaS(mz));
   REQUIRE(alphaS_view.ptr() == alphaS.ptr());
 
-  cout << "alphaS(10.0) = " << alphaS(10.0) << endl;
 }
