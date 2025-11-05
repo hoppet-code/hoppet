@@ -15,7 +15,7 @@
 // - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
 
 // Next steps:
-// - [ ] add the running_coupling class
+// - [~] add the running_coupling class
 // - [ ] add the dglap_holder
 // - [ ] add the tabulation class
 // - [ ] add the mass thresholds (or wait until more mature?)
@@ -26,7 +26,7 @@
 // - [ ] add documentation
 
 // Things to perhaps add
-// - [ ] add take_view to the obj_view class
+// - [x] add take_view to the obj_view class
 // - [x] basic checks of grid compatibility, so as to get C++ errors rather than Fortran errors
 // - [ ] mvv interface for splitting functions?
 
@@ -187,6 +187,11 @@ public:
     _ptr   = other._ptr;
     _extra = other._extra;
     return *this;
+  }
+
+  void take_view(const obj_view & other) noexcept {
+    _ptr   = other._ptr;
+    _extra = other._extra;
   }
 
   const E & extra() const { return _extra; }

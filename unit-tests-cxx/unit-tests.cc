@@ -462,13 +462,18 @@ TEST_CASE( "running_coupling", "[hoppet]" ) {
   double asmz = 0.118;
   double mz = 91.1880;
   hoppet::running_coupling alphaS(asmz, mz, nloop, 5);
+
+  // deferred assignment
   hoppet::running_coupling alphaS2;
+  REQUIRE_THROWS_AS(alphaS2(mz), std::runtime_error);
+
   alphaS2 = hoppet::running_coupling(asmz, mz, nloop, 5); // test move assignment operator
 
   REQUIRE_THAT(alphaS(mz), WithinAbs(asmz, 1e-6));
   REQUIRE(alphaS2(mz) == alphaS(mz));
 
-  hoppet::running_coupling_view alphaS_view(alphaS);
+  hoppet::running_coupling::view_type alphaS_view;
+  alphaS_view.take_view(alphaS);
   REQUIRE(alphaS_view(mz) == alphaS(mz));
   REQUIRE(alphaS_view.ptr() == alphaS.ptr());
 
