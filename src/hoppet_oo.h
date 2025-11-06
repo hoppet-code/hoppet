@@ -1,5 +1,5 @@
 #ifndef __HOPPET_OO__
-#define __HOPPET_ OO__
+#define __HOPPET_OO__
 #include "hoppet.h"
 #include <vector>
 #include <cmath>
@@ -20,8 +20,8 @@
 #define RETURN_INT_MEMBER(classname, membername)           inline int    membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 #define RETURN_DBL_MEMBER(classname, membername)           inline double membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 #define RETURN_OBJ_MEMBER(classname, membername, typename) inline typename##_view membername() const {return typename##_view(hoppet_cxx__##classname##__##membername(valid_ptr()));} 
-//#define USE_RETURN_OBJ_MEMBER_I (classname, membername, typename) inline typename##_view membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
-//#define USE_RETURN_OBJ_MEMBER_IJ(classname, membername, typename) inline typename##_view membername(int i, int j) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i, j);} 
+#define RETURN_OBJ_MEMBER_I( classname, membername, typename) inline typename##_view membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
+#define RETURN_OBJ_MEMBER_IJ(classname, membername, typename) inline typename##_view membername(int i, int j) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i, j);} 
 
 
 // Elements to think about
@@ -32,7 +32,7 @@
 
 // Next steps:
 // - [x] add the running_coupling class
-// - [ ] add the dglap_holder
+// - [~] add the dglap_holder
 // - [ ] add the tabulation class
 // - [ ] add the mass thresholds (or wait until more mature?)
 // - [ ] add streamlined interface functions
@@ -174,6 +174,10 @@ DEFINE_RETURN_INT_MEMBER(dglap_holder,nf)
 DEFINE_RETURN_INT_MEMBER(dglap_holder,factscheme)
 DEFINE_RETURN_OBJ_MEMBER_IJ(dglap_holder,allp,split_mat)
 
+DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_lo,split_mat)
+DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nlo,split_mat)
+DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nnlo,split_mat)
+DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_n3lo,split_mat)
 
 namespace hoppet {
 
@@ -756,6 +760,10 @@ inline grid_quant operator*(const grid_def_view & grid, DoubleFnDouble auto && f
 
 ///@}
 
+typedef grid_quant_view pdf_flav_view;
+typedef grid_quant      pdf_flav;
+
+
 //-----------------------------------------------------------------------------
 struct gq2d_extras {
   grid_def_view grid;
@@ -927,6 +935,10 @@ inline grid_quant operator*(const grid_conv_view & conv, const grid_quant_view &
 
   hoppet_cxx__grid_conv__times_grid_quant(conv.ptr(), q.data(), result.data());
   return result;
+}
+
+inline grid_conv operator*(const grid_def_view & grid, DoubleFnDoubleInt auto && conv_ignd_fn) {
+  return grid_conv(grid, std::forward<decltype(conv_ignd_fn)>(conv_ignd_fn));
 }
 
 // these all use a copy-and-modify strategy, exploiting the move semantics
@@ -1193,12 +1205,40 @@ public:
   typedef obj_view<dglap_holder_f> base_type;
   using base_type::base_type; // ensures that constructors are inherited
 
+  /// @brief  set the number of active flavours (nf) for this dglap_holder
+  /// @param nf  the new number of active flavours
+  ///
+  /// Note: this also sets the global nf variable, affecting all
+  /// the global variables in the hoppet::qcd namespace
   void set_nf(int nf) {
     hoppet_cxx__dglap_holder__set_nf(valid_ptr(), nf);
   }
+
+  /// @brief  return a view of the splitting function matrix for the given
+  ///         evolution loop and number of flavours
+  ///
+  /// @param iloop  number of loops for the splitting function (1=LO, 2=NLO, etc)
+  /// @param nf     the nf value for which to return the splitting matrix
+  /// @return       a split_mat_view object corresponding to the requested splitting matrix
+  inline split_mat_view p(int iloop, int nf) {
+    return split_mat_view(hoppet_cxx__dglap_holder__allp(valid_ptr(), iloop, nf));
+  }
+
+  grid_def_view grid() const {return p_lo().grid();}  
+
+  /// @brief return the maximum number of loops supported by this dglap_holder
   RETURN_INT_MEMBER(dglap_holder,nloop)
+
+  /// @brief return nf value that is currently set in this dglap_holder
   RETURN_INT_MEMBER(dglap_holder,nf)
+  
+  /// @brief return the factorization scheme used in this dglap_holder
   RETURN_INT_MEMBER(dglap_holder,factscheme)
+
+  RETURN_OBJ_MEMBER(dglap_holder,p_lo,split_mat)
+  RETURN_OBJ_MEMBER(dglap_holder,p_nlo,split_mat)
+  RETURN_OBJ_MEMBER(dglap_holder,p_nnlo,split_mat)
+  RETURN_OBJ_MEMBER(dglap_holder,p_n3lo,split_mat)
 
 
 };

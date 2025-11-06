@@ -575,7 +575,9 @@ contains
     res = c_loc(res_f)
   end function hoppet_cxx__grid_conv__alloc_and_conv
 
+  !! finally the member accessors
   DEFINE_RETURN_OBJ_MEMBER(grid_conv,grid,grid_def)
+
 end module hoppet_cxx_oo_grid_conv
 
 
@@ -931,6 +933,11 @@ contains
   DEFINE_RETURN_INT_MEMBER(dglap_holder,nf)
   DEFINE_RETURN_INT_MEMBER(dglap_holder,factscheme)
   DEFINE_RETURN_OBJ_MEMBER_IJ(dglap_holder,allp,split_mat)
+
+  DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_lo,split_mat)
+  DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nlo,split_mat)
+  DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nnlo,split_mat)
+  DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_n3lo,split_mat)
 
 
 end module hoppet_cxx_oo_dglap_holder
