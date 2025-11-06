@@ -574,6 +574,8 @@ contains
     call SetToConvolution(res_f, conv1_f, conv2_f)
     res = c_loc(res_f)
   end function hoppet_cxx__grid_conv__alloc_and_conv
+
+  DEFINE_RETURN_OBJ_MEMBER(grid_conv,grid,grid_def)
 end module hoppet_cxx_oo_grid_conv
 
 
