@@ -765,16 +765,17 @@ contains
   end subroutine hoppet_cxx__running_coupling__nf_range
 
   !-- nf at Q: returns nf and optional Qlo,Qhi via out args
-  function hoppet_cxx__running_coupling__nf_at_q(rc, Q, Qlo, Qhi) bind(C) result(nf)
+  function hoppet_cxx__running_coupling__nf_at_q(rc, Q, Qlo, Qhi, muM_mQ) bind(C) result(nf)
     implicit none
     type(c_ptr), intent(in), value :: rc
     real(c_double), intent(in), value :: Q
-    real(c_double), intent(out) :: Qlo, Qhi
+    real(c_double), intent(out), optional :: Qlo, Qhi
+    real(c_double), intent(in),  optional :: muM_mQ
     integer(c_int) :: nf
     type(running_coupling), pointer :: rc_f
 
     call c_f_pointer(rc, rc_f)
-    nf = NfAtQ(rc_f, Q, Qlo, Qhi)
+    nf = NfAtQ(rc_f, Q, Qlo, Qhi, muM_mQ=muM_mQ)
   end function hoppet_cxx__running_coupling__nf_at_q
 
   !-- quark mass for a flavour

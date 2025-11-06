@@ -137,7 +137,7 @@ extern "C" {
   double hoppet_cxx__running_coupling__value(const running_coupling_f * rc, double Q, int * fixnf = 0);
   int    hoppet_cxx__running_coupling__num_loops(const running_coupling_f * rc);
   void   hoppet_cxx__running_coupling__nf_range(const running_coupling_f * rc, int * nflo, int * nfhi);
-  int    hoppet_cxx__running_coupling__nf_at_q(const running_coupling_f * rc, double Q, double * Qlo=0, double * Qhi=0);
+  int    hoppet_cxx__running_coupling__nf_at_q(const running_coupling_f * rc, double Q, double * Qlo=0, double * Qhi=0, const double * muM_mQ=0);
   double hoppet_cxx__running_coupling__quark_mass(const running_coupling_f * rc, int iflv);
   bool   hoppet_cxx__running_coupling__quark_masses_are_msbar(const running_coupling_f * rc);
   void   hoppet_cxx__running_coupling__q_range_at_nf(const running_coupling_f * rc, int nflcl, double * Qlo, double * Qhi);
@@ -1058,25 +1058,71 @@ public:
   /// cached range
   double operator()(double Q, int fixnf) const {return hoppet_cxx__running_coupling__value(valid_ptr(), Q, &fixnf);}
 
+  /// @brief  Return the number of loops (nloop) for this running coupling
+  /// @return nloop
   int nloop() const { return hoppet_cxx__running_coupling__num_loops(valid_ptr()); }
 
+  /// @brief  Returns the range of active flavours (nflcl) for this running coupling
+  /// @return  a tuple (nflcl_lo, nflcl_hi)
+  ///
+  /// use this as `auto [nflcl_lo, nflcl_hi] = rc.nf_range();`
+  /// or (if nflcl_lo, nflcl_hi are already defined) `std::tie(nflcl_lo, nflcl_hi) = rc.nf_range();`
   std::tuple<int,int> nf_range() const {
     int lo=0, hi=0;
     hoppet_cxx__running_coupling__nf_range(valid_ptr(), &lo, &hi);
     return {lo, hi};
   }
 
+  /// @brief  Returns the number of active flavours at a given scale Q  
+  /// @param Q 
+  /// @return 
   int nf_at_Q(double Q) const {
     return hoppet_cxx__running_coupling__nf_at_q(valid_ptr(), Q);
   }
+
+  /// @brief  Returns the number of active flavours at a given scale Q, 
+  ///         along with the range of Q for which this number of flavours is valid
+  ///
+  /// @param Q 
+  /// @param Qlo is set to the lower edge of the Q range
+  /// @param Qhi is set to the upper edge of the Q range
+  /// @return number of active flavours at scale Q
   int nf_at_Q(double Q, double &Qlo, double & Qhi) const {
     return hoppet_cxx__running_coupling__nf_at_q(valid_ptr(), Q, &Qlo, &Qhi);
   }
 
-  double quark_mass(int iflv) const { return hoppet_cxx__running_coupling__quark_mass(valid_ptr(), iflv); }
+  /// @brief  Returns the number of active flavours at a given scale Q, 
+  ///         along with the range of Q for which this number of flavours is valid
+  ///
+  /// @param Q 
+  /// @param Qlo is set to the lower edge of the Q range
+  /// @param Qhi is set to the upper edge of the Q range
+  /// @param muM_mQ a non-default choice for the matching scale / quark mass ratio
+  /// @return number of active flavours at scale Q
+  int nf_at_Q(double Q, double &Qlo, double & Qhi, double muM_mQ) const {
+    return hoppet_cxx__running_coupling__nf_at_q(valid_ptr(), Q, &Qlo, &Qhi, &muM_mQ);
+  }
+
+  /// @brief Returns the quark mass for a given flavour 
+  /// @param iflv 
+  /// @return 
+  double quark_mass(int iflv) const { 
+    // there is some ambiguity here iflv could be usual 4,5,6 or 
+    // iflv_c, iflv_b, iflv_t, which are offset by iflv_g; be tolerant
+    // and accept both
+    int iflv_lcl = iflv > 6 ? iflv - iflv_g : iflv;
+    return hoppet_cxx__running_coupling__quark_mass(valid_ptr(), iflv_lcl); 
+  }
 
   bool quark_masses_are_msbar() const { return hoppet_cxx__running_coupling__quark_masses_are_msbar(valid_ptr()); }
 
+  /// @brief returns the Q range for which the coupling has the corresponding number of flavours nflcl
+  ///
+  /// @param nflcl  the number of flavours
+  /// @return       a tuple (Qlo, Qhi) giving the range in Q
+  ///
+  /// use this as `auto [Qlo, Qhi] = rc.Q_range_at_nf(nflcl);`
+  /// or (if Qlo, Qhi are already defined) `std::tie(Qlo, Qhi) = rc.Q_range_at_nf(nflcl);`
   std::tuple<double,double> Q_range_at_nf(int nflcl) const {
     double Qlo=0.0, Qhi=0.0;
     hoppet_cxx__running_coupling__q_range_at_nf(valid_ptr(), nflcl, &Qlo, &Qhi);
