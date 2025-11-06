@@ -13,7 +13,7 @@
   end function
 
   ! define a macro to generate the functions that returns a generic object's real(dp) member
-#define DEFINE_RETURN_DOUBLE_MEMBER(OBJ,NAME) \
+#define DEFINE_RETURN_DBL_MEMBER(OBJ,NAME) \
   function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\

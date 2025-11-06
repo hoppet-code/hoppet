@@ -9,16 +9,16 @@
 #include <concepts>
 
 #define DEFINE_RETURN_INT_MEMBER(classname, membername)              extern "C" int            hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
-#define DEFINE_RETURN_DOUBLE_MEMBER(classname, membername)           extern "C" double         hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
+#define DEFINE_RETURN_DBL_MEMBER(classname, membername)           extern "C" double         hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_OBJ_MEMBER(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
-#define DEFINE_RETURN_OBJ_MEMBER_I(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i);
+#define DEFINE_RETURN_OBJ_MEMBER_I( classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i);
 #define DEFINE_RETURN_OBJ_MEMBER_IJ(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i, int j);
 #define DEFINE_DELETE(classname) \
    extern "C" void hoppet_cxx__##classname##__delete(classname##_f ** ptr); \
    inline void generic_delete(classname##_f * ptr) {if (ptr) hoppet_cxx__##classname##__delete(&ptr);}
 
 #define RETURN_INT_MEMBER(classname, membername)           inline int    membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
-#define RETURN_DOUBLE_MEMBER(classname, membername)        inline double membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
+#define RETURN_DBL_MEMBER(classname, membername)           inline double membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 #define RETURN_OBJ_MEMBER(classname, membername, typename) inline typename##_view membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 //#define USE_RETURN_OBJ_MEMBER_I (classname, membername, typename) inline typename##_view membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
 //#define USE_RETURN_OBJ_MEMBER_IJ(classname, membername, typename) inline typename##_view membername(int i, int j) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i, j);} 
@@ -918,9 +918,7 @@ public:
 
 inline grid_quant operator*(const grid_conv_view & conv, const grid_quant_view & q) {
   // create an output grid_quant
-  if (conv.grid().ptr() != q.grid().ptr()) {
-    throw std::runtime_error("grid_conv * grid_quant: grids do not match");
-  }
+  conv.grid().ensure_compatible(q.grid());
   grid_quant result(q.grid());
 
   hoppet_cxx__grid_conv__times_grid_quant(conv.ptr(), q.data(), result.data());
