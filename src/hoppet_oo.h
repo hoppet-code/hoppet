@@ -16,6 +16,9 @@
 #define DEFINE_DELETE(classname) \
    extern "C" void hoppet_cxx__##classname##__delete(classname##_f ** ptr); \
    inline void generic_delete(classname##_f * ptr) {if (ptr) hoppet_cxx__##classname##__delete(&ptr);}
+#define DEFINE_COPY(classname) \
+   extern "C" classname##_f * hoppet_cxx__##classname##__copy(const classname##_f * ptr); \
+   inline classname##_f * generic_copy(const classname##_f * ptr) {return hoppet_cxx__##classname##__copy(ptr);}
 
 #define RETURN_INT_MEMBER(classname, membername)           inline int    membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 #define RETURN_DBL_MEMBER(classname, membername)           inline double membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
@@ -58,6 +61,7 @@ class grid_conv_f;
 class split_mat_f;
 class running_coupling_f;
 class dglap_holder_f;
+class mass_threshold_mat_f;
 
 
 /// grid_def function wrappers
@@ -145,6 +149,31 @@ extern "C" {
 inline void generic_delete(split_mat_f * ptr) {if (ptr) hoppet_cxx__split_mat__delete(&ptr);}
 inline split_mat_f * generic_copy(const split_mat_f * ptr) {return hoppet_cxx__split_mat__copy(ptr);}
 
+/// mass_threshold_mat function wrappers
+extern "C" {
+  mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__new(int nf_heavy);
+  void hoppet_cxx__mass_threshold_mat__set_nf(mass_threshold_mat_f * ptr, int nf_lcl);
+  void hoppet_cxx__mass_threshold_mat__multiply(mass_threshold_mat_f * ptr, const double factor);
+  void hoppet_cxx__mass_threshold_mat__add     (mass_threshold_mat_f * ptr, const mass_threshold_mat_f * other, double * factor = nullptr);
+  mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(const mass_threshold_mat_f * mtm, const double * q_in_data, double * q_out_data);
+  void hoppet_cxx__mass_threshold_mat__copy_contents(mass_threshold_mat_f * dest, const mass_threshold_mat_f * src); //< src copied into dest
+}
+DEFINE_COPY(mass_threshold_mat)
+DEFINE_DELETE(mass_threshold_mat)
+DEFINE_RETURN_INT_MEMBER(mass_threshold_mat,nf_int)
+
+#define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
+MTM_REF(pshq      ) //< A^PS_Qq    Q+Qbar from singlet(nflight)
+MTM_REF(pshg      ) //< A^PS_Qg    Q+Qbar from gluon  (nflight)
+MTM_REF(nsqq_h    ) //< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
+MTM_REF(sgg_h     ) //< A^S_gg,Q   Δg(nfheavy) from g(nflight)
+MTM_REF(sgq_H     ) //< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
+MTM_REF(psqq_h    ) //< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
+MTM_REF(sqg_h     ) //< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
+MTM_REF(nsmqq_h   ) //< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
+MTM_REF(pshg_msbar) //< replaces PShg when masses are MSbar (not yet supported at N3LO)
+#undef MTM_REF
+
 
 /// running_coupling function wrappers
 extern "C" {
@@ -173,6 +202,7 @@ DEFINE_RETURN_INT_MEMBER(dglap_holder,nloop)
 DEFINE_RETURN_INT_MEMBER(dglap_holder,nf)
 DEFINE_RETURN_INT_MEMBER(dglap_holder,factscheme)
 DEFINE_RETURN_OBJ_MEMBER_IJ(dglap_holder,allp,split_mat)
+DEFINE_RETURN_OBJ_MEMBER_IJ(dglap_holder,allmtm,mass_threshold_mat)
 
 DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_lo,split_mat)
 DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nlo,split_mat)
@@ -595,9 +625,7 @@ public:
   ///
   //template<typename F, IsDoubleFunction<F> = 0>
   void assign(const DoubleFnDouble auto & fn) {
-    if (!data()) {
-      throw std::runtime_error("grid_quant_view::assign(fn): grid_quant_view object not associated");
-    }
+    ensure_valid();
     // there is a design choice here: do we package whatever function
     // we have received into a Fortran-callable function, or do we
     // just do the filling on the C++ side? The latter is simpler
@@ -608,6 +636,15 @@ public:
       my_data[iy] = fn(yvals[iy]);
     }
   } 
+
+  /// @brief assign a constant value to all elements
+  /// @param val   the value to assign
+  void assign(double val) {ensure_valid(); std::fill(data(), data()+size(), val);}
+
+  /// @brief  ensure that the grid_quant_view is valid (i.e. associated with data), otherwise throw an exception
+  void ensure_valid() const {
+    if (!data()) {throw std::runtime_error("hoppet::grid_quant_view::ensure_valid: data pointer is null");}
+  }
 
   /// @brief  assign from a function, similar to assign()
   //template<typename F, IsDoubleFunction<F> = 0>
@@ -620,6 +657,9 @@ public:
   //template<> 
   grid_quant_view & operator=(const grid_quant_view & other) = default;// {copy_data(other); return *this;}
 
+  // /// @brief  assign a constant value to all elements
+  // /// @param val the value to assign
+  grid_quant_view & operator=(double val) {assign(val); return *this;}
 
   /// @brief  indexing operator
   /// @param i index of the element to access
@@ -706,14 +746,7 @@ public:
 
   //template<typename F>
   grid_quant & operator=(const DoubleFnDouble auto & fn) {assign(fn); return *this;}
-
-  //grid_quant_view & view() {return *this;} // is this needed?
-
-  /// copy constructor
-
-  /// move constructor
-  //grid_quant(grid_quant && other) noexcept {move_no_del(other);
-
+  grid_quant & operator=(double val) {assign(val); return *this;}
 
 //  /// @brief  assign from a function 
 //  /// @tparam T generic function type
@@ -781,6 +814,7 @@ struct gq2d_extras {
   }
   bool operator!=(const gq2d_extras & other) const { return !(*this == other); }
 };
+
 //-----------------------------------------------------------------------------
 class grid_quant_2d_view : public data_view<gq2d_extras> {
 public:  
@@ -808,6 +842,19 @@ public:
       }
     }
   }
+
+  void ensure_valid() const {
+    if (!data()) {
+      throw std::runtime_error("hoppet::grid_quant_2d_view::ensure_valid: data pointer is null");
+    }
+  }
+
+  void assign(double val) {
+    ensure_valid();
+    std::fill(data(), data() + size(), val);
+  } 
+
+  grid_quant_2d_view & operator=(double value) {assign(value); return *this;}
 };
 
 
@@ -840,6 +887,9 @@ public:
     _data   = hoppet_cxx__grid_quant_2d__data_ptr(_ptr);
     _size   = _extras.stride * extras_in.dim1_sz;
   }
+
+  grid_quant_2d & operator=(double value) {assign(value); return *this;}
+
 };
 
 inline grid_quant_2d operator+(grid_quant_2d a, const grid_quant_2d_view & b) {a += b; return a;}
@@ -1073,8 +1123,116 @@ inline grid_quant_2d operator*(const split_mat_view & split, const grid_quant_2d
   if (q.extras().dim1_sz <= ncompmax) throw std::runtime_error("split_fn * grid_quant_2d: grid_quant_2d dim1_sz too small");
   grid_quant_2d result(q.grid(), q.extras().dim1_sz);
   hoppet_cxx__split_mat__times_grid_quant_2d(split.ptr(), q.data(), result.data());
+  // zero out any components beyond ncompmax
+  //for (size_t i = ncompmax+1; i < result.extras().dim1_sz; ++i) {result[i].assign(0);}
   return result;
 }
+
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the mass_threshold_mat Fortran type, non-owning
+class mass_threshold_mat_view : public obj_view<mass_threshold_mat_f> {
+public:
+
+  typedef obj_view<mass_threshold_mat_f> base_type;
+  typedef grid_def_view extra_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  mass_threshold_mat_view & operator=(const mass_threshold_mat_view & other) {
+    if (!ptr()) throw std::runtime_error("mass_threshold_mat_view::operator=: mass_threshold_mat_view object not associated");
+    hoppet_cxx__mass_threshold_mat__copy_contents(ptr(), other.ptr());
+    return *this;
+  }
+
+  const grid_def_view grid() const { return pshq().grid(); }
+  int nf_heavy() const { return hoppet_cxx__mass_threshold_mat__nf_int(ptr()); }
+
+  #define MTM_MEMBER(NAME) RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
+  /// views of the individual components of the splitting matrix
+  ///@{
+  MTM_MEMBER(pshq      ) //< A^PS_Qq    Q+Qbar from singlet(nflight)
+  MTM_MEMBER(pshg      ) //< A^PS_Qg    Q+Qbar from gluon  (nflight)
+  MTM_MEMBER(nsqq_h    ) //< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
+  MTM_MEMBER(sgg_h     ) //< A^S_gg,Q   Δg(nfheavy) from g(nflight)
+  MTM_MEMBER(sgq_H     ) //< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
+  MTM_MEMBER(psqq_h    ) //< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
+  MTM_MEMBER(sqg_h     ) //< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
+  MTM_MEMBER(nsmqq_h   ) //< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
+  MTM_MEMBER(pshg_msbar) //< replaces PShg when masses are MSbar (not yet supported at N3LO)
+  ///@}
+  #undef MTM_MEMBER
+
+  /// compound assignment arithmetic operators
+  ///@{
+  mass_threshold_mat_view & operator+=(const mass_threshold_mat_view & other) {
+    ensure_compatible(other);
+    hoppet_cxx__mass_threshold_mat__add(_ptr, other.ptr());
+    return *this;
+  }
+  mass_threshold_mat_view & operator-=(const mass_threshold_mat_view & other) {
+    ensure_compatible(other);
+    double minus_one = -1.0;
+    hoppet_cxx__mass_threshold_mat__add(_ptr, other.ptr(), &minus_one);
+    return *this;
+  }
+  mass_threshold_mat_view & operator*=(double factor) {
+    grid().ensure_valid();
+    hoppet_cxx__mass_threshold_mat__multiply(_ptr, factor);
+    return *this;
+  }
+  mass_threshold_mat_view & operator/=(double factor) {
+    grid().ensure_valid();
+    hoppet_cxx__mass_threshold_mat__multiply(_ptr, 1.0/factor);
+    return *this;
+  }
+  ///@}
+
+  /// throws an exception if other is not compatible with *this
+  void ensure_compatible(const mass_threshold_mat_view & other) const {
+    if (nf_heavy() != other.nf_heavy()) {
+      throw std::runtime_error("hoppet::mass_threshold_mat_view::ensure_compatible: incompatible mass_threshold_mat nf");
+    }
+    grid().ensure_compatible(other.grid());
+  }
+
+};
+
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the mass_threshold_mat Fortran type, owning
+class mass_threshold_mat : public obj_owner<mass_threshold_mat_view> {
+
+public:
+
+  typedef obj_owner<mass_threshold_mat_view> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  mass_threshold_mat() {}
+
+  /// construct and allocate a mass_threshold_mat object for the given number of flavours
+  mass_threshold_mat(int nf_heavy) {
+    _ptr = hoppet_cxx__mass_threshold_mat__new(nf_heavy);
+  }
+}; 
+
+// these all use a copy-and-modify strategy, exploiting the move semantics
+// for copy elision
+inline mass_threshold_mat operator+(mass_threshold_mat a, const mass_threshold_mat_view & b) {a += b; return a;}
+inline mass_threshold_mat operator-(mass_threshold_mat a, const mass_threshold_mat_view & b) {a -= b; return a;}
+inline mass_threshold_mat operator*(mass_threshold_mat a, double b) {a *= b; return a;}
+inline mass_threshold_mat operator*(double b, mass_threshold_mat a) {a *= b; return a;}
+inline mass_threshold_mat operator/(mass_threshold_mat a, double b) {a /= b; return a;}
+inline mass_threshold_mat operator-(const mass_threshold_mat_view & a) {return -1.0 * a;}
+
+
+inline grid_quant_2d operator*(const mass_threshold_mat_view & mtm, const grid_quant_2d_view & q) {
+  mtm.grid().ensure_compatible(q.grid());
+  if (q.extras().dim1_sz <= ncompmax) throw std::runtime_error("mass_threshold * grid_quant_2d: grid_quant_2d dim1_sz too small");
+  grid_quant_2d result(q.grid(), q.extras().dim1_sz);
+  hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(mtm.ptr(), q.data(), result.data());
+  // zero out any components beyond ncompmax
+  //for (size_t i = ncompmax+1; i < result.extras().dim1_sz; ++i) {result[i].assign(0.0);}
+  return result;
+}
+
 
 //-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the running_coupling Fortran type, non-owning
@@ -1223,6 +1381,9 @@ public:
   inline split_mat_view p(int iloop, int nf) {
     return split_mat_view(hoppet_cxx__dglap_holder__allp(valid_ptr(), iloop, nf));
   }
+  inline mass_threshold_mat_view mtm(int iloop, int nf_heavy) {
+    return mass_threshold_mat_view(hoppet_cxx__dglap_holder__allmtm(valid_ptr(), iloop, nf_heavy));
+  }
 
   grid_def_view grid() const {return p_lo().grid();}  
 
@@ -1267,5 +1428,20 @@ namespace sl {
   extern dglap_holder_view dh;
 }
 }
+
+#undef DEFINE_RETURN_INT_MEMBER
+#undef DEFINE_RETURN_DBL_MEMBER
+#undef DEFINE_RETURN_OBJ_MEMBER
+#undef DEFINE_RETURN_OBJ_MEMBER_I 
+#undef DEFINE_RETURN_OBJ_MEMBER_IJ
+#undef DEFINE_DELETE
+#undef DEFINE_COPY
+
+#undef RETURN_INT_MEMBER
+#undef RETURN_DBL_MEMBER
+#undef RETURN_OBJ_MEMBER
+#undef RETURN_OBJ_MEMBER_I 
+#undef RETURN_OBJ_MEMBER_IJ
+
 
 #endif // __HOPPET_OO__

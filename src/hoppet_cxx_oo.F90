@@ -685,11 +685,11 @@ contains
   end function hoppet_cxx__split_mat__alloc_and_commutate
 
 
-  !! result_data = conv * q_data
-  subroutine hoppet_cxx__split_mat__times_grid_quant_2d(split_max_ptr, q_data, result_data) bind(C)
+  !! result_data = split_mat_ptr * q_data
+  subroutine hoppet_cxx__split_mat__times_grid_quant_2d(split_mat_ptr, q_data, result_data) bind(C)
     use pdf_representation
-    implicit none    
-    type(c_ptr), intent(in), value :: split_max_ptr
+    implicit none
+    type(c_ptr), intent(in), value :: split_mat_ptr
     type(c_ptr), intent(in), value :: q_data
     type(c_ptr), intent(in), value :: result_data
     !--
@@ -697,7 +697,7 @@ contains
     real(dp), pointer :: q(:,:)
     real(dp), pointer :: result(:,:)
 
-    call c_f_pointer(split_max_ptr, split_mat_f)
+    call c_f_pointer(split_mat_ptr, split_mat_f)
     call c_f_pointer(q_data, q, shape=[split_mat_f%qq%grid%ny+1, ncompmax-ncompmin+1])
     call c_f_pointer(result_data, result, shape=[split_mat_f%qq%grid%ny+1, ncompmax-ncompmin+1])
 
@@ -745,6 +745,127 @@ contains
 
 end module hoppet_cxx_oo_split_mat
 
+
+!=====================================================================
+!! wrappers for C++ OO interface to mass_threshold_mat objects
+module hoppet_cxx_oo_mass_threshold_mat
+  use, intrinsic :: iso_c_binding
+  use dglap_objects
+  implicit none
+contains
+
+  !! return a C pointer to a new mass_threshold_mat with the given lcl_nf
+  function hoppet_cxx__mass_threshold_mat__new(lcl_nf) bind(C) result(mass_threshold_mat_ptr)
+    implicit none
+    integer(c_int), intent(in), value :: lcl_nf
+    type(c_ptr) :: mass_threshold_mat_ptr
+    !--
+    type(mass_threshold_mat), pointer :: f_ptr
+
+    allocate(f_ptr)    
+    f_ptr%nf_int = lcl_nf
+    f_ptr%loops  = 0
+    mass_threshold_mat_ptr = c_loc(f_ptr)
+  end function hoppet_cxx__mass_threshold_mat__new
+
+  !! return a C pointer to a copy of the other mass_threshold_mat
+  function hoppet_cxx__mass_threshold_mat__copy(other) bind(C) result(mass_threshold_mat_ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: other
+    type(c_ptr) :: mass_threshold_mat_ptr
+    !--
+    type(mass_threshold_mat), pointer :: f_ptr, other_f_ptr
+
+    call c_f_pointer(other, other_f_ptr)
+    allocate(f_ptr)
+    call InitMTM(other_f_ptr, f_ptr)
+    mass_threshold_mat_ptr = c_loc(f_ptr)
+  end function hoppet_cxx__mass_threshold_mat__copy
+
+  !! return a C pointer to a copy of the other mass_threshold_mat
+  subroutine hoppet_cxx__mass_threshold_mat__copy_contents(dest,other) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: dest,other
+    type(c_ptr) :: mass_threshold_mat_ptr
+    !--
+    type(mass_threshold_mat), pointer :: f_ptr, other_f_ptr
+
+    call c_f_pointer(other, other_f_ptr)
+    call InitMTM(other_f_ptr, f_ptr)
+  end subroutine hoppet_cxx__mass_threshold_mat__copy_contents
+
+  DEFINE_DELETE(mass_threshold_mat)
+
+  !! set the nf(heavy) value of the mass_threshold_mat
+  subroutine hoppet_cxx__mass_threshold_mat__set_nf(mtm, nf_lcl) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: mtm
+    integer(c_int), intent(in), value :: nf_lcl
+    !--
+    type(mass_threshold_mat), pointer :: mtm_f
+
+    call c_f_pointer(mtm, mtm_f)
+    call SetNfMTM(mtm_f, nf_lcl)
+  end subroutine hoppet_cxx__mass_threshold_mat__set_nf
+
+  !! result_data = mass_threshold_mat_ptr * q_data
+  subroutine hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(mass_threshold_mat_ptr, q_data, result_data) bind(C)
+    use pdf_representation
+    implicit none
+    type(c_ptr), intent(in), value :: mass_threshold_mat_ptr
+    type(c_ptr), intent(in), value :: q_data
+    type(c_ptr), intent(in), value :: result_data
+    !--
+    type(mass_threshold_mat), pointer :: mass_threshold_mat_f
+    real(dp), pointer :: q(:,:)
+    real(dp), pointer :: result(:,:)
+
+    call c_f_pointer(mass_threshold_mat_ptr, mass_threshold_mat_f)
+    call c_f_pointer(q_data, q, shape=[mass_threshold_mat_f%PShq%grid%ny+1, ncompmax-ncompmin+1])
+    call c_f_pointer(result_data, result, shape=[mass_threshold_mat_f%PShq%grid%ny+1, ncompmax-ncompmin+1])
+
+    result = mass_threshold_mat_f * q
+  end subroutine hoppet_cxx__mass_threshold_mat__times_grid_quant_2d
+
+  !! mtm1 += mtm2
+  subroutine hoppet_cxx__mass_threshold_mat__add(mtm1, mtm2, factor) bind(C)
+    implicit none
+    type(c_ptr),    intent(in), value    :: mtm1, mtm2
+    real(c_double), intent(in), optional :: factor
+    type(mass_threshold_mat), pointer :: mtm1_f, mtm2_f
+    call c_f_pointer(mtm1, mtm1_f)
+    call c_f_pointer(mtm2, mtm2_f)
+    call AddWithCoeff(mtm1_f,mtm2_f,factor)
+  end subroutine hoppet_cxx__mass_threshold_mat__add
+
+  !! mtm1 *=factor
+  subroutine hoppet_cxx__mass_threshold_mat__multiply(mtm1, factor) bind(C)
+    implicit none
+    type(c_ptr),    intent(in), value :: mtm1
+    real(c_double), intent(in), value :: factor
+    type(mass_threshold_mat), pointer :: mtm1_f
+    call c_f_pointer(mtm1, mtm1_f)
+    call Multiply(mtm1_f,factor)
+  end subroutine hoppet_cxx__mass_threshold_mat__multiply
+
+
+#define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
+  MTM_REF(pshq      ) !!< A^PS_Qq    Q+Qbar from singlet(nflight)
+  MTM_REF(pshg      ) !!< A^PS_Qg    Q+Qbar from gluon  (nflight)
+  MTM_REF(nsqq_h    ) !!< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
+  MTM_REF(sgg_h     ) !!< A^S_gg,Q   Δg(nfheavy) from g(nflight)
+  MTM_REF(sgq_H     ) !!< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
+  MTM_REF(psqq_h    ) !!< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
+  MTM_REF(sqg_h     ) !!< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
+  MTM_REF(nsmqq_h   ) !!< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
+  MTM_REF(pshg_msbar) !!< replaces PShg when masses are MSbar
+
+#define MTM_INT(NAME)  DEFINE_RETURN_INT_MEMBER(mass_threshold_mat,NAME)
+  MTM_INT(nf_int)
+  MTM_INT(loops)
+
+end module hoppet_cxx_oo_mass_threshold_mat
+!=====================================================================
 !! module for the wrapping a running_coupling object
 module hoppet_cxx_oo_running_coupling
   use, intrinsic :: iso_c_binding
@@ -907,15 +1028,15 @@ contains
     dh_ptr = c_loc(dh_f)
   end function hoppet_cxx__dglap_holder__new
 
-  subroutine hoppet_cxx__dglap_holder__set_nf(dh, nf) bind(C)
+  subroutine hoppet_cxx__dglap_holder__set_nf(dh, nf_lcl) bind(C)
     implicit none
     type(c_ptr), intent(in), value :: dh
-    integer(c_int), intent(in), value :: nf
+    integer(c_int), intent(in), value :: nf_lcl
     !--
     type(dglap_holder), pointer :: dh_f
 
     call c_f_pointer(dh, dh_f)
-    call SetNfDglapHolder(dh_f, nf)
+    call SetNfDglapHolder(dh_f, nf_lcl)
   end subroutine hoppet_cxx__dglap_holder__set_nf
 
 
@@ -932,3 +1053,6 @@ contains
 
 
 end module hoppet_cxx_oo_dglap_holder
+
+
+

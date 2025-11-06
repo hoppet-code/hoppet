@@ -86,6 +86,9 @@ TEST_CASE( "grid_quant", "[hoppet]" ) {
   cout << "Defining grid_quant on grid_def, with grid100.ptr(): " << grid100.ptr() << endl;
   hoppet::grid_quant q(grid100);
 
+  q = 4.0;
+  REQUIRE_THAT( q.at_y(5.0), WithinAbs(4.0, 1e-12) );
+
   std::cout << "grid_quant.ptr(): " << q.ptr() << std::endl;
   q = [](double y) { return y*y; };
 
@@ -161,10 +164,21 @@ TEST_CASE( "grid_quant", "[hoppet]" ) {
 //-----------------------------------------------------------------------------
 TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
   hoppet::grid_quant_2d pdf(grid100, 14); // 14 is size of 2nd dimension
+
+  pdf = 4.0; // set all values to 4.0
+  REQUIRE_THAT( pdf[hoppet::iflv_g   ].at_y(5.0), WithinAbs(4.0, 1e-12) );
+
+  hoppet::grid_quant_2d_view pdf_view(pdf);
+  pdf_view = 3.0;
+  REQUIRE_THAT( pdf[hoppet::iflv_g   ].at_y(5.0), WithinAbs(3.0, 1e-12) );
+  pdf = 0.0;
+
+
   pdf[hoppet::iflv_g   ] =  grid100 * [](double y) { return y*y; };
   pdf[hoppet::iflv_dbar] =            [](double y) { return pow(y,3); };
   REQUIRE_THAT( pdf[hoppet::iflv_g   ].at_y(5.0), WithinAbs(25.0, 1e-6));
   REQUIRE_THAT( pdf[hoppet::iflv_dbar].at_y(5.0), WithinAbs(125.0, 1e-6));
+
 
   hoppet::grid_quant_2d pdf2 = pdf; // copy constructor
   auto pdf3 = pdf + pdf2;
@@ -350,6 +364,14 @@ TEST_CASE( "split_mat", "[hoppet]" ) {
   auto p_comm_pdf = p_comm * pdf;
   auto p_comm_pdf_direct = (p_lo * (p_lo_swapped * pdf)) - (p_lo_swapped * (p_lo * pdf));
   REQUIRE_THAT( mom1(p_comm_pdf[iflv_g]), WithinAbs(mom1(p_comm_pdf_direct[iflv_g]), 3e-5) );
+
+  hoppet::grid_quant_2d pdf_big(big_grid, 21); // 21 is size of 2nd dimension (more than standard 14)
+  auto p_lo_pdf_big = p_lo * pdf_big; // test multiplication with larger pdf_2d
+  REQUIRE( p_lo_pdf_big.size()  == pdf_big.size() );
+  REQUIRE( p_lo_pdf_big[15].at_y(5.0) == 0.0); // should be set to zero
+
+  hoppet::grid_quant_2d pdf_sml(big_grid, 7); // 
+  REQUIRE_THROWS_AS( p_lo * pdf_sml, std::runtime_error ); // should throw because too small
 }
 
 //-----------------------------------------------------------------------------
