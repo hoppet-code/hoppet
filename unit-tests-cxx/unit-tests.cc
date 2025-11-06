@@ -467,7 +467,7 @@ TEST_CASE( "running_coupling", "[hoppet]" ) {
   // deferred assignment
   hoppet::running_coupling alphaS2;
   REQUIRE_THROWS_AS(alphaS2(mz), std::runtime_error);
-  alphaS2 = hoppet::running_coupling(asmz, mz, nloop, 5); // move assignment?
+  alphaS2 = hoppet::running_coupling(asmz, mz, nloop, nf); // move assignment?
 
   REQUIRE_THAT(alphaS(mz), WithinAbs(asmz, 1e-6));
   REQUIRE(alphaS2(mz) == alphaS(mz));
