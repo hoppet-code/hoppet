@@ -8,6 +8,22 @@
 #include <functional>
 #include <concepts>
 
+#define DEFINE_RETURN_INT_MEMBER(classname, membername)              extern "C" int            hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
+#define DEFINE_RETURN_DOUBLE_MEMBER(classname, membername)           extern "C" double         hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
+#define DEFINE_RETURN_OBJ_MEMBER(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
+#define DEFINE_RETURN_OBJ_MEMBER_I(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i);
+#define DEFINE_RETURN_OBJ_MEMBER_IJ(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i, int j);
+#define DEFINE_DELETE(classname) \
+   extern "C" void hoppet_cxx__##classname##__delete(classname##_f ** ptr); \
+   inline void generic_delete(classname##_f * ptr) {if (ptr) hoppet_cxx__##classname##__delete(&ptr);}
+
+#define RETURN_INT_MEMBER(classname, membername)           inline int    membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
+#define RETURN_DOUBLE_MEMBER(classname, membername)        inline double membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
+#define RETURN_OBJ_MEMBER(classname, membername, typename) inline typename##_view membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
+//#define USE_RETURN_OBJ_MEMBER_I (classname, membername, typename) inline typename##_view membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
+//#define USE_RETURN_OBJ_MEMBER_IJ(classname, membername, typename) inline typename##_view membername(int i, int j) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i, j);} 
+
+
 // Elements to think about
 // - [ ] do we separate things out into different files
 // - [ ] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
@@ -15,7 +31,7 @@
 // - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
 
 // Next steps:
-// - [~] add the running_coupling class
+// - [x] add the running_coupling class
 // - [ ] add the dglap_holder
 // - [ ] add the tabulation class
 // - [ ] add the mass thresholds (or wait until more mature?)
@@ -41,6 +57,7 @@ class grid_quant_2d_f;
 class grid_conv_f;
 class split_mat_f;
 class running_coupling_f;
+class dglap_holder_f;
 
 
 /// grid_def function wrappers
@@ -144,10 +161,21 @@ extern "C" {
 }
 inline void generic_delete(running_coupling_f * ptr) {if (ptr) hoppet_cxx__running_coupling__delete(&ptr);}
 
+// things for the dglap_holder
+extern "C" {
+  dglap_holder_f * hoppet_cxx__dglap_holder__new(const grid_def_f * gridptr, const int * factscheme, const int * nloop, const int * nflo, const int * nfhi);
+  void hoppet_cxx__dglap_holder__set_nf(dglap_holder_f * ptr, int nf);
+}
+DEFINE_DELETE(dglap_holder)
+DEFINE_RETURN_INT_MEMBER(dglap_holder,nloop)
+DEFINE_RETURN_INT_MEMBER(dglap_holder,nf)
+DEFINE_RETURN_INT_MEMBER(dglap_holder,factscheme)
+DEFINE_RETURN_OBJ_MEMBER_IJ(dglap_holder,allp,split_mat)
+
+
 namespace hoppet {
 
 typedef std::size_t size_type;
-
 
 //template <typename F>
 //using IsDoubleFunction = std::enable_if_t<
@@ -1094,6 +1122,7 @@ public:
   /// @brief  Returns the number of active flavours at a given scale Q, 
   ///         along with the range of Q for which this number of flavours is valid
   ///
+
   /// @param Q 
   /// @param Qlo is set to the lower edge of the Q range
   /// @param Qhi is set to the upper edge of the Q range
@@ -1154,8 +1183,38 @@ public:
 
 };
 
-}// end namespace hoppet
 
+
+//-----------------------------------------------------------------------------
+/// @brief Object-oriented wrapper around the dglap_holder Fortran type, non-owning
+class dglap_holder_view : public obj_view<dglap_holder_f> {
+public:
+  typedef obj_view<dglap_holder_f> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  void set_nf(int nf) {
+    hoppet_cxx__dglap_holder__set_nf(valid_ptr(), nf);
+  }
+  RETURN_INT_MEMBER(dglap_holder,nloop)
+  RETURN_INT_MEMBER(dglap_holder,nf)
+  RETURN_INT_MEMBER(dglap_holder,factscheme)
+
+
+};
+
+/// @brief Object-oriented wrapper around the dglap_holder Fortran type, owning
+class dglap_holder : public obj_owner<dglap_holder_view> {
+public:
+  typedef obj_owner<dglap_holder_view> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  dglap_holder() {}
+  dglap_holder(const hoppet::grid_def_view & grid, int factscheme, int nloop, int nflo, int nfhi) {
+    _ptr = hoppet_cxx__dglap_holder__new(grid.ptr(), &factscheme, &nloop, &nflo, &nfhi);
+  }
+};
+
+} // end namespace hoppet 
 
 
 
@@ -1164,6 +1223,7 @@ namespace hoppet {
 namespace sl {
   /// a view of the grid_def object being used in the streamlined interface
   extern grid_def_view grid;
+  extern dglap_holder_view dh;
 }
 }
 

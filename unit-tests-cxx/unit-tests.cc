@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
   // and also set up the objects in the hoppet streamlined interface
   double ymax = 12.0, dy = 0.2, Qmin = 1.0, Qmax = 1e4;
   double dlnlnQ = dy/4.0;
-  int nloop = 1, order = -6;
+  int nloop = 2, order = -6;
   hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order);
 
   // then run the tests
@@ -201,13 +201,6 @@ TEST_CASE( "pdf_qcd", "[hoppet]" ) {
   //cout << pdf2.ptr() << "=pdf2.ptr()\n";
 }
 
-//-----------------------------------------------------------------------------
-TEST_CASE( "streamlined-objects", "[hoppet]" ) {
-  hoppet::grid_quant q(hoppet::sl::grid);
-  //hoppet::grid_quant q(hoppet_sl_grid_ptr);
-  q = [](double y) { return y*y; };
-  REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
-}
 
 constexpr double cf = 4.0/3.0;
 inline double pqq_fn(double y, int piece) {
@@ -535,4 +528,26 @@ TEST_CASE( "running_coupling", "[hoppet]" ) {
   // sanity check: MSbar masses would be lower, but we've kept them the same numerical values as the pole
   // which means the switch is effectively higher, giving more running 
 
+}
+
+TEST_CASE("dglap_holder", "[hoppet]") {
+  int nloop = 1;
+  int nflo = 4;
+  int nfhi = 5;
+  hoppet::dglap_holder dh(big_grid, hoppet::factscheme_MSbar, nloop, nflo, nfhi);
+
+  REQUIRE(dh.nloop() == nloop);
+}
+
+//-----------------------------------------------------------------------------
+TEST_CASE( "streamlined-objects", "[hoppet]" ) {
+  hoppet::grid_quant q(hoppet::sl::grid);
+  hoppet::dglap_holder_view dh = hoppet::sl::dh;
+  //hoppet::grid_quant q(hoppet_sl_grid_ptr);
+  q = [](double y) { return y*y; };
+  REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
+
+  dh.set_nf(4);
+  REQUIRE( dh.nf() == 4 );
+  REQUIRE( dh.nloop() == 2 );
 }

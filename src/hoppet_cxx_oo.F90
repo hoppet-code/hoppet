@@ -1,5 +1,73 @@
 
 #include "inc/ftlMacros.inc"
+
+! define a macro to generate the functions that returns a generic object's integer member
+#define DEFINE_RETURN_INT_MEMBER(OBJ,NAME) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    integer(c_int) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = obj_f%NAME;\
+  end function
+
+  ! define a macro to generate the functions that returns a generic object's real(dp) member
+#define DEFINE_RETURN_DOUBLE_MEMBER(OBJ,NAME) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    real(c_double) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = obj_f%NAME;\
+  end function
+
+#define DEFINE_RETURN_OBJ_MEMBER(OBJ,NAME,TYPE) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    type(c_ptr) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = c_loc(obj_f%NAME);\
+  end function
+
+#define DEFINE_RETURN_OBJ_MEMBER_I(OBJ,NAME,TYPE) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) bind(C) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    integer(c_int), intent(in), value :: i;\
+    type(c_ptr) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = c_loc(obj_f%NAME(i));\
+  end function
+
+#define DEFINE_RETURN_OBJ_MEMBER_IJ(OBJ,NAME,TYPE) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i,j) bind(C) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    integer(c_int), intent(in), value :: i,j;\
+    type(c_ptr) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = c_loc(obj_f%NAME(i,j));\
+  end function
+
+
+#define DEFINE_DELETE(OBJ) \
+  subroutine CAT3(hoppet_cxx__,OBJ,__delete)(ptr) bind(C);\
+    implicit none;\
+    type(c_ptr), intent(inout) :: ptr;\
+    type(OBJ), pointer :: f_ptr;\
+    call c_f_pointer(ptr, f_ptr);\
+    call delete(f_ptr);\
+    deallocate(f_ptr);\
+    ptr = c_null_ptr;\
+  end subroutine
+
+
 !=====================================================================
 !! wrappers for C++ OO interface to grid_def
 module hoppet_cxx_oo_grid_def
@@ -814,3 +882,53 @@ contains
   end subroutine hoppet_cxx__running_coupling__q_range_at_nf
 
 end module hoppet_cxx_oo_running_coupling
+
+!=====================================================================
+! wrappers for C++ OO interface to dglap_holder
+module hoppet_cxx_oo_dglap_holder
+  use, intrinsic :: iso_c_binding
+  use dglap_holders
+  use convolution
+  implicit none
+contains
+
+  function hoppet_cxx__dglap_holder__new(grid, factscheme, nloop, nflo, nfhi) bind(C) result(dh_ptr)
+    implicit none
+    type(c_ptr) :: dh_ptr
+    type(c_ptr), intent(in), value :: grid
+    integer(c_int), intent(in), optional :: factscheme
+    integer(c_int), intent(in), optional :: nloop
+    integer(c_int), intent(in), optional :: nflo
+    integer(c_int), intent(in), optional :: nfhi
+    !-- local Fortran pointers
+    type(grid_def), pointer :: grid_f
+    type(dglap_holder), pointer :: dh_f
+
+    call c_f_pointer(grid, grid_f)
+    allocate(dh_f)
+
+    call InitDglapHolder(grid_f, dh_f, factscheme, nloop, nflo, nfhi)
+
+    dh_ptr = c_loc(dh_f)
+  end function hoppet_cxx__dglap_holder__new
+
+  subroutine hoppet_cxx__dglap_holder__set_nf(dh, nf) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: dh
+    integer(c_int), intent(in), value :: nf
+    !--
+    type(dglap_holder), pointer :: dh_f
+
+    call c_f_pointer(dh, dh_f)
+    call SetNfDglapHolder(dh_f, nf)
+  end subroutine hoppet_cxx__dglap_holder__set_nf
+
+
+  DEFINE_DELETE(dglap_holder)
+  DEFINE_RETURN_INT_MEMBER(dglap_holder,nloop)
+  DEFINE_RETURN_INT_MEMBER(dglap_holder,nf)
+  DEFINE_RETURN_INT_MEMBER(dglap_holder,factscheme)
+  DEFINE_RETURN_OBJ_MEMBER_IJ(dglap_holder,allp,split_mat)
+
+
+end module hoppet_cxx_oo_dglap_holder

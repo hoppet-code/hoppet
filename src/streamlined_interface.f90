@@ -17,7 +17,7 @@ module streamlined_interface
   type(grid_def),     save, target :: grid, gdarray(4)
 
   !! holds the splitting functions
-  type(dglap_holder), save :: dh
+  type(dglap_holder), save, target :: dh
 
   !! table_index_from_iloop tells us which table to loop up for a give
   !! iloop value; most of the iloop values are illegal (index -1), but
@@ -55,9 +55,10 @@ module streamlined_interface
   logical,  save :: with_Plq_nnloqed = .false.
 
   interface
-    subroutine hoppetStartCXX(grid_cptr) bind(C, name="hoppetStartCXX")
+    subroutine hoppetStartCXX(grid_cptr, dh_cptr) bind(C, name="hoppetStartCXX")
       use, intrinsic :: iso_c_binding, only : c_ptr
       type(c_ptr), value :: grid_cptr
+      type(c_ptr), value :: dh_cptr
     end subroutine hoppetStartCXX
   end interface
 
@@ -280,7 +281,7 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
 
   ! set up a range of C-pointers, so that C++ can access the objects
   ! (for now, just one pointer, will expand later as needed)
-  call hoppetStartCXX(c_loc(grid))
+  call hoppetStartCXX(c_loc(grid), c_loc(dh))
 
   ! indicate that allocations have already been done,
   ! to allow for cleanup if hoppetStartExtended is
