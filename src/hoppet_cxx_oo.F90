@@ -731,26 +731,17 @@ contains
 
 
   ! define a macro to generate the functions that return references to the grid_conv members
-#define HOPPET_CXX__SPLIT_MAT__REF(NAME) \
-  function CAT(hoppet_cxx__split_mat__,NAME)(split_mat_c_ptr) bind(C) result(grid_conv_c_ptr);\
-    implicit none;\
-    type(c_ptr), intent(in), value :: split_mat_c_ptr;\
-    type(c_ptr) :: grid_conv_c_ptr;\
-    type(split_mat), pointer :: f_ptr;\
-    type(grid_conv), pointer :: gg_ptr;\
-    call c_f_pointer(split_mat_c_ptr, f_ptr);\
-    grid_conv_c_ptr = c_loc(CAT(f_ptr%,NAME));\
-  end function CAT(hoppet_cxx__split_mat__,NAME)
+#define SPLIT_MAT__REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(split_mat,NAME,grid_conv)
 
-  HOPPET_CXX__SPLIT_MAT__REF(qq      )
-  HOPPET_CXX__SPLIT_MAT__REF(qg      )
-  HOPPET_CXX__SPLIT_MAT__REF(gq      )
-  HOPPET_CXX__SPLIT_MAT__REF(gg      )
-  HOPPET_CXX__SPLIT_MAT__REF(ns_plus )
-  HOPPET_CXX__SPLIT_MAT__REF(ns_minus)
-  HOPPET_CXX__SPLIT_MAT__REF(ns_v    )
+  SPLIT_MAT__REF(qq      )
+  SPLIT_MAT__REF(qg      )
+  SPLIT_MAT__REF(gq      )
+  SPLIT_MAT__REF(gg      )
+  SPLIT_MAT__REF(ns_plus )
+  SPLIT_MAT__REF(ns_minus)
+  SPLIT_MAT__REF(ns_v    )
 
-#undef HOPPET_CXX__SPLIT_MAT__REF
+#undef SPLIT_MAT__REF
 
 end module hoppet_cxx_oo_split_mat
 
