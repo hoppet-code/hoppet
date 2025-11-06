@@ -700,6 +700,23 @@ contains
     res = c_loc(rc_f)
   end function hoppet_cxx__running_coupling__new_fixnf
 
+  function hoppet_cxx__running_coupling__new_varnf(alphas_at_Q, Q, nloop, mc, mb, mt, masses_are_MSbar, muMatch_mQuark) bind(C) result(res)
+    real(c_double), intent(in), value :: alphas_at_Q, Q
+    integer(c_int), intent(in), value :: nloop
+    real(c_double), intent(in), value :: mc, mb, mt
+    logical(c_bool), intent(in), value :: masses_are_MSbar
+    real(c_double), intent(in), value :: muMatch_mQuark
+    type(c_ptr) :: res
+    !--
+    type(running_coupling), pointer :: rc_f
+    logical :: masses_are_MSbar_f
+    masses_are_MSbar_f = (masses_are_MSbar .neqv. .false._c_bool) ! safely convert to fortran logical
+    allocate(rc_f)
+    call InitRunningCoupling(rc_f, alphas_at_Q, Q, nloop, quark_masses = [mc, mb, mt], &
+                             masses_are_MSbar = masses_are_MSbar_f, muMatch_mQuark = muMatch_mQuark)
+    res = c_loc(rc_f)
+  end function hoppet_cxx__running_coupling__new_varnf
+
   subroutine hoppet_cxx__running_coupling__delete(rc) bind(C)
     implicit none
     type(c_ptr), intent(inout) :: rc
@@ -724,5 +741,75 @@ contains
     call c_f_pointer(rc, rc_f)
     res = Value(rc_f, Q, fixnf=fixnf)
   end function hoppet_cxx__running_coupling__value
+
+  !-- number of loops in the coupling
+  function hoppet_cxx__running_coupling__num_loops(rc) bind(C) result(nloops)
+    implicit none
+    type(c_ptr), intent(in), value :: rc
+    integer(c_int) :: nloops
+    type(running_coupling), pointer :: rc_f
+
+    call c_f_pointer(rc, rc_f)
+    nloops = NumberOfLoops(rc_f)
+  end function hoppet_cxx__running_coupling__num_loops
+
+  !-- nf range: returns nflo,nfhi via out arguments
+  subroutine hoppet_cxx__running_coupling__nf_range(rc, nflo, nfhi) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: rc
+    integer(c_int), intent(out) :: nflo, nfhi
+    type(running_coupling), pointer :: rc_f
+
+    call c_f_pointer(rc, rc_f)
+    call NfRange(rc_f, nflo, nfhi)
+  end subroutine hoppet_cxx__running_coupling__nf_range
+
+  !-- nf at Q: returns nf and optional Qlo,Qhi via out args
+  function hoppet_cxx__running_coupling__nf_at_q(rc, Q, Qlo, Qhi) bind(C) result(nf)
+    implicit none
+    type(c_ptr), intent(in), value :: rc
+    real(c_double), intent(in), value :: Q
+    real(c_double), intent(out) :: Qlo, Qhi
+    integer(c_int) :: nf
+    type(running_coupling), pointer :: rc_f
+
+    call c_f_pointer(rc, rc_f)
+    nf = NfAtQ(rc_f, Q, Qlo, Qhi)
+  end function hoppet_cxx__running_coupling__nf_at_q
+
+  !-- quark mass for a flavour
+  function hoppet_cxx__running_coupling__quark_mass(rc, iflv) bind(C) result(mass)
+    implicit none
+    type(c_ptr), intent(in), value :: rc
+    integer(c_int), intent(in), value :: iflv
+    real(c_double) :: mass
+    type(running_coupling), pointer :: rc_f
+
+    call c_f_pointer(rc, rc_f)
+    mass = QuarkMass(rc_f, iflv)
+  end function hoppet_cxx__running_coupling__quark_mass
+
+  !-- quark masses are MSbar?
+  function hoppet_cxx__running_coupling__quark_masses_are_msbar(rc) bind(C) result(res)
+    implicit none
+    type(c_ptr), intent(in), value :: rc
+    logical(c_bool) :: res
+    type(running_coupling), pointer :: rc_f
+
+    call c_f_pointer(rc, rc_f)
+    res = QuarkMassesAreMSbar(rc_f)
+  end function hoppet_cxx__running_coupling__quark_masses_are_msbar
+
+  !-- Q range at nf
+  subroutine hoppet_cxx__running_coupling__q_range_at_nf(rc, nflcl, Qlo, Qhi) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: rc
+    integer(c_int), intent(in), value :: nflcl
+    real(c_double), intent(out) :: Qlo, Qhi
+    type(running_coupling), pointer :: rc_f
+
+    call c_f_pointer(rc, rc_f)
+    call QRangeAtNf(rc_f, nflcl, Qlo, Qhi)
+  end subroutine hoppet_cxx__running_coupling__q_range_at_nf
 
 end module hoppet_cxx_oo_running_coupling

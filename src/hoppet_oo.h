@@ -130,8 +130,17 @@ inline split_mat_f * generic_copy(const split_mat_f * ptr) {return hoppet_cxx__s
 /// running_coupling function wrappers
 extern "C" {
   running_coupling_f * hoppet_cxx__running_coupling__new_fixnf(double alphaS, double Q, int nloop, int fixnf);
+  running_coupling_f * hoppet_cxx__running_coupling__new_varnf(double alphaS, double Q, int nloop,
+                                                              double mc, double mb, double mt,
+                                                              bool masses_are_MSbar, double muMatch_mQuark);
   void hoppet_cxx__running_coupling__delete(running_coupling_f ** rc);
   double hoppet_cxx__running_coupling__value(const running_coupling_f * rc, double Q, int * fixnf = 0);
+  int    hoppet_cxx__running_coupling__num_loops(const running_coupling_f * rc);
+  void   hoppet_cxx__running_coupling__nf_range(const running_coupling_f * rc, int * nflo, int * nfhi);
+  int    hoppet_cxx__running_coupling__nf_at_q(const running_coupling_f * rc, double Q, double * Qlo=0, double * Qhi=0);
+  double hoppet_cxx__running_coupling__quark_mass(const running_coupling_f * rc, int iflv);
+  bool   hoppet_cxx__running_coupling__quark_masses_are_msbar(const running_coupling_f * rc);
+  void   hoppet_cxx__running_coupling__q_range_at_nf(const running_coupling_f * rc, int nflcl, double * Qlo, double * Qhi);
 }
 inline void generic_delete(running_coupling_f * ptr) {if (ptr) hoppet_cxx__running_coupling__delete(&ptr);}
 
@@ -1034,8 +1043,45 @@ public:
   typedef obj_view<running_coupling_f> base_type;
   using base_type::base_type; // ensures that constructors are inherited
 
+  /// @brief Evaluate the running coupling at a given scale Q
+  /// @param Q 
+  /// @return the value of alpha_s(Q)
   double operator()(double Q) const {return hoppet_cxx__running_coupling__value(valid_ptr(), Q);}
+
+  /// @brief Evaluate the running coupling at a given scale Q, forcing it to correspond to the specific fixed nf
+  /// @param Q 
+  /// @param fixnf fixed number of flavours
+  /// @return the value of alpha_s(Q)
+  ///
+  /// Note that this may be slower than the version without fixnf, since it may
+  /// bypass fast interpolation and might need solve the evolution beyond the 
+  /// cached range
   double operator()(double Q, int fixnf) const {return hoppet_cxx__running_coupling__value(valid_ptr(), Q, &fixnf);}
+
+  int nloop() const { return hoppet_cxx__running_coupling__num_loops(valid_ptr()); }
+
+  std::tuple<int,int> nf_range() const {
+    int lo=0, hi=0;
+    hoppet_cxx__running_coupling__nf_range(valid_ptr(), &lo, &hi);
+    return {lo, hi};
+  }
+
+  int nf_at_Q(double Q) const {
+    return hoppet_cxx__running_coupling__nf_at_q(valid_ptr(), Q);
+  }
+  int nf_at_Q(double Q, double &Qlo, double & Qhi) const {
+    return hoppet_cxx__running_coupling__nf_at_q(valid_ptr(), Q, &Qlo, &Qhi);
+  }
+
+  double quark_mass(int iflv) const { return hoppet_cxx__running_coupling__quark_mass(valid_ptr(), iflv); }
+
+  bool quark_masses_are_msbar() const { return hoppet_cxx__running_coupling__quark_masses_are_msbar(valid_ptr()); }
+
+  std::tuple<double,double> Q_range_at_nf(int nflcl) const {
+    double Qlo=0.0, Qhi=0.0;
+    hoppet_cxx__running_coupling__q_range_at_nf(valid_ptr(), nflcl, &Qlo, &Qhi);
+    return {Qlo, Qhi};
+  }
 
 };
 
@@ -1051,6 +1097,13 @@ public:
 
   running_coupling(double alphas_at_Q, double Q, int nloop, int fixnf) {
     _ptr = hoppet_cxx__running_coupling__new_fixnf(alphas_at_Q, Q, nloop, fixnf);
+  }
+
+  running_coupling(double alphas_at_Q, double Q, int nloop,
+                   double mc, double mb, double mt,
+                   bool masses_are_MSbar = false, double muMatch_mQuark = 1.0) {
+    _ptr = hoppet_cxx__running_coupling__new_varnf(alphas_at_Q, Q, nloop,
+                                                  mc, mb, mt, masses_are_MSbar, muMatch_mQuark);
   }
 
 };

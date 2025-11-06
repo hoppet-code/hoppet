@@ -458,30 +458,57 @@ TEST_CASE( "qcd", "[hoppet]" ) {
 
 //-----------------------------------------------------------------------------
 TEST_CASE( "running_coupling", "[hoppet]" ) {
+  // first with fixnf
   double asmz = 0.118;
   double mz = 91.1880;
   int nloop = 3;
   int nf = 5;
-  hoppet::running_coupling alphaS(asmz, mz, nloop, nf);
+  hoppet::running_coupling alphas(asmz, mz, nloop, nf);
 
   // deferred assignment
-  hoppet::running_coupling alphaS2;
-  REQUIRE_THROWS_AS(alphaS2(mz), std::runtime_error);
-  alphaS2 = hoppet::running_coupling(asmz, mz, nloop, nf); // move assignment?
+  hoppet::running_coupling alphas2;
+  REQUIRE_THROWS_AS(alphas2(mz), std::runtime_error);
+  alphas2 = hoppet::running_coupling(asmz, mz, nloop, nf); // move assignment?
 
-  REQUIRE_THAT(alphaS(mz), WithinAbs(asmz, 1e-6));
-  REQUIRE(alphaS2(mz) == alphaS(mz));
+  REQUIRE_THAT(alphas(mz), WithinAbs(asmz, 1e-6));
+  REQUIRE(alphas2(mz) == alphas(mz));
 
-  //alphaS2 = alphaS; // test copy assignment operator
-  //auto alphas3(alphaS); // test copy constructor
+  //alphas2 = alphas; // test copy assignment operator
+  //auto alphas3(alphas); // test copy constructor
 
-  hoppet::running_coupling alphas3 = std::move(alphaS2); // test move via std::move
+  hoppet::running_coupling alphas3 = std::move(alphas2); // test move via std::move
   REQUIRE(alphas3.ptr() != nullptr);
-  REQUIRE(alphaS2.ptr() == nullptr);
+  REQUIRE(alphas2.ptr() == nullptr);
 
-  hoppet::running_coupling::view_type alphaS_view;
-  alphaS_view.take_view(alphaS);
-  REQUIRE(alphaS_view(mz) == alphaS(mz));
-  REQUIRE(alphaS_view.ptr() == alphaS.ptr());
+  hoppet::running_coupling::view_type alphas_view;
+  alphas_view.take_view(alphas);
+  REQUIRE(alphas_view(mz) == alphas(mz));
+  REQUIRE(alphas_view.ptr() == alphas.ptr());
 
+  // now with variable nf ---------------
+  double mc = 1.5, mb = 4.75, mt = 175.0;
+  alphas = hoppet::running_coupling(asmz, mz, nloop, mc, mb, mt); // variable nf
+  REQUIRE_THAT(alphas(mz), WithinAbs(asmz, 1e-6));
+  REQUIRE(alphas(1.0) > alphas3(1.0)); // should be larger at low Q, because of fewer flavours
+
+  REQUIRE(alphas.nloop() == nloop);
+
+  auto [nflo, nfhi] = alphas.nf_range();
+  REQUIRE(nflo == 3);
+  REQUIRE(nfhi == 6);
+
+  double nf_at_1 = alphas.nf_at_Q(1.0);
+  REQUIRE(nf_at_1 == 3);
+
+  double nf_at_3 = alphas.nf_at_Q(3.0);
+  REQUIRE(nf_at_3 == 4);
+
+  double Qlo, Qhi;
+  double nf_at_5 = alphas.nf_at_Q(5.0, Qlo, Qhi);
+  REQUIRE(nf_at_5 == 5);
+  REQUIRE_THAT(Qlo, WithinAbs(mb, 1e-12));
+  REQUIRE_THAT(Qhi, WithinAbs(mt, 1e-12));
+  std::tie(Qlo, Qhi) = alphas.Q_range_at_nf(4);
+  REQUIRE_THAT(Qlo, WithinAbs(mc, 1e-12));
+  REQUIRE_THAT(Qhi, WithinAbs(mb, 1e-12));
 }
