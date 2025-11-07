@@ -8,6 +8,32 @@
 #include <functional>
 #include <concepts>
 
+
+// Elements to think about
+// - [ ] do we separate things out into different files
+// - [ ] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
+// - [ ] make sure hoppet/qcd.h (etc) gets installed properly
+// - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
+// - [ ] making sure we treat default epsilon correctly
+
+// Next steps:
+// - [x] add the running_coupling class
+// - [~] add the dglap_holder                                 -- NEEDS TESTS of mtm access
+// - [ ] add the tabulation class
+// - [~] add the mass thresholds (or wait until more mature?) -- NEEDS TESTS still
+// - [ ] add streamlined interface functions
+// - [ ] add qed support
+// - [x] add access to things like the beta function coefficients, qcd group constants, etc.
+// - [ ] add structure function support
+// - [ ] add documentation
+
+// Things to perhaps add
+// - [x] add take_view to the obj_view class
+// - [x] basic checks of grid compatibility, so as to get C++ errors rather than Fortran errors
+// - [ ] mvv interface for splitting functions?
+
+
+
 #define DEFINE_RETURN_INT_MEMBER(classname, membername)              extern "C" int            hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_DBL_MEMBER(classname, membername)           extern "C" double         hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_OBJ_MEMBER(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
@@ -27,27 +53,6 @@
 #define RETURN_OBJ_MEMBER_IJ(classname, membername, typename) inline typename##_view membername(int i, int j) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i, j);} 
 
 
-// Elements to think about
-// - [ ] do we separate things out into different files
-// - [ ] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
-// - [ ] make sure hoppet/qcd.h (etc) gets installed properly
-// - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
-
-// Next steps:
-// - [x] add the running_coupling class
-// - [~] add the dglap_holder
-// - [ ] add the tabulation class
-// - [ ] add the mass thresholds (or wait until more mature?)
-// - [ ] add streamlined interface functions
-// - [ ] add qed support
-// - [x] add access to things like the beta function coefficients, qcd group constants, etc.
-// - [ ] add structure function support
-// - [ ] add documentation
-
-// Things to perhaps add
-// - [x] add take_view to the obj_view class
-// - [x] basic checks of grid compatibility, so as to get C++ errors rather than Fortran errors
-// - [ ] mvv interface for splitting functions?
 
 
 /// "forward" declaration of the Fortran grid_def type;
@@ -1124,7 +1129,7 @@ inline grid_quant_2d operator*(const split_mat_view & split, const grid_quant_2d
   grid_quant_2d result(q.grid(), q.extras().dim1_sz);
   hoppet_cxx__split_mat__times_grid_quant_2d(split.ptr(), q.data(), result.data());
   // zero out any components beyond ncompmax
-  //for (size_t i = ncompmax+1; i < result.extras().dim1_sz; ++i) {result[i].assign(0);}
+  for (size_t i = ncompmax+1; i < result.extras().dim1_sz; ++i) {result[i].assign(0);}
   return result;
 }
 
@@ -1229,7 +1234,7 @@ inline grid_quant_2d operator*(const mass_threshold_mat_view & mtm, const grid_q
   grid_quant_2d result(q.grid(), q.extras().dim1_sz);
   hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(mtm.ptr(), q.data(), result.data());
   // zero out any components beyond ncompmax
-  //for (size_t i = ncompmax+1; i < result.extras().dim1_sz; ++i) {result[i].assign(0.0);}
+  for (size_t i = ncompmax+1; i < result.extras().dim1_sz; ++i) {result[i].assign(0.0);}
   return result;
 }
 

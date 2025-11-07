@@ -366,11 +366,15 @@ TEST_CASE( "split_mat", "[hoppet]" ) {
   REQUIRE_THAT( mom1(p_comm_pdf[iflv_g]), WithinAbs(mom1(p_comm_pdf_direct[iflv_g]), 3e-5) );
 
   hoppet::grid_quant_2d pdf_big(big_grid, 21); // 21 is size of 2nd dimension (more than standard 14)
+  pdf_big.assign(0.01);
+  pdf_big[hoppet::ncompmax] = 0.0;
   auto p_lo_pdf_big = p_lo * pdf_big; // test multiplication with larger pdf_2d
   REQUIRE( p_lo_pdf_big.size()  == pdf_big.size() );
   REQUIRE( p_lo_pdf_big[15].at_y(5.0) == 0.0); // should be set to zero
+  REQUIRE( p_lo_pdf_big[hoppet::iflv_g].at_y(5.0) != 0.0); // should not be zero
 
   hoppet::grid_quant_2d pdf_sml(big_grid, 7); // 
+  pdf_sml.assign(0.0);
   REQUIRE_THROWS_AS( p_lo * pdf_sml, std::runtime_error ); // should throw because too small
 }
 
