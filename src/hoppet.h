@@ -216,6 +216,13 @@ extern "C" {
   ///  Override the default interpolation order in y and lnlnQ.
   void hoppetSetYLnlnQInterpOrders(const int & yorder, const int & lnlnQorder);
 
+
+  // On some systems (linux, MacOS at the time of writing, 2025), 
+  // C++ exceptions can propagate through Fortran code correctly, and
+  // this flag, if set to true, will cause a C++ exception to be
+  // thrown instead of the Fortran error stop being invoked.
+  void hoppetEnableCxxExceptionsFromFortran();
+
   /// Given a pdf_subroutine with the interface shown below, initialise
   /// our internal pdf table.
   void hoppetAssign(void (* pdf_subroutine)(const double & x, 

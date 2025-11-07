@@ -68,6 +68,12 @@ Access to streamlined interface objects
 	causing trouble with ifx (2024) now that we have a bind(C)
 	attribute for the original symbols
 
+	* src/wae_error.f90:
+	added new subroutine wae_enable_cxx_exceptions, bound to C
+	hoppetEnableCxxExceptionsFromFortran, which sets a flag to enable C++
+	exceptions to be thrown instead of Fortran error stops.
+	Not generally portable, but appears to work on linux and MacOS.
+
 --------- end 2025-10-cxx-OO branch ---------
 
 2025-11-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk>

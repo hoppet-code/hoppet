@@ -1,6 +1,7 @@
 #include "hoppet_oo.h"
 
 
+extern "C" void hoppet_throw_runtime_error() {throw std::runtime_error("hoppet wae_error");}
 
 extern "C" double hoppet_grid_conv_f__wrapper(double y, int piece, void*ctx) {
   auto func = static_cast<std::function<double(const double, const int)>*>(ctx);

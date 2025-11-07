@@ -26,8 +26,31 @@ module warnings_and_errors
   integer, parameter :: stddev_in = 0
   integer            :: stddev = stddev_in
 
+  logical, save :: throw_cxx_exceptions = .false.
+
+  interface 
+    subroutine hoppet_throw_runtime_error() bind(C,name="hoppet_throw_runtime_error")
+    end subroutine hoppet_throw_runtime_error
+  end interface
+
+
+
 
 contains
+
+  !! On some systems (linux, MacOS at the time of writing, 2025), 
+  !! C++ exceptions can propagate through Fortran code correctly, and
+  !! this flag, if set to true, will cause a C++ exception to be
+  !! thrown instead of the Fortran error stop being invoked.
+  !!
+  !! Beware, this is not generally portable, nor guaranteed to be future proof.
+  !! Use at your own risk.
+  subroutine wae_enable_cxx_exceptions() bind(C, name='hoppetEnableCxxExceptionsFromFortran')
+    use iso_c_binding
+    use hoppet_term
+    print '(a)', bg_white//red//bold//'*** Enabled C++ exceptions from hoppet Fortran; use with care: not portable ***'//reset
+    throw_cxx_exceptions = .true.
+  end subroutine wae_enable_cxx_exceptions
   !---------------------------------------------------------------------
   !! Routine to allow the output of a warning up to some maximum number of 
   !! times after which no such warning will be issues.
@@ -134,7 +157,13 @@ contains
     if (present(dbleval)) write(stddev,*) dbleval
 
     write(stddev,*)
-    error stop 1
+
+    if (throw_cxx_exceptions) then
+      call hoppet_throw_runtime_error()
+    else
+      error stop 1
+    end if
+
   end subroutine wae_error
   
   !!
