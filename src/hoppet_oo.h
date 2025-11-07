@@ -20,8 +20,11 @@
 // - [x] add the running_coupling class
 // - [x] add the dglap_holder    
 // - [ ] add the tabulation class
+// - [ ] add the evln_operator class
 // - [x] add the mass thresholds 
+// - [ ] grid_quant_3d?
 // - [~] add streamlined interface functions
+// - [ ] support for probes
 // - [ ] add qed support
 // - [x] add access to things like the beta function coefficients, qcd group constants, etc.
 // - [ ] add structure function support
@@ -34,7 +37,8 @@
 
 
 
-#define DEFINE_RETURN_INT_MEMBER(classname, membername)              extern "C" int            hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
+#define DEFINE_RETURN_INT_MEMBER(classname, membername)           extern "C" int            hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
+#define DEFINE_RETURN_LOG_MEMBER(classname, membername)           extern "C" bool           hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_DBL_MEMBER(classname, membername)           extern "C" double         hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_OBJ_MEMBER(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_OBJ_MEMBER_I( classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i);
@@ -47,6 +51,7 @@
    inline classname##_f * generic_copy(const classname##_f * ptr) {return hoppet_cxx__##classname##__copy(ptr);}
 
 #define RETURN_INT_MEMBER(classname, membername)           inline int    membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
+#define RETURN_LOG_MEMBER(classname, membername)           inline bool   membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 #define RETURN_DBL_MEMBER(classname, membername)           inline double membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 #define RETURN_OBJ_MEMBER(classname, membername, typename) inline typename##_view membername() const {return typename##_view(hoppet_cxx__##classname##__##membername(valid_ptr()));} 
 #define RETURN_OBJ_MEMBER_I( classname, membername, typename) inline typename##_view membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
@@ -67,6 +72,11 @@ class split_mat_f;
 class running_coupling_f;
 class dglap_holder_f;
 class mass_threshold_mat_f;
+// things for pdf_table
+class pdf_table_f;
+class pdfseginfo_f;
+class evln_operator_f;
+
 
 
 /// grid_def function wrappers
@@ -82,6 +92,11 @@ extern "C" {
   void   hoppet_cxx__grid_def__x_values(const grid_def_f * griddef, double * xvals);
   bool   hoppet_cxx__grid_def__equiv(const grid_def_f * griddef1, const grid_def_f * griddef2);
 }
+DEFINE_RETURN_DBL_MEMBER(grid_def,dy)
+DEFINE_RETURN_DBL_MEMBER(grid_def,ymax)
+DEFINE_RETURN_DBL_MEMBER(grid_def,eps)
+DEFINE_RETURN_INT_MEMBER(grid_def,nsub)
+DEFINE_RETURN_INT_MEMBER(grid_def,order)
 inline void generic_delete(grid_def_f * ptr) {if (ptr) hoppet_cxx__grid_def__delete(&ptr);}
 inline grid_def_f * generic_copy(const grid_def_f * ptr) {  return hoppet_cxx__grid_def__copy(ptr);}
 
@@ -213,6 +228,15 @@ DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_lo,split_mat)
 DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nlo,split_mat)
 DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nnlo,split_mat)
 DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_n3lo,split_mat)
+
+//----- things for pdfseginfo ----------
+DEFINE_RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_lo)
+DEFINE_RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_hi)
+DEFINE_RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_lo)
+DEFINE_RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_hi)
+DEFINE_RETURN_DBL_MEMBER(pdfseginfo,dlnlnQ)
+DEFINE_RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ)
+
 
 namespace hoppet {
 
@@ -380,6 +404,12 @@ public:
         "hoppet::grid_def_view::ensure_compatible: grids are not equivalent");
     }
   }
+
+  RETURN_DBL_MEMBER(grid_def,dy)
+  RETURN_DBL_MEMBER(grid_def,ymax)
+  RETURN_DBL_MEMBER(grid_def,eps)
+  RETURN_INT_MEMBER(grid_def,nsub)
+  RETURN_INT_MEMBER(grid_def,order)
 
 };
 
@@ -1426,7 +1456,19 @@ public:
   }
 };
 
-} // end namespace hoppet 
+class pdfseginfo_view : public obj_view<pdfseginfo_f> {
+public:
+  typedef obj_view<pdfseginfo_f> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+  RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_lo)
+  RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_hi)
+  RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_lo)
+  RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_hi)
+  RETURN_DBL_MEMBER(pdfseginfo,dlnlnQ)
+  RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ)
+};
+
+} // end namespace hoppet -------------------------------------
 
 
 

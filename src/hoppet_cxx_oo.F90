@@ -23,6 +23,17 @@
     res = obj_f%NAME;\
   end function
 
+! define a macro to generate the functions that returns a generic object's logical member
+#define DEFINE_RETURN_LOG_MEMBER(OBJ,NAME) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    logical(c_bool) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = obj_f%NAME;\
+  end function
+
 #define DEFINE_RETURN_OBJ_MEMBER(OBJ,NAME,TYPE) \
   function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
     implicit none;\
@@ -230,6 +241,11 @@ contains
     res = (grid1_f == grid2_f)
   end function hoppet_cxx__grid_def__equiv
 
+  DEFINE_RETURN_DBL_MEMBER(grid_def,dy)
+  DEFINE_RETURN_DBL_MEMBER(grid_def,ymax)
+  DEFINE_RETURN_DBL_MEMBER(grid_def,eps)
+  DEFINE_RETURN_INT_MEMBER(grid_def,nsub)
+  DEFINE_RETURN_INT_MEMBER(grid_def,order)
 
 end module hoppet_cxx_oo_grid_def
 
@@ -865,6 +881,7 @@ contains
   MTM_INT(loops)
 
 end module hoppet_cxx_oo_mass_threshold_mat
+
 !=====================================================================
 !! module for the wrapping a running_coupling object
 module hoppet_cxx_oo_running_coupling
@@ -1058,4 +1075,53 @@ contains
 end module hoppet_cxx_oo_dglap_holder
 
 
+!=====================================================================
+!! wrappers for C++ OO interface to pdf_table, as well as pdfseginfo
+module hoppet_cxx_oo_pdf_table
+  use, intrinsic :: iso_c_binding
+  use pdf_tabulate
+  use convolution
+  use dglap_objects
+  implicit none
 
+contains
+
+  ! things related to the pdfseginfo type, will be 
+  ! accessible only as a "view" so not need for allocation
+  ! or deletion functions
+  DEFINE_RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_lo)
+  DEFINE_RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_hi)
+  DEFINE_RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_lo)
+  DEFINE_RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_hi)
+  DEFINE_RETURN_DBL_MEMBER(pdfseginfo,dlnlnQ)
+  DEFINE_RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ)
+
+  function hoppet_cxx__pdf_table__new(grid, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table)  bind(C) result(tab_ptr)
+    implicit none
+    type(c_ptr) :: tab_ptr
+    type(c_ptr), intent(in), value :: grid
+    real(c_double),  intent(in), value :: Qmin, Qmax 
+    real(c_double),  intent(in), optional :: dlnlnQ
+    integer(c_int),  intent(in), optional :: lnlnQ_order
+    logical(c_bool), intent(in), optional :: freeze_at_Qmin
+    integer(c_int),  intent(in), optional :: iflv_max_table
+    !-- local Fortran pointers
+    type(grid_def), pointer :: grid_f
+    type(pdf_table), pointer :: tab_f
+    type(logical) :: freeze_at_Qmin_f
+
+    call c_f_pointer(grid, grid_f)
+    allocate(tab_f)
+    if (.not. present(freeze_at_Qmin)) then
+      freeze_at_Qmin_f = .false.
+    else
+      freeze_at_Qmin_f = (freeze_at_Qmin .neqv. .false._c_bool) ! safely convert to fortran logical
+    end if
+    call AllocPDFTable(grid_f, tab_f, Qmin, Qmax, dlnlnQ, lnlnQ_order, &
+                      freeze_at_Qmin=freeze_at_Qmin_f, &
+                      iflv_max_table=iflv_max_table)
+
+    tab_ptr = c_loc(tab_f)
+  end function hoppet_cxx__pdf_table__new
+
+end module hoppet_cxx_oo_pdf_table

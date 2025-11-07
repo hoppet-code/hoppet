@@ -23,7 +23,6 @@ hoppet::grid_def big_grid;
 /// We supply the main routine, to make sure that we can 
 /// do any global-object initialisation that's needed
 int main(int argc, char* argv[]) {
-  hoppetEnableCxxExceptionsFromFortran(); // enable C++ exceptions from Fortran
 
   // Global setup
   // make a simple grid for use in the tests
@@ -35,6 +34,7 @@ int main(int argc, char* argv[]) {
   double dlnlnQ = dy/4.0;
   int nloop = 3, order = -6;
   hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order);
+  hoppetEnableCxxExceptionsFromFortran(); // enable C++ exceptions from Fortran
 
   // then run the tests
   int result = Catch::Session().run(argc, argv);
