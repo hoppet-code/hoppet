@@ -100,35 +100,35 @@ def write_f1_py(Qtest, ymax, ny, muF=None, muR=None, use_sep_orders=False):
         xval = np.exp(-ytest)
         if use_sep_orders:
             res_lo = hp.StrFctLO(xval, Qtest, muR, muF)
-            print(f"{xval:12.4e} {res_lo[hp.iF1Wp]:11.4e} {res_lo[hp.iF1Wm]:11.4e}", end=' ')
+            print(f"{xval:12.4E} {res_lo[hp.iF1Wp]:11.4E} {res_lo[hp.iF1Wm]:11.4E}", end=' ')
             F1Z_LO = res_lo[hp.iF1Z]
             F1EM_LO = res_lo[hp.iF1EM]
             F1gZ_LO = res_lo[hp.iF1gZ]
 
             res_nlo = hp.StrFctNLO(xval, Qtest, muR, muF)
-            print(f"{res_nlo[hp.iF1Wp]:11.4e} {res_nlo[hp.iF1Wm]:11.4e}", end=' ')
+            print(f"{res_nlo[hp.iF1Wp]:11.4E} {res_nlo[hp.iF1Wm]:11.4E}", end=' ')
             F1Z_NLO = res_nlo[hp.iF1Z]
             F1EM_NLO = res_nlo[hp.iF1EM]
             F1gZ_NLO = res_nlo[hp.iF1gZ]
 
             res_nnlo = hp.StrFctNNLO(xval, Qtest, muR, muF)
-            print(f"{res_nnlo[hp.iF1Wp]:11.4e} {res_nnlo[hp.iF1Wm]:11.4e}", end=' ')
+            print(f"{res_nnlo[hp.iF1Wp]:11.4E} {res_nnlo[hp.iF1Wm]:11.4E}", end=' ')
             F1Z_NNLO = res_nnlo[hp.iF1Z]
             F1EM_NNLO = res_nnlo[hp.iF1EM]
             F1gZ_NNLO = res_nnlo[hp.iF1gZ]
 
             res_n3lo = hp.StrFctN3LO(xval, Qtest, muR, muF)
-            print(f"{res_n3lo[hp.iF1Wp]:11.4e} {res_n3lo[hp.iF1Wm]:11.4e}", end=' ')
+            print(f"{res_n3lo[hp.iF1Wp]:11.4E} {res_n3lo[hp.iF1Wm]:11.4E}", end=' ')
             F1Z_N3LO = res_n3lo[hp.iF1Z]
             F1EM_N3LO = res_n3lo[hp.iF1EM]
             F1gZ_N3LO = res_n3lo[hp.iF1gZ]
 
-            print(f"{F1Z_LO:11.4e} {F1Z_NLO:11.4e} {F1Z_NNLO:11.4e} {F1Z_N3LO:11.4e} "
-                  f"{F1EM_LO:11.4e} {F1EM_NLO:11.4e} {F1EM_NNLO:11.4e} {F1EM_N3LO:11.4e} "
-                  f"{F1gZ_LO:11.4e} {F1gZ_NLO:11.4e} {F1gZ_NNLO:11.4e} {F1gZ_N3LO:11.4e}")
+            print(f"{F1Z_LO:11.4E} {F1Z_NLO:11.4E} {F1Z_NNLO:11.4E} {F1Z_N3LO:11.4E} "
+                  f"{F1EM_LO:11.4E} {F1EM_NLO:11.4E} {F1EM_NNLO:11.4E} {F1EM_N3LO:11.4E} "
+                  f"{F1gZ_LO:11.4E} {F1gZ_NLO:11.4E} {F1gZ_NNLO:11.4E} {F1gZ_N3LO:11.4E}")
         else:
             res = hp.StrFct(xval, Qtest, muR, muF)
-            print(f"{xval:12.4e} {res[hp.iF1Wp]:11.4e} {res[hp.iF1Wm]:11.4e} {res[hp.iF1Z]:11.4e} {res[hp.iF1EM]:11.4e} {res[hp.iF1gZ]:11.4e}")
+            print(f"{xval:12.4E} {res[hp.iF1Wp]:11.4E} {res[hp.iF1Wm]:11.4E} {res[hp.iF1Z]:11.4E} {res[hp.iF1EM]:11.4E} {res[hp.iF1gZ]:11.4E}")
     print()
     print()
 
@@ -147,35 +147,35 @@ def write_f2_py(Qtest, ymax, ny, muF=None, muR=None, use_sep_orders=False):
         xval = np.exp(-ytest)
         if use_sep_orders:
             res_lo = hp.StrFctLO(xval, Qtest, muR, muF)
-            print(f"{xval:12.4e} {res_lo[hp.iF2Wp]:11.4e} {res_lo[hp.iF2Wm]:11.4e}", end=' ')
+            print(f"{xval:12.4E} {res_lo[hp.iF2Wp]:11.4E} {res_lo[hp.iF2Wm]:11.4E}", end=' ')
             F2Z_LO = res_lo[hp.iF2Z]
             F2EM_LO = res_lo[hp.iF2EM]
             F2gZ_LO = res_lo[hp.iF2gZ]
 
             res_nlo = hp.StrFctNLO(xval, Qtest, muR, muF)
-            print(f"{res_nlo[hp.iF2Wp]:11.4e} {res_nlo[hp.iF2Wm]:11.4e}", end=' ')
+            print(f"{res_nlo[hp.iF2Wp]:11.4E} {res_nlo[hp.iF2Wm]:11.4E}", end=' ')
             F2Z_NLO = res_nlo[hp.iF2Z]
             F2EM_NLO = res_nlo[hp.iF2EM]
             F2gZ_NLO = res_nlo[hp.iF2gZ]
 
             res_nnlo = hp.StrFctNNLO(xval, Qtest, muR, muF)
-            print(f"{res_nnlo[hp.iF2Wp]:11.4e} {res_nnlo[hp.iF2Wm]:11.4e}", end=' ')
+            print(f"{res_nnlo[hp.iF2Wp]:11.4E} {res_nnlo[hp.iF2Wm]:11.4E}", end=' ')
             F2Z_NNLO = res_nnlo[hp.iF2Z]
             F2EM_NNLO = res_nnlo[hp.iF2EM]
             F2gZ_NNLO = res_nnlo[hp.iF2gZ]
 
             res_n3lo = hp.StrFctN3LO(xval, Qtest, muR, muF)
-            print(f"{res_n3lo[hp.iF2Wp]:11.4e} {res_n3lo[hp.iF2Wm]:11.4e}", end=' ')
+            print(f"{res_n3lo[hp.iF2Wp]:11.4E} {res_n3lo[hp.iF2Wm]:11.4E}", end=' ')
             F2Z_N3LO = res_n3lo[hp.iF2Z]
             F2EM_N3LO = res_n3lo[hp.iF2EM]
             F2gZ_N3LO = res_n3lo[hp.iF2gZ]
 
-            print(f"{F2Z_LO:11.4e} {F2Z_NLO:11.4e} {F2Z_NNLO:11.4e} {F2Z_N3LO:11.4e} "
-                  f"{F2EM_LO:11.4e} {F2EM_NLO:11.4e} {F2EM_NNLO:11.4e} {F2EM_N3LO:11.4e} "
-                  f"{F2gZ_LO:11.4e} {F2gZ_NLO:11.4e} {F2gZ_NNLO:11.4e} {F2gZ_N3LO:11.4e}")
+            print(f"{F2Z_LO:11.4E} {F2Z_NLO:11.4E} {F2Z_NNLO:11.4E} {F2Z_N3LO:11.4E} "
+                  f"{F2EM_LO:11.4E} {F2EM_NLO:11.4E} {F2EM_NNLO:11.4E} {F2EM_N3LO:11.4E} "
+                  f"{F2gZ_LO:11.4E} {F2gZ_NLO:11.4E} {F2gZ_NNLO:11.4E} {F2gZ_N3LO:11.4E}")
         else:
             res = hp.StrFct(xval, Qtest, muR, muF)
-            print(f"{xval:12.4e} {res[hp.iF2Wp]:11.4e} {res[hp.iF2Wm]:11.4e} {res[hp.iF2Z]:11.4e} {res[hp.iF2EM]:11.4e} {res[hp.iF2gZ]:11.4e}")
+            print(f"{xval:12.4E} {res[hp.iF2Wp]:11.4E} {res[hp.iF2Wm]:11.4E} {res[hp.iF2Z]:11.4E} {res[hp.iF2EM]:11.4E} {res[hp.iF2gZ]:11.4E}")
     print()
     print()
 
@@ -194,30 +194,30 @@ def write_f3_py(Qtest, ymax, ny, muF=None, muR=None, use_sep_orders=False):
         xval = np.exp(-ytest)
         if use_sep_orders:
             res_lo = hp.StrFctLO(xval, Qtest, muR, muF)
-            print(f"{xval:12.4e} {res_lo[hp.iF3Wp]:11.4e} {res_lo[hp.iF3Wm]:11.4e}", end=' ')
+            print(f"{xval:12.4E} {res_lo[hp.iF3Wp]:11.4E} {res_lo[hp.iF3Wm]:11.4E}", end=' ')
             F3Z_LO = res_lo[hp.iF3Z]
             F3gZ_LO = res_lo[hp.iF3gZ]
 
             res_nlo = hp.StrFctNLO(xval, Qtest, muR, muF)
-            print(f"{res_nlo[hp.iF3Wp]:11.4e} {res_nlo[hp.iF3Wm]:11.4e}", end=' ')
+            print(f"{res_nlo[hp.iF3Wp]:11.4E} {res_nlo[hp.iF3Wm]:11.4E}", end=' ')
             F3Z_NLO = res_nlo[hp.iF3Z]
             F3gZ_NLO = res_nlo[hp.iF3gZ]
 
             res_nnlo = hp.StrFctNNLO(xval, Qtest, muR, muF)
-            print(f"{res_nnlo[hp.iF3Wp]:11.4e} {res_nnlo[hp.iF3Wm]:11.4e}", end=' ')
+            print(f"{res_nnlo[hp.iF3Wp]:11.4E} {res_nnlo[hp.iF3Wm]:11.4E}", end=' ')
             F3Z_NNLO = res_nnlo[hp.iF3Z]
             F3gZ_NNLO = res_nnlo[hp.iF3gZ]
     
             res_n3lo = hp.StrFctN3LO(xval, Qtest, muR, muF)
-            print(f"{res_n3lo[hp.iF3Wp]:11.4e} {res_n3lo[hp.iF3Wm]:11.4e}", end=' ')
+            print(f"{res_n3lo[hp.iF3Wp]:11.4E} {res_n3lo[hp.iF3Wm]:11.4E}", end=' ')
             F3Z_N3LO = res_n3lo[hp.iF3Z]
             F3gZ_N3LO = res_n3lo[hp.iF3gZ]
 
-            print(f"{F3Z_LO:11.4e} {F3Z_NLO:11.4e} {F3Z_NNLO:11.4e} {F3Z_N3LO:11.4e} "
-                  f"{F3gZ_LO:11.4e} {F3gZ_NLO:11.4e} {F3gZ_NNLO:11.4e} {F3gZ_N3LO:11.4e}")
+            print(f"{F3Z_LO:11.4E} {F3Z_NLO:11.4E} {F3Z_NNLO:11.4E} {F3Z_N3LO:11.4E} "
+                  f"{F3gZ_LO:11.4E} {F3gZ_NLO:11.4E} {F3gZ_NNLO:11.4E} {F3gZ_N3LO:11.4E}")
         else:
             res = hp.StrFct(xval, Qtest, muR, muF)
-            print(f"{xval:12.4e} {res[hp.iF3Wp]:11.4e} {res[hp.iF3Wm]:11.4e} {res[hp.iF3Z]:11.4e} {res[hp.iF3gZ]:11.4e}")
+            print(f"{xval:12.4E} {res[hp.iF3Wp]:11.4E} {res[hp.iF3Wm]:11.4E} {res[hp.iF3Z]:11.4E} {res[hp.iF3gZ]:11.4E}")
     print()
     print()
 
