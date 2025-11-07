@@ -91,8 +91,11 @@ jobs:
           #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
           #BUILD/unit-tests/hoppet-unit-tests 
           ctest --test-dir BUILD -j 2 --output-on-failure
-          # now try running the python example
-          python3 example_py/tabulation_example.py
+
+          # now try running some python examples, checking the output matches the expected output
+          scripts/check python3 example_py/tabulation_example.py
+          scripts/check python3 example_py/tabulation_example_qed.py
+          scripts/check python3 example_py/structure_functions_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT

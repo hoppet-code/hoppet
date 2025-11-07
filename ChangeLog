@@ -1,4 +1,21 @@
-2025-11-07  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+2025-11-07 Gavin
+
+	* unit-tests/test_libome.F90:
+	added a check also of the third moment of the N3LO n_thresholds
+	between Fortran and libOME.
+
+2025-11-07  Alexander Karlberg + Gavin
+
+	* example_py/tabulation_example.py.default_output: *** ADDED(symlink) ***
+	* example_py/tabulation_example_qed.py.default_output: *** ADDED(symlink) ***
+	* example_f90/structure_functions_example.default_output: *** ADDED(symlink) ***
+	* .github/workflows/main.yml:
+	running more of the Python examples, adding checks of their output
+
+	* example_f90/structure_functions_example.f90:
+	in choosing x value, an intermediate single-precision 1/xmax value
+	was being used, which caused certain x values to differ from those
+	in the corresponding C++ and Python examples. Now fixed.
 
 	* pyinterface/hoppet.i:
 	Fixed a bug where the structure functions where using the

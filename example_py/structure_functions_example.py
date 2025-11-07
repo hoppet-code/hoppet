@@ -160,7 +160,7 @@ def write_f3_py(Qtest, ymax, ny, muF=None, muR=None, use_sep_orders=False):
         xval = np.exp(-ytest)
         if use_sep_orders:
             res_lo = hp.StrFctLO(xval, Qtest, muR, muF)
-            print(f"{xval:16.8E} {res_lo[hp.iF3Wp]:11.4E} {res_lo[hp.iF3Wm]:11.4E}", end=' ')
+            print(f"{xval:12.4E} {res_lo[hp.iF3Wp]:11.4E} {res_lo[hp.iF3Wm]:11.4E}", end=' ')
             F3Z_LO = res_lo[hp.iF3Z]
             F3gZ_LO = res_lo[hp.iF3gZ]
 
