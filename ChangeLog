@@ -1,3 +1,11 @@
+2025-11-07  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* pyinterface/hoppet.i:
+	Fixed a bug where the structure functions where using the
+	global_pdf list rathr global_str_fct list for access which gave
+	correct results, but caused trouble when Python was cleaning up
+	because of corrupted memory.
+
 2025-11-05  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* pyinterface/hoppet.i:

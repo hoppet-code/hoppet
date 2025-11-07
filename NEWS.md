@@ -5,7 +5,8 @@
 ## Bug fixes
 
 * Fixed SetExactDGLAP and StartStrFctExtended in Python interface,
-  which were not working.
+  which were not working. Fixed bug where the structure functions were
+  being accessed through the global_pdf list rather than str_fct_list.
 
 ## Small changes
 
