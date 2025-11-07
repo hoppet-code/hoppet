@@ -534,6 +534,21 @@ TEST_CASE("dglap_holder", "[hoppet]") {
   REQUIRE_THAT(plo_qq_q1.at_y(5.05), WithinAbs(plo_qq_q2.at_y(5.05), 1e-6));
 }
 
+TEST_CASE("pdf_table", "[hoppet]") {
+  double Qmin = 1.0, Qmax = 1e4;
+  double dlnlnQ = big_grid.dy()/4.0;
+  hoppet::pdf_table tab(big_grid, Qmin, Qmax, dlnlnQ);
+  double mc = sqrt(2.0) + 1e-10;
+  double mb = 4.5;
+  double mt = 175.0;
+  hoppet::running_coupling alphas(0.118, 91.1880, 3, mc, mb, mt);
+  tab.add_nf_info(alphas);
+
+  auto tab_copy = tab; // copy constructor
+  //hoppet::pdf_table_view tab_view(tab);
+}
+
+
 //-----------------------------------------------------------------------------
 TEST_CASE( "streamlined-objects", "[hoppet]" ) {
   hoppet::grid_quant q(hoppet::sl::grid);

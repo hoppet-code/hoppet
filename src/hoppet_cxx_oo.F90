@@ -34,6 +34,30 @@
     res = obj_f%NAME;\
   end function
 
+! define a macro to generate the functions that returns a generic object's integer member
+#define DEFINE_RETURN_INT_MEMBER_I(OBJ,NAME) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) bind(C) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    integer(c_int), intent(in), value :: i;\
+    integer(c_int) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = obj_f%NAME(i);\
+  end function
+
+  ! define a macro to generate the functions that returns a generic object's real(dp) member
+#define DEFINE_RETURN_DBL_MEMBER_I(OBJ,NAME) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) bind(C) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    integer(c_int), intent(in), value :: i;\
+    real(c_double) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = obj_f%NAME(i);\
+  end function
+
 #define DEFINE_RETURN_OBJ_MEMBER(OBJ,NAME,TYPE) \
   function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
     implicit none;\
@@ -1096,15 +1120,16 @@ contains
   DEFINE_RETURN_DBL_MEMBER(pdfseginfo,dlnlnQ)
   DEFINE_RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ)
 
+  !! allocate a new pdf_table object and return a pointer to it
   function hoppet_cxx__pdf_table__new(grid, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table)  bind(C) result(tab_ptr)
     implicit none
     type(c_ptr) :: tab_ptr
     type(c_ptr), intent(in), value :: grid
     real(c_double),  intent(in), value :: Qmin, Qmax 
-    real(c_double),  intent(in), optional :: dlnlnQ
-    integer(c_int),  intent(in), optional :: lnlnQ_order
-    logical(c_bool), intent(in), optional :: freeze_at_Qmin
-    integer(c_int),  intent(in), optional :: iflv_max_table
+    real(c_double),  intent(in), value :: dlnlnQ
+    integer(c_int),  intent(in), value :: lnlnQ_order
+    logical(c_bool), intent(in), value :: freeze_at_Qmin
+    integer(c_int),  intent(in), value :: iflv_max_table
     !-- local Fortran pointers
     type(grid_def), pointer :: grid_f
     type(pdf_table), pointer :: tab_f
@@ -1112,11 +1137,7 @@ contains
 
     call c_f_pointer(grid, grid_f)
     allocate(tab_f)
-    if (.not. present(freeze_at_Qmin)) then
-      freeze_at_Qmin_f = .false.
-    else
-      freeze_at_Qmin_f = (freeze_at_Qmin .neqv. .false._c_bool) ! safely convert to fortran logical
-    end if
+    freeze_at_Qmin_f = (freeze_at_Qmin .neqv. .false._c_bool) ! safely convert to fortran logical
     call AllocPDFTable(grid_f, tab_f, Qmin, Qmax, dlnlnQ, lnlnQ_order, &
                       freeze_at_Qmin=freeze_at_Qmin_f, &
                       iflv_max_table=iflv_max_table)
@@ -1124,4 +1145,68 @@ contains
     tab_ptr = c_loc(tab_f)
   end function hoppet_cxx__pdf_table__new
 
+  function hoppet_cxx__pdf_table__copy(other) bind(C) result(tab_ptr)
+    implicit none
+    type(c_ptr), intent(in), value :: other
+    type(c_ptr) :: tab_ptr
+    !-- local Fortran pointers
+    type(pdf_table), pointer :: other_f, tab_f
+
+    call c_f_pointer(other, other_f)
+    allocate(tab_f)
+    call AllocPDFTable(tab_f, other_f)
+    tab_f%tab = other_f%tab
+    tab_ptr = c_loc(tab_f)
+  end function hoppet_cxx__pdf_table__copy
+
+  subroutine hoppet_cxx__pdf_table__copy_contents(dest, src) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: dest, src
+    !-- local Fortran pointers
+    type(pdf_table), pointer :: src_f, dest_f
+
+    call c_f_pointer(src, src_f)
+    call c_f_pointer(dest, dest_f)
+    call AllocPDFTable(dest_f, src_f)
+    dest_f%tab = src_f%tab
+  end subroutine hoppet_cxx__pdf_table__copy_contents
+
+  subroutine hoppet_cxx__pdf_table__add_nf_info(tab, coupling) bind(C)
+    use qcd_coupling
+    implicit none
+    type(c_ptr), intent(in), value :: tab
+    type(c_ptr), intent(in), value :: coupling
+    !--
+    type(pdf_table), pointer :: tab_f
+    type(running_coupling), pointer :: coupling_f
+
+    call c_f_pointer(tab, tab_f)
+    call c_f_pointer(coupling, coupling_f)
+
+    call AddNfInfoToPDFTable(tab_f, coupling_f)
+  end subroutine hoppet_cxx__pdf_table__add_nf_info
+
+  DEFINE_DELETE(pdf_table)
+
+  ! think carefully which of these interfaces should be public, which renamed
+  DEFINE_RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
+  DEFINE_RETURN_INT_MEMBER(pdf_table,nQ)
+  DEFINE_RETURN_INT_MEMBER(pdf_table,tab_iflv_max)
+  DEFINE_RETURN_INT_MEMBER(pdf_table,lnlnQ_order)
+  DEFINE_RETURN_LOG_MEMBER(pdf_table,freeze_at_Qmin)
+  DEFINE_RETURN_LOG_MEMBER(pdf_table,nf_info_associated)
+  DEFINE_RETURN_INT_MEMBER(pdf_table,nflo)
+  DEFINE_RETURN_INT_MEMBER(pdf_table,nfhi)
+  DEFINE_RETURN_DBL_MEMBER(pdf_table,lnlnQ_min)
+  DEFINE_RETURN_DBL_MEMBER(pdf_table,lnlnQ_max)
+  DEFINE_RETURN_DBL_MEMBER(pdf_table,lambda_eff)
+  DEFINE_RETURN_DBL_MEMBER(pdf_table,dlnlnQ)
+  DEFINE_RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)
+
+  DEFINE_RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo)
+  DEFINE_RETURN_DBL_MEMBER_I(pdf_table,as2pi)
+  DEFINE_RETURN_INT_MEMBER_I(pdf_table,nf_int)
+  DEFINE_RETURN_INT_MEMBER_I(pdf_table,lnlnQ_vals)
+  DEFINE_RETURN_INT_MEMBER_I(pdf_table,Q_vals)
 end module hoppet_cxx_oo_pdf_table
+

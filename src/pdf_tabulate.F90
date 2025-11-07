@@ -32,6 +32,7 @@ module pdf_tabulate
   use pdf_representation; use pdf_general
   use interpolation
   use warnings_and_errors
+  use iso_c_binding, only: c_double, c_int
   !use pdf_tabulate_types
   !-- needed only for EvolvePdfTable [separate it out one day?]
   use qcd_coupling; use evolution; use dglap_holders
@@ -51,8 +52,8 @@ module pdf_tabulate
     type(grid_def) :: grid
     real(dp) :: default_dlnlnQ
     real(dp) :: lnlnQ_min, lnlnQ_max, lambda_eff
-    real(dp), pointer :: tab(:,:,:)
-    real(dp), pointer :: lnlnQ_vals(:), Q_vals(:)
+    real(dp), pointer :: tab(:,:,:) => null()  !< (iflv, ilnlnQ, iQ)
+    real(dp), pointer :: lnlnQ_vals(:) => null(), Q_vals(:) => null()
     integer :: nQ, lnlnQ_order
     logical :: freeze_at_Qmin
     ! this is useful only in absence of nf info.
@@ -69,13 +70,13 @@ module pdf_tabulate
     !
     logical :: nf_info_associated
     integer :: nflo, nfhi
-    type(pdfseginfo), pointer :: seginfo(:)
-    integer,          pointer :: nf_int(:)
-    real(dp),         pointer :: as2pi(:)
+    type(pdfseginfo), pointer :: seginfo(:) => null()
+    integer,          pointer :: nf_int(:)  => null()
+    real(dp),         pointer :: as2pi(:)   => null()
     !
     ! Elements needed in case we want to do precalculation of
     ! of evolution. Not always available.
-    type(evln_operator), pointer :: evops(:)
+    type(evln_operator), pointer :: evops(:) => null()
     integer                      :: StartScale_iQlo
     real(dp)                     :: StartScale
 
@@ -107,7 +108,7 @@ module pdf_tabulate
   !! used in various contexts for deciding when an interval is
   !! sufficiently small that it can be ignored...
   real(dp), parameter :: min_dlnlnQ_singleQ = 1e-10_dp
-  integer, public :: def_lnlnQ_order = 4
+  integer(c_int), public, bind(C,name="hoppet_pdf_table_def_lnlnQ_order") :: def_lnlnQ_order = 4
   !! the max_lnlnQ_order is used in certain hard-coded array sizes
   !! so that they can be created on the stack rather than the heap,
   !! which has a speed advantage
@@ -572,6 +573,8 @@ contains
     type(pdf_table), intent(in)  :: origtab
     integer                      :: iflv_max_table
     
+    call Delete(tab) ! in case it was already allocated
+
     tab = origtab
     !-- the next things are those not taken care of automatically by the assignment;
     !   we allow for arbitrary numbers of flavours
@@ -1734,6 +1737,9 @@ contains
   subroutine pdftab_DelTab_0d(tab)
     type(pdf_table), intent(inout) :: tab
     integer :: i
+
+    if (.not. tab%allocated) return
+
     deallocate(tab%tab)
     deallocate(tab%lnlnQ_vals)
     deallocate(tab%Q_vals)

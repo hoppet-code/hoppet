@@ -25,7 +25,7 @@
 // - [ ] grid_quant_3d?
 // - [~] add streamlined interface functions
 // - [ ] support for probes
-// - [ ] add qed support
+// - [ ] add qed support, including pdf_table allocators
 // - [x] add access to things like the beta function coefficients, qcd group constants, etc.
 // - [ ] add structure function support
 // - [ ] add documentation
@@ -40,6 +40,8 @@
 #define DEFINE_RETURN_INT_MEMBER(classname, membername)           extern "C" int            hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_LOG_MEMBER(classname, membername)           extern "C" bool           hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_DBL_MEMBER(classname, membername)           extern "C" double         hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
+#define DEFINE_RETURN_INT_MEMBER_I(classname, membername)         extern "C" int            hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i);
+#define DEFINE_RETURN_DBL_MEMBER_I(classname, membername)         extern "C" double         hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i);
 #define DEFINE_RETURN_OBJ_MEMBER(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_OBJ_MEMBER_I( classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i);
 #define DEFINE_RETURN_OBJ_MEMBER_IJ(classname, membername, typename) extern "C" typename##_f * hoppet_cxx__##classname##__##membername(const classname##_f * ptr, int i, int j);
@@ -53,6 +55,8 @@
 #define RETURN_INT_MEMBER(classname, membername)           inline int    membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 #define RETURN_LOG_MEMBER(classname, membername)           inline bool   membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
 #define RETURN_DBL_MEMBER(classname, membername)           inline double membername() const {return hoppet_cxx__##classname##__##membername(valid_ptr());} 
+#define RETURN_INT_MEMBER_I(classname, membername)         inline int    membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
+#define RETURN_DBL_MEMBER_I(classname, membername)         inline double membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
 #define RETURN_OBJ_MEMBER(classname, membername, typename) inline typename##_view membername() const {return typename##_view(hoppet_cxx__##classname##__##membername(valid_ptr()));} 
 #define RETURN_OBJ_MEMBER_I( classname, membername, typename) inline typename##_view membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
 #define RETURN_OBJ_MEMBER_IJ(classname, membername, typename) inline typename##_view membername(int i, int j) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i, j);} 
@@ -237,6 +241,16 @@ DEFINE_RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_hi)
 DEFINE_RETURN_DBL_MEMBER(pdfseginfo,dlnlnQ)
 DEFINE_RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ)
 
+//----- things for pdf_table ----------
+extern "C" {
+  extern int hoppet_pdf_table_def_lnlnQ_order; //< default lnlnQ order for pdf_table
+  pdf_table_f * hoppet_cxx__pdf_table__new(const grid_def_f * grid, double Qmin, double Qmax, 
+                    double dlnlnQ, int lnlnQ_order, bool freeze_at_Qmin, int iflv_max_table); 
+  void hoppet_cxx__pdf_table__copy_contents(pdf_table_f * dest, const pdf_table_f * src); //< src copied into dest                  
+  void hoppet_cxx__pdf_table__add_nf_info(pdf_table_f * tab, const running_coupling_f * coupling);
+}
+DEFINE_COPY(pdf_table)
+DEFINE_DELETE(pdf_table)
 
 namespace hoppet {
 
@@ -1466,6 +1480,36 @@ public:
   RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_hi)
   RETURN_DBL_MEMBER(pdfseginfo,dlnlnQ)
   RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ)
+};
+
+class pdf_table_view : public obj_view<pdf_table_f> {
+public:
+  typedef obj_view<pdf_table_f> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  pdf_table_view & operator=(const pdf_table_view & other) {
+    if (!ptr()) throw std::runtime_error("pdf_table_view::operator=: pdf_table_view object not associated");
+    hoppet_cxx__pdf_table__copy_contents(ptr(), other.ptr());
+    return *this;
+  }
+
+};
+
+class pdf_table : public obj_owner<pdf_table_view> {
+public:
+  typedef obj_owner<pdf_table_view> base_type;
+  using base_type::base_type; // ensures that constructors are inherited  
+  pdf_table() {}
+  pdf_table(const grid_def_view & grid, double Qmin, double Qmax, 
+            double dlnlnQ, int lnlnQ_order = hoppet_pdf_table_def_lnlnQ_order, 
+            bool freeze_at_Qmin = false, 
+            int iflv_max_table = ncompmax) {
+    _ptr = hoppet_cxx__pdf_table__new(grid.ptr(), Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table);
+  }
+
+  void add_nf_info(const running_coupling & coupling) {
+    hoppet_cxx__pdf_table__add_nf_info(valid_ptr(), coupling.ptr());
+  }
 };
 
 } // end namespace hoppet -------------------------------------
