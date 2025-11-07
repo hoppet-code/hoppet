@@ -1188,7 +1188,7 @@ contains
 
   DEFINE_DELETE(pdf_table)
 
-  ! think carefully which of these interfaces should be public, which renamed
+  ! think carefully which of these interfaces should be public, which perhaps renamed
   DEFINE_RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
   DEFINE_RETURN_INT_MEMBER(pdf_table,nQ)
   DEFINE_RETURN_INT_MEMBER(pdf_table,tab_iflv_max)

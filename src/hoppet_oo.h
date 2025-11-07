@@ -252,6 +252,27 @@ extern "C" {
 DEFINE_COPY(pdf_table)
 DEFINE_DELETE(pdf_table)
 
+DEFINE_RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
+DEFINE_RETURN_INT_MEMBER(pdf_table,nq)
+DEFINE_RETURN_INT_MEMBER(pdf_table,tab_iflv_max)
+DEFINE_RETURN_INT_MEMBER(pdf_table,lnlnq_order)
+DEFINE_RETURN_LOG_MEMBER(pdf_table,freeze_at_qmin)
+DEFINE_RETURN_LOG_MEMBER(pdf_table,nf_info_associated)
+DEFINE_RETURN_INT_MEMBER(pdf_table,nflo)
+DEFINE_RETURN_INT_MEMBER(pdf_table,nfhi)
+DEFINE_RETURN_DBL_MEMBER(pdf_table,lnlnq_min)
+DEFINE_RETURN_DBL_MEMBER(pdf_table,lnlnq_max)
+DEFINE_RETURN_DBL_MEMBER(pdf_table,lambda_eff)
+DEFINE_RETURN_DBL_MEMBER(pdf_table,dlnlnq)
+DEFINE_RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)
+DEFINE_RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo)
+DEFINE_RETURN_DBL_MEMBER_I(pdf_table,as2pi)
+DEFINE_RETURN_INT_MEMBER_I(pdf_table,nf_int)
+DEFINE_RETURN_INT_MEMBER_I(pdf_table,lnlnq_vals)
+DEFINE_RETURN_INT_MEMBER_I(pdf_table,q_vals)
+
+
+/// namespace hoppet contains the object-oriented C++ interface to HOPPET
 namespace hoppet {
 
 typedef std::size_t size_type;
@@ -1493,6 +1514,26 @@ public:
     return *this;
   }
 
+  // think carefully which of these interfaces should be public, which perhaps renamed
+  RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
+  RETURN_INT_MEMBER(pdf_table,nq)
+  RETURN_INT_MEMBER(pdf_table,tab_iflv_max)
+  RETURN_INT_MEMBER(pdf_table,lnlnq_order)
+  RETURN_LOG_MEMBER(pdf_table,freeze_at_qmin)
+  RETURN_LOG_MEMBER(pdf_table,nf_info_associated)
+  RETURN_INT_MEMBER(pdf_table,nflo)
+  RETURN_INT_MEMBER(pdf_table,nfhi)
+  RETURN_DBL_MEMBER(pdf_table,lnlnq_min)
+  RETURN_DBL_MEMBER(pdf_table,lnlnq_max)
+  RETURN_DBL_MEMBER(pdf_table,lambda_eff)
+  RETURN_DBL_MEMBER(pdf_table,dlnlnq)
+  RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)
+  RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo)
+  RETURN_DBL_MEMBER_I(pdf_table,as2pi)
+  RETURN_INT_MEMBER_I(pdf_table,nf_int)
+  RETURN_INT_MEMBER_I(pdf_table,lnlnq_vals)
+  RETURN_INT_MEMBER_I(pdf_table,q_vals)
+
 };
 
 class pdf_table : public obj_owner<pdf_table_view> {
@@ -1522,6 +1563,8 @@ namespace sl {
   /// a view of the grid_def object being used in the streamlined interface
   extern grid_def_view grid;
   extern dglap_holder_view dh;
+  extern pdf_table_view    table; //< this should evolve to become an array of tables
+  extern running_coupling_view coupling; 
 }
 }
 

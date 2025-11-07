@@ -41,7 +41,7 @@ module streamlined_interface
   
   !! coupling
   logical,                save :: coupling_initialised = .false.
-  type(running_coupling), save :: coupling
+  type(running_coupling), save, target :: coupling
   integer,  save :: ffn_nf = -1
   logical,  save :: quark_masses_are_MSbar = .false.
   real(dp), save :: masses(4:6) = quark_masses_def(4:6)
@@ -60,6 +60,11 @@ module streamlined_interface
       type(c_ptr), value :: grid_cptr
       type(c_ptr), value :: dh_cptr
     end subroutine hoppetStartCXX
+    subroutine hoppetSetEvolvedPointers(coupling_cptr,tab_cptr) bind(C, name="hoppetSetEvolvedPointers")
+      use, intrinsic :: iso_c_binding, only : c_ptr
+      type(c_ptr), value :: coupling_cptr
+      type(c_ptr), value :: tab_cptr
+    end subroutine hoppetSetEvolvedPointers
   end interface
 
 contains
@@ -452,6 +457,14 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
   ! clean up
   call Delete(pdf0) 
   
+
+  block
+    use, intrinsic :: iso_c_binding, only : c_ptr, c_loc
+    type(c_ptr) :: coupling_cptr, tab_cptr
+    coupling_cptr = c_loc(coupling)
+    tab_cptr      = c_loc(tables(0))
+    call hoppetSetEvolvedPointers(coupling_cptr, tab_cptr)
+  end block
 end subroutine hoppetEvolve
 
 

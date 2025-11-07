@@ -34,6 +34,10 @@ int main(int argc, char* argv[]) {
   double dlnlnQ = dy/4.0;
   int nloop = 3, order = -6;
   hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order);
+  // evolve the initial condition
+  double asQ0 = 0.35, Q0=sqrt(2.0), muR_Q = 1.0;
+  hoppetEvolve(asQ0, Q0, nloop, muR_Q, hoppetBenchmarkPDFunpol, Q0);
+
   hoppetEnableCxxExceptionsFromFortran(); // enable C++ exceptions from Fortran
 
   // then run the tests
@@ -546,6 +550,8 @@ TEST_CASE("pdf_table", "[hoppet]") {
 
   auto tab_copy = tab; // copy constructor
   //hoppet::pdf_table_view tab_view(tab);
+
+  cout << hoppet::sl::table.nq() << "=hoppet::sl::table.nQ()\n";
 }
 
 
