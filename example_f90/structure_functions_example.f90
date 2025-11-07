@@ -67,7 +67,7 @@ program structure_functions_example
   call InitStrFct(nloop_coefs, .true., xR = xmur, xF = xmuf)
 
   ! write out the structure functions
-  ymax = log(1e5) !ymax=20
+  ymax = log(1e5_dp) !ymax=20
   Q = 100.0_dp
   call write_f1(6, Q, ymax, 10)
   call write_f2(6, Q, ymax, 10)
