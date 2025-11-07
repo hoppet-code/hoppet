@@ -1387,6 +1387,12 @@ public:
     return split_mat_view(hoppet_cxx__dglap_holder__allp(valid_ptr(), iloop, nf));
   }
   inline mass_threshold_mat_view mtm(int iloop, int nf_heavy) {
+    // only have these checks when debugging is turned on
+    if (iloop < 3 || iloop > nloop()) {
+      throw std::runtime_error("dglap_holder_view::mtm(iloop,nf_heavy) requested iloop " + std::to_string(iloop) +
+                               " outside supported range [3," + std::to_string(nloop()) + "]");
+    }
+
     return mass_threshold_mat_view(hoppet_cxx__dglap_holder__allmtm(valid_ptr(), iloop, nf_heavy));
   }
 
@@ -1405,7 +1411,6 @@ public:
   RETURN_OBJ_MEMBER(dglap_holder,p_nlo,split_mat)
   RETURN_OBJ_MEMBER(dglap_holder,p_nnlo,split_mat)
   RETURN_OBJ_MEMBER(dglap_holder,p_n3lo,split_mat)
-
 
 };
 

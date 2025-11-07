@@ -778,7 +778,7 @@ contains
 
     call c_f_pointer(other, other_f_ptr)
     allocate(f_ptr)
-    call InitMTM(other_f_ptr, f_ptr)
+    call InitMTM(f_ptr, other_f_ptr)
     mass_threshold_mat_ptr = c_loc(f_ptr)
   end function hoppet_cxx__mass_threshold_mat__copy
 
@@ -1051,6 +1051,9 @@ contains
   DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nnlo,split_mat)
   DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_n3lo,split_mat)
 
+  DEFINE_RETURN_OBJ_MEMBER_IJ(dglap_holder,allmtm,mass_threshold_mat)
+  DEFINE_RETURN_OBJ_MEMBER(dglap_holder,mtm_nnlo,mass_threshold_mat)
+  DEFINE_RETURN_OBJ_MEMBER(dglap_holder,mtm_n3lo,mass_threshold_mat)
 
 end module hoppet_cxx_oo_dglap_holder
 

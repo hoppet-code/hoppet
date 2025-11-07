@@ -23,6 +23,8 @@ hoppet::grid_def big_grid;
 /// We supply the main routine, to make sure that we can 
 /// do any global-object initialisation that's needed
 int main(int argc, char* argv[]) {
+  hoppetEnableCxxExceptionsFromFortran(); // enable C++ exceptions from Fortran
+
   // Global setup
   // make a simple grid for use in the tests
   grid100  = hoppet::grid_def(0.1, 10.0);
@@ -31,7 +33,7 @@ int main(int argc, char* argv[]) {
   // and also set up the objects in the hoppet streamlined interface
   double ymax = 12.0, dy = 0.2, Qmin = 1.0, Qmax = 1e4;
   double dlnlnQ = dy/4.0;
-  int nloop = 2, order = -6;
+  int nloop = 3, order = -6;
   hoppetStartExtended(ymax, dy, Qmin, Qmax, dlnlnQ, nloop, order);
 
   // then run the tests
@@ -376,6 +378,32 @@ TEST_CASE( "split_mat", "[hoppet]" ) {
   hoppet::grid_quant_2d pdf_sml(big_grid, 7); // 
   pdf_sml.assign(0.0);
   REQUIRE_THROWS_AS( p_lo * pdf_sml, std::runtime_error ); // should throw because too small
+
+  // test copying from the streamlined interface
+  int nloop = 2;
+  hoppet::split_mat p_gen = hoppet::sl::dh.p(nloop, nf);
+}
+
+//-----------------------------------------------------------------------------
+TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
+  typedef hoppet::mass_threshold_mat MTM;
+  MTM::view_type mtm_view;
+  int nf_heavy = 4;
+  int nloop    = 3;
+  MTM mtm(nf_heavy);
+  auto & dh = hoppet::sl::dh;
+  mtm_view.take_view(dh.mtm(nloop, nf_heavy));
+  cout << "mtm_view.ptr(): " << mtm_view.ptr() << endl;
+  mtm = mtm_view; // test assignment from view
+  hoppet::pdf pdf = pdf_qcd(dh.grid());
+  pdf = 0.0;
+  pdf[hoppet::iflv_g] = dh.grid() * [](double y) { double x = exp(-y); return 2*pow(1-x,6)*x; };
+  auto dpdf = mtm * pdf;
+  cout << dpdf[hoppet::iflv_c].at_y(5.0) << "=dpdf[c].at_y(5.0)\n";
+
+  //hoppet::split_fn_view sf()
+  //mtm = hoppet::sl::dh.mtm(nloop, nf_heavy);
+  //mtm_view.take_view();
 }
 
 //-----------------------------------------------------------------------------
@@ -513,5 +541,5 @@ TEST_CASE( "streamlined-objects", "[hoppet]" ) {
 
   dh.set_nf(4);
   REQUIRE( dh.nf() == 4 );
-  REQUIRE( dh.nloop() == 2 );
+  REQUIRE( dh.nloop() == 3 );
 }
