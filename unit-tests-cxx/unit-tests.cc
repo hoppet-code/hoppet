@@ -393,17 +393,21 @@ TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
   MTM mtm(nf_heavy);
   auto & dh = hoppet::sl::dh;
   mtm_view.take_view(dh.mtm(nloop, nf_heavy));
-  cout << "mtm_view.ptr(): " << mtm_view.ptr() << endl;
   mtm = mtm_view; // test assignment from view
+
+  // now do some basic logic checks, namely that heavy-quark entries are zero/non-zero as appropriate
   hoppet::pdf pdf = pdf_qcd(dh.grid());
   pdf = 0.0;
   pdf[hoppet::iflv_g] = dh.grid() * [](double y) { double x = exp(-y); return 2*pow(1-x,6)*x; };
   auto dpdf = mtm * pdf;
-  cout << dpdf[hoppet::iflv_c].at_y(5.0) << "=dpdf[c].at_y(5.0)\n";
+  REQUIRE(dpdf[hoppet::iflv_c].at_y(5.0) != 0.0);
+  REQUIRE(dpdf[hoppet::iflv_b].at_y(5.0) == 0.0);
 
-  //hoppet::split_fn_view sf()
-  //mtm = hoppet::sl::dh.mtm(nloop, nf_heavy);
-  //mtm_view.take_view();
+  // try replacing a one of the entries in the mtm and check that it propagates
+  mtm.sgg_h() = dh.p_lo().gg(); // set to LO gg->gg (physically wrong, but serves the purpose)
+  auto ddpdf = mtm * pdf;
+  REQUIRE(ddpdf[hoppet::iflv_g].at_y(5.0) != dpdf[hoppet::iflv_g].at_y(5.0));
+  REQUIRE(ddpdf[hoppet::iflv_c].at_y(5.0) == dpdf[hoppet::iflv_c].at_y(5.0));
 }
 
 //-----------------------------------------------------------------------------

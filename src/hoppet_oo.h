@@ -18,10 +18,10 @@
 
 // Next steps:
 // - [x] add the running_coupling class
-// - [~] add the dglap_holder                                 -- NEEDS TESTS of mtm access
+// - [x] add the dglap_holder    
 // - [ ] add the tabulation class
-// - [~] add the mass thresholds (or wait until more mature?) -- NEEDS TESTS still
-// - [ ] add streamlined interface functions
+// - [x] add the mass thresholds 
+// - [~] add streamlined interface functions
 // - [ ] add qed support
 // - [x] add access to things like the beta function coefficients, qcd group constants, etc.
 // - [ ] add structure function support
