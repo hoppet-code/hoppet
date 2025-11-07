@@ -128,37 +128,40 @@ contains
       use streamlined_interface
       use mass_thresholds_n3lo
       real(dp) :: moment_N
+      integer  :: imoment_N
       type(mass_threshold_mat) :: mtm2, mtm3, mtm3_fortran
 
       call InitMTMLibOME(grid, mtm2, nloop=3)
       call InitMTMLibOME(grid, mtm3, nloop=4)
       call InitMTMN3LOExactFortran(grid, mtm3_fortran) ! fortran exact except AQg
 
-      moment_N = 2.0_dp
 
-      call check_moment("nloop=3, PShq     ", moment_N,   mtm2%PShq   , dh%allMTM(3,nf_int)%PShq   )
-      call check_moment("nloop=3, PShg     ", moment_N,   mtm2%PShg   , dh%allMTM(3,nf_int)%PShg   )
-      call check_moment("nloop=3, PSqq_H   ", moment_N,   mtm2%PSqq_H , dh%allMTM(3,nf_int)%PSqq_H )
-      call check_moment("nloop=3, NSqq_H   ", moment_N,   mtm2%NSqq_H , dh%allMTM(3,nf_int)%NSqq_H )
-      call check_moment("nloop=3, NSmqq_H  ", moment_N,   mtm2%NSmqq_H, dh%allMTM(3,nf_int)%NSmqq_H)      
-      call check_moment("nloop=3, Sgg_H    ", moment_N,   mtm2%Sgg_H  , dh%allMTM(3,nf_int)%Sgg_H  )
-      call check_moment("nloop=3, Sgq_H    ", moment_N,   mtm2%Sgq_H  , dh%allMTM(3,nf_int)%Sgq_H  )
-      call check_moment("nloop=3, Sqg_H    ", moment_N,   mtm2%Sqg_H  , dh%allMTM(3,nf_int)%Sqg_H  )
+      do imoment_N = 2, 3
+        moment_N = real(imoment_N, dp)
 
-      ! AQg can differ at the 6e-6 relative level; in the fortran OME code, it is the only
-      ! only one that is not exact. It appears to use expansions and, depending on the
-      ! system and optimisation level, one can trigger differences, perhaps because of
-      ! a combination of rounding errors and how they induce adaptive integration fluctuations
-      call check_moment("nloop=4, PShg     ", moment_N,   mtm3%PShg   , mtm3_fortran%PShg, override_tol=1e-5_dp ) 
-      ! all others should be precise.
-      call check_moment("nloop=4, PShq     ", moment_N,   mtm3%PShq   , mtm3_fortran%PShq   )
-      call check_moment("nloop=4, PSqq_H   ", moment_N,   mtm3%PSqq_H , mtm3_fortran%PSqq_H )
-      call check_moment("nloop=4, NSqq_H   ", moment_N,   mtm3%NSqq_H , mtm3_fortran%NSqq_H )
-      call check_moment("nloop=4, NSmqq_H  ", moment_N,   mtm3%NSmqq_H, mtm3_fortran%NSmqq_H)      
-      call check_moment("nloop=4, Sgg_H    ", moment_N,   mtm3%Sgg_H  , mtm3_fortran%Sgg_H  )
-      call check_moment("nloop=4, Sgq_H    ", moment_N,   mtm3%Sgq_H  , mtm3_fortran%Sgq_H  )
-      call check_moment("nloop=4, Sqg_H    ", moment_N,   mtm3%Sqg_H  , mtm3_fortran%Sqg_H  )
-
+        call check_moment("nloop=3, PShq     ", moment_N,   mtm2%PShq   , dh%allMTM(3,nf_int)%PShq   )
+        call check_moment("nloop=3, PShg     ", moment_N,   mtm2%PShg   , dh%allMTM(3,nf_int)%PShg   )
+        call check_moment("nloop=3, PSqq_H   ", moment_N,   mtm2%PSqq_H , dh%allMTM(3,nf_int)%PSqq_H )
+        call check_moment("nloop=3, NSqq_H   ", moment_N,   mtm2%NSqq_H , dh%allMTM(3,nf_int)%NSqq_H )
+        call check_moment("nloop=3, NSmqq_H  ", moment_N,   mtm2%NSmqq_H, dh%allMTM(3,nf_int)%NSmqq_H)      
+        call check_moment("nloop=3, Sgg_H    ", moment_N,   mtm2%Sgg_H  , dh%allMTM(3,nf_int)%Sgg_H  )
+        call check_moment("nloop=3, Sgq_H    ", moment_N,   mtm2%Sgq_H  , dh%allMTM(3,nf_int)%Sgq_H  )
+        call check_moment("nloop=3, Sqg_H    ", moment_N,   mtm2%Sqg_H  , dh%allMTM(3,nf_int)%Sqg_H  )
+  
+        ! AQg can differ at the 6e-6 relative level; in the fortran OME code, it is the only
+        ! only one that is not exact. It appears to use expansions and, depending on the
+        ! system and optimisation level, one can trigger differences, perhaps because of
+        ! a combination of rounding errors and how they induce adaptive integration fluctuations
+        call check_moment("nloop=4, PShg     ", moment_N,   mtm3%PShg   , mtm3_fortran%PShg, override_tol=1e-5_dp ) 
+        ! all others should be precise.
+        call check_moment("nloop=4, PShq     ", moment_N,   mtm3%PShq   , mtm3_fortran%PShq   )
+        call check_moment("nloop=4, PSqq_H   ", moment_N,   mtm3%PSqq_H , mtm3_fortran%PSqq_H )
+        call check_moment("nloop=4, NSqq_H   ", moment_N,   mtm3%NSqq_H , mtm3_fortran%NSqq_H )
+        call check_moment("nloop=4, NSmqq_H  ", moment_N,   mtm3%NSmqq_H, mtm3_fortran%NSmqq_H)      
+        call check_moment("nloop=4, Sgg_H    ", moment_N,   mtm3%Sgg_H  , mtm3_fortran%Sgg_H  )
+        call check_moment("nloop=4, Sgq_H    ", moment_N,   mtm3%Sgq_H  , mtm3_fortran%Sgq_H  )
+        call check_moment("nloop=4, Sqg_H    ", moment_N,   mtm3%Sqg_H  , mtm3_fortran%Sqg_H  )
+      end do
     end subroutine moment_check
 
     subroutine check_moment(name, momN, gc_test, gc_ref, override_tol)
