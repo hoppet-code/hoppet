@@ -39,8 +39,8 @@ module pdf_tabulate
   private
 
   type pdfseginfo
-  real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ, inv_dlnlnQ
-    integer :: ilnlnQ_lo, ilnlnQ_hi
+    real(dp) :: lnlnQ_lo, lnlnQ_hi, dlnlnQ, inv_dlnlnQ
+    integer  :: ilnlnQ_lo, ilnlnQ_hi
   end type pdfseginfo
   public :: pdfseginfo
 
