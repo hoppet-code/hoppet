@@ -62,6 +62,12 @@ Access to streamlined interface objects
 	added bind(C) attributes to all variables here and to SetNf and
 	SetGroup, with suitable names (hoppet__qcd__set_group, etc.)
 
+	* src/convolution.f90:
+	changed behaviour of grid%dy for grid_defs with subgrid 
+	definitions: it is now set to the coarsest dy among the
+	subgrids, e.g. to allow users to detect and decide on a
+	appropriate dlnlnQ based on the grid.
+
 	* src/splitting-functions/xpns2e.f:
 	* src/splitting-functions/xpij2e.f:
 	turned off renaming A3G => mvv_A3G and A3 => mvv_A3, which was

@@ -65,13 +65,23 @@ module convolution
 
   !-------------------------------
   !! Definition of a grid.
-  !! Includes possibility of one layer of subsidiary definitions.
+  !!
+  !! Includes possibility of one layer of subsidiary grid definitions.
   type grid_def
-     real(dp) :: dy, ymax, eps
-     integer  :: ny, order, nsub = 0
-     logical  :: locked
-     integer,        pointer :: subiy(:) => null() ! starting points of subsidiary grid
-     type(grid_def), pointer :: subgd(:) => null() ! subsidiary grid defs
+     real(dp) :: dy        !< actual grid spacing in y = ln(1/x) (with subgrids: largest of subgd(:)%dy)
+     real(dp) :: ymax      !< maximum y value (with subgrids: largest of subgd(:)%ymax)
+     real(dp) :: eps       !< integration precision
+     integer  :: ny        !< max index along y direction (0:ny)
+     integer  :: order     !< interpolation order ()
+     integer  :: nsub = 0  !< number of subsidiary grids 
+     logical  :: locked    !< whether subgrids are "locked", i.e. finer subgrids are aligned and transfer info up to coarser grids
+     integer, pointer :: subiy(:) => null() !< starting iy indices of subgrids within overall grid (1:nsub)
+     !! Subsidiary grid defs (1:nsub), if they're being used.
+     !! When used with locking:
+     !! * the grids are stored in order of increasing dy
+     !! * the grid spacings of the finer grids will be the next coarser grid divided by an integer
+     !! * finer grids have ymax values that are smaller than the coarser grids
+     type(grid_def), pointer :: subgd(:) => null() 
   end type grid_def
 
   !--------------------------------------------------
@@ -465,7 +475,8 @@ contains
        subgd(:) = gdarray(:)
     end if
     
-    grid%dy       = zero
+    ! set dy to the coarsest of the dy's, useful e.g. when deciding on a dlnlnQ based on the grid
+    grid%dy       = maxval(subgd(:)%dy) 
     grid%ymax     = maxval(subgd(:)%ymax)
     grid%order    = conv_UndefinedInt
     !-- arrays will stretch from 0:grid%ny; so must get this right!
