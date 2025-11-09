@@ -551,7 +551,7 @@ TEST_CASE("pdf_table", "[hoppet]") {
   auto tab_copy = tab; // copy constructor
   //hoppet::pdf_table_view tab_view(tab);
 
-  cout << hoppet::sl::table.nq() << "=hoppet::sl::table.nQ()\n";
+  cout << hoppet::sl::table.nQ() << "=hoppet::sl::table.nQ()\n";
 }
 
 

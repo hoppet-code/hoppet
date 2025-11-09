@@ -74,6 +74,10 @@ Access to streamlined interface objects
 	exceptions to be thrown instead of Fortran error stops.
 	Not generally portable, but appears to work on linux and MacOS.
 
+	* src/inc/extraMacros.inc:
+	added an extra macro STRINGIFY(x) to help provide universal
+	stringification (whose internals differ depending on the compiler)
+
 --------- end 2025-10-cxx-OO branch ---------
 
 2025-11-01  Gavin Salam  <gavin.salam@physics.ox.ac.uk>

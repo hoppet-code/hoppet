@@ -1,9 +1,11 @@
 
 #include "inc/ftlMacros.inc"
+#include "inc/extraMacros.inc"
+
 
 ! define a macro to generate the functions that returns a generic object's integer member
 #define DEFINE_RETURN_INT_MEMBER(OBJ,NAME) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C,name="hoppet_cxx__"//STRINGIFY(OBJ)//"__"//STRINGIFY(NAME)) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     integer(c_int) :: res;\
