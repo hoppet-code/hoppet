@@ -1,9 +1,10 @@
 #ifndef __HOPPET___BASE_TYPES__
 #define __HOPPET___BASE_TYPES__
 
+#include <tuple>
+
 /// an empty class as a default for template parameters    
 struct Empty {};
-
 
 //-----------------------------------------------------------------------------
 /// @brief Generic object view class, to be used as a base for non-owning wrappers
