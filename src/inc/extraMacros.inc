@@ -2,7 +2,8 @@
 #ifndef EXTRA_MACROS_INCLUDED
 #define EXTRA_MACROS_INCLUDED
 
-#if defined(__GFORTRAN__) || defined(NAGFOR) || defined(__flang__)
+!#if defined(__GFORTRAN__) || defined(NAGFOR) || defined(__flang__)
+#if defined(__GFORTRAN__) || defined(NAGFOR)
 #define STRINGIFY(x) "x"
 #else 
 #define STRINGIFY(x) #x
