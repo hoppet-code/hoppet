@@ -56,7 +56,7 @@ Access to streamlined interface objects
 
 --------- core code changes on 2025-10-cxx-OO branch ---------
 
-2025-11-05  Gavin Salam 
+2025-11-05 ->09 Gavin Salam 
 
 	* src/qcd.f90:
 	added bind(C) attributes to all variables here and to SetNf and
@@ -67,6 +67,11 @@ Access to streamlined interface objects
 	it is now set to the coarsest dy among the subgrids (rather than
 	being set to zero), e.g. to allow users to detect and decide on a
 	appropriate dlnlnQ based on the grid.
+
+	* src/tabulation.f90:
+	fixed an issue where tab%allocated was .false. for tabulations
+	where nf info had been added, causing memory leaks in some 
+	scenarios.
 
 	* src/splitting-functions/xpns2e.f:
 	* src/splitting-functions/xpij2e.f:

@@ -17,6 +17,14 @@ using Catch::Matchers::WithinRel;
 
 using namespace std;
 
+string red = "\033[1;31m";
+string grn = "\033[1;32m";
+string yel = "\033[1;33m";
+string blu = "\033[1;34m";
+string mag = "\033[1;35m";
+string cyn = "\033[1;36m";
+string endc= "\033[0m";
+
 hoppet::grid_def grid100;
 hoppet::grid_def big_grid;
 
@@ -549,7 +557,8 @@ TEST_CASE("pdf_table", "[hoppet]") {
   tab.add_nf_info(alphas);
 
   auto tab_copy = tab; // copy constructor
-  //hoppet::pdf_table_view tab_view(tab);
+//
+  hoppet::pdf_table_view tab_view(tab);
 
   cout << hoppet::sl::table.nQ() << "=hoppet::sl::table.nQ()\n";
 }
@@ -563,6 +572,9 @@ TEST_CASE( "streamlined-objects", "[hoppet]" ) {
   q = [](double y) { return y*y; };
   REQUIRE_THAT( q.at_y(5.0), WithinAbs(25.0, 1e-6));
 
+
+  auto qq = q;
+  //q.take_view(qq);
 
   dh.set_nf(4);
   REQUIRE( dh.nf() == 4 );

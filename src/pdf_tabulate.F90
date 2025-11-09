@@ -409,7 +409,6 @@ contains
     real(dp) :: Qlo, Qhi, Qhi_test
     type(pdfseginfo), pointer :: seginfo
 
-    
     !if (tab%nf_info_associated) call wae_error('AddNfInfoToPdfTable',&
     !     &'nf info already associated: delete it first')
 
@@ -518,6 +517,7 @@ contains
 
     ! REMEMBER TO COMPLETE FROM ORIG...
     tab%nf_info_associated = .true.
+    tab%allocated = .true.
   end subroutine AddNfInfoToPdfTable
 
   !---------------------------------------------------------------
