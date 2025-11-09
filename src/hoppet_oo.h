@@ -416,6 +416,9 @@ public:
     return *this;
   }
   virtual ~obj_owner() {generic_delete(V::ptr());}
+
+  void take_view() noexcept = delete; // obj_owner cannot safely take_view(), so disable it
+
 };
 
 //-----------------------------------------------------------------------------
@@ -607,7 +610,7 @@ protected:
 
 
 //-----------------------------------------------------------------------------
-/// @brief Generic object view class, to be used as a base for owning wrappers
+/// @brief Generic data_owner class, to be used as a base for owning wrappers
 /// of Fortran objects that provide a view of the underlying double-precision data
 ///
 /// @tparam V  the data_view type from which this derives
@@ -616,6 +619,9 @@ protected:
 template<typename V, typename P>
 class data_owner : public V {
 public:
+
+  typedef V view_type;
+
   data_owner() {}
   virtual ~data_owner() {del();}
   void del() {generic_delete(_ptr); reset();}
@@ -667,6 +673,8 @@ public:
   const P* ptr() const { return _ptr; }
   P* ptr()  { return _ptr; }
 
+
+
 protected:
 
   /// @brief  move the contents from other into this, without deleting existing data
@@ -676,12 +684,14 @@ protected:
   /// Note that this does not delete any existing data in *this, so be careful to call del() 
   /// first if needed.
   void move_no_del(data_owner & other) noexcept {
-    //std::cout << "actually moving " << other.ptr() << "\n"; 
     // move the semantics
     this->take_view(other);
     _ptr = other._ptr;
     other.reset();
   }
+
+  using view_type::take_view; //< data_owner cannot safely take_view(), so disable it
+
 
   P * _ptr = nullptr;
 };
