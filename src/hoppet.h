@@ -217,22 +217,21 @@ extern "C" {
   void hoppetAssign(void (* pdf_subroutine)(const double & x, 
                                             const double & Q, double * res) );
 
-//=====================================================================
-// Set up the strong coupling such that alphas(Q)=alphas_Q, with the
-// given number of loops (nloop).
-//
-// The user should have set the quark masses or requested a FFN scheme
-// prior to calling this function.
-//
-// This function is provided mainly for use in conjunction with hoppetAssign.
-// In particular, it has the side effect of modifying the structure of the
-// PDF tables to make sure they know about the mass thresholds.
-//
-// If QED has been requested, a QED coupling will also be set up
-// (its value is not currently configurable from this interface).
-//
-// If you call hoppetEvolve (below), there is no need to separately call
-// hoppetSetCoupling.
+  /// Set up the strong coupling such that alphas(Q)=alphas_Q, with the
+  /// given number of loops (nloop).
+  ///
+  /// The user should have set the quark masses or requested a FFN scheme
+  /// prior to calling this function.
+  ///
+  /// This function is provided mainly for use in conjunction with hoppetAssign.
+  /// In particular, it has the side effect of modifying the structure of the
+  /// PDF tables to make sure they know about the mass thresholds.
+  ///
+  /// If QED has been requested, a QED coupling will also be set up
+  /// (its value is not currently configurable from this interface).
+  ///
+  /// If you call hoppetEvolve (below), there is no need to separately call
+  /// hoppetSetCoupling.
   void hoppetSetCoupling(const double & asQ0,
                          const double & Q0alphas,
                          const int    & nloop);
