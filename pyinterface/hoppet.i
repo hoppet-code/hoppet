@@ -1,4 +1,5 @@
 /* File: hoppet.i */
+
 %module(docstring="
 A Higher Order Perturbative Parton Evolution Toolkit
 
@@ -7,50 +8,51 @@ common manipulations of parton distribution functions (PDFs).
 
 Citation:
 G.P. Salam, J. Rojo, 'A Higher Order Perturbative Parton Evolution Toolkit (HOPPET)', 
-Comput. Phys. Commun. 180 (2009) 120-156, arXiv:0804.3755
+Comput. Phys. Commun. 180 (2009) 120-156, `arXiv:0804.3755 <https://arXiv.org/abs/0804.3755>`_
 
 and                                                       
 
-A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer (arXiv:2510.XXXXX). 
+A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer, 
+`arXiv:2510.09310 <https://arXiv.org/abs/2510.09310>`_. 
 
 Example:
+--------
 
-   import hoppet as hp
-   import numpy as np
+   >>> import hoppet as hp
+   >>> import numpy as np
+   >>> 
+   >>> def main():
+   >>>     dy = 0.1    
+   >>>     nloop = 3
+   >>>     # Start hoppet
+   >>>     hp.Start(dy, nloop)
+   >>>     
+   >>>     asQ0 = 0.35
+   >>>     Q0 = np.sqrt(2.0)
+   >>>     # Do the evolution. 
+   >>>     hp.Evolve(asQ0, Q0, nloop, 1.0, hp.BenchmarkPDFunpol, Q0)
+   >>> 
+   >>>     # Evaluate the PDFs at some x values and print them
+   >>>     xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
+   >>>     Q = 100.0
+   >>> 
+   >>>     print('')
+   >>>     print('           Evaluating PDFs at Q =',Q, ' GeV')
+   >>>     print('    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon')
+   >>>     for ix in range(9):
+   >>>         pdf_array = hp.Eval(xvals[ix], Q)
+   >>>         print('{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}'.format(
+   >>>             xvals[ix],
+   >>>             pdf_array[6 + 2] - pdf_array[6 - 2], 
+   >>>             pdf_array[6 + 1] - pdf_array[6 - 1], 
+   >>>             2 * (pdf_array[6 - 1] + pdf_array[6 - 2]),
+   >>>             pdf_array[6 - 4] + pdf_array[6 + 4],
+   >>>             pdf_array[6 + 0]
+   >>>         ))
+   >>> 
+   >>>     hp.DeleteAll()
    
-   def main():
-       dy = 0.1    
-       nloop = 3
-       # Start hoppet
-       hp.Start(dy, nloop)
-       
-       asQ0 = 0.35
-       Q0 = np.sqrt(2.0)
-       # Do the evolution. 
-       hp.Evolve(asQ0, Q0, nloop, 1.0, hp.BenchmarkPDFunpol, Q0)
-   
-       # Evaluate the PDFs at some x values and print them
-       xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
-       Q = 100.0
-   
-       print('')
-       print('           Evaluating PDFs at Q =',Q, ' GeV')
-       print('    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon')
-       for ix in range(9):
-           pdf_array = hp.Eval(xvals[ix], Q)
-           print('{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}'.format(
-               xvals[ix],
-               pdf_array[6 + 2] - pdf_array[6 - 2], 
-               pdf_array[6 + 1] - pdf_array[6 - 1], 
-               2 * (pdf_array[6 - 1] + pdf_array[6 - 2]),
-               pdf_array[6 - 4] + pdf_array[6 + 4],
-               pdf_array[6 + 0]
-           ))
-
-   
-       hp.DeleteAll()
-   
-For more examples look at https://github.com/hoppet-code/hoppet/tree/master/example_py	
+For more examples, see https://github.com/hoppet-code/hoppet/tree/master/example_py	
 ") hoppet
 
 %module hoppet
@@ -302,62 +304,62 @@ static void InitStrFctFlav(const int & order_max, const int & separate_orders, c
 }
 static PyObject* StrFct(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFct(x, Q, muR_in, muF_in, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFct(x, Q, muR_in, muF_in, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctNoMu(const double & x, const double & Q) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctNoMu(x, Q, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctNoMu(x, Q, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctLO(x, Q, muR_in, muF_in, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctLO(x, Q, muR_in, muF_in, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctNLO(x, Q, muR_in, muF_in, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctNLO(x, Q, muR_in, muF_in, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctFlav(x, Q, muR_in, muF_in, flav, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctFlav(x, Q, muR_in, muF_in, flav, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctNoMuFlav(const double & x, const double & Q, const int & flav) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctNoMuFlav(x, Q, flav, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctNoMuFlav(x, Q, flav, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctLOFlav(x, Q, muR_in, muF_in, flav, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctLOFlav(x, Q, muR_in, muF_in, flav, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctNLOFlav(const double & x, const double & Q, const double & muR_in, const double & muF_in, const int & flav) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctNLOFlav(x, Q, muR_in, muF_in, flav, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctNLOFlav(x, Q, muR_in, muF_in, flav, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctNNLO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctNNLO(x, Q, muR_in, muF_in, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctNNLO(x, Q, muR_in, muF_in, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 
 static PyObject* StrFctN3LO(const double & x, const double & Q, const double & muR_in, const double & muF_in) {
     CHECK_GLOBAL_STR_FNC_INITIALIZED
-    hoppetStrFctN3LO(x, Q, muR_in, muF_in, global_pdf);
-    return str_fnc_to_array(global_pdf);
+    hoppetStrFctN3LO(x, Q, muR_in, muF_in, global_str_fnc);
+    return str_fnc_to_array(global_str_fnc);
 }
 %}
 
@@ -384,14 +386,14 @@ Parameters:
 %rename(SetVFN                  )      hoppetsetvfn_;       
 %rename(SetPoleMassVFN          )      hoppetsetpolemassvfn_;       
 %rename(SetMSbarMassVFN         )      hoppetsetmsbarmassvfn_;       
-%rename(SetExactDGLAP           )      hoppetsetexactdglap_;
+%rename(SetExactDGLAP           )      hoppetSetExactDGLAP_c;
 %rename(SetYLnlnQInterpOrders   )      hoppetsetylnlnqinterporders_;
 %rename(SetApproximateDGLAPN3LO )      hoppetsetapproximatedglapn3lo_;
 %rename(SetSplittingNNLO        )      hoppetsetsplittingnnlo_;
 %rename(SetSplittingN3LO        )      hoppetsetsplittingn3lo_;
 %rename(SetN3LOnfthresholds     )      hoppetsetn3lonfthresholds_;
 %rename(StartStrFct             )      hoppetstartstrfct_;
-%rename(StartStrFctExtended     )      hoppetstartstrfctextended_;
+%rename(StartStrFctExtended     )      hoppetStartStrFctExtended_c;
 %rename(WriteLHAPDFGrid         )      hoppetWriteLHAPDFGrid;
 %rename(version                 )      hoppetVersion;
 
@@ -422,8 +424,6 @@ Parameters:
 %ignore hoppetinitstrfct_;
 %ignore hoppetinitstrfctflav_;
 %ignore hoppetVersionC;
-%ignore hoppetSetExactDGLAP_c;
-%ignore hoppetStartStrFctExtended_c;
 %ignore hoppetInitStrFct_c;
 %ignore hoppetInitStrFctFlav_c;
 %ignore hoppetwritelhapdfgrid_;
@@ -508,7 +508,7 @@ Parameters:
   callback (callable): PDF function with signature callback(x, Q)
                        returning array of 13 PDF values
 
-More efficient than Evolve() when doing multiple evolutions. Needs a call to PreEvolve() first.
+More efficient than :func:`Evolve` when doing multiple evolutions. Needs a call to :func:`PreEvolve` first.
 ";
 
 %feature("docstring") Eval "
