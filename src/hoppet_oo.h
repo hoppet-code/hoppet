@@ -20,7 +20,10 @@
 // Next steps:
 // - [x] add the running_coupling class
 // - [x] add the dglap_holder    
-// - [ ] add the tabulation class
+// - [~] add the pdf_table
+//       - [ ] grid_quant_3d
+//       - [ ] evolution functions
+//       - [ ] PDF access functions
 // - [ ] add the evln_operator class
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
@@ -622,17 +625,17 @@ typedef grid_quant      pdf_flav;
 //-----------------------------------------------------------------------------
 struct gq2d_extras {
   grid_def_view grid;
-  std::size_t   stride;
-  std::size_t   dim1_sz;
-  gq2d_extras() : grid(), stride(0), dim1_sz(0) {}
-  gq2d_extras(const gq2d_extras & other) : grid(other.grid), stride(other.stride), dim1_sz(other.dim1_sz) {}
-  gq2d_extras(const grid_def_view & grid, std::size_t dim1_sz) : grid(grid), stride(grid.ny() + 1), dim1_sz(dim1_sz) {}
+  std::size_t   size_dim1;
+  std::size_t   size_dim0;
+  gq2d_extras() : grid(), size_dim1(0), size_dim0(0) {}
+  gq2d_extras(const gq2d_extras & other) : grid(other.grid), size_dim1(other.size_dim1), size_dim0(other.size_dim0) {}
+  gq2d_extras(const grid_def_view & grid, std::size_t size_dim0) : grid(grid), size_dim1(grid.ny() + 1), size_dim0(size_dim0) {}
   void ensure_compatible(const gq2d_extras & other) const {
-    if (dim1_sz != other.dim1_sz) throw std::runtime_error("hoppet::gq2d_extras::ensure_compatible: incompatible grid_quant_2d dim1_sz");
+    if (size_dim0 != other.size_dim0) throw std::runtime_error("hoppet::gq2d_extras::ensure_compatible: incompatible grid_quant_2d dim1_sz");
     grid.ensure_compatible(other.grid);
   }
   bool operator==(const gq2d_extras & other) const {
-    return stride == other.stride && dim1_sz == other.dim1_sz && grid == other.grid;
+    return size_dim0 == other.size_dim0 && grid == other.grid;
   }
   bool operator!=(const gq2d_extras & other) const { return !(*this == other); }
 };
@@ -643,24 +646,28 @@ public:
   grid_quant_2d_view() {}
   grid_def_view grid() const {return extras().grid;}
   grid_quant_view operator[](std::size_t i) {
-    grid_quant_view result(this->data() + i * extras().stride, extras().stride, extras().grid);
+    grid_quant_view result(this->data() + i * extras().size_dim1, extras().size_dim1, extras().grid);
     return result;
   }
+  grid_quant_view operator()(std::size_t i) {return (*this)[i];}
+  double & operator()(std::size_t i, std::size_t j) {return this->data()[i * extras().size_dim1 + j];}
+  const double & operator()(std::size_t i, std::size_t j) const {return this->data()[i * extras().size_dim1 + j];}
+
   void assign(const VoidFnDoubleDoubleDoubleptr auto & fn, double Q) {
   //void assign(void (*fn)(double,double,double*), double Q) {
     if (!data()) {
       throw std::runtime_error("grid_quant_2d_view::assign(fn): grid_quant_2d_view object not associated");
     }
-    if (extras().dim1_sz < iflv_max+1) {
+    if (extras().size_dim0 < iflv_max+1) {
       throw std::runtime_error("grid_quant_2d_view::assign(fn): grid_quant_2d_view dim1_sz = " 
-                  + std::to_string(extras().dim1_sz) + " < iflv_max+1 = " + std::to_string(iflv_max+1));
+                  + std::to_string(extras().size_dim0) + " < iflv_max+1 = " + std::to_string(iflv_max+1));
     }
     std::vector<double> xvals = grid().x_values();
-    std::vector<double> xpdf (extras().dim1_sz);
+    std::vector<double> xpdf (extras().size_dim0);
     for (std::size_t iy=0; iy < grid().ny()+1; ++iy) {
       fn(xvals[iy], Q, xpdf.data());
-      for (std::size_t i=0; i < extras().dim1_sz; ++i) {
-        this->data()[i*extras().stride + iy] = i <= iflv_max ? xpdf[i] : 0.0;
+      for (std::size_t i=0; i < extras().size_dim0; ++i) {
+        this->data()[i*extras().size_dim1 + iy] = i <= iflv_max ? xpdf[i] : 0.0;
       }
     }
   }
@@ -705,9 +712,9 @@ public:
 
   void alloc(gq2d_extras extras_in) {
     _extras = extras_in;
-    _ptr    = hoppet_cxx__grid_quant_2d__new(extras_in.grid.ptr(), static_cast<int>(extras_in.dim1_sz));
+    _ptr    = hoppet_cxx__grid_quant_2d__new(extras_in.grid.ptr(), static_cast<int>(extras_in.size_dim0));
     _data   = hoppet_cxx__grid_quant_2d__data_ptr(_ptr);
-    _size   = _extras.stride * extras_in.dim1_sz;
+    _size   = _extras.size_dim1 * extras_in.size_dim0;
   }
 
   grid_quant_2d & operator=(double value) {assign(value); return *this;}
@@ -942,11 +949,11 @@ inline split_mat commutator(split_mat_view const & a, split_mat_view const & b) 
 
 inline grid_quant_2d operator*(const split_mat_view & split, const grid_quant_2d_view & q) {
   split.grid().ensure_compatible(q.grid());
-  if (q.extras().dim1_sz <= ncompmax) throw std::runtime_error("split_fn * grid_quant_2d: grid_quant_2d dim1_sz too small");
-  grid_quant_2d result(q.grid(), q.extras().dim1_sz);
+  if (q.extras().size_dim0 <= ncompmax) throw std::runtime_error("split_fn * grid_quant_2d: grid_quant_2d dim1_sz too small");
+  grid_quant_2d result(q.grid(), q.extras().size_dim0);
   hoppet_cxx__split_mat__times_grid_quant_2d(split.ptr(), q.data(), result.data());
   // zero out any components beyond ncompmax
-  for (size_t i = ncompmax+1; i < result.extras().dim1_sz; ++i) {result[i].assign(0);}
+  for (size_t i = ncompmax+1; i < result.extras().size_dim0; ++i) {result[i].assign(0);}
   return result;
 }
 
@@ -1047,11 +1054,11 @@ inline mass_threshold_mat operator-(const mass_threshold_mat_view & a) {return -
 
 inline grid_quant_2d operator*(const mass_threshold_mat_view & mtm, const grid_quant_2d_view & q) {
   mtm.grid().ensure_compatible(q.grid());
-  if (q.extras().dim1_sz <= ncompmax) throw std::runtime_error("mass_threshold * grid_quant_2d: grid_quant_2d dim1_sz too small");
-  grid_quant_2d result(q.grid(), q.extras().dim1_sz);
+  if (q.extras().size_dim0 <= ncompmax) throw std::runtime_error("mass_threshold * grid_quant_2d: grid_quant_2d dim1_sz too small");
+  grid_quant_2d result(q.grid(), q.extras().size_dim0);
   hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(mtm.ptr(), q.data(), result.data());
   // zero out any components beyond ncompmax
-  for (size_t i = ncompmax+1; i < result.extras().dim1_sz; ++i) {result[i].assign(0.0);}
+  for (size_t i = ncompmax+1; i < result.extras().size_dim0; ++i) {result[i].assign(0.0);}
   return result;
 }
 
