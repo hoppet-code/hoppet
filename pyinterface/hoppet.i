@@ -1,4 +1,5 @@
 /* File: hoppet.i */
+
 %module(docstring="
 A Higher Order Perturbative Parton Evolution Toolkit
 
@@ -7,50 +8,51 @@ common manipulations of parton distribution functions (PDFs).
 
 Citation:
 G.P. Salam, J. Rojo, 'A Higher Order Perturbative Parton Evolution Toolkit (HOPPET)', 
-Comput. Phys. Commun. 180 (2009) 120-156, arXiv:0804.3755
+Comput. Phys. Commun. 180 (2009) 120-156, `arXiv:0804.3755 <https://arXiv.org/abs/0804.3755>`_
 
 and                                                       
 
-A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer (arXiv:2510.XXXXX). 
+A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi & F. Dreyer, 
+`arXiv:2510.09310 <https://arXiv.org/abs/2510.09310>`_. 
 
 Example:
+--------
 
-   import hoppet as hp
-   import numpy as np
+   >>> import hoppet as hp
+   >>> import numpy as np
+   >>> 
+   >>> def main():
+   >>>     dy = 0.1    
+   >>>     nloop = 3
+   >>>     # Start hoppet
+   >>>     hp.Start(dy, nloop)
+   >>>     
+   >>>     asQ0 = 0.35
+   >>>     Q0 = np.sqrt(2.0)
+   >>>     # Do the evolution. 
+   >>>     hp.Evolve(asQ0, Q0, nloop, 1.0, hp.BenchmarkPDFunpol, Q0)
+   >>> 
+   >>>     # Evaluate the PDFs at some x values and print them
+   >>>     xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
+   >>>     Q = 100.0
+   >>> 
+   >>>     print('')
+   >>>     print('           Evaluating PDFs at Q =',Q, ' GeV')
+   >>>     print('    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon')
+   >>>     for ix in range(9):
+   >>>         pdf_array = hp.Eval(xvals[ix], Q)
+   >>>         print('{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}'.format(
+   >>>             xvals[ix],
+   >>>             pdf_array[6 + 2] - pdf_array[6 - 2], 
+   >>>             pdf_array[6 + 1] - pdf_array[6 - 1], 
+   >>>             2 * (pdf_array[6 - 1] + pdf_array[6 - 2]),
+   >>>             pdf_array[6 - 4] + pdf_array[6 + 4],
+   >>>             pdf_array[6 + 0]
+   >>>         ))
+   >>> 
+   >>>     hp.DeleteAll()
    
-   def main():
-       dy = 0.1    
-       nloop = 3
-       # Start hoppet
-       hp.Start(dy, nloop)
-       
-       asQ0 = 0.35
-       Q0 = np.sqrt(2.0)
-       # Do the evolution. 
-       hp.Evolve(asQ0, Q0, nloop, 1.0, hp.BenchmarkPDFunpol, Q0)
-   
-       # Evaluate the PDFs at some x values and print them
-       xvals = [1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9]
-       Q = 100.0
-   
-       print('')
-       print('           Evaluating PDFs at Q =',Q, ' GeV')
-       print('    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon')
-       for ix in range(9):
-           pdf_array = hp.Eval(xvals[ix], Q)
-           print('{:7.1E} {:11.4E} {:11.4E} {:11.4E} {:11.4E} {:11.4E}'.format(
-               xvals[ix],
-               pdf_array[6 + 2] - pdf_array[6 - 2], 
-               pdf_array[6 + 1] - pdf_array[6 - 1], 
-               2 * (pdf_array[6 - 1] + pdf_array[6 - 2]),
-               pdf_array[6 - 4] + pdf_array[6 + 4],
-               pdf_array[6 + 0]
-           ))
-
-   
-       hp.DeleteAll()
-   
-For more examples look at https://github.com/hoppet-code/hoppet/tree/master/example_py	
+For more examples, see https://github.com/hoppet-code/hoppet/tree/master/example_py	
 ") hoppet
 
 %module hoppet
@@ -506,7 +508,7 @@ Parameters:
   callback (callable): PDF function with signature callback(x, Q)
                        returning array of 13 PDF values
 
-More efficient than Evolve() when doing multiple evolutions. Needs a call to PreEvolve() first.
+More efficient than :func:`Evolve` when doing multiple evolutions. Needs a call to :func:`PreEvolve` first.
 ";
 
 %feature("docstring") Eval "

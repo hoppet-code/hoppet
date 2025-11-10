@@ -241,6 +241,13 @@ extern "C" {
   /// Given a pdf_subroutine with the interface shown below, fill the 
   /// table by evolving the PDF from scale Q0pdf, with alphas provided 
   /// at scale Q0alphas
+  ///
+  /// @param Q0alphas       Initial scale for alpha_s [GeV]
+  /// @param nloop          Number of loops for evolution (1=LO, 2=NLO, 3=NNLO, 4=N3LO)
+  /// @param muR_Q          Ratio of renormalisation scheme to factorisation scale during evolution
+  /// @param pdf_subroutine Function pointer to the user-defined PDF function
+  /// @param Q0pdf          Initial scale for PDF [GeV]
+  ///
   void hoppetEvolve(const double & asQ0,
                     const double & Q0alphas,
                     const int    & nloop,
@@ -250,7 +257,16 @@ extern "C" {
                     const double & Q0pdf);
 
 
-  /// Prepare a cached evolution
+  /// Prepare a cached evolution.
+  /// Once this has been called, one can use hoppetCachedEvolve to
+  /// carry out the cached evolution of a specific initial condition.
+  ///
+  /// @param asQ0     Strong coupling at initial scale Q0alphas
+  /// @param Q0alphas Initial scale for alpha_s [GeV]
+  /// @param nloop    Number of loops for evolution (1=LO, 2=NLO, 3=NNLO, 4=N3LO)
+  /// @param muR_Q    Ratio of renormalisation scheme to factorisation scale during evolution
+  /// @param Q0pdf    Initial scale for PDF [GeV]
+  ///
   void hoppetPreEvolve(const double & asQ0, 
                        const double & Q0alphas, 
                        const int    & nloop, 
