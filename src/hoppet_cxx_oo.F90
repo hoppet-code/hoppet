@@ -2,10 +2,11 @@
 #include "inc/ftlMacros.inc"
 #include "inc/extraMacros.inc"
 
+#define BINDC(OBJ,NAME) bind(C,name="hoppet_cxx__"//STRINGIFY(OBJ)//"__"//STRINGIFY(NAME))
 
 ! define a macro to generate the functions that returns a generic object's integer member
 #define DEFINE_RETURN_INT_MEMBER(OBJ,NAME) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C,name="hoppet_cxx__"//STRINGIFY(OBJ)//"__"//STRINGIFY(NAME)) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) BINDC(OBJ,NAME) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     integer(c_int) :: res;\
@@ -16,7 +17,7 @@
 
   ! define a macro to generate the functions that returns a generic object's real(dp) member
 #define DEFINE_RETURN_DBL_MEMBER(OBJ,NAME) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) BINDC(OBJ,NAME) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     real(c_double) :: res;\
@@ -25,9 +26,20 @@
     res = obj_f%NAME;\
   end function
 
+  ! define a macro to generate the functions that returns a generic object's real(dp) member
+#define DEFINE_RETURN_DBL_ARR_PTR_MEMBER(OBJ,NAME) \
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) BINDC(OBJ,NAME) result(res);\
+    implicit none;\
+    type(c_ptr), intent(in), value :: obj;\
+    type(c_ptr) :: res;\
+    type(OBJ), pointer :: obj_f;\
+    call c_f_pointer(obj, obj_f);\
+    res = c_loc(obj_f%NAME(lbound(obj_f%NAME)));\
+  end function
+
 ! define a macro to generate the functions that returns a generic object's logical member
 #define DEFINE_RETURN_LOG_MEMBER(OBJ,NAME) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) BINDC(OBJ,NAME) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     logical(c_bool) :: res;\
@@ -38,7 +50,7 @@
 
 ! define a macro to generate the functions that returns a generic object's integer member
 #define DEFINE_RETURN_INT_MEMBER_I(OBJ,NAME) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) bind(C) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) BINDC(OBJ,NAME) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     integer(c_int), intent(in), value :: i;\
@@ -50,7 +62,7 @@
 
   ! define a macro to generate the functions that returns a generic object's real(dp) member
 #define DEFINE_RETURN_DBL_MEMBER_I(OBJ,NAME) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) bind(C) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) BINDC(OBJ,NAME) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     integer(c_int), intent(in), value :: i;\
@@ -61,7 +73,7 @@
   end function
 
 #define DEFINE_RETURN_OBJ_MEMBER(OBJ,NAME,TYPE) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) bind(C) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj) BINDC(OBJ,NAME) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     type(c_ptr) :: res;\
@@ -71,7 +83,7 @@
   end function
 
 #define DEFINE_RETURN_OBJ_MEMBER_I(OBJ,NAME,TYPE) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) bind(C) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i) BINDC(OBJ,NAME) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     integer(c_int), intent(in), value :: i;\
@@ -82,7 +94,7 @@
   end function
 
 #define DEFINE_RETURN_OBJ_MEMBER_IJ(OBJ,NAME,TYPE) \
-  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i,j) bind(C) result(res);\
+  function CAT4(hoppet_cxx__,OBJ,__,NAME)(obj,i,j) BINDC(OBJ,NAME) result(res);\
     implicit none;\
     type(c_ptr), intent(in), value :: obj;\
     integer(c_int), intent(in), value :: i,j;\
@@ -1188,6 +1200,29 @@ contains
     call AddNfInfoToPDFTable(tab_f, coupling_f)
   end subroutine hoppet_cxx__pdf_table__add_nf_info
 
+  ! define a macro to generate the functions that returns a generic object's real(dp) member
+  function hoppet_cxx__pdf_table__tab_ptr(obj) result(res) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: obj
+    type(c_ptr) :: res
+    type(pdf_table), pointer :: obj_f
+
+    call c_f_pointer(obj, obj_f)
+    res = c_loc(obj_f%tab(lbound(obj_f%tab,1),lbound(obj_f%tab,2),lbound(obj_f%tab,3)))
+  end function
+
+  ! define a macro to generate the functions that returns a generic object's real(dp) member
+  function hoppet_cxx__pdf_table__size_flv(obj) result(res) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: obj
+    integer(c_int) :: res
+    type(pdf_table), pointer :: obj_f
+
+    call c_f_pointer(obj, obj_f)
+    res = size(obj_f%tab,2)
+  end function
+
+
   DEFINE_DELETE(pdf_table)
 
   ! think carefully which of these interfaces should be public, which perhaps renamed
@@ -1205,10 +1240,11 @@ contains
   DEFINE_RETURN_DBL_MEMBER(pdf_table,dlnlnQ)
   DEFINE_RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)
 
+
   DEFINE_RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo)
   DEFINE_RETURN_DBL_MEMBER_I(pdf_table,as2pi)
+  DEFINE_RETURN_DBL_MEMBER_I(pdf_table,lnlnQ_vals)
+  DEFINE_RETURN_DBL_MEMBER_I(pdf_table,Q_vals)
   DEFINE_RETURN_INT_MEMBER_I(pdf_table,nf_int)
-  DEFINE_RETURN_INT_MEMBER_I(pdf_table,lnlnQ_vals)
-  DEFINE_RETURN_INT_MEMBER_I(pdf_table,Q_vals)
 end module hoppet_cxx_oo_pdf_table
 

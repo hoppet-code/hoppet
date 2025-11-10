@@ -560,6 +560,34 @@ TEST_CASE("pdf_table", "[hoppet]") {
 //
   hoppet::pdf_table_view tab_view(tab);
 
+  auto sl_tab = hoppet::sl::table;
+  size_t iQ = sl_tab.nQ() / 2;
+  double Q = sl_tab.Q_vals(iQ);
+  int nf = sl_tab.nf_int(iQ);
+  int nloop = 1;
+  double x = 0.09;
+
+  // try various evaluations to check equivalence bewteen the streamlined interface
+  // and explicit local evaluations here
+  double gluon_sl = hoppetEvalIFlv(x,Q,hoppet::iflv_g);
+  double gluon_oo = sl_tab.at_iQ(iQ)[hoppet::iflv_g].at_x(x);
+  hoppet::pdf_flav_view gluon_flav = sl_tab.at_iQ(iQ)[hoppet::iflv_g];
+  hoppet::pdf_flav_view gluon_flav_alt = sl_tab.at_iQf(iQ,hoppet::iflv_g);
+  REQUIRE_THAT(gluon_sl, WithinAbs(gluon_flav.at_x(x), 1e-6));
+  REQUIRE((gluon_flav.data() == gluon_flav_alt.data()));
+
+  // explore applying splitting functions, locally versus streamlined
+  hoppet::pdf p_pdf = hoppet::sl::dh.p(nloop,nf) * sl_tab.at_iQ(iQ);
+  vector<double> p_pdf_raw(sl_tab.size_flv());
+  hoppetEvalSplit(x, Q, nloop, nf, p_pdf_raw.data());
+  for (int i = 0; i <= sl_tab.iflv_max(); ++i) {
+    REQUIRE_THAT(p_pdf[i].at_x(x), WithinAbs(p_pdf_raw[i], 1e-6));
+  }
+  //// now look at the gluon
+  
+
+
+
   cout << hoppet::sl::table.nQ() << "=hoppet::sl::table.nQ()\n";
 }
 

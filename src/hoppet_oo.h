@@ -252,6 +252,8 @@ extern "C" {
                     double dlnlnQ, int lnlnQ_order, bool freeze_at_Qmin, int iflv_max_table); 
   void hoppet_cxx__pdf_table__copy_contents(pdf_table_f * dest, const pdf_table_f * src); //< src copied into dest                  
   void hoppet_cxx__pdf_table__add_nf_info(pdf_table_f * tab, const running_coupling_f * coupling);
+  double * hoppet_cxx__pdf_table__tab_ptr(const pdf_table_f * tab);
+  int      hoppet_cxx__pdf_table__size_flv(const pdf_table_f * tab);
 }
 DEFINE_COPY(pdf_table)
 DEFINE_DELETE(pdf_table)
@@ -273,8 +275,8 @@ DEFINE_RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)
 DEFINE_RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo)
 DEFINE_RETURN_DBL_MEMBER_I(pdf_table,as2pi)
 DEFINE_RETURN_INT_MEMBER_I(pdf_table,nf_int)
-DEFINE_RETURN_INT_MEMBER_I(pdf_table,lnlnQ_vals)
-DEFINE_RETURN_INT_MEMBER_I(pdf_table,Q_vals)
+DEFINE_RETURN_DBL_MEMBER_I(pdf_table,lnlnQ_vals)
+DEFINE_RETURN_DBL_MEMBER_I(pdf_table,Q_vals)
 
 // DEFINE_RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
 // DEFINE_RETURN_INT_MEMBER(pdf_table,nq)
@@ -643,6 +645,9 @@ struct gq2d_extras {
 //-----------------------------------------------------------------------------
 class grid_quant_2d_view : public data_view<gq2d_extras> {
 public:  
+  typedef data_view<gq2d_extras> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
   grid_quant_2d_view() {}
   grid_def_view grid() const {return extras().grid;}
   grid_quant_view operator[](std::size_t i) {
@@ -1273,10 +1278,34 @@ public:
     return *this;
   }
 
+  grid_quant_view at_iQf(size_t iQ, size_t iflv) const {
+    double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
+    // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
+    size_t size_dim0 = size_flv();
+    size_t size_dim1 = static_cast<size_t>(grid().ny()+1);
+    size_t iQ_size = size_dim0 * size_dim1;
+    double * iQf_ptr  = tab_ptr + iQ * iQ_size + iflv * size_dim1;
+    return grid_quant_view(iQf_ptr, size_dim1, grid());
+  }
+
+  grid_quant_2d_view at_iQ(size_t iQ) const {
+    double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
+    // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
+    size_t size_dim0 = size_flv();
+    size_t size_dim1 = static_cast<size_t>(grid().ny()+1);
+    size_t iQ_size = size_dim0 * size_dim1;
+    double * iQ_ptr  = tab_ptr + iQ * iQ_size;
+    return grid_quant_2d_view(iQ_ptr, iQ_size, gq2d_extras(grid(), size_dim0));
+  }
+
+  /// return the maximum valid iflv index, in C++ numbering; 
+  size_t iflv_max() const {return static_cast<size_t>(tab_iflv_max() - iflv_min_fortran);  }
+  /// @brief return the size of the flavour (dim1=2nd) dimension of the table 
+  size_t size_flv() const {return static_cast<size_t>(hoppet_cxx__pdf_table__size_flv(valid_ptr())); }
+
   // think carefully which of these interfaces should be public, which perhaps renamed
   RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
   RETURN_INT_MEMBER(pdf_table,nQ)
-  RETURN_INT_MEMBER(pdf_table,tab_iflv_max)
   RETURN_INT_MEMBER(pdf_table,lnlnQ_order)
   RETURN_LOG_MEMBER(pdf_table,freeze_at_Qmin)
   RETURN_LOG_MEMBER(pdf_table,nf_info_associated)
@@ -1290,8 +1319,14 @@ public:
   RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo)
   RETURN_DBL_MEMBER_I(pdf_table,as2pi)
   RETURN_INT_MEMBER_I(pdf_table,nf_int)
-  RETURN_INT_MEMBER_I(pdf_table,lnlnQ_vals)
-  RETURN_INT_MEMBER_I(pdf_table,Q_vals)
+  RETURN_DBL_MEMBER_I(pdf_table,lnlnQ_vals)
+  RETURN_DBL_MEMBER_I(pdf_table,Q_vals)
+
+
+protected:
+  /// @brief return the maximum flavour number for which the table has been allocate
+  /// This is in Fortran numbering, which is why it is protected; use iflv_max() instead
+  RETURN_INT_MEMBER(pdf_table,tab_iflv_max)
 
 //  RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
 //  RETURN_INT_MEMBER(pdf_table,nq)
