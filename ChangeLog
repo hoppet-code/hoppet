@@ -85,9 +85,12 @@ Access to streamlined interface objects
 	exceptions to be thrown instead of Fortran error stops.
 	Not generally portable, but appears to work on linux and MacOS.
 
-	* src/inc/extraMacros.inc:
+	* src/inc/extraMacros.inc: *** ADDED ***
 	added an extra macro STRINGIFY(x) to help provide universal
 	stringification (whose internals differ depending on the compiler)
+
+	* src/hoppet.h:
+	made some more of the constants constexpr
 
 --------- end 2025-10-cxx-OO branch ---------
 

@@ -76,75 +76,76 @@ namespace hoppet {
   constexpr int cc_DELTA=4;     //< delta function
 
 
-  const int scale_choice_fixed     = 0; ///< muR,muF scales
+  constexpr int scale_choice_fixed     = 0; ///< muR,muF scales
 					///predetermined in the
 					///hoppetStartStrFct call
-  const int scale_choice_Q         = 1; ///< muR,muF scales equal to
+  constexpr int scale_choice_Q         = 1; ///< muR,muF scales equal to
 					///xR,xQ * Q (xR,xQ to be set
 					///in hoppetStartStrFct)
-  const int scale_choice_arbitrary = 2; ///< muR,muF scales can be
+  constexpr int scale_choice_arbitrary = 2; ///< muR,muF scales can be
 					///chosen freely in the
 					///hoppetStrFctLO (etc.) and
 					///hoppetStrFct calls
-  const int nnlo_splitting_exact = -2;
-  const int nnlo_splitting_param = -1;
+  constexpr int nnlo_splitting_exact = -2;
+  constexpr int nnlo_splitting_param = -1;
   // these three should keep their numerical values because of a
   // correspondence with vogt imod values
-  const int nnlo_splitting_Nfitav   =  0;
-  const int nnlo_splitting_Nfiterr1 =  1;
-  const int nnlo_splitting_Nfiterr2 =  2;
+  constexpr int nnlo_splitting_Nfitav   =  0;
+  constexpr int nnlo_splitting_Nfiterr1 =  1;
+  constexpr int nnlo_splitting_Nfiterr2 =  2;
 
-  const int n3lo_splitting_exact = -2;
-  const int n3lo_splitting_param = -1;
+  constexpr int n3lo_splitting_exact = -2;
+  constexpr int n3lo_splitting_param = -1;
   // these three should keep their numerical values because of a
   // correspondence with vogt imod values
-  const int n3lo_splitting_Nfitav   =  0;
-  const int n3lo_splitting_Nfiterr1 =  1;
-  const int n3lo_splitting_Nfiterr2 =  2;
+  constexpr int n3lo_splitting_Nfitav   =  0;
+  constexpr int n3lo_splitting_Nfiterr1 =  1;
+  constexpr int n3lo_splitting_Nfiterr2 =  2;
   // As of 2024-04-16 there are several approximations available of
   // the n3lo splitting functions. To maintain some backwards
   // compatibility we have a switch below that allows the user to pick
   // which set of approximations to use. The have progressively more
   // moments.
-  const int n3lo_splitting_approximation_up_to_2310_05744 = 100;
+  constexpr int n3lo_splitting_approximation_up_to_2310_05744 = 100;
   //< Uses non-singlet of 1610.07477+1707.08315, pure-singlet (qq) of
   //2302.07593, qg of 2307.04158 and gq and gg of 2310.05744
-  const int n3lo_splitting_approximation_up_to_2404_09701
+  constexpr int n3lo_splitting_approximation_up_to_2404_09701
             = 101; //< Replaces gq with that of 2404.09701
-  const int n3lo_splitting_approximation_up_to_2410_08089
+  constexpr int n3lo_splitting_approximation_up_to_2410_08089
             = 102; //< Additionally replaces gg with that of 2410.08089
   
-  const int nnlo_nfthreshold_exact = -12;
-  const int nnlo_nfthreshold_param = -11;
+  constexpr int nnlo_nfthreshold_exact = -12;
+  constexpr int nnlo_nfthreshold_param = -11;
 
   constexpr int n3lo_nfthreshold_libOME        = 1;
   constexpr int n3lo_nfthreshold_exact_fortran = 2;
   constexpr int n3lo_nfthreshold_off = 0;
   constexpr int n3lo_nfthreshold_on = n3lo_nfthreshold_libOME;
 
-  const int factscheme_MSbar    = 1;
-  const int factscheme_DIS      = 2;
-  const int factscheme_PolMSbar = 3;
-  const int factscheme_FragMSbar = 4;
+  constexpr int factscheme_MSbar    = 1;
+  constexpr int factscheme_DIS      = 2;
+  constexpr int factscheme_PolMSbar = 3;
+  constexpr int factscheme_FragMSbar = 4;
 
-  const int iflv_g=0+6;
-  const int iflv_d = 1+6, iflv_u = 2+6, iflv_s = 3+6, iflv_c = 4+6;
-  const int iflv_b = 5+6, iflv_t = 6+6;
-  const int iflv_dbar = -1+6;
-  const int iflv_ubar = -2+6;
-  const int iflv_sbar = -3+6;
-  const int iflv_cbar = -4+6;
-  const int iflv_bbar = -5+6;
-  const int iflv_tbar = -6+6;
-  const int iflv_photon = 8+6;
-  const int iflv_electron = 9+6; //< note this is the sum of e- and e+
-  const int iflv_muon = 10+6;    //< note this is the sum of mu- and mu+
-  const int iflv_tau = 11+6;     //< note this is the sum of tau- and tau+
-  const int iflv_min = iflv_tbar;
-  const int iflv_max = iflv_t; //< this is for QCD-only evolution
-  const int iflv_info = iflv_max + 1;   //< this is for QCD+QED evolution
-  const int ncompmin = iflv_min;
-  const int ncompmax = iflv_info; //< this is for QCD-only evolution
+  constexpr int iflv_min_fortran = -6;
+  constexpr int iflv_g=0+6;
+  constexpr int iflv_d = 1+6, iflv_u = 2+6, iflv_s = 3+6, iflv_c = 4+6;
+  constexpr int iflv_b = 5+6, iflv_t = 6+6;
+  constexpr int iflv_dbar = -1+6;
+  constexpr int iflv_ubar = -2+6;
+  constexpr int iflv_sbar = -3+6;
+  constexpr int iflv_cbar = -4+6;
+  constexpr int iflv_bbar = -5+6;
+  constexpr int iflv_tbar = -6+6;
+  constexpr int iflv_photon = 8+6;
+  constexpr int iflv_electron = 9+6; //< note this is the sum of e- and e+
+  constexpr int iflv_muon = 10+6;    //< note this is the sum of mu- and mu+
+  constexpr int iflv_tau = 11+6;     //< note this is the sum of tau- and tau+
+  constexpr int iflv_min = iflv_tbar;
+  constexpr int iflv_max = iflv_t; //< this is for QCD-only evolution
+  constexpr int iflv_info = iflv_max + 1;   //< this is for QCD+QED evolution
+  constexpr int ncompmin = iflv_min;
+  constexpr int ncompmax = iflv_info; //< this is for QCD-only evolution
 
 }
 
