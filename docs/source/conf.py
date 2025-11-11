@@ -148,7 +148,8 @@ def _generate_hoppet_constants(app):
 
     # Optional extra text to include under specific section titles
     GROUP_DESCRIPTIONS = {
-        "PDF indices": """ These are the PDF indices of lists that are returned by e.g. :func:`Eval`. Note that index 13 is not used for historical reasons. 
+        "PDF indices": """ These are the PDF indices of lists that are returned by e.g. :func:`Eval` or that are to be passed to :func:`EvalIFlv`.
+        Note that index 13, not listed below, is used to encode information about the PDF flavour representation. 
         """,        
         "Structure function indices": """These constants label the various structure functions  used in HOPPET
 
