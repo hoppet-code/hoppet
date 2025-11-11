@@ -73,6 +73,10 @@ Access to streamlined interface objects
 	where nf info had been added, causing memory leaks in some 
 	scenarios.
 
+	* src/streamlined_interface.f90:
+	introduced hard-coded parameter for offset for upper bound of arrays
+	passed from C-style binding
+
 	* src/splitting-functions/xpns2e.f:
 	* src/splitting-functions/xpij2e.f:
 	turned off renaming A3G => mvv_A3G and A3 => mvv_A3, which was

@@ -732,6 +732,8 @@ subroutine hoppetEval(x,Q,f)
   use streamlined_interface; use pdf_representation
   implicit none
   real(dp), intent(in)  :: x, Q
+  real(dp), intent(out) :: f(*) ! QED-TBD [check it still works without QED]
+  integer, parameter :: iflv_max_offset = - ncompmin + 1
   ! the interface does pass the size of the array, but the functions we
   ! call have interfaces that do need the size; so here give it a dummy
   ! value that is the largest that could ever be used. The functions
@@ -740,8 +742,7 @@ subroutine hoppetEval(x,Q,f)
   !real(dp), intent(out) :: f(-6:ncompmaxLeptons) ! QED-TBD [check it still works without QED]
   !call EvalPdfTable_xQ(tables(0),x,Q,f)
 
-  real(dp), intent(out) :: f(*) ! QED-TBD [check it still works without QED]
-  call EvalPdfTable_xQ(tables(0),x,Q,f(1:tables(0)%tab_iflv_max-ncompmin+1))
+  call EvalPdfTable_xQ(tables(0),x,Q,f(1:tables(0)%tab_iflv_max+iflv_max_offset))
 end subroutine hoppetEval
 
 !======================================================================
