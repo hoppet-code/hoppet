@@ -23,7 +23,10 @@
 // - [~] add the pdf_table
 //       - [ ] grid_quant_3d
 //       - [ ] evolution functions
-//       - [ ] PDF access functions
+//       - [x] PDF access functions
+//       - [ ] does copying also copy the evolution operators?
+//       - [ ] fill from LHAPDF
+//       - [ ] write to LHAPDF
 // - [ ] add the evln_operator class
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
@@ -1095,6 +1098,8 @@ public:
 
   /// @brief  Return the number of loops (nloop) for this running coupling
   /// @return nloop
+  ///
+  /// nloop=1 means the first term in the beta function, etc.
   int nloop() const { return hoppet_cxx__running_coupling__num_loops(valid_ptr()); }
 
   /// @brief  Returns the range of active flavours (nflcl) for this running coupling
@@ -1333,6 +1338,31 @@ public:
   /// @param result  pointer to an array of size at least iflv_max()+1 to be filled with the results
   void at_xQ_into(double x, double Q, double * result) const {
     at_yQ_into(-std::log(x), Q, result);
+  }
+
+  /// @brief Fill the PDF table by evolving from an input PDF at scale Q0
+  ///
+  /// Note that if (untie_nf) is true [default false] then alphas is
+  /// allowed to have its natural value for nf, even if the dglap_holder
+  /// cannot reach this nf value.
+  void evolve(double                        Q0,        //< scale of input PDF
+              const grid_quant_2d_view &    pdf_at_Q0, //< input PDF at scale Q0
+              const running_coupling_view & coupling,  //< running coupling to use for evolution
+              const dglap_holder_view &     dh,        //< DGLAP holder to use for evolution
+              double muR_over_Q = 1.0,                 //< ratio of renormalization to factorization scale
+              int    nloop = -1,                       //< number of loops to use; if <0, use coupling.nloop()
+              bool   untie_nf = false                  //< whether to untie nf in evolution
+            ) {
+    if (nloop < 0) nloop = coupling.nloop();
+    throw std::runtime_error("pdf_table_view::evolve: not yet implemented in C++ interface");
+    //hoppet_cxx__pdf_table__evolve(valid_ptr(), pdf_in.data(), coupling.ptr(), dh.ptr());
+  }  
+
+  /// @brief  Fill the PDF table by evolving from an input PDF using previously determine evolution operators
+  ///
+  /// @param pdf_at_Q0  the initial condition PDF at scale Q0 (as set FILL THIS IN)
+  void evolve(const grid_quant_2d_view & pdf_at_Q0) {
+    throw std::runtime_error("pdf_table_view::evolve: not yet implemented in C++ interface");
   }
 
   // think carefully which of these interfaces should be public, which perhaps renamed
