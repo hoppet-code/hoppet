@@ -254,6 +254,8 @@ extern "C" {
   void hoppet_cxx__pdf_table__add_nf_info(pdf_table_f * tab, const running_coupling_f * coupling);
   double * hoppet_cxx__pdf_table__tab_ptr(const pdf_table_f * tab);
   int      hoppet_cxx__pdf_table__size_flv(const pdf_table_f * tab);
+  double   hoppet_cxx__pdf_table__at_yqf(const pdf_table_f * tab, double y, double Q, int iflv);
+  void     hoppet_cxx__pdf_table__at_yq_into(const pdf_table_f * tab, double y, double Q, double * res);
 }
 DEFINE_COPY(pdf_table)
 DEFINE_DELETE(pdf_table)
@@ -1303,6 +1305,36 @@ public:
   /// @brief return the size of the flavour (dim1=2nd) dimension of the table 
   size_t size_flv() const {return static_cast<size_t>(hoppet_cxx__pdf_table__size_flv(valid_ptr())); }
 
+  /// @brief return the value of xf(x,Q,iflv) at x = exp(-y)
+  /// @param y     log(1/x)
+  /// @param Q     the factorisation scale at which to evaluate the PDF
+  /// @param iflv  the index of the flavour (in C++ numbering)
+  double at_yQf(double y, double Q, int iflv) const {
+    return hoppet_cxx__pdf_table__at_yqf(ptr(), y, Q, iflv);
+  }
+
+  /// @brief return the value of xf(x,Q,iflv)
+  /// @param x     the momentum fraction x
+  /// @param Q     the factorisation scale at which to evaluate the PDF
+  /// @param iflv  the index of the flavour (in C++ numbering)
+  double at_xQf(double x, double Q, int iflv) const {return at_yQf(-std::log(x), Q, iflv);}
+
+  /// @brief fill the result array with the values of xf(x,Q,:) at the given y and Q
+  /// @param y       y = log(1/x)
+  /// @param Q       the factorisation scale at which to evaluate the PDF
+  /// @param result  pointer to an array of size at least iflv_max()+1 to be filled with the results
+  void at_yQ_into(double y, double Q, double * result) const {
+    hoppet_cxx__pdf_table__at_yq_into(ptr(), y, Q, result);
+  }
+
+  /// @brief fill the result array with the values of xf(x,Q,:) 
+  /// @param x       the momentum fraction x
+  /// @param Q       the factorisation scale at which to evaluate the PDF
+  /// @param result  pointer to an array of size at least iflv_max()+1 to be filled with the results
+  void at_xQ_into(double x, double Q, double * result) const {
+    at_yQ_into(-std::log(x), Q, result);
+  }
+
   // think carefully which of these interfaces should be public, which perhaps renamed
   RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
   RETURN_INT_MEMBER(pdf_table,nQ)
@@ -1327,25 +1359,6 @@ protected:
   /// @brief return the maximum flavour number for which the table has been allocate
   /// This is in Fortran numbering, which is why it is protected; use iflv_max() instead
   RETURN_INT_MEMBER(pdf_table,tab_iflv_max)
-
-//  RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
-//  RETURN_INT_MEMBER(pdf_table,nq)
-//  RETURN_INT_MEMBER(pdf_table,tab_iflv_max)
-//  RETURN_INT_MEMBER(pdf_table,lnlnq_order)
-//  RETURN_LOG_MEMBER(pdf_table,freeze_at_qmin)
-//  RETURN_LOG_MEMBER(pdf_table,nf_info_associated)
-//  RETURN_INT_MEMBER(pdf_table,nflo)
-//  RETURN_INT_MEMBER(pdf_table,nfhi)
-//  RETURN_DBL_MEMBER(pdf_table,lnlnq_min)
-//  RETURN_DBL_MEMBER(pdf_table,lnlnq_max)
-//  RETURN_DBL_MEMBER(pdf_table,lambda_eff)
-//  RETURN_DBL_MEMBER(pdf_table,dlnlnq)
-//  RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)
-//  RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo)
-//  RETURN_DBL_MEMBER_I(pdf_table,as2pi)
-//  RETURN_INT_MEMBER_I(pdf_table,nf_int)
-//  RETURN_INT_MEMBER_I(pdf_table,lnlnq_vals)
-//  RETURN_INT_MEMBER_I(pdf_table,q_vals)
 
 };
 

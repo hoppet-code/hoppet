@@ -557,7 +557,6 @@ TEST_CASE("pdf_table", "[hoppet]") {
   tab.add_nf_info(alphas);
 
   auto tab_copy = tab; // copy constructor
-//
   hoppet::pdf_table_view tab_view(tab);
 
   auto sl_tab = hoppet::sl::table;
@@ -567,7 +566,7 @@ TEST_CASE("pdf_table", "[hoppet]") {
   int nloop = 1;
   double x = 0.09;
 
-  // try various evaluations to check equivalence bewteen the streamlined interface
+  // try various evaluations to check equivalence between the streamlined interface
   // and explicit local evaluations here
   double gluon_sl = hoppetEvalIFlv(x,Q,hoppet::iflv_g);
   double gluon_oo = sl_tab.at_iQ(iQ)[hoppet::iflv_g].at_x(x);
@@ -575,6 +574,16 @@ TEST_CASE("pdf_table", "[hoppet]") {
   hoppet::pdf_flav_view gluon_flav_alt = sl_tab.at_iQf(iQ,hoppet::iflv_g);
   REQUIRE_THAT(gluon_sl, WithinAbs(gluon_flav.at_x(x), 1e-6));
   REQUIRE((gluon_flav.data() == gluon_flav_alt.data()));
+
+  // access via xQf
+  gluon_oo = sl_tab.at_xQf(x, Q, hoppet::iflv_g);
+  REQUIRE_THAT(gluon_sl, WithinAbs(gluon_oo, 1e-6));
+
+  // access via at_xQ_into
+  double f_into[hoppet::ncompmax];
+  sl_tab.at_xQ_into(x, Q, f_into);
+  REQUIRE_THAT(gluon_sl, WithinAbs(f_into[hoppet::iflv_g], 1e-6));
+
 
   // explore applying splitting functions, locally versus streamlined
   hoppet::pdf p_pdf = hoppet::sl::dh.p(nloop,nf) * sl_tab.at_iQ(iQ);

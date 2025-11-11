@@ -1222,6 +1222,32 @@ contains
     res = size(obj_f%tab,2)
   end function
 
+  !! watch out iflv_cxx starts from zero, while iflv in fortran pdf_table starts from ncompmin
+  function hoppet_cxx__pdf_table__at_yQf(obj, y, Q, iflv_cxx) result(res) bind(C)
+    use pdf_representation
+    implicit none
+    type(c_ptr), intent(in), value :: obj
+    real(c_double), intent(in), value :: y, Q
+    integer(c_int), intent(in), value :: iflv_cxx
+    real(c_double) :: res
+    type(pdf_table), pointer :: obj_f
+
+    call c_f_pointer(obj, obj_f)
+    res = EvalPdfTable_yQf(obj_f, y, Q, iflv_cxx + ncompmin)
+  end function
+
+  subroutine hoppet_cxx__pdf_table__at_yQ_into(obj, y, Q, res) bind(C)
+    use pdf_representation
+    implicit none
+    type(c_ptr), intent(in), value :: obj
+    real(c_double), intent(in), value :: y, Q
+    real(c_double), intent(out) :: res(*)
+    type(pdf_table), pointer :: obj_f
+    integer, parameter :: iflv_max_offset = - ncompmin + 1
+
+    call c_f_pointer(obj, obj_f)
+    call EvalPdfTable_yQ(obj_f, y, Q, res( 1:obj_f%tab_iflv_max+iflv_max_offset ) )
+  end subroutine
 
   DEFINE_DELETE(pdf_table)
 
