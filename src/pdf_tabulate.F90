@@ -681,7 +681,7 @@ contains
   end subroutine FillPdfTable_LHAPDF
 
   !---------------------------------------------------------------------
-  !! Given a starting distribution, StartDist, at StartScale and an
+  !! Given a starting distribution, StartDist, at StartScale and a
   !! "coupling" determining the behaviour of alphas, fill in the tab with
   !! the evolution of the starting distribution. Most of the arguments
   !! have meanings similar to those in the evolution routines
