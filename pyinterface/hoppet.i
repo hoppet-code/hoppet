@@ -105,8 +105,15 @@ For more examples, see https://github.com/hoppet-code/hoppet/tree/master/example
 //        return nullptr; \
 //    }
 const unsigned int pdf_len          = 13; 
-const unsigned int qed_pdf_len      = 18; // 18 to have space for photon and leptons if needed
-const unsigned int str_fnc_len      = 14; // We have 14 structure functions (6 CC, 3 Z, 2 photon, 3 gammaZ)
+const unsigned int qed_pdf_len      = 18; // 18 to have space for
+					  // photon and leptons if
+					  // needed. Note that index
+					  // 14 is left empty, so
+					  // photon = 15, electron =
+					  // 16, muon = 17, tau = 18
+const unsigned int str_fnc_len      = 14; // We have 14 structure
+					  // functions (6 CC, 3 Z, 2
+					  // photon, 3 gammaZ)
 const unsigned int str_fnc_flav_len = 3; // F1, F2, F3
 unsigned int py_pdf_len             = pdf_len; // Default to pdf_len, can be set to qed_pdf_len
 unsigned int py_str_fnc_len         = str_fnc_len; // Default to str_fnc_pdf_len, can be set to str_fnc_flav_pdf_len
@@ -381,7 +388,7 @@ Parameters:
 ";
 %rename(SetCoupling             )      hoppetsetcoupling_;       
 %rename(EvalIFlv                )      hoppetEvalIFlv; 
-%rename(EvalFortranIFlv         )      hoppetevaliflv_; 
+//%rename(EvalFortranIFlv         )      hoppetevaliflv_; 
 %rename(SetFFN                  )      hoppetsetffn_;       
 %rename(SetVFN                  )      hoppetsetvfn_;       
 %rename(SetPoleMassVFN          )      hoppetsetpolemassvfn_;       
@@ -427,7 +434,15 @@ Parameters:
 %ignore hoppetInitStrFct_c;
 %ignore hoppetInitStrFctFlav_c;
 %ignore hoppetwritelhapdfgrid_;
+%ignore hoppetevaliflv_; 
 
+// Now we make sure to keep the internal functions private
+%ignore free_global_pdf;
+%ignore free_global_str_fnc;
+%ignore init_global_pdf;
+%ignore init_global_str_fnc;
+%ignore pdf_to_array;
+%ignore str_fnc_to_array;
 
 %include "hoppet.h"
 
@@ -440,17 +455,18 @@ Parameters:
   qcdqed (int): Treatment of QCD-QED coupling (implementation-specific)
   plq (int): 1 to enable lepton splitting function
 
-Note: Must be called before Start() as it modifies global PDF settings.
+  Note: Must be called before :func:`Start` as it modifies global PDF settings.
 ";
 
 %feature("docstring") Start "
 Initialize HOPPET evolution tables with basic parameters.
 
 Parameters:
-  dy (float): Step size in ln(1/x). Typical range: 0.1-0.25
+  dy (float): Step size in ln(1/x). Typical range: 0.05-0.2
   nloop (int): Maximum number of loops (1=LO, 2=NLO, 3=NNLO, 4=N3LO)
 
-Note: This is the basic initialization. For more control, use StartExtended().
+  Note: This is the basic initialization. For more control, use
+  :func:`StartExtended`.
 ";
 
 %feature("docstring") StartExtended "
@@ -458,13 +474,13 @@ Initialize HOPPET evolution tables with extended parameters.
 
 Parameters:
   ymax (float): Highest value of ln(1/x) user wants to access
-  dy (float): Internal ln(1/x) grid spacing (0.1-0.25 is sensible)
+  dy (float): Internal ln(1/x) grid spacing (0.05-0.2 is sensible)
   Qmin (float): Lower limit of Q range [GeV]
   Qmax (float): Upper limit of Q range [GeV]  
   dlnlnQ (float): Internal table spacing in ln(ln(Q)) (e.g. dy/4)
   nloop (int): Maximum number of loops (1=LO, 2=NLO, 3=NNLO, 4=N3LO)
   order (int): Order of numerical interpolation (e.g. -6)
-  factscheme (int): Factorization scheme identifier
+   factscheme (int): One of the hoppet.factscheme_* factorization scheme identifier (e.g. hoppet.factscheme_MSbar)
 
 This provides full control over the evolution grid setup.
 ";
@@ -483,7 +499,12 @@ Parameters:
                        returning array of 13 PDF values
 
 The callback should return PDFs in HOPPET order:
+
 [tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t]
+
+or if QED evolution is included
+
+[tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t, EMPTY, photon, electron, muon, tau]
 ";
 
 %feature("docstring") Evolve "
@@ -498,7 +519,12 @@ Parameters:
   Q0pdf (float): Initial scale for PDF [GeV]
 
 The callback should return PDFs in HOPPET order:
+
 [tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t]
+
+or if QED evolution is included
+
+[tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t, EMPTY, photon, electron, muon, tau]
 ";
 
 %feature("docstring") CachedEvolve "
@@ -506,21 +532,32 @@ Perform a cached evolution.
 
 Parameters:
   callback (callable): PDF function with signature callback(x, Q)
-                       returning array of 13 PDF values
+                       returning array of 13/18 PDF values
 
 More efficient than :func:`Evolve` when doing multiple evolutions. Needs a call to :func:`PreEvolve` first.
+
+The callback should return PDFs in HOPPET order:
+
+[tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t]
+
+or if QED evolution is included
+
+[tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t, EMPTY, photon, electron, muon, tau]
+
 ";
 
 %feature("docstring") Eval "
 Evaluate evolved PDFs at given x and Q.
 
 Parameters:
-  x (float): Bjorken x value (0 < x < 1)
-  Q (float): Energy scale [GeV]
+  x (float): Longitudinal momentum fraction (0 < x < 1)
+  Q (float): Momentum scale [GeV]
 
 Returns:
-  list: Array of 13 PDF values in HOPPET order:
-        [tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t]
+  list: Array of 13/18 PDF values in HOPPET order:
+  [tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t]
+  or if QED evolution is included
+  [tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t, EMPTY, photon, electron, muon, tau]
 ";
 
 %feature("docstring") EvalSplit "
@@ -553,33 +590,39 @@ Returns:
  The number of loops must be consistent with iloop
 
 Parameters:
-  x (float): Bjorken x value (0 < x < 1)
-  Q (float): Energy scale [GeV]
+  x (float): Longitudinal momentum fraction (0 < x < 1)
+  Q (float): Momentum scale [GeV]
   iloop (int): Perturbative order (1=LO, 2=NLO, etc.)
   nf (int): Number of active flavours
 
 Returns:
-  list: Array of 13 PDF values at specified order and nf
+  list: Array of 13/18 PDF values in HOPPET order:
+  [tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t]
+  or if QED evolution is included
+  [tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t, EMPTY, photon, electron, muon, tau]
 ";
 
 %feature("docstring") BenchmarkPDFunpol "
 Evaluate the unpolarized benchmark PDF set.
 
 Parameters:
-  x (float): Bjorken x value (0 < x < 1)  
-  Q (float): Energy scale [GeV]
+  x (float): Longitudinal momentum fraction (0 < x < 1)  
+  Q (float): Momentum scale [GeV]
 
 Returns:
   list: Array of 13 benchmark PDF values
 
-Useful for testing and validation against known results.
+Useful for testing and validation against known results. For a
+benchmark PDF with photon and leptons look at
+`example_py/tabulation_example_qed.py
+<https://github.com/hoppet-code/hoppet/blob/master/example_py/tabulation_example_qed.py>`_
 ";
 
 %feature("docstring") InitStrFct "
 Initialize structure function calculations.
 
 Parameters:
-  order_max (int): Maximum perturbative order
+  order_max (int): Maximum perturbative order <=4
   separate_orders (int): Whether to separate by order
   xR (float): Renormalization scale factor
   xF (float): Factorization scale factor
@@ -589,7 +632,7 @@ Parameters:
 Initialize flavour-decomposed structure function calculations.
 
 Parameters:
-  order_max (int): Maximum perturbative order
+  order_max (int): Maximum perturbative order <=4
   separate_orders (int): Whether to separate by order  
   xR (float): Renormalization scale factor
   xF (float): Factorization scale factor
@@ -599,7 +642,7 @@ Parameters:
 Calculate structure functions with specified scales.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]
   muF_in (float): Factorization scale [GeV]
@@ -612,7 +655,7 @@ Returns:
 Calculate structure functions with default scale choices.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV] (used for both muR and muF)
 
 Returns:
@@ -623,7 +666,7 @@ Returns:
 Calculate leading-order structure functions.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]
   muF_in (float): Factorization scale [GeV]
@@ -636,7 +679,7 @@ Returns:
 Calculate next-to-leading-order structure functions.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]
   muF_in (float): Factorization scale [GeV]
@@ -649,7 +692,7 @@ Returns:
 Calculate next-to-next-to-leading-order structure functions.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]  
   muF_in (float): Factorization scale [GeV]
@@ -662,7 +705,7 @@ Returns:
 Calculate next-to-next-to-next-to-leading-order structure functions.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]
   muF_in (float): Factorization scale [GeV]
@@ -675,7 +718,7 @@ Returns:
 Calculate flavour-decomposed structure functions.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]
   muF_in (float): Factorization scale [GeV]
@@ -689,7 +732,7 @@ Returns:
 Calculate flavour-decomposed structure functions with default scales.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]  
   flav (int): Flavour index
 
@@ -701,7 +744,7 @@ Returns:
 Calculate LO flavour-decomposed structure functions.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]
   muF_in (float): Factorization scale [GeV]
@@ -715,7 +758,7 @@ Returns:
 Calculate NLO flavour-decomposed structure functions.
 
 Parameters:
-  x (float): Bjorken x value
+  x (float): Longitudinal momentum fraction
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]
   muF_in (float): Factorization scale [GeV]

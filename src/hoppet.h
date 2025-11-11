@@ -180,41 +180,75 @@ extern "C" {
 
   /// Set things up to be a fixed-flavour number scheme with the given
   /// fixed_nf number of flavours
+  ///
+  /// @param fixed_nf Value of fixed number of flavours (e.g. 5)
   void hoppetSetFFN(const int & fixed_nf);
 
 
-  /// Set things up to be a variable-flavour number scheme with the given
-  /// quark (pole) masses. Now deprecated; use hoppetSetPoleMassVFN instead
+  /// Set things up to be a variable-flavour number scheme with the
+  /// given quark (pole) masses. Now deprecated; use
+  /// hoppetSetPoleMassVFN instead, which is what is being called
+  /// undder the hood.
+  ///
+  /// @param mc Charm mass
+  /// @param mb Bottom mass
+  /// @param mt Top mass
   void  hoppetSetVFN(const double &mc, const double & mb, const double & mt);
 
   /// Set things up to be a variable-flavour number scheme with the
   /// given quark (pole) masses. Thresholds are crossed at the pole
   /// masses, both for the coupling and the PDF evolution.
+  ///
+  /// @param mc Charm mass
+  /// @param mb Bottom mass
+  /// @param mt Top mass
   void  hoppetSetPoleMassVFN(const double &mc, const double & mb, const double & mt);
 
   /// Set things up to be a variable-flavour number scheme with the given
   /// quark (MSbar) masses. Thresholds are crossed at the MSbar
   /// masses, both for the coupling and the PDF evolution.
+  ///
+  /// @param mc Charm mass
+  /// @param mb Bottom mass
+  /// @param mt Top mass
   void  hoppetSetMSbarMassVFN(const double &mc, const double & mb, const double & mt);
 
   
   /// Arrange for the use of exact NNLO splitting and mass-threshold
   /// functions.
+  ///
+  /// @param exact_nfthreshold If True use the exact NNLO mass
+  /// threshold functions. If False use the faster parametrisations
+  /// @param exact_splitting If True use the exact NNLO splitting
+  /// functions. If False use the faster parametrisations
   void hoppetSetExactDGLAP(const bool & exact_nfthreshold, const bool & exact_splitting);
 
   /// Arrange for the use of various approximate N3LO splitting functions.
+  ///
+  /// @param splitting_variant One of the hoppet.n3lo_splitting_approximation_* options.
   void hoppetSetApproximateDGLAPN3LO(const int & splitting_variant);
 
   /// Arrange for the use of various NNLO splitting functions.
+  ///
+  /// @param splitting_variant One of the hoppet.nnlo_splitting_* options.
   void hoppetSetSplittingNNLO(const int & splitting_variant);
 
   /// Arrange for the use of various N3LO splitting functions.
+  ///
+  /// @param splitting_variant One of the hoppet.n3lo_splitting_* options. 
   void hoppetSetSplittingN3LO(const int & splitting_variant);
 
   ///  Arrange for the use of N3LO mass thresholds or not.
+  ///
+  /// @param variant One of the hoppet.n3lo_nfthresholds_* options.
   void hoppetSetN3LOnfthresholds(const int & variant);
 
   ///  Override the default interpolation order in y and lnlnQ.
+  ///
+  /// @param yorder The interpolation order in y (default: 5)
+  /// @param lnlnQorder The interpolation order in lnlnQ (default: 4)
+  ///
+  /// 2 corresponds to quadratic, 3 to cubic etc.
   void hoppetSetYLnlnQInterpOrders(const int & yorder, const int & lnlnQorder);
 
 
@@ -235,15 +269,20 @@ extern "C" {
   /// The user should have set the quark masses or requested a FFN scheme
   /// prior to calling this function.
   ///
-  /// This function is provided mainly for use in conjunction with hoppetAssign.
-  /// In particular, it has the side effect of modifying the structure of the
-  /// PDF tables to make sure they know about the mass thresholds.
+  /// This function is provided mainly for use in conjunction with
+  /// hoppetAssign (C++) :func:`Assign` (Python).  In particular, it
+  /// has the side effect of modifying the structure of the PDF tables
+  /// to make sure they know about the mass thresholds.
   ///
   /// If QED has been requested, a QED coupling will also be set up
   /// (its value is not currently configurable from this interface).
   ///
-  /// If you call hoppetEvolve (below), there is no need to separately call
-  /// hoppetSetCoupling.
+  /// If you call hoppetEvolve (C++) :func:`Evolve` (Python), there is
+  /// no need to separately call this routine.
+  ///
+  /// @param asQ0 alphas at the scale Q0
+  /// @param Q0alphas the scale Q0
+  /// @param nloop Perturbative order (1: LO, 2: NLO, 3: NNLO, 4: N3LO)
   void hoppetSetCoupling(const double & asQ0,
                          const double & Q0alphas,
                          const int    & nloop);
@@ -268,8 +307,8 @@ extern "C" {
                     const double & Q0pdf);
 
 
-  /// Prepare a cached evolution.
-  /// Once this has been called, one can use hoppetCachedEvolve to
+  /// Prepare a cached evolution.  Once this has been called, one can
+  /// use hoppetCachedEvolve (C++) or :func:`CachedEvolve` (Python) to
   /// carry out the cached evolution of a specific initial condition.
   ///
   /// @param asQ0     Strong coupling at initial scale Q0alphas
@@ -291,7 +330,10 @@ extern "C" {
   void hoppetCachedEvolve(void (*pdf_subroutine)(const double & x, 
                                      const double & Q, double * res));
 
-  /// Return the coupling at scale Q
+  /// Return the strong coupling at scale Q
+  ///
+  /// @param Q Scale in GeV
+  /// @return The strong coupling
   double hoppetAlphaS(const double & Q);
 
   /// Return in f[0..N] the value of the internally stored pdf at
@@ -309,7 +351,7 @@ extern "C" {
 
   /// the interface to get a single flavour, which takes iflv
   /// starting from -6. This is the direct Fortran interface.
-  /// The C++ interface is hoppetEvalIFlv below, which takes the
+  /// The C++/Python interface is hoppetEvalIFlv below, which takes the
   /// hoppet iflv constants, which have been shifted by +6
   /// to make them non-negative and match the indices to be used
   /// with hoppetEval
@@ -320,6 +362,12 @@ extern "C" {
   /// Return xf(x,Q) for the flavour indicated by iflv, which should
   /// be one of the hoppet iflv_* constants (iflv_g, iflv_d,
   /// iflv_ubar, etc.)
+  ///
+  /// @param x Longitudinal momentum fraction (0 < x < 1)
+  /// @param Q Scale in GeV
+  /// @param iflv One of the hoppet.iflv_g, hoppet.iflv_d, etc.
+  ///
+  /// @return xf(x,Q) for the flavour indicated by iflv
   inline double hoppetEvalIFlv(const double & x,
 		       const double & Q,
 		       const int & iflv) {return hoppetEvalFortranIFlv(x,Q,iflv-6);}
@@ -361,13 +409,23 @@ extern "C" {
   /// part of the interface
   void hoppetDeleteAll();
   
-  ///----------------------------------------------------------------------
-  /// Setup of constants and parameters needed for structure functions
+  /// Minimal setup of structure functions
+  ///
+  /// @param order_max highest order in QCD to compute (1: LO, 2: NLO, 3: NNLO, 4: N3LO)
+  ///
   void hoppetStartStrFct(const int & order_max);
 			 
   
-  ///----------------------------------------------------------------------
   /// Setup of constants and parameters needed for structure functions
+  ///
+  /// @param     order_max      highest order in QCD to compute (1: LO, 2: NLO, 3: NNLO, 4: N3LO)
+  /// @param     nflav          integer number of flavours (if negative use variable flavour)
+  /// @param     scale_choice   (0: fixed scale, 1: use Q, 2: use arbitrary scale)
+  /// @param     constant_mu    if scale_choice = scale_choice_fixed (= 0) then this is the fixed scale
+  /// @param     param_coefs    if .true. use parametrised coefficients functions
+  /// @param     wmass          Mass of the W boson
+  /// @param     zmass          Mass of the z boson
+  ///
   void hoppetStartStrFctExtended(const int & order_max,
 				 const int & nflav,
 				 const int & scale_choice,
