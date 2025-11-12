@@ -3,10 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HOPPET documentation &mdash; HOPPET 2.1.1-dev0 documentation</title>
+  <title>Python Module Index &mdash; HOPPET 2.1.1-dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -19,7 +18,13 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Python API Reference" href="api.html" /> 
+ 
+
+    <script>
+      DOCUMENTATION_OPTIONS.COLLAPSE_INDEX = true;
+    </script>
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -30,7 +35,7 @@
 
           
           
-          <a href="#" class="icon icon-home">
+          <a href="index.html" class="icon icon-home">
             HOPPET
           </a>
 <div role="search">
@@ -54,17 +59,16 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">HOPPET</a>
+          <a href="index.html">HOPPET</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">HOPPET documentation</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Python Module Index</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -72,47 +76,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="hoppet-documentation">
-<h1>HOPPET documentation<a class="headerlink" href="#hoppet-documentation" title="Link to this heading"></a></h1>
-<p>This is the documentation for HOPPET’s Python interface.</p>
-<p>HOPPET is a Fortran package for carrying out DGLAP evolution and other
-common manipulations of parton distribution functions (PDFs). It also
-includes C++ and Python interfaces to many of the key features.</p>
-<p>Within HOPPET, PDFs are represented on a grid in x-space so as to
-avoid limitations on the functional form of input
-distributions. Good speed and accuracy are obtained through the
-representation of splitting functions in terms of their convolution
-with a set of piecewise polynomial basis functions, and Runge-Kutta
-techniques are used for the evolution in Q.</p>
-<p>Key features include:</p>
-<ul class="simple">
-<li><p>unpolarized evolution in the MSbar scheme to N3LO including heavy-quark thresholds</p></li>
-<li><p>QED evolution</p></li>
-<li><p>massless structure function evaluation up to N3LO</p></li>
-<li><p>polarized evolution up to NLO</p></li>
-<li><p>simple access (in Fortran 90) to the objects representing splitting
-function and PDFs, making it possible for a user to extend the
-facilities already provided.</p></li>
-</ul>
-<p>For more complete explanations of how HOPPET works, as well as its
-underlying Fortran interface, see the full <span class="xref std std-doc">PDF documentation</span>
-for details.</p>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Python API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hoppet_constants.html">HOPPET constants</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/github_links.html">PDF documentation (latest release)</a></li>
-</ul>
-</div>
-</section>
+
+   <h1>Python Module Index</h1>
+
+   <div class="modindex-jumpbox">
+   <a href="#cap-h"><strong>h</strong></a>
+   </div>
+
+   <table class="indextable modindextable">
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-h"><td></td><td>
+       <strong>h</strong></td><td></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="api.html#module-hoppet"><code class="xref">hoppet</code></a></td><td>
+       <em></em></td></tr>
+   </table>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api.html" class="btn btn-neutral float-right" title="Python API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
