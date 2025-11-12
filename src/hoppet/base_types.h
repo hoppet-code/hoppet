@@ -193,6 +193,9 @@ protected:
   std::size_t   _size = 0;
   E _extras = E();
 
+  /// @brief  prepare for a compound assignment operation
+  /// @param b  the other data_view to operate on
+  /// @return  a tuple containing the size, this data pointer, and the other data pointer
   inline std::tuple<std::size_t, double *, const double *> prepare_compound(const data_view<E> & b ) {
     extras().ensure_compatible(b.extras());
     return std::make_tuple(size(), data(), b.data());

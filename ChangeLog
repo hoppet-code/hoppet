@@ -10,6 +10,20 @@ Summary of classes
 Access to streamlined interface objects
 	- hoppet::sl::grid
 
+Files added
+	* doc/auto-doxygen-and-ford/Doxyfile-cxx: *** ADDED ***
+	for generating documentation of the C++ interface with doxygen
+
+	* unit-tests-cxx/unit-tests.cc:   *** ADDED ***
+	unit tests for the C++ OO interface
+
+	* src/hoppet/base_types.h:   *** ADDED ***
+	contains the base types for viewing and owning underlying Fortran
+	objects.
+
+	* src/hoppet/qcd.h:   *** ADDED ***
+	provides access to the global C++ QCD constants and functions (wrapping qcd.f90)
+
 2025-11-04 Gavin
 	* CMakeLists.txt:
 	* src/hoppet_oo.h:

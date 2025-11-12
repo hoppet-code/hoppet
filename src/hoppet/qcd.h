@@ -46,15 +46,16 @@ extern "C" {
 }
 
 namespace hoppet {
+/// @brief namespace containing QCD-related global constants and functions  
 namespace qcd {
-  const double & ca     = hoppet__qcd__ca    ;
-  const double & cf     = hoppet__qcd__cf    ;
-  const double & tr     = hoppet__qcd__tr    ;
-  const int    & nf_int = hoppet__qcd__nf_int;
-  const int    & nf_u   = hoppet__qcd__nf_u  ;
-  const int    & nf_d   = hoppet__qcd__nf_d  ;
-  const double & nf     = hoppet__qcd__nf    ;
-  const double & tf     = hoppet__qcd__tf    ;
+  const double & ca     = hoppet__qcd__ca    ;  //< $C_A$ colour factor
+  const double & cf     = hoppet__qcd__cf    ;  //< $C_F$ colour factor
+  const double & tr     = hoppet__qcd__tr    ;  //< $T_R$ colour factor
+  const int    & nf_int = hoppet__qcd__nf_int;  //< number of active flavours as an integer
+  const int    & nf_u   = hoppet__qcd__nf_u  ;  //< number of active up-type flavours
+  const int    & nf_d   = hoppet__qcd__nf_d  ;  //< number of active down-type flavours
+  const double & nf     = hoppet__qcd__nf    ;  //< number of active flavours as a double
+  const double & tf     = hoppet__qcd__tf    ;  //< $T_F = n_f T_R$ factor
 
   const double & beta0       = hoppet__qcd__beta0;
   const double & twopi_beta0 = hoppet__qcd__twopi_beta0;
@@ -86,7 +87,14 @@ namespace qcd {
   const double & mvv_A3 = hoppet__qcd__mvv_A3;
   const double & mvv_A3G= hoppet__qcd__mvv_A3G;
 
-  auto & set_nf    = hoppet__qcd__set_nf;
+  /// @brief  set the number of active flavours (nf) globally
+  /// @param nf_in  the new number of active flavours (integer)
+  inline void set_nf(const int & nf_in) {hoppet__qcd__set_nf(nf_in);}
+
+  /// @brief  set the QCD group constants globally
+  /// @param ca_in  the new value of C_A
+  /// @param cf_in  the new value of C_F
+  /// @param tr_in  the new value of T_R
   auto & set_group = hoppet__qcd__set_group;
 }
 }

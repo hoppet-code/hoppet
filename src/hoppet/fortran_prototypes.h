@@ -1,5 +1,5 @@
-#ifndef HOPPET_FORTRAN_PROTOTYPES_H
-#define HOPPET_FORTRAN_PROTOTYPES_H
+#ifndef __HOPPET_FORTRAN_PROTOTYPES_H__
+#define __HOPPET_FORTRAN_PROTOTYPES_H__
 #include "hoppet.h"
 #include "hoppet/base_types.h"
 
@@ -233,4 +233,4 @@ DEFINE_RETURN_DBL_MEMBER_I(pdf_table,lnlnQ_vals)
 DEFINE_RETURN_DBL_MEMBER_I(pdf_table,Q_vals)
 
 
-#endif // HOPPET_FORTRAN_PROTOTYPES_H
+#endif // __HOPPET_FORTRAN_PROTOTYPES_H__

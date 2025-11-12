@@ -566,7 +566,7 @@ contains
   !!
   !! Additionally, information concerning any varnf and alphas
   !! structure copied from origtab to tab. Actual PDF contents of the
-  !! tab are not however copied, nor are the evolution operators.
+  !! tab are not however copied
   !! 
   subroutine pdftab_AllocTab_fromorig(tab, origtab)
     type(pdf_table), intent(out) :: tab

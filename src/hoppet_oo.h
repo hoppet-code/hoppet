@@ -24,7 +24,7 @@
 //       - [ ] grid_quant_3d
 //       - [~] evolution functions
 //       - [x] PDF access functions
-//       - [ ] does copying also copy the evolution operators?
+//       - [ ] does copying also copy the evolution operators? Check everything being copied
 //       - [ ] fill from LHAPDF
 //       - [ ] write to LHAPDF
 // - [ ] add the evln_operator class
@@ -846,7 +846,7 @@ public:
   /// @return the value of alpha_s(Q)
   ///
   /// Note that this may be slower than the version without fixnf, since it may
-  /// bypass fast interpolation and might need solve the evolution beyond the 
+  /// bypass fast interpolation and might need to solve the evolution beyond the 
   /// cached range
   double operator()(double Q, int fixnf) const {return hoppet_cxx__running_coupling__value(valid_ptr(), Q, &fixnf);}
 
