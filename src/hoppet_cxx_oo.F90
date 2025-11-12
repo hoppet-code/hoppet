@@ -1173,6 +1173,8 @@ contains
     tab_ptr = c_loc(tab_f)
   end function hoppet_cxx__pdf_table__copy
 
+  !! Note that as of 2025-11-12 this does not copy any evolution
+  !! operators
   subroutine hoppet_cxx__pdf_table__copy_contents(dest, src) bind(C)
     implicit none
     type(c_ptr), intent(in), value :: dest, src
