@@ -26,13 +26,13 @@ module warnings_and_errors
   integer, parameter :: stddev_in = 0
   integer            :: stddev = stddev_in
 
-  logical, save :: throw_cxx_exceptions = .false.
+  logical, public, save :: throw_cxx_exceptions = .false.
 
   interface 
     subroutine hoppet_throw_runtime_error() bind(C,name="hoppet_throw_runtime_error")
     end subroutine hoppet_throw_runtime_error
   end interface
-
+  public :: hoppet_throw_runtime_error
 
 
 

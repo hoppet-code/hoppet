@@ -436,6 +436,11 @@ public:
     }
   }
 
+  inline std::size_t size_dim0() const {return extras().size_dim0;}
+  inline std::size_t size_dim1() const {return extras().size_dim1;}
+  /// return the size of the flavour dimension (dim0)
+  inline std::size_t size_flv() const {return size_dim0();}
+
   void ensure_valid() const {
     if (!data()) {
       throw std::runtime_error("hoppet::grid_quant_2d_view::ensure_valid: data pointer is null");
@@ -1101,16 +1106,28 @@ public:
   /// cannot reach this nf value.
   void evolve(double                        Q0,        //< scale of input PDF
               const grid_quant_2d_view &    pdf_at_Q0, //< input PDF at scale Q0
-              const running_coupling_view & coupling,  //< running coupling to use for evolution
               const dglap_holder_view &     dh,        //< DGLAP holder to use for evolution
+              const running_coupling_view & coupling,  //< running coupling to use for evolution
               double muR_over_Q = 1.0,                 //< ratio of renormalization to factorization scale
               int    nloop = -1,                       //< number of loops to use; if <0, use coupling.nloop()
               bool   untie_nf = false                  //< whether to untie nf in evolution
             ) {
+    ensure_compatible(pdf_at_Q0);
     if (nloop < 0) nloop = coupling.nloop();
-    throw std::runtime_error("pdf_table_view::evolve: not yet implemented in C++ interface");
-    //hoppet_cxx__pdf_table__evolve(valid_ptr(), pdf_in.data(), coupling.ptr(), dh.ptr());
+    hoppet_cxx__pdf_table__evolve(valid_ptr(), Q0, pdf_at_Q0.data(), dh.ptr(), coupling.ptr(),
+                                 muR_over_Q, nloop, untie_nf);
   }  
+
+  /// @brief  throw an error if some_pdf is not compatible with *this (grid & flavour dimension size)
+  /// @param some_pdf 
+  void ensure_compatible(const grid_quant_2d_view & some_pdf) const {
+    grid().ensure_compatible(some_pdf.grid());
+    if (some_pdf.size_flv() != size_flv()) {
+      throw std::runtime_error(
+        "hoppet::pdf_table_view::ensure_compatible: incompatible pdf_table.size_flv()="+std::to_string(size_flv())+
+        " vs pdf_at_Q0.size_flv()="+std::to_string(some_pdf.size_flv()));
+    }
+  }
 
   /// @brief  Fill the PDF table by evolving from an input PDF using previously determine evolution operators
   ///

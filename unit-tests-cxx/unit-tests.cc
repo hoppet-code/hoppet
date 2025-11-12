@@ -527,6 +527,7 @@ TEST_CASE( "running_coupling", "[hoppet]" ) {
 
 }
 
+//-----------------------------------------------------------------------------
 TEST_CASE("dglap_holder", "[hoppet]") {
   using namespace hoppet;
   int nloop = 1;
@@ -546,18 +547,19 @@ TEST_CASE("dglap_holder", "[hoppet]") {
   REQUIRE_THAT(plo_qq_q1.at_y(5.05), WithinAbs(plo_qq_q2.at_y(5.05), 1e-6));
 }
 
+
+//-----------------------------------------------------------------------------
 TEST_CASE("pdf_table", "[hoppet]") {
   double Qmin = 1.0, Qmax = 1e4;
   double dlnlnQ = big_grid.dy()/4.0;
   hoppet::pdf_table tab(big_grid, Qmin, Qmax, dlnlnQ);
+  cout << red << "Created pdf_table with nQ=" << tab.nQ() << " and size_flv = " << tab.size_flv() << "\n" << endc;
   double mc = sqrt(2.0) + 1e-10;
   double mb = 4.5;
   double mt = 175.0;
   hoppet::running_coupling alphas(0.118, 91.1880, 3, mc, mb, mt);
   tab.add_nf_info(alphas);
 
-  auto tab_copy = tab; // copy constructor
-  hoppet::pdf_table_view tab_view(tab);
 
   auto sl_tab = hoppet::sl::table;
   size_t iQ = sl_tab.nQ() / 2;
@@ -592,10 +594,16 @@ TEST_CASE("pdf_table", "[hoppet]") {
   for (int i = 0; i <= sl_tab.iflv_max(); ++i) {
     REQUIRE_THAT(p_pdf[i].at_x(x), WithinAbs(p_pdf_raw[i], 1e-6));
   }
-  //// now look at the gluon
-  
 
-
+  //// now try to evolve a table  
+  hoppet::pdf_table tab_copy = hoppet::sl::table; // copy constructor
+  hoppet::pdf_table_view tab_view(tab_copy);
+  REQUIRE(tab_view.ptr() != hoppet::sl::table.ptr()); // different underlying pointers
+  hoppet::pdf pdf_Q0 = hoppet::pdf_qcd(tab_view.grid());
+  double Q0 = sqrt(2.0);
+  pdf_Q0.assign(hoppetBenchmarkPDFunpol, 0.0);
+  tab_view.evolve(Q0, pdf_Q0, hoppet::sl::dh, hoppet::sl::coupling);
+  REQUIRE_THAT( tab_view.at_xQf(x, Q, hoppet::iflv_g), WithinAbs( hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6) );
 
   cout << hoppet::sl::table.nQ() << "=hoppet::sl::table.nQ()\n";
 }

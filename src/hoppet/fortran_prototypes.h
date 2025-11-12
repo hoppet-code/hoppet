@@ -3,6 +3,10 @@
 #include "hoppet.h"
 #include "hoppet/base_types.h"
 
+#ifdef __cplusplus
+  #define _Bool bool
+#endif
+
 #define DEFINE_RETURN_INT_MEMBER(classname, membername)           extern "C" int            hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_LOG_MEMBER(classname, membername)           extern "C" bool           hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
 #define DEFINE_RETURN_DBL_MEMBER(classname, membername)           extern "C" double         hoppet_cxx__##classname##__##membername(const classname##_f * ptr);
@@ -208,6 +212,9 @@ extern "C" {
   int      hoppet_cxx__pdf_table__size_flv(const pdf_table_f * tab);
   double   hoppet_cxx__pdf_table__at_yqf(const pdf_table_f * tab, double y, double Q, int iflv);
   void     hoppet_cxx__pdf_table__at_yq_into(const pdf_table_f * tab, double y, double Q, double * res);
+  void     hoppet_cxx__pdf_table__evolve(pdf_table_f *tab, double q0, const double * pdf_at_q0,
+                                         const dglap_holder_f *dh, const running_coupling_f *coupling, 
+                                         double mur_over_q, int nloop, _Bool untie_nf);
 }
 DEFINE_COPY(pdf_table)
 DEFINE_DELETE(pdf_table)

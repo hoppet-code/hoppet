@@ -1136,6 +1136,7 @@ contains
 
   !! allocate a new pdf_table object and return a pointer to it
   function hoppet_cxx__pdf_table__new(grid, Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table)  bind(C) result(tab_ptr)
+    use pdf_representation
     implicit none
     type(c_ptr) :: tab_ptr
     type(c_ptr), intent(in), value :: grid
@@ -1154,7 +1155,7 @@ contains
     freeze_at_Qmin_f = (freeze_at_Qmin .neqv. .false._c_bool) ! safely convert to fortran logical
     call AllocPDFTable(grid_f, tab_f, Qmin, Qmax, dlnlnQ, lnlnQ_order, &
                       freeze_at_Qmin=freeze_at_Qmin_f, &
-                      iflv_max_table=iflv_max_table)
+                      iflv_max_table=iflv_max_table + iflv_min)
 
     tab_ptr = c_loc(tab_f)
   end function hoppet_cxx__pdf_table__new
@@ -1250,6 +1251,38 @@ contains
     call c_f_pointer(obj, obj_f)
     call EvalPdfTable_yQ(obj_f, y, Q, res( 1:obj_f%tab_iflv_max+iflv_max_offset ) )
   end subroutine
+
+  subroutine hoppet_cxx__pdf_table__evolve(tab, &
+              Q0, pdf_at_Q0, &
+              dh, coupling, muR_over_Q, nloop, untie_nf) bind(C)
+    use, intrinsic :: iso_c_binding
+    use qcd_coupling,    only: running_coupling
+    use dglap_holders,   only: dglap_holder
+    implicit none
+    type(c_ptr), intent(in), value :: tab
+    real(c_double), intent(in), value :: Q0
+    type(c_ptr), intent(in), value :: pdf_at_Q0
+    type(c_ptr), intent(in), value :: dh, coupling
+    real(c_double), intent(in), value :: muR_over_Q
+    integer(c_int), intent(in), value :: nloop
+    logical(c_bool), intent(in), value :: untie_nf
+    !-----------
+    real(c_double), pointer :: pdf_at_Q0_f(:,:)
+    type(pdf_table), pointer        :: tab_f
+    type(running_coupling), pointer :: coupling_f
+    type(dglap_holder), pointer    :: dh_f
+    logical :: untie_nf_f
+
+    call c_f_pointer(tab, tab_f)
+    call c_f_pointer(pdf_at_Q0, pdf_at_Q0_f, shape=[size(tab_f%tab,1), size(tab_f%tab,2)])
+    call c_f_pointer(coupling, coupling_f)
+    call c_f_pointer(dh, dh_f)
+    untie_nf_f = (untie_nf .neqv. .false._c_bool) ! safely convert to fortran logical
+
+    call EvolvePdfTable(tab_f, &
+                        Q0, pdf_at_Q0_f, &
+                        dh_f, coupling_f, muR_over_Q, nloop, untie_nf=untie_nf_f)
+  end subroutine hoppet_cxx__pdf_table__evolve
 
   DEFINE_DELETE(pdf_table)
 

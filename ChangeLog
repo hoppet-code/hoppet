@@ -30,9 +30,13 @@ __Files added__
 	* src/hoppet_oo.h:                        *** ADDED ***
 	- contains the C++ object-oriented interfaces
 
-	* src/hoppet_oo.cc:                        *** ADDED ***
+	* src/hoppet_oo.cc:                       *** ADDED ***
 	- FILL THIS IN, including hoppetStartCXX function
 
+	* src/hoppet_cxx_oo.f90:		          *** ADDED ***
+	Fortran side of the C++ OO interface. Contains a series of 
+	bind(C) routines that take or return a pointer to a Fortran
+	objects, allowing the C++ code to view and manipulate them.
 
 --------- core code changes on 2025-10-cxx-OO branch ---------
 
