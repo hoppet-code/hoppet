@@ -26,6 +26,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r docs/python-auto/requirements.txt
           pip install scikit-build-core swig build
+          pip uninstall ninja -y || echo "ninja removed"
+          apt remove ninja-build -y || echo "ninja-build removed"
           python -m build
           pip install ./dist/hoppet-*.whl
 
