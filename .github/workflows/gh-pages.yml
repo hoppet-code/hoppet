@@ -25,7 +25,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get update
-          sudo apt-get install -y gcc g++  gfortran
+          sudo apt-get install -y gcc g++  gfortran python3-devel python3-numpy swig
           
       - name: configure_build_check
         run: |
@@ -35,10 +35,15 @@ jobs:
           sudo cmake --install BUILD
           ctest --test-dir BUILD -j 4 --output-on-failure
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
+          # now try running some python examples, checking the output matches the expected output
+          scripts/check python3 example_py/tabulation_example.py
+          scripts/check python3 example_py/tabulation_example_qed.py
+          scripts/check python3 example_py/structure_functions_example.py
+
+      #- name: Set up Python
+      #  uses: actions/setup-python@v4
+      #  with:
+      #    python-version: '3.12'
 
       - name: Install dependencies
         run: |
