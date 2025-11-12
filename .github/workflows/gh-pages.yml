@@ -30,9 +30,9 @@ jobs:
       - name: configure_build_check
         run: |
           # build and run unit tests
-          cmake -S . -B BUILD -DHOPPET_BUILD_PYINTERFACE=ON 
+          cmake -S . -B BUILD -DHOPPET_BUILD_PYINTERFACE=ON -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
           cmake --build BUILD -j 4
-          sudo cmake --install BUILD
+          cmake --install BUILD
           ctest --test-dir BUILD -j 4 --output-on-failure
 
           # now try running some python examples, checking the output matches the expected output
