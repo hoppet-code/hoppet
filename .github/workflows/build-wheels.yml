@@ -25,9 +25,12 @@ jobs:
     
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.16.2 # Seems not to work with the most recent version of v2
+      if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev' }}
       env:
         # Build for Python 3.9-3.12
         CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
+	# Overwrite if on dev branch (only 3.11)
+	CIBW_BUILD: ${{ github.ref == 'refs/heads/dev' && 'cp311-*' || 'cp39-* cp310-* cp311-* cp312-*' }}
         
         # Skip 32-bit and musl builds
         CIBW_SKIP: "*-manylinux_i686 *-musllinux* *-win32"
