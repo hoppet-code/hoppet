@@ -1,4 +1,4 @@
-PDF documentation (latest release)
+PDF documentation
 =====================================
 
 `Download latest PDF manual <https://github.com/hoppet-code/hoppet/releases/download/hoppet-2.1.0/HOPPET-doc.pdf>`_
