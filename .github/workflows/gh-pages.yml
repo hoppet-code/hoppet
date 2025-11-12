@@ -26,10 +26,7 @@ jobs:
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get update
           sudo apt-get install -y gcc g++  gfortran
-          --slave /usr/bin/g++ g++ /usr/bin/g++ \
-          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran \
-          --slave /usr/bin/gcov gcov /usr/bin/gcov     
-  
+          
       - name: configure_build_check
         run: |
           # build and run unit tests
