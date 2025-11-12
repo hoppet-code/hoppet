@@ -25,10 +25,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r docs/python-auto/requirements.txt
-          pip install scikit-build-core swig
+          pip install scikit-build-core swig build
           python -m build
           pip install ./dist/hoppet-*.whl
-          
+
       - name: Build Sphinx HTML
         run: |
           sphinx-build -b html docs/python-auto/source docs/python-auto/_build/html
