@@ -18,6 +18,7 @@ namespace sl {
 }
 
 extern "C" {
+/// @brief set up the C++ streamlined interface objects to view the Fortran ones  
 void hoppetStartCXX(grid_def_f * grid_ptr, dglap_holder_f * dh_ptr) {
   hoppet::sl::grid = hoppet::grid_def_view(grid_ptr);
   hoppet::sl::dh.take_view(dh_ptr);
