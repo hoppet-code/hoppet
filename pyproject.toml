@@ -40,6 +40,7 @@ dependencies = ["numpy"]
 
 [project.urls]
 Homepage = "https://github.com/hoppet-code"
+Documentation = "https://hoppet-code.github.io/hoppet/"
 Repository = "https://github.com/hoppet-code/hoppet"
 Changelog = "https://github.com/hoppet-code/hoppet/blob/master/NEWS.md"
 

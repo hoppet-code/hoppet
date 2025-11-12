@@ -236,24 +236,23 @@ jobs:
         name: sdist
         path: dist/*.tar.gz
 
-#  upload_test_pypi:
-#    needs: [build_wheels, build_sdist]
-#    runs-on: ubuntu-latest
-#    if: github.ref == 'refs/heads/2025-09-python-wheels-new' || github.ref == 'refs/heads/master'
-#    
-#    steps:
-#    - name: Download all artifacts
-#      uses: actions/download-artifact@v4
-#      with:
-#        path: dist
-#        merge-multiple: true
-#        
-#    - name: Publish to TestPyPI
-#      uses: pypa/gh-action-pypi-publish@release/v1
-#      with:
-#        repository-url: https://test.pypi.org/legacy/
-#        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-#        skip-existing: true
+  upload_test_pypi:
+    needs: [build_wheels_legacy, build_wheels_modern, build_sdist]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+        
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        skip-existing: true
 
   upload_pypi:
     needs: [build_wheels_legacy, build_wheels_modern, build_sdist]
@@ -272,7 +271,7 @@ jobs:
         skip-existing: true
 
   build_and_deploy_documentation:
-    needs: [upload_pypi]
+    needs: [upload_pypi, upload_test_pypi]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -287,6 +286,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r docs/requirements.txt
+
+      - name: Extra pip steps for test PyPI scenario
+        if: ${{ needs.upload_test_pypi.result == 'success' }}
+	run: |
+	pip uninstall hoppet -y
+	pip install -i https://test.pypi.org/simple/ hoppet
 
       - name: Build Sphinx HTML
         run: |
