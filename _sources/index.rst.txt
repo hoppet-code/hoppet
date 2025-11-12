@@ -31,7 +31,7 @@ Key features include:
 
 
 For more complete explanations of how HOPPET works, as well as its
-underlying Fortran interface, see the full :doc:`PDF documentation`
+underlying Fortran interface, see the full :doc:`PDF documentation <_generated/github_links>`
 for details.
 
 
