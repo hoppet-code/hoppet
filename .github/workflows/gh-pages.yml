@@ -17,39 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           submodules: recursive
-  
-      - name: Install GFortran Linux
-        run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-          sudo apt-get update
-          sudo apt-get install -y gcc g++  gfortran python3-numpy swig
-          
-      - name: configure_build_check
-        run: |
-          # build and run unit tests
-          cmake -S . -B BUILD -DHOPPET_BUILD_PYINTERFACE=ON -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL
-          cmake --build BUILD -j 4
-          cmake --install BUILD
-          ctest --test-dir BUILD -j 4 --output-on-failure
-
-          # now try running some python examples, checking the output matches the expected output
-          scripts/check python3 example_py/tabulation_example.py
-          scripts/check python3 example_py/tabulation_example_qed.py
-          scripts/check python3 example_py/structure_functions_example.py
-
-      #- name: Set up Python
-      #  uses: actions/setup-python@v4
-      #  with:
-      #    python-version: '3.12'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r docs/python-auto/requirements.txt
-
+          pip install scikit-build-core swig
+          python -m build
+          pip install ./dist/hoppet-*.whl
+          
       - name: Build Sphinx HTML
         run: |
           sphinx-build -b html docs/python-auto/source docs/python-auto/_build/html
