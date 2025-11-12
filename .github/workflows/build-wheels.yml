@@ -26,26 +26,12 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: recursive
-
-  # compute the CIBW_BUILD value and export as job output
-    - id: set_cibw_build
-      run: |
-        if [ "${{ github.ref_name }}" = "refs/heads/dev" ]; then
-          echo "cibw=cp311-*"
-        else
-          echo "cibw=cp39-* cp310-* cp311-* cp312-*"
-        fi
-        # export to GITHUB_OUTPUT so other steps can read it via needs..outputs or steps..outputs
-        echo "cibw_build=${cibw}" >> $GITHUB_OUTPUT
-      # note: $GITHUB_OUTPUT only available in steps-level scripts
-
-    
+  
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.16.2 # Seems not to work with the most recent version of v2
       env:
         # Build for Python 3.9-3.12
-#        CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
-        CIBW_BUILD: ${{ steps.set_cibw_build.outputs.cibw_build }}
+        CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
         
         # Skip 32-bit and musl builds
         CIBW_SKIP: "*-manylinux_i686 *-musllinux* *-win32"
@@ -287,47 +273,3 @@ jobs:
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
         skip-existing: true
-
-  build_and_deploy_documentation:
-    needs: [upload_pypi, upload_test_pypi]
-    runs-on: ubuntu-latest
-    # Only run this job if either upload job succeeded
-    if: ${{ needs.upload_pypi.result == 'success' || needs.upload_test_pypi.result == 'success' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r docs/python-auto/requirements.txt
-
-      - name: Extra pip steps for test PyPI scenario
-        if: ${{ needs.upload_test_pypi.result == 'success' }}
-        run: |
-          pip uninstall hoppet -y
-          pip install -i https://test.pypi.org/simple/ hoppet
-
-      - name: Build Sphinx HTML
-        run: |
-          sphinx-build -b html docs/python-auto/source docs/python-auto/_build/html
-          # or use: make -C docs html
-
-      - name: Upload artifact (optional, for debugging)
-        uses: actions/upload-artifact@v4
-        with:
-          name: sphinx-html
-          path: docs/python-auto/_build/html
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GH_PAGES_PAT }}
-          publish_branch: gh-pages
-          publish_dir: ./docs/python-auto/_build/html
-          # you can set commit_name, commit_email if desired

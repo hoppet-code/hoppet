@@ -1,5 +1,7 @@
 [![build](https://github.com/hoppet-code/hoppet/actions/workflows/main.yml/badge.svg)](https://github.com/hoppet-code/hoppet/actions/workflows/main.yml)
 <a href="https://pypi.org/project/HOPPET/"><img alt="PyPI" src="https://img.shields.io/pypi/v/HOPPET"/></a>
+[![Documentation](https://github.com/hoppet-code/hoppet/actions/workflows/gh-pages.yml/badge.svg)](https://github.com/hoppet-code/hoppet/actions/workflows/gh-pages.yml)
+
 
 # HOPPET: Higher Order Perturbative Parton Evolution Toolkit
 
