@@ -36,30 +36,30 @@ int main () {
   running_coupling alphas(asQ0, Q0, nloop, mc, mb, mt);
 
   // set up an initial condition
-  pdf pdf0 = pdf_qcd(grid);
-  pdf0.assign(heralhc_init, Q0);
+  pdf pdf0 = pdf_qcd(grid);        // allocate space for a a pdf with QCD flavours
+  pdf0.assign(heralhc_init, Q0);   // fill it from the heralhc_init function (below)
 
-  // set up a table and then fill it
+  // set up a table (in y=ln1/x and Q) and then fill it
   double Qmin = 1.2, Qmax = 1e4;
-  pdf_table tab(grid, Qmin, Qmax, dlnlnQ);
-  tab.add_nf_info(alphas);
-  tab.evolve(Q0, pdf0, dh, alphas);
-
+  pdf_table table(grid, Qmin, Qmax, dlnlnQ); // create the table
+  table.add_nf_info(alphas);                 // make sure it has the nf boundaries (from the coupling)
+  table.evolve(Q0, pdf0, dh, alphas);        // take the initial condition and evolve it to fill the table
 
   // output the results
-  double pdf[13];
-  double xvals[9]={1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9};
+  double results[13];
+  vector<double> xvals = {1e-5,1e-4,1e-3,1e-2,0.1,0.3,0.5,0.7,0.9};
   double Q = 100;
   printf("           Evaluating PDFs at Q = %8.3f GeV\n",Q);
   printf("    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon\n");
-  for (int ix = 0; ix < 9; ix++) {
-    tab.at_xQ_into(xvals[ix], Q, pdf);
-    printf("%7.1E %11.4E %11.4E %11.4E %11.4E %11.4E\n",xvals[ix],
-           pdf[6+2]-pdf[6-2], 
-           pdf[6+1]-pdf[6-1], 
-           2*(pdf[6-1]+pdf[6-2]),
-           (pdf[6-4]+pdf[6+4]),
-           pdf[6+0]);
+  for (double x: xvals) {
+    // put the x*pdf(x,Q) values for all flavours into results[]
+    table.at_xQ_into(x, Q, results); 
+    printf("%7.1E %11.4E %11.4E %11.4E %11.4E %11.4E\n",x,
+           results[iflv_u] - results[iflv_ubar], 
+           results[iflv_d] - results[iflv_dbar], 
+           2*(results[iflv_dbar] + results[iflv_ubar]),
+           (results[iflv_c] + results[iflv_cbar]),
+           results[iflv_g]);
   }
 
   // write out the PDF in LHAPDF format (basename/ directory must exist)

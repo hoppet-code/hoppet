@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 --------- 2025-10-cxx-OO branch ---------
 
@@ -94,7 +93,6 @@ __Files added__
 	- made the factscheme argument optional in the C++ hoppetStartExtended.
 
 --------- end 2025-10-cxx-OO branch ---------
-=======
 2025-11-12 Alexander
 
 	* doc/ -> docs/manual:
@@ -102,7 +100,6 @@ __Files added__
 	moved the documentation to docs/manual and added python-auto
 	which uses sphinx to generate documentation mainly for the 
 	Python interface.
->>>>>>> dev
 
 2025-11-07 Gavin
 
