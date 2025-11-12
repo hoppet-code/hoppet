@@ -31,8 +31,8 @@ Key features include:
 
 
 For more complete explanations of how HOPPET works, as well as its
-underlying Fortran interface, see the full PDF manual from
-<https://github.com/hoppet-code/hoppet/releases/download/hoppet-2.1.0/HOPPET-doc.pdf>
+underlying Fortran interface, see the full manual in :doc:`PDF format <_generated/github_links>`
+for details.
 
 
 .. toctree::

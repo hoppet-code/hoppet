@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath('.'))
 project = 'HOPPET'
 copyright = '2025, Alexander Karlberg, Paolo Nason, Gavin Salam, Giulia Zanderighi, Frederic Dreyer, Juan Rojo'
 author = 'Alexander Karlberg, Paolo Nason, Gavin Salam, Giulia Zanderighi, Frederic Dreyer, Juan Rojo'
-release = '2.1.1'
+release = "2.1.1-dev0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -251,7 +251,7 @@ def _generate_latest_doc_link(app):
 
     url = get_latest_hoppet_doc_url()
     with open(outfile, "w", encoding="utf8") as f:
-        f.write("PDF documentation (latest release)\n")
+        f.write("Manual in PDF format\n")
         f.write("=====================================\n\n")
         f.write(f"`Download latest PDF manual <{url}>`_\n")
 

@@ -1,5 +1,7 @@
 [![build](https://github.com/hoppet-code/hoppet/actions/workflows/main.yml/badge.svg)](https://github.com/hoppet-code/hoppet/actions/workflows/main.yml)
 <a href="https://pypi.org/project/HOPPET/"><img alt="PyPI" src="https://img.shields.io/pypi/v/HOPPET"/></a>
+[![Documentation](https://img.shields.io/github/actions/workflow/status/hoppet-code/hoppet/gh-pages.yml?label=Documentation)](https://hoppet-code.github.io/hoppet/)
+
 
 # HOPPET: Higher Order Perturbative Parton Evolution Toolkit
 
@@ -152,7 +154,7 @@ cmake -S . -B BUILD -Dhoppet_DIR=hoppet/installation/share/hoppet/cmake
 # Documentation
 
 Detailed documentation is available as
-[doc/HOPPET-doc.tex](doc/HOPPET-doc.tex). If you use HOPPET in a
+[docs/manual/HOPPET-doc.tex](docs/manual/HOPPET-doc.tex). If you use HOPPET in a
 scientific publication, please refer to https://arxiv.org/abs/0804.3755
 (original v1 release) and https://arxiv.org/abs/2510.09310 (v2 features).
 
