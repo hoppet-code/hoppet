@@ -273,6 +273,8 @@ jobs:
   build_and_deploy_documentation:
     needs: [upload_pypi, upload_test_pypi]
     runs-on: ubuntu-latest
+    # Only run this job if either upload job succeeded
+    if: ${{ needs.upload_pypi.result == 'success' || needs.upload_test_pypi.result == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -285,7 +287,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r docs/requirements.txt
+          pip install -r docs/python-auto/requirements.txt
 
       - name: Extra pip steps for test PyPI scenario
         if: ${{ needs.upload_test_pypi.result == 'success' }}
@@ -295,19 +297,19 @@ jobs:
 
       - name: Build Sphinx HTML
         run: |
-          sphinx-build -b html docs/source docs/_build/html
+          sphinx-build -b html docs/python-auto/source docs/python-auto/_build/html
           # or use: make -C docs html
 
       - name: Upload artifact (optional, for debugging)
         uses: actions/upload-artifact@v4
         with:
           name: sphinx-html
-          path: docs/_build/html
+          path: docs/python-auto/_build/html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GH_PAGES_PAT }}
           publish_branch: gh-pages
-          publish_dir: ./docs/_build/html
+          publish_dir: ./docs/python-auto/_build/html
           # you can set commit_name, commit_email if desired

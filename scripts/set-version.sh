@@ -10,7 +10,7 @@ then
  echo "Usage: scripts/set-version.sh version-number"
  exit
 fi
-t
+
 version=$1
 versionNumber=`echo $version | sed 's/-.*//'`
 # if there is a dash in the version number, take everything afterwards
@@ -59,6 +59,10 @@ echo ${bold}"------------ Setting it in pyinterface/hoppet.i -------------------
 sed -i.bak 's/__version__ = .*/__version__ = "'$version'"/' pyinterface/hoppet.i
 checkChanged pyinterface/hoppet.i
 
+echo ${bold}"------------ Setting it docs/python-auto/source/conf.py------------------"${normal}
+sed -i.bak 's/release = .*/release = "'$version'"/' docs/python-auto/source/conf.py
+checkChanged docs/python-auto/source/conf.py
+
 
 # echo
 # echo "------------ Setting it in configure.ac ---------------------"
@@ -82,10 +86,9 @@ checkChanged pyinterface/hoppet.i
 # diff Doxyfile.bak Doxyfile
 
 
-echo
-echo ${bold}"------------ Setting it in doc/HOPPET-doc.tex --------------"${normal}
-sed -i.bak 's/^\( *\)[^%]*\(%.*VERSION-NUMBER.*\)/\1version '$version'\2/' doc/HOPPET-doc.tex
-checkChanged doc/HOPPET-doc.tex
+echo ${bold}"------------ Setting it in docs/manual/HOPPET-doc.tex --------------"${normal}
+sed -i.bak 's/^\( *\)[^%]*\(%.*VERSION-NUMBER.*\)/\1version '$version'\2/' docs/manual/HOPPET-doc.tex
+checkChanged docs/manual/HOPPET-doc.tex
 
 echo
 echo ${bold}"------------ Recommended ChangeLog entry --------------------"${normal}
