@@ -416,7 +416,12 @@ if (HOPPET_BUILD_EXAMPLES)
   endif()
 
   # and finally the C++ examples
-  set( cppprograms structure_functions_example tabulation_example_qed tabulation_example)
+  set( cppprograms 
+       structure_functions_example 
+       tabulation_example_qed 
+       tabulation_example
+       tabulation_example_oo
+       )
   foreach ( p ${cppprograms})
     add_executable( ${p}_cpp example_cpp/${p}.cc)
     target_include_directories(${p}_cpp PUBLIC ${PROJECT_SOURCE_DIR}/src)

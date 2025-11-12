@@ -38,6 +38,10 @@ __Files added__
 	bind(C) routines that take or return a pointer to a Fortran
 	objects, allowing the C++ code to view and manipulate them.
 
+	* example_cpp/tabulation_example_oo.cc:  *** ADDED ***
+	example using the C++ OO interface to produce the default
+	tabulation_example output.
+
 --------- core code changes on 2025-10-cxx-OO branch ---------
 
 2025-11-05 ->09 Gavin Salam 
