@@ -856,7 +856,7 @@ public:
   /// nloop=1 means the first term in the beta function, etc.
   int nloop() const { return hoppet_cxx__running_coupling__num_loops(valid_ptr()); }
 
-  /// @brief  Returns the range of active flavours (nflcl) for this running coupling
+  /// @brief  Return the range of active flavours (nflcl) for this running coupling
   /// @return  a tuple (nflcl_lo, nflcl_hi)
   ///
   /// use this as `auto [nflcl_lo, nflcl_hi] = rc.nf_range();`
@@ -867,14 +867,14 @@ public:
     return {lo, hi};
   }
 
-  /// @brief  Returns the number of active flavours at a given scale Q  
+  /// @brief  Return the number of active flavours at a given scale Q  
   /// @param Q 
   /// @return 
   int nf_at_Q(double Q) const {
     return hoppet_cxx__running_coupling__nf_at_q(valid_ptr(), Q);
   }
 
-  /// @brief  Returns the number of active flavours at a given scale Q, 
+  /// @brief  Return the number of active flavours at a given scale Q, 
   ///         along with the range of Q for which this number of flavours is valid
   ///
   /// @param Q 
@@ -885,7 +885,7 @@ public:
     return hoppet_cxx__running_coupling__nf_at_q(valid_ptr(), Q, &Qlo, &Qhi);
   }
 
-  /// @brief  Returns the number of active flavours at a given scale Q, 
+  /// @brief  Return the number of active flavours at a given scale Q, 
   ///         along with the range of Q for which this number of flavours is valid
   ///
 
@@ -1169,12 +1169,17 @@ public:
 
 /// objects globally defined in the streamlined interface
 namespace hoppet {
+/// namespace for access to the globally defined objects from the streamlined interface  
 namespace sl {
   /// a view of the grid_def object being used in the streamlined interface
   extern grid_def_view grid;
+  /// a view of the dglap_holder object being used in the streamlined interface
   extern dglap_holder_view dh;
-  extern pdf_table_view    table; //< this should evolve to become an array of tables
+  /// a view of the running_coupling object being used in the streamlined interface
   extern running_coupling_view coupling; 
+
+  extern pdf_table_view    table; //< this should evolve to become an array of tables
+
 }
 }
 

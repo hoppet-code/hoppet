@@ -30,6 +30,8 @@ public:
     return *this;
   }
 
+  /// @brief  make this object a view of the "other" object
+  /// @param other the object of which to take a view
   void take_view(const obj_view & other) noexcept {
     _ptr   = other._ptr;
     _extra = other._extra;
@@ -38,10 +40,19 @@ public:
   const E & extra() const { return _extra; }
   E & extra() { return _extra; }
 
+  /// @brief return a const pointer to the underlying Fortran object
   const T * ptr() const { return _ptr; }
+  /// @brief return a non-const pointer to the underlying Fortran object
   T * ptr() { return _ptr; }
 
+  /// @brief  return a validated const pointer to the underlying Fortran object
+  ///
+  /// If the pointer is null, an exception is thrown
   const T * valid_ptr() const { ensure_valid(); return _ptr; }
+
+  /// @brief  return a validated non-const pointer to the underlying Fortran object
+  ///
+  /// If the pointer is null, an exception is thrown
   T * valid_ptr() { ensure_valid(); return _ptr; }
 
   void ensure_valid() const {if (!_ptr) throw std::runtime_error("hoppet::obj_view::ensure_valid: object pointer is null");}
@@ -138,8 +149,13 @@ public:
     _extras = other._extras;
   }
 
+  /// @brief  return pointer to the underlying data
   double       * data()       {return _data;}
+
+  /// @brief  return a const pointer to the underlying data
   const double * data() const {return _data;}
+
+  /// @brief  return the size of the data array
   std::size_t    size() const {return _size;}
 
   data_view & set_data_ptr(double * data_in) noexcept {_data = data_in; return *this;}
