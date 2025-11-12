@@ -8,14 +8,17 @@
 #include <concepts>
 #include "hoppet.h"
 #include "hoppet/base_types.h"
+// see also hoppet_cxx_oo.f90 for the Fortran prototypes
 #include "hoppet/fortran_prototypes.h"
 
 // Elements to think about
-// - [ ] do we separate things out into different files
-// - [ ] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
+// - [~] do we separate things out into different files (done to some extent)
+// - [~] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
 // - [ ] make sure hoppet/qcd.h (etc) gets installed properly
 // - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
 // - [ ] making sure we treat default epsilon correctly
+// - [ ] where does hoppet_oo.h go?
+// - [ ] check everything gets installed
 
 // Next steps:
 // - [x] add the running_coupling class
@@ -27,6 +30,7 @@
 //       - [ ] does copying also copy the evolution operators? Check everything being copied
 //       - [ ] fill from LHAPDF
 //       - [ ] write to LHAPDF
+// - [ ] array of tables
 // - [ ] add the evln_operator class
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
@@ -1118,6 +1122,37 @@ public:
                                  muR_over_Q, nloop, untie_nf);
   }  
 
+  /// @brief Fill pre-evolution information for this table, to be with evolve()
+  ///
+  /// Note that if (untie_nf) is true [default false] then alphas is
+  /// allowed to have its natural value for nf, even if the dglap_holder
+  /// cannot reach this nf value.
+  void pre_evolve(
+              double                        Q0,        //< scale of input PDF
+              const dglap_holder_view &     dh,        //< DGLAP holder to use for evolution
+              const running_coupling_view & coupling,  //< running coupling to use for evolution
+              double muR_over_Q = 1.0,                 //< ratio of renormalization to factorization scale
+              int    nloop = -1,                       //< number of loops to use; if <0, use coupling.nloop()
+              bool   untie_nf = false                  //< whether to untie nf in evolution
+            ) {
+    if (nloop < 0) nloop = coupling.nloop();
+    hoppet_cxx__pdf_table__pre_evolve(valid_ptr(), Q0, dh.ptr(), coupling.ptr(),
+                                 muR_over_Q, nloop, untie_nf);
+  }  
+
+  /// @brief Fill the PDF table by evolution of an initial condition, using pre_evolve() information
+  ///
+  /// @param pdf_at_Q0  the initial condition PDF at scale Q0 (as set in a pre_evolve(...) call)
+  ///
+  /// This is several times faster than the evolve(...) call without
+  /// pre-evolution, and is the preferred option when evolving multiple
+  /// initial conditions with the same evolution settings.
+  void evolve(const grid_quant_2d_view &    pdf_at_Q0 //< input PDF at scale Q0
+             ) {
+    ensure_compatible(pdf_at_Q0);
+    hoppet_cxx__pdf_table__evolve_frompre(valid_ptr(), pdf_at_Q0.data());
+  }  
+
   /// @brief  throw an error if some_pdf is not compatible with *this (grid & flavour dimension size)
   /// @param some_pdf 
   void ensure_compatible(const grid_quant_2d_view & some_pdf) const {
@@ -1127,13 +1162,6 @@ public:
         "hoppet::pdf_table_view::ensure_compatible: incompatible pdf_table.size_flv()="+std::to_string(size_flv())+
         " vs pdf_at_Q0.size_flv()="+std::to_string(some_pdf.size_flv()));
     }
-  }
-
-  /// @brief  Fill the PDF table by evolving from an input PDF using previously determine evolution operators
-  ///
-  /// @param pdf_at_Q0  the initial condition PDF at scale Q0 (as set FILL THIS IN)
-  void evolve(const grid_quant_2d_view & pdf_at_Q0) {
-    throw std::runtime_error("pdf_table_view::evolve: not yet implemented in C++ interface");
   }
 
   // think carefully which of these interfaces should be public, which perhaps renamed

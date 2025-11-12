@@ -39,11 +39,21 @@ int main () {
   pdf pdf0 = pdf_qcd(grid);        // allocate space for a a pdf with QCD flavours
   pdf0.assign(heralhc_init, Q0);   // fill it from the heralhc_init function (below)
 
-  // set up a table (in y=ln1/x and Q) and then fill it
+  // set up a table (in y=ln1/x and Q)
   double Qmin = 1.2, Qmax = 1e4;
   pdf_table table(grid, Qmin, Qmax, dlnlnQ); // create the table
   table.add_nf_info(alphas);                 // make sure it has the nf boundaries (from the coupling)
-  table.evolve(Q0, pdf0, dh, alphas);        // take the initial condition and evolve it to fill the table
+  
+  // then fill it by evolution from the initial condition
+  bool pre_evolve = false;
+  if (!pre_evolve) {
+    cout << "Using direct evolution, faster with just a single initial condition\n";
+    table.evolve(Q0, pdf0, dh, alphas);  // take the initial condition and evolve it to fill the table
+  } else {
+    cout << "Using pre-evolution, faster for multiple initial conditions\n";
+    table.pre_evolve(Q0, dh, alphas);    // "pre-evolve" to set up the evolution operators
+    table.evolve(pdf0);                  // apply to initial condition 
+  }
 
   // output the results
   double results[13];

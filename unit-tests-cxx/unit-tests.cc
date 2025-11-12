@@ -553,7 +553,6 @@ TEST_CASE("pdf_table", "[hoppet]") {
   double Qmin = 1.0, Qmax = 1e4;
   double dlnlnQ = big_grid.dy()/4.0;
   hoppet::pdf_table tab(big_grid, Qmin, Qmax, dlnlnQ);
-  cout << red << "Created pdf_table with nQ=" << tab.nQ() << " and size_flv = " << tab.size_flv() << "\n" << endc;
   double mc = sqrt(2.0) + 1e-10;
   double mb = 4.5;
   double mt = 175.0;
@@ -595,7 +594,7 @@ TEST_CASE("pdf_table", "[hoppet]") {
     REQUIRE_THAT(p_pdf[i].at_x(x), WithinAbs(p_pdf_raw[i], 1e-6));
   }
 
-  //// now try to evolve a table  
+  // now try to evolve a table  
   hoppet::pdf_table tab_copy = hoppet::sl::table; // copy constructor
   hoppet::pdf_table_view tab_view(tab_copy);
   REQUIRE(tab_view.ptr() != hoppet::sl::table.ptr()); // different underlying pointers
@@ -604,6 +603,12 @@ TEST_CASE("pdf_table", "[hoppet]") {
   pdf_Q0.assign(hoppetBenchmarkPDFunpol, 0.0);
   tab_view.evolve(Q0, pdf_Q0, hoppet::sl::dh, hoppet::sl::coupling);
   REQUIRE_THAT( tab_view.at_xQf(x, Q, hoppet::iflv_g), WithinAbs( hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6) );
+
+  // next, try pre-evolution
+  hoppet::pdf_table tab_pre = hoppet::sl::table; // copy constructor
+  tab_pre.pre_evolve(Q0, hoppet::sl::dh, hoppet::sl::coupling);
+  tab_pre.evolve(pdf_Q0);
+  REQUIRE_THAT( tab_pre.at_xQf(x, Q, hoppet::iflv_g), WithinAbs( hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6) );
 
   cout << hoppet::sl::table.nQ() << "=hoppet::sl::table.nQ()\n";
 }

@@ -1,5 +1,11 @@
+/// @file hoppet/fortran_prototypes.h
+/// @brief C++ prototypes for the Fortran routines used in the object-oriented interface
+///
+/// See hoppet_cxx_oo.f90 for the Fortran implementations of these routines.
+
 #ifndef __HOPPET_FORTRAN_PROTOTYPES_H__
 #define __HOPPET_FORTRAN_PROTOTYPES_H__
+
 #include "hoppet.h"
 #include "hoppet/base_types.h"
 
@@ -23,10 +29,14 @@
    inline classname##_f * generic_copy(const classname##_f * ptr) {return hoppet_cxx__##classname##__copy(ptr);}
 
 
+/// "forward" declarations of classes corresponding to Fortran types.
+///
+/// note that we only ever use pointers to to these class, so we do not
+/// need to know anything about their actual structure, which is hidden in
+/// the Fortran code.
+///
+/// @{
 /// "forward" declaration of the Fortran grid_def type;
-/// note that we only ever use pointers to it, so we do not
-/// need to know anything about its actual structure, which
-/// is hidden in the Fortran code.
 class grid_def_f;
 class grid_quant_f;
 class grid_quant_2d_f;
@@ -39,7 +49,7 @@ class mass_threshold_mat_f;
 class pdf_table_f;
 class pdfseginfo_f;
 class evln_operator_f;
-
+/// @}
 
 
 /// grid_def function wrappers
@@ -215,6 +225,10 @@ extern "C" {
   void     hoppet_cxx__pdf_table__evolve(pdf_table_f *tab, double q0, const double * pdf_at_q0,
                                          const dglap_holder_f *dh, const running_coupling_f *coupling, 
                                          double mur_over_q, int nloop, _Bool untie_nf);
+  void     hoppet_cxx__pdf_table__pre_evolve(pdf_table_f *tab, double q0, 
+                                         const dglap_holder_f *dh, const running_coupling_f *coupling, 
+                                         double mur_over_q, int nloop, _Bool untie_nf);
+  void     hoppet_cxx__pdf_table__evolve_frompre(pdf_table_f *tab, const double * pdf_at_q0);
 }
 DEFINE_COPY(pdf_table)
 DEFINE_DELETE(pdf_table)
