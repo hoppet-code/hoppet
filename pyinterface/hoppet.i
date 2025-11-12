@@ -377,7 +377,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 
 %rename(PreEvolve               )      hoppetpreevolve_;     
 %rename(AlphaS                  )      hoppetalphas_; 
-
+%rename(SetCoupling             )      hoppetsetcoupling_;       
 %feature("docstring") SetCoupling "
 Set the strong coupling constant at a reference scale.
 
@@ -386,7 +386,6 @@ Parameters:
   Q (float): Reference scale [GeV]
   nloop (int): Number of loops for alpha_s running
 ";
-%rename(SetCoupling             )      hoppetsetcoupling_;       
 %rename(EvalIFlv                )      hoppetEvalIFlv; 
 //%rename(EvalFortranIFlv         )      hoppetevaliflv_; 
 %rename(SetFFN                  )      hoppetsetffn_;       
@@ -402,7 +401,13 @@ Parameters:
 %rename(StartStrFct             )      hoppetstartstrfct_;
 %rename(StartStrFctExtended     )      hoppetStartStrFctExtended_c;
 %rename(WriteLHAPDFGrid         )      hoppetWriteLHAPDFGrid;
-%rename(version                 )      hoppetVersion;
+%feature("docstring") WriteLHAPDFGrid "
+Write out the contents of tables(0) (assumed to be the PDF) in the LHAPDF format
+
+Parameters:
+  basename (string): The basename of the output
+  pdf_index (int): The intended index in the LHAPDF meaning. If index is 0 both the PDF and the .info file is saved to disk
+";
 
 // These are the functions that have an explicit interface defined
 // above, so we make sure not to include the C++ versions
@@ -435,6 +440,7 @@ Parameters:
 %ignore hoppetInitStrFctFlav_c;
 %ignore hoppetwritelhapdfgrid_;
 %ignore hoppetevaliflv_; 
+%ignore hoppetVersion;
 
 // Now we make sure to keep the internal functions private
 %ignore free_global_pdf;
@@ -456,6 +462,7 @@ Parameters:
   plq (int): 1 to enable lepton splitting function
 
   Note: Must be called before :func:`Start` as it modifies global PDF settings.
+
 ";
 
 %feature("docstring") Start "
@@ -467,6 +474,7 @@ Parameters:
 
   Note: This is the basic initialization. For more control, use
   :func:`StartExtended`.
+
 ";
 
 %feature("docstring") StartExtended "
@@ -648,7 +656,7 @@ Parameters:
   muF_in (float): Factorization scale [GeV]
 
 Returns:
-  list: Array of structure function values
+  list: Array of structure function values where the indices correspond to the hoppet.iF1Wp etc. constants
 ";
 
 %feature("docstring") StrFctNoMu "
@@ -659,7 +667,7 @@ Parameters:
   Q (float): Hard scale [GeV] (used for both muR and muF)
 
 Returns:
-  list: Array of structure function values
+  list: Array of structure function values where the indices correspond to the hoppet.iF1Wp etc. constants
 ";
 
 %feature("docstring") StrFctLO "
@@ -672,7 +680,7 @@ Parameters:
   muF_in (float): Factorization scale [GeV]
 
 Returns:
-  list: Array of LO structure function values
+  list: Array of LO structure function values where the indices correspond to the hoppet.iF1Wp etc. constants
 ";
 
 %feature("docstring") StrFctNLO "
@@ -685,7 +693,7 @@ Parameters:
   muF_in (float): Factorization scale [GeV]
 
 Returns:
-  list: Array of NLO structure function values
+  list: Array of NLO structure function values where the indices correspond to the hoppet.iF1Wp etc. constants
 ";
 
 %feature("docstring") StrFctNNLO "
@@ -698,7 +706,7 @@ Parameters:
   muF_in (float): Factorization scale [GeV]
 
 Returns:
-  list: Array of NNLO structure function values
+  list: Array of NNLO structure function values where the indices correspond to the hoppet.iF1Wp etc. constants
 ";
 
 %feature("docstring") StrFctN3LO "
@@ -711,7 +719,7 @@ Parameters:
   muF_in (float): Factorization scale [GeV]
 
 Returns:
-  list: Array of N3LO structure function values
+  list: Array of N3LO structure function values where the indices correspond to the hoppet.iF1Wp etc. constants
 ";
 
 %feature("docstring") StrFctFlav "
@@ -722,10 +730,10 @@ Parameters:
   Q (float): Hard scale [GeV]
   muR_in (float): Renormalization scale [GeV]
   muF_in (float): Factorization scale [GeV]
-  flav (int): Flavour index
+  flav (int): Flavour index (one of hoppet.iflv* constants)
 
 Returns:
-  list: Array of structure function values for specified flavour
+   list: Array of structure function values for specified flavour where indices correspond to FL, F2, F3
 ";
 
 %feature("docstring") StrFctNoMuFlav "
@@ -737,7 +745,7 @@ Parameters:
   flav (int): Flavour index
 
 Returns:
-  list: Array of structure function values for specified flavour
+  list: Array of structure function values for specified flavour where indices correspond to FL, F2, F3
 ";
 
 %feature("docstring") StrFctLOFlav "
@@ -751,7 +759,7 @@ Parameters:
   flav (int): Flavour index
 
 Returns:
-  list: Array of LO structure function values for specified flavour
+  list: Array of LO structure function values for specified flavour where indices correspond to FL, F2, F3
 ";
 
 %feature("docstring") StrFctNLOFlav "
@@ -765,7 +773,7 @@ Parameters:
   flav (int): Flavour index
 
 Returns:
-  list: Array of NLO structure function values for specified flavour
+  list: Array of NLO structure function values for specified flavour where indices correspond to FL, F2, F3
 ";
 
 %inline %{

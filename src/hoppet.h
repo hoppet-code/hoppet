@@ -128,7 +128,7 @@ namespace hoppet {
   constexpr int factscheme_FragMSbar = 4;
 
   constexpr int iflv_min_fortran = -6;
-  constexpr int iflv_g=0+6;
+  constexpr int iflv_g = 0+6;
   constexpr int iflv_d = 1+6, iflv_u = 2+6, iflv_s = 3+6, iflv_c = 4+6;
   constexpr int iflv_b = 5+6, iflv_t = 6+6;
   constexpr int iflv_dbar = -1+6;
@@ -548,6 +548,9 @@ void hoppetwritelhapdfgrid_(const char* basename, const int* basename_len, const
   
   /// Write out the contents of tables(0) (assumed to be the PDF) in the
   /// LHAPDF format
+  ///
+  /// @param basename The basename of the output
+  /// @param pdf_index The intended index in the LHAPDF meaning. If index is 0 both the PDF and the .info file is saved to disk
   inline void hoppetWriteLHAPDFGrid(const std::string& basename, const int& pdf_index) {
     // Fortran expects a char array, its length, and the index (all as pointers)
     const char* basename_cstr = basename.c_str();
