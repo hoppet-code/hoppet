@@ -1,9 +1,9 @@
 name: Build and deploy Sphinx docs to GitHub Pages
 
 on:
-#  push:
-#    branches:
-#      - dev    # change to your default branch if different
+  push:
+    branches:
+      - dev    # change to your default branch if different
   workflow_dispatch:
 
 permissions:
@@ -12,11 +12,34 @@ permissions:
   id-token: write
 
 jobs:
+
   build-and-deploy:
     runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Install Git
+        run: dnf -y install git    
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: Install 
+        run: |
+             yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
+             yum -y install swig python3-devel python3-numpy
+             yum -y install valgrind
+      - name: Compile
+        run: |
+            cmake -S . -B BUILD  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_USE_EXACT_COEF=ON -DHOPPET_BUILD_PYINTERFACE=ON
+            cmake --build BUILD -j
+            cmake --install BUILD
+            ctest --test-dir BUILD -j 2 --output-on-failure
+  
+            # now try running some python examples, checking the output matches the expected output
+            scripts/check python3 example_py/tabulation_example.py
+            scripts/check python3 example_py/tabulation_example_qed.py
+            scripts/check python3 example_py/structure_functions_example.py
 
       - name: Set up Python
         uses: actions/setup-python@v4
