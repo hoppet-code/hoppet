@@ -309,6 +309,7 @@ add_subdirectory(src/libome)
 add_library(hoppet SHARED ${SOURCESf90} ${SOURCESf} ${SOURCESCXX})
 target_include_directories(hoppet PRIVATE ${CXXINCLUDE})
 target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
+target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
 set_target_properties(hoppet PROPERTIES OUTPUT_NAME hoppet
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
@@ -323,6 +324,7 @@ add_library(hoppet::hoppet ALIAS hoppet)
 add_library(hoppet_static STATIC ${SOURCESf90} ${SOURCESf} ${SOURCESCXX})
 target_include_directories(hoppet_static PRIVATE ${CXXINCLUDE})
 target_include_directories(hoppet_static PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
+target_include_directories(hoppet_static PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
 set_target_properties(hoppet_static PROPERTIES OUTPUT_NAME hoppet
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
