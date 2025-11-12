@@ -275,6 +275,7 @@ jobs:
         skip-existing: true
 
   build_and_deploy_docs:
+    needs: [build_wheels_legacy, build_wheels_modern, build_sdist]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
