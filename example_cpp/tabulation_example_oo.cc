@@ -31,7 +31,8 @@ int main () {
   double mc = 1.414213563;
   double mb = 4.5;
   double mt = 175.0;
-  double asQ0 = 0.35, Q0=sqrt(2.0);
+  double asQ0 = 0.35;  
+  double Q0=sqrt(2.0);
   running_coupling alphas(asQ0, Q0, nloop, mc, mb, mt);
 
   // set up an initial condition
