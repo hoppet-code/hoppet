@@ -289,9 +289,9 @@ jobs:
 
       - name: Extra pip steps for test PyPI scenario
         if: ${{ needs.upload_test_pypi.result == 'success' }}
-	run: |
-	  pip uninstall hoppet -y
-	  pip install -i https://test.pypi.org/simple/ hoppet
+        run: |
+          pip uninstall hoppet -y
+          pip install -i https://test.pypi.org/simple/ hoppet
 
       - name: Build Sphinx HTML
         run: |
