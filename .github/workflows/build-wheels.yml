@@ -30,7 +30,7 @@ jobs:
   # compute the CIBW_BUILD value and export as job output
     - id: set_cibw_build
       run: |
-        if [ "${{ github.ref_name }}" = "dev" ]; then
+        if [ "${{ github.ref_name }}" = "refs/heads/dev" ]; then
           echo "cibw=cp311-*"
         else
           echo "cibw=cp39-* cp310-* cp311-* cp312-*"
