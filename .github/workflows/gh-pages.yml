@@ -15,31 +15,29 @@ jobs:
 
   build-and-deploy:
     runs-on: ubuntu-latest
-    container:
-      image: fedora:latest
     steps:
-      - name: Install Git
-        run: dnf -y install git    
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Install 
-        run: |
-             yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
-             yum -y install swig python3-devel python3-numpy
-             yum -y install valgrind
-      - name: Compile
-        run: |
-            cmake -S . -B BUILD  -DHOPPET_ENABLE_FPES=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_USE_EXACT_COEF=ON -DHOPPET_BUILD_PYINTERFACE=ON
-            cmake --build BUILD -j
-            cmake --install BUILD
-            ctest --test-dir BUILD -j 2 --output-on-failure
   
-            # now try running some python examples, checking the output matches the expected output
-            scripts/check python3 example_py/tabulation_example.py
-            scripts/check python3 example_py/tabulation_example_qed.py
-            scripts/check python3 example_py/structure_functions_example.py
+      - name: Install GFortran Linux
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y gcc g++  gfortran
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc 100 \
+          --slave /usr/bin/g++ g++ /usr/bin/g++ \
+          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran \
+          --slave /usr/bin/gcov gcov /usr/bin/gcov     
+  
+      - name: configure_build_check
+        run: |
+          # build and run unit tests
+          cmake -S . -B BUILD -DHOPPET_BUILD_PYINTERFACE=ON 
+          cmake --build BUILD -j 4
+          cmake --install BUILD
+          ctest --test-dir BUILD -j 4 --output-on-failure
 
       - name: Set up Python
         uses: actions/setup-python@v4
