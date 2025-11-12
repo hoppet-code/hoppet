@@ -92,6 +92,7 @@ class evln_operator_f;
 
 /// grid_def function wrappers
 extern "C" {
+  extern const double hoppet_default_conv_eps;
   grid_def_f * hoppet_cxx__grid_def__new(double dy, double ymax, int order, double eps);
   grid_def_f * hoppet_cxx__grid_def__new_from_grids(const grid_def_f ** griddefs, int ngrids, bool locked);
   grid_def_f * hoppet_cxx__grid_def__new_default(double dy, double ymax, int order = -6);
@@ -400,7 +401,7 @@ public:
   /// @param order   usual interpolation order parameter
   /// @param eps     accuracy for the adaptive integration
   //
-  explicit grid_def(double dy, double ymax, int order=-5, double eps=1e-7)
+  explicit grid_def(double dy, double ymax, int order=-5, double eps=hoppet_default_conv_eps)
     : grid_def(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
 
   /// @brief construct a grid_def from multiple grid_def objects

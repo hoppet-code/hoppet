@@ -53,6 +53,7 @@ end module convolution_communicator
 module convolution
   use types; use consts_dp; use assertions; use warnings_and_errors
   use integrator
+  use iso_c_binding, only: c_double
   implicit none
   private
 
@@ -301,7 +302,7 @@ module convolution
   public :: operator(.aty.)
 
   !-- precision used for integration
-  real(dp) :: default_conv_eps=1e-7_dp
+  real(c_double), bind(C,name="hoppet_default_conv_eps") :: default_conv_eps=1e-7_dp
   !real(dp), parameter :: default_conv_eps=1e-8_dp
   real(dp), parameter :: warn_tolerance = 1e-3_dp
   
