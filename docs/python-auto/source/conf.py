@@ -251,7 +251,7 @@ def _generate_latest_doc_link(app):
 
     url = get_latest_hoppet_doc_url()
     with open(outfile, "w", encoding="utf8") as f:
-        f.write("PDF documentation\n")
+        f.write("Manual in PDF format\n")
         f.write("=====================================\n\n")
         f.write(f"`Download latest PDF manual <{url}>`_\n")
 
