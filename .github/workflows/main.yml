@@ -92,7 +92,7 @@ jobs:
     - name: explicit structure-function check
       run: |
           cd BUILD
-          ../scripts/check examples/f90/structure_functions_example || cat examples_f90_structure_functions_example.tmp.*
+          ../scripts/check examples/f90/structure_functions_example:exact || cat examples_f90_structure_functions*
 
     - name: Tests
       run: |
