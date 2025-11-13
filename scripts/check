@@ -40,7 +40,7 @@ done
 
 # parse the command line according to the usage, using a simple loop
 # that just shifts and checks each argument
-# Default sourcedir is one leel up from this script
+# Default sourcedir is one level up from this script
 sourcedir="$(dirname "$(realpath "$0")")/.."
 tests=()
 
