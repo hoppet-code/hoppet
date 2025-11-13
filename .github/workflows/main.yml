@@ -94,6 +94,7 @@ jobs:
           #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
           #BUILD/unit-tests/hoppet-unit-tests 
           ctest --test-dir BUILD -j 2 --output-on-failure
+          cat examples_f90_structure_functions_example_exact.tmp.*
 
     - name: Python tests
       run: |
