@@ -393,7 +393,7 @@ Refs.~\cite{Dreyer:2016vbc,Karlberg:2016zik,Bertone:2024dpm}, and here
 we mainly focus on the code interface.
 %A small sample program
 %that prints out the structure functions can be found in
-%\masterlink{example\_f90/structure\_functions\_example.f90}.
+%\masterlink{examples/f90/structure\_functions\_example.f90}.
 
 The structure functions have been implemented including only QCD
 corrections up to N$^3$LO using both the exact and parametrised
@@ -663,7 +663,7 @@ with that prior scale choice.
 
 An example of structure function evaluations using the Fortran~90
 interface is to be found in
-\repolink{example_f90/structure_functions_example.f90}{example\_f90/structure\_functions\_example.f90}. 
+\repolink{examples/f90/structure_functions_example.f90}{examples/f90/structure\_functions\_example.f90}. 
 %%
 %\gps{added this link}\ak{It is also at the beginning of the section}
 
@@ -731,9 +731,9 @@ would be defined as \ttt{double ff[14]}.
 
 An example of structure function evaluations using the \CPP{} version
 of the streamlined interface is to be found in
-\repolink{example_cpp/structure_functions_example.cc}{example\_cpp/structure\_functions\_example.cc}
+\repolink{examples/cpp/structure_functions_example.cc}{examples/cpp/structure\_functions\_example.cc}
 and a Python example is similarly to be found at
-\masterlink{example_py/structure_function_example.py}.
+\masterlink{examples/python/structure_function_example.py}.
 
 Finally we present a small update on the results presented in
 Ref.~\cite{Bertone:2024dpm}. That reference was published before the
@@ -1253,8 +1253,8 @@ suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons.
 Examples of the streamlined interface being used with QED evolution
 can be found in
 \begin{quote}
-  \masterlink{example_f90/tabulation_example_qed_streamlined.f90}\\
-  \masterlink{example_cpp/tabulation_example_qed.cc}
+  \masterlink{examples/f90/tabulation_example_qed_streamlined.f90}\\
+  \masterlink{examples/cpp/tabulation_example_qed.cc}
 \end{quote}
 %\gps{added this last paragraph}
 %\gps{NB: to make links work, I've hard-coded them to the current
@@ -1279,7 +1279,7 @@ can be imported into a \ttt{Python} instance through \ttt{import
 %
 For a simple tabulation example, the user should take a look
 at
-\repolink{example_py/tabulation_example.py}{example\_py/tabulation\_example.py}
+\repolink{examples/python/tabulation_example.py}{examples/python/tabulation\_example.py}
 (and in the same directory for a number of other illustrative examples
 of how to use the interface, including in conjunction with
 LHAPDF~\cite{LHAPDF}). The interface uses SWIG (Simplified Wrapper and
@@ -1334,11 +1334,11 @@ of
 \ttt{x} and \ttt{Q} that returns an object that corresponds to array
 of flavours (it can be a \ttt{numpy}~\cite{Harris:2020xlr} array of a
 Python list; see the \ttt{hera\_lhc(x,Q)} function in
-\repolink{example\_py/tabulation_example.py}{tabulation\_example.py}
+\repolink{examples/python/tabulation_example.py}{tabulation\_example.py}
 for an explicit example).
 
 In addition to the examples provided in
-\repolink{example\_py/}{example\_py/} we have also developed a small
+\repolink{examples/python/}{examples/python/} we have also developed a small
 tool that loads a grid from LHAPDF at an initial scale and evolves it
 with \hoppet{} over a large range of $Q$. The resulting grids are then
 compared between \hoppet{} and LHAPDF to determine the relative
@@ -1971,20 +1971,20 @@ a $(2,2)$ interpolation choice.
 %
 We provide examples for how to do this in Fortran, \CPP, and Python:
 \begin{itemize}
- \item \masterlink{example_f90/with-lhapdf/lhapdf_to_hoppet.f90}: it
+ \item \masterlink{examples/f90/with-lhapdf/lhapdf_to_hoppet.f90}: it
    uses the module \ttt{hoppet\_lhapdf} and the associated
    \ttt{subroutine LoadLHAPDF(name, imem)}. The module is in the same
    directory and can be copied over to a user's application;
  \item
-   \masterlink{example_f90/with-lhapdf/lhapdf_to_hoppet_allmembers.f90},
+   \masterlink{examples/f90/with-lhapdf/lhapdf_to_hoppet_allmembers.f90},
    same as above but the example shows how to read in and efficiently
    evaluate all
    LHAPDF members, with an illustration for computing the PDF uncertainty;
- \item \masterlink{example_cpp/with-lhapdf/lhapdf_to_hoppet.cc}, which
+ \item \masterlink{examples/cpp/with-lhapdf/lhapdf_to_hoppet.cc}, which
    includes a routine called \ttt{void load\_lhapdf\_assign\_hoppet(const
      string \& pdfname, int imem=0)} which can be included directly in a
    user's application;
- \item \masterlink{example_py/lhapdf_to_hoppet.py}, makes use
+ \item \masterlink{examples/python/lhapdf_to_hoppet.py}, makes use
    of \ttt{hoppet.lhapdf.load()}, accessible using ``\ttt{from hoppet import lhapdf}''.
 \end{itemize}
 %
@@ -2061,14 +2061,14 @@ authors for assistance.
     \hline
     %% Timings from Gavin on 2025-09-25
     %%
-    %% Fortran: evaluated by calling build/example_f90/fast_pdf_evaluation
+    %% Fortran: evaluated by calling build/examples/f90/fast_pdf_evaluation
     %%      manually editing yorder and lnlnQorder
     %%
-    %% C++: evaluated by calling build/example_cpp/fast_pdf_evaluation,
+    %% C++: evaluated by calling build/examples/cpp/fast_pdf_evaluation,
     %%      manually editing yorder and lnlnQorder
     %%
     %% Python: make install, make sure Python picks up that version
-    %%      then run example_py/tabulation_example_lhapdf.py -pdf PDF4LHC21_40 -yorder 2 -lnlnQorder 2
+    %%      then run examples/python/tabulation_example_lhapdf.py -pdf PDF4LHC21_40 -yorder 2 -lnlnQorder 2
     %%
     %% Zoom was on, and I picked the smallest consistent speed
     %% (i.e. I needed to see it a couple of times before putting it in) 
