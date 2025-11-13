@@ -19,6 +19,7 @@
 // - [ ] making sure we treat default epsilon correctly
 // - [ ] where does hoppet_oo.h go?
 // - [ ] check everything gets installed
+// - [ ] nomenclature: pdf_flav, v. pdf v. pdf_set (old hoppet, set=allflav; LHAPDF set: = error set)
 
 // Next steps:
 // - [x] add the running_coupling class
