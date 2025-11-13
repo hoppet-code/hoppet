@@ -200,6 +200,11 @@ interface, giving high-level access to the functionality that is most
 widely needed, such as evolving to fill a PDF tabulation and then
 accessing that PDF tabulation at given $x,Q$ points.
 %
+For faster tabulation of many distinct initial conditions, one can
+pre-determine (cache) the evolution operators between the different
+$Q$ scales at which the PDF is tabulated, and then repeatedly apply
+that cached evolution.
+%
 The streamlined interface also provides access to convolutions of the
 various orders of splitting functions with the tabulated PDF.
 %

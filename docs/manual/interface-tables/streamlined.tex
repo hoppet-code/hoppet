@@ -1,4 +1,4 @@
-\newcommand{\tabsecheader}[1]{\multicolumn{2}{|c|}{\bf #1\hspace{6.5em}\mbox{ }}}
+\newcommand{\tabsecheader}[1]{\multicolumn{2}{|c|}{\bf #1\hspace{5.5em}\mbox{ }}}
 %
 \begin{tabular}{|c|p{0.55\textwidth}|}
 %\hline
@@ -98,9 +98,9 @@ with LHAPDF-like interface.
                    $P_\text{NLO}\otimes P_\text{LO} \otimes f$. \\
 \hline
 \begin{lstlisting}
- alphas = hoppetAlphaS(Q)
+ hoppetAlphaS(Q)
 \end{lstlisting} &
-\fn Accessing the coupling \\  \hline
+\fn Returns the coupling at scale $Q$ \\  \hline
 %
 \begin{lstlisting}
   hoppetWriteLHAPDFGrid(basename,
