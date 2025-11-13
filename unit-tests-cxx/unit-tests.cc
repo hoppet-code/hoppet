@@ -198,7 +198,7 @@ TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
   auto pdf3 = pdf + pdf2;
 
   hoppet::grid_quant_2d pdf4(grid100, 14);
-  //pdf4.assign(hoppetBenchmarkPDFunpol, 10.0);
+  //pdf4.assign_xQ_into(hoppetBenchmarkPDFunpol, 10.0);
   //cout << "g    " << pdf4[hoppet::iflv_g   ].at_y(5.0) << endl;
   //cout << "ubar " << pdf4[hoppet::iflv_ubar].at_y(5.0) << endl;
 }
@@ -207,7 +207,7 @@ TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
 TEST_CASE( "pdf_qcd", "[hoppet]" ) {
   hoppet::pdf pdf = pdf_qcd(big_grid);
   double dummy_Q = 0.0;
-  pdf.assign(hoppetBenchmarkPDFunpol, dummy_Q);
+  pdf.assign_xQ_into(hoppetBenchmarkPDFunpol, dummy_Q);
   // hard-coded values from the benchmark function
   auto fn_g    = [](double x) { return 1.7*pow(x,-0.1) * pow(1-x,5); };
   auto fn_ubar = [](double x) { return 0.387975*0.5*pow(x,-0.1)*pow(1-x,7); };
@@ -330,8 +330,22 @@ TEST_CASE( "split_mat", "[hoppet]" ) {
   auto p_copy = p_lo; // copy constructor
 
   hoppet::pdf pdf = pdf_qcd(big_grid);  
+  // check assignment with the classic LHAPDF interface
   double dummy_Q = 0.0;
-  pdf.assign(hoppetBenchmarkPDFunpol, dummy_Q);
+  pdf.assign_xQ_into(hoppetBenchmarkPDFunpol, dummy_Q);
+
+  // check assignment with the LHAPDF PDF::xfxQ(x,Q,v) interface
+  hoppet::pdf pdf2 = pdf_qcd(big_grid);
+  auto benchmark_via_vec = [](double x, double Q, vector<double> & v){
+    v.resize(13);
+    hoppetBenchmarkPDFunpol(x, Q, v.data());
+  };
+  pdf2.assign_xQ_into(benchmark_via_vec, dummy_Q);
+  for (double x : {1e-4, 1e-2, 0.1, 0.5}) {
+    for (int iflv = hoppet::iflv_min; iflv <= hoppet::iflv_max; ++iflv)
+      REQUIRE( pdf[iflv].at_x(x) == pdf2[iflv].at_x(x) );
+  }
+
   //  pdf[hoppet::iflv_g] *= 0.0; // zero gluon to make life simpler
   //pdf *= 0.0; // zero everything to make life simpler
   //pdf[hoppet::iflv_g ] = big_grid * [](double y) { double x = exp(-y); return 2*pow(1-x,4)*x; };
@@ -600,7 +614,7 @@ TEST_CASE("pdf_table", "[hoppet]") {
   REQUIRE(tab_view.ptr() != hoppet::sl::table.ptr()); // different underlying pointers
   hoppet::pdf pdf_Q0 = hoppet::pdf_qcd(tab_view.grid());
   double Q0 = sqrt(2.0);
-  pdf_Q0.assign(hoppetBenchmarkPDFunpol, 0.0);
+  pdf_Q0.assign_xQ_into(hoppetBenchmarkPDFunpol, 0.0);
   tab_view.evolve(Q0, pdf_Q0, hoppet::sl::dh, hoppet::sl::coupling);
   REQUIRE_THAT( tab_view.at_xQf(x, Q, hoppet::iflv_g), WithinAbs( hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6) );
 

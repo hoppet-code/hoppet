@@ -11,7 +11,7 @@ using namespace std;
 // definition of the initial condition function
 void  heralhc_init(const double & x,
                    const double & Q,
-                   double * pdf);
+                   vector<double> & pdf);
 
 
 using namespace hoppet;                   
@@ -37,7 +37,7 @@ int main () {
 
   // set up an initial condition
   pdf pdf0 = pdf_qcd(grid);        // allocate space for a a pdf with QCD flavours
-  pdf0.assign(heralhc_init, Q0);   // fill it from the heralhc_init function (below)
+  pdf0.assign_xQ_into(heralhc_init, Q0);   // fill it from the heralhc_init function (below)
 
   // set up a table (in y=ln1/x and Q)
   double Qmin = 1.2, Qmax = 1e4;
@@ -84,7 +84,10 @@ int main () {
 // the initial condition
 void  heralhc_init(const double & x,
                    const double & Q,
-                   double * pdf) {
+                   vector<double>& pdf) {
+
+  pdf.resize(13); // ensure pdf has enough space
+
   double uv, dv;
   double ubar, dbar;
   double N_g=1.7, N_ls=0.387975;

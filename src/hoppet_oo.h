@@ -25,9 +25,9 @@
 // - [x] add the dglap_holder    
 // - [~] add the pdf_table
 //       - [ ] grid_quant_3d
-//       - [~] evolution functions
+//       - [x] evolution functions
 //       - [x] PDF access functions
-//       - [ ] does copying also copy the evolution operators? Check everything being copied
+//       - [ ] does copying also copy the evolution operators? **NO**
 //       - [ ] fill from LHAPDF
 //       - [ ] write to LHAPDF
 // - [ ] array of tables
@@ -87,6 +87,11 @@ template <typename F>
 concept VoidFnDoubleDoubleDoubleptr =
     std::invocable<F, double, double, double *> &&
     std::same_as<std::invoke_result_t<F, double, double, double *>, void >;
+
+template <typename F>
+concept VoidFnDoubleDoubleDoublevec =
+    std::invocable<F, double, double, std::vector<double> &> &&
+    std::same_as<std::invoke_result_t<F, double, double, std::vector<double> &>, void >;
 
 
 
@@ -419,26 +424,51 @@ public:
   }
   grid_quant_view operator()(std::size_t i) {return (*this)[i];}
   double & operator()(std::size_t i, std::size_t j) {return this->data()[i * extras().size_dim1 + j];}
-  const double & operator()(std::size_t i, std::size_t j) const {return this->data()[i * extras().size_dim1 + j];}
+  const double & operator()(std::size_t i, std::size_t j) const {return this->data()[i * extras().size_dim1 + j];}  
 
-  void assign(const VoidFnDoubleDoubleDoubleptr auto & fn, double Q) {
-  //void assign(void (*fn)(double,double,double*), double Q) {
-    if (!data()) {
-      throw std::runtime_error("grid_quant_2d_view::assign(fn): grid_quant_2d_view object not associated");
-    }
-    if (extras().size_dim0 < iflv_max+1) {
-      throw std::runtime_error("grid_quant_2d_view::assign(fn): grid_quant_2d_view dim1_sz = " 
-                  + std::to_string(extras().size_dim0) + " < iflv_max+1 = " + std::to_string(iflv_max+1));
+  /// assign using a function f(x,Q, xpdf_array), similar to the LHAPDF
+  /// "evolve" fortran interface, where xpdf_array is a double* pointing
+  /// to an array with at least 13 entries
+  void assign_xQ_into(const VoidFnDoubleDoubleDoubleptr auto & fn, double Q) {
+    ensure_valid();
+    if (size_flv() < iflv_max+1) {
+      throw std::runtime_error("grid_quant_2d_view::assign(fn): grid_quant_2d_view size_flv() = " 
+                  + std::to_string(size_flv()) + " < iflv_max+1 = " + std::to_string(iflv_max+1));
     }
     std::vector<double> xvals = grid().x_values();
-    std::vector<double> xpdf (extras().size_dim0);
+    std::vector<double> xpdf (size_flv());
     for (std::size_t iy=0; iy < grid().ny()+1; ++iy) {
       fn(xvals[iy], Q, xpdf.data());
-      for (std::size_t i=0; i < extras().size_dim0; ++i) {
-        this->data()[i*extras().size_dim1 + iy] = i <= iflv_max ? xpdf[i] : 0.0;
+      for (std::size_t i=0; i < size_flv(); ++i) {
+        this->data()[i*extras().size_dim1 + iy] = (i <= iflv_max) ? xpdf[i] : 0.0;
       }
     }
   }
+
+  /// assign using a function f(x,Q, vector<double> & pdf_vec), similar to the LHAPDF
+  /// C++ `PDF::xfxQ(x,Q,pdf_vec)` member function.
+  void assign_xQ_into(const VoidFnDoubleDoubleDoublevec auto & fn, double Q) {
+    ensure_valid();
+    std::vector<double> xvals = grid().x_values();
+    std::vector<double> xpdf (size_flv());
+    for (std::size_t iy=0; iy < grid().ny()+1; ++iy) {
+      fn(xvals[iy], Q, xpdf);
+      // check only the first time around
+      if (iy == 0 && xpdf.size() > size_flv()) {
+        throw std::runtime_error("grid_quant_2d_view::assign(fn): supplied pdf_vec size = " 
+                  + std::to_string(xpdf.size()) + " > grid_quant_2d_view size_flv() = " + std::to_string(size_flv()));
+      }
+      // up to the flavours that have been supplied, copy the values
+      for (std::size_t i=0; i < xpdf.size(); ++i) {
+        this->data()[i*extras().size_dim1 + iy] = (i <= iflv_max) ? xpdf[i] : 0.0;
+      }
+      // for any remaining flavours, set to zero
+      for (std::size_t i=xpdf.size(); i < size_flv(); ++i) {
+        this->data()[i*extras().size_dim1 + iy] = 0.0;
+      }
+    }
+  }
+
 
   inline std::size_t size_dim0() const {return extras().size_dim0;}
   inline std::size_t size_dim1() const {return extras().size_dim1;}
