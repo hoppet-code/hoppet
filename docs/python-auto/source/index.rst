@@ -42,3 +42,4 @@ for details.
    api
    _generated/hoppet_constants
    _generated/github_links
+   examples.md
