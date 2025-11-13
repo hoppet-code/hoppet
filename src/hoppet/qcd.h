@@ -48,20 +48,22 @@ extern "C" {
 namespace hoppet {
 /// @brief namespace containing QCD-related global constants and functions  
 namespace qcd {
-  const double & ca     = hoppet__qcd__ca    ;  //< $C_A$ colour factor
-  const double & cf     = hoppet__qcd__cf    ;  //< $C_F$ colour factor
-  const double & tr     = hoppet__qcd__tr    ;  //< $T_R$ colour factor
-  const int    & nf_int = hoppet__qcd__nf_int;  //< number of active flavours as an integer
-  const int    & nf_u   = hoppet__qcd__nf_u  ;  //< number of active up-type flavours
-  const int    & nf_d   = hoppet__qcd__nf_d  ;  //< number of active down-type flavours
-  const double & nf     = hoppet__qcd__nf    ;  //< number of active flavours as a double
-  const double & tf     = hoppet__qcd__tf    ;  //< $T_F = n_f T_R$ factor
 
-  const double & beta0       = hoppet__qcd__beta0;
+  const double & ca     = hoppet__qcd__ca    ;  ///< $C_A$ colour factor
+  const double & cf     = hoppet__qcd__cf    ;  ///< $C_F$ colour factor
+  const double & tr     = hoppet__qcd__tr    ;  ///< $T_R$ colour factor
+  const int    & nf_int = hoppet__qcd__nf_int;  ///< number of active flavours as an integer
+  const int    & nf_u   = hoppet__qcd__nf_u  ;  ///< number of active up-type flavours
+  const int    & nf_d   = hoppet__qcd__nf_d  ;  ///< number of active down-type flavours
+  const double & nf     = hoppet__qcd__nf    ;  ///< number of active flavours as a double
+  const double & tf     = hoppet__qcd__tf    ;  ///< $T_F = n_f T_R$ factor
+
+  const double & beta0  = hoppet__qcd__beta0;
+  const double & beta1  = hoppet__qcd__beta1;
+  const double & beta2  = hoppet__qcd__beta2;
+  const double & beta3  = hoppet__qcd__beta3;
+
   const double & twopi_beta0 = hoppet__qcd__twopi_beta0;
-  const double & beta1       = hoppet__qcd__beta1;
-  const double & beta2       = hoppet__qcd__beta2;
-  const double & beta3       = hoppet__qcd__beta3;
 
   const double & alphastep11 = hoppet__qcd__alphastep11;
   const double & alphastep22 = hoppet__qcd__alphastep22;

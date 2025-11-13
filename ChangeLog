@@ -13,7 +13,7 @@ Access to streamlined interface objects
 
 __Files added__
 
-	* doc/auto-doxygen-and-ford/Doxyfile-cxx: *** ADDED ***
+	* docs/manual/auto-doxygen-and-ford/Doxyfile-cxx: *** ADDED ***
 	for generating documentation of the C++ interface with doxygen
 
 	* unit-tests-cxx/unit-tests.cc:           *** ADDED ***
@@ -24,7 +24,8 @@ __Files added__
 	objects.
 
 	* src/hoppet/qcd.h:                       *** ADDED ***
-	provides access to the global C++ QCD constants and functions (wrapping qcd.f90)
+	provides access to the global C++ QCD constants and functions 
+	(wrapping qcd.f90)
 
 	* src/hoppet_oo.h:                        *** ADDED ***
 	- contains the C++ object-oriented interfaces
@@ -37,7 +38,7 @@ __Files added__
 	bind(C) routines that take or return a pointer to a Fortran
 	objects, allowing the C++ code to view and manipulate them.
 
-	* example_cpp/tabulation_example_oo.cc:  *** ADDED ***
+	* examples/cpp/tabulation_example_oo.cc:  *** ADDED ***
 	example using the C++ OO interface to produce the default
 	tabulation_example output.
 

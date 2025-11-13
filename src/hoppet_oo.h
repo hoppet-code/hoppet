@@ -182,11 +182,11 @@ public:
 
 };  
 
-/// @brief  create a grid_def object with the default choice of nested, locked grids
+/// @brief return a grid_def object with the default choice of nested, locked grids
 /// @param dy      spacing of the coarsest grid
 /// @param ymax    maximum y value for the coarsest grid
 /// @param order   usual interpolation order parameter
-/// @return 
+/// @return the grid_def object
 inline grid_def grid_def_default(double dy, double ymax, int order) {
   return grid_def(hoppet_cxx__grid_def__new_default(dy, ymax, order));
 }
