@@ -88,9 +88,7 @@ It is designed to provide flexible, fast and accurate evolution.
 Since the first major release of \hoppet, the landscape of PDF
 evolution codes has evolved substantially, with a range of new open-source
 codes having been developed, for example the APFEL~\cite{Bertone:2013vaa}, \APFELPP{}~\cite{Bertone:2017gds} and EKO~\cite{Candido:2022tld}
-codes (the latter including
-features such as cached evolution that have long been standard in
-\hoppet).\footnote{Other codes such as ChiliPDF~\cite{Diehl:2021gvs}
+codes.\footnote{Other codes such as ChiliPDF~\cite{Diehl:2021gvs}
   appear to not yet be public.}
 %
 Nevertheless, \hoppet remains a powerful tool, notably for its ability
@@ -107,7 +105,7 @@ phenomenological applications.
 %
 Furthermore its exposition not just of full PDF
 evolution~\cite{Lai:2010vv,Gao:2013xoa,Butterworth:2015oua,PDF4LHCWorkingGroup:2022cjn}
-but also of low-level functionality makes it useful for a range of
+but also of low-level functionality though a stable, public API, has led to it being used for a range of
 fixed-order~\cite{Caola:2019nzf,Asteriadis:2019dte,Bargiela:2022dla},
 all-order~\cite{Banfi:2010xy,Dasgupta:2014yra,Banfi:2015pju,Monni:2016ktx,Bizon:2017rah,Buonocore:2024xmy}
 and Monte
@@ -150,7 +148,9 @@ for interpolating PDF tables also when loaded from LHAPDF (Section~\ref{sec:v2-p
 %
 \hoppet can be obtained by executing
 \begin{lstlisting}
-          git clone https://github.com/hoppet-code/hoppet.git
+  git clone https://github.com/hoppet-code/hoppet.git
+  cd hoppet
+  git switch -d hoppet-2.x.y  # to switch to a specific release tag, e.g. hoppet-2.1.0
 \end{lstlisting}
 Unified documentation of the whole \hoppet package is part of the
 distribution at \url{https://github.com/hoppet-code/hoppet} in the

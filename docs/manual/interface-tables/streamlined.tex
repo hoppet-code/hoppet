@@ -1,10 +1,11 @@
 \newcommand{\tabsecheader}[1]{\multicolumn{2}{|c|}{\bf #1\hspace{6.5em}\mbox{ }}}
 %
 \begin{tabular}{|c|p{0.55\textwidth}|}
-\hline
-\bf METHOD  & \bf DESCRIPTION \\
-%--------------------------------------------------------
-\hline\hline
+%\hline
+%\bf METHOD  & \bf DESCRIPTION \\
+%%--------------------------------------------------------
+%  \hline
+  \hline
 \tabsecheader{Initialisation} \\\hline
 %--------------------------------------------------------
 %\hline
@@ -97,8 +98,18 @@ with LHAPDF-like interface.
                    $P_\text{NLO}\otimes P_\text{LO} \otimes f$. \\
 \hline
 \begin{lstlisting}
-  alphas = hoppetAlphaS(Q)
+ alphas = hoppetAlphaS(Q)
 \end{lstlisting} &
-\fn Accessing the coupling \\
-\hline
+\fn Accessing the coupling \\  \hline
+%
+\begin{lstlisting}
+  hoppetWriteLHAPDFGrid(basename,
+                          pdf_index)
+\end{lstlisting}
+            & \fn
+              Write an LHAPDF grid file to \ttt{basename\_nnnn.dat} where
+              \ttt{nnnn} is \ttt{pdf\_index}; if
+              \ttt{pdf\_index} is
+              0, also write a template \ttt{basename.info} file.
+  \\\hline
 \end{tabular}
