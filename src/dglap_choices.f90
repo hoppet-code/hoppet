@@ -4,8 +4,6 @@
 !! as schemes, polarization) as well as technical choices (choice of 
 !! approximation used for NNLO splitting function).
 !!
-!! GPS: adapted from qcd.f90 18/09/2004
-!!
 module dglap_choices
   implicit none
   private
