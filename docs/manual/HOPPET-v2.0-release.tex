@@ -171,6 +171,50 @@ Users with an existing installation of \hoppet (v1) should make sure
 that they link with the new library name.}
 }}
 
+%======================================================================
+\input{perturbative-evolution-in-qcd.tex}
+
+%======================================================================
+\section{Brief summary of \hoppet structure}
+\label{sec:hoppet-structure}
+
+\hoppet code has two interfaces.
+%
+For simple usage, it provides a so-called ``streamlined''
+interface, giving high-level access to the functionality that is most
+widely needed, such as evolving to fill a PDF tabulation and then
+accessing that PDF tabulation at given $x,Q$ points.
+%
+The streamlined interface also provides access to convolutions of the
+various orders of splitting functions with the tabulated PDF.
+%
+The streamlined interface has long been available from Fortran and
+\CPP and, as of v2, can be accessed also in Python.
+%
+The core methods of the streamlined interface are illustrated in
+Table~\ref{tab:streamlined-interface}. 
+
+
+From modern Fortran, one has access to the full code functionality,
+the ``general'' interface, including low-level objects that are useful
+in DGLAP evolution, such as splitting functions, splitting matrices,
+tabulations of PDFs, etc.
+
+\begin{table}[t]
+  \centering
+  \input{interface-tables/streamlined.tex}
+  \caption{Core methods of the streamlined interface.
+    %
+    In Python, \ttt{hoppetStart(...)} is to be replaced with
+    \ttt{hoppet.Start(...)}, and \ttt{hoppet.Eval(...)} returns
+    \texttt{f} rather than taking \texttt{f} as an argument and
+    filling it.
+    %
+    \label{tab:streamlined-interface}
+  }
+\end{table}
+
+%======================================================================
 \input{v2-updates.tex}
 
 %======================================================================
@@ -235,9 +279,8 @@ Technology Facilities Council (STFC) under grant ST/X000761/1.
 %
 PN thanks the Humboldt Foundation for support. 
 %
-\appendix
+%\appendix
 
-\input{perturbative-evolution-in-qcd.tex}
 
 \bibliographystyle{elsarticle-num}
 \bibliography{hoppet.bib}
