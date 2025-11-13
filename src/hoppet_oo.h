@@ -148,9 +148,20 @@ public:
 
 
 //-----------------------------------------------------------------------------
-/// @brief Object-oriented wrapper around the grid_def Fortran type, with ownership
+/// @brief Object-oriented wrapper around the `grid_def` Fortran type, with ownership
 ///
-/// This version takes ownership of the underlying Fortran grid_def object
+/// Most users will want to construct the grid_def object with the function
+/// hoppet::grid_def_default, e.g. 
+///
+/// ```cpp
+/// double dy = 0.1;
+/// double ymax = 12.0;
+/// int order = -6;
+/// hoppet::grid_def grid = hoppet::grid_def_default(dy, ymax, order);
+/// ```
+/// which directly constructs a nested grid that provides good
+/// accuracy over a wide range of x values.
+///
 class grid_def : public obj_owner<grid_def_view> {
 public:
 
