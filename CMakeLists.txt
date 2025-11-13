@@ -358,11 +358,11 @@ if (HOPPET_BUILD_EXAMPLES)
 		   )
   # first handle the f90 examples
   foreach ( p ${f90programs_f90})
-    add_executable( ${p}_f90 example_f90/${p}.f90)
+    add_executable( ${p}_f90 examples/f90/${p}.f90)
     target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
+      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/examples/f90/
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/examples/f90/
       POSITION_INDEPENDENT_CODE TRUE
       LINKER_LANGUAGE Fortran
     )
@@ -370,16 +370,16 @@ if (HOPPET_BUILD_EXAMPLES)
   if (LHAPDF_FOUND)
     set( f90programs_lhapdf lhapdf_to_hoppet lhapdf_to_hoppet_allmembers)
     foreach ( p ${f90programs_lhapdf})
-      add_executable( ${p}_f90 example_f90/with-lhapdf/${p}.f90 example_f90/with-lhapdf/hoppet_lhapdf.f90)
+      add_executable( ${p}_f90 examples/f90/with-lhapdf/${p}.f90 examples/f90/with-lhapdf/hoppet_lhapdf.f90)
       target_link_libraries(${p}_f90 PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
       set_target_properties(${p}_f90 PROPERTIES OUTPUT_NAME ${p}
-        RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/
-        Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f90/modules/${p}_modules
+        RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/examples/f90/
+        Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/examples/f90/modules/${p}_modules
         POSITION_INDEPENDENT_CODE TRUE
 	LINKER_LANGUAGE Fortran
         )
       if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
-        set_source_files_properties( example_f90/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
+        set_source_files_properties( examples/f90/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
       endif()     
     endforeach()
   endif()
@@ -391,16 +391,16 @@ if (HOPPET_BUILD_EXAMPLES)
     list(APPEND f77programs_f compare_lhapdf_hoppet convolution_example)  
   endif()
   foreach ( p ${f77programs_f})
-    add_executable( ${p}_f77 example_f77/${p}.f)
+    add_executable( ${p}_f77 examples/f77/${p}.f)
     target_link_libraries(${p}_f77 PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_f77 PROPERTIES  OUTPUT_NAME ${p} 
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_f77/
+      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/examples/f77/
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/examples/f77/
       POSITION_INDEPENDENT_CODE TRUE
       LINKER_LANGUAGE Fortran
       )
     if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
-      set_source_files_properties( example_f77/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
+      set_source_files_properties( examples/f77/${p}.f  PROPERTIES COMPILE_OPTIONS "-qfixed")
     endif()     
   endforeach()
   if (LHAPDF_FOUND)
@@ -411,24 +411,24 @@ if (HOPPET_BUILD_EXAMPLES)
   # and finally the C++ examples
   set( cppprograms structure_functions_example tabulation_example_qed tabulation_example)
   foreach ( p ${cppprograms})
-    add_executable( ${p}_cpp example_cpp/${p}.cc)
+    add_executable( ${p}_cpp examples/cpp/${p}.cc)
     target_include_directories(${p}_cpp PUBLIC ${PROJECT_SOURCE_DIR}/src)
     target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static)
     set_target_properties(${p}_cpp PROPERTIES  OUTPUT_NAME ${p}
-      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_cpp/
-      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_cpp/
+      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/examples/cpp/
+      Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/examples/cpp/
       POSITION_INDEPENDENT_CODE TRUE
      )
   endforeach()
   if (LHAPDF_FOUND)
     set(cppprograms_lhapdf lhapdf_to_hoppet)
     foreach ( p ${cppprograms_lhapdf})
-      add_executable( ${p}_cpp example_cpp/with-lhapdf/${p}.cc)
+      add_executable( ${p}_cpp examples/cpp/with-lhapdf/${p}.cc)
       target_include_directories(${p}_cpp PUBLIC ${PROJECT_SOURCE_DIR}/src)
       target_link_libraries(${p}_cpp PUBLIC hoppet::hoppet_static PUBLIC LHAPDF::LHAPDF)
       set_target_properties(${p}_cpp PROPERTIES  OUTPUT_NAME ${p}
-                            RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/example_cpp/
-                            Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/example_cpp/
+                            RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/examples/cpp/
+                            Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/examples/cpp/
                             POSITION_INDEPENDENT_CODE TRUE
       )
     endforeach()
@@ -453,13 +453,13 @@ if (HOPPET_BUILD_EXAMPLES)
         set(testName "${testName}_takes_up_to_30s")
       endif()
       add_test(NAME ${testName} COMMAND 
-         sh -c "${CMAKE_SOURCE_DIR}/scripts/check example_f90/${ex}")
+         sh -c "${CMAKE_SOURCE_DIR}/scripts/check examples/f90/${ex}")
     endforeach()
     set( execs_cpp tabulation_example)
     foreach (ex ${execs_cpp})
       set(testName "${ex}_cpp")
       add_test(NAME ${testName} COMMAND 
-         sh -c "${CMAKE_SOURCE_DIR}/scripts/check example_cpp/${ex}")
+         sh -c "${CMAKE_SOURCE_DIR}/scripts/check examples/cpp/${ex}")
     endforeach()
   endif() # end of HOPPET_ENABLE_TESTING
 

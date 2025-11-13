@@ -79,19 +79,19 @@ for test in ${tests[@]}; do
   extraargs=""  
   if [[ "$testcmd" == benchmarking/prec_and_timing* ]]; then
     extraargs="-o /dev/null -output-benchmark"
-    refname=$(echo "$refname" | sed -e 's|prec_and_timing|prec_and_timing.default_output/prec_and_timing|g')
+    refname=$(echo "$refname" | sed -e 's|prec_and_timing|prec_and_timing.default_output/prec_and_timing|g' || exit 1)
   fi
   echo "Running: ($testcmd $extraargs)"
   ($testcmd $extraargs | tee ${checkname}.tmp.new-pregrep) || exit 1;
   
-  grep -vi -e '^ *[a-z]' -e '^\*' -e '^ *$' ${checkname}.tmp.new-pregrep > ${checkname}.tmp.new
-  grep -vi -e '^ *[a-z]' -e '^\*' -e '^ *$' $sourcedir/$refname.default_output > ${checkname}.tmp.orig  
+  grep -vi -e '^ *[a-z]' -e '^\*' -e '^ *$' ${checkname}.tmp.new-pregrep > ${checkname}.tmp.new            || exit 1
+  grep -vi -e '^ *[a-z]' -e '^\*' -e '^ *$' $sourcedir/$refname.default_output > ${checkname}.tmp.orig     || exit 1
 
-  diff ${checkname}.tmp.new ${checkname}.tmp.orig > ${checkname}.tmp.diff
-  checkwc=`cat ${checkname}.tmp.diff| wc -l `
+  diff ${checkname}.tmp.new ${checkname}.tmp.orig > ${checkname}.tmp.diff || exit 1
+  checkwc=$(cat ${checkname}.tmp.diff| wc -l)
   
   echo
-  if [ $checkwc == "0" ] 
+  if [ x$checkwc == x"0" ] 
   then
     echo check PASSED
     rm -f ${checkname}.tmp.new ${checkname}.tmp.orig ${checkname}.tmp.diff ${checkname}.tmp.new-pregrep

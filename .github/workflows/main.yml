@@ -78,7 +78,7 @@ jobs:
     - name: Install 
       run: |
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
-           yum -y install swig python3-devel python3-numpy
+           yum -y install swig python3-devel python3-numpy diffutils
            yum -y install valgrind
     - name: Compile
       run: |
@@ -92,10 +92,12 @@ jobs:
           #BUILD/unit-tests/hoppet-unit-tests 
           ctest --test-dir BUILD -j 2 --output-on-failure
 
+    - name: Python tests
+      run: |
           # now try running some python examples, checking the output matches the expected output
-          scripts/check python3 example_py/tabulation_example.py
-          scripts/check python3 example_py/tabulation_example_qed.py
-          scripts/check python3 example_py/structure_functions_example.py
+          scripts/check examples/python/tabulation_example.py
+          scripts/check examples/python/tabulation_example_qed.py
+          scripts/check examples/python/structure_functions_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT
