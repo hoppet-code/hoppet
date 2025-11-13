@@ -88,6 +88,9 @@ jobs:
           # cmake -S . -B BUILD -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_USE_EXACT_COEF=ON -DHOPPET_BUILD_PYINTERFACE=ON
           cmake --build BUILD -j
           cmake --install BUILD
+
+    - name: Tests
+      run: |
           #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
           #BUILD/unit-tests/hoppet-unit-tests 
           ctest --test-dir BUILD -j 2 --output-on-failure
@@ -132,6 +135,9 @@ jobs:
           cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
           cmake --build BUILDifx -j
           cmake --install BUILDifx
+
+    - name: Tests_with_ifx
+      run: |
           ctest --test-dir BUILDifx -j 2 --output-on-failure
     # - name: Compile_with_ifort
     #   run: |
