@@ -44,8 +44,6 @@ Q<28 \TeV$, \fn~ \ttt{dlnlnQ=dy/4} and the factorisation scheme is
  hoppetEvolve(asQ,Q0alphas,
   nloop,muR_Q,LHAsub,Q0pdf)
 \end{lstlisting} &
-%  \texttt{\footnotesize
-% hoppetEvolve(asQ,Q0alphas,}
 \fn PDF evolution: specifies the coupling \ttt{asQ} at a 
 scale \ttt{Q0alphas}, 
 % \texttt{\footnotesize nloop,muR\_Q,LHAsub,Q0pdf)}&
@@ -84,7 +82,7 @@ with LHAPDF-like interface.
  hoppetEval(x,Q,f)
 \end{lstlisting} &
 \fn On return, \ttt{f(-6:6)} contains all flavours of the PDF set
-                   (multiplied by $x$). In \CPP the array
+                   (multiplied by $x$). In \CPP, the array
                    indices span 0 to 12.\\
 \hline
 \begin{lstlisting}
@@ -93,7 +91,7 @@ with LHAPDF-like interface.
 \fn On return, \ttt{pf(-6:6)} contains the (cached) convolution of the
                    \ttt{iloop} splitting function ($1=\text{LO}$) with the tabulated
                    PDF for the given \texttt{nf}. One can chain splitting
-                   functions, e.g.\ \texttt{iloop=21} gives
+                   functions up to $\order{\as^4}$, e.g.\ \texttt{iloop=21} gives
                    $P_\text{NLO}\otimes P_\text{LO} \otimes f$. \\
 \hline
 \begin{lstlisting}

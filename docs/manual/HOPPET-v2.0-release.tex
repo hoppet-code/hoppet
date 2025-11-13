@@ -178,7 +178,22 @@ that they link with the new library name.}
 \section{Brief summary of \hoppet structure}
 \label{sec:hoppet-structure}
 
-\hoppet code has two interfaces.
+\hoppet works in $x$-space.
+%
+It represents PDFs and splitting functions on grids, typically
+multiple nested, each uniform in $y= \ln 1/x$, with the nesting
+involving smaller spacings and smaller $y$ ranges so as to achieve
+good accuracy not just at small $x$ but also large $x$.
+%
+The underlying convolutions of splitting functions with PDFs
+effectively use piecewise polynomial interpolations of the PDFs.
+%
+The convolutions of the splitting functions with individual basis
+polynomials are evaluated using adaptive Gaussian integration.
+%
+Evolution equations are solved using Runge-Kutta methods.
+
+The code has two interfaces.
 %
 For simple usage, it provides a so-called ``streamlined''
 interface, giving high-level access to the functionality that is most
@@ -192,13 +207,18 @@ The streamlined interface has long been available from Fortran and
 \CPP and, as of v2, can be accessed also in Python.
 %
 The core methods of the streamlined interface are illustrated in
-Table~\ref{tab:streamlined-interface}. 
+Table~\ref{tab:streamlined-interface}. \gps{Include QED?}
 
 
-From modern Fortran, one has access to the full code functionality,
-the ``general'' interface, including low-level objects that are useful
-in DGLAP evolution, such as splitting functions, splitting matrices,
+For more advanced usage there is a ``general'' interface (sometimes
+called the object-oriented interface, though it is only partially so).
+%
+It gives access to the various low-level objects that are useful in
+DGLAP evolution, such as splitting functions, splitting matrices,
 tabulations of PDFs, etc.
+%
+Up to v2.1, that interface is accessible only in modern Fortran,
+though some parts of it are being extended it to other languages.
 
 \begin{table}[t]
   \centering
@@ -206,13 +226,18 @@ tabulations of PDFs, etc.
   \caption{Core methods of the streamlined interface.
     %
     In Python, \ttt{hoppetStart(...)} is to be replaced with
-    \ttt{hoppet.Start(...)}, and \ttt{hoppet.Eval(...)} returns
+    \ttt{hoppet.Start(...)}, and routines like \ttt{hoppet.Eval(...)}
+    and \ttt{LHAsub(x,Q)} return
     \texttt{f} rather than taking \texttt{f} as an argument and
     filling it.
     %
     \label{tab:streamlined-interface}
   }
 \end{table}
+
+%
+Various examples are available with the two sets of interfaces, to be
+found in the \masterlink{examples/} directory of the repository.
 
 %======================================================================
 \input{v2-updates.tex}
