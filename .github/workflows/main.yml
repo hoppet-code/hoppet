@@ -89,12 +89,16 @@ jobs:
           cmake --build BUILD -j
           cmake --install BUILD
 
+    - name: explicit structure-function check
+      run: |
+          cd BUILD
+          ../scripts/check examples/f90/structure_functions_example || cat examples_f90_structure_functions_example.tmp.*
+
     - name: Tests
       run: |
           #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
           #BUILD/unit-tests/hoppet-unit-tests 
           ctest --test-dir BUILD -j 2 --output-on-failure
-          cat examples_f90_structure_functions_example_exact.tmp.*
 
     - name: Python tests
       run: |
@@ -139,6 +143,7 @@ jobs:
 
     - name: Tests_with_ifx
       run: |
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
           ctest --test-dir BUILDifx -j 2 --output-on-failure
     # - name: Compile_with_ifort
     #   run: |
