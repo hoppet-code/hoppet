@@ -29,7 +29,7 @@
 //       - [x] evolution functions
 //       - [x] PDF access functions
 //       - [ ] does copying also copy the evolution operators? **NO**
-//       - [ ] fill from LHAPDF
+//       - [~] fill from LHAPDF
 //       - [ ] write to LHAPDF
 // - [ ] array of tables
 // - [ ] add the evln_operator class
@@ -435,8 +435,8 @@ public:
     return result;
   }
   grid_quant_view operator()(std::size_t i) {return (*this)[i];}
-  double & operator()(std::size_t i, std::size_t j) {return this->data()[i * extras().size_dim1 + j];}
-  const double & operator()(std::size_t i, std::size_t j) const {return this->data()[i * extras().size_dim1 + j];}  
+  double & operator()(std::size_t iflv, std::size_t iy) {return this->data()[iflv * extras().size_dim1 + iy];}
+  const double & operator()(std::size_t iflv, std::size_t iy) const {return this->data()[iflv * extras().size_dim1 + iy];}  
 
   /// assign using a function f(x,Q, xpdf_array), similar to the LHAPDF
   /// "evolve" fortran interface, where xpdf_array is a double* pointing
@@ -451,8 +451,8 @@ public:
     std::vector<double> xpdf (size_flv());
     for (std::size_t iy=0; iy < grid().ny()+1; ++iy) {
       fn(xvals[iy], Q, xpdf.data());
-      for (std::size_t i=0; i < size_flv(); ++i) {
-        this->data()[i*extras().size_dim1 + iy] = (i <= iflv_max) ? xpdf[i] : 0.0;
+      for (std::size_t iflv=0; iflv < size_flv(); ++iflv) {
+        (*this)(iflv,iy) = (iflv <= iflv_max) ? xpdf[iflv] : 0.0;
       }
     }
   }
@@ -1090,6 +1090,29 @@ public:
     return *this;
   }
 
+  /// assign using a function f(x,Q, xpdf_array), similar to the LHAPDF
+  /// "evolve" fortran interface, where xpdf_array is a double* pointing
+  /// to an array with at least 13 entries
+  void assign_xQ_into(const VoidFnDoubleDoubleDoubleptr auto & fn, double Q) {
+    ensure_valid();
+    if (size_flv() < hoppet::iflv_max+1) {
+      throw std::runtime_error("grid_quant_2d_view::assign(fn): pdf_table size_flv() = " 
+                  + std::to_string(size_flv()) + " < iflv_max+1 = " + std::to_string(hoppet::iflv_max+1));
+    }
+    std::vector<double> xvals = grid().x_values();
+    std::vector<double> xpdf (size_flv());
+    for (std::size_t iQ = 0 ; iQ < size_Q(); ++iQ) {
+      double Q = Q_vals(iQ);
+      pdf_view pdf_at_Q = at_iQ(iQ);
+      for (std::size_t iy=0; iy < xvals.size(); ++iy) {
+        fn(xvals[iy], Q, xpdf.data());
+        for (std::size_t iflv=0; iflv < size_flv(); ++iflv) {
+          pdf_at_Q(iflv,iy) = (iflv <= hoppet::iflv_max) ? xpdf[iflv] : 0.0;
+        }
+      }
+    }
+  }
+
   grid_quant_view at_iQf(size_t iQ, size_t iflv) const {
     double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
     // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
@@ -1114,6 +1137,8 @@ public:
   size_t iflv_max() const {return static_cast<size_t>(tab_iflv_max() - iflv_min_fortran);  }
   /// @brief return the size of the flavour (dim1=2nd) dimension of the table 
   size_t size_flv() const {return static_cast<size_t>(hoppet_cxx__pdf_table__size_flv(valid_ptr())); }
+  /// return the size of the Q (dim0=1st) dimension of the table
+  size_t size_Q() const {return nQ()+1;}
 
   /// @brief return the value of xf(x,Q,iflv) at x = exp(-y)
   /// @param y     log(1/x)
@@ -1164,7 +1189,7 @@ public:
                                  muR_over_Q, nloop, untie_nf);
   }  
 
-  /// @brief Fill pre-evolution information for this table, to be with evolve()
+  /// @brief Fill pre-evolution information for this table, to used by calling evolve()
   ///
   /// Note that if (untie_nf) is true [default false] then alphas is
   /// allowed to have its natural value for nf, even if the dglap_holder
