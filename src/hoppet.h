@@ -51,41 +51,78 @@
 #include <stdbool.h>
 
 namespace hoppet {
-  /// indices for the different structure functions
-  const int iF1Wp = 1+6; //< F1 W+ : D + Ubar                                                       
-  const int iF2Wp = 2+6; //< F2 W+ : D + Ubar                                                      
-  const int iF3Wp = 3+6; //< F3 W+ : D + Ubar                                                      
-  const int iF1Wm =-1+6; //< F1 W- : Dbar + U                                                      
-  const int iF2Wm =-2+6; //< F2 W- : Dbar + U                                                      
-  const int iF3Wm =-3+6; //< F3 W- : Dbar + U                                                      
-  const int iF1Z  = 4+6; //< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up     
-  const int iF2Z  = 5+6; //< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up     
-  const int iF3Z  = 6+6; //< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up           
-  const int iF1EM =-4+6; //< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up                     
-  const int iF2EM =-5+6; //< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up                     
-  const int iF1gZ = 0+6; //< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up 
-  const int iF2gZ =-6+6; //< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
-  const int iF3gZ = 7+6; //< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up  
+  /// @defgroup HOPPET_CC_CONSTS Constants used when integrating splitting functions
+  /// @{
+  /// @brief Constants indicating which part of a splitting function to return.
+  ///
+  /// When converting a splitting function to a grid_conv object, the function
+  /// being integrated must return one specific part of the splitting function.
+  /// These constants label the different parts
+  constexpr int cc_REAL=1;      ///< the sum of regular + plus parts
+  constexpr int cc_VIRT=2;      ///< minus the "plus"
+  constexpr int cc_REALVIRT=3;  ///< just the regular part
+  constexpr int cc_DELTA=4;     ///< the delta function part
+  /// @}
 
-  /// The hoppet_global_cc_piece variable is set by routines like InitGridConv_func
-  /// to indicate which part of the splitting function should be returned.
-  /// It will be set to one of the cc_X values defined below
-  constexpr int cc_REAL=1;      //< regular + plus 
-  constexpr int cc_VIRT=2;      //< -plus
-  constexpr int cc_REALVIRT=3;  //< regular
-  constexpr int cc_DELTA=4;     //< delta function
+  /// @defgroup HOPPET_IFLV Flavour indices
+  /// @{
+  /// These are the indices used to address the different parton flavours
+  /// in HOPPET. Note that they are shifted by +6 compared to the Fortran
+  /// numbering, i.e. they start from zero
+  constexpr int iflv_g = 0+6;
+  constexpr int iflv_d = 1+6, iflv_u = 2+6, iflv_s = 3+6, iflv_c = 4+6;
+  constexpr int iflv_b = 5+6, iflv_t = 6+6;
+  constexpr int iflv_dbar = -1+6;
+  constexpr int iflv_ubar = -2+6;
+  constexpr int iflv_sbar = -3+6;
+  constexpr int iflv_cbar = -4+6;
+  constexpr int iflv_bbar = -5+6;
+  constexpr int iflv_tbar = -6+6;
+  constexpr int iflv_photon = 8+6;
+  constexpr int iflv_electron = 9+6; ///< this is the sum of e- and e+
+  constexpr int iflv_muon = 10+6;    ///< this is the sum of mu- and mu+
+  constexpr int iflv_tau = 11+6;     ///< this is the sum of tau- and tau+
+  constexpr int iflv_min = iflv_tbar;     ///< lowest actual flavour index for QCD-only evolution
+  constexpr int iflv_max = iflv_t;        ///< highest actual flavour index for QCD-only evolution
+  constexpr int iflv_info = iflv_max + 1; ///< index for storing extra representation info
+  constexpr int ncompmin = iflv_min;  ///< lowest stored index for QCD-only evolution
+  constexpr int ncompmax = iflv_info; ///< highest stored index for QCD-only evolution
+  /// the value of iflv_min in fortran, useful for calculating offsets in some cases
+  constexpr int iflv_min_fortran = -6;
+  /// @}
 
+  /// @defgroup HOPPET_STRFCT_CONSTS Structure function indices
+  /// @{
+  /// @brief Indices of the different structure functions
+  const int iF1Wp = 1+6; ///< F1 W+ : D + Ubar                                                       
+  const int iF2Wp = 2+6; ///< F2 W+ : D + Ubar                                                      
+  const int iF3Wp = 3+6; ///< F3 W+ : D + Ubar                                                      
+  const int iF1Wm =-1+6; ///< F1 W- : Dbar + U                                                      
+  const int iF2Wm =-2+6; ///< F2 W- : Dbar + U                                                      
+  const int iF3Wm =-3+6; ///< F3 W- : Dbar + U                                                      
+  const int iF1Z  = 4+6; ///< F1 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up     
+  const int iF2Z  = 5+6; ///< F2 Z  : (D + Dbar) * v_i^2a_i^2_down + (U + Ubar) * v_i^2a_i^2_up     
+  const int iF3Z  = 6+6; ///< F3 Z  : (D + Dbar) * 2v_ia_i_down + (U + Ubar) * 2v_ia_i_up           
+  const int iF1EM =-4+6; ///< F1 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up                     
+  const int iF2EM =-5+6; ///< F2 γ  : (D + Dbar) * e2_down + (U + Ubar) * e2_up                     
+  const int iF1gZ = 0+6; ///< F1 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up 
+  const int iF2gZ =-6+6; ///< F2 γZ : (D + Dbar) * e_down * 2v_i_down + (U + Ubar) * e_up * 2v_i_up
+  const int iF3gZ = 7+6; ///< F3 γZ : (D + Dbar) * e_down * 2a_i_down + (U + Ubar) * e_up * 2a_i_up  
+  /// @}
 
-  constexpr int scale_choice_fixed     = 0; ///< muR,muF scales
-					///predetermined in the
-					///hoppetStartStrFct call
-  constexpr int scale_choice_Q         = 1; ///< muR,muF scales equal to
-					///xR,xQ * Q (xR,xQ to be set
-					///in hoppetStartStrFct)
-  constexpr int scale_choice_arbitrary = 2; ///< muR,muF scales can be
-					///chosen freely in the
-					///hoppetStrFctLO (etc.) and
-					///hoppetStrFct calls
+  /// @defgroup HOPPET_SFSCALE_CONSTS Constants that control scale choices in structure functions
+  /// @{
+  /// @brief Constants that control the choice of \f$\mu_R\f$ and \f$\mu_F\f$ scales in structure functions
+  
+  /// muR,muF scales predetermined in the hoppetStartStrFct call
+  constexpr int scale_choice_fixed     = 0; 
+  /// muR,muF scales equal to xR,xQ * Q (xR,xQ to be set in hoppetStartStrFct)
+  constexpr int scale_choice_Q         = 1; 
+  /// muR,muF scales can be chosen freely in the hoppetStrFctLO (etc.)
+  /// and hoppetStrFct calls
+  constexpr int scale_choice_arbitrary = 2; 
+  /// @}
+
   constexpr int nnlo_splitting_exact = -2;
   constexpr int nnlo_splitting_param = -1;
   // these three should keep their numerical values because of a
@@ -127,25 +164,6 @@ namespace hoppet {
   constexpr int factscheme_PolMSbar = 3;
   constexpr int factscheme_FragMSbar = 4;
 
-  constexpr int iflv_min_fortran = -6;
-  constexpr int iflv_g = 0+6;
-  constexpr int iflv_d = 1+6, iflv_u = 2+6, iflv_s = 3+6, iflv_c = 4+6;
-  constexpr int iflv_b = 5+6, iflv_t = 6+6;
-  constexpr int iflv_dbar = -1+6;
-  constexpr int iflv_ubar = -2+6;
-  constexpr int iflv_sbar = -3+6;
-  constexpr int iflv_cbar = -4+6;
-  constexpr int iflv_bbar = -5+6;
-  constexpr int iflv_tbar = -6+6;
-  constexpr int iflv_photon = 8+6;
-  constexpr int iflv_electron = 9+6; //< note this is the sum of e- and e+
-  constexpr int iflv_muon = 10+6;    //< note this is the sum of mu- and mu+
-  constexpr int iflv_tau = 11+6;     //< note this is the sum of tau- and tau+
-  constexpr int iflv_min = iflv_tbar;
-  constexpr int iflv_max = iflv_t; //< this is for QCD-only evolution
-  constexpr int iflv_info = iflv_max + 1;   //< this is for QCD+QED evolution
-  constexpr int ncompmin = iflv_min;
-  constexpr int ncompmax = iflv_info; //< this is for QCD-only evolution
 
 }
 
@@ -292,7 +310,8 @@ extern "C" {
   /// table by evolving the PDF from scale Q0pdf, with alphas provided 
   /// at scale Q0alphas
   ///
-  /// @param Q0alphas       Initial scale for alpha_s [GeV]
+  /// @param asQ0           value of $\alpha_s$ at scale Q0alphas
+  /// @param Q0alphas       Scale at which $\alpha_s$ has been supplied [GeV]
   /// @param nloop          Number of loops for evolution (1=LO, 2=NLO, 3=NNLO, 4=N3LO)
   /// @param muR_Q          Ratio of renormalisation scheme to factorisation scale during evolution
   /// @param pdf_subroutine Function pointer to the user-defined PDF function
@@ -375,7 +394,7 @@ extern "C" {
 
   /// Return in f[0..12] the value of 
   ///
-  ///    [P(iloop,nf) \otimes pdf] (x,Q)
+  ///    [P(iloop,nf) \f$\otimes\f$ pdf] (x,Q)
   ///
   /// where P(iloop,nf) is the iloop-splitting function for the given
   /// value of nf, and pdf is our internally stored pdf.
