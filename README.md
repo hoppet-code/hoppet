@@ -154,9 +154,14 @@ cmake -S . -B BUILD -Dhoppet_DIR=hoppet/installation/share/hoppet/cmake
 # Documentation
 
 Detailed documentation is available as
-[docs/manual/HOPPET-doc.tex](docs/manual/HOPPET-doc.tex). If you use HOPPET in a
-scientific publication, please refer to https://arxiv.org/abs/0804.3755
-(original v1 release) and https://arxiv.org/abs/2510.09310 (v2 features).
+[docs/manual/HOPPET-doc.tex](docs/manual/HOPPET-doc.tex) (available as a PDF on the [releases](https://github.com/hoppet-code/hoppet/releases) page), with further
+information available also at
+https://hoppet-code.github.io/hoppet/. 
+
+
+If you use HOPPET in a scientific publication, please refer to
+https://arxiv.org/abs/0804.3755 (original v1 release) and
+https://arxiv.org/abs/2510.09310 (v2 features).
 
 
 # Other notes
