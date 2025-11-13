@@ -41,18 +41,20 @@ Q<28 \TeV$, \fn~ \ttt{dlnlnQ=dy/4} and the factorisation scheme is
 \tabsecheader{Normal evolution} \\\hline
 %--------------------------------------------------------
 \begin{lstlisting}
- hoppetEvolve(asQ,Q0alphas,
+ hoppetEvolve(asQ0,Q0alphas,
   nloop,muR_Q,LHAsub,Q0pdf)
 \end{lstlisting} &
-\fn PDF evolution: specifies the coupling \ttt{asQ} at a 
+\fn PDF evolution: specifies the coupling \ttt{asQ0} at a 
 scale \ttt{Q0alphas}, 
 % \texttt{\footnotesize nloop,muR\_Q,LHAsub,Q0pdf)}&
   the number of loops for  evol., \ttt{nloop},
-  the ratio (\ttt{muR\_Q}) of ren. to fact. scales.
- the name of a subroutine \ttt{LHAsub} with an LHAPDF-like interface 
+  the ratio (\ttt{muR\_Q}) of ren. to fact. scales,
+ the name of a subroutine \ttt{LHAsub(x,Q,f}) that fills \ttt{f(-6:6)},
  and the scale
-\ttt{Q0pdf} at which one starts the PDF evolution 
- Note:  \ttt{LHAsub} only called at scale \ttt{Q0pdf}\\
+\ttt{Q0pdf} at which one starts the PDF evolution, 
+ Note:  \ttt{LHAsub} is only called at scale \ttt{Q0pdf}
+and in \CPP \ttt{f[iflv]} spans \ttt{iflv=0..12}.
+\\
 %The PDF at a given value of  is obtained \\
 %(multiplied by $x$) at the given $\ttt{x}$ and $\ttt{Q}$ values \\
 %\hline&\\[-0.5em]
@@ -65,7 +67,7 @@ scale \ttt{Q0alphas},
  hoppetPreEvolve(asQ,Q0alphas, 
           nloop, muR_Q, Q0pdf)
 \end{lstlisting} & \fn
- Preparation of the cached evolution\\
+ Preparation of a cached evolution\\
 \hline
 \begin{lstlisting}
  hoppetCachedEvolve(LHAsub)

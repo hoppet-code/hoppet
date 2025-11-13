@@ -181,7 +181,7 @@ that they link with the new library name.}
 \hoppet works in $x$-space.
 %
 It represents PDFs and splitting functions on grids, typically
-multiple nested, each uniform in $y= \ln 1/x$, with the nesting
+multiple nested grids, each uniform in $y= \ln 1/x$, with the nesting
 involving smaller spacings and smaller $y$ ranges so as to achieve
 good accuracy not just at small $x$ but also large $x$.
 %
@@ -189,7 +189,7 @@ The underlying convolutions of splitting functions with PDFs
 effectively use piecewise polynomial interpolations of the PDFs.
 %
 The convolutions of the splitting functions with individual basis
-polynomials are evaluated using adaptive Gaussian integration.
+polynomials are pre-evaluated using adaptive Gaussian integration.
 %
 Evolution equations are solved using Runge-Kutta methods.
 
@@ -217,13 +217,13 @@ It gives access to the various low-level objects that are useful in
 DGLAP evolution, such as splitting functions, splitting matrices,
 tabulations of PDFs, etc.
 %
-Up to v2.1, that interface is accessible only in modern Fortran,
-though some parts of it are being extended it to other languages.
+As of v2.1, that interface is accessible only in modern Fortran,
+though in due course we expect to extend it to other languages.
 
 \begin{table}[t]
   \centering
   \input{interface-tables/streamlined.tex}
-  \caption{Core methods of the streamlined interface.
+  \caption{Core methods of the streamlined interface in Fortran and \CPP.
     %
     In Python, \ttt{hoppetStart(...)} is to be replaced with
     \ttt{hoppet.Start(...)}, and routines like \ttt{hoppet.Eval(...)}
