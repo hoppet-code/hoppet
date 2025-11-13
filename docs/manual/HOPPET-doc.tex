@@ -2954,11 +2954,11 @@ ST/T000864/1 and ST/X000761/1 (GPS).
 The program below generates a subset of table~15 of the NNLO benchmark
 evolution in the second reference of~\cite{Giele:2002hx,Dittmar:2005ed}. It is to be
 found (in a slightly more commented form) in
-\ttt{example\_f90/tabulation\_example.f90}. Compilation instructions
+\ttt{examples/f90/tabulation\_example.f90}. Compilation instructions
 are to be found in the \ttt{README} file in the main directory of the
 release. A program that has the same functionality but in F77, using
 the streamlined interface of section~\ref{sec:vanilla}, is to be found as
-\ttt{example\_f77/tabulation\_example.f} (cf.\ section~\ref{sec:stream-example}).
+\ttt{examples/f77/tabulation\_example.f} (cf.\ section~\ref{sec:stream-example}).
 
 
 \begin{lstlisting}
@@ -3089,7 +3089,7 @@ end program tabulation_example
 }
 
 \noindent The file
-\ttt{example\_f90/tabulation\_example.default\_output} contains a copy
+\ttt{examples/f90/tabulation\_example.default\_output} contains a copy
 of these results, so as to allow easy comparison. The numbers
 correspond to evolution with variable flavour number, $\mu_F = \mu_R$,
 and the parametrised versions of the NNLO splitting functions and mass
@@ -3107,10 +3107,10 @@ as the previous example program, but this time
 using the streamlined interface introduced
 in section~\ref{sec:vanilla}. It is to be
 found in
-\ttt{example\_f90/tabulation\_example\_streamlined.f90}. 
+\ttt{examples/f90/tabulation\_example\_streamlined.f90}. 
 A program with same interface and same output 
 but in F77, is to be found in
-\ttt{example\_f77/tabulation\_example.f}.
+\ttt{examples/f77/tabulation\_example.f}.
 
 \begin{lstlisting}
 program tabulation_example_streamlined
@@ -3197,7 +3197,7 @@ end program tabulation_example_streamlined
 
 \subsection{Interface example with QED included}
   The following is an example program using the QED extension of \hoppet{}.
-  It can be found in \ttt{example\_f90/tabulation\_example\_qed.f90}.
+  It can be found in \ttt{examples/f90/tabulation\_example\_qed.f90}.
   
 \begin{lstlisting}
 !! An example program using a tabulation. It should yield an output identical

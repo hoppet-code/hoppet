@@ -1,4 +1,3 @@
-
 --------- 2025-10-cxx-OO branch ---------
 
 2025-10-16 -> 2025-11-XX (Gavin): work on a C++ interface
@@ -93,6 +92,21 @@ __Files added__
 	- made the factscheme argument optional in the C++ hoppetStartExtended.
 
 --------- end 2025-10-cxx-OO branch ---------
+
+2025-11-13 Gavin + Alexander
+
+	* scripts/check: 
+	tried to make this more robust against missing commands and weird output
+
+	* example_f90/ -> examples/f90/:
+	* example_f77/ -> examples/f77/:
+	* example_cpp/ -> examples/cpp/:
+	* example_py/ -> examples/python/:
+
+	moved examples into a single examples/ directory (with
+	sub-directories) to reduce clutter
+
+
 2025-11-12 Alexander
 
 	* doc/ -> docs/manual:

@@ -88,9 +88,7 @@ It is designed to provide flexible, fast and accurate evolution.
 Since the first major release of \hoppet, the landscape of PDF
 evolution codes has evolved substantially, with a range of new open-source
 codes having been developed, for example the APFEL~\cite{Bertone:2013vaa}, \APFELPP{}~\cite{Bertone:2017gds} and EKO~\cite{Candido:2022tld}
-codes (the latter including
-features such as cached evolution that have long been standard in
-\hoppet).\footnote{Other codes such as ChiliPDF~\cite{Diehl:2021gvs}
+codes.\footnote{Other codes such as ChiliPDF~\cite{Diehl:2021gvs}
   appear to not yet be public.}
 %
 Nevertheless, \hoppet remains a powerful tool, notably for its ability
@@ -107,7 +105,7 @@ phenomenological applications.
 %
 Furthermore its exposition not just of full PDF
 evolution~\cite{Lai:2010vv,Gao:2013xoa,Butterworth:2015oua,PDF4LHCWorkingGroup:2022cjn}
-but also of low-level functionality makes it useful for a range of
+but also of low-level functionality though a stable, public API, has led to it being used for a range of
 fixed-order~\cite{Caola:2019nzf,Asteriadis:2019dte,Bargiela:2022dla},
 all-order~\cite{Banfi:2010xy,Dasgupta:2014yra,Banfi:2015pju,Monni:2016ktx,Bizon:2017rah,Buonocore:2024xmy}
 and Monte
@@ -150,11 +148,13 @@ for interpolating PDF tables also when loaded from LHAPDF (Section~\ref{sec:v2-p
 %
 \hoppet can be obtained by executing
 \begin{lstlisting}
-          git clone https://github.com/hoppet-code/hoppet.git
+  git clone https://github.com/hoppet-code/hoppet.git
+  cd hoppet
+  git switch -d hoppet-2.x.y  # to switch to a specific release tag, e.g. hoppet-2.1.0
 \end{lstlisting}
 Unified documentation of the whole \hoppet package is part of the
 distribution at \url{https://github.com/hoppet-code/hoppet} in the
-\masterlink{doc/} directory.
+\masterlink{docs/manual} directory.
 %
 Details of the other changes since release 1.1.0 can be found in the
 \masterlink{NEWS.md} and \masterlink{ChangeLog} files from the
@@ -171,6 +171,80 @@ Users with an existing installation of \hoppet (v1) should make sure
 that they link with the new library name.}
 }}
 
+%======================================================================
+\input{perturbative-evolution-in-qcd.tex}
+
+%======================================================================
+\section{Brief summary of \hoppet structure}
+\label{sec:hoppet-structure}
+
+\hoppet works in $x$-space.
+%
+It represents PDFs and splitting functions on grids, typically
+multiple nested grids, each uniform in $y= \ln 1/x$, with the nesting
+involving smaller spacings and smaller $y$ ranges so as to achieve
+good accuracy not just at small $x$ but also large $x$.
+%
+The underlying convolutions of splitting functions with PDFs
+effectively use piecewise polynomial interpolations of the PDFs.
+%
+The convolutions of the splitting functions with individual basis
+polynomials are pre-evaluated using adaptive Gaussian integration.
+%
+Evolution equations are solved using Runge-Kutta methods.
+
+The code has two interfaces.
+%
+For simple usage, it provides a so-called ``streamlined''
+interface, giving high-level access to the functionality that is most
+widely needed, such as evolving to fill a PDF tabulation and then
+accessing that PDF tabulation at given $x,Q$ points.
+%
+For faster tabulation of many distinct initial conditions, one can
+pre-determine (cache) the evolution operators between the different
+$Q$ scales at which the PDF is tabulated, and then repeatedly apply
+that cached evolution.
+%
+The streamlined interface also provides access to convolutions of the
+various orders of splitting functions with the tabulated PDF.
+%
+The streamlined interface has long been available from Fortran and
+\CPP and, as of v2, can be accessed also in Python.
+%
+The core methods of the streamlined interface are illustrated in
+Table~\ref{tab:streamlined-interface}. \gps{Include QED?}
+
+
+For more advanced usage there is a ``general'' interface (sometimes
+called the object-oriented interface, though it is only partially so).
+%
+It gives access to the various low-level objects that are useful in
+DGLAP evolution, such as splitting functions, splitting matrices,
+tabulations of PDFs, etc.
+%
+As of v2.1, that interface is accessible only in modern Fortran,
+though in due course we expect to extend it to other languages.
+
+\begin{table}[t]
+  \centering
+  \input{interface-tables/streamlined.tex}
+  \caption{Core methods of the streamlined interface in Fortran and \CPP.
+    %
+    In Python, \ttt{hoppetStart(...)} is to be replaced with
+    \ttt{hoppet.Start(...)}, and routines like \ttt{hoppet.Eval(...)}
+    and \ttt{LHAsub(x,Q)} return
+    \texttt{f} rather than taking \texttt{f} as an argument and
+    filling it.
+    %
+    \label{tab:streamlined-interface}
+  }
+\end{table}
+
+%
+Various examples are available with the two sets of interfaces, to be
+found in the \masterlink{examples/} directory of the repository.
+
+%======================================================================
 \input{v2-updates.tex}
 
 %======================================================================
@@ -235,9 +309,8 @@ Technology Facilities Council (STFC) under grant ST/X000761/1.
 %
 PN thanks the Humboldt Foundation for support. 
 %
-\appendix
+%\appendix
 
-\input{perturbative-evolution-in-qcd.tex}
 
 \bibliographystyle{elsarticle-num}
 \bibliography{hoppet.bib}

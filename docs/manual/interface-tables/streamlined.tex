@@ -1,0 +1,115 @@
+\newcommand{\tabsecheader}[1]{\multicolumn{2}{|c|}{\bf #1\hspace{5.5em}\mbox{ }}}
+%
+\begin{tabular}{|c|p{0.55\textwidth}|}
+%\hline
+%\bf METHOD  & \bf DESCRIPTION \\
+%%--------------------------------------------------------
+%  \hline
+  \hline
+\tabsecheader{Initialisation} \\\hline
+%--------------------------------------------------------
+%\hline
+% \multicolumn{2}{c}{\bf Initialisation}  \\
+%\tabsecheader{Initialisation}\\
+%\multicolumn{2}{|c|}{\bf Initialisation\hspace{5.5em}\mbox{ }}  \\
+%\hline
+\begin{lstlisting}
+ hoppetStart(dy,nloop)
+\end{lstlisting} 
+& \scriptsize
+Sets up a compound grid with
+spacing in $\ln 1/x$ of \ttt{dy} at small $x$,
+extending to $y = 12$ and numerical
+order $\ttt=-6$. The $Q$ range for the tabulation will be $1\GeV <
+Q<28 \TeV$, \fn~ \ttt{dlnlnQ=dy/4} and the factorisation scheme is
+  ${\overline{\rm MS}}$ (\ttt{factscheme\_MSbar}).
+  \\
+\hline
+\begin{lstlisting}
+ hoppetStartExtended(ymax,dy,Qmin,
+  Qmax,dlnlnQ,nloop,order,factscheme)
+\end{lstlisting} & \fn
+  More general initialisation \\
+\hline 
+\begin{lstlisting}
+ hoppetSetFFN(fixed_nf)
+ hoppetSetVFN(mc, mb, mt)
+\end{lstlisting} &
+\fn Set heavy flavour scheme\\
+%            &\\[-0.5em]
+%--------------------------------------------------------
+\hline\hline
+\tabsecheader{Normal evolution} \\\hline
+%--------------------------------------------------------
+\begin{lstlisting}
+ hoppetEvolve(asQ0,Q0alphas,
+  nloop,muR_Q,LHAsub,Q0pdf)
+\end{lstlisting} &
+\fn PDF evolution: specifies the coupling \ttt{asQ0} at a 
+scale \ttt{Q0alphas}, 
+% \texttt{\footnotesize nloop,muR\_Q,LHAsub,Q0pdf)}&
+  the number of loops for  evol., \ttt{nloop},
+  the ratio (\ttt{muR\_Q}) of ren. to fact. scales,
+ the name of a subroutine \ttt{LHAsub(x,Q,f}) that fills \ttt{f(-6:6)},
+ and the scale
+\ttt{Q0pdf} at which one starts the PDF evolution, 
+ Note:  \ttt{LHAsub} is only called at scale \ttt{Q0pdf}
+and in \CPP \ttt{f[iflv]} spans \ttt{iflv=0..12}.
+\\
+%The PDF at a given value of  is obtained \\
+%(multiplied by $x$) at the given $\ttt{x}$ and $\ttt{Q}$ values \\
+%\hline&\\[-0.5em]
+%--------------------------------------------------------
+\hline\hline
+\tabsecheader{Cached evolution} \\\hline
+%--------------------------------------------------------
+%\bf Cached evolution & \\
+\begin{lstlisting}
+ hoppetPreEvolve(asQ,Q0alphas, 
+          nloop, muR_Q, Q0pdf)
+\end{lstlisting} & \fn
+ Preparation of a cached evolution\\
+\hline
+\begin{lstlisting}
+ hoppetCachedEvolve(LHAsub)
+\end{lstlisting} &
+\fn  Perform cached evolution with the initial condition
+     at \ttt{Q0pdf} from a routine \ttt{LHAsub} 
+with LHAPDF-like interface.
+ Note: \ttt{LHAsub} only called at scale \ttt{Q0pdf}\\
+%--------------------------------------------------------
+\hline\hline
+\tabsecheader{Evaluation} \\\hline
+%--------------------------------------------------------
+\begin{lstlisting}
+ hoppetEval(x,Q,f)
+\end{lstlisting} &
+\fn On return, \ttt{f(-6:6)} contains all flavours of the PDF set
+                   (multiplied by $x$). In \CPP, the array
+                   indices span 0 to 12.\\
+\hline
+\begin{lstlisting}
+ hoppetEvalSplit(x,Q,iloop,nf,pf)
+\end{lstlisting} &
+\fn On return, \ttt{pf(-6:6)} contains the (cached) convolution of the
+                   \ttt{iloop} splitting function ($1=\text{LO}$) with the tabulated
+                   PDF for the given \texttt{nf}. One can chain splitting
+                   functions up to $\order{\as^4}$, e.g.\ \texttt{iloop=21} gives
+                   $P_\text{NLO}\otimes P_\text{LO} \otimes f$. \\
+\hline
+\begin{lstlisting}
+ hoppetAlphaS(Q)
+\end{lstlisting} &
+\fn Returns the coupling at scale $Q$ \\  \hline
+%
+\begin{lstlisting}
+  hoppetWriteLHAPDFGrid(basename,
+                          pdf_index)
+\end{lstlisting}
+            & \fn
+              Write an LHAPDF grid file to \ttt{basename\_nnnn.dat} where
+              \ttt{nnnn} is \ttt{pdf\_index}; if
+              \ttt{pdf\_index} is
+              0, also write a template \ttt{basename.info} file.
+  \\\hline
+\end{tabular}

@@ -63,23 +63,6 @@ echo ${bold}"------------ Setting it docs/python-auto/source/conf.py------------
 sed -i.bak 's/release = .*/release = "'$version'"/' docs/python-auto/source/conf.py
 checkChanged docs/python-auto/source/conf.py
 
-
-# echo
-# echo "------------ Setting it in configure.ac ---------------------"
-# #sed -i.bak 's/\(AC_INIT.*\)])/\1-'$extralabel'])/' configure.ac
-# sed -i.bak 's/^\(AC_INIT(\[.*\],\[\).*/\1'$version'])/' configure.ac
-# diff configure.ac.bak configure.ac 
-# #AC_INIT([FastJet],[3.0.2-devel])
-
-# # now make sure the windows config file is consistent
-# echo
-# echo "------------ Setting it in include/fastjet/config_win.h -----"
-# cp -p include/fastjet/config_win.h include/fastjet/config_win.h.bak
-# cd src
-# ./genconfig.sh ../include/fastjet/config_win.h
-# cd ..
-# diff include/fastjet/config_win.h.bak include/fastjet/config_win.h 
-
 # echo
 # echo "------------ Setting it in Doxyfile -------------------------"
 # sed -i.bak 's/^\(PROJECT_NUMBER.*=\).*/\1 '$version'/' Doxyfile
@@ -89,6 +72,16 @@ checkChanged docs/python-auto/source/conf.py
 echo ${bold}"------------ Setting it in docs/manual/HOPPET-doc.tex --------------"${normal}
 sed -i.bak 's/^\( *\)[^%]*\(%.*VERSION-NUMBER.*\)/\1version '$version'\2/' docs/manual/HOPPET-doc.tex
 checkChanged docs/manual/HOPPET-doc.tex
+
+echo ${bold}"------------ Setting it in docs/manual/preamble.tex --------------"${normal}
+if [ -z $versionPreRelease ]
+then
+  sed -i.bak 's:^\(\\newcommand.*repolink.*blob\)/\(.*\)/#1:\1/hoppet-'$versionNumber'/#1:' docs/manual/preamble.tex
+else
+  sed -i.bak 's:^\(\\newcommand.*repolink.*blob\)/\(.*\)/#1:\1/master/#1:' docs/manual/preamble.tex
+fi
+checkChanged docs/manual/preamble.tex
+
 
 echo
 echo ${bold}"------------ Recommended ChangeLog entry --------------------"${normal}

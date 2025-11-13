@@ -80,7 +80,7 @@ jobs:
     - name: Install 
       run: |
            yum -y install  gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
-           yum -y install swig python3-devel python3-numpy
+           yum -y install swig python3-devel python3-numpy diffutils
            yum -y install valgrind
     - name: Compile
       run: |
@@ -90,15 +90,25 @@ jobs:
           # cmake -S . -B BUILD -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHOPPET_USE_EXACT_COEF=ON -DHOPPET_BUILD_PYINTERFACE=ON
           cmake --build BUILD -j
           cmake --install BUILD
+
+    - name: explicit structure-function check
+      run: |
+          cd BUILD
+          ../scripts/check examples/f90/structure_functions_example:exact || cat examples_f90_structure_functions*
+
+    - name: Tests
+      run: |
           #valgrind BUILD/unit-tests/hoppet-unit-tests -only ome -verbose
           valgrind --leak-check=full BUILD/unit-tests-cxx/hoppet-unit-tests-cxx -s
           #BUILD/unit-tests/hoppet-unit-tests 
           ctest --test-dir BUILD -j 2 --output-on-failure
 
+    - name: Python tests
+      run: |
           # now try running some python examples, checking the output matches the expected output
-          scripts/check python3 example_py/tabulation_example.py
-          scripts/check python3 example_py/tabulation_example_qed.py
-          scripts/check python3 example_py/structure_functions_example.py
+          scripts/check examples/python/tabulation_example.py
+          scripts/check examples/python/tabulation_example_qed.py
+          scripts/check examples/python/structure_functions_example.py
 
   compilejobFedorax86_64_Intel_HPCKIT:
     name: Fedorax86_64_Intel_HPCKIT
@@ -113,7 +123,7 @@ jobs:
     - name: Install
       run: |
              dnf -y install findutils procps gcc gcc-c++ gcc-gfortran make wget which cmake cmake-data cmake-filesystem lhapdf lhapdf-devel
-              dnf -y install swig python3-devel python3-numpy
+              dnf -y install swig python3-devel python3-numpy diffutils
              tee > /tmp/oneAPI.repo << EOF
              [oneAPI]
              name=Intel(R) oneAPI repository
@@ -133,6 +143,10 @@ jobs:
           cmake -S . -B BUILDifx -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALLifx
           cmake --build BUILDifx -j
           cmake --install BUILDifx
+
+    - name: Tests_with_ifx
+      run: |
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
           ctest --test-dir BUILDifx -j 2 --output-on-failure
     # - name: Compile_with_ifort
     #   run: |

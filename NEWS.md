@@ -15,6 +15,15 @@
   enabled, added -ffp-exception-behavior=maytrap to avoid
   optimisations that can trigger unjustified FPE exceptions
 
+* Moved `doc` to `docs/manual` and created readthedocs-style
+  documentation for python in `docs/python-auto`. It can be accessed
+  at: https://hoppet-code.github.io/hoppet/. As part of creating the
+  python documentation more complete doxygen comments have been added
+  both in `hoppet.h` and `hoppet.i`.
+
+* Moved all the `example_*` directories to `examples`. They are now
+  called `cpp`, `f77`, `f90`, and `python`. 
+
 
 # Release 2.1.0, 29 October 2025
 

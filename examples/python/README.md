@@ -6,7 +6,7 @@
 - [tabulation_example_qed.py](tabulation_example_qed.py): illustrates
   evolution including QED effects
 
-- [structure_function_example.py](structure_function_example.py):
+- [structure_functions_example.py](structure_functions_example.py):
   illustrates evaluation of structure functions
 
 - [lhapdf_to_hoppet.py](lhapdf_to_hoppet.py): shows how to read in an

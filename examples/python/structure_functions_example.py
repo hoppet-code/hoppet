@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+"""Example using HOPPET in Python to compute structure functions."""
 import hoppet as hp
 import numpy as np
 

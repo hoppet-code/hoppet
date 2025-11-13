@@ -34,7 +34,11 @@
 %\topmargin -2.3cm  % for nikhef
 %\topmargin -0.5cm  % for hep-ph
 
+%% BEWARE: repolink gets modified by scripts/set-version.sh (set to master on
+%% a development or pre-release version, specific tag corresponding to
+%% the the hoppet-x.y.z tag otherwise
 \newcommand{\repolink}[2]{\href{https://github.com/hoppet-code/hoppet/blob/master/#1}{\ttt{#2}}}
+%%
 \newcommand{\masterlink}[1]{\repolink{#1}{\escapeunderscores{#1}}}
 
 

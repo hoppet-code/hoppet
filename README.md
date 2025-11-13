@@ -85,17 +85,17 @@ Key `<extra flags>` include:
 The simplest way to use HOPPET is through its streamlined interface.
 There are examples for basic QCD evolution in 
 - modern Fortran:
-[example_f90/tabulation_example_streamlined.f90](example_f90/tabulation_example_streamlined.f90)
-- Fortran 77: [example_f77/tabulation_example.f](example_f77/tabulation_example.f) 
-- C++: [example_cpp/tabulation_example.cc](example_cpp/tabulation_example.cc)
-- Python: [example_py/tabulation_example.py](example_py/tabulation_example.py)
+[examples/f90/tabulation_example_streamlined.f90](examples/f90/tabulation_example_streamlined.f90)
+- Fortran 77: [examples/f77/tabulation_example.f](examples/f77/tabulation_example.f) 
+- C++: [examples/cpp/tabulation_example.cc](examples/cpp/tabulation_example.cc)
+- Python: [examples/python/tabulation_example.py](examples/python/tabulation_example.py)
 
 Other features illustrated in the examples include
 
-- accessing convolutions with splitting functions ([Fortran](example_f77/convolution_example.f))
-- QCD+QED evolution ([Fortran90](example_f90/tabulation_example_qed_streamlined.f90), [C++](example_cpp/tabulation_example_qed.cc), [Python](example_py/tabulation_example_qed.py))
-- massless structure functions ([Fortran90](example_f90/structure_functions_example.f90), [C++](example_cpp/structure_functions_example.cc), [Python](example_py/structure_function_example.py))
-- comparisons with LHAPDF ([Fortran](example_f77/compare_lhapdf_hoppet.f), [Fortran90](example_f90/with-lhapdf/lhapdf_to_hoppet.f90), [C++](example_cpp/with-lhapdf/lhapdf_to_hoppet.cc), [Python](example_py/lhapdf_to_hoppet.py))
+- accessing convolutions with splitting functions ([Fortran](examples/f77/convolution_example.f))
+- QCD+QED evolution ([Fortran90](examples/f90/tabulation_example_qed_streamlined.f90), [C++](examples/cpp/tabulation_example_qed.cc), [Python](examples/python/tabulation_example_qed.py))
+- massless structure functions ([Fortran90](examples/f90/structure_functions_example.f90), [C++](examples/cpp/structure_functions_example.cc), [Python](examples/python/structure_function_example.py))
+- comparisons with LHAPDF ([Fortran](examples/f77/compare_lhapdf_hoppet.f), [Fortran90](examples/f90/with-lhapdf/lhapdf_to_hoppet.f90), [C++](examples/cpp/with-lhapdf/lhapdf_to_hoppet.cc), [Python](examples/python/lhapdf_to_hoppet.py))
 
 
 ## Full interface  
@@ -103,10 +103,10 @@ The Fortran examples also illustrate usage of the full lower-level interface,
 allowing fine-grained access to the underlying objects, which provide a
 powerful and flexible framework for convolution and evolution.
 See for example
-[example_f90/tabulation_example.f90](example_f90/tabulation_example.f90).
+[examples/f90/tabulation_example.f90](examples/f90/tabulation_example.f90).
 An equivalent program with the startup, pdf initialisation and
 evolution spread across different subroutines is given as
-[example_f90/tabulation_example_2.f90](example_f90/tabulation_example_2.f90).
+[examples/f90/tabulation_example_2.f90](examples/f90/tabulation_example_2.f90).
 
 ## Building the examples
 
@@ -154,9 +154,14 @@ cmake -S . -B BUILD -Dhoppet_DIR=hoppet/installation/share/hoppet/cmake
 # Documentation
 
 Detailed documentation is available as
-[docs/manual/HOPPET-doc.tex](docs/manual/HOPPET-doc.tex). If you use HOPPET in a
-scientific publication, please refer to https://arxiv.org/abs/0804.3755
-(original v1 release) and https://arxiv.org/abs/2510.09310 (v2 features).
+[docs/manual/HOPPET-doc.tex](docs/manual/HOPPET-doc.tex) (available as a PDF on the [releases](https://github.com/hoppet-code/hoppet/releases) page), with further
+information available also at
+https://hoppet-code.github.io/hoppet/. 
+
+
+If you use HOPPET in a scientific publication, please refer to
+https://arxiv.org/abs/0804.3755 (original v1 release) and
+https://arxiv.org/abs/2510.09310 (v2 features).
 
 
 # Other notes
@@ -166,30 +171,12 @@ scientific publication, please refer to https://arxiv.org/abs/0804.3755
 The benchmarking/ directory contains the programs used for the full
 benchmarking, accuracy and precision testing. 
 
-## Compiler warnings
-
-When the hoppet library is being built, on some systems the following
-warnings may be reported 
-
-```
-    /usr/bin/ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
-    /usr/bin/ranlib: file: libhoppet_v1.a(types.o) has no symbols
-    
-    ranlib: file: libhoppet_v1.a(hoppet_v1.o) has no symbols
-    ranlib: file: libhoppet_v1.a(types.o) has no symbols
-```
-
-These warnings do not indicate an actual problem. They are simply a
-consequence of the fact that some of the source (.f90) files contain
-only information about interfaces and constants, so that the resulting
-object (.o) files are essentially empty.
-
-
 ## Branches
 
 - The [dev](https://github.com/hoppet-code/hoppet/tree/dev) branch
 provides the latest development version of HOPPET. 
 - The [master](https://github.com/hoppet-code/hoppet/tree/branch) will
-usually be a little behind the dev branch
+usually be a little behind the dev branch and is intended to be suitable
+for production use.
 
 
