@@ -267,7 +267,6 @@ public:
 
   /// @brief  make a copy of other, including allocating new storage if needed
   /// @param  other the other grid_quant to copy from
-  /// @return a reference to the current object
   void copy(const V & other) {
     if (_ptr && this->extras() == other.extras()) {
       //std::cout << " reusing existing storage in grid_quant::copy\n";
@@ -288,7 +287,6 @@ protected:
 
   /// @brief  move the contents from other into this, without deleting existing data
   /// @param  other: the other grid_quant to move from
-  /// @return a reference to the current object
   ///
   /// Note that this does not delete any existing data in *this, so be careful to call del() 
   /// first if needed.
