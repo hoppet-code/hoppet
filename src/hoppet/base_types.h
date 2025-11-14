@@ -72,7 +72,6 @@ template<typename V>
 class obj_owner : public V {
 public:
   typedef V             view_type;
-  typedef V             view;
   typedef V::ptr_type   ptr_type;
   typedef V::extra_type extra_type;
 
@@ -231,7 +230,7 @@ class data_owner : public V {
 public:
 
   typedef V view_type;
-  typedef V view;
+  typedef P ptr_type;
 
   data_owner() {}
   virtual ~data_owner() {del();}

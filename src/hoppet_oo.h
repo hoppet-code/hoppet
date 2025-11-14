@@ -98,7 +98,7 @@ concept VoidFnDoubleDoubleDoublevec =
 
 
 //-----------------------------------------------------------------------------
-/// @brief Object-oriented wrapper around the grid_def Fortran type, non-owning
+/// @brief A view (non-owning) of a grid_def object that holds a grid definition
 ///
 /// This version provides a "view" onto an existing Fortran grid_def object,
 /// without taking ownership of it.
@@ -110,6 +110,9 @@ public:
 
   /// return the upper limit of the iy index (i.e. highest valid index)
   int ny() const {return hoppet_cxx__grid_def__ny(valid_ptr()); }
+
+  /// return the size of the grid (i.e. total number of points)
+  std::size_t size() const {return static_cast<std::size_t>(ny())+1;}
 
   std::vector<double> y_values() const {
     std::vector<double> yvals(ny()+1);
@@ -165,7 +168,7 @@ public:
 
 
 //-----------------------------------------------------------------------------
-/// @brief Object-oriented wrapper around the `grid_def` Fortran type, with ownership
+/// @brief A definition of a grid in y=ln(1/x), wrapping and owning the underlying Fortran type
 ///
 /// Most users will want to construct the grid_def object with the function
 /// hoppet::grid_def_default, e.g. 
@@ -210,7 +213,8 @@ public:
 
 };  
 
-/// @brief return a grid_def object with the default choice of nested, locked grids
+/// @brief return a grid_def object with HOPPET's default choice of nested, locked grids
+///
 /// @param dy      spacing of the coarsest grid
 /// @param ymax    maximum y value for the coarsest grid
 /// @param order   usual interpolation order parameter
@@ -221,14 +225,10 @@ inline grid_def grid_def_default(double dy, double ymax, int order) {
 
 
 //-----------------------------------------------------------------------------
-/// @brief Object-oriented wrapper around the grid_quant Fortran type, non-owning
+/// @brief A view of a grid_quant object, i.e. a function of y=ln(1/x) stored at fixed grid points in y
 ///
-/// This version provides a "view" onto an existing Fortran grid_quant object,
-/// without taking ownership of it.
+/// This does not own the underlying data, but can still manipulate it.
 ///
-/// Note hoppet doesn't have grid_quant objects by default, instead it just 
-/// uses `real(dp) :: gq(0:ny)` arrays. The c++ wrapper instead explicitly
-/// goes via a fortran grid_quant object, which manages the data array internally.
 class grid_quant_view : public data_view<grid_def_view> {
 public:
 
@@ -332,6 +332,11 @@ public:
 
 
 //-----------------------------------------------------------------------------
+/// @brief A function of y=ln(1/x) stored at fixed grid points in y (see grid_quant_view for core member functions)
+///
+/// Note that Fortran hoppet does not use grid_quant objects by default, instead it just 
+/// uses `real(dp) :: gq(0:ny)` arrays. This C++ wrapper instead explicitly
+/// goes via a fortran grid_quant object, which manages the data array internally.
 class grid_quant : public data_owner<grid_quant_view, grid_quant_f> {
 public:
 
@@ -417,11 +422,14 @@ inline grid_quant operator*(const grid_def_view & grid, DoubleFnDouble auto && f
 
 ///@}
 
+/// @brief  an alias for grid_quant_view, i.e. representing a single PDF flavour across y=ln(1/x)
 typedef grid_quant_view pdf_flav_view;
+/// @brief  an alias for grid_quant, i.e. representing a single PDF flavour across y=ln(1/x)
 typedef grid_quant      pdf_flav;
 
 
 //-----------------------------------------------------------------------------
+/// @brief Internal class related to storage of properties of grid_quant_2d objects
 struct gq2d_extras {
   grid_def_view grid;
   std::size_t   size_dim1;
@@ -440,6 +448,9 @@ struct gq2d_extras {
 };
 
 //-----------------------------------------------------------------------------
+/// @brief A non-owning view of a grid_quant_2d object, i.e. a function of
+///        y=ln(1/x) stored at fixed grid points in y for each of several flavour
+///        indices
 class grid_quant_2d_view : public data_view<gq2d_extras> {
 public:  
   typedef data_view<gq2d_extras> base_type;
@@ -520,6 +531,9 @@ public:
 
 
 //-----------------------------------------------------------------------------
+/// @brief A function of y=ln(1/x) stored at fixed grid points in y for
+///        each of several flavour indices
+
 class grid_quant_2d : public data_owner<grid_quant_2d_view, grid_quant_2d_f> {
 
 public:
@@ -1373,7 +1387,7 @@ protected:
 
 };
 
-/// @brief  an object that holds a tabulation of a pdf. Most functions
+/// @brief  Holds a tabulation of a pdf. Most functions
 ///         are inherited from and documented in pdf_table_view
 class pdf_table : public obj_owner<pdf_table_view> {
 public:
