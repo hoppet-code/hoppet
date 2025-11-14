@@ -198,8 +198,6 @@ TEST_CASE( "grid_quant", "[hoppet]" ) {
             (5*(-5 - 32*x + 32*pow(x,3) + 5*pow(x,4)))/6.;
   };
   for (double y : {10.0, 8.0, 5.0, 2.0}) {
-    //cout << "Luminosity at y=" << y << ": " << lumi.at_y(y) << endl;
-    //cout << " Expected lum:       " << expected_lumi(y) << endl;
     REQUIRE_THAT( lumi.at_y(y), WithinRel( expected_lumi(y), 1e-5) );
   }
 
