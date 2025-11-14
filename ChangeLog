@@ -1,5 +1,10 @@
 2025-11-13 Gavin + Alexander
 
+	* scripts/set-version.sh:
+	for releases (anything without a prerelease tag), the repolink macro
+	in docs/manual/preamble.tex is now set to the specific tag rather than
+	the master branch. 
+
 	* scripts/check: 
 	tried to make this more robust against missing commands and weird output
 
