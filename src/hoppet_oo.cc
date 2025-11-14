@@ -1,4 +1,5 @@
 #include "hoppet_oo.h"
+#include <cstring>
 
 
 extern "C" void hoppet_throw_runtime_error() {throw std::runtime_error("hoppet wae_error");}
@@ -7,6 +8,18 @@ extern "C" double hoppet_grid_conv_f__wrapper(double y, int piece, void*ctx) {
   auto func = static_cast<std::function<double(const double, const int)>*>(ctx);
   return (*func)(y, piece);
 }
+
+/// @brief Allocate a C-style string of given size (for use in fortran -> C++ string conversion)
+/// @param size 
+/// @return a pointer to the allocated char array
+extern "C" char * hoppet_allocate_cstr(int size) {
+  return new char[size];
+}
+
+/// @brief Return the length of a C-style string (up to but not including the null terminator)
+/// @param cstr_ptr 
+/// @return 
+extern "C" int hoppet_cstr_len(char * cstr_ptr) {return strlen(cstr_ptr);}
 
 namespace hoppet {
 namespace sl {

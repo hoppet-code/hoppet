@@ -3,6 +3,7 @@
 #include "unit-test-helpers.h"
 #include <iostream>
 #include <cmath>
+#include <string>
 
 //#include "catch_amalgamated.hpp"
 #include <catch2/catch_test_macros.hpp>
@@ -23,15 +24,22 @@ string yel = "\033[1;33m";
 string blu = "\033[1;34m";
 string mag = "\033[1;35m";
 string cyn = "\033[1;36m";
+string bold = "\033[1m";
 string endc= "\033[0m";
 
 hoppet::grid_def grid100;
 hoppet::grid_def big_grid;
 
+extern "C" void hoppet_cxx__print_c_str(const char * cstr_ptr); // declaration of fortran routine
+
 //-----------------------------------------------------------------------------
 /// We supply the main routine, to make sure that we can 
 /// do any global-object initialisation that's needed
 int main(int argc, char* argv[]) {
+
+  cout << bold << "Starting C++ unit tests with hoppet " << hoppetVersion() << endc << endl;
+  string hello="Hello from Fortran to C++";
+  hoppet_cxx__print_c_str(hello.c_str()); // test calling Fortran from C++
 
   // Global setup
   // make a simple grid for use in the tests

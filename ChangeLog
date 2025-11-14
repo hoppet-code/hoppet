@@ -38,6 +38,9 @@ __Files added__
 	bind(C) routines that take or return a pointer to a Fortran
 	objects, allowing the C++ code to view and manipulate them.
 
+	* src/hoppet_c_f_string_utils.f90:        *** ADDED ***
+	utilities for converting between C-style strings and Fortran
+
 	* examples/cpp/tabulation_example_oo.cc:  *** ADDED ***
 	example using the C++ OO interface to produce the default
 	tabulation_example output.
@@ -91,6 +94,11 @@ __Files added__
 	* src/hoppet.h:
 	- made some more of the constants constexpr
 	- made the factscheme argument optional in the C++ hoppetStartExtended.
+	- hoppetVersion() now calls hoppetVersionCStr()
+
+	* src/welcome_message.f90:
+	- replaced hoppetVersionC(...) with hoppetVersionCStr(), using the new 
+	  fortran-C++ conversion utilities.
 
 --------- end 2025-10-cxx-OO branch ---------
 

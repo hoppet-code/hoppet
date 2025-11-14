@@ -24,6 +24,7 @@
 // Next steps:
 // - [x] add the running_coupling class
 // - [x] add the dglap_holder    
+// - [x] generic string conversion (hoppet_c_f_string_utils.f90)
 // - [~] add the pdf_table
 //       - [ ] grid_quant_3d
 //       - [x] evolution functions
@@ -31,7 +32,7 @@
 //       - [ ] does copying also copy the evolution operators? **NO**
 //       - [x] fill from LHAPDF type functions
 //       - [ ] write to LHAPDF
-//       - [ ] access to lambda_eff & doc in pdfseginfo
+//       - [x] access to lambda_eff
 // - [ ] array of tables
 // - [ ] add the evln_operator class
 // - [x] add the mass thresholds 

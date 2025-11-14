@@ -14,44 +14,16 @@ contains
     vs = private_version_string
   end function HoppetVersion
 
-  !! Takes a pointer to an array of C characters and if the version
-  !! string length is < maxlen-1, then fills the C-array with a null
-  !! terminated string with the version, and returns 0. If the version
-  !! string length is >= maxlen-1, then does not fill the C-array,
-  !! and returns the required length (including the null terminator).
-  !!
-  !! C-signature is 
-  !!  int HoppetVersionC(char *cchar, int maxlen)
-  function hoppetVersionC(cchar, maxlen) result (errcode_or_maxlen) bind(C, name="hoppetVersionC")
+  !! return a C-style string (null-terminated char array) with the current version of HOPPET
+  !! The caller is responsible for deallocating the returned string with delete[]
+  function hoppetVersionCStr() result (cstr_ptr) bind(C, name="hoppetVersionCStr")
+    use hoppet_c_f_string_utils
     use, intrinsic :: iso_c_binding
     implicit none
-    ! Arguments
-    type(c_ptr),    value        :: cchar          !< pointer to char buffer from C/C++
-    integer(c_int), value        :: maxlen         !< max buffer length provided by caller
-    integer(c_int)               :: errcode_or_maxlen
-    ! Local variables
-    integer :: verlen
-    character(kind=c_char), pointer :: fbuf(:)
+    type(c_ptr) :: cstr_ptr
 
-    ! Actual length of version string
-    verlen = len_trim(private_version_string)
-
-    if (verlen < maxlen) then
-      ! Associate the C pointer with a Fortran char buffer of length maxlen
-      call c_f_pointer(cchar, fbuf, [maxlen])
-
-      fbuf(1:verlen) = transfer(private_version_string(1:verlen), fbuf(1:verlen))
-
-      ! Null terminate
-      fbuf(verlen+1) = c_null_char
-
-      ! Return success (0)
-      errcode_or_maxlen = 0
-    else
-       ! Not enough room: return required length including null terminator
-       errcode_or_maxlen = verlen + 1
-    end if
-  end function HoppetVersionC
+    cstr_ptr = cstr_from_fortran_string(private_version_string)
+  end function hoppetVersionCStr
 
 end module hoppet_version
 

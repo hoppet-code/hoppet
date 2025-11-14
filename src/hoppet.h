@@ -582,31 +582,22 @@ void hoppetwritelhapdfgrid_(const char* basename, const int* basename_len, const
 			       double * xpdf);
 
 
-  /// Take a pointer to an array of C characters and if the version
-  /// string length is < maxlen-1, fill the C-array with a null
-  /// terminated string with the version, and return 0. If the version
-  /// string length is >= maxlen-1, then do not fill the C-array,
-  /// and return the required length (including the null terminator).
-  int hoppetVersionC(char *cchar, int maxlen);
+  /// @brief  Return the version of hoppet as a C-style string
+  /// @return the version string as a newly allocated char array
+  ///
+  /// The caller is responsible for deleting the returned char array
+  char * hoppetVersionCStr();
 
 }
 
 /// @brief  Return the version of hoppet as a std::string
 /// @return The version string
 inline std::string hoppetVersion() {
-  const int maxlen = 100; // should be more than enough
-  char cchar[maxlen];
-  int errcode_or_maxlen = hoppetVersionC(cchar, maxlen);
-  if (errcode_or_maxlen == 0) {
-    return std::string(cchar);
-  } else {
-    // we need a longer buffer
-    char * cchar2 = new char[errcode_or_maxlen];
-    errcode_or_maxlen = hoppetVersionC(cchar2, errcode_or_maxlen);
-    std::string result(cchar2);
-    delete[] cchar2;
-    return result;
-  }
+
+  char * cstr = hoppetVersionCStr();
+  std::string version(cstr);
+  delete[] cstr;
+  return version;
 }
 
 

@@ -2,6 +2,7 @@
 #include "inc/ftlMacros.inc"
 #include "inc/extraMacros.inc"
 
+
 #define BINDC(OBJ,NAME) bind(C,name="hoppet_cxx__"//STRINGIFY(OBJ)//"__"//STRINGIFY(NAME))
 
 ! define a macro to generate the functions that returns a generic object's integer member
@@ -117,17 +118,33 @@
   end subroutine
 
 
+
+module hoppet_cxx_oo_various
+  use, intrinsic :: iso_c_binding
+  implicit none
+contains
+
+  !! routine to help testing: print a C-style string passed from C++
+  subroutine hoppet_cxx__print_c_str(cstr_ptr) bind(C)
+    use hoppet_c_f_string_utils
+    use, intrinsic :: iso_c_binding
+    implicit none
+    type(c_ptr), intent(in), value :: cstr_ptr
+    character(len=:), allocatable :: fstr
+    fstr = fortran_string_from_cstr(cstr_ptr)
+    print '(a)', "START:"//fstr//":END"
+  end subroutine hoppet_cxx__print_c_str
+
+end module hoppet_cxx_oo_various
 !=====================================================================
 !! wrappers for C++ OO interface to grid_def
 module hoppet_cxx_oo_grid_def
   use types, only: dp
   use, intrinsic :: iso_c_binding
   use convolution
-  implicit none
-  
+  implicit none  
 
 contains
-
 
   !! return a c pointer to a new grid_def
   function hoppet_cxx__grid_def__new(dy,ymax,order,eps) bind(C) result(ptr)
