@@ -84,7 +84,7 @@ TEST_CASE( "grid_def", "[hoppet]" ) {
   REQUIRE(grid3.subiy(1) == 0);
   REQUIRE(grid3.subiy(2) == grid3.subgd(1).ny()+1);
 
-  // now unlocked grid with subgrids, which should preserve order of input grids
+  // now locked=false grid with subgrids, which should preserve order of input grids
   hoppet::grid_def grid4({grid100, hoppet::grid_def(0.03,0.3)}, false);
   REQUIRE(grid4.subgd(1) == grid100);
 
@@ -578,15 +578,8 @@ TEST_CASE("dglap_holder", "[hoppet]") {
 
 //-----------------------------------------------------------------------------
 TEST_CASE("pdf_table", "[hoppet]") {
-  double Qmin = 1.0, Qmax = 1e4;
-  double dlnlnQ = big_grid.dy()/4.0;
-  hoppet::pdf_table tab(big_grid, Qmin, Qmax, dlnlnQ);
-  double mc = sqrt(2.0) + 1e-10;
-  double mb = 4.5;
-  double mt = 175.0;
-  hoppet::running_coupling alphas(0.118, 91.1880, 3, mc, mb, mt);
-  tab.add_nf_info(alphas);
 
+  hoppet::pdf_table tab = setup_table(big_grid);
 
   auto sl_tab = hoppet::sl::table;
   size_t iQ = sl_tab.nQ() / 2;
@@ -639,6 +632,49 @@ TEST_CASE("pdf_table", "[hoppet]") {
   REQUIRE_THAT( tab_pre.at_xQf(x, Q, hoppet::iflv_g), WithinAbs( hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6) );
 
   cout << hoppet::sl::table.nQ() << "=hoppet::sl::table.nQ()\n";
+}
+
+//-----------------------------------------------------------------------------
+TEST_CASE("pdf_table_assignment", "[hoppet]") {
+
+  auto silly_pdf_dblptr = [&](double x, double Q, double * f){
+    for (int iflv = hoppet::iflv_min; iflv <= hoppet::iflv_max; ++iflv) {
+      f[iflv] = silly_pdf(x, Q, iflv);
+    }
+  };
+  auto silly_pdf_dblvec = [&](double x, double Q, vector<double> & f){
+    f.resize(hoppet::iflv_max+1);
+    for (int iflv = hoppet::iflv_min; iflv <= hoppet::iflv_max; ++iflv) {
+      f[iflv] = silly_pdf(x, Q, iflv);
+    }
+  };
+
+  auto tab1 = setup_table(big_grid);
+  tab1.assign_xQ_into(silly_pdf_dblptr);
+  auto tab2 = setup_table(big_grid);
+  tab2.assign_xQ_into(silly_pdf_dblvec);
+
+  vector<double> xvals = {1e-4, 1e-2, 0.1, 0.5};
+  vector<double> Qvals = {2.0, 10.0, 100.0, 1000.0};
+  for (double x : xvals) {
+    for (double Q : Qvals) {
+      for (int iflv = hoppet::iflv_min; iflv <= tab1.iflv_max(); ++iflv) {
+        REQUIRE_THAT( tab1.at_xQf(x, Q, iflv), WithinAbs(silly_pdf(x,Q,iflv), 1e-6) );
+        REQUIRE_THAT( tab2.at_xQf(x, Q, iflv), WithinAbs(silly_pdf(x,Q,iflv), 1e-6) );
+      }
+    }
+  }
+
+  // check the control component is zero
+  int iy_test = 1;
+  int iQ = tab1.nQ() / 2;
+  for (auto & tab : {tab1, tab2}) {
+    auto control = tab.at_iQ(iQ)[hoppet::ncompmax];
+    //for (unsigned i = 0; i < control.size(); ++i) {cout << i << " " << control[i] << "\n";} 
+    REQUIRE(control[iy_test] == 0);
+  }
+
+
 }
 
 

@@ -78,4 +78,28 @@ inline double pqg_fn(double y, int piece, double nf) {
   return x*res;
 }
 
+
+//-----------------------------------------------------------------------
+/// @brief  Allocate a pdf_table for testing
+/// @return 
+inline hoppet::pdf_table setup_table(const hoppet::grid_def_view & grid, bool with_running_coupling = true) {
+  double Qmin = 1.0, Qmax = 1e4;
+  double dlnlnQ = grid.dy()/4.0;
+  hoppet::pdf_table tab(grid, Qmin, Qmax, dlnlnQ);
+  if (!with_running_coupling) return tab;
+  double mc = sqrt(2.0) + 1e-10;
+  double mb = 4.5;
+  double mt = 175.0;
+  hoppet::running_coupling alphas(0.118, 91.1880, 3, mc, mb, mt);
+  tab.add_nf_info(alphas);
+  return tab;
+}
+
+//-----------------------------------------------------------------------
+/// @brief  A silly pdf function for testing, with an (x,q,iflv) signature
+inline double silly_pdf(double x, double Q, int iflv){
+  if (iflv < hoppet::iflv_min || iflv > hoppet::iflv_max) return 0.0;
+  return log(x) + 2*log(Q) + 0.5*(iflv-6 + 0.5);
+};
+
 #endif // UNIT_TEST_HELPERS_H

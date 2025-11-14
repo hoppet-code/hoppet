@@ -29,8 +29,9 @@
 //       - [x] evolution functions
 //       - [x] PDF access functions
 //       - [ ] does copying also copy the evolution operators? **NO**
-//       - [~] fill from LHAPDF
+//       - [x] fill from LHAPDF type functions
 //       - [ ] write to LHAPDF
+//       - [ ] access to lambda_eff & doc in pdfseginfo
 // - [ ] array of tables
 // - [ ] add the evln_operator class
 // - [x] add the mass thresholds 
@@ -455,7 +456,7 @@ public:
   const double & operator()(std::size_t iflv, std::size_t iy) const {return this->data()[iflv * extras().size_dim1 + iy];}  
 
   /// assign using a function f(x,Q, xpdf_array), similar to the LHAPDF
-  /// "evolve" fortran interface, where xpdf_array is a double* pointing
+  /// "evolve" fortran interface, where xpdf_array is a double* pointing 
   /// to an array with at least 13 entries
   void assign_xQ_into(const VoidFnDoubleDoubleDoubleptr auto & fn, double Q) {
     ensure_valid();
@@ -1083,34 +1084,96 @@ public:
   }
 };
 
+/// @brief  A view of the segmentation information for PDF tables
 class pdfseginfo_view : public obj_view<pdfseginfo_f> {
 public:
   typedef obj_view<pdfseginfo_f> base_type;
   using base_type::base_type; // ensures that constructors are inherited
-  RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_lo)
-  RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_hi)
-  RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_lo)
-  RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_hi)
-  RETURN_DBL_MEMBER(pdfseginfo,dlnlnQ)
-  RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ)
+  RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_lo)  ///< return the lowest  iQ index for this segment
+  RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_hi)  ///< return the highest iQ index for this segment
+  RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_lo)   ///< return the lowest  ln(ln(Q/Λ)) value for this segment
+  RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_hi)   ///< return the highest ln(ln(Q/Λ)) value for this segment
+  RETURN_DBL_MEMBER(pdfseginfo,dlnlnQ)     ///< return the spacing in ln(ln(Q/Λ)) value for this segment
+  RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ) ///< return the inverse spacing in ln(ln(Q/Λ)) value for this segment
 };
 
+/// @brief  A view of pdf_table, i.e. a tabulation of PDFs on a (Q,iflv,y) grid
+///
 class pdf_table_view : public obj_view<pdf_table_f> {
 public:
   typedef obj_view<pdf_table_f> base_type;
   using base_type::base_type; // ensures that constructors are inherited
 
+  /// @brief copy assignment operator
+  ///
+  /// Note that currently this does _not_ copy the cached evolution operators
   pdf_table_view & operator=(const pdf_table_view & other) {
     if (!ptr()) throw std::runtime_error("pdf_table_view::operator=: pdf_table_view object not associated");
     hoppet_cxx__pdf_table__copy_contents(ptr(), other.ptr());
     return *this;
   }
 
+  /// @name Functions to fill the table by DGLAP evolution
+  ///@{
+  /// @brief Fill the PDF table by evolving from an input PDF at scale Q0
+  ///
+  /// Note that if (untie_nf) is true [default false] then alphas is
+  /// allowed to have its natural value for nf, even if the dglap_holder
+  /// cannot reach this nf value.
+  void evolve(double                        Q0,        ///< scale of input PDF
+              const grid_quant_2d_view &    pdf_at_Q0, ///< input PDF at scale Q0
+              const dglap_holder_view &     dh,        ///< DGLAP holder to use for evolution
+              const running_coupling_view & coupling,  ///< running coupling to use for evolution
+              double muR_over_Q = 1.0,                 ///< ratio of renormalization to factorization scale
+              int    nloop = -1,                       ///< number of loops to use; if <0, use coupling.nloop()
+              bool   untie_nf = false                  ///< whether to untie nf in evolution
+            ) {
+    ensure_compatible(pdf_at_Q0);
+    if (nloop < 0) nloop = coupling.nloop();
+    hoppet_cxx__pdf_table__evolve(valid_ptr(), Q0, pdf_at_Q0.data(), dh.ptr(), coupling.ptr(),
+                                 muR_over_Q, nloop, untie_nf);
+  }  
+
+  /// @brief Fill pre-evolution information for this table, to used by calling evolve()
+  ///
+  /// Note that if (untie_nf) is true [default false] then alphas is
+  /// allowed to have its natural value for nf, even if the dglap_holder
+  /// cannot reach this nf value.
+  void pre_evolve(
+              double                        Q0,        ///< scale of input PDF
+              const dglap_holder_view &     dh,        ///< DGLAP holder to use for evolution
+              const running_coupling_view & coupling,  ///< running coupling to use for evolution
+              double muR_over_Q = 1.0,                 ///< ratio of renormalization to factorization scale
+              int    nloop = -1,                       ///< number of loops to use; if <0, use coupling.nloop()
+              bool   untie_nf = false                  ///< whether to untie nf in evolution
+            ) {
+    if (nloop < 0) nloop = coupling.nloop();
+    hoppet_cxx__pdf_table__pre_evolve(valid_ptr(), Q0, dh.ptr(), coupling.ptr(),
+                                 muR_over_Q, nloop, untie_nf);
+  }  
+
+  /// @brief Fill the PDF table by evolution of an initial condition, using pre_evolve() information
+  ///
+  /// @param pdf_at_Q0  the initial condition PDF at scale Q0 (as set in a pre_evolve(...) call)
+  ///
+  /// This is several times faster than the evolve(...) call without
+  /// pre-evolution, and is the preferred option when evolving multiple
+  /// initial conditions with the same evolution settings.
+  void evolve(const grid_quant_2d_view &    pdf_at_Q0 //< input PDF at scale Q0
+             ) {
+    ensure_compatible(pdf_at_Q0);
+    hoppet_cxx__pdf_table__evolve_frompre(valid_ptr(), pdf_at_Q0.data());
+  }  
+  ///@}
+
+
+  /// @name Functions to fill the table from existing information across x,Q,iflv
+  ///@{
   /// @brief assign to (i.e. fill) this table using a function fn(x,Q, xpdf_array)
   /// 
-  /// @param fn Should have the signature void(double x, double Q, double * xpdf_array);
-  ///           xpdf_array is a double* pointingto an array with 13 entries that is 
-  ///           filled by fn.  The function signature is comparible with the LHAPDF
+  /// @param fn Should have the signature `void(double x, double Q, double * xpdf_array)`;
+  ///           xpdf_array is a double* pointing to an array with 13 entries that is 
+  ///           filled by fn.  The function signature is compatible with the LHAPDF
   ///           "evolve" fortran interface;  
   ///
   /// Any flavours beyond 13 (i.e. beyond iflv_top) are set to zero.
@@ -1134,48 +1197,42 @@ public:
     }
   }
 
-  /// @brief return a grid_quant_view (i.e. pdf_flav slice) at the specified iQ, iflv
+  /// @brief assign to (i.e. fill) this table using a function fn(x,Q, xpdf_vector)
+  /// 
+  /// @param fn Should have the signature `void(double x, double Q,
+  ///           std::vector<double> xpdf_vector)`; xpdf_vector is resized and
+  ///           filled by fn. filled by fn.  The function signature is compatible
+  ///           LHAPDF's C++ `PDF::xfxQ(x,Q,pdf_vec)` member function.
   ///
-  /// @param iQ     the index in the Q dimension
-  /// @param iflv   the index in the flavour dimension
-  /// @return       a view of the table's full (y) structure at iQ,iflv
-  ///
-  /// Note that the view can be read from and written to. In the latter case, this
-  /// effectively (silently) discards the function's const qualifier
-  grid_quant_view at_iQf(size_t iQ, size_t iflv) const {
-    double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
-    // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
-    size_t size_dim0 = size_flv();
-    size_t size_dim1 = static_cast<size_t>(grid().ny()+1);
-    size_t iQ_size = size_dim0 * size_dim1;
-    double * iQf_ptr  = tab_ptr + iQ * iQ_size + iflv * size_dim1;
-    return grid_quant_view(iQf_ptr, size_dim1, grid());
+  /// Any flavours beyond the size of the xpdf_vector are set to zero.
+  void assign_xQ_into(const VoidFnDoubleDoubleDoublevec auto & fn) {
+    ensure_valid();
+    if (size_flv() < hoppet::iflv_max+1) {
+      throw std::runtime_error("grid_quant_2d_view::assign(fn): pdf_table size_flv() = " 
+                  + std::to_string(size_flv()) + " < iflv_max+1 = " + std::to_string(hoppet::iflv_max+1));
+    }
+    std::vector<double> xvals = grid().x_values();
+    std::vector<double> xpdf (size_flv());
+    for (std::size_t iQ = 0 ; iQ < size_Q(); ++iQ) {
+      double Q = Q_vals(iQ);
+      pdf_view pdf_at_Q = at_iQ(iQ);
+      for (std::size_t iy=0; iy < xvals.size(); ++iy) {
+        fn(xvals[iy], Q, xpdf);
+        // run a check only for the first y point
+        if (iy == 0 && xpdf.size() > size_flv()) {
+          throw std::runtime_error("grid_quant_2d_view::assign(fn): xpdf_vector size = " 
+                  + std::to_string(xpdf.size()) + " > pdf_table size_flv() = " + std::to_string(size_flv()));
+        }
+        for (std::size_t iflv=0; iflv < xpdf.size(); ++iflv) {pdf_at_Q(iflv,iy) = xpdf[iflv];}
+        for (std::size_t iflv=xpdf.size(); iflv < size_flv(); ++iflv) {pdf_at_Q(iflv,iy) = 0.0;}
+      }
+    }
   }
+  ///@}
 
-  /// @brief return a grid_quant_2d_view (i.e. pdf slice) at the specified iQ
+  /// @name Access to interpolated PDF values
+  ///@{
   ///
-  /// @param iQ     the index in the Q dimension
-  /// @return       a view of the table's full (y,iflv) structure at iQ
-  ///
-  /// Note that the view can be read from and written to. In the latter case, this
-  /// effectively (silently) discards the function's const qualifier
-  grid_quant_2d_view at_iQ(size_t iQ) const {
-    double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
-    // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
-    size_t size_dim0 = size_flv();
-    size_t size_dim1 = static_cast<size_t>(grid().ny()+1);
-    size_t iQ_size = size_dim0 * size_dim1;
-    double * iQ_ptr  = tab_ptr + iQ * iQ_size;
-    return grid_quant_2d_view(iQ_ptr, iQ_size, gq2d_extras(grid(), size_dim0));
-  }
-
-  /// return the maximum valid iflv index, in C++ numbering; 
-  size_t iflv_max() const {return static_cast<size_t>(tab_iflv_max() - iflv_min_fortran);  }
-  /// @brief return the size of the flavour (dim1=2nd) dimension of the table 
-  size_t size_flv() const {return static_cast<size_t>(hoppet_cxx__pdf_table__size_flv(valid_ptr())); }
-  /// return the size of the Q (dim0=1st) dimension of the table
-  size_t size_Q() const {return nQ()+1;}
-
   /// @brief return the value of xf(x,Q,iflv) at x = exp(-y)
   /// @param y     log(1/x)
   /// @param Q     the factorisation scale at which to evaluate the PDF
@@ -1205,56 +1262,75 @@ public:
   void at_xQ_into(double x, double Q, double * result) const {
     at_yQ_into(-std::log(x), Q, result);
   }
+  ///@}
 
-  /// @brief Fill the PDF table by evolving from an input PDF at scale Q0
-  ///
-  /// Note that if (untie_nf) is true [default false] then alphas is
-  /// allowed to have its natural value for nf, even if the dglap_holder
-  /// cannot reach this nf value.
-  void evolve(double                        Q0,        //< scale of input PDF
-              const grid_quant_2d_view &    pdf_at_Q0, //< input PDF at scale Q0
-              const dglap_holder_view &     dh,        //< DGLAP holder to use for evolution
-              const running_coupling_view & coupling,  //< running coupling to use for evolution
-              double muR_over_Q = 1.0,                 //< ratio of renormalization to factorization scale
-              int    nloop = -1,                       //< number of loops to use; if <0, use coupling.nloop()
-              bool   untie_nf = false                  //< whether to untie nf in evolution
-            ) {
-    ensure_compatible(pdf_at_Q0);
-    if (nloop < 0) nloop = coupling.nloop();
-    hoppet_cxx__pdf_table__evolve(valid_ptr(), Q0, pdf_at_Q0.data(), dh.ptr(), coupling.ptr(),
-                                 muR_over_Q, nloop, untie_nf);
-  }  
+  
+  /// @name Direct access to the table data
+  ///@{
+  //-------------------------------------------------------------
 
-  /// @brief Fill pre-evolution information for this table, to used by calling evolve()
+  /// @brief return a grid_quant_2d_view (i.e. pdf slice) at the specified iQ
   ///
-  /// Note that if (untie_nf) is true [default false] then alphas is
-  /// allowed to have its natural value for nf, even if the dglap_holder
-  /// cannot reach this nf value.
-  void pre_evolve(
-              double                        Q0,        //< scale of input PDF
-              const dglap_holder_view &     dh,        //< DGLAP holder to use for evolution
-              const running_coupling_view & coupling,  //< running coupling to use for evolution
-              double muR_over_Q = 1.0,                 //< ratio of renormalization to factorization scale
-              int    nloop = -1,                       //< number of loops to use; if <0, use coupling.nloop()
-              bool   untie_nf = false                  //< whether to untie nf in evolution
-            ) {
-    if (nloop < 0) nloop = coupling.nloop();
-    hoppet_cxx__pdf_table__pre_evolve(valid_ptr(), Q0, dh.ptr(), coupling.ptr(),
-                                 muR_over_Q, nloop, untie_nf);
-  }  
+  /// @param iQ     the index in the Q dimension
+  /// @return       a view of the table's full (y,iflv) structure at iQ
+  ///
+  /// Note that the view can be read from and written to. In the latter case, this
+  /// effectively (silently) discards the function's const qualifier
+  grid_quant_2d_view at_iQ(size_t iQ) const {
+    double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
+    // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
+    size_t size_dim0 = size_flv();
+    size_t size_dim1 = static_cast<size_t>(grid().ny()+1);
+    size_t iQ_size = size_dim0 * size_dim1;
+    double * iQ_ptr  = tab_ptr + iQ * iQ_size;
+    return grid_quant_2d_view(iQ_ptr, iQ_size, gq2d_extras(grid(), size_dim0));
+  }
 
-  /// @brief Fill the PDF table by evolution of an initial condition, using pre_evolve() information
+  /// @brief return a grid_quant_view (i.e. pdf_flav slice) at the specified iQ, iflv
   ///
-  /// @param pdf_at_Q0  the initial condition PDF at scale Q0 (as set in a pre_evolve(...) call)
+  /// @param iQ     the index in the Q dimension
+  /// @param iflv   the index in the flavour dimension
+  /// @return       a view of the table's full (y) structure at iQ,iflv
   ///
-  /// This is several times faster than the evolve(...) call without
-  /// pre-evolution, and is the preferred option when evolving multiple
-  /// initial conditions with the same evolution settings.
-  void evolve(const grid_quant_2d_view &    pdf_at_Q0 //< input PDF at scale Q0
-             ) {
-    ensure_compatible(pdf_at_Q0);
-    hoppet_cxx__pdf_table__evolve_frompre(valid_ptr(), pdf_at_Q0.data());
-  }  
+  /// Note that the view can be read from and written to. In the latter case, this
+  /// effectively (silently) discards the function's const qualifier
+  grid_quant_view at_iQf(size_t iQ, size_t iflv) const {
+    double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
+    // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
+    size_t size_dim0 = size_flv();
+    size_t size_dim1 = static_cast<size_t>(grid().ny()+1);
+    size_t iQ_size = size_dim0 * size_dim1;
+    double * iQf_ptr  = tab_ptr + iQ * iQ_size + iflv * size_dim1;
+    return grid_quant_view(iQf_ptr, size_dim1, grid());
+  }
+
+
+  /// @brief alias for at_iQ(iQ)
+  grid_quant_2d_view operator[](size_t iQ) const {return at_iQ(iQ);}
+  /// @brief alias for at_iQ(iQ)
+  grid_quant_2d_view operator()(size_t iQ) const {return at_iQ(iQ);}
+  /// @brief alias for at_iQf(iQ,iflv)
+  grid_quant_view operator()(size_t iQ, size_t iflv) const {return at_iQf(iQ,iflv);}
+
+  //-------------------------------------------------------------
+  ///@}
+
+  /// @name Querying the table properties
+  ///@{
+  ///
+  /// @brief return the maximum valid iflv index, in C++ numbering; 
+  size_t iflv_max() const {return static_cast<size_t>(tab_iflv_max() - iflv_min_fortran);  }
+
+  /// @brief return the size of the flavour (dim1=2nd) dimension of the table 
+  ///
+  /// For pure QCD tables, this is iflv_max() + 2, because it includes
+  /// hoppet::iflv_info, which is at index iflv_max() + 1. 
+  size_t size_flv() const {return static_cast<size_t>(hoppet_cxx__pdf_table__size_flv(valid_ptr())); }
+
+  /// return the size of the Q (dim0=1st) dimension of the table
+  size_t size_Q() const {return nQ()+1;}
+
+
 
   /// @brief  throw an error if some_pdf is not compatible with *this (grid & flavour dimension size)
   /// @param some_pdf 
@@ -1268,23 +1344,26 @@ public:
   }
 
   // think carefully which of these interfaces should be public, which perhaps renamed
-  RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)
-  RETURN_INT_MEMBER(pdf_table,nQ)
-  RETURN_INT_MEMBER(pdf_table,lnlnQ_order)
-  RETURN_LOG_MEMBER(pdf_table,freeze_at_Qmin)
-  RETURN_LOG_MEMBER(pdf_table,nf_info_associated)
-  RETURN_INT_MEMBER(pdf_table,nflo)
-  RETURN_INT_MEMBER(pdf_table,nfhi)
-  RETURN_DBL_MEMBER(pdf_table,lnlnQ_min)
-  RETURN_DBL_MEMBER(pdf_table,lnlnQ_max)
-  RETURN_DBL_MEMBER(pdf_table,lambda_eff)
-  RETURN_DBL_MEMBER(pdf_table,dlnlnQ)
-  RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)
-  RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo)
-  RETURN_DBL_MEMBER_I(pdf_table,as2pi)
-  RETURN_INT_MEMBER_I(pdf_table,nf_int)
-  RETURN_DBL_MEMBER_I(pdf_table,lnlnQ_vals)
-  RETURN_DBL_MEMBER_I(pdf_table,Q_vals)
+  RETURN_OBJ_MEMBER(pdf_table,grid,grid_def)      ///< return the table's grid definition
+  RETURN_INT_MEMBER(pdf_table,nQ)                 ///< return nQ, the highest Q index (size_Q() = nQ()+1)
+  RETURN_INT_MEMBER(pdf_table,lnlnQ_order)        ///< return the order of the ln(ln(Q)) interpolation
+  RETURN_LOG_MEMBER(pdf_table,freeze_at_Qmin)     ///< if true, access functions return pdf at Qmin for Q<Qmin; otherwise they return zero
+  RETURN_LOG_MEMBER(pdf_table,nf_info_associated) ///< returns true if the table has nf info associated
+  RETURN_INT_MEMBER(pdf_table,nflo)               ///< return table's lowest nf value
+  RETURN_INT_MEMBER(pdf_table,nfhi)               ///< return table's highest nf value
+  RETURN_DBL_MEMBER(pdf_table,lnlnQ_min)          ///< return the minimum ln(ln(Q/Λ)) value of the table
+  RETURN_DBL_MEMBER(pdf_table,lnlnQ_max)          ///< return the maximum ln(ln(Q/Λ)) value of the table
+  RETURN_DBL_MEMBER(pdf_table,lambda_eff)         ///< return the effective Λ value of the table
+  RETURN_DBL_MEMBER(pdf_table,dlnlnQ)             ///< return the spacing in ln(ln(Q/Λ)) of the table
+  RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)  ///< return the pdfseginfo object when there is no nf info
+  RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo) ///< return the pdfseginfo object for segment with nf == i
+  RETURN_DBL_MEMBER_I(pdf_table,as2pi)            ///< return \f$\alpha_s(Q_i)/2\pi\f$ where \f$Q_i\f$ is Q_vals(i)
+  RETURN_INT_MEMBER_I(pdf_table,nf_int)           ///< return the number of active flavours at Q index i
+  RETURN_DBL_MEMBER_I(pdf_table,lnlnQ_vals)       ///< return the ln(ln(Q/Λ)) value at Q index i
+  RETURN_DBL_MEMBER_I(pdf_table,Q_vals)           ///< return the Q value at Q index i
+
+  ///
+  ///@}
 
 
 protected:
@@ -1294,18 +1373,33 @@ protected:
 
 };
 
+/// @brief  an object that holds a tabulation of a pdf. Most functions
+///         are inherited from and documented in pdf_table_view
 class pdf_table : public obj_owner<pdf_table_view> {
 public:
   typedef obj_owner<pdf_table_view> base_type;
   using base_type::base_type; // ensures that constructors are inherited  
+
+  /// @brief  default constructor
   pdf_table() {}
-  pdf_table(const grid_def_view & grid, double Qmin, double Qmax, 
-            double dlnlnQ, int lnlnQ_order = hoppet_pdf_table_def_lnlnQ_order, 
-            bool freeze_at_Qmin = false, 
-            int iflv_max_table = ncompmax) {
+
+  /// @brief construct and allocate a pdf_table object
+  pdf_table(const grid_def_view & grid,    ///< grid definition on which to build the table
+            double Qmin,                   ///< minimum Q value of the table
+            double Qmax,                   ///< maximum Q value of the table  
+            double dlnlnQ,                 ///< spacing in ln(ln(Q/Λ)) of the table
+            int lnlnQ_order = hoppet_pdf_table_def_lnlnQ_order, ///< order of ln(ln(Q)) interpolation
+            bool freeze_at_Qmin = false,   ///< if true, access functions return pdf at Qmin for Q<Qmin; otherwise they return zero  
+            int iflv_max_table = ncompmax  ///< maximum iflv index to allocate in the table (including info index)
+          ) {
     _ptr = hoppet_cxx__pdf_table__new(grid.ptr(), Qmin, Qmax, dlnlnQ, lnlnQ_order, freeze_at_Qmin, iflv_max_table);
   }
 
+  /// @brief  Associate nf information with this table, to allow for segmentation across different nf values
+  /// @param coupling a variable-flavour-number coupling, whose flavour thresholds will be used to segment the table
+  ///
+  /// This function reallocates the table storage to allow for the segmentation
+  /// in nf, so it should be called before filling the table.
   void add_nf_info(const running_coupling & coupling) {
     hoppet_cxx__pdf_table__add_nf_info(valid_ptr(), coupling.ptr());
   }
