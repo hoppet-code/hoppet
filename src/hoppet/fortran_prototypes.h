@@ -85,6 +85,7 @@ extern "C" {
   double   hoppet_cxx__grid_quant__trunc_mom(const grid_def_f * griddef, const double * data, double n, const double * ymax = 0);
   double * hoppet_cxx__grid_quant__data_ptr(grid_quant_f * gridquant);
 
+  void hoppet_cxx__grid_quant__luminosity(const grid_def_f * griddef, const double * gq1_data, const double * gq2_data, double * result_data);
   //void   hoppet_cxx__grid_quant__set_zero(void * gridquant);
   //void   hoppet_cxx__grid_quant__copy_from(void * gridquant, void * other);
 }

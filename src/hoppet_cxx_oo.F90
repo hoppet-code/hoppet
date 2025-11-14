@@ -375,6 +375,27 @@ contains
     call c_f_pointer(data, data_ptr, shape=[grid_ptr%ny+1])
     res = TruncatedMoment(grid_ptr, data_ptr, n, ymax)
   end function hoppet_cxx__grid_quant__trunc_mom
+
+  !! result_data = lumi(gq1,gq2)
+  subroutine hoppet_cxx__grid_quant__luminosity(grid, gq1, gq2, result_data) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: grid
+    type(c_ptr), intent(in), value :: gq1
+    type(c_ptr), intent(in), value :: gq2
+    type(c_ptr), intent(in), value :: result_data
+    !--
+    type(grid_def), pointer :: grid_f
+    real(dp), pointer :: gq1_f(:), gq2_f(:)
+    real(dp), pointer :: result_data_f(:)
+
+    call c_f_pointer(grid, grid_f)
+    call c_f_pointer(gq1, gq1_f,                 shape=[grid_f%ny+1])
+    call c_f_pointer(gq2, gq2_f,                 shape=[grid_f%ny+1])
+    call c_f_pointer(result_data, result_data_f, shape=[grid_f%ny+1])
+
+    result_data_f = PartonLuminosity(grid_f, gq1_f, gq2_f)
+  end subroutine 
+
 end module hoppet_cxx_oo_grid_quant
 
 !=====================================================================

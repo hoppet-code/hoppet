@@ -223,6 +223,7 @@ inline grid_def grid_def_default(double dy, double ymax, int order) {
   return grid_def(hoppet_cxx__grid_def__new_default(dy, ymax, order));
 }
 
+class grid_quant; // forward declaration
 
 //-----------------------------------------------------------------------------
 /// @brief A view of a grid_quant object, i.e. a function of y=ln(1/x) stored at fixed grid points in y
@@ -328,6 +329,22 @@ public:
     return hoppet_cxx__grid_quant__trunc_mom(grid().ptr(), data(), n, &y);
   }
 
+  /// @brief  compute the luminosity with another grid_quant_view
+  /// @param other   the other grid_quant_view
+  /// @return the luminosity grid_quant (in a dimensionless definition)
+  grid_quant luminosity(const grid_quant_view & other) const;
+  // {
+  //  grid().ensure_compatible(other.grid());
+  //  grid_quant result(grid());
+  //  hoppet_cxx__grid_quant__luminosity(
+  //    grid().ptr(),
+  //    data(),
+  //    other.data(),
+  //    result.data()
+  //  );
+  //  return result;
+  //}
+
 };
 
 
@@ -421,6 +438,21 @@ inline grid_quant operator*(const grid_def_view & grid, DoubleFnDouble auto && f
 }
 
 ///@}
+
+// actual implementation of luminosity, needs to be defined out of the grid_quant_view
+// class, because it returns a grid_quant (not yet defined there)
+inline grid_quant grid_quant_view::luminosity(const grid_quant_view & other) const {
+  grid().ensure_compatible(other.grid());
+  grid_quant result(grid());
+  hoppet_cxx__grid_quant__luminosity(
+    grid().ptr(),
+    data(),
+    other.data(),
+    result.data()
+  );
+  return result;
+}
+
 
 /// @brief  an alias for grid_quant_view, i.e. representing a single PDF flavour across y=ln(1/x)
 typedef grid_quant_view pdf_flav_view;

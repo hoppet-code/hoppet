@@ -28,6 +28,7 @@ string endc= "\033[0m";
 hoppet::grid_def grid100;
 hoppet::grid_def big_grid;
 
+//-----------------------------------------------------------------------------
 /// We supply the main routine, to make sure that we can 
 /// do any global-object initialisation that's needed
 int main(int argc, char* argv[]) {
@@ -57,6 +58,7 @@ int main(int argc, char* argv[]) {
 }
 
 
+//-----------------------------------------------------------------------------
 TEST_CASE( "grid_def", "[hoppet]" ) {  
   REQUIRE(grid100.ptr() != nullptr);
   REQUIRE(grid100.ny() == 100);
@@ -185,6 +187,21 @@ TEST_CASE( "grid_quant", "[hoppet]" ) {
   REQUIRE_THAT(qdist.truncated_moment(0.0), WithinAbs(1.0, 1e-5));
   REQUIRE_THAT(qdist.truncated_moment(1.0), WithinAbs(1/6.0, 1e-7));
   double ytrunc = 5.0; REQUIRE(qdist.truncated_moment(0.0, ytrunc) < qdist.truncated_moment(0.0));
+
+  //------- luminosity ------------------------
+  qdist = big_grid * [](double y) { double x = exp(-y); return pow(1-x,4);};
+  auto lumi = qdist.luminosity(qdist);
+  auto expected_lumi = [](double y) { 
+    double x = exp(-y);
+    // function specfic to (1-x)^4 with (1-x)^4 luminosity
+    return -(log(x)*(1 + 16*x + 36*pow(x,2) + 16*pow(x,3) + pow(x,4))) + 
+            (5*(-5 - 32*x + 32*pow(x,3) + 5*pow(x,4)))/6.;
+  };
+  for (double y : {10.0, 8.0, 5.0, 2.0}) {
+    //cout << "Luminosity at y=" << y << ": " << lumi.at_y(y) << endl;
+    //cout << " Expected lum:       " << expected_lumi(y) << endl;
+    REQUIRE_THAT( lumi.at_y(y), WithinRel( expected_lumi(y), 1e-5) );
+  }
 
 }
 
