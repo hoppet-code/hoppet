@@ -71,6 +71,9 @@ DEFINE_RETURN_DBL_MEMBER(grid_def,ymax)
 DEFINE_RETURN_DBL_MEMBER(grid_def,eps)
 DEFINE_RETURN_INT_MEMBER(grid_def,nsub)
 DEFINE_RETURN_INT_MEMBER(grid_def,order)
+DEFINE_RETURN_LOG_MEMBER(grid_def,locked)
+DEFINE_RETURN_OBJ_MEMBER_I(grid_def,subgd,grid_def)
+DEFINE_RETURN_INT_MEMBER_I(grid_def,subiy)
 inline void generic_delete(grid_def_f * ptr) {if (ptr) hoppet_cxx__grid_def__delete(&ptr);}
 inline grid_def_f * generic_copy(const grid_def_f * ptr) {  return hoppet_cxx__grid_def__copy(ptr);}
 

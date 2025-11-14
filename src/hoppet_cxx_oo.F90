@@ -284,6 +284,9 @@ contains
   DEFINE_RETURN_DBL_MEMBER(grid_def,eps)
   DEFINE_RETURN_INT_MEMBER(grid_def,nsub)
   DEFINE_RETURN_INT_MEMBER(grid_def,order)
+  DEFINE_RETURN_LOG_MEMBER(grid_def,locked)
+  DEFINE_RETURN_OBJ_MEMBER_I(grid_def,subgd,grid_def)
+  DEFINE_RETURN_INT_MEMBER_I(grid_def,subiy)
 
 end module hoppet_cxx_oo_grid_def
 

@@ -76,11 +76,25 @@ TEST_CASE( "grid_def", "[hoppet]" ) {
   REQUIRE( grid100 == grid2);              // copy should still be equivalent
   REQUIRE_THAT( grid100.y_values()[iy], WithinRel( grid2.y_values()[iy], 1e-12) );
 
+  // check construction of grid with subgrids & various query operations 
   hoppet::grid_def grid3({grid100, hoppet::grid_def(0.03,0.3)}, true);
-  hoppet::grid_def grid4;
-  grid4 = grid3;
+  REQUIRE(grid3.nsub()   == 2);
+  REQUIRE(grid3.locked() == true);
+  REQUIRE(grid3.subgd(2) == grid100);
+  REQUIRE(grid3.subiy(1) == 0);
+  REQUIRE(grid3.subiy(2) == grid3.subgd(1).ny()+1);
 
-  // tests of (in)equality
+  // now unlocked grid with subgrids, which should preserve order of input grids
+  hoppet::grid_def grid4({grid100, hoppet::grid_def(0.03,0.3)}, false);
+  REQUIRE(grid4.subgd(1) == grid100);
+
+  // assignment and equality of grids with subgrids
+  hoppet::grid_def grid5;
+  grid5 = grid3;
+  REQUIRE(grid3.ptr() != grid5.ptr());
+  REQUIRE(grid3 == grid5);
+
+  // further tests of (in)equality
   REQUIRE(!(grid100 == big_grid));
   REQUIRE(grid100 != big_grid);
   hoppet::grid_def null_grid;

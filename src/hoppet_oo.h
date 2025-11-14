@@ -107,6 +107,7 @@ public:
   typedef obj_view<grid_def_f> base_type;
   using base_type::base_type; // ensures that constructors are inherited
 
+  /// return the upper limit of the iy index (i.e. highest valid index)
   int ny() const {return hoppet_cxx__grid_def__ny(valid_ptr()); }
 
   std::vector<double> y_values() const {
@@ -120,17 +121,20 @@ public:
     return xvals;
   }
 
+  /// @brief return true if both grids non-null and `other` is equivalent to this
   inline bool operator==(const grid_def_view & other) const noexcept {
-    // equivalence is only true if both pointers are non-null
+    // equivalence is only true if both pointers are non-null and
     // they are either the same pointer or equivalent grids
     return ptr() && other.ptr() && (
       ptr() == other.ptr() || hoppet_cxx__grid_def__equiv(ptr(), other.ptr())
     );
   }
+  /// @brief return true if either grid is null or `other` is not equivalent to this
   inline bool operator!=(const grid_def_view & other) const noexcept {
     return !(*this == other);
   }
 
+  /// throw a runtime_error if the other grid is not equivalent to this
   void ensure_compatible(const grid_def_view & other) const {
     if (*this != other) {
       throw std::runtime_error(
@@ -138,11 +142,23 @@ public:
     }
   }
 
-  RETURN_DBL_MEMBER(grid_def,dy)
-  RETURN_DBL_MEMBER(grid_def,ymax)
-  RETURN_DBL_MEMBER(grid_def,eps)
-  RETURN_INT_MEMBER(grid_def,nsub)
-  RETURN_INT_MEMBER(grid_def,order)
+  
+  RETURN_DBL_MEMBER(grid_def,dy)     ///< return the grid's dy spacing (coarsest if using subgrids)
+  RETURN_DBL_MEMBER(grid_def,ymax)   ///< return the grid's maximum y value (largest among subgrids)
+  RETURN_DBL_MEMBER(grid_def,eps)    ///< return the grid's  adaptive integration precision (only for individual grids)  
+  RETURN_INT_MEMBER(grid_def,nsub)   ///< return the number of subgrids (0 if this in an individual grid)
+  RETURN_INT_MEMBER(grid_def,order)  ///< return the interpolation order (meaninful only for individual grids)
+  RETURN_LOG_MEMBER(grid_def,locked) ///< return true if the subgrids are locked (only valid with subgrids)
+
+  /// @brief return the grid_def_view for subgrid i (index runs from 1 to nsub()).
+  /// 
+  /// If the subgrids are locked, subgrids are ordered in increasing dy and ymax,
+  /// otherwise the order is that in which they were provided at construction.
+  RETURN_OBJ_MEMBER_I(grid_def,subgd,grid_def) 
+
+  /// @brief return the iy index at which subgrid i starts
+  RETURN_INT_MEMBER_I(grid_def,subiy) 
+
 
 };
 
