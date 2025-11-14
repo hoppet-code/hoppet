@@ -209,7 +209,7 @@ inline grid_def grid_def_default(double dy, double ymax, int order) {
 /// This version provides a "view" onto an existing Fortran grid_quant object,
 /// without taking ownership of it.
 ///
-/// Note hoppet doesn't have grid_quant objects by default, instead it just
+/// Note hoppet doesn't have grid_quant objects by default, instead it just 
 /// uses `real(dp) :: gq(0:ny)` arrays. The c++ wrapper instead explicitly
 /// goes via a fortran grid_quant object, which manages the data array internally.
 class grid_quant_view : public data_view<grid_def_view> {
@@ -1090,10 +1090,15 @@ public:
     return *this;
   }
 
-  /// assign using a function f(x,Q, xpdf_array), similar to the LHAPDF
-  /// "evolve" fortran interface, where xpdf_array is a double* pointing
-  /// to an array with at least 13 entries
-  void assign_xQ_into(const VoidFnDoubleDoubleDoubleptr auto & fn, double Q) {
+  /// @brief assign to (i.e. fill) this table using a function fn(x,Q, xpdf_array)
+  /// 
+  /// @param fn Should have the signature void(double x, double Q, double * xpdf_array);
+  ///           xpdf_array is a double* pointingto an array with 13 entries that is 
+  ///           filled by fn.  The function signature is comparible with the LHAPDF
+  ///           "evolve" fortran interface;  
+  ///
+  /// Any flavours beyond 13 (i.e. beyond iflv_top) are set to zero.
+  void assign_xQ_into(const VoidFnDoubleDoubleDoubleptr auto & fn) {
     ensure_valid();
     if (size_flv() < hoppet::iflv_max+1) {
       throw std::runtime_error("grid_quant_2d_view::assign(fn): pdf_table size_flv() = " 
@@ -1113,6 +1118,14 @@ public:
     }
   }
 
+  /// @brief return a grid_quant_view (i.e. pdf_flav slice) at the specified iQ, iflv
+  ///
+  /// @param iQ     the index in the Q dimension
+  /// @param iflv   the index in the flavour dimension
+  /// @return       a view of the table's full (y) structure at iQ,iflv
+  ///
+  /// Note that the view can be read from and written to. In the latter case, this
+  /// effectively (silently) discards the function's const qualifier
   grid_quant_view at_iQf(size_t iQ, size_t iflv) const {
     double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
     // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
@@ -1123,6 +1136,13 @@ public:
     return grid_quant_view(iQf_ptr, size_dim1, grid());
   }
 
+  /// @brief return a grid_quant_2d_view (i.e. pdf slice) at the specified iQ
+  ///
+  /// @param iQ     the index in the Q dimension
+  /// @return       a view of the table's full (y,iflv) structure at iQ
+  ///
+  /// Note that the view can be read from and written to. In the latter case, this
+  /// effectively (silently) discards the function's const qualifier
   grid_quant_2d_view at_iQ(size_t iQ) const {
     double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
     // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
