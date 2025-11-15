@@ -119,6 +119,8 @@
 
 
 
+!=====================================================================
+!! misc routines for the C++ OO interface, for example to help with debugging
 module hoppet_cxx_oo_various
   use, intrinsic :: iso_c_binding
   implicit none
@@ -136,6 +138,7 @@ contains
   end subroutine hoppet_cxx__print_c_str
 
 end module hoppet_cxx_oo_various
+
 !=====================================================================
 !! wrappers for C++ OO interface to grid_def
 module hoppet_cxx_oo_grid_def
@@ -1450,3 +1453,34 @@ contains
   DEFINE_RETURN_INT_MEMBER_I(pdf_table,nf_int)
 end module hoppet_cxx_oo_pdf_table
 
+!=====================================================================
+!! wrappers for C++ OO interface to grid quantities, with an intermediate
+!! grid_quant type holds both the data and the grid_def
+module hoppet_cxx_oo_pdf_table_array
+  use types, only: dp
+  use, intrinsic :: iso_c_binding
+  use pdf_tabulate
+  implicit none
+
+  type pdf_table_array
+    type(pdf_table), pointer :: tables(:) => null()
+  end type pdf_table_array
+
+contains
+
+  function hoppet_cxx__pdf_tables__table_i(ptr, sz, i) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: ptr !< pointer to zeroth element of pdf_table_array
+    integer(c_int), intent(in), value :: sz  !< size of the array
+    integer(c_int), intent(in), value :: i   !< index of the desired pdf_table (zero-indexed)
+    type(c_ptr) :: res
+    !--
+    type(pdf_table_array), pointer :: ptr_f(:)
+
+    call c_f_pointer(ptr, ptr_f, shape=[sz])
+    ! i is zero indexed in C++, but Fortran arrays are one-indexed
+    ! (and this can be changed only in Fortran 2023, which we are not yet using)
+    res = c_loc(ptr_f(i+1))
+  end function 
+
+end module hoppet_cxx_oo_pdf_table_array

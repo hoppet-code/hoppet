@@ -60,10 +60,11 @@ module streamlined_interface
       type(c_ptr), value :: grid_cptr
       type(c_ptr), value :: dh_cptr
     end subroutine hoppetStartCXX
-    subroutine hoppetSetEvolvedPointers(coupling_cptr,tab_cptr) bind(C, name="hoppetSetEvolvedPointers")
-      use, intrinsic :: iso_c_binding, only : c_ptr
-      type(c_ptr), value :: coupling_cptr
-      type(c_ptr), value :: tab_cptr
+    subroutine hoppetSetEvolvedPointers(coupling_cptr,tab_cptr,tab_array_sz) bind(C, name="hoppetSetEvolvedPointers")
+      use, intrinsic :: iso_c_binding, only : c_ptr, c_int
+      type(c_ptr),    value :: coupling_cptr
+      type(c_ptr),    value :: tab_cptr
+      integer(c_int), value :: tab_array_sz
     end subroutine hoppetSetEvolvedPointers
   end interface
 
@@ -463,7 +464,7 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
     type(c_ptr) :: coupling_cptr, tab_cptr
     coupling_cptr = c_loc(coupling)
     tab_cptr      = c_loc(tables(0))
-    call hoppetSetEvolvedPointers(coupling_cptr, tab_cptr)
+    call hoppetSetEvolvedPointers(coupling_cptr, tab_cptr, size(tables))
   end block
 end subroutine hoppetEvolve
 

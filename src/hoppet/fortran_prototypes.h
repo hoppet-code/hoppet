@@ -49,6 +49,7 @@ class mass_threshold_mat_f;
 class pdf_table_f;
 class pdfseginfo_f;
 class evln_operator_f;
+class pdf_table_array_f;
 /// @}
 
 
@@ -261,5 +262,9 @@ DEFINE_RETURN_INT_MEMBER_I(pdf_table,nf_int)
 DEFINE_RETURN_DBL_MEMBER_I(pdf_table,lnlnQ_vals)
 DEFINE_RETURN_DBL_MEMBER_I(pdf_table,Q_vals)
 
+//----- things for pdf_table arrays ----------
+extern "C" {
+  pdf_table_f * hoppet_cxx__pdf_tables__table_i(const pdf_table_f * arr_start, int sz, int i);
+}
 
 #endif // __HOPPET_FORTRAN_PROTOTYPES_H__

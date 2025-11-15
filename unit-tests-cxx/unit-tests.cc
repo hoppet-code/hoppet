@@ -697,8 +697,6 @@ TEST_CASE("pdf_table_assignment", "[hoppet]") {
     //for (unsigned i = 0; i < control.size(); ++i) {cout << i << " " << control[i] << "\n";} 
     REQUIRE(control[iy_test] == 0);
   }
-
-
 }
 
 
@@ -717,4 +715,7 @@ TEST_CASE( "streamlined-objects", "[hoppet]" ) {
   dh.set_nf(4);
   REQUIRE( dh.nf() == 4 );
   REQUIRE( dh.nloop() == 3 );
+
+  // check pdf tables
+  REQUIRE( hoppet::sl::tables[0].ptr() == hoppet::sl::table.ptr() );
 }

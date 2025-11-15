@@ -23,22 +23,27 @@ extern "C" int hoppet_cstr_len(char * cstr_ptr) {return strlen(cstr_ptr);}
 
 namespace hoppet {
 namespace sl {
-  grid_def_view     grid;
-  dglap_holder_view dh;
-  pdf_table_view    table;
+  grid_def_view        grid;
+  dglap_holder_view    dh;
+  pdf_table_view       table;
+  pdf_table_array_view tables;
   running_coupling_view coupling; 
 }
 }
 
+/// @brief functions to enable the C++ streamlined interface to view the underlying Fortran objects
 extern "C" {
-/// @brief set up the C++ streamlined interface objects to view the Fortran ones  
-void hoppetStartCXX(grid_def_f * grid_ptr, dglap_holder_f * dh_ptr) {
-  hoppet::sl::grid = hoppet::grid_def_view(grid_ptr);
-  hoppet::sl::dh.take_view(dh_ptr);
-}
-// maybe fix up the name here
-void hoppetSetEvolvedPointers(running_coupling_f * coupling_ptr, pdf_table_f * tab_ptr) {
-  hoppet::sl::coupling.take_view(coupling_ptr);
-  hoppet::sl::table.take_view(tab_ptr);
-}
+
+  /// @brief set up the C++ streamlined interface grid and dglap_holder views  
+  void hoppetStartCXX(grid_def_f * grid_ptr, dglap_holder_f * dh_ptr) {
+    hoppet::sl::grid = hoppet::grid_def_view(grid_ptr);
+    hoppet::sl::dh.take_view(dh_ptr);
+  }
+
+  /// @brief set the pointers to the objects that contain the evolved information
+  void hoppetSetEvolvedPointers(running_coupling_f * coupling_ptr, pdf_table_f * tab_ptr, int n_tables) {
+    hoppet::sl::coupling.take_view(coupling_ptr);
+    hoppet::sl::table.take_view(tab_ptr);
+    hoppet::sl::tables.take_view(hoppet::pdf_table_array_view(tab_ptr, n_tables));
+  }
 } // extern "C"

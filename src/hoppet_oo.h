@@ -35,7 +35,9 @@
 //       - [x] fill from LHAPDF type functions
 //       - [x] write to LHAPDF
 //       - [x] access to lambda_eff
-// - [ ] array of tables
+// - [~] array of tables
+//       - [~] view creation and indexing
+//       - [ ] array creation
 // - [ ] add the evln_operator class
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
@@ -1478,22 +1480,44 @@ public:
   }
 };
 
+
+/// @brief  A view of an array of pdf_table objects
+class pdf_table_array_view : public data_view<Empty, pdf_table_f> {
+public:
+  typedef data_view<Empty, pdf_table_f> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+
+  pdf_table_array_view() noexcept {}
+  pdf_table_array_view(pdf_table_f * ptr, std::size_t sz): base_type(ptr, sz, Empty()) {}
+
+  pdf_table_view operator[](std::size_t i) {
+    return pdf_table_view(hoppet_cxx__pdf_tables__table_i(this->data(), this->size(), i));
+  }
+};
+
 } // end namespace hoppet -------------------------------------
 
 
 
 /// objects globally defined in the streamlined interface
 namespace hoppet {
+
 /// namespace for access to the globally defined objects from the streamlined interface  
 namespace sl {
   /// a view of the grid_def object being used in the streamlined interface
   extern grid_def_view grid;
+
   /// a view of the dglap_holder object being used in the streamlined interface
   extern dglap_holder_view dh;
+
   /// a view of the running_coupling object being used in the streamlined interface
   extern running_coupling_view coupling; 
 
-  extern pdf_table_view    table; //< this should evolve to become an array of tables
+  /// @brief  a view of the main pdf_table object being used in the streamlined interface (same as hoppet::sl::tables[0])
+  extern pdf_table_view    table; 
+
+  /// @brief  a view of the array of pdf_table objects in the streamlined interface
+  extern pdf_table_array_view  tables; 
 
 }
 }
