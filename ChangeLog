@@ -49,9 +49,10 @@ __Files added__
 
 2025-11-05 ->09 Gavin Salam 
 
-	* CMakeLists.txt:
-	switched C++ to C++20, specifically for use of concepts, which are
-	available in g++ since v10.
+	* CMakeLists.txt: ***MAYBE REVERT SOME CHANGES, NOTABLE C++20?***
+	- switched C++ to C++20, specifically for use of concepts, which are
+	  available in g++ since v10. 
+	- arranged for installation of all .h files in src/ and src/hoppet/
 
 	* src/qcd.f90:
 	added bind(C) attributes to all variables here and to SetNf and

@@ -17,11 +17,11 @@
 // - [~] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
 // - [ ] make sure hoppet/qcd.h (etc) gets installed properly
 // - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
-// - [ ] making sure we treat default epsilon correctly
+// - [x] making sure we treat default epsilon correctly
 // - [ ] where does hoppet_oo.h go?
-// - [ ] check everything gets installed
+// - [x] check everything gets installed
 // - [ ] nomenclature: pdf_flav, v. pdf v. pdf_set (old hoppet, set=allflav; LHAPDF set: = error set)
-// - [ ] downgrade from concepts to C++17 is_invocable_r_v (e.g. for swig compatibility)
+// - [ ] downgrade from concepts to C++17 is_invocable_r_v (e.g. for swig compatibility)?
 
 // Next steps:
 // - [x] add the running_coupling class
@@ -33,7 +33,7 @@
 //       - [x] PDF access functions
 //       - [ ] does copying also copy the evolution operators? **NO**
 //       - [x] fill from LHAPDF type functions
-//       - [ ] write to LHAPDF
+//       - [x] write to LHAPDF
 //       - [x] access to lambda_eff
 // - [ ] array of tables
 // - [ ] add the evln_operator class
