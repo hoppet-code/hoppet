@@ -221,7 +221,7 @@ protected:
 
 //-----------------------------------------------------------------------------
 /// @brief Generic data_owner class, to be used as a base for owning wrappers
-/// of Fortran objects that provide a view of the underlying double-precision data
+/// of Fortran objects that provide a view of the underlying data (typically double-precision)
 ///
 /// @tparam V  the data_view type from which this derives
 /// @tparam P  the pointer type to the underlying Fortran object that owns the data
@@ -235,13 +235,9 @@ public:
 
   data_owner() {}
   virtual ~data_owner() {del();}
-  void del() {generic_delete(_ptr); reset();}
+  void del() {generic_delete(_ptr); reset_ptrs();}
 
-  virtual void alloc_virtual(const typename V::extras_type & extras) = 0;
-  void reset() {
-    V::reset();
-    _ptr = nullptr;
-  }
+  virtual void alloc_virtual(std::size_t sz, const typename V::extras_type & extras) = 0;
 
   data_owner & operator=(const data_owner & other) {
     if (_ptr == other._ptr) return *this; // self-assignment check
@@ -249,12 +245,14 @@ public:
     return *this;
   }
 
-  // copy constructor: perform a deep copy using the `copy` helper
+  /// copy constructor: perform a deep copy using the `copy` helper
   data_owner(const data_owner & other) {
     _ptr = nullptr;
     copy(other);
   }
 
+  /// @brief move constructor: take ownership of other's data
+  /// @param other the other data_owner to move from
   data_owner(data_owner && other) noexcept  {move_no_del(other);}
 
   data_owner & operator=(data_owner && other) noexcept {
@@ -274,7 +272,7 @@ public:
     } else {
       //std::cout << " allocating new storage in grid_quant::copy, size = " << other.size() << "\n";
       del();
-      alloc_virtual(other.extras());
+      alloc_virtual(other.size(), other.extras());
       this->copy_data(other);
       //std::cout << " data[50] = " << data()[50] << " v " << other.data()[50] << "\n";
     }
@@ -285,6 +283,12 @@ public:
 
 protected:
 
+  /// @brief  resets the internal pointers to null and the extras to their default, without deleting any data
+  void reset_ptrs() {
+    V::reset();
+    _ptr = nullptr;
+  }
+
   /// @brief  move the contents from other into this, without deleting existing data
   /// @param  other: the other grid_quant to move from
   ///
@@ -294,7 +298,7 @@ protected:
     // move the semantics
     this->take_view(other);
     _ptr = other._ptr;
-    other.reset();
+    other.reset_ptrs();
   }
 
   using view_type::take_view; //< data_owner cannot safely take_view(), so disable it

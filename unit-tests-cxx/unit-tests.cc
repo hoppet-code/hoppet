@@ -699,6 +699,30 @@ TEST_CASE("pdf_table_assignment", "[hoppet]") {
   }
 }
 
+TEST_CASE("pdf_table_array", "[hoppet]") {
+
+  int ntab = 3;
+  hoppet::pdf_table_array tab_array(ntab);
+  tab_array[0] = hoppet::sl::tables[0];
+  tab_array[1] = hoppet::sl::tables[0];
+  tab_array[2] = hoppet::sl::tables[0];
+  // check we've copied things
+  REQUIRE(tab_array[0].ptr() != hoppet::sl::tables[0].ptr());
+  REQUIRE(tab_array[0].ptr() != tab_array[1].ptr());
+  // and that structure is the same
+  REQUIRE(tab_array[2].nQ() == hoppet::sl::tables[0].nQ());
+
+  // modify entries in different tables
+  for (int iQ = 0; iQ <= tab_array[0].nQ(); ++iQ) {
+    tab_array[1](iQ,hoppet::iflv_g) *= 2.0; // double gluon in tab 1
+    tab_array[2](iQ,hoppet::iflv_g) *= 3.0; // triple gluon in tab 2
+  }
+  double x = 0.1;
+  double Q = 100.0;
+  REQUIRE_THAT(tab_array[2].at_xQf(x,Q,hoppet::iflv_g), WithinAbs(3.0*hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6));
+  REQUIRE_THAT(tab_array[1].at_xQf(x,Q,hoppet::iflv_g), WithinAbs(2.0*hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6));
+  REQUIRE_THAT(tab_array[0].at_xQf(x,Q,hoppet::iflv_g), WithinAbs(1.0*hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6));
+}
 
 //-----------------------------------------------------------------------------
 TEST_CASE( "streamlined-objects", "[hoppet]" ) {

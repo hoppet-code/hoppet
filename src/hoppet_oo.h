@@ -32,12 +32,15 @@
 //       - [x] evolution functions
 //       - [x] PDF access functions
 //       - [ ] does copying also copy the evolution operators? **NO**
+//       - [ ] applying an evolution operator from a different dglap_holder?
+//       - [ ] moving a pdf_table
 //       - [x] fill from LHAPDF type functions
 //       - [x] write to LHAPDF
 //       - [x] access to lambda_eff
 // - [~] array of tables
-//       - [~] view creation and indexing
-//       - [ ] array creation
+//       - [x] view creation and indexing
+//       - [~] array creation
+//       - [ ] access to efficient at_xQ functions
 // - [ ] add the evln_operator class
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
@@ -386,7 +389,7 @@ public:
     _data   = hoppet_cxx__grid_quant__data_ptr(_ptr);
     _size   = static_cast<std::size_t>(grid.ny()+1);
   }
-  void alloc_virtual(const grid_def_view & grid) override {alloc(grid);}
+  void alloc_virtual(std::size_t /*sz*/, const grid_def_view & grid) override {alloc(grid);}
   
 
   /// construct and allocate a grid_quant for the given grid, and fill it
@@ -582,7 +585,7 @@ public:
   grid_quant_2d(const grid_def_view & grid, std::size_t dim1_size) {
     alloc(gq2d_extras(grid, dim1_size));
   }
-  void alloc_virtual(const gq2d_extras & extras_in) override {
+  void alloc_virtual(std::size_t /*sz*/, const gq2d_extras & extras_in) override {
     alloc(extras_in);
   }
 
@@ -1136,6 +1139,7 @@ public:
   }
 };
 
+
 /// @brief  A view of the segmentation information for PDF tables
 class pdfseginfo_view : public obj_view<pdfseginfo_f> {
 public:
@@ -1149,6 +1153,7 @@ public:
   RETURN_DBL_MEMBER(pdfseginfo,inv_dlnlnQ) ///< return the inverse spacing in ln(ln(Q/Λ)) value for this segment
 };
 
+//-----------------------------------------------------------------------------
 /// @brief  A view of pdf_table, i.e. a tabulation of PDFs on a (Q,iflv,y) grid
 ///
 class pdf_table_view : public obj_view<pdf_table_f> {
@@ -1448,6 +1453,7 @@ protected:
 
 };
 
+//-----------------------------------------------------------------------------
 /// @brief  Holds a tabulation of a pdf. Most functions
 ///         are inherited from and documented in pdf_table_view
 class pdf_table : public obj_owner<pdf_table_view> {
@@ -1481,6 +1487,7 @@ public:
 };
 
 
+//-----------------------------------------------------------------------------
 /// @brief  A view of an array of pdf_table objects
 class pdf_table_array_view : public data_view<Empty, pdf_table_f> {
 public:
@@ -1493,6 +1500,31 @@ public:
   pdf_table_view operator[](std::size_t i) {
     return pdf_table_view(hoppet_cxx__pdf_tables__table_i(this->data(), this->size(), i));
   }
+};
+
+//-----------------------------------------------------------------------------
+/// @brief  An object that holds an array of pdf_table objects
+///
+/// The main advantage of this class (and its view) over a std::vector
+/// of pdf_tables is that it gives access to efficient operations on the
+/// whole array of tables, notably interpolation in x,Q across all
+/// tables in one go. These require an underlying Fortran array of
+/// pdf_table objects, which is what this class effectively wraps.
+class pdf_table_array: public data_owner<pdf_table_array_view, pdf_table_array_f> {
+public:
+  typedef data_owner<pdf_table_array_view, pdf_table_array_f> base_type;
+  using base_type::base_type; // ensures that constructors are inherited
+  typedef pdf_table_array_view view_type;
+
+  pdf_table_array(std::size_t sz) {alloc(sz);}
+
+  void alloc_virtual(std::size_t sz, const Empty & ) override {alloc(sz);}
+  void alloc(std::size_t sz) {
+    _size = sz;
+    hoppet_cxx__pdf_table_array__new(sz, &_ptr, &_data);
+    std::cout << "Done calling hoppet_cxx__pdf_table_array__new and _ptr, _data are " << _ptr << ", " << _data << std::endl;
+  }
+
 };
 
 } // end namespace hoppet -------------------------------------

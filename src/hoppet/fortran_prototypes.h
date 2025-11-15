@@ -264,7 +264,9 @@ DEFINE_RETURN_DBL_MEMBER_I(pdf_table,Q_vals)
 
 //----- things for pdf_table arrays ----------
 extern "C" {
+  void hoppet_cxx__pdf_table_array__new(int sz, pdf_table_array_f **ptr, pdf_table_f **table0_ptr);
+  
   pdf_table_f * hoppet_cxx__pdf_tables__table_i(const pdf_table_f * arr_start, int sz, int i);
 }
-
+DEFINE_DELETE(pdf_table_array)
 #endif // __HOPPET_FORTRAN_PROTOTYPES_H__

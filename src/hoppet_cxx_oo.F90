@@ -1248,7 +1248,7 @@ contains
     call AddNfInfoToPDFTable(tab_f, coupling_f)
   end subroutine hoppet_cxx__pdf_table__add_nf_info
 
-  ! define a macro to generate the functions that returns a generic object's real(dp) member
+  !! return a c pointer to the first element of the tab array
   function hoppet_cxx__pdf_table__tab_ptr(obj) result(res) bind(C)
     implicit none
     type(c_ptr), intent(in), value :: obj
@@ -1259,7 +1259,7 @@ contains
     res = c_loc(obj_f%tab(lbound(obj_f%tab,1),lbound(obj_f%tab,2),lbound(obj_f%tab,3)))
   end function
 
-  ! define a macro to generate the functions that returns a generic object's real(dp) member
+  !! return the size of the flavour dimension of the tab array (including the "info" index)
   function hoppet_cxx__pdf_table__size_flv(obj) result(res) bind(C)
     implicit none
     type(c_ptr), intent(in), value :: obj
@@ -1270,6 +1270,7 @@ contains
     res = size(obj_f%tab,2)
   end function
 
+  !! return the interpolation of the pdf table at (y,Q,iflv)
   !! watch out iflv_cxx starts from zero, while iflv in fortran pdf_table starts from ncompmin
   function hoppet_cxx__pdf_table__at_yQf(obj, y, Q, iflv_cxx) result(res) bind(C)
     use pdf_representation
@@ -1284,6 +1285,7 @@ contains
     res = EvalPdfTable_yQf(obj_f, y, Q, iflv_cxx + ncompmin)
   end function
 
+  !! fill res with the interpolation of the pdf table at (y,Q) for all iflv up to and including iflv_max
   subroutine hoppet_cxx__pdf_table__at_yQ_into(obj, y, Q, res) bind(C)
     use pdf_representation
     implicit none
@@ -1468,6 +1470,36 @@ module hoppet_cxx_oo_pdf_table_array
 
 contains
 
+  !! create a pdf_table_array of the specified size and set up pointers
+  !! to the pdf_table_array and to its tables(0) element
+  subroutine hoppet_cxx__pdf_table_array__new(sz, ptr, table0_ptr) bind(C)
+    implicit none
+    integer(c_int), intent(in), value :: sz !< size of the array
+    type(c_ptr), intent(out) :: ptr         !< pointer to the pdf_table_array object
+    type(c_ptr), intent(out) :: table0_ptr  !< pointer to zeroth element of pdf_table_array
+    type(c_ptr) :: res
+    !--
+    type(pdf_table_array), pointer :: ptr_f
+
+    allocate(ptr_f)
+    allocate(ptr_f%tables(0:sz-1))
+    ptr = c_loc(ptr_f)
+    table0_ptr = c_loc(ptr_f%tables(0))
+  end subroutine hoppet_cxx__pdf_table_array__new
+
+  !! delete a pdf_table_array created with hoppet_cxx__pdf_table_array__new
+  subroutine hoppet_cxx__pdf_table_array__delete(ptr) bind(C)
+    implicit none
+    type(c_ptr), intent(out) :: ptr         !< pointer to the pdf_table_array object
+    !--
+    type(pdf_table_array), pointer :: ptr_f
+
+    call c_f_pointer(ptr, ptr_f)
+    call Delete(ptr_f%tables) ! clean up the storage in each pdf_table
+    deallocate(ptr_f%tables)  ! deallocate the array of pdf_table pointers 
+    deallocate(ptr_f)         ! deallocate the pdf_table_array itself
+  end subroutine hoppet_cxx__pdf_table_array__delete
+
   function hoppet_cxx__pdf_tables__table_i(ptr, sz, i) bind(C) result(res)
     implicit none
     type(c_ptr),    intent(in), value :: ptr !< pointer to zeroth element of pdf_table_array
@@ -1475,11 +1507,11 @@ contains
     integer(c_int), intent(in), value :: i   !< index of the desired pdf_table (zero-indexed)
     type(c_ptr) :: res
     !--
-    type(pdf_table_array), pointer :: ptr_f(:)
+    type(pdf_table), pointer :: ptr_f(:)
 
     call c_f_pointer(ptr, ptr_f, shape=[sz])
-    ! i is zero indexed in C++, but Fortran arrays are one-indexed
-    ! (and this can be changed only in Fortran 2023, which we are not yet using)
+    ! i is zero indexed in C++, but Fortran arrays from c_f_pointer are one-indexed
+    ! (and this can be changed only from Fortran 2023, which we are not yet using)
     res = c_loc(ptr_f(i+1))
   end function 
 
