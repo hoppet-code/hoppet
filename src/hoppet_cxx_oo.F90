@@ -1379,7 +1379,7 @@ contains
   !! interface to write LHAPDF format files
   subroutine hoppet_cxx__pdf_table__write_lhapdf(table, coupling, basename, pdf_index, &
                                  & iy_increment, &
-                                 & n_flav, flav_indices, flav_pdg_ids, flav_rescale)                                
+                                 & n_flav, flav_indices, flav_pdg_ids, flav_rescale) bind(C)                                
     use qcd_coupling,    only: running_coupling
     use hoppet_c_f_string_utils
     use warnings_and_errors

@@ -647,6 +647,7 @@ TEST_CASE("pdf_table", "[hoppet]") {
   pdf_Q0.assign_xQ_into(hoppetBenchmarkPDFunpol, 0.0);
   tab_view.evolve(Q0, pdf_Q0, hoppet::sl::dh, hoppet::sl::coupling);
   REQUIRE_THAT( tab_view.at_xQf(x, Q, hoppet::iflv_g), WithinAbs( hoppetEvalIFlv(x,Q,hoppet::iflv_g), 1e-6) );
+  //tab_view.write_lhapdf(hoppet::sl::coupling, "/tmp/base");
 
   // next, try pre-evolution
   hoppet::pdf_table tab_pre = hoppet::sl::table; // copy constructor
