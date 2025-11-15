@@ -59,7 +59,7 @@ those objects are in use.
 
 | class | brief description |
 |-------|-------------------|
-| hoppet::running_coupling | an object that represents the running coupling \f$\alpha_s(Q)\f$ |
+| hoppet::running_coupling | an object that represents the QCD running coupling \f$\alpha_s(Q)\f$ |
 
 ## Object-oriented access to streamlined-interface objects
 
