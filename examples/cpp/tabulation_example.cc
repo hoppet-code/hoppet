@@ -1,3 +1,9 @@
+/**
+ * @example tabulation_example.cc
+ * 
+ * Carry out QCD evolution, using the streamlined C++ interface
+ */
+
 #include "hoppet.h"
 #include<iostream>
 #include<cmath>

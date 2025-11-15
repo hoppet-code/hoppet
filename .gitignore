@@ -2,10 +2,11 @@
 *.o
 *~
 /.compiler
+/build*/docs/doxygen-cpp-output/
 /config.log
 /hoppet-config
 /Makefile
 benchmarking/structure_functions_benchmark_checks
+docs/doxygen-cpp-output
 example_f90/tabulation_example_qed_streamlined
 src/.vscode
-/build*/

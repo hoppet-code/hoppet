@@ -1,5 +1,8 @@
-/// An example in C++ similar to the one found in examples_f90
-///
+/**
+ * @example structure_functions_example.cc
+ * 
+ * Create and access a tabulation of structure functions using the streamlined C++ interface
+ */
 #include "hoppet.h"
 #include<iostream>
 #include<cmath>

@@ -1,10 +1,13 @@
-/// An example in C++ showing how to replace LHAPDF interpolation with
-/// (faster) hoppet interpolation
-///
-/// Usage (from CMake build directory):
-///
-///   example_cpp/fast_pdf_evaluation [PDFsetName]
-///
+/**
+ * @example lhapdf_to_hoppet.cc
+ * 
+ * An example in C++ showing how to replace LHAPDF interpolation with
+ * (faster) hoppet interpolation
+ * 
+ * Usage (from CMake build directory):
+ * `examples/cpp/lhapdf_to_hoppet <PDFsetName>`
+ */
+
 #include "hoppet.h"
 #include "LHAPDF/LHAPDF.h"
 #include <iostream>

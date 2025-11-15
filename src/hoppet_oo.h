@@ -39,9 +39,10 @@
 //       - [x] access to lambda_eff
 // - [~] array of tables
 //       - [x] view creation and indexing
-//       - [~] array creation
+//       - [x] array creation
 //       - [ ] access to efficient at_xQ functions
 // - [ ] add the evln_operator class
+// - [ ] functions to query & change flavour representations
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
 // - [~] add streamlined interface functions
@@ -49,7 +50,7 @@
 // - [ ] add qed support, including pdf_table allocators
 // - [x] add access to things like the beta function coefficients, qcd group constants, etc.
 // - [ ] add structure function support
-// - [ ] add documentation
+// - [~] add documentation
 
 // Things to perhaps add
 // - [x] add take_view to the obj_view class
@@ -71,7 +72,10 @@
 
 
 
-/// namespace hoppet contains the object-oriented C++ interface to HOPPET
+/// Namespace hoppet contains the object-oriented C++ interface to HOPPET,
+/// as well as various integer constants that are useful in the streamlined
+/// interface (e.g. hoppet::iflv_g for the gluon flavour index).
+///
 namespace hoppet {
 
 typedef std::size_t size_type;
@@ -1497,6 +1501,7 @@ public:
   pdf_table_array_view() noexcept {}
   pdf_table_array_view(pdf_table_f * ptr, std::size_t sz): base_type(ptr, sz, Empty()) {}
 
+  /// @brief return a view of the i-th pdf_table in the array (numbered from 0)
   pdf_table_view operator[](std::size_t i) {
     return pdf_table_view(hoppet_cxx__pdf_tables__table_i(this->data(), this->size(), i));
   }
@@ -1506,10 +1511,22 @@ public:
 /// @brief  An object that holds an array of pdf_table objects
 ///
 /// The main advantage of this class (and its view) over a std::vector
-/// of pdf_tables is that it gives access to efficient operations on the
+/// of pdf_tables, is that it gives access to efficient operations on the
 /// whole array of tables, notably interpolation in x,Q across all
 /// tables in one go. These require an underlying Fortran array of
 /// pdf_table objects, which is what this class effectively wraps.
+///
+/// To use this class, one first constructs it with the desired size
+/// (number of pdf_table objects), and then allocates and fills each
+/// table individually, e.g. using the operator[] to get a view of each
+/// table in turn.
+///
+/// ```c++
+/// hoppet::pdf_table_array tables(3); // array of 3 pdf_table objects
+/// tables[0] = hoppet::pdf_table(...); // allocate table 0
+/// tables[1] = hoppet::pdf_table(...); // allocate table 1
+/// tables[2] = hoppet::pdf_table(...); // allocate table 2
+/// ```
 class pdf_table_array: public data_owner<pdf_table_array_view, pdf_table_array_f> {
 public:
   typedef data_owner<pdf_table_array_view, pdf_table_array_f> base_type;
@@ -1522,7 +1539,6 @@ public:
   void alloc(std::size_t sz) {
     _size = sz;
     hoppet_cxx__pdf_table_array__new(sz, &_ptr, &_data);
-    std::cout << "Done calling hoppet_cxx__pdf_table_array__new and _ptr, _data are " << _ptr << ", " << _data << std::endl;
   }
 
 };
@@ -1534,7 +1550,11 @@ public:
 /// objects globally defined in the streamlined interface
 namespace hoppet {
 
-/// namespace for access to the globally defined objects from the streamlined interface  
+/// Namespace for access to the globally defined objects from the streamlined interface  
+///
+/// The objects here are automatically set up when calling hoppetStart
+/// (or hoppetStartExtended) followed by a call hoppetEvolve.
+///
 namespace sl {
   /// a view of the grid_def object being used in the streamlined interface
   extern grid_def_view grid;

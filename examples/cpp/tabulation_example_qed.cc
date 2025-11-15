@@ -1,4 +1,10 @@
-#include "hoppet.h"
+/**
+ * @example tabulation_example_qed.cc
+ * 
+ * Carry out QCD+QED evolution, using the streamlined C++ interface
+ */
+
+ #include "hoppet.h"
 #include<iostream>
 #include<cmath>
 #include<cstdio>
