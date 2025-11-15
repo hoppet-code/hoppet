@@ -225,7 +225,7 @@ static PyObject* str_fnc_to_array(double *str_fnc) {
 
 // To setup the QED pdfs we need a small wrapper to SetQED. Needs to
 // be called before Start because it modifies the global PDF settings.
-static void SetQED(const int & withqed, const int & qcdqed, const int & plq) {
+static void SetQED(bool withqed, bool qcdqed, bool plq) {
     if (global_pdf != nullptr) {
         PyErr_SetString(PyExc_RuntimeError, "Cannot change QED settings after PDF initialization");
         return;
@@ -783,7 +783,7 @@ Returns:
     void free_global_str_fnc();
     PyObject* pdf_to_array(double *pdf);
     PyObject* str_fnc_to_array(double *str_fnc);
-    void SetQED(const int & withqed, const int & qcdqed, const int & plq);
+    void SetQED(bool withqed, bool qcdqed, bool plq);
     void Start(const double & dy, const int & nloop);
     void StartExtended(const double & ymax, const double & dy, const double & Qmin, 
                         const double & Qmax, const double & dlnlnQ, const int & nloop, 
