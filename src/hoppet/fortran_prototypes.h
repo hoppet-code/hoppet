@@ -233,6 +233,10 @@ extern "C" {
                                          const dglap_holder_f *dh, const running_coupling_f *coupling, 
                                          double mur_over_q, int nloop, _Bool untie_nf);
   void     hoppet_cxx__pdf_table__evolve_frompre(pdf_table_f *tab, const double * pdf_at_q0);
+  void hoppet_cxx__pdf_table__write_lhapdf(const pdf_table_f * tab, const running_coupling_f * coupling, 
+                                           const char * filename_cstr, int pdf_index, const int * iy_increment = nullptr, 
+                                           const int * n_flav = nullptr, const int * flav_indices = nullptr, 
+                                           const int * flav_pdg_ids = nullptr, const double * flav_rescale = nullptr);
 }
 DEFINE_COPY(pdf_table)
 DEFINE_DELETE(pdf_table)

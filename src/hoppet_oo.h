@@ -6,6 +6,7 @@
 #include <tuple>
 #include <functional>
 #include <concepts>
+#include <optional>
 #include "hoppet.h"
 #include "hoppet/base_types.h"
 // see also hoppet_cxx_oo.f90 for the Fortran prototypes
@@ -1378,6 +1379,29 @@ public:
   size_t size_Q() const {return nQ()+1;}
 
 
+  /// @brief write the table to a file in LHAPDF(6) grid format
+  void write_lhapdf(const running_coupling_view & coupling, 
+                    const std::string &           basename,
+                    int                           pdf_index = 0,
+                    const std::optional<int> &    iy_increment = std::nullopt,
+                    const std::optional<std::vector<int>> &  flav_indices = std::nullopt,
+                    const std::optional<std::vector<int>> &  flav_pdg_ids = std::nullopt,
+                    const std::optional<std::vector<double>> & flav_rescale = std::nullopt
+                   ) const {
+    auto opt_sclptr = [](const auto & optin) {return optin ? &(optin.value())     : nullptr;};
+    auto opt_vecptr = [](const auto & optin) {return optin ? optin.value().data() : nullptr;};
+
+    int n_flav = flav_indices ? flav_indices->size() : 0;
+
+    hoppet_cxx__pdf_table__write_lhapdf(this->valid_ptr(), coupling.valid_ptr(),
+                                        basename.c_str(), pdf_index,
+                                        opt_sclptr(iy_increment),
+                                        flav_indices ? & n_flav : nullptr,
+                                        opt_vecptr(flav_indices),
+                                        opt_vecptr(flav_pdg_ids),
+                                        opt_vecptr(flav_rescale)
+                                       );
+  }
 
   /// @brief  throw an error if some_pdf is not compatible with *this (grid & flavour dimension size)
   /// @param some_pdf 

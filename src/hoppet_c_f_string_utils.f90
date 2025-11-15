@@ -32,7 +32,7 @@ contains
     implicit none
     type(c_ptr), intent(in), value :: cstr_ptr
     character(len=:), allocatable :: fstr
-    character(len=1), pointer :: cchars(:)
+    character(kind=c_char,len=1), pointer :: cchars(:)
     integer :: len, i
 
     len = hoppet_cstr_len(cstr_ptr)
@@ -58,7 +58,7 @@ contains
     implicit none
     character(len=*), intent(in) :: fstr
     type(c_ptr) :: cstr_ptr
-    character(len=1), pointer :: cchars(:)
+    character(kind=c_char,len=1), pointer :: cchars(:)
     integer :: len, i
 
     len = len_trim(fstr)

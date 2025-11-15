@@ -1161,6 +1161,7 @@ module hoppet_cxx_oo_pdf_table
   use pdf_tabulate
   use convolution
   use dglap_objects
+  use types, only: dp
   implicit none
 
 contains
@@ -1374,6 +1375,54 @@ contains
 
     call EvolvePdfTable(tab_f, pdf_at_Q0_f)
   end subroutine 
+
+  !! interface to write LHAPDF format files
+  subroutine hoppet_cxx__pdf_table__write_lhapdf(table, coupling, basename, pdf_index, &
+                                 & iy_increment, &
+                                 & n_flav, flav_indices, flav_pdg_ids, flav_rescale)                                
+    use qcd_coupling,    only: running_coupling
+    use hoppet_c_f_string_utils
+    use warnings_and_errors
+    implicit none
+    type(c_ptr),    intent(in), value :: table
+    type(c_ptr),    intent(in), value :: coupling
+    type(c_ptr),    intent(in), value :: basename
+    integer(c_int), intent(in), value :: pdf_index
+    integer(c_int), intent(in), optional :: iy_increment
+    integer(c_int), intent(in), optional :: n_flav !! the size of the flav_indices, etc. arrays
+    type(c_ptr),    intent(in)           :: flav_indices !! integer array
+    type(c_ptr),    intent(in)           :: flav_pdg_ids !! integer array
+    type(c_ptr),    intent(in)           :: flav_rescale !! real(c_double) array
+    !--
+    type(pdf_table), pointer        :: table_f
+    type(running_coupling), pointer :: coupling_f
+    character(len=:), allocatable :: basename_f
+    integer, pointer :: flav_indices_f(:)
+    integer, pointer :: flav_pdg_ids_f(:)
+    real(dp), pointer :: flav_rescale_f(:)
+
+    call c_f_pointer(table, table_f)
+    call c_f_pointer(coupling, coupling_f)
+    basename_f = fortran_string_from_cstr(basename)
+    if (present(n_flav)) then
+      if (.not. c_associated(flav_indices) .or. &
+          .not. c_associated(flav_pdg_ids) .or. &
+          .not. c_associated(flav_rescale)) then
+        call wae_error("hoppet_cxx__pdf_table__write_lhapdf: "//&
+                      "if n_flav is present, flav_indices, flav_pdg_ids and flav_rescale must also be present")
+      end if
+      call c_f_pointer(flav_indices, flav_indices_f, shape=[n_flav])
+      call c_f_pointer(flav_pdg_ids, flav_pdg_ids_f, shape=[n_flav])
+      call c_f_pointer(flav_rescale, flav_rescale_f, shape=[n_flav])
+      call WriteLHAPDFFromPdfTable(table_f, coupling_f, basename_f, pdf_index, &
+                                iy_increment=iy_increment, &
+                                flav_indices = flav_indices_f, &
+                                flav_pdg_ids = flav_pdg_ids_f, flav_rescale = flav_rescale_f)
+    else
+      call WriteLHAPDFFromPdfTable(table_f, coupling_f, basename_f, pdf_index, &
+                                iy_increment=iy_increment)
+    end if
+  end subroutine hoppet_cxx__pdf_table__write_lhapdf
 
 
   DEFINE_DELETE(pdf_table)
