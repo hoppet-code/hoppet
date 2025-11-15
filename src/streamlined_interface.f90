@@ -158,9 +158,9 @@ subroutine hoppetSetQED_c(use_qed, use_qcd_qed, use_Plq_nnlo) bind(C,name="hoppe
   logical :: use_qed_f
   logical :: use_qcd_qed_f, use_Plq_nnlo_f
 
-  use_qed_f = merge(.true._1, .false._1, use_qed)
-  use_qcd_qed_f = merge(.true._1, .false._1, use_qcd_qed)
-  use_Plq_nnlo_f = merge(.true._1, .false._1, use_Plq_nnlo)
+  use_qed_f      = (use_qed      .neqv. .false._c_bool)
+  use_qcd_qed_f  = (use_qcd_qed  .neqv. .false._c_bool)
+  use_Plq_nnlo_f = (use_Plq_nnlo .neqv. .false._c_bool)
   call hoppetSetQED(use_qed_f, use_qcd_qed_f, use_Plq_nnlo_f)
 end subroutine hoppetSetQED_c
 

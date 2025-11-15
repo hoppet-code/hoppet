@@ -1,3 +1,11 @@
+2025-11-15 Gavin
+
+	* pyinterface/hoppet.i:
+	* src/streamlined_interface.f90:
+	SetQED function now takes bool arguments in Python (like the C++)
+	& processing of those bool arguments in Fortran hoppsetSetQED_c
+	now uses .neqv. to convert from C bool to Fortran logical.
+
 2025-11-13 Gavin + Alexander
 
 	* scripts/set-version.sh:
