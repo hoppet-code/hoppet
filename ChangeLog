@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 --------- 2025-10-cxx-OO branch ---------
 
 2025-10-16 -> 2025-11-XX (Gavin): work on a C++ interface
@@ -96,13 +95,19 @@ __Files added__
 	- made some more of the constants constexpr
 	- made the factscheme argument optional in the C++ hoppetStartExtended.
 	- hoppetVersion() now calls hoppetVersionCStr()
+	- new hoppetEnableCxxExceptionsFromFortran() function to enable C++ exceptions
+
+	* pyinterface/hoppet.i:
+	- added interface for hoppetEnableCxxExceptionsFromFortran()
+	  as hoppet.EnableCxxExceptionsFromFortran() and added some lines
+	  to enable exception propagation from C++ to Python. Checked
+	  no visible impact on timing.
 
 	* src/welcome_message.f90:
 	- replaced hoppetVersionC(...) with hoppetVersionCStr(), using the new 
 	  fortran-C++ conversion utilities.
 
 --------- end 2025-10-cxx-OO branch ---------
-=======
 2025-11-15 Gavin
 
 	* pyinterface/hoppet.i:
@@ -110,7 +115,6 @@ __Files added__
 	SetQED function now takes bool arguments in Python (like the C++)
 	& processing of those bool arguments in Fortran hoppsetSetQED_c
 	now uses .neqv. to convert from C bool to Fortran logical.
->>>>>>> dev
 
 2025-11-13 Gavin + Alexander
 

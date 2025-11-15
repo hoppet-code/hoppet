@@ -57,6 +57,8 @@ For more examples, see https://github.com/hoppet-code/hoppet/tree/master/example
 
 %module hoppet
 %include "std_string.i"
+
+
 //%header %{
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 //#include <numpy/arrayobject.h>
@@ -72,10 +74,24 @@ For more examples, see https://github.com/hoppet-code/hoppet/tree/master/example
   __author__ = "Frederic Dreyer, Alexander Karlberg, Paolo Nason, Juan Rojo, Gavin Salam, Giulia Zanderighi"
 %}
 
+// enable C++ exceptions to propagate through Fortran calls
+%include "exception.i"
+%exception {
+  try {
+    $action
+  } catch (const std::exception& e) {
+    SWIG_exception(SWIG_RuntimeError, e.what());
+  }
+}
+
+
 %{
 #define SWIG_FILE_WITH_INIT
 #include "hoppet.h"
+//#include "hoppet_oo.h" // not yet working, because of use of concepts, which swig can't handle
 #include <Python.h>
+
+
 //#include <numpy/arrayobject.h>
 // Check if the callback is a callable object and set it as a global
 // variable. This routine is used in the Assign, Evolve and
@@ -370,6 +386,8 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 }
 %}
 
+
+
 // Routines that retain their "hoppet" prefix in this list have an  
 // explicit functions defined above in order to correctly return a pdf
 // object. The rest we rename to remove the trailing underscore,
@@ -401,6 +419,7 @@ Parameters:
 %rename(StartStrFct             )      hoppetstartstrfct_;
 %rename(StartStrFctExtended     )      hoppetStartStrFctExtended_c;
 %rename(WriteLHAPDFGrid         )      hoppetWriteLHAPDFGrid;
+%rename(EnableCxxExceptionsFromFortran) hoppetEnableCxxExceptionsFromFortran;
 %feature("docstring") WriteLHAPDFGrid "
 Write out the contents of tables(0) (assumed to be the PDF) in the LHAPDF format
 
@@ -450,7 +469,10 @@ Parameters:
 %ignore pdf_to_array;
 %ignore str_fnc_to_array;
 
+
+
 %include "hoppet.h"
+//%include "hoppet_oo.h"
 
 // Docstrings for custom functions
 %feature("docstring") SetQED "
