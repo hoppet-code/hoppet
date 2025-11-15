@@ -21,6 +21,7 @@
 // - [ ] where does hoppet_oo.h go?
 // - [ ] check everything gets installed
 // - [ ] nomenclature: pdf_flav, v. pdf v. pdf_set (old hoppet, set=allflav; LHAPDF set: = error set)
+// - [ ] downgrade from concepts to C++17 is_invocable_r_v (e.g. for swig compatibility)
 
 // Next steps:
 // - [x] add the running_coupling class
@@ -250,7 +251,8 @@ public:
   /// @tparam T generic function type
   /// @param  fn any double(double) callable
   ///
-  //template<typename F, IsDoubleFunction<F> = 0>
+  //template<typename F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double>>>
+  //void assign(const F & fn) {
   void assign(const DoubleFnDouble auto & fn) {
     ensure_valid();
     // there is a design choice here: do we package whatever function
