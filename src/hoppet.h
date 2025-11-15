@@ -174,7 +174,7 @@ extern "C" {
   /// a grid_conv object
   extern int hoppet_global_cc_piece;
 
-  /// Set the configuration of QED evolution
+  /// Set the configuration of QED evolution (off by default)
   ///
   /// @param withqed If true, include QED evolution alongside QCD
   /// @param qcdqed If true, include mixed QCD+QED terms , \f$O(\alpha_s \alpha)\f$
