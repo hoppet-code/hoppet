@@ -122,74 +122,75 @@ public:
 /// of Fortran objects that provide a view of the underlying double-precision data
 ///
 /// @tparam E  a type for holding extra information
-template<typename E>
+template<typename E, typename D = double>
 class data_view {
 public:
 
   typedef E extras_type;
+  typedef D data_type;
 
   data_view() noexcept {}
 
-  data_view(double * data_ptr, std::size_t size, const extras_type & extras) noexcept
+  data_view(D * data_ptr, std::size_t size, const extras_type & extras) noexcept
     : _data(data_ptr), _size(size), _extras(extras) {}
 
-  explicit data_view(const data_view<E> & other) noexcept {
+  explicit data_view(const data_view<E, D> & other) noexcept {
     take_view(other);
   }
 
-  data_view<E> & operator=(const data_view<E> & other) {
+  data_view<E, D> & operator=(const data_view<E, D> & other) {
     this->copy_data(other);
     return *this;
   }
 
-  void take_view(const data_view<E> & other) noexcept {
+  void take_view(const data_view<E, D> & other) noexcept {
     _data = other._data;
     _size = other._size;
     _extras = other._extras;
   }
 
   /// @brief  return pointer to the underlying data
-  double       * data()       {return _data;}
+  D       * data()       {return _data;}
 
   /// @brief  return a const pointer to the underlying data
-  const double * data() const {return _data;}
+  const D * data() const {return _data;}
 
   /// @brief  return the size of the data array
   std::size_t    size() const {return _size;}
 
-  data_view & set_data_ptr(double * data_in) noexcept {_data = data_in; return *this;}
+  data_view & set_data_ptr(D * data_in) noexcept {_data = data_in; return *this;}
   data_view & set_size(std::size_t size_in) noexcept {_size = size_in; return *this;}
   data_view & set_extras(const E & extras_in) noexcept {_extras = extras_in; return *this;}
   /// compound assignment arithmetic operators
   ///@{
-  data_view<E> & operator+=(const data_view<E> & other) {
+  data_view<E, D> & operator+=(const data_view<E, D> & other) {
     auto [sz, this_data, other_data] = prepare_compound(other);
     for (std::size_t iy=0; iy<sz; ++iy) this_data[iy] += other_data[iy];
     return *this;
   }
 
-  data_view<E> & operator-=(const data_view<E> & other) {
+  data_view<E, D> & operator-=(const data_view<E, D> & other) {
     auto [sz, this_data, other_data] = prepare_compound(other);
     for (std::size_t iy=0; iy<sz; ++iy) this_data[iy] -= other_data[iy];
     return *this;
   }
 
-  data_view<E> & operator*=(double val) {
+  data_view<E, D> & operator*=(double val) {
     std::size_t sz = size();
-    double * this_data = data();
+    D * this_data = data();
     for (std::size_t iy=0; iy<sz; ++iy) this_data[iy] *= val;
     return *this;
   }
-  data_view<E> & operator/=(double val) {
+  data_view<E, D> & operator/=(double val) {
     std::size_t sz = size();
-    double * this_data = data();
+    D * this_data = data();
     for (std::size_t iy=0; iy<sz; ++iy) this_data[iy] /= val;
     return *this;
   }
   ///@}
 
   /// copy the data from other, assuming *this is initialised and of the correct size, etc.
-  void copy_data(const data_view<E> & other) {
+  void copy_data(const data_view<E, D> & other) {
     auto [sz, this_data, other_data] = prepare_compound(other);
     std::copy(other_data, other_data + sz, this_data);
   }
@@ -204,7 +205,7 @@ public:
   }
 
 protected:
-  double *      _data = nullptr;
+  D *           _data = nullptr;
   std::size_t   _size = 0;
   E _extras = E();
 
