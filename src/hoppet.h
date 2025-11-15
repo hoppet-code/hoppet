@@ -244,26 +244,36 @@ extern "C" {
   /// threshold functions. If False use the faster parametrisations
   /// @param exact_splitting If True use the exact NNLO splitting
   /// functions. If False use the faster parametrisations
+  ///
+  /// To be called before hoppetStart
   void hoppetSetExactDGLAP(const bool & exact_nfthreshold, const bool & exact_splitting);
 
   /// Arrange for the use of various approximate N3LO splitting functions.
   ///
   /// @param splitting_variant One of the hoppet.n3lo_splitting_approximation_* options.
+  ///
+  /// To be called before hoppetStart
   void hoppetSetApproximateDGLAPN3LO(const int & splitting_variant);
 
   /// Arrange for the use of various NNLO splitting functions.
   ///
   /// @param splitting_variant One of the hoppet.nnlo_splitting_* options.
+  ///
+  /// To be called before hoppetStart
   void hoppetSetSplittingNNLO(const int & splitting_variant);
 
-  /// Arrange for the use of various N3LO splitting functions.
+  /// Change the variant for the N3LO splitting functions.
   ///
   /// @param splitting_variant One of the hoppet.n3lo_splitting_* options. 
+  ///
+  /// To be called before hoppetStart
   void hoppetSetSplittingN3LO(const int & splitting_variant);
 
   ///  Arrange for the use of N3LO mass thresholds or not.
   ///
   /// @param variant One of the hoppet.n3lo_nfthresholds_* options.
+  ///
+  /// To be called before hoppetStart
   void hoppetSetN3LOnfthresholds(const int & variant);
 
   ///  Override the default interpolation order in y and lnlnQ.
