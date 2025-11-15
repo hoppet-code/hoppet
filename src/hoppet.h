@@ -169,13 +169,18 @@ namespace hoppet {
 
 extern "C" {
 
+  /// hoppet's global variable indicating which part of the
+  /// splitting function is being requested when converting to 
+  /// a grid_conv object
   extern int hoppet_global_cc_piece;
 
-  // The following does not work
-  // void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
-  // There must be a problem in passing boolean from c++ to fortran. Passing them
-  // as integer works, but is it safe? (TBD)
-  //  void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
+  /// Set the configuration of QED evolution
+  ///
+  /// @param withqed If true, include QED evolution alongside QCD
+  /// @param qcdqed If true, include mixed QCD+QED terms , \f$O(\alpha_s \alpha)\f$
+  /// @param plq If true, in the \f$O(\alpha^2)\f$ \f$P_{\ell q}\f$ QED term
+  ///
+  /// This is to be called before hoppetStart
   void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
 
   /// initialise the underlying grid, splitting functions and pdf-table
