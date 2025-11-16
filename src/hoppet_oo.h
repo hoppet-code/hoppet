@@ -68,9 +68,9 @@
 #define RETURN_OBJ_MEMBER_I( classname, membername, typename) inline typename##_view membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
 #define RETURN_OBJ_MEMBER_IJ(classname, membername, typename) inline typename##_view membername(int i, int j) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i, j);} 
 
-
-
-
+#define RETURN_OBJ_MEMBER_REF(classname, membername, typename) inline typename##_ref membername() const {return typename##_ref(hoppet_cxx__##classname##__##membername(valid_ptr()));} 
+#define RETURN_OBJ_MEMBER_REF_I( classname, membername, typename) inline typename##_ref membername(int i) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i);} 
+#define RETURN_OBJ_MEMBER_REF_IJ(classname, membername, typename) inline typename##_ref membername(int i, int j) const {return hoppet_cxx__##classname##__##membername(valid_ptr(), i, j);} 
 
 /// Namespace hoppet contains the object-oriented C++ interface to HOPPET,
 /// as well as various integer constants that are useful in the streamlined
@@ -114,11 +114,12 @@ concept VoidFnDoubleDoubleDoublevec =
 ///
 /// This version provides a "view" onto an existing Fortran grid_def object,
 /// without taking ownership of it.
-class grid_def_view : public obj_view<grid_def_f> {
+class grid_def_ref : public obj_view<grid_def_f> {
 public:
 
-  typedef obj_view<grid_def_f> base_type;
+  using base_type = obj_view<grid_def_f>;
   using base_type::base_type; // ensures that constructors are inherited
+  
 
   /// return the upper limit of the iy index (i.e. highest valid index)
   int ny() const {return hoppet_cxx__grid_def__ny(valid_ptr()); }
@@ -138,7 +139,7 @@ public:
   }
 
   /// @brief return true if both grids non-null and `other` is equivalent to this
-  inline bool operator==(const grid_def_view & other) const noexcept {
+  inline bool operator==(const grid_def_ref & other) const noexcept {
     // equivalence is only true if both pointers are non-null and
     // they are either the same pointer or equivalent grids
     return ptr() && other.ptr() && (
@@ -146,12 +147,12 @@ public:
     );
   }
   /// @brief return true if either grid is null or `other` is not equivalent to this
-  inline bool operator!=(const grid_def_view & other) const noexcept {
+  inline bool operator!=(const grid_def_ref & other) const noexcept {
     return !(*this == other);
   }
 
   /// throw a runtime_error if the other grid is not equivalent to this
-  void ensure_compatible(const grid_def_view & other) const {
+  void ensure_compatible(const grid_def_ref & other) const {
     if (*this != other) {
       throw std::runtime_error(
         "hoppet::grid_def_view::ensure_compatible: grids are not equivalent");
@@ -170,14 +171,21 @@ public:
   /// 
   /// If the subgrids are locked, subgrids are ordered in increasing dy and ymax,
   /// otherwise the order is that in which they were provided at construction.
-  RETURN_OBJ_MEMBER_I(grid_def,subgd,grid_def) 
+  RETURN_OBJ_MEMBER_REF_I(grid_def,subgd,grid_def) 
 
   /// @brief return the iy index at which subgrid i starts
   RETURN_INT_MEMBER_I(grid_def,subiy) 
 
-
 };
 
+class grid_def_view : public grid_def_ref {
+public:
+  using base_type = grid_def_ref;
+  using base_type::base_type; // ensures that constructors are inherited
+  using view_t = grid_def_view;
+  using ref_t = grid_def_ref;
+
+};
 
 //-----------------------------------------------------------------------------
 /// @brief A definition of a grid in \f$y=ln(1/x)\f$.
@@ -641,7 +649,7 @@ public:
   //grid_conv_view(const grid_def_view & grid) :  base_type(nullptr, grid) {}
   grid_conv_view(grid_conv_f * ptr) : base_type(ptr) {}
 
-  const grid_def_view grid() const {return grid_def_view(hoppet_cxx__grid_conv__grid(ptr()));}
+  grid_def_ref grid() const {return grid_def_ref(hoppet_cxx__grid_conv__grid(ptr()));}
 
   grid_conv_view & operator=(const grid_conv_view & other) {
     if (!ptr()) throw std::runtime_error("grid_conv_view::operator=: grid_conv_view object not associated");
@@ -740,7 +748,7 @@ class split_mat_view : public obj_view<split_mat_f> {
 public:
 
   typedef obj_view<split_mat_f> base_type;
-  typedef grid_def_view extra_type;
+  //typedef grid_def_view extra_type;
   using base_type::base_type; // ensures that constructors are inherited
 
   split_mat_view & operator=(const split_mat_view & other) {
@@ -749,7 +757,7 @@ public:
     return *this;
   }
 
-  const grid_def_view grid() const { return qq().grid(); }
+  const grid_def_ref grid() const { return qq().grid(); }
   int nf() const { return hoppet_cxx__split_mat__nf(ptr()); }
 
   /// views of the individual components of the splitting matrix
@@ -866,7 +874,7 @@ public:
     return *this;
   }
 
-  const grid_def_view grid() const { return pshq().grid(); }
+  const grid_def_ref grid() const { return pshq().grid(); }
   int nf_heavy() const { return hoppet_cxx__mass_threshold_mat__nf_int(ptr()); }
 
   #define MTM_MEMBER(NAME) RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
