@@ -81,10 +81,13 @@ TEST_CASE( "grid_def", "[hoppet]" ) {
   REQUIRE_THAT( yvals[iy], WithinRel(5.0, 1e-12) );
   REQUIRE_THAT( xvals[iy], WithinRel(exp(-5.0), 1e-12) );
 
-  hoppet::grid_def grid2 = grid100; // copy constructor
-  REQUIRE( grid100.ptr() != grid2.ptr() ); // different underlying pointers
-  REQUIRE( grid100 == grid2);              // copy should still be equivalent
-  REQUIRE_THAT( grid100.y_values()[iy], WithinRel( grid2.y_values()[iy], 1e-12) );
+  hoppet::split_fn sf(grid100, pqq_fn);
+  REQUIRE(sf.grid().ptr() != grid100.ptr());
+  REQUIRE(sf.grid() == grid100);
+  //hoppet::grid_def grid2 = grid100; // copy constructor
+  //REQUIRE( grid100.ptr() != grid2.ptr() ); // different underlying pointers
+  //REQUIRE( grid100 == grid2);              // copy should still be equivalent
+  //REQUIRE_THAT( grid100.y_values()[iy], WithinRel( grid2.y_values()[iy], 1e-12) );
 
   // check construction of grid with subgrids & various query operations 
   hoppet::grid_def grid3({grid100, hoppet::grid_def(0.03,0.3)}, true);
@@ -98,11 +101,11 @@ TEST_CASE( "grid_def", "[hoppet]" ) {
   hoppet::grid_def grid4({grid100, hoppet::grid_def(0.03,0.3)}, false);
   REQUIRE(grid4.subgd(1) == grid100);
 
-  // assignment and equality of grids with subgrids
-  hoppet::grid_def grid5;
-  grid5 = grid3;
-  REQUIRE(grid3.ptr() != grid5.ptr());
-  REQUIRE(grid3 == grid5);
+  //// assignment and equality of grids with subgrids
+  //hoppet::grid_def grid5;
+  //grid5 = grid3;
+  //REQUIRE(grid3.ptr() != grid5.ptr());
+  //REQUIRE(grid3 == grid5);
 
   // further tests of (in)equality
   REQUIRE(!(grid100 == big_grid));

@@ -109,17 +109,18 @@ concept VoidFnDoubleDoubleDoublevec =
 
 
 
+class grid_def_view; // forward declaration
+
 //-----------------------------------------------------------------------------
-/// @brief A view (non-owning) of a grid_def object that holds a grid definition
+/// @brief A reference to an underlying Fortran object that holds a grid definition
 ///
-/// This version provides a "view" onto an existing Fortran grid_def object,
-/// without taking ownership of it.
 class grid_def_ref : public obj_view<grid_def_f> {
 public:
 
   using base_type = obj_view<grid_def_f>;
   using base_type::base_type; // ensures that constructors are inherited
-  
+  using view_t = grid_def_view;
+  using ref_t = grid_def_ref;
 
   /// return the upper limit of the iy index (i.e. highest valid index)
   int ny() const {return hoppet_cxx__grid_def__ny(valid_ptr()); }
@@ -178,6 +179,8 @@ public:
 
 };
 
+//-----------------------------------------------------------------------------
+/// @brief A view of a grid_def object, i.e. a definition of a grid in y=ln(1/x)
 class grid_def_view : public grid_def_ref {
 public:
   using base_type = grid_def_ref;
@@ -207,9 +210,10 @@ public:
 class grid_def : public obj_owner<grid_def_view> {
 public:
 
-  typedef obj_owner<grid_def_view> base_type;
+  using base_type = obj_owner<grid_def_view>;
   using base_type::base_type; // ensures that constructors are inherited
-  typedef grid_def_view view_t;
+  using view_t = grid_def_view;
+  using ref_t  = grid_def_ref;
 
   /// @brief construct and allocate a new grid_def object
   ///
@@ -225,13 +229,35 @@ public:
   ///
   /// @param grids   vector of grid_def objects
   /// @param locked  whether the new grid should be "locked"
-  explicit grid_def(const std::vector<grid_def> & grids, bool locked=false) {
+  explicit grid_def(const std::vector<grid_def_view> & grids, bool locked=false) {
     int ngrids = static_cast<int>(grids.size());
     std::vector<const grid_def_f *> grid_ptrs(ngrids);
     for (int i=0; i<ngrids; ++i) {
       grid_ptrs[i] = grids[i].ptr();
     }
     _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
+  }
+
+  /// the copy constructor and copy assignment operator are disabled to avoid
+  /// accidental copies of grid_def objects; while the copies themselves
+  /// would work correctly, if you construct a grid_quant (or similar) from
+  /// a copied grid, if that grid goes out of scope, the grid_quant would
+  /// be left with a dangling pointer. Eliminating the copy constructor
+  /// encourages users to keep a single grid_def object around and -- if needed
+  /// -- to pass grid_def_view to pass references to other objects.
+  grid_def(const grid_def &) = delete; // disable copy constructor
+  grid_def & operator=(const grid_def &) = delete; // disable copy assignment operator
+
+  grid_def & operator=(grid_def && other) noexcept {
+    if (this != &other) {
+      _ptr = other._ptr;
+      other._ptr = nullptr;
+    }
+    return *this;
+  }
+  grid_def(grid_def && other) noexcept
+    : obj_owner<grid_def_view>(other._ptr) {
+    other._ptr = nullptr;
   }
 
 };  
@@ -698,7 +724,7 @@ public:
   /// @param grid          the grid definition
   /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)
   ///
-  grid_conv(const grid_def_view & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : base_type(nullptr) {
+  grid_conv(const grid_def_ref & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : base_type(nullptr) {
 
     //std::cout << "grid_conv: constructing from function object, grid = " << grid.ptr() <<" " << this->grid().ptr() << "\n";
     using FuncType = decltype(conv_ignd_fn);
