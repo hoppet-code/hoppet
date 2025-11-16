@@ -1124,7 +1124,11 @@ public:
     return mass_threshold_mat_view(hoppet_cxx__dglap_holder__allmtm(valid_ptr(), iloop, nf_heavy));
   }
 
-  grid_def_view grid() const {return p_lo().grid();}  
+  /// @brief return the grid definition used in this dglap_holder
+  ///
+  /// Note that if you use grid to construct other objects, you must ensure
+  /// that those objects do not outlive the underlying dglap_holder that owns the grid.
+  RETURN_OBJ_MEMBER(dglap_holder,grid,grid_def)
 
   /// @brief return the maximum number of loops supported by this dglap_holder
   RETURN_INT_MEMBER(dglap_holder,nloop)

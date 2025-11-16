@@ -1145,6 +1145,7 @@ contains
   DEFINE_RETURN_INT_MEMBER(dglap_holder,factscheme)
   DEFINE_RETURN_OBJ_MEMBER_IJ(dglap_holder,allp,split_mat)
 
+  DEFINE_RETURN_OBJ_MEMBER(dglap_holder,grid,grid_def)
   DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_lo,split_mat)
   DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nlo,split_mat)
   DEFINE_RETURN_OBJ_MEMBER(dglap_holder,p_nnlo,split_mat)

@@ -454,14 +454,15 @@ TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
   int nf_heavy = 4;
   int nloop    = 3;
   MTM mtm(nf_heavy);
-  auto & dh = hoppet::sl::dh;
+  auto & grid = hoppet::sl::grid;
+  auto & dh   = hoppet::sl::dh;
   mtm_view.take_view(dh.mtm(nloop, nf_heavy));
   mtm = mtm_view; // test assignment from view
 
   // now do some basic logic checks, namely that heavy-quark entries are zero/non-zero as appropriate
-  hoppet::pdf pdf = pdf_qcd(dh.grid());
+  hoppet::pdf pdf = pdf_qcd(grid);
   pdf = 0.0;
-  pdf[hoppet::iflv_g] = dh.grid() * [](double y) { double x = exp(-y); return 2*pow(1-x,6)*x; };
+  pdf[hoppet::iflv_g] = grid * [](double y) { double x = exp(-y); return 2*pow(1-x,6)*x; };
   auto dpdf = mtm * pdf;
   REQUIRE(dpdf[hoppet::iflv_c].at_y(5.0) != 0.0);
   REQUIRE(dpdf[hoppet::iflv_b].at_y(5.0) == 0.0);
