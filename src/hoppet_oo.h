@@ -1126,8 +1126,9 @@ public:
 
   /// @brief return the grid definition used in this dglap_holder
   ///
-  /// Note that if you use grid to construct other objects, you must ensure
-  /// that those objects do not outlive the underlying dglap_holder that owns the grid.
+  /// Note that if you use grid to construct other objects, you must
+  /// ensure that those objects do not outlive the underlying
+  /// dglap_holder that owns the grid.
   RETURN_OBJ_MEMBER(dglap_holder,grid,grid_def)
 
   /// @brief return the maximum number of loops supported by this dglap_holder
