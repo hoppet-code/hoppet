@@ -28,22 +28,23 @@ int main () {
   double dy    = 0.1;   // the y=ln(1/x) grid spacing
   double dlnlnQ = dy/4; // the table lnlnQ step size
   int    nloop = 3;     // number of loops (LO=1, etc.)
-
+  int    nflo=3, nfhi=6; // number of flavours in the low and high Q regions
+  
   // set up the grid and the dglap splitting functions etc.
   grid_def grid = grid_def_default(dy, ymax, -6);
-  dglap_holder dh(grid, factscheme_MSbar, nloop, 3, 6);
+  dglap_holder dh(grid, factscheme_MSbar, nloop, nflo, nfhi);
 
   // set up a running coupling with variable nf
   double mc = 1.414213563;
   double mb = 4.5;
-  double mt = 175.0;
+  double mt = 175.0;    // alternatively set it to 1e100 to effectively remove the top quark
   double asQ0 = 0.35;  
   double Q0=sqrt(2.0);
   running_coupling alphas(asQ0, Q0, nloop, mc, mb, mt);
 
   // set up an initial condition
-  pdf pdf0 = pdf_qcd(grid);        // allocate space for a a pdf with QCD flavours
-  pdf0.assign_xQ_into(heralhc_init, Q0);   // fill it from the heralhc_init function (below)
+  pdf pdf0 = pdf_qcd(grid);               // allocate space for a a pdf with QCD flavours
+  pdf0.assign_xQ_into(heralhc_init, Q0);  // fill it from the heralhc_init function (below)
 
   // set up a table (in y=ln1/x and Q)
   double Qmin = 1.2, Qmax = 1e4;
