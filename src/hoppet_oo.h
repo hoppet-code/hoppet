@@ -180,25 +180,28 @@ public:
 
 
 //-----------------------------------------------------------------------------
-/// @brief A definition of a grid in y=ln(1/x), wrapping and owning the underlying Fortran type
+/// @brief A definition of a grid in \f$y=ln(1/x)\f$.
 ///
 /// Most users will want to construct the grid_def object with the function
 /// hoppet::grid_def_default, e.g. 
 ///
 /// ```cpp
-/// double dy = 0.1;
+/// double dy   = 0.1;  /// grid spacing, sufficient for about $10^{}
 /// double ymax = 12.0;
-/// int order = -6;
+/// int order   = -6;
 /// hoppet::grid_def grid = hoppet::grid_def_default(dy, ymax, order);
 /// ```
 /// which directly constructs a nested grid that provides good
 /// accuracy over a wide range of x values.
+///
+/// See grid_def_view for additional member functions.
 ///
 class grid_def : public obj_owner<grid_def_view> {
 public:
 
   typedef obj_owner<grid_def_view> base_type;
   using base_type::base_type; // ensures that constructors are inherited
+  typedef grid_def_view view_t;
 
   /// @brief construct and allocate a new grid_def object
   ///
@@ -370,7 +373,7 @@ public:
 class grid_quant : public data_owner<grid_quant_view, grid_quant_f> {
 public:
 
-  typedef grid_quant_view view_type;
+  typedef grid_quant_view view_t;
 
   grid_quant() {}
 
@@ -583,7 +586,7 @@ class grid_quant_2d : public data_owner<grid_quant_2d_view, grid_quant_2d_f> {
 
 public:
 
-  typedef grid_quant_2d_view view_type;
+  typedef grid_quant_2d_view view_t;
 
   grid_quant_2d() {}
   grid_quant_2d(const grid_def_view & grid, std::size_t dim1_size) {
@@ -1531,7 +1534,7 @@ class pdf_table_array: public data_owner<pdf_table_array_view, pdf_table_array_f
 public:
   typedef data_owner<pdf_table_array_view, pdf_table_array_f> base_type;
   using base_type::base_type; // ensures that constructors are inherited
-  typedef pdf_table_array_view view_type;
+  typedef pdf_table_array_view view_t;
 
   pdf_table_array(std::size_t sz) {alloc(sz);}
 
