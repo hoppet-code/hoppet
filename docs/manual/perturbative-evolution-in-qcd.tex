@@ -48,17 +48,24 @@ where NNLO results
 are also available \cite{Mitov:2006ic,Moch:2007tx,Almasy:2011eq}.
 
 
-As with the splitting functions, all perturbative quantities in
-\hoppet are defined to be coefficients of powers of $\as/2\pi$. The one
-exception is the $\beta$-function coefficients of the running
-coupling equation:
+As with the splitting functions, most perturbative quantities in
+\hoppet are defined to be coefficients of powers of $\as/2\pi$.
+%
+However there are some places where a different convention is used,
+either for historical reasons or because external code uses a
+different convention.
+%
+In particular the $\beta$-function coefficients of the running
+coupling equation,
 \begin{equation}
   \label{eq:as-ev}
   \frac{d\as}{d\ln Q^2} = \beta\lp \aq\rp = -\as (\beta_0\as +
   \beta_1\as^2 + 
   \beta_2\as^3 + 
-  \beta_3\as^4) \ .
+  \beta_3\as^4) \,,
 \end{equation}
+are defined internally in \hoppet as multiplying powers of $\alpha_s$
+directly.
 
 The evolution of the strong coupling and the parton distributions can
 be performed in both the fixed flavour-number scheme (FFNS) and the 

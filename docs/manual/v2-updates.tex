@@ -57,42 +57,21 @@ were already available in version 1.1.0, very little is needed on the
 side of the user to invoke the evolution.
 %
 Most importantly all routines that take an \ttt{nloop} argument,
-e.g.\ \ttt{InitDglapHolder}, \ttt{InitRunningCoupling},
-\ttt{hoppetStart}, and \ttt{hoppetEvolve} now support \ttt{nloop = 4}.
+e.g.\ \ttt{hoppetStart}, and \ttt{hoppetEvolve} (or
+\ttt{InitDglapHolder}, \ttt{InitRunningCoupling} in the general
+interface)  now support \ttt{nloop = 4}.
 %
 The user also has a few choices they can make in terms of the
-splitting functions used.
-%
-The approximate splitting functions can return
-three different
-choices corresponding to upper and lower edges of an uncertainty band and their
-average. 
-%
-The user can control which one to use by setting the
-\ttt{n3lo\_splitting\_variant} variable in the
-\repolink{src/dglap_choices.f90}{dglap\_choices} module.
-%
-Allowed values are
-\ttt{n3lo\_splitting\_Nfitav} (default),
-\ttt{n3lo\_splitting\_Nfiterr1}, or \ttt{n3lo\_splitting\_Nfiterr2}.
-%
-When the exact splitting functions become available they will
-correspond to \ttt{n3lo\_splitting\_exact}.
-%
-Similarly if a set of parametrisations of the exact splitting
-functions become available they will correspond to
-\ttt{n3lo\_splitting\_param}.
+splitting functions and mass thresholds used.
 
-It is expected that more precise approximations will become
-available in the future.
+
+Firstly, there have been successively improved approximations to the
+splitting functions.
 %
-The user can control which series of approximation to use, again by setting
-a variable in \repolink{src/dglap_choices.f90}{dglap\_choices}, called
-\ttt{n3lo\_splitting\_approximation}.\footnote{In the streamlined
-  interface, instead call \ttt{hoppetSetApproximateDGLAPN3LO(splitting\_approx)}.}
+The user can control which series of approximation to use by making a
+call to the subroutine \ttt{hoppetSetApproximateDGLAPN3LO(splitting\_approx)}.
 %
-By default it is set to the most recent set of approximations by
-the FHMPRUVV group. At the time of writing it can take one of three values:
+At the time of writing, three options are available for the \ttt{splitting\_approx}:
 %
 \begin{itemize}
 \item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310\_05744}, with the
@@ -104,6 +83,55 @@ the FHMPRUVV group. At the time of writing it can take one of three values:
   writing, with the approximations in papers up to and including
   Ref.~\cite{Falcioni:2024qpd}.
 \end{itemize}
+These constants, and the others discussed in this section, are defined
+in the \repolink{src/dglap_choices.f90}{dglap\_choices} module in
+Fortran.
+%
+In \CPP they are in the \ttt{hoppet} namespace, as defined in
+\masterlink{src/hoppet.h}.
+
+The approximate splitting functions come with an uncertainty band.
+%
+The user has a choice between the two extremities of the band and an
+average of those extremities.
+%
+They can make the choice by calling \ttt{hoppetSetSplittingN3LO(variant)}, where
+\ttt{variant} is one of
+\begin{itemize}
+\item \ttt{n3lo\_splitting\_Nfitav}: the average (the default),
+\item \ttt{n3lo\_splitting\_Nfiterr1}: one of the two extremities,
+\item \ttt{n3lo\_splitting\_Nfiterr2}: the other of the two.
+  extremities
+\end{itemize}
+
+% each can in three variants: a
+% central, or ``average'' one, as well and two 
+% 
+% %
+% The approximate splitting functions can return
+% three different
+% choices corresponding to upper and lower edges of an uncertainty band and their
+% average. 
+% %
+% The user can control which one to use by setting the
+% \ttt{n3lo\_splitting\_variant} variable in the
+% \repolink{src/dglap_choices.f90}{dglap\_choices} module.
+% %
+% Allowed values are
+% \ttt{n3lo\_splitting\_Nfitav} (default),
+% \ttt{n3lo\_splitting\_Nfiterr1}, or \ttt{n3lo\_splitting\_Nfiterr2}.
+% %
+% When the exact splitting functions become available they will
+% correspond to \ttt{n3lo\_splitting\_exact}.
+% %
+% Similarly if a set of parametrisations of the exact splitting
+% functions become available they will correspond to
+% \ttt{n3lo\_splitting\_param}.
+% 
+% It is expected that more precise approximations will become
+% available in the future.
+% %
+
 Besides the splitting functions, we have also incorporated the
 single-mass thresholds up to N$^3$LO, as calculated in
 Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}.
@@ -111,11 +139,9 @@ Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,AB
 As of version 2.1.0, the \ntlo thresholds are available in two forms,
 using code from Refs.~\cite{BlumleinCode,Fael:2022miw}.
 %
-One can choose which form to use by setting the
-\ttt{n3lo\_nfthreshold} variable\footnote{%
-  In the streamlined interface, call
-  \ttt{hoppetSetN3LOnfthresholds(n3lo\_threshold\_choice)}. In \CPP,
-  the constants are in the \ttt{hoppet} namespace.} to one of
+One can choose which form to use by calling
+\ttt{hoppetSetN3LOnfthresholds(n3lo\_threshold\_choice)},
+with one of the following values for \ttt{n3lo\_threshold\_choice}:
 \begin{itemize}
 \item \ttt{n3lo\_nfthreshold\_libOME}:
   %
@@ -1411,6 +1437,18 @@ to compile \hoppet with the exact coefficient functions.
 Note that the Python interface is not compiled by default, because we
 anticipate that users of Python will prefer to obtain \hoppet through
 \ttt{pip install hoppet}.
+
+
+Users should be aware that this release of \hoppet makes use of
+features introduced in Fortran~2008, for example its \ttt{abstract
+  interface}, and hence a Fortran~2008 compliant compiler is now
+needed. The code has been tested to compile and run with
+\texttt{gfortran v10.5.0} and later, and the 2025 version of the Intel
+compiler \texttt{ifx}.
+%
+If multiple Fortran compilers are available, a specific one can be
+chosen with the \ttt{-DCMAKE\_Fortran\_COMPILER=...} option.
+
 
 \section{Saving LHAPDF grids}
 \label{sec:lhapdf}

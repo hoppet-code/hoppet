@@ -71,12 +71,7 @@
 
 
 \hoppet~\cite{Salam:2008qg} is a parton distribution function (PDF)
-evolution code written in modern Fortran,\footnote{This release of
-\hoppet makes use of features introduced in Fortran~2008, for example
-its \ttt{abstract interface}, and hence a Fortran~2008 compliant
-compiler is now needed. The code has been tested to compile and run
-with \texttt{gfortran v10.5.0} and later, and the 2025 version of the
-Intel compiler \texttt{ifx}.}  with interfaces also for C/\CPP{} and
+evolution code written in modern Fortran,  with interfaces also for C/\CPP{} and
 earlier dialects of Fortran.
 %
 It offers both a high-level PDF evolution interface and user-access to
@@ -86,10 +81,13 @@ coefficient functions and PDFs.
 It is designed to provide flexible, fast and accurate evolution.
 
 Since the first major release of \hoppet, the landscape of PDF
-evolution codes has evolved substantially, with a range of new open-source
-codes having been developed, for example the APFEL~\cite{Bertone:2013vaa}, \APFELPP{}~\cite{Bertone:2017gds} and EKO~\cite{Candido:2022tld}
-codes.\footnote{Other codes such as ChiliPDF~\cite{Diehl:2021gvs}
-  appear to not yet be public.}
+evolution codes has evolved substantially, with a range of new
+open-source codes having been developed, for example the
+APFEL~\cite{Bertone:2013vaa}, \APFELPP{}~\cite{Bertone:2017gds} and
+EKO~\cite{Candido:2022tld} codes supplementing earlier widely-used
+public codes such as QCDNUM~\cite{Botje} and
+PEGASUS~\cite{Pegasus}.\footnote{Other codes such as 
+  ChiliPDF~\cite{Diehl:2021gvs} appear to not yet be public.}
 %
 Nevertheless, \hoppet remains a powerful tool, notably for its ability
 to reach high and quantifiable accuracies with competitive speed.
@@ -103,9 +101,10 @@ accuracies $\sim 10^{-4}$, which is more than sufficient for
 phenomenological applications.
 %
 %
-Furthermore its exposition not just of full PDF
-evolution~\cite{Lai:2010vv,Gao:2013xoa,Butterworth:2015oua,PDF4LHCWorkingGroup:2022cjn}
-but also of low-level functionality though a stable, public API, has led to it being used for a range of
+Furthermore \hoppet's exposition not just of full PDF
+evolution (as exploited in Refs.~\cite{Lai:2010vv,Gao:2013xoa,Butterworth:2015oua,Hou:2019efy,PDF4LHCWorkingGroup:2022cjn}),
+but also of low-level functionality though a stable, public API, has
+led to its use for a range of
 fixed-order~\cite{Caola:2019nzf,Asteriadis:2019dte,Bargiela:2022dla},
 all-order~\cite{Banfi:2010xy,Dasgupta:2014yra,Banfi:2015pju,Monni:2016ktx,Bizon:2017rah,Buonocore:2024xmy}
 and Monte
@@ -193,6 +192,22 @@ polynomials are pre-evaluated using adaptive Gaussian integration.
 %
 Evolution equations are solved using Runge-Kutta methods.
 
+\begin{table}[pt!]
+  \centering
+ \input{interface-tables/streamlined.tex}
+  \caption{Core methods of the streamlined interface in Fortran and \CPP.
+    %
+    In Python, \ttt{hoppetStart(...)} is to be replaced with
+    \ttt{hoppet.Start(...)}, and routines like \ttt{hoppet.Eval(...)}
+    and \ttt{LHAsub(x,Q)} return
+    \texttt{f} rather than taking \texttt{f} as an argument and
+    filling it.
+    %
+    \label{tab:streamlined-interface}
+  }
+\end{table}
+
+
 The code has two interfaces.
 %
 For simple usage, it provides a so-called ``streamlined''
@@ -212,7 +227,7 @@ The streamlined interface has long been available from Fortran and
 \CPP and, as of v2, can be accessed also in Python.
 %
 The core methods of the streamlined interface are illustrated in
-Table~\ref{tab:streamlined-interface}. \gps{Include QED?}
+Table~\ref{tab:streamlined-interface}. 
 
 
 For more advanced usage there is a ``general'' interface (sometimes
@@ -224,25 +239,15 @@ tabulations of PDFs, etc.
 %
 As of v2.1, that interface is accessible only in modern Fortran,
 though in due course we expect to extend it to other languages.
-
-\begin{table}[pt!]
-  \centering
- \input{interface-tables/streamlined.tex}
-  \caption{Core methods of the streamlined interface in Fortran and \CPP.
-    %
-    In Python, \ttt{hoppetStart(...)} is to be replaced with
-    \ttt{hoppet.Start(...)}, and routines like \ttt{hoppet.Eval(...)}
-    and \ttt{LHAsub(x,Q)} return
-    \texttt{f} rather than taking \texttt{f} as an argument and
-    filling it.
-    %
-    \label{tab:streamlined-interface}
-  }
-\end{table}
-
 %
+We refer the reader to the original manual~\cite{Salam:2008qg} for an
+extended discussion of the general interface.
+
 Various examples are available with the two sets of interfaces, to be
 found in the \masterlink{examples/} directory of the repository.
+%
+This document will focus mostly on the streamlined interface, though
+in a places we will also discuss key additions to the general interface.
 
 %======================================================================
 \input{v2-updates.tex}
