@@ -1,3 +1,10 @@
+2025-11-20 Alexander + Gavin
+
+	* src/streamlined_interface.f90:
+	* src/structure_functions.f90:
+	conversion from C bool to Fortran logical now uses logical_from_cbool function,
+	defined once in streamlined_interface.f90.
+
 2025-11-15 Gavin
 
 	* pyinterface/hoppet.i:

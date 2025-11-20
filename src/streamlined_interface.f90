@@ -119,7 +119,13 @@ contains
 
   end function tableIndexValue
 
-  
+  !! return a standard fortran logical from a C logical(c_bool)
+  function logical_from_cbool(cbool) result(lbool)
+    use iso_c_binding
+    logical(c_bool), intent(in) :: cbool
+    logical :: lbool
+    lbool = (cbool .neqv. .false._c_bool)
+  end function logical_from_cbool
   
 end module streamlined_interface
 
@@ -158,9 +164,9 @@ subroutine hoppetSetQED_c(use_qed, use_qcd_qed, use_Plq_nnlo) bind(C,name="hoppe
   logical :: use_qed_f
   logical :: use_qcd_qed_f, use_Plq_nnlo_f
 
-  use_qed_f      = (use_qed      .neqv. .false._c_bool)
-  use_qcd_qed_f  = (use_qcd_qed  .neqv. .false._c_bool)
-  use_Plq_nnlo_f = (use_Plq_nnlo .neqv. .false._c_bool)
+  use_qed_f      = logical_from_cbool(use_qed     )
+  use_qcd_qed_f  = logical_from_cbool(use_qcd_qed )
+  use_Plq_nnlo_f = logical_from_cbool(use_Plq_nnlo)
   call hoppetSetQED(use_qed_f, use_qcd_qed_f, use_Plq_nnlo_f)
 end subroutine hoppetSetQED_c
 
@@ -599,8 +605,8 @@ subroutine hoppetSetExactDGLAP_c(exact_nfthreshold, exact_splitting) bind(C,name
   logical(c_bool) :: exact_nfthreshold, exact_splitting
   logical :: exact_nfthreshold_f, exact_splitting_f
 
-  exact_nfthreshold_f = merge(.true._1,.false._1,exact_nfthreshold)
-  exact_splitting_f = merge(.true._1,.false._1,exact_splitting)
+  exact_nfthreshold_f = logical_from_cbool(exact_nfthreshold)
+  exact_splitting_f   = logical_from_cbool(exact_splitting)
 
   call hoppetSetExactDGLAP(exact_nfthreshold_f, exact_splitting_f)
 

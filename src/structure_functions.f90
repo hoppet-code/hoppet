@@ -2278,7 +2278,7 @@ subroutine hoppetStartStrFctExtended_c(order_max, nflav, scale_choice,&
   order_max_f = order_max
   nflav_f = nflav
   scale_choice_f = scale_choice
-  param_coefs_f = merge(.true._1, .false._1, param_coefs)
+  param_coefs_f = logical_from_cbool(param_coefs)
   call StartStrFct(order_max_f, nflav_f, scale_choice_f, constant_mu_f, &
      & param_coefs_f, wmass_f, zmass_f)
 
@@ -2326,7 +2326,7 @@ subroutine hoppetInitStrFct_c(order, separate_orders, xR, xF) bind(C, name="hopp
   xR_f = xR
   xF_f = xF
   order_f = order
-  separate_orders_f = merge(.true._1, .false._1, separate_orders)
+  separate_orders_f = logical_from_cbool(separate_orders)
   call InitStrFct(order_f, separate_orders_f, xR_f, xF_f, .false.)
 
 end subroutine hoppetInitStrFct_c
@@ -2372,7 +2372,7 @@ subroutine hoppetInitStrFctFlav_c(order, separate_orders, xR, xF) bind(C, name="
   xR_f = xR
   xF_f = xF
   order_f = order
-  separate_orders_f = merge(.true._1, .false._1, separate_orders)
+  separate_orders_f = logical_from_cbool(separate_orders)
   call InitStrFct(order_f, separate_orders_f, xR_f, xF_f, .true.)
 
 end subroutine hoppetInitStrFctFlav_c
