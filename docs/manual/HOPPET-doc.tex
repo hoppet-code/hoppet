@@ -12,6 +12,7 @@
 %\releasenotetrue % comment out to hide answers
 
 \input{preamble.tex}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \hypersetup{
   colorlinks = true,
   linkcolor  = blue,
@@ -74,7 +75,7 @@ version 2.1.1-dev0%% VERSION-NUMBER
   evolution part of the code from F77, C/\CPP and Python.  \smallskip
 \end{abstract}
 
-\begin{textblock*}{2cm}(0.55\textwidth,0.1\textheight)  % (width)(x,y position)
+\begin{textblock*}{2cm}(0.52\textwidth,0.05\textheight)  % (width)(x,y position)
   %\includegraphics[width=3cm]{logo/2025-09-logo-cropped.pdf}
   \includegraphics[width=2cm]{logo/2025-09-logo.png}
 \end{textblock*}
@@ -3403,13 +3404,13 @@ end program tabulation_example_qed
 \subsection{Other general-interface examples}
 
 To help better illustrate the usage of the general interface,
-additional examples are available in the \ttt{examples\_f90/} and
+additional examples are available in the \ttt{examples/f90/} and
 \ttt{benchmarking/} directories. One,
-\ttt{examples\_f90/tabulation\_example\_2.f90}, summarised briefly
+\ttt{examples/f90/tabulation\_example\_2.f90}, summarised briefly
 below, illustrates how to distribute initialisation and evolution
 tasks across different parts of the program, and also illustrates how
 to verify sum rules. A second example for sum rules,
-\ttt{examples\_f90/sumrules.f90}, also illustrates the use of
+\ttt{examples/f90/sumrules.f90}, also illustrates the use of
 evolution without tabulation.
 %
 The programs in the \ttt{benchmarking/} directory are the ones that
@@ -3466,7 +3467,7 @@ end subroutine D
 A more detailed description of the above technique 
 can be found in a 
 second example program, called \ttt{tabulation\_example\_2.f90},
-which is available in the \ttt{example\_f90} 
+which is available in the \ttt{examples/f90} 
 directory. It generates exactly
 the same output as the previous example program, as well as additional
 output about truncated moments (sum rules), while
