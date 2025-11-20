@@ -706,20 +706,15 @@ end subroutine hoppetSetYLnlnQInterpOrders
 !! If QED has been enabled, the indices that will be set are 
 !! f(-6:ncompmaxLeptons), where ncompmaxLeptons=11.
 !! NB: f(7) is a dummy entry, f(8) is the photon and f(9:11) are 
-!! of (e+ + e-), (mu+ + mu-) and (tau+ + tau-)
+!! (e+ + e-), (mu+ + mu-) and (tau+ + tau-)
+!! 
+!! It is the user's responsibility to make sure f is of sufficient size.
 subroutine hoppetEval(x,Q,f)
   use streamlined_interface; use pdf_representation
   implicit none
   real(dp), intent(in)  :: x, Q
-  ! the interface does pass the size of the array, but the functions we
-  ! call have interfaces that do need the size; so here give it a dummy
-  ! value that is the largest that could ever be used. The functions
-  ! that we call will fill -6:6 with normal QCD evolution set and
-  ! -6:ncompmaxLeptons with QED evolution set.
-  !real(dp), intent(out) :: f(-6:ncompmaxLeptons) ! QED-TBD [check it still works without QED]
-  !call EvalPdfTable_xQ(tables(0),x,Q,f)
-
-  real(dp), intent(out) :: f(*) ! QED-TBD [check it still works without QED]
+  real(dp), intent(out) :: f(*) ! an array of size at least 13 (i.e. -6:6), 
+                                ! or at least 18 if QED is enabled (-6:11)
   call EvalPdfTable_xQ(tables(0),x,Q,f(1:tables(0)%tab_iflv_max-ncompmin+1))
 end subroutine hoppetEval
 
