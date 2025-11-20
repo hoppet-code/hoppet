@@ -30,12 +30,18 @@ The latest version can always be obtained from
 
     git clone https://github.com/hoppet-code/hoppet
 
+If you want a specific version, check out the relevant tag, e.g. for a
+version 2.x.y, do
+
+    cd hoppet
+    git switch -d hoppet-2.x.y
+
 Summaries of main new features in each release are in
 [NEWS.md](NEWS.md). More detailed lists of changes are in the
 [ChangeLog](ChangeLog) file.
 
 
-# Documentation
+## Documentation
 
 Detailed documentation is available at
 https://hoppet-code.github.io/hoppet/ and can be built also from source,
