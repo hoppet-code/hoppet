@@ -855,13 +855,59 @@ of the QED coupling, which contribute at order $\alpha^2 \as L^2 \sim \as^3$
 %
 
 The rest of this section is structured as follows:
-Section~\ref{sec:qed-implementation} gives a technical discussion of
-the implementation of the QED evolution.
-%
-Some readers may prefer to skip or skim this on a first reading.
 %
 Section~\ref{sec:qed-streamlined} shows how to get QED evolution in
 the streamlined interface, which is relatively straightforward.
+%
+Section~\ref{sec:qed-implementation} then gives a technical discussion
+of the implementation of the QED evolution, including details, for
+example, regarding the choice of QED coupling.
+%
+Some readers may prefer to skip or skim this on a first reading.
+
+\subsection{Streamlined interface with QED effects} 
+\label{sec:qed-streamlined}
+The streamlined interface including QED effects works as in the case of pure QCD evolution.
+One has to add the following call
+\begin{lstlisting}
+  logical use_qed, use_qcd_qed, use_Plq_nnlo
+  ...
+  call hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
+\end{lstlisting}
+before using the streamlined interface routines.
+%
+The \ttt{use\_qed} argument turns QED evolution on/off at order
+${\cal O}(\alpha)$ (i.e.\ items \ref{item:qed1} and \ref{item:qed2} in
+the enumerated list at the beginning of
+Sec.~\ref{sec:qed-evolution}).
+%
+The \ttt{use\_qcd\_qed} one turns
+mixed QCD$\times$QED effects on/off in the evolution (i.e.\ item \ref{item:qed3}) and \ttt{use\_Plq\_nnlo} turns 
+the order $\alpha^2 P_{\ell q}$ splitting function on/off (i.e.\
+item \ref{item:qed4}).
+%
+Without this call, all QED corrections
+are off.
+
+With the above, the streamlined interface can then be used as normal.
+%
+E.g.\ by calling the \ttt{hoppetEvolve(...)} function to fill the PDF
+table and \ttt{hoppetEval(x,Q,f)} to evaluate the PDF at a given $x$
+and $Q$.
+%
+Note that the \ttt{f} array in the latter call must be
+suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons (numbering
+is shifted by $+6$ in \CPP).
+%
+Examples of the streamlined interface being used with QED evolution
+can be found in
+\begin{quote}
+  \masterlink{examples/f90/tabulation_example_qed_streamlined.f90}\\
+  \masterlink{examples/cpp/tabulation_example_qed.cc}
+\end{quote}
+%\gps{added this last paragraph}
+%\gps{NB: to make links work, I've hard-coded them to the current
+%  branch, but we should switch over to the master/main branch}
 
 \subsection{Implementation of the QED extension}
 \label{sec:qed-implementation}
@@ -1217,48 +1263,6 @@ Note that at the moment, when QED effects are included, cached
 evolution is not supported.
 
 
-\subsection{Streamlined interface with QED effects}
-\label{sec:qed-streamlined}
-The streamlined interface including QED effects works as in the case of pure QCD evolution.
-One has to add the following call
-\begin{lstlisting}
-  logical use_qed, use_qcd_qed, use_Plq_nnlo
-  ...
-  call hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
-\end{lstlisting}
-before using the streamlined interface routines.
-%
-The \ttt{use\_qed} argument turns QED evolution on/off at order
-${\cal O}(\alpha)$ (i.e.\ items \ref{item:qed1} and \ref{item:qed2} in
-the enumerated list at the beginning of
-Sec.~\ref{sec:qed-evolution}).
-%
-The \ttt{use\_qcd\_qed} one turns
-mixed QCD$\times$QED effects on/off in the evolution (i.e.\ item \ref{item:qed3}) and \ttt{use\_Plq\_nnlo} turns 
-the order $\alpha^2 P_{\ell q}$ splitting function on/off (i.e.\
-item \ref{item:qed4}).
-%
-Without this call, all QED corrections
-are off.
-
-With the above, the streamlined interface can then be used as normal.
-%
-E.g.\ by calling the \ttt{hoppetEvolve(...)} function to fill the PDF
-table and \ttt{hoppetEval(x,Q,f)} to evaluate the PDF at a given $x$
-and $Q$.
-%
-Note that the \ttt{f} array in the latter call must be
-suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons.
-%
-Examples of the streamlined interface being used with QED evolution
-can be found in
-\begin{quote}
-  \masterlink{examples/f90/tabulation_example_qed_streamlined.f90}\\
-  \masterlink{examples/cpp/tabulation_example_qed.cc}
-\end{quote}
-%\gps{added this last paragraph}
-%\gps{NB: to make links work, I've hard-coded them to the current
-%  branch, but we should switch over to the master/main branch}
 
 \section{Python interface}
 \label{sec:pyinterface}
