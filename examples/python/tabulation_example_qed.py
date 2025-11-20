@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
-"""Example using HOPPET in Python to perform PDF evolution and tabulation, including QED effects."""
+"""Example using HOPPET in Python to perform PDF evolution and
+tabulation, including QED effects."""
 import hoppet as hp
 import numpy as np
 
-# This is the PDF subroutine. Notice that the signature is different
-# from the one in the C++ code to allow for the python interface, that
-# handles pointers in a more complicated way
 def hera_lhc(x, Q):
+    """This routine provides the initial conditions for the PDF evolution,
+    setting up the individual flavours at the specified x and Q values,
+    and returning them in a numpy array. 
+    
+    In this instance, the Q value is ignored, but it is required by the
+    underlying HOPPET interface.
+
+    Notice that the signature is different from that in the C++ code to
+    allow for the python interface, which handles pointers in a more
+    complicated way. 
+    """
     N_g = 1.7
     N_ls = 0.387975
     N_uv = 5.107200
@@ -30,12 +39,12 @@ def hera_lhc(x, Q):
     pdf[-1+6] = 0.9 * dbar
 
     # qed part
-    pdf[ 8+6] = gluon / 100.0 + ubar / 10.0  # photon 
-    pdf[ 9+6] = dbar / 10.0  # electron
-    pdf[ 10+6] = ubar / 10.0 # muon
-    pdf[ 11+6] = dbar / 10.0 # tau
+    pdf[  8+6] = gluon / 100.0 + ubar / 10.0  # photon 
+    pdf[  9+6] = dbar  / 10.0  # electron + positron
+    pdf[ 10+6] = ubar  / 10.0  # mu+ + mu-
+    pdf[ 11+6] = dbar  / 10.0  # tau+ + tau-
     
-# Overkill
+    # Make sure other flavours are zero
     pdf[ 4+6] = 0.0
     pdf[ 5+6] = 0.0
     pdf[ 6+6] = 0.0
