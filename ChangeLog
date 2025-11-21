@@ -1,3 +1,9 @@
+2025-11-21 Alexander + Gavin
+
+	* dglap_objects.f90:
+	turned off the warnings about the use of parametrised MTM%PSHg
+	(since we don't warn about about other bits that use parametrisations).
+
 2025-11-20 Alexander + Gavin
 
 	* src/streamlined_interface.f90:

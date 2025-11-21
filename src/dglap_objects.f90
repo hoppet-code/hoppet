@@ -914,14 +914,11 @@ contains
     type(mass_threshold_mat), intent(out) :: MTM
     !logical, parameter :: vogt_A2PShg = .false.
     !logical, parameter :: vogt_A2PShg = .true.
-    integer, save :: warn_param = 3
 
     call InitGridConv(grid, MTM%PSHq, sf_A2PShq)
     select case (nnlo_nfthreshold_variant)
     case(nnlo_nfthreshold_param)
        call InitGridConv(grid, MTM%PSHg, sf_A2PShg_vogt)
-       call wae_warn(warn_param,'InitMTMNNLO:&
-            & using parametrisation  (less accurate) for A2PShg')
     case(nnlo_nfthreshold_exact)
        call InitGridConv(grid, MTM%PSHg, sf_A2PShg)
     case default
