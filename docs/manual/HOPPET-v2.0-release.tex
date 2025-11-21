@@ -167,7 +167,11 @@ from \texttt{hoppet\_v1} to \texttt{hoppet}, and similarly for the main
 module and \CPP include file.
 %
 Users with an existing installation of \hoppet (v1) should make sure
-that they link with the new library name.}
+that they link with the new library name.
+%
+Apart from this, v2 remains fully backwards compatible with code
+designed for v1.
+}
 }}
 
 %======================================================================
@@ -194,7 +198,7 @@ Evolution equations are solved using Runge-Kutta methods.
 
 \begin{table}[pt!]
   \centering
- \input{interface-tables/streamlined.tex}
+  \input{interface-tables/streamlined.tex}
   \caption{Core methods of the streamlined interface in Fortran and \CPP.
     %
     In Python, \ttt{hoppetStart(...)} is to be replaced with
@@ -212,7 +216,14 @@ The code has two interfaces.
 %
 For simple usage, it provides a so-called ``streamlined''
 interface, giving high-level access to the functionality that is most
-widely needed, such as evolving to fill a PDF tabulation and then
+widely needed.
+%
+It is available from Fortran, \CPP and, as of v2, Python
+(cf.\ Sec.~\ref{sec:pyinterface}).
+%
+Its main routines are listed in Table~\ref{tab:streamlined-interface}.
+%
+The functionality includes evolving to fill a PDF tabulation and then
 accessing that PDF tabulation at given $x,Q$ points.
 %
 For faster tabulation of many distinct initial conditions, one can
@@ -222,12 +233,16 @@ that cached evolution.
 %
 The streamlined interface also provides access to convolutions of the
 various orders of splitting functions with the tabulated PDF.
-%
-The streamlined interface has long been available from Fortran and
-\CPP and, as of v2, can be accessed also in Python.
-%
-The core methods of the streamlined interface are illustrated in
-Table~\ref{tab:streamlined-interface}. 
+
+
+\begin{table}[pt!]
+  \centering
+  \input{interface-tables/general-objects.tex}
+  \caption{Core objects in the general interface.
+    %
+    \label{tab:general-interface}
+  }
+\end{table}
 
 
 For more advanced usage there is a ``general'' interface (sometimes
@@ -237,11 +252,19 @@ It gives access to the various low-level objects that are useful in
 DGLAP evolution, such as splitting functions, splitting matrices,
 tabulations of PDFs, etc.
 %
-As of v2.1, that interface is accessible only in modern Fortran,
+The main objects are listed in Table~\ref{tab:general-interface}.
+%
+Up to v2.1, that interface is accessible only in modern Fortran,
 though in due course we expect to extend it to other languages.
 %
 We refer the reader to the original manual~\cite{Salam:2008qg} for an
 extended discussion of the general interface.
+%
+For some uses, it can be convenient to initialise \hoppet with the
+streamlined interface and then access the underlying objects in
+Fortran from the
+\repolink{src/streamlined_interface.f90}{streamlined\_interface}
+module. 
 
 Various examples are available with the two sets of interfaces, to be
 found in the \masterlink{examples/} directory of the repository.
