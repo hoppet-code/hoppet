@@ -43,7 +43,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">Python API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../_generated/hoppet_constants.html">HOPPET constants</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../_generated/github_links.html">PDF documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_generated/github_links.html">Manual in PDF format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 </ul>
 
         </div>
@@ -274,6 +275,8 @@
 <span class="sd">    :type exact_splitting: boolean</span>
 <span class="sd">    :param exact_splitting: If True use the exact NNLO splitting</span>
 <span class="sd">        functions. If False use the faster parametrisations</span>
+
+<span class="sd">    To be called before hoppetStart</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_hoppet_swig</span><span class="o">.</span><span class="n">SetExactDGLAP</span><span class="p">(</span><span class="n">exact_nfthreshold</span><span class="p">,</span> <span class="n">exact_splitting</span><span class="p">)</span></div>
 
@@ -286,6 +289,8 @@
 
 <span class="sd">    :type splitting_variant: int</span>
 <span class="sd">    :param splitting_variant: One of the hoppet.n3lo_splitting_approximation_* options.</span>
+
+<span class="sd">    To be called before hoppetStart</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_hoppet_swig</span><span class="o">.</span><span class="n">SetApproximateDGLAPN3LO</span><span class="p">(</span><span class="n">splitting_variant</span><span class="p">)</span></div>
 
@@ -298,6 +303,8 @@
 
 <span class="sd">    :type splitting_variant: int</span>
 <span class="sd">    :param splitting_variant: One of the hoppet.nnlo_splitting_* options.</span>
+
+<span class="sd">    To be called before hoppetStart</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_hoppet_swig</span><span class="o">.</span><span class="n">SetSplittingNNLO</span><span class="p">(</span><span class="n">splitting_variant</span><span class="p">)</span></div>
 
@@ -306,10 +313,12 @@
 <a class="viewcode-back" href="../api.html#hoppet.SetSplittingN3LO">[docs]</a>
 <span class="k">def</span> <span class="nf">SetSplittingN3LO</span><span class="p">(</span><span class="n">splitting_variant</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Arrange for the use of various N3LO splitting functions.</span>
+<span class="sd">    Change the variant for the N3LO splitting functions.</span>
 
 <span class="sd">    :type splitting_variant: int</span>
 <span class="sd">    :param splitting_variant: One of the hoppet.n3lo_splitting_* options.</span>
+
+<span class="sd">    To be called before hoppetStart</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_hoppet_swig</span><span class="o">.</span><span class="n">SetSplittingN3LO</span><span class="p">(</span><span class="n">splitting_variant</span><span class="p">)</span></div>
 
@@ -322,6 +331,8 @@
 
 <span class="sd">    :type variant: int</span>
 <span class="sd">    :param variant: One of the hoppet.n3lo_nfthresholds_* options.</span>
+
+<span class="sd">    To be called before hoppetStart</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_hoppet_swig</span><span class="o">.</span><span class="n">SetN3LOnfthresholds</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span></div>
 
@@ -959,6 +970,33 @@
 
 
 <span class="n">cvar</span> <span class="o">=</span> <span class="n">_hoppet_swig</span><span class="o">.</span><span class="n">cvar</span>
+<span class="n">cc_REAL</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">cc_REAL</span>
+<span class="n">cc_VIRT</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">cc_VIRT</span>
+<span class="n">cc_REALVIRT</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">cc_REALVIRT</span>
+<span class="n">cc_DELTA</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">cc_DELTA</span>
+<span class="n">iflv_g</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_g</span>
+<span class="n">iflv_d</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_d</span>
+<span class="n">iflv_u</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_u</span>
+<span class="n">iflv_s</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_s</span>
+<span class="n">iflv_c</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_c</span>
+<span class="n">iflv_b</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_b</span>
+<span class="n">iflv_t</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_t</span>
+<span class="n">iflv_dbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_dbar</span>
+<span class="n">iflv_ubar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_ubar</span>
+<span class="n">iflv_sbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_sbar</span>
+<span class="n">iflv_cbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_cbar</span>
+<span class="n">iflv_bbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_bbar</span>
+<span class="n">iflv_tbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_tbar</span>
+<span class="n">iflv_photon</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_photon</span>
+<span class="n">iflv_electron</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_electron</span>
+<span class="n">iflv_muon</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_muon</span>
+<span class="n">iflv_tau</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_tau</span>
+<span class="n">iflv_min</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_min</span>
+<span class="n">iflv_max</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_max</span>
+<span class="n">iflv_info</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_info</span>
+<span class="n">ncompmin</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">ncompmin</span>
+<span class="n">ncompmax</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">ncompmax</span>
+<span class="n">iflv_min_fortran</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_min_fortran</span>
 <span class="n">iF1Wp</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iF1Wp</span>
 <span class="n">iF2Wp</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iF2Wp</span>
 <span class="n">iF3Wp</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iF3Wp</span>
@@ -973,10 +1011,6 @@
 <span class="n">iF1gZ</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iF1gZ</span>
 <span class="n">iF2gZ</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iF2gZ</span>
 <span class="n">iF3gZ</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iF3gZ</span>
-<span class="n">cc_REAL</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">cc_REAL</span>
-<span class="n">cc_VIRT</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">cc_VIRT</span>
-<span class="n">cc_REALVIRT</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">cc_REALVIRT</span>
-<span class="n">cc_DELTA</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">cc_DELTA</span>
 <span class="n">scale_choice_fixed</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">scale_choice_fixed</span>
 <span class="n">scale_choice_Q</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">scale_choice_Q</span>
 <span class="n">scale_choice_arbitrary</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">scale_choice_arbitrary</span>
@@ -1003,23 +1037,6 @@
 <span class="n">factscheme_DIS</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">factscheme_DIS</span>
 <span class="n">factscheme_PolMSbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">factscheme_PolMSbar</span>
 <span class="n">factscheme_FragMSbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">factscheme_FragMSbar</span>
-<span class="n">iflv_g</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_g</span>
-<span class="n">iflv_d</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_d</span>
-<span class="n">iflv_u</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_u</span>
-<span class="n">iflv_s</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_s</span>
-<span class="n">iflv_c</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_c</span>
-<span class="n">iflv_b</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_b</span>
-<span class="n">iflv_t</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_t</span>
-<span class="n">iflv_dbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_dbar</span>
-<span class="n">iflv_ubar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_ubar</span>
-<span class="n">iflv_sbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_sbar</span>
-<span class="n">iflv_cbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_cbar</span>
-<span class="n">iflv_bbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_bbar</span>
-<span class="n">iflv_tbar</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_tbar</span>
-<span class="n">iflv_photon</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_photon</span>
-<span class="n">iflv_electron</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_electron</span>
-<span class="n">iflv_muon</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_muon</span>
-<span class="n">iflv_tau</span> <span class="o">=</span> <span class="n">cvar</span><span class="o">.</span><span class="n">iflv_tau</span>
 
 </pre></div>
 

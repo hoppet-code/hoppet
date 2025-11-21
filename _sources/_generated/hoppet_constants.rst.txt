@@ -25,6 +25,14 @@ These are the PDF indices of lists that are returned by e.g. :func:`Eval` or tha
 
 .. autodata:: hoppet.iflv_g
 
+.. autodata:: hoppet.iflv_info
+
+.. autodata:: hoppet.iflv_max
+
+.. autodata:: hoppet.iflv_min
+
+.. autodata:: hoppet.iflv_min_fortran
+
 .. autodata:: hoppet.iflv_muon
 
 .. autodata:: hoppet.iflv_photon
@@ -176,4 +184,11 @@ Structure function scale choices
 .. autodata:: hoppet.scale_choice_arbitrary
 
 .. autodata:: hoppet.scale_choice_fixed
+
+Other constants
+---------------
+
+.. autodata:: hoppet.ncompmax
+
+.. autodata:: hoppet.ncompmin
 

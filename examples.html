@@ -1,0 +1,640 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples &mdash; HOPPET 2.1.1-dev0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1abc1c1c"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Manual in PDF format" href="_generated/github_links.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            HOPPET
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">Python API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hoppet_constants.html">HOPPET constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/github_links.html">Manual in PDF format</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#simple-qcd-evolution-and-tabulation">Simple QCD evolution and tabulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qed-evolution">QED evolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#structure-function-tabulation">Structure function tabulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-lhapdf-into-a-tabulation-and-fast-evaluation">Reading LHAPDF into a tabulation and fast evaluation</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">HOPPET</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/examples.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
+<section id="simple-qcd-evolution-and-tabulation">
+<h2>Simple QCD evolution and tabulation<a class="headerlink" href="#simple-qcd-evolution-and-tabulation" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="ch">#!/usr/bin/env python3</span>
+<span class="linenos"> 2</span><span class="sd">&quot;&quot;&quot;Example using HOPPET in Python to perform PDF evolution and tabulation.&quot;&quot;&quot;</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">hoppet</span> <span class="k">as</span> <span class="nn">hp</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="c1"># This is the PDF subroutine. Notice that the signature is different</span>
+<span class="linenos"> 7</span><span class="c1"># from the one in the C++ code to allow for the python interface, that</span>
+<span class="linenos"> 8</span><span class="c1"># handles pointers in a more complicated way. In the actual example we</span>
+<span class="linenos"> 9</span><span class="c1"># use the internal BenchmarkPDFunpol which is identical</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1">#def hera_lhc(x, Q):</span>
+<span class="linenos">12</span><span class="c1">#    N_g = 1.7</span>
+<span class="linenos">13</span><span class="c1">#    N_ls = 0.387975</span>
+<span class="linenos">14</span><span class="c1">#    N_uv = 5.107200</span>
+<span class="linenos">15</span><span class="c1">#    N_dv = 3.064320</span>
+<span class="linenos">16</span><span class="c1">#    N_db = N_ls / 2</span>
+<span class="linenos">17</span><span class="c1">#</span>
+<span class="linenos">18</span><span class="c1">#    uv = N_uv * pow(x, 0.8) * pow((1 - x), 3)</span>
+<span class="linenos">19</span><span class="c1">#    dv = N_dv * pow(x, 0.8) * pow((1 - x), 4)</span>
+<span class="linenos">20</span><span class="c1">#    dbar = N_db * pow(x, -0.1) * pow(1 - x, 6)</span>
+<span class="linenos">21</span><span class="c1">#    ubar = dbar * (1 - x)</span>
+<span class="linenos">22</span><span class="c1">#</span>
+<span class="linenos">23</span><span class="c1">#    pdf = np.zeros(13) # Initialise the array with zeros</span>
+<span class="linenos">24</span><span class="c1">#</span>
+<span class="linenos">25</span><span class="c1">#    pdf[ 0+6] = N_g * pow(x, -0.1) * pow(1 - x, 5)</span>
+<span class="linenos">26</span><span class="c1">#    pdf[-3+6] = 0.2 * (dbar + ubar)</span>
+<span class="linenos">27</span><span class="c1">#    pdf[ 3+6] = pdf[-3 + 6]</span>
+<span class="linenos">28</span><span class="c1">#    pdf[ 2+6] = uv + ubar</span>
+<span class="linenos">29</span><span class="c1">#    pdf[-2+6] = ubar</span>
+<span class="linenos">30</span><span class="c1">#    pdf[ 1+6] = dv + dbar</span>
+<span class="linenos">31</span><span class="c1">#    pdf[-1+6] = dbar</span>
+<span class="linenos">32</span><span class="c1">#    </span>
+<span class="linenos">33</span><span class="c1">## Overkill</span>
+<span class="linenos">34</span><span class="c1">#    pdf[ 4+6] = 0.0</span>
+<span class="linenos">35</span><span class="c1">#    pdf[ 5+6] = 0.0</span>
+<span class="linenos">36</span><span class="c1">#    pdf[ 6+6] = 0.0</span>
+<span class="linenos">37</span><span class="c1">#    pdf[-4+6] = 0.0</span>
+<span class="linenos">38</span><span class="c1">#    pdf[-5+6] = 0.0</span>
+<span class="linenos">39</span><span class="c1">#    pdf[-6+6] = 0.0</span>
+<span class="linenos">40</span><span class="c1">#</span>
+<span class="linenos">41</span><span class="c1">#    return pdf</span>
+<span class="linenos">42</span>
+<span class="linenos">43</span><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="linenos">44</span>    <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.1</span>    
+<span class="linenos">45</span>    <span class="n">nloop</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">46</span>    <span class="c1"># Start hoppet</span>
+<span class="linenos">47</span>    <span class="n">hp</span><span class="o">.</span><span class="n">Start</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">nloop</span><span class="p">)</span>
+<span class="linenos">48</span>    
+<span class="linenos">49</span>    <span class="n">asQ0</span> <span class="o">=</span> <span class="mf">0.35</span>
+<span class="linenos">50</span>    <span class="n">Q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="linenos">51</span>    <span class="c1"># Do the evolution (replace hp.BenchmarkPDFunpol with a function</span>
+<span class="linenos">52</span>    <span class="c1"># that acts like hera_lhc above to use your own initial condition)</span>
+<span class="linenos">53</span>    <span class="n">hp</span><span class="o">.</span><span class="n">Evolve</span><span class="p">(</span><span class="n">asQ0</span><span class="p">,</span> <span class="n">Q0</span><span class="p">,</span> <span class="n">nloop</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">hp</span><span class="o">.</span><span class="n">BenchmarkPDFunpol</span><span class="p">,</span> <span class="n">Q0</span><span class="p">)</span>
+<span class="linenos">54</span>
+<span class="linenos">55</span>    <span class="c1"># Evaluate the PDFs at some x values and print them</span>
+<span class="linenos">56</span>    <span class="n">xvals</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span><span class="mf">1e-4</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.9</span><span class="p">]</span>
+<span class="linenos">57</span>    <span class="n">Q</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="linenos">58</span>
+<span class="linenos">59</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="linenos">60</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;           Evaluating PDFs at Q =&quot;</span><span class="p">,</span><span class="n">Q</span><span class="p">,</span> <span class="s2">&quot; GeV&quot;</span><span class="p">)</span>
+<span class="linenos">61</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon&quot;</span><span class="p">)</span>
+<span class="linenos">62</span>    <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+<span class="linenos">63</span>        <span class="n">pdf_array</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">Eval</span><span class="p">(</span><span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">Q</span><span class="p">)</span>
+<span class="linenos">64</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:7.1E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="linenos">65</span>            <span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+<span class="linenos">66</span>            <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">2</span><span class="p">],</span> 
+<span class="linenos">67</span>            <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> 
+<span class="linenos">68</span>            <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]),</span>
+<span class="linenos">69</span>            <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">4</span><span class="p">],</span>
+<span class="linenos">70</span>            <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">0</span><span class="p">]</span>
+<span class="linenos">71</span>        <span class="p">))</span>
+<span class="linenos">72</span>
+<span class="linenos">73</span>    <span class="c1">#hp.WriteLHAPDFGrid(&quot;test_python&quot;,0)</span>
+<span class="linenos">74</span>
+<span class="linenos">75</span>    <span class="n">hp</span><span class="o">.</span><span class="n">DeleteAll</span><span class="p">()</span>
+<span class="linenos">76</span>
+<span class="linenos">77</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">78</span>    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="qed-evolution">
+<h2>QED evolution<a class="headerlink" href="#qed-evolution" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="ch">#!/usr/bin/env python3</span>
+<span class="linenos">  2</span><span class="sd">&quot;&quot;&quot;Example using HOPPET in Python to perform PDF evolution and</span>
+<span class="linenos">  3</span><span class="sd">tabulation, including QED effects.&quot;&quot;&quot;</span>
+<span class="linenos">  4</span><span class="kn">import</span> <span class="nn">hoppet</span> <span class="k">as</span> <span class="nn">hp</span>
+<span class="linenos">  5</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos">  6</span>
+<span class="linenos">  7</span><span class="k">def</span> <span class="nf">hera_lhc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Q</span><span class="p">):</span>
+<span class="linenos">  8</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;This routine provides the initial conditions for the PDF evolution,</span>
+<span class="linenos">  9</span><span class="sd">    setting up the individual flavours at the specified x and Q values,</span>
+<span class="linenos"> 10</span><span class="sd">    and returning them in a numpy array. </span>
+<span class="linenos"> 11</span><span class="sd">    </span>
+<span class="linenos"> 12</span><span class="sd">    In this instance, the Q value is ignored, but it is required by the</span>
+<span class="linenos"> 13</span><span class="sd">    underlying HOPPET interface.</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="sd">    Notice that the signature is different from that in the C++ code to</span>
+<span class="linenos"> 16</span><span class="sd">    allow for the python interface, which handles pointers in a more</span>
+<span class="linenos"> 17</span><span class="sd">    complicated way. </span>
+<span class="linenos"> 18</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 19</span>    <span class="n">N_g</span> <span class="o">=</span> <span class="mf">1.7</span>
+<span class="linenos"> 20</span>    <span class="n">N_ls</span> <span class="o">=</span> <span class="mf">0.387975</span>
+<span class="linenos"> 21</span>    <span class="n">N_uv</span> <span class="o">=</span> <span class="mf">5.107200</span>
+<span class="linenos"> 22</span>    <span class="n">N_dv</span> <span class="o">=</span> <span class="mf">3.064320</span>
+<span class="linenos"> 23</span>    <span class="n">N_db</span> <span class="o">=</span> <span class="n">N_ls</span> <span class="o">/</span> <span class="mi">2</span>
+<span class="linenos"> 24</span>
+<span class="linenos"> 25</span>    <span class="n">gluon</span> <span class="o">=</span> <span class="n">N_g</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="linenos"> 26</span>    <span class="n">uv</span> <span class="o">=</span> <span class="n">N_uv</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 27</span>    <span class="n">dv</span> <span class="o">=</span> <span class="n">N_dv</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="linenos"> 28</span>    <span class="n">dbar</span> <span class="o">=</span> <span class="n">N_db</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="linenos"> 29</span>    <span class="n">ubar</span> <span class="o">=</span> <span class="n">dbar</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
+<span class="linenos"> 30</span>
+<span class="linenos"> 31</span>    <span class="n">pdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span> <span class="c1"># Initialise the array with zeros</span>
+<span class="linenos"> 32</span>
+<span class="linenos"> 33</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">0</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.99</span> <span class="o">*</span> <span class="n">gluon</span>
+<span class="linenos"> 34</span>    <span class="n">pdf</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="p">(</span><span class="n">dbar</span> <span class="o">+</span> <span class="n">ubar</span><span class="p">)</span>
+<span class="linenos"> 35</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">3</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">6</span><span class="p">]</span>
+<span class="linenos"> 36</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">2</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">uv</span> <span class="o">+</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">ubar</span>
+<span class="linenos"> 37</span>    <span class="n">pdf</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">ubar</span>
+<span class="linenos"> 38</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">1</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">dv</span> <span class="o">+</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">dbar</span>
+<span class="linenos"> 39</span>    <span class="n">pdf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">dbar</span>
+<span class="linenos"> 40</span>
+<span class="linenos"> 41</span>    <span class="c1"># qed part</span>
+<span class="linenos"> 42</span>    <span class="n">pdf</span><span class="p">[</span>  <span class="mi">8</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">gluon</span> <span class="o">/</span> <span class="mf">100.0</span> <span class="o">+</span> <span class="n">ubar</span> <span class="o">/</span> <span class="mf">10.0</span>  <span class="c1"># photon </span>
+<span class="linenos"> 43</span>    <span class="n">pdf</span><span class="p">[</span>  <span class="mi">9</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">dbar</span>  <span class="o">/</span> <span class="mf">10.0</span>  <span class="c1"># electron + positron</span>
+<span class="linenos"> 44</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">10</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">ubar</span>  <span class="o">/</span> <span class="mf">10.0</span>  <span class="c1"># mu+ + mu-</span>
+<span class="linenos"> 45</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">11</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">dbar</span>  <span class="o">/</span> <span class="mf">10.0</span>  <span class="c1"># tau+ + tau-</span>
+<span class="linenos"> 46</span>    
+<span class="linenos"> 47</span>    <span class="c1"># Make sure other flavours are zero</span>
+<span class="linenos"> 48</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">4</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos"> 49</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">5</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos"> 50</span>    <span class="n">pdf</span><span class="p">[</span> <span class="mi">6</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos"> 51</span>    <span class="n">pdf</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos"> 52</span>    <span class="n">pdf</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos"> 53</span>    <span class="n">pdf</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos"> 54</span>
+<span class="linenos"> 55</span>    <span class="k">return</span> <span class="n">pdf</span>
+<span class="linenos"> 56</span>
+<span class="linenos"> 57</span><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="linenos"> 58</span>    <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.1</span>    
+<span class="linenos"> 59</span>    <span class="n">nloop</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos"> 60</span>    
+<span class="linenos"> 61</span>    <span class="c1"># set QED</span>
+<span class="linenos"> 62</span>    <span class="n">use_qcd_qed</span>  <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos"> 63</span>    <span class="n">use_Plq_nnlo</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos"> 64</span>    <span class="n">hp</span><span class="o">.</span><span class="n">SetQED</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_qcd_qed</span><span class="p">,</span> <span class="n">use_Plq_nnlo</span><span class="p">)</span>
+<span class="linenos"> 65</span>    
+<span class="linenos"> 66</span>    <span class="c1"># Start hoppet</span>
+<span class="linenos"> 67</span>    <span class="n">hp</span><span class="o">.</span><span class="n">StartExtended</span><span class="p">(</span><span class="mf">12.0</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">28000.0</span><span class="p">,</span> <span class="n">dy</span><span class="o">/</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">nloop</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="n">hp</span><span class="o">.</span><span class="n">factscheme_MSbar</span><span class="p">)</span>
+<span class="linenos"> 68</span>
+<span class="linenos"> 69</span>    <span class="c1"># Set heavy flavour scheme</span>
+<span class="linenos"> 70</span>    <span class="n">mc</span> <span class="o">=</span> <span class="mf">1.414213563</span>
+<span class="linenos"> 71</span>    <span class="n">mb</span> <span class="o">=</span> <span class="mf">4.5</span>
+<span class="linenos"> 72</span>    <span class="n">mt</span> <span class="o">=</span> <span class="mf">175.0</span>
+<span class="linenos"> 73</span>    <span class="n">hp</span><span class="o">.</span><span class="n">SetVFN</span><span class="p">(</span><span class="n">mc</span><span class="p">,</span> <span class="n">mb</span><span class="p">,</span> <span class="n">mt</span><span class="p">)</span>
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span>    
+<span class="linenos"> 76</span>    <span class="n">asQ0</span> <span class="o">=</span> <span class="mf">0.35</span>
+<span class="linenos"> 77</span>    <span class="n">Q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="linenos"> 78</span>    <span class="c1"># Do the evolution. </span>
+<span class="linenos"> 79</span>    <span class="n">hp</span><span class="o">.</span><span class="n">Evolve</span><span class="p">(</span><span class="n">asQ0</span><span class="p">,</span> <span class="n">Q0</span><span class="p">,</span> <span class="n">nloop</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">hera_lhc</span><span class="p">,</span> <span class="n">Q0</span><span class="p">)</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span>    <span class="c1"># Evaluate the PDFs at some x values and print them</span>
+<span class="linenos"> 82</span>    <span class="n">xvals</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span><span class="mf">1e-4</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.9</span><span class="p">]</span>
+<span class="linenos"> 83</span>    <span class="n">Q</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="linenos"> 84</span>    
+<span class="linenos"> 85</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="linenos"> 86</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;           Evaluating PDFs at Q =&quot;</span><span class="p">,</span><span class="n">Q</span><span class="p">,</span> <span class="s2">&quot; GeV&quot;</span><span class="p">)</span>
+<span class="linenos"> 87</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon      photon     e+ + e-    mu+ + mu-   tau+ + tau-&quot;</span><span class="p">)</span>
+<span class="linenos"> 88</span>    <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+<span class="linenos"> 89</span>        <span class="n">pdf_array</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">Eval</span><span class="p">(</span><span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">Q</span><span class="p">)</span>
+<span class="linenos"> 90</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:7.1E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="linenos"> 91</span>            <span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+<span class="linenos"> 92</span>            <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">2</span><span class="p">],</span> 
+<span class="linenos"> 93</span>            <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> 
+<span class="linenos"> 94</span>            <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]),</span>
+<span class="linenos"> 95</span>            <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">4</span><span class="p">],</span>
+<span class="linenos"> 96</span>            <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">8</span><span class="p">],</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">9</span><span class="p">],</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">10</span><span class="p">],</span> <span class="n">pdf_array</span><span class="p">[</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">11</span><span class="p">]</span>
+<span class="linenos"> 97</span>        <span class="p">))</span>
+<span class="linenos"> 98</span>
+<span class="linenos"> 99</span>    <span class="c1">#hp.WriteLHAPDFGrid(&quot;test_python&quot;,0)</span>
+<span class="linenos">100</span>
+<span class="linenos">101</span>    <span class="n">hp</span><span class="o">.</span><span class="n">DeleteAll</span><span class="p">()</span>
+<span class="linenos">102</span>
+<span class="linenos">103</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">104</span>    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="structure-function-tabulation">
+<h2>Structure function tabulation<a class="headerlink" href="#structure-function-tabulation" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="ch">#!/usr/bin/env python3</span>
+<span class="linenos">  2</span><span class="sd">&quot;&quot;&quot;Example using HOPPET in Python to compute structure functions.&quot;&quot;&quot;</span>
+<span class="linenos">  3</span><span class="kn">import</span> <span class="nn">hoppet</span> <span class="k">as</span> <span class="nn">hp</span>
+<span class="linenos">  4</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="linenos">  7</span>    <span class="n">Qmax</span> <span class="o">=</span> <span class="mf">13000.0</span>
+<span class="linenos">  8</span>    <span class="n">nloop_coefs</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="linenos">  9</span>    <span class="n">xmur</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos"> 10</span>    <span class="n">xmuf</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos"> 11</span>    <span class="n">sc_choice</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">scale_choice_Q</span> <span class="c1"># Uses Q as the central scale choice</span>
+<span class="linenos"> 12</span>    <span class="n">Qmin</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos"> 13</span>
+<span class="linenos"> 14</span>    <span class="c1"># Set heavy flavour scheme</span>
+<span class="linenos"> 15</span>    <span class="n">mc</span> <span class="o">=</span> <span class="mf">1.414213563</span>  <span class="c1"># sqrt(2.0_dp) + epsilon</span>
+<span class="linenos"> 16</span>    <span class="n">mb</span> <span class="o">=</span> <span class="mf">4.5</span>
+<span class="linenos"> 17</span>    <span class="n">mt</span> <span class="o">=</span> <span class="mf">175.0</span>
+<span class="linenos"> 18</span>    <span class="n">hp</span><span class="o">.</span><span class="n">SetPoleMassVFN</span><span class="p">(</span><span class="n">mc</span><span class="p">,</span> <span class="n">mb</span><span class="p">,</span> <span class="n">mt</span><span class="p">)</span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span>    <span class="c1"># Streamlined initialization</span>
+<span class="linenos"> 21</span>    <span class="c1"># including  parameters for x-grid</span>
+<span class="linenos"> 22</span>    <span class="n">order</span> <span class="o">=</span> <span class="o">-</span><span class="mi">6</span> <span class="c1"># interpolation order, not perturbative order in alphas!</span>
+<span class="linenos"> 23</span>    <span class="n">ymax</span>  <span class="o">=</span> <span class="mf">16.0</span>
+<span class="linenos"> 24</span>    <span class="n">dy</span>    <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># dble_val_opt(&quot;-dy&quot;,0.1_dp)</span>
+<span class="linenos"> 25</span>    <span class="n">dlnlnQ</span> <span class="o">=</span> <span class="n">dy</span><span class="o">/</span><span class="mf">4.0</span>
+<span class="linenos"> 26</span>    <span class="n">nloop</span> <span class="o">=</span> <span class="mi">3</span> 
+<span class="linenos"> 27</span>    <span class="n">minQval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">xmuf</span><span class="o">*</span><span class="n">Qmin</span><span class="p">,</span> <span class="n">Qmin</span><span class="p">)</span>
+<span class="linenos"> 28</span>    <span class="n">maxQval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">xmuf</span><span class="o">*</span><span class="n">Qmax</span><span class="p">,</span> <span class="n">Qmax</span><span class="p">)</span>
+<span class="linenos"> 29</span>
+<span class="linenos"> 30</span>    <span class="c1"># initialise the grid and dglap holder, using the streamlined</span>
+<span class="linenos"> 31</span>    <span class="c1"># interface for simplicity</span>
+<span class="linenos"> 32</span>    <span class="n">hp</span><span class="o">.</span><span class="n">StartExtended</span><span class="p">(</span><span class="n">ymax</span><span class="p">,</span><span class="n">dy</span><span class="p">,</span><span class="n">minQval</span><span class="p">,</span><span class="n">maxQval</span><span class="p">,</span><span class="n">dlnlnQ</span><span class="p">,</span><span class="n">nloop</span><span class="p">,</span><span class="n">order</span><span class="p">,</span><span class="n">hp</span><span class="o">.</span><span class="n">factscheme_MSbar</span><span class="p">)</span>
+<span class="linenos"> 33</span>
+<span class="linenos"> 34</span>    <span class="c1"># Setup all constants and parameters needed by the structure functions</span>
+<span class="linenos"> 35</span>    <span class="n">nflav</span><span class="o">=</span> <span class="mi">5</span>
+<span class="linenos"> 36</span>    <span class="n">hp</span><span class="o">.</span><span class="n">StartStrFctExtended</span><span class="p">(</span><span class="n">nloop_coefs</span><span class="p">,</span><span class="n">nflav</span><span class="p">,</span><span class="n">sc_choice</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="mf">80.377</span><span class="p">,</span><span class="mf">91.1876</span><span class="p">)</span>
+<span class="linenos"> 37</span>    
+<span class="linenos"> 38</span>    <span class="n">asQ0</span> <span class="o">=</span> <span class="mf">0.35</span>
+<span class="linenos"> 39</span>    <span class="n">Q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="linenos"> 40</span>    <span class="c1"># Do the evolution. </span>
+<span class="linenos"> 41</span>    <span class="n">hp</span><span class="o">.</span><span class="n">Evolve</span><span class="p">(</span><span class="n">asQ0</span><span class="p">,</span> <span class="n">Q0</span><span class="p">,</span> <span class="n">nloop</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">hp</span><span class="o">.</span><span class="n">BenchmarkPDFunpol</span><span class="p">,</span> <span class="n">Q0</span><span class="p">)</span>
+<span class="linenos"> 42</span>
+<span class="linenos"> 43</span>    <span class="n">hp</span><span class="o">.</span><span class="n">InitStrFct</span><span class="p">(</span><span class="n">nloop_coefs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">xmur</span><span class="p">,</span> <span class="n">xmuf</span><span class="p">)</span>
+<span class="linenos"> 44</span>
+<span class="linenos"> 45</span>    <span class="c1"># write out the structure functions</span>
+<span class="linenos"> 46</span>    <span class="n">ymax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1e5</span><span class="p">)</span> 
+<span class="linenos"> 47</span>    <span class="n">Q</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="linenos"> 48</span>    <span class="n">write_f1_py</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 49</span>    <span class="n">write_f2_py</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 50</span>    <span class="n">write_f3_py</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 51</span>
+<span class="linenos"> 52</span>    <span class="n">hp</span><span class="o">.</span><span class="n">DeleteAll</span><span class="p">()</span>
+<span class="linenos"> 53</span>
+<span class="linenos"> 54</span><span class="k">def</span> <span class="nf">write_f1_py</span><span class="p">(</span><span class="n">Qtest</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">muF</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">muR</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_sep_orders</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="linenos"> 55</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# Q = </span><span class="si">{</span><span class="n">Qtest</span><span class="si">:</span><span class="s2">10.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 56</span>    <span class="k">if</span> <span class="n">use_sep_orders</span><span class="p">:</span>
+<span class="linenos"> 57</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#     x        F1Wp(LO)    F1Wm(LO)    F1Wp(NLO)   F1Wm(NLO)  F1Wp(NNLO)  F1Wm(NNLO)&quot;</span>
+<span class="linenos"> 58</span>              <span class="s2">&quot;  F1Wp(N3LO)  F1Wm(N3LO)    F1Z(LO)    F1Z(NLO)    F1Z(NNLO)&quot;</span>
+<span class="linenos"> 59</span>              <span class="s2">&quot;   F1Z(N3LO)    F1γ(LO)    F1γ(NLO)    F1γ(NNLO)   F1γ(N3LO)   F1γZ(LO)&quot;</span>
+<span class="linenos"> 60</span>              <span class="s2">&quot;   F1γZ(NLO)   F1γZ(NNLO)  F1γZ(N3LO)&quot;</span><span class="p">)</span>
+<span class="linenos"> 61</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos"> 62</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# x F1Wp F1Wm F1Z F1γ F1γZ&quot;</span><span class="p">)</span>
+<span class="linenos"> 63</span>
+<span class="linenos"> 64</span>    <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+<span class="linenos"> 65</span>        <span class="n">ytest</span> <span class="o">=</span> <span class="n">iy</span> <span class="o">*</span> <span class="n">ymax</span> <span class="o">/</span> <span class="n">ny</span>
+<span class="linenos"> 66</span>        <span class="n">xval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ytest</span><span class="p">)</span>
+<span class="linenos"> 67</span>        <span class="k">if</span> <span class="n">use_sep_orders</span><span class="p">:</span>
+<span class="linenos"> 68</span>            <span class="n">res_lo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos"> 69</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xval</span><span class="si">:</span><span class="s2">12.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos"> 70</span>            <span class="n">F1Z_LO</span> <span class="o">=</span> <span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Z</span><span class="p">]</span>
+<span class="linenos"> 71</span>            <span class="n">F1EM_LO</span> <span class="o">=</span> <span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1EM</span><span class="p">]</span>
+<span class="linenos"> 72</span>            <span class="n">F1gZ_LO</span> <span class="o">=</span> <span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1gZ</span><span class="p">]</span>
+<span class="linenos"> 73</span>
+<span class="linenos"> 74</span>            <span class="n">res_nlo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctNLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos"> 75</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos"> 76</span>            <span class="n">F1Z_NLO</span> <span class="o">=</span> <span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Z</span><span class="p">]</span>
+<span class="linenos"> 77</span>            <span class="n">F1EM_NLO</span> <span class="o">=</span> <span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1EM</span><span class="p">]</span>
+<span class="linenos"> 78</span>            <span class="n">F1gZ_NLO</span> <span class="o">=</span> <span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1gZ</span><span class="p">]</span>
+<span class="linenos"> 79</span>
+<span class="linenos"> 80</span>            <span class="n">res_nnlo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctNNLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos"> 81</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos"> 82</span>            <span class="n">F1Z_NNLO</span> <span class="o">=</span> <span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Z</span><span class="p">]</span>
+<span class="linenos"> 83</span>            <span class="n">F1EM_NNLO</span> <span class="o">=</span> <span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1EM</span><span class="p">]</span>
+<span class="linenos"> 84</span>            <span class="n">F1gZ_NNLO</span> <span class="o">=</span> <span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1gZ</span><span class="p">]</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span>            <span class="n">res_n3lo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctN3LO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos"> 87</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos"> 88</span>            <span class="n">F1Z_N3LO</span> <span class="o">=</span> <span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Z</span><span class="p">]</span>
+<span class="linenos"> 89</span>            <span class="n">F1EM_N3LO</span> <span class="o">=</span> <span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1EM</span><span class="p">]</span>
+<span class="linenos"> 90</span>            <span class="n">F1gZ_N3LO</span> <span class="o">=</span> <span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1gZ</span><span class="p">]</span>
+<span class="linenos"> 91</span>
+<span class="linenos"> 92</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">F1Z_LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1Z_NLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1Z_NNLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1Z_N3LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> &quot;</span>
+<span class="linenos"> 93</span>                  <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">F1EM_LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1EM_NLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1EM_NNLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1EM_N3LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> &quot;</span>
+<span class="linenos"> 94</span>                  <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">F1gZ_LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1gZ_NLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1gZ_NNLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F1gZ_N3LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 95</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos"> 96</span>            <span class="n">res</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFct</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos"> 97</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xval</span><span class="si">:</span><span class="s2">12.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1Z</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1EM</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF1gZ</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 98</span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos"> 99</span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos">100</span>
+<span class="linenos">101</span><span class="k">def</span> <span class="nf">write_f2_py</span><span class="p">(</span><span class="n">Qtest</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">muF</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">muR</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_sep_orders</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="linenos">102</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# Q =           </span><span class="si">{</span><span class="n">Qtest</span><span class="si">:</span><span class="s2">10.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">103</span>    <span class="k">if</span> <span class="n">use_sep_orders</span><span class="p">:</span>
+<span class="linenos">104</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#     x        F2Wp(LO)    F2Wm(LO)    F2Wp(NLO)   F2Wm(NLO)  F2Wp(NNLO)  F2Wm(NNLO)&quot;</span>
+<span class="linenos">105</span>              <span class="s2">&quot;  F2Wp(N3LO)  F2Wm(N3LO)    F2Z(LO)    F2Z(NLO)    F2Z(NNLO)&quot;</span>
+<span class="linenos">106</span>              <span class="s2">&quot;   F2Z(N3LO)    F2γ(LO)    F2γ(NLO)    F2γ(NNLO)   F2γ(N3LO)   F2γZ(LO)&quot;</span>
+<span class="linenos">107</span>              <span class="s2">&quot;   F2γZ(NLO)   F2γZ(NNLO)  F2γZ(N3LO)&quot;</span><span class="p">)</span>
+<span class="linenos">108</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">109</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# x F2Wp F2Wm F2Z F2γ F2γZ&quot;</span><span class="p">)</span>
+<span class="linenos">110</span>
+<span class="linenos">111</span>    <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+<span class="linenos">112</span>        <span class="n">ytest</span> <span class="o">=</span> <span class="n">iy</span> <span class="o">*</span> <span class="n">ymax</span> <span class="o">/</span> <span class="n">ny</span>
+<span class="linenos">113</span>        <span class="n">xval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ytest</span><span class="p">)</span>
+<span class="linenos">114</span>        <span class="k">if</span> <span class="n">use_sep_orders</span><span class="p">:</span>
+<span class="linenos">115</span>            <span class="n">res_lo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">116</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xval</span><span class="si">:</span><span class="s2">12.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">117</span>            <span class="n">F2Z_LO</span> <span class="o">=</span> <span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Z</span><span class="p">]</span>
+<span class="linenos">118</span>            <span class="n">F2EM_LO</span> <span class="o">=</span> <span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2EM</span><span class="p">]</span>
+<span class="linenos">119</span>            <span class="n">F2gZ_LO</span> <span class="o">=</span> <span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2gZ</span><span class="p">]</span>
+<span class="linenos">120</span>
+<span class="linenos">121</span>            <span class="n">res_nlo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctNLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">122</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">123</span>            <span class="n">F2Z_NLO</span> <span class="o">=</span> <span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Z</span><span class="p">]</span>
+<span class="linenos">124</span>            <span class="n">F2EM_NLO</span> <span class="o">=</span> <span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2EM</span><span class="p">]</span>
+<span class="linenos">125</span>            <span class="n">F2gZ_NLO</span> <span class="o">=</span> <span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2gZ</span><span class="p">]</span>
+<span class="linenos">126</span>
+<span class="linenos">127</span>            <span class="n">res_nnlo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctNNLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">128</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">129</span>            <span class="n">F2Z_NNLO</span> <span class="o">=</span> <span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Z</span><span class="p">]</span>
+<span class="linenos">130</span>            <span class="n">F2EM_NNLO</span> <span class="o">=</span> <span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2EM</span><span class="p">]</span>
+<span class="linenos">131</span>            <span class="n">F2gZ_NNLO</span> <span class="o">=</span> <span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2gZ</span><span class="p">]</span>
+<span class="linenos">132</span>
+<span class="linenos">133</span>            <span class="n">res_n3lo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctN3LO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">134</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">135</span>            <span class="n">F2Z_N3LO</span> <span class="o">=</span> <span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Z</span><span class="p">]</span>
+<span class="linenos">136</span>            <span class="n">F2EM_N3LO</span> <span class="o">=</span> <span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2EM</span><span class="p">]</span>
+<span class="linenos">137</span>            <span class="n">F2gZ_N3LO</span> <span class="o">=</span> <span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2gZ</span><span class="p">]</span>
+<span class="linenos">138</span>
+<span class="linenos">139</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">F2Z_LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2Z_NLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2Z_NNLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2Z_N3LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> &quot;</span>
+<span class="linenos">140</span>                  <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">F2EM_LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2EM_NLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2EM_NNLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2EM_N3LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> &quot;</span>
+<span class="linenos">141</span>                  <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">F2gZ_LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2gZ_NLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2gZ_NNLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F2gZ_N3LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">142</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">143</span>            <span class="n">res</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFct</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">144</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xval</span><span class="si">:</span><span class="s2">12.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2Z</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2EM</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF2gZ</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">145</span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos">146</span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos">147</span>
+<span class="linenos">148</span><span class="k">def</span> <span class="nf">write_f3_py</span><span class="p">(</span><span class="n">Qtest</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">muF</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">muR</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_sep_orders</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="linenos">149</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# Q =                     </span><span class="si">{</span><span class="n">Qtest</span><span class="si">:</span><span class="s2">10.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">150</span>    <span class="k">if</span> <span class="n">use_sep_orders</span><span class="p">:</span>
+<span class="linenos">151</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#     x        F3Wp(LO)    F3Wm(LO)    F3Wp(NLO)   F3Wm(NLO)  F3Wp(NNLO)  F3Wm(NNLO)&quot;</span>
+<span class="linenos">152</span>              <span class="s2">&quot;  F3Wp(N3LO)  F3Wm(N3LO)    F3Z(LO)    F3Z(NLO)    F3Z(NNLO)&quot;</span>
+<span class="linenos">153</span>              <span class="s2">&quot;   F3Z(N3LO)    F3γZ(LO)&quot;</span>
+<span class="linenos">154</span>              <span class="s2">&quot;   F3γZ(NLO)  F3γZ(NNLO)  F3γZ(N3LO)&quot;</span><span class="p">)</span>
+<span class="linenos">155</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">156</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# x F3Wp F3Wm F3Z F3γZ&quot;</span><span class="p">)</span>
+<span class="linenos">157</span>
+<span class="linenos">158</span>    <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+<span class="linenos">159</span>        <span class="n">ytest</span> <span class="o">=</span> <span class="n">iy</span> <span class="o">*</span> <span class="n">ymax</span> <span class="o">/</span> <span class="n">ny</span>
+<span class="linenos">160</span>        <span class="n">xval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ytest</span><span class="p">)</span>
+<span class="linenos">161</span>        <span class="k">if</span> <span class="n">use_sep_orders</span><span class="p">:</span>
+<span class="linenos">162</span>            <span class="n">res_lo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">163</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xval</span><span class="si">:</span><span class="s2">12.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">164</span>            <span class="n">F3Z_LO</span> <span class="o">=</span> <span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Z</span><span class="p">]</span>
+<span class="linenos">165</span>            <span class="n">F3gZ_LO</span> <span class="o">=</span> <span class="n">res_lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3gZ</span><span class="p">]</span>
+<span class="linenos">166</span>
+<span class="linenos">167</span>            <span class="n">res_nlo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctNLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">168</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">169</span>            <span class="n">F3Z_NLO</span> <span class="o">=</span> <span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Z</span><span class="p">]</span>
+<span class="linenos">170</span>            <span class="n">F3gZ_NLO</span> <span class="o">=</span> <span class="n">res_nlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3gZ</span><span class="p">]</span>
+<span class="linenos">171</span>
+<span class="linenos">172</span>            <span class="n">res_nnlo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctNNLO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">173</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">174</span>            <span class="n">F3Z_NNLO</span> <span class="o">=</span> <span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Z</span><span class="p">]</span>
+<span class="linenos">175</span>            <span class="n">F3gZ_NNLO</span> <span class="o">=</span> <span class="n">res_nnlo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3gZ</span><span class="p">]</span>
+<span class="linenos">176</span>    
+<span class="linenos">177</span>            <span class="n">res_n3lo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFctN3LO</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">178</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">179</span>            <span class="n">F3Z_N3LO</span> <span class="o">=</span> <span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Z</span><span class="p">]</span>
+<span class="linenos">180</span>            <span class="n">F3gZ_N3LO</span> <span class="o">=</span> <span class="n">res_n3lo</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3gZ</span><span class="p">]</span>
+<span class="linenos">181</span>
+<span class="linenos">182</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">F3Z_LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F3Z_NLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F3Z_NNLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F3Z_N3LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> &quot;</span>
+<span class="linenos">183</span>                  <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">F3gZ_LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F3gZ_NLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F3gZ_NNLO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">F3gZ_N3LO</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">184</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">185</span>            <span class="n">res</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">StrFct</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">Qtest</span><span class="p">,</span> <span class="n">muR</span><span class="p">,</span> <span class="n">muF</span><span class="p">)</span>
+<span class="linenos">186</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xval</span><span class="si">:</span><span class="s2">12.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wp</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Wm</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3Z</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iF3gZ</span><span class="p">]</span><span class="si">:</span><span class="s2">11.4E</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">187</span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos">188</span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos">189</span>
+<span class="linenos">190</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">191</span>    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="reading-lhapdf-into-a-tabulation-and-fast-evaluation">
+<h2>Reading LHAPDF into a tabulation and fast evaluation<a class="headerlink" href="#reading-lhapdf-into-a-tabulation-and-fast-evaluation" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="ch">#! /usr/bin/env python3</span>
+<span class="linenos">  2</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">  3</span><span class="sd">This is a small example that uses the Hoppet and LHAPDF python</span>
+<span class="linenos">  4</span><span class="sd">interfaces. It loads an LHAPDF set and assigns it to Hoppet.</span>
+<span class="linenos">  5</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">  6</span>
+<span class="linenos">  7</span><span class="kn">import</span> <span class="nn">hoppet</span> <span class="k">as</span> <span class="nn">hp</span>
+<span class="linenos">  8</span><span class="kn">from</span> <span class="nn">hoppet</span> <span class="kn">import</span> <span class="n">lhapdf</span>
+<span class="linenos">  9</span><span class="kn">import</span> <span class="nn">lhapdf</span>
+<span class="linenos"> 10</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 11</span><span class="kn">import</span> <span class="nn">argparse</span>
+<span class="linenos"> 12</span><span class="kn">import</span> <span class="nn">time</span>
+<span class="linenos"> 13</span>
+<span class="linenos"> 14</span><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="linenos"> 15</span>    <span class="c1"># Get commandline</span>
+<span class="linenos"> 16</span>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Check of an LHAPDF grid against HOPPET evolution.&quot;</span><span class="p">)</span>
+<span class="linenos"> 17</span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-pdf&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;PDF4LHC21_40&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;LHAPDF set name (default PDF4LHC21_40)&#39;</span><span class="p">)</span>
+<span class="linenos"> 18</span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-yorder&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;order for interpolation in y=ln1/x (default=2)&#39;</span><span class="p">)</span>
+<span class="linenos"> 19</span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-lnlnQorder&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;order for interpolation in lnlnQ (default=2)&#39;</span><span class="p">)</span>
+<span class="linenos"> 20</span>
+<span class="linenos"> 21</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+<span class="linenos"> 22</span>
+<span class="linenos"> 23</span>    <span class="n">hlinfo</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">lhapdf</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">pdf</span><span class="p">)</span>
+<span class="linenos"> 24</span>    <span class="n">p_lhapdf</span> <span class="o">=</span> <span class="n">lhapdf</span><span class="o">.</span><span class="n">mkPDF</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">pdf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 25</span>
+<span class="linenos"> 26</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking that hlinfo is valid:&quot;</span><span class="p">,</span> <span class="n">hlinfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+<span class="linenos"> 27</span>
+<span class="linenos"> 28</span>    <span class="c1"># Overwrite the yorder and lnlnQorder interpolation orders</span>
+<span class="linenos"> 29</span>    <span class="n">hp</span><span class="o">.</span><span class="n">SetYLnlnQInterpOrders</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">yorder</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">lnlnQorder</span><span class="p">)</span>
+<span class="linenos"> 30</span>
+<span class="linenos"> 31</span>    <span class="c1"># Evaluate the PDFs at some x values and print them</span>
+<span class="linenos"> 32</span>    <span class="n">xvals</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1e-5</span><span class="p">,</span><span class="mf">1e-4</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.9</span><span class="p">]</span>
+<span class="linenos"> 33</span>    <span class="n">Q</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="linenos"> 34</span>
+<span class="linenos"> 35</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="linenos"> 36</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;           Evaluating PDFs at Q =&quot;</span><span class="p">,</span><span class="n">Q</span><span class="p">,</span> <span class="s2">&quot; GeV&quot;</span><span class="p">)</span>
+<span class="linenos"> 37</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-------------- HOPPET ------------------&quot;</span><span class="p">)</span>
+<span class="linenos"> 38</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">hlinfo</span><span class="o">.</span><span class="n">QED</span><span class="p">:</span>
+<span class="linenos"> 39</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon&quot;</span><span class="p">)</span>
+<span class="linenos"> 40</span>        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+<span class="linenos"> 41</span>            <span class="n">pdf_array</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">Eval</span><span class="p">(</span><span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">Q</span><span class="p">)</span>
+<span class="linenos"> 42</span>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:7.1E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="linenos"> 43</span>                <span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+<span class="linenos"> 44</span>                <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_u</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_ubar</span><span class="p">],</span> 
+<span class="linenos"> 45</span>                <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_d</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_dbar</span><span class="p">],</span> 
+<span class="linenos"> 46</span>                <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_dbar</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_ubar</span><span class="p">]),</span>
+<span class="linenos"> 47</span>                <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_cbar</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_c</span><span class="p">],</span>
+<span class="linenos"> 48</span>                <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_g</span><span class="p">]</span>
+<span class="linenos"> 49</span>            <span class="p">))</span>
+<span class="linenos"> 50</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-------------- LHAPDF ------------------&quot;</span><span class="p">)</span>
+<span class="linenos"> 51</span>        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+<span class="linenos"> 52</span>            <span class="n">pdf_dict</span> <span class="o">=</span> <span class="n">p_lhapdf</span><span class="o">.</span><span class="n">xfxQ</span><span class="p">(</span><span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">Q</span><span class="p">)</span>
+<span class="linenos"> 53</span>            <span class="c1">#print(type(pdf_dict)</span>
+<span class="linenos"> 54</span>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:7.1E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="linenos"> 55</span>                <span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+<span class="linenos"> 56</span>                <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> 
+<span class="linenos"> 57</span>                <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> 
+<span class="linenos"> 58</span>                <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span>
+<span class="linenos"> 59</span>                <span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+<span class="linenos"> 60</span>                <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span>
+<span class="linenos"> 61</span>            <span class="p">))</span>
+<span class="linenos"> 62</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos"> 63</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon      photon&quot;</span><span class="p">)</span>
+<span class="linenos"> 64</span>        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+<span class="linenos"> 65</span>            <span class="n">pdf_array</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">Eval</span><span class="p">(</span><span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">Q</span><span class="p">)</span>
+<span class="linenos"> 66</span>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:7.1E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="linenos"> 67</span>                <span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+<span class="linenos"> 68</span>                <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_u</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_ubar</span><span class="p">],</span> 
+<span class="linenos"> 69</span>                <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_d</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_dbar</span><span class="p">],</span> 
+<span class="linenos"> 70</span>                <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_dbar</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_ubar</span><span class="p">]),</span>
+<span class="linenos"> 71</span>                <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_cbar</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_c</span><span class="p">],</span>
+<span class="linenos"> 72</span>                <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_g</span><span class="p">],</span> <span class="n">pdf_array</span><span class="p">[</span><span class="n">hp</span><span class="o">.</span><span class="n">iflv_photon</span><span class="p">]</span>
+<span class="linenos"> 73</span>            <span class="p">))</span>
+<span class="linenos"> 74</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-------------- LHAPDF ------------------&quot;</span><span class="p">)</span>
+<span class="linenos"> 75</span>        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+<span class="linenos"> 76</span>            <span class="n">pdf_dict</span> <span class="o">=</span> <span class="n">p_lhapdf</span><span class="o">.</span><span class="n">xfxQ</span><span class="p">(</span><span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">Q</span><span class="p">)</span>
+<span class="linenos"> 77</span>            <span class="c1">#print(type(pdf_dict)</span>
+<span class="linenos"> 78</span>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:7.1E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2"> </span><span class="si">{:11.4E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="linenos"> 79</span>                <span class="n">xvals</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+<span class="linenos"> 80</span>                <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> 
+<span class="linenos"> 81</span>                <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> 
+<span class="linenos"> 82</span>                <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span>
+<span class="linenos"> 83</span>                <span class="n">pdf_dict</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+<span class="linenos"> 84</span>                <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">21</span><span class="p">],</span> <span class="n">pdf_dict</span><span class="p">[</span><span class="mi">22</span><span class="p">]</span>
+<span class="linenos"> 85</span>            <span class="p">))</span>
+<span class="linenos"> 86</span>    
+<span class="linenos"> 87</span>
+<span class="linenos"> 88</span>
+<span class="linenos"> 89</span>    <span class="c1">#hp.WriteLHAPDFGrid(&quot;test_python&quot;,0)</span>
+<span class="linenos"> 90</span>
+<span class="linenos"> 91</span>    <span class="c1"># Define grids for timing test</span>
+<span class="linenos"> 92</span>    <span class="n">npoints</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="linenos"> 93</span>    <span class="n">xvals_timing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">0.9</span><span class="p">),</span> <span class="n">npoints</span><span class="p">)</span>
+<span class="linenos"> 94</span>    <span class="n">Qvals_timing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1000.0</span><span class="p">),</span> <span class="n">npoints</span><span class="p">)</span>
+<span class="linenos"> 95</span>
+<span class="linenos"> 96</span>    <span class="c1"># Timing HOPPET</span>
+<span class="linenos"> 97</span>    <span class="n">start_hoppet</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos"> 98</span>    <span class="k">for</span> <span class="n">Q</span> <span class="ow">in</span> <span class="n">Qvals_timing</span><span class="p">:</span>
+<span class="linenos"> 99</span>        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xvals_timing</span><span class="p">:</span>
+<span class="linenos">100</span>            <span class="n">pdf_array</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">Eval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span>
+<span class="linenos">101</span>    <span class="n">end_hoppet</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">102</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HOPPET evaluation time </span><span class="si">{</span><span class="p">(</span><span class="n">end_hoppet</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_hoppet</span><span class="p">)</span><span class="o">/</span><span class="n">npoints</span><span class="o">/</span><span class="n">npoints</span><span class="o">*</span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> ns&quot;</span><span class="p">)</span>
+<span class="linenos">103</span>
+<span class="linenos">104</span>    <span class="c1"># Timing LHAPDF</span>
+<span class="linenos">105</span>    <span class="c1"># Load the PDF from LHAPDF</span>
+<span class="linenos">106</span>    <span class="n">start_lhapdf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">107</span>    <span class="k">for</span> <span class="n">Q</span> <span class="ow">in</span> <span class="n">Qvals_timing</span><span class="p">:</span>
+<span class="linenos">108</span>        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xvals_timing</span><span class="p">:</span>
+<span class="linenos">109</span>            <span class="n">pdf_dict</span> <span class="o">=</span> <span class="n">p_lhapdf</span><span class="o">.</span><span class="n">xfxQ</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span>
+<span class="linenos">110</span>            <span class="c1"># The following call is faster but works only with a patch to LHAPDF</span>
+<span class="linenos">111</span>            <span class="c1"># pdf_list = p_lhapdf.xfxQv(x, Q)</span>
+<span class="linenos">112</span>    <span class="n">end_lhapdf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">113</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LHAPDF evaluation time </span><span class="si">{</span><span class="p">(</span><span class="n">end_lhapdf</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_lhapdf</span><span class="p">)</span><span class="o">/</span><span class="n">npoints</span><span class="o">/</span><span class="n">npoints</span><span class="o">*</span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> ns&quot;</span><span class="p">)</span>
+<span class="linenos">114</span>
+<span class="linenos">115</span>    <span class="c1"># AlphaS timings</span>
+<span class="linenos">116</span>    <span class="n">start_hoppet_as</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">117</span>    <span class="k">for</span> <span class="n">Q</span> <span class="ow">in</span> <span class="n">Qvals_timing</span><span class="p">:</span>
+<span class="linenos">118</span>        <span class="n">as_hoppet</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">AlphaS</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+<span class="linenos">119</span>    <span class="n">end_hoppet_as</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">120</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HOPPET alphaS time </span><span class="si">{</span><span class="p">(</span><span class="n">end_hoppet_as</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_hoppet_as</span><span class="p">)</span><span class="o">/</span><span class="n">npoints</span><span class="o">*</span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> ns&quot;</span><span class="p">)</span> 
+<span class="linenos">121</span>    <span class="n">start_lhapdf_as</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">122</span>    <span class="k">for</span> <span class="n">Q</span> <span class="ow">in</span> <span class="n">Qvals_timing</span><span class="p">:</span>
+<span class="linenos">123</span>        <span class="n">as_lhapdf</span> <span class="o">=</span> <span class="n">p_lhapdf</span><span class="o">.</span><span class="n">alphasQ</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+<span class="linenos">124</span>    <span class="n">end_lhapdf_as</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">125</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LHAPDF alphaS time </span><span class="si">{</span><span class="p">(</span><span class="n">end_lhapdf_as</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_lhapdf_as</span><span class="p">)</span><span class="o">/</span><span class="n">npoints</span><span class="o">*</span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> ns&quot;</span><span class="p">)</span>
+<span class="linenos">126</span>    
+<span class="linenos">127</span>    <span class="n">hp</span><span class="o">.</span><span class="n">DeleteAll</span><span class="p">()</span>
+<span class="linenos">128</span>
+<span class="linenos">129</span>
+<span class="linenos">130</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">131</span>    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="_generated/github_links.html" class="btn btn-neutral float-left" title="Manual in PDF format" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alexander Karlberg, Paolo Nason, Gavin Salam, Giulia Zanderighi, Frederic Dreyer, Juan Rojo.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

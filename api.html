@@ -88,7 +88,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hoppet_constants.html">HOPPET constants</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/github_links.html">PDF documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/github_links.html">Manual in PDF format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 
         </div>
@@ -424,6 +425,7 @@ carry out the cached evolution of a specific initial condition.</p>
 <dd class="field-odd"><p><strong>splitting_variant</strong> (<em>int</em>) – One of the hoppet.n3lo_splitting_approximation_* options.</p>
 </dd>
 </dl>
+<p>To be called before hoppetStart</p>
 </dd></dl>
 
 <dl class="py function">
@@ -467,6 +469,7 @@ functions. If False use the faster parametrisations</p></li>
 </ul>
 </dd>
 </dl>
+<p>To be called before hoppetStart</p>
 </dd></dl>
 
 <dl class="py function">
@@ -509,6 +512,7 @@ masses, both for the coupling and the PDF evolution.</p>
 <dd class="field-odd"><p><strong>variant</strong> (<em>int</em>) – One of the hoppet.n3lo_nfthresholds_* options.</p>
 </dd>
 </dl>
+<p>To be called before hoppetStart</p>
 </dd></dl>
 
 <dl class="py function">
@@ -547,12 +551,13 @@ masses, both for the coupling and the PDF evolution.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="hoppet.SetSplittingN3LO">
 <span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">SetSplittingN3LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">splitting_variant</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hoppet.html#SetSplittingN3LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hoppet.SetSplittingN3LO" title="Link to this definition"></a></dt>
-<dd><p>Arrange for the use of various N3LO splitting functions.</p>
+<dd><p>Change the variant for the N3LO splitting functions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>splitting_variant</strong> (<em>int</em>) – One of the hoppet.n3lo_splitting_* options.</p>
 </dd>
 </dl>
+<p>To be called before hoppetStart</p>
 </dd></dl>
 
 <dl class="py function">
@@ -564,6 +569,7 @@ masses, both for the coupling and the PDF evolution.</p>
 <dd class="field-odd"><p><strong>splitting_variant</strong> (<em>int</em>) – One of the hoppet.nnlo_splitting_* options.</p>
 </dd>
 </dl>
+<p>To be called before hoppetStart</p>
 </dd></dl>
 
 <dl class="py function">
