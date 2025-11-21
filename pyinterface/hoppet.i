@@ -68,7 +68,7 @@ For more examples, see https://github.com/hoppet-code/hoppet/tree/master/example
 //%}
 
 %pythoncode %{
-  __version__ = "2.1.1-dev0"
+  __version__ = "2.1.1"
   __author__ = "Frederic Dreyer, Alexander Karlberg, Paolo Nason, Juan Rojo, Gavin Salam, Giulia Zanderighi"
 %}
 
