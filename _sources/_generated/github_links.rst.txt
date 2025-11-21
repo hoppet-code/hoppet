@@ -1,4 +1,4 @@
 Manual in PDF format
 =====================================
 
-`Download latest PDF manual <https://github.com/hoppet-code/hoppet/releases/download/hoppet-2.1.0/HOPPET-doc.pdf>`_
+`Download latest PDF manual <https://github.com/hoppet-code/hoppet/releases/download/hoppet-2.1.1/HOPPET-doc.pdf>`_
