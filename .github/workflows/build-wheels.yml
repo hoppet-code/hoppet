@@ -199,7 +199,7 @@ jobs:
         # Test the built wheels
         CIBW_TEST_COMMAND: |
           python -c "import hoppet; print('Hoppet import successful for {platform}!')"
-          python {project}/exampls/python/tabulation_example.py
+          python {project}/examples/python/tabulation_example.py
         
         CIBW_TEST_REQUIRES: numpy
         CIBW_BUILD_VERBOSITY: 1
