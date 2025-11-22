@@ -42,7 +42,7 @@
 //       - [x] array creation
 //       - [ ] access to efficient at_xQ functions
 // - [ ] add the evln_operator class
-// - [ ] add split option when creating splitting functions
+// - [x] add split option when creating splitting functions
 // - [ ] functions to query & change flavour representations
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
@@ -56,7 +56,7 @@
 // Things to perhaps add
 // - [x] add take_view to the obj_view class
 // - [x] basic checks of grid compatibility, so as to get C++ errors rather than Fortran errors
-// - [ ] mvv interface for splitting functions?
+// - [x] mvv-like interface for splitting functions?
 
 
 
