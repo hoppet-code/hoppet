@@ -57,42 +57,21 @@ were already available in version 1.1.0, very little is needed on the
 side of the user to invoke the evolution.
 %
 Most importantly all routines that take an \ttt{nloop} argument,
-e.g.\ \ttt{InitDglapHolder}, \ttt{InitRunningCoupling},
-\ttt{hoppetStart}, and \ttt{hoppetEvolve} now support \ttt{nloop = 4}.
+e.g.\ \ttt{hoppetStart}, and \ttt{hoppetEvolve} (or
+\ttt{InitDglapHolder}, \ttt{InitRunningCoupling} in the general
+interface)  now support \ttt{nloop = 4}.
 %
 The user also has a few choices they can make in terms of the
-splitting functions used.
-%
-The approximate splitting functions can return
-three different
-choices corresponding to upper and lower edges of an uncertainty band and their
-average. 
-%
-The user can control which one to use by setting the
-\ttt{n3lo\_splitting\_variant} variable in the
-\repolink{src/dglap_choices.f90}{dglap\_choices} module.
-%
-Allowed values are
-\ttt{n3lo\_splitting\_Nfitav} (default),
-\ttt{n3lo\_splitting\_Nfiterr1}, or \ttt{n3lo\_splitting\_Nfiterr2}.
-%
-When the exact splitting functions become available they will
-correspond to \ttt{n3lo\_splitting\_exact}.
-%
-Similarly if a set of parametrisations of the exact splitting
-functions become available they will correspond to
-\ttt{n3lo\_splitting\_param}.
+splitting functions and mass thresholds used.
 
-It is expected that more precise approximations will become
-available in the future.
+
+Firstly, there have been successively improved approximations to the
+splitting functions.
 %
-The user can control which series of approximation to use, again by setting
-a variable in \repolink{src/dglap_choices.f90}{dglap\_choices}, called
-\ttt{n3lo\_splitting\_approximation}.\footnote{In the streamlined
-  interface, instead call \ttt{hoppetSetApproximateDGLAPN3LO(splitting\_approx)}.}
+The user can control which series of approximation to use by making a
+call to the subroutine \ttt{hoppetSetApproximateDGLAPN3LO(splitting\_approx)}.
 %
-By default it is set to the most recent set of approximations by
-the FHMPRUVV group. At the time of writing it can take one of three values:
+At the time of writing, three options are available for the \ttt{splitting\_approx}:
 %
 \begin{itemize}
 \item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310\_05744}, with the
@@ -104,6 +83,55 @@ the FHMPRUVV group. At the time of writing it can take one of three values:
   writing, with the approximations in papers up to and including
   Ref.~\cite{Falcioni:2024qpd}.
 \end{itemize}
+These constants, and the others discussed in this section, are defined
+in the \repolink{src/dglap_choices.f90}{dglap\_choices} module in
+Fortran.
+%
+In \CPP they are in the \ttt{hoppet} namespace, as defined in
+\masterlink{src/hoppet.h}.
+
+The approximate splitting functions come with an uncertainty band.
+%
+The user has a choice between the two extremities of the band and an
+average of those extremities.
+%
+They can make the choice by calling \ttt{hoppetSetSplittingN3LO(variant)}, where
+\ttt{variant} is one of
+\begin{itemize}
+\item \ttt{n3lo\_splitting\_Nfitav}: the average (the default),
+\item \ttt{n3lo\_splitting\_Nfiterr1}: one of the two extremities,
+\item \ttt{n3lo\_splitting\_Nfiterr2}: the other of the two.
+  extremities
+\end{itemize}
+
+% each can in three variants: a
+% central, or ``average'' one, as well and two 
+% 
+% %
+% The approximate splitting functions can return
+% three different
+% choices corresponding to upper and lower edges of an uncertainty band and their
+% average. 
+% %
+% The user can control which one to use by setting the
+% \ttt{n3lo\_splitting\_variant} variable in the
+% \repolink{src/dglap_choices.f90}{dglap\_choices} module.
+% %
+% Allowed values are
+% \ttt{n3lo\_splitting\_Nfitav} (default),
+% \ttt{n3lo\_splitting\_Nfiterr1}, or \ttt{n3lo\_splitting\_Nfiterr2}.
+% %
+% When the exact splitting functions become available they will
+% correspond to \ttt{n3lo\_splitting\_exact}.
+% %
+% Similarly if a set of parametrisations of the exact splitting
+% functions become available they will correspond to
+% \ttt{n3lo\_splitting\_param}.
+% 
+% It is expected that more precise approximations will become
+% available in the future.
+% %
+
 Besides the splitting functions, we have also incorporated the
 single-mass thresholds up to N$^3$LO, as calculated in
 Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}.
@@ -111,11 +139,9 @@ Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,AB
 As of version 2.1.0, the \ntlo thresholds are available in two forms,
 using code from Refs.~\cite{BlumleinCode,Fael:2022miw}.
 %
-One can choose which form to use by setting the
-\ttt{n3lo\_nfthreshold} variable\footnote{%
-  In the streamlined interface, call
-  \ttt{hoppetSetN3LOnfthresholds(n3lo\_threshold\_choice)}. In \CPP,
-  the constants are in the \ttt{hoppet} namespace.} to one of
+One can choose which form to use by calling
+\ttt{hoppetSetN3LOnfthresholds(n3lo\_threshold\_choice)},
+with one of the following values for \ttt{n3lo\_threshold\_choice}:
 \begin{itemize}
 \item \ttt{n3lo\_nfthreshold\_libOME}:
   %
@@ -516,7 +542,8 @@ Refs.~\cite{vanNeerven:1999ca,vanNeerven:2000uj,Moch:2004xu,Vermaseren:2005qc,Mo
 which are stated to have a relative precision of a few permille (order
 by order) except at particularly small or large values of $x$.
 %
-Otherwise the exact versions are used.\footnote{The LO and NLO
+Alternatively, it is possible to ask for the exact coefficient
+functions.\footnote{The LO and NLO
 coefficient functions are always exact as their expressions are very
 compact. Note that for very large values of $x$ we switch to a
 large-$x$ expansion for the regular part of non-singlet coefficient
@@ -524,22 +551,29 @@ functions at N$^3$LO, to avoid numerical instabilities in the exact
 expressions as discussed in Appendix A of
 Ref.~\cite{Bertone:2024dpm}.}
 %
-This however means that the initialisation becomes slow (about two
+Since the expressions are large, and slow down the compilation, one
+must explicitly request their compilation with the
+\texttt{-DHOPPET\_USE\_EXACT\_COEF=ON} CMake flag.
+%
+Having done that, one then has the option of setting
+\ttt{param\_coefs} to \ttt{.false.}.
+%
+This will lead the initialisation to become quite slow (up to two
 minutes rather than a few seconds).
 %
 Given the good accuracy of the parametrised coefficient functions,
 they are to be preferred for most applications.
 % 
-% and since the parametrised
-% expressions are good to a relative accuracy of $10^{-4}$ for most
-% values of $x$, it is recommended to use the parametrised option for
-% most applications.
-% 
-Note that the exact expressions also add to compilation time and need
-to be explicitly enabled with the \texttt{-DHOPPET\_USE\_EXACT\_COEF=ON}
-CMake flag.\footnote{At N$^3$LO they rely on an extended version of
-  \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
-  is able to handle harmonic polylogarithms up to weight 5.}
+% % and since the parametrised
+% % expressions are good to a relative accuracy of $10^{-4}$ for most
+% % values of $x$, it is recommended to use the parametrised option for
+% % most applications.
+% % 
+% Note that the exact expressions also add to compilation time and need
+% to be explicitly enabled with the \texttt{-DHOPPET\_USE\_EXACT\_COEF=ON}
+% CMake flag.\footnote{At N$^3$LO they rely on an extended version of
+%   \ttt{hplog}~\cite{FortranPolyLog}, \texttt{hplog5} version 1.0, that
+%   is able to handle harmonic polylogarithms up to weight 5.}
 
 The masses of the electroweak vector bosons are used only to calculate
 the weak mixing angle, $\sin^2 \theta_W = 1 - (m_W/m_Z)^2$, which
@@ -855,13 +889,59 @@ of the QED coupling, which contribute at order $\alpha^2 \as L^2 \sim \as^3$
 %
 
 The rest of this section is structured as follows:
-Section~\ref{sec:qed-implementation} gives a technical discussion of
-the implementation of the QED evolution.
-%
-Some readers may prefer to skip or skim this on a first reading.
 %
 Section~\ref{sec:qed-streamlined} shows how to get QED evolution in
 the streamlined interface, which is relatively straightforward.
+%
+Section~\ref{sec:qed-implementation} then gives a technical discussion
+of the implementation of the QED evolution, including details, for
+example, regarding the choice of QED coupling.
+%
+Some readers may prefer to skip or skim this on a first reading.
+
+\subsection{Streamlined interface with QED effects} 
+\label{sec:qed-streamlined}
+The streamlined interface including QED effects works as in the case of pure QCD evolution.
+One has to add the following call
+\begin{lstlisting}
+  logical use_qed, use_qcd_qed, use_Plq_nnlo
+  ...
+  call hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
+\end{lstlisting}
+before using the streamlined interface routines.
+%
+The \ttt{use\_qed} argument turns QED evolution on/off at order
+${\cal O}(\alpha)$ (i.e.\ items \ref{item:qed1} and \ref{item:qed2} in
+the enumerated list at the beginning of
+Sec.~\ref{sec:qed-evolution}).
+%
+The \ttt{use\_qcd\_qed} one turns
+mixed QCD$\times$QED effects on/off in the evolution (i.e.\ item \ref{item:qed3}) and \ttt{use\_Plq\_nnlo} turns 
+the order $\alpha^2 P_{\ell q}$ splitting function on/off (i.e.\
+item \ref{item:qed4}).
+%
+Without this call, all QED corrections
+are off.
+
+With the above, the streamlined interface can then be used as normal.
+%
+E.g.\ by calling the \ttt{hoppetEvolve(...)} function to fill the PDF
+table and \ttt{hoppetEval(x,Q,f)} to evaluate the PDF at a given $x$
+and $Q$.
+%
+Note that the \ttt{f} array in the latter call must be
+suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons (numbering
+is shifted by $+6$ in \CPP).
+%
+Examples of the streamlined interface being used with QED evolution
+can be found in
+\begin{quote}
+  \masterlink{examples/f90/tabulation_example_qed_streamlined.f90}\\
+  \masterlink{examples/cpp/tabulation_example_qed.cc}
+\end{quote}
+%\gps{added this last paragraph}
+%\gps{NB: to make links work, I've hard-coded them to the current
+%  branch, but we should switch over to the master/main branch}
 
 \subsection{Implementation of the QED extension}
 \label{sec:qed-implementation}
@@ -1193,7 +1273,7 @@ To perform the evolution \ttt{EvolvePdfTableQED} calls the routine
        integer,                intent(in)         :: nqcdloop_qed
        logical,  optional,     intent(in)         :: with_Plq_nnloqed
        [...]
-       end subroutine QEDQCDEvolvePDF
+    end subroutine QEDQCDEvolvePDF
 \end{lstlisting}
 Given the \ttt{pdf} at an initial scale \ttt{Q\_init}, it
 evolves it to scale \ttt{Q\_end}, overwriting the \ttt{pdf} array. 
@@ -1210,55 +1290,30 @@ However the \texttt{pdf} array that is passed as an argument and that
 is set by those subroutines should range not from \texttt{(-6:6)} but
 instead from \texttt{(-6:8)} if the PDF just has photons and
 \texttt{(-6:11)} if the PDF also includes leptons.\footnote{Index $7$
-is a historical artefact associated with internal \hoppet bookkeeping
-and should be ignored in the resulting \ttt{pdf} array.}
+  is reserved in \hoppet to hold information about the flavour
+  representation of PDFs.
+  %
+  Ideally PDFs with the full set of flavours would be represented by an
+  underlying type with a 2D array for storing the $x$-dependence of
+  the different PDFs, supplemented with an index for the representation.
+  %
+  However when we explored this option during v1 development we found
+  that this compromised our ability to maintain speed while writing
+  operations of PDFs such as \ttt{a=b+d*c}.
+  %
+  We thus opted to work with plain 2D arrays, encoding the flavour
+  structure with a specific signature for the $x$-dependence of index
+  7.
+  %
+  This is not ideal, however changing it would come at the price of
+  breaking backwards compatibility, and one would still need to
+  explore whether, with today's Fortran features, one could find a
+  good solution without a speed impact.}
 
 Note that at the moment, when QED effects are included, cached
 evolution is not supported.
 
 
-\subsection{Streamlined interface with QED effects}
-\label{sec:qed-streamlined}
-The streamlined interface including QED effects works as in the case of pure QCD evolution.
-One has to add the following call
-\begin{lstlisting}
-  logical use_qed, use_qcd_qed, use_Plq_nnlo
-  ...
-  call hoppetSetQED(use_qed, use_qcd_qed, use_Plq_nnlo)
-\end{lstlisting}
-before using the streamlined interface routines.
-%
-The \ttt{use\_qed} argument turns QED evolution on/off at order
-${\cal O}(\alpha)$ (i.e.\ items \ref{item:qed1} and \ref{item:qed2} in
-the enumerated list at the beginning of
-Sec.~\ref{sec:qed-evolution}).
-%
-The \ttt{use\_qcd\_qed} one turns
-mixed QCD$\times$QED effects on/off in the evolution (i.e.\ item \ref{item:qed3}) and \ttt{use\_Plq\_nnlo} turns 
-the order $\alpha^2 P_{\ell q}$ splitting function on/off (i.e.\
-item \ref{item:qed4}).
-%
-Without this call, all QED corrections
-are off.
-
-With the above, the streamlined interface can then be used as normal.
-%
-E.g.\ by calling the \ttt{hoppetEvolve(...)} function to fill the PDF
-table and \ttt{hoppetEval(x,Q,f)} to evaluate the PDF at a given $x$
-and $Q$.
-%
-Note that the \ttt{f} array in the latter call must be
-suitably large, e.g.\ \ttt{f(-6:11)} for a PDF with leptons.
-%
-Examples of the streamlined interface being used with QED evolution
-can be found in
-\begin{quote}
-  \masterlink{examples/f90/tabulation_example_qed_streamlined.f90}\\
-  \masterlink{examples/cpp/tabulation_example_qed.cc}
-\end{quote}
-%\gps{added this last paragraph}
-%\gps{NB: to make links work, I've hard-coded them to the current
-%  branch, but we should switch over to the master/main branch}
 
 \section{Python interface}
 \label{sec:pyinterface}
@@ -1367,8 +1422,8 @@ For a typical user it will be enough to invoke the following lines
 from the main directory 
 \begin{lstlisting}
   cmake -S . -B build
-  cmake --build build -j
-  ctest --test-dir build [-j8]
+  cmake --build build [-j<num_cores>]
+  ctest --test-dir build [-j<num_cores>]
   cmake --install build
 \end{lstlisting}
 % 
@@ -1380,7 +1435,7 @@ from the main directory
 % 
 This will compile and install \hoppet, along with the streamlined interface.
 %
-Note that \ttt{make install} will typically
+Note that \ttt{cmake --install build} will typically
 install in a location that requires root privileges, unless a user has
 specified a custom prefix (through
 \ttt{-DCMAKE\_INSTALL\_PREFIX=/install/path}). A number of options can
@@ -1407,6 +1462,18 @@ to compile \hoppet with the exact coefficient functions.
 Note that the Python interface is not compiled by default, because we
 anticipate that users of Python will prefer to obtain \hoppet through
 \ttt{pip install hoppet}.
+
+
+Users should be aware that this release of \hoppet makes use of
+features introduced in Fortran~2008, for example its \ttt{abstract
+  interface}, and hence a Fortran~2008 compliant compiler is now
+needed. The code has been tested to compile and run with
+\texttt{gfortran v10.5.0} and later, and the 2025 version of the Intel
+compiler \texttt{ifx}.
+%
+If multiple Fortran compilers are available, a specific one can be
+chosen with the \ttt{-DCMAKE\_Fortran\_COMPILER=...} option.
+
 
 \section{Saving LHAPDF grids}
 \label{sec:lhapdf}

@@ -1,34 +1,17 @@
 
 
-!! An example program using HOPPET's streamlined interface. 
-!! It outputs a subset of
-!! table 15 of hep-ph/0511119 and this output should be identical
-!! to the contents of the file tabulation_example_streamlined.default_output
-!!
-!! NB: for the full functionality used in generating the HeraLHC and
-!!     Les Houches comparison tables, see ../benchmarks/benchmarks.f90
-!!     and carefully read the comments at the beginning. Subtleties
-!!     exist in particular wrt the treatment of scales muF/=muR.
-!!
-!! NB: commented code shows usage with LHAPDF (e.g. for cross-checking 
-!!     some public PDF set's evolution) -- to use this part of the code
-!!     you will also need to link with LHAPDF
-!!
-!! This program uses the streamlined HOPPET interface rather
-!! than the more general ones, used in the example programs
-!! tabulation_example.f90 and tabulation_example_2.f90
-!!
-!!
+!! An example program using HOPPET's streamlined interface to
+!! perform a QCD+QED evolution of PDFs.
 
-
-
+!! A module that contains the initial condition for the evolution
 module lhasub4streamlinedqed
   implicit none
 
 contains
   !======================================================================
   !! The dummy PDF suggested by Vogt as the initial condition for the 
-  !! unpolarized evolution (as used in hep-ph/0511119).
+  !! unpolarized evolution (as used in hep-ph/0511119), 
+  !! extended to include QED partons in a simple way.
   subroutine LHAsub(x,Q,xpdf)
   use types; use consts_dp; use hoppet; implicit none
     real(dp), intent(in)  :: x,Q
@@ -69,7 +52,7 @@ end module lhasub4streamlinedqed
 
 
 
-
+!! the main program illustrating the streamlined interface with QED
 program tabulation_example_qed_streamlined
   use hoppet; use lhasub4streamlinedqed
   !! if using LHAPDF, rename a couple of hoppet functions which
