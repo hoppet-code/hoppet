@@ -15,8 +15,9 @@ struct Empty {};
 template<typename T, typename E = Empty>
 class obj_view {
 public:
-  typedef T ptr_type;
-  typedef E extra_type;
+  using ptr_t = T;
+  using extras_t = E;
+  using view_t = obj_view<T,E>;
 
   //obj_view() noexcept {}
   obj_view() noexcept = default; 
@@ -68,16 +69,16 @@ protected:
 ///
 /// @tparam V  the obj_view type to be wrapped
 template<typename V>
-//requires (requires { typename V::ptr_type; } && std::derived_from<V, obj_view<typename V::ptr_type, typename V::extra_type>>)
+//requires (requires { typename V::ptr_t; } && std::derived_from<V, obj_view<typename V::ptr_t, typename V::extras_t>>)
 class obj_owner : public V {
 public:
-  typedef V             view_type;
-  typedef V::ptr_type   ptr_type;
-  typedef V::extra_type extra_type;
+  using view_type = V;
+  using ptr_t = V::ptr_t;
+  using extras_t = V::extras_t;
 
   obj_owner() noexcept = default;
-  obj_owner(ptr_type * ptr) noexcept : V(ptr) {}
-  obj_owner(ptr_type * ptr, extra_type extras) noexcept : view_type(ptr, extras) {}
+  obj_owner(ptr_t * ptr) noexcept : V(ptr) {}
+  obj_owner(ptr_t * ptr, extras_t extras) noexcept : view_type(ptr, extras) {}
   obj_owner(const view_type & obj) : view_type(generic_copy(obj.ptr()),obj.extra()) {}
   obj_owner(const obj_owner & obj) : view_type(generic_copy(obj.ptr()),obj.extra()) {}
   obj_owner & operator= (const view_type & obj) {
@@ -126,12 +127,12 @@ template<typename E, typename D = double>
 class data_view {
 public:
 
-  typedef E extras_type;
-  typedef D data_type;
+  using extras_t = E;
+  using data_t = D;
 
   data_view() noexcept {}
 
-  data_view(D * data_ptr, std::size_t size, const extras_type & extras) noexcept
+  data_view(D * data_ptr, std::size_t size, const extras_t & extras) noexcept
     : _data(data_ptr), _size(size), _extras(extras) {}
 
   explicit data_view(const data_view<E, D> & other) noexcept {
@@ -231,13 +232,13 @@ class data_owner : public V {
 public:
 
   typedef V view_type;
-  typedef P ptr_type;
+  typedef P ptr_t;
 
   data_owner() {}
   virtual ~data_owner() {del();}
   void del() {generic_delete(_ptr); reset_ptrs();}
 
-  virtual void alloc_virtual(std::size_t sz, const typename V::extras_type & extras) = 0;
+  virtual void alloc_virtual(std::size_t sz, const typename V::extras_t & extras) = 0;
 
   data_owner & operator=(const data_owner & other) {
     if (_ptr == other._ptr) return *this; // self-assignment check

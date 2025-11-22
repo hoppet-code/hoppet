@@ -117,8 +117,8 @@ class grid_def_view; // forward declaration
 class grid_def_ref : public obj_view<grid_def_f> {
 public:
 
-  using base_type = obj_view<grid_def_f>;
-  using base_type::base_type; // ensures that constructors are inherited
+  using base_t = obj_view<grid_def_f>;
+  using base_t::base_t; // ensures that constructors are inherited
   using view_t = grid_def_view;
   using ref_t = grid_def_ref;
 
@@ -183,8 +183,8 @@ public:
 /// @brief A view of a grid_def object, i.e. a definition of a grid in y=ln(1/x)
 class grid_def_view : public grid_def_ref {
 public:
-  using base_type = grid_def_ref;
-  using base_type::base_type; // ensures that constructors are inherited
+  using base_t = grid_def_ref;
+  using base_t::base_t; // ensures that constructors are inherited
   using view_t = grid_def_view;
   using ref_t = grid_def_ref;
 
@@ -210,8 +210,8 @@ public:
 class grid_def : public obj_owner<grid_def_view> {
 public:
 
-  using base_type = obj_owner<grid_def_view>;
-  using base_type::base_type; // ensures that constructors are inherited
+  using base_t = obj_owner<grid_def_view>;
+  using base_t::base_t; // ensures that constructors are inherited
   using view_t = grid_def_view;
   using ref_t  = grid_def_ref;
 
@@ -535,8 +535,8 @@ struct gq2d_extras {
 ///        indices
 class grid_quant_2d_view : public data_view<gq2d_extras> {
 public:  
-  typedef data_view<gq2d_extras> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef data_view<gq2d_extras> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   grid_quant_2d_view() {}
   grid_def_view grid() const {return extras().grid;}
@@ -668,12 +668,12 @@ inline  grid_quant_2d pdf_qcd(grid_def_view const & grid) {return grid_quant_2d(
 /// @brief Object-oriented wrapper around the grid_conv Fortran type, non-owning
 class grid_conv_view : public obj_view<grid_conv_f> {
 public:
-  typedef obj_view<grid_conv_f> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_view<grid_conv_f> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   grid_conv_view() = default;
-  //grid_conv_view(const grid_def_view & grid) :  base_type(nullptr, grid) {}
-  grid_conv_view(grid_conv_f * ptr) : base_type(ptr) {}
+  //grid_conv_view(const grid_def_view & grid) :  base_t(nullptr, grid) {}
+  grid_conv_view(grid_conv_f * ptr) : base_t(ptr) {}
 
   grid_def_ref grid() const {return grid_def_ref(hoppet_cxx__grid_conv__grid(ptr()));}
 
@@ -714,8 +714,8 @@ public:
 class grid_conv : public obj_owner<grid_conv_view> {
 public:
 
-  typedef obj_owner<grid_conv_view> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_owner<grid_conv_view> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   grid_conv() {}
 
@@ -724,7 +724,7 @@ public:
   /// @param grid          the grid definition
   /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)
   ///
-  grid_conv(const grid_def_ref & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : base_type(nullptr) {
+  grid_conv(const grid_def_ref & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : base_t(nullptr) {
 
     //std::cout << "grid_conv: constructing from function object, grid = " << grid.ptr() <<" " << this->grid().ptr() << "\n";
     using FuncType = decltype(conv_ignd_fn);
@@ -773,9 +773,9 @@ typedef grid_conv_view split_fn_view;
 class split_mat_view : public obj_view<split_mat_f> {
 public:
 
-  typedef obj_view<split_mat_f> base_type;
-  //typedef grid_def_view extra_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_view<split_mat_f> base_t;
+  //typedef grid_def_view extra_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   split_mat_view & operator=(const split_mat_view & other) {
     if (!ptr()) throw std::runtime_error("split_mat_view::operator=: split_mat_view object not associated");
@@ -839,8 +839,8 @@ class split_mat : public obj_owner<split_mat_view> {
 
 public:
 
-  typedef obj_owner<split_mat_view> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_owner<split_mat_view> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   split_mat() {}
 
@@ -890,9 +890,9 @@ inline grid_quant_2d operator*(const split_mat_view & split, const grid_quant_2d
 class mass_threshold_mat_view : public obj_view<mass_threshold_mat_f> {
 public:
 
-  typedef obj_view<mass_threshold_mat_f> base_type;
-  typedef grid_def_view extra_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_view<mass_threshold_mat_f> base_t;
+  typedef grid_def_view extra_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   mass_threshold_mat_view & operator=(const mass_threshold_mat_view & other) {
     if (!ptr()) throw std::runtime_error("mass_threshold_mat_view::operator=: mass_threshold_mat_view object not associated");
@@ -959,8 +959,8 @@ class mass_threshold_mat : public obj_owner<mass_threshold_mat_view> {
 
 public:
 
-  typedef obj_owner<mass_threshold_mat_view> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_owner<mass_threshold_mat_view> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   mass_threshold_mat() {}
 
@@ -996,8 +996,8 @@ inline grid_quant_2d operator*(const mass_threshold_mat_view & mtm, const grid_q
 ///
 class running_coupling_view : public obj_view<running_coupling_f> {
 public:
-  typedef obj_view<running_coupling_f> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_view<running_coupling_f> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   /// @brief Evaluate the running coupling at a given scale Q
   /// @param Q 
@@ -1095,8 +1095,8 @@ public:
 ///
 class running_coupling : public obj_owner<running_coupling_view> {
 public:
-  typedef obj_owner<running_coupling_view> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_owner<running_coupling_view> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   running_coupling() {}
 
@@ -1119,8 +1119,8 @@ public:
 /// @brief Object-oriented wrapper around the dglap_holder Fortran type, non-owning
 class dglap_holder_view : public obj_view<dglap_holder_f> {
 public:
-  typedef obj_view<dglap_holder_f> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_view<dglap_holder_f> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   /// @brief  set the number of active flavours (nf) for this dglap_holder
   /// @param nf  the new number of active flavours
@@ -1176,8 +1176,8 @@ public:
 /// @brief Object-oriented wrapper around the dglap_holder Fortran type, owning
 class dglap_holder : public obj_owner<dglap_holder_view> {
 public:
-  typedef obj_owner<dglap_holder_view> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_owner<dglap_holder_view> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   dglap_holder() {}
   dglap_holder(const hoppet::grid_def_view & grid, int factscheme, int nloop, int nflo, int nfhi) {
@@ -1189,8 +1189,8 @@ public:
 /// @brief  A view of the segmentation information for PDF tables
 class pdfseginfo_view : public obj_view<pdfseginfo_f> {
 public:
-  typedef obj_view<pdfseginfo_f> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_view<pdfseginfo_f> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
   RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_lo)  ///< return the lowest  iQ index for this segment
   RETURN_INT_MEMBER(pdfseginfo,ilnlnQ_hi)  ///< return the highest iQ index for this segment
   RETURN_DBL_MEMBER(pdfseginfo,lnlnQ_lo)   ///< return the lowest  ln(ln(Q/Λ)) value for this segment
@@ -1204,8 +1204,8 @@ public:
 ///
 class pdf_table_view : public obj_view<pdf_table_f> {
 public:
-  typedef obj_view<pdf_table_f> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef obj_view<pdf_table_f> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   /// @brief copy assignment operator
   ///
@@ -1504,8 +1504,8 @@ protected:
 ///         are inherited from and documented in pdf_table_view
 class pdf_table : public obj_owner<pdf_table_view> {
 public:
-  typedef obj_owner<pdf_table_view> base_type;
-  using base_type::base_type; // ensures that constructors are inherited  
+  typedef obj_owner<pdf_table_view> base_t;
+  using base_t::base_t; // ensures that constructors are inherited  
 
   /// @brief  default constructor
   pdf_table() {}
@@ -1537,11 +1537,11 @@ public:
 /// @brief  A view of an array of pdf_table objects
 class pdf_table_array_view : public data_view<Empty, pdf_table_f> {
 public:
-  typedef data_view<Empty, pdf_table_f> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef data_view<Empty, pdf_table_f> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
 
   pdf_table_array_view() noexcept {}
-  pdf_table_array_view(pdf_table_f * ptr, std::size_t sz): base_type(ptr, sz, Empty()) {}
+  pdf_table_array_view(pdf_table_f * ptr, std::size_t sz): base_t(ptr, sz, Empty()) {}
 
   /// @brief return a view of the i-th pdf_table in the array (numbered from 0)
   pdf_table_view operator[](std::size_t i) {
@@ -1571,8 +1571,8 @@ public:
 /// ```
 class pdf_table_array: public data_owner<pdf_table_array_view, pdf_table_array_f> {
 public:
-  typedef data_owner<pdf_table_array_view, pdf_table_array_f> base_type;
-  using base_type::base_type; // ensures that constructors are inherited
+  typedef data_owner<pdf_table_array_view, pdf_table_array_f> base_t;
+  using base_t::base_t; // ensures that constructors are inherited
   typedef pdf_table_array_view view_t;
 
   pdf_table_array(std::size_t sz) {alloc(sz);}
