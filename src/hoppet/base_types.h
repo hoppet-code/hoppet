@@ -72,16 +72,16 @@ template<typename V>
 //requires (requires { typename V::ptr_t; } && std::derived_from<V, obj_view<typename V::ptr_t, typename V::extras_t>>)
 class obj_owner : public V {
 public:
-  using view_type = V;
+  using view_t = V;
   using ptr_t = V::ptr_t;
   using extras_t = V::extras_t;
 
   obj_owner() noexcept = default;
   obj_owner(ptr_t * ptr) noexcept : V(ptr) {}
-  obj_owner(ptr_t * ptr, extras_t extras) noexcept : view_type(ptr, extras) {}
-  obj_owner(const view_type & obj) : view_type(generic_copy(obj.ptr()),obj.extra()) {}
-  obj_owner(const obj_owner & obj) : view_type(generic_copy(obj.ptr()),obj.extra()) {}
-  obj_owner & operator= (const view_type & obj) {
+  obj_owner(ptr_t * ptr, extras_t extras) noexcept : view_t(ptr, extras) {}
+  obj_owner(const view_t & obj) : view_t(generic_copy(obj.ptr()),obj.extra()) {}
+  obj_owner(const obj_owner & obj) : view_t(generic_copy(obj.ptr()),obj.extra()) {}
+  obj_owner & operator= (const view_t & obj) {
     if (this != &obj) {
       generic_delete(this->_ptr);
       this->_ptr = generic_copy(obj.ptr());
@@ -98,7 +98,7 @@ public:
     return *this;
   }
 
-  obj_owner(obj_owner && other) noexcept : view_type(other.ptr(), other.extra()) {
+  obj_owner(obj_owner && other) noexcept : view_t(other.ptr(), other.extra()) {
     // null out the other pointer to avoid double deletion
     other._ptr = nullptr;
   }
@@ -129,6 +129,7 @@ public:
 
   using extras_t = E;
   using data_t = D;
+  using view_t = data_view<E,D>;
 
   data_view() noexcept {}
 
@@ -231,8 +232,9 @@ template<typename V, typename P>
 class data_owner : public V {
 public:
 
-  typedef V view_type;
-  typedef P ptr_t;
+  using base_t = data_owner<V,P>;
+  using view_t = V;
+  using ptr_t  = P;
 
   data_owner() {}
   virtual ~data_owner() {del();}
@@ -302,7 +304,7 @@ protected:
     other.reset_ptrs();
   }
 
-  using view_type::take_view; //< data_owner cannot safely take_view(), so disable it
+  using view_t::take_view; //< data_owner cannot safely take_view(), so disable it
 
 
   P * _ptr = nullptr;

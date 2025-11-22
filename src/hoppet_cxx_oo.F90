@@ -545,23 +545,34 @@ module hoppet_cxx_oo_grid_conv
 contains
 
   !! return a c pointer to a new grid_conv constructed from a conv_ignd_c_interface object
-  function hoppet_cxx__grid_conv__new_from_fn(grid_ptr, conv_ignd_c_fn_obj) bind(C) result(ptr)
+  function hoppet_cxx__grid_conv__new_from_fn(grid_ptr, conv_ignd_c_fn_obj, split_array_ptr, nsplit) bind(C) result(ptr)
+    use warnings_and_errors
     implicit none
     type(c_ptr), intent(in), value :: grid_ptr
     type(c_ptr), intent(in), value :: conv_ignd_c_fn_obj
-    !type(c_ptr), intent(in) :: split_array_ptr
-    !integer(c_int), intent(in), value :: nsplit
+    type(c_ptr), intent(in), value :: split_array_ptr
+    integer(c_int), intent(in), optional :: nsplit
     type(c_ptr) :: ptr
     !--
     type(grid_conv), pointer :: gc
     type(grid_def), pointer :: grid
     procedure(conv_ignd_c_interface), pointer :: conv_ignd_f_fn
     type(conv_ignd_from_c) :: lcl_conv_ignd
+    real(dp), pointer :: split_array_f(:)
 
     call c_f_pointer(grid_ptr, grid)
     lcl_conv_ignd%ctx = conv_ignd_c_fn_obj
 
     allocate(gc)
+    if (c_associated(split_array_ptr)) then
+      if (.not. present(nsplit)) then
+        call wae_error("hoppet_cxx__grid_conv__new_from_fn: nsplit must be provided if split_array_ptr is associated")
+      end if
+      call c_f_pointer(split_array_ptr, split_array_f, shape=[nsplit])
+      call InitGridConv(grid, gc, lcl_conv_ignd, alloc=.true., split=split_array_f)
+    else
+      call InitGridConv(grid, gc, lcl_conv_ignd, alloc=.true.)
+    end if
     call InitGridConv(grid, gc, lcl_conv_ignd, alloc=.true.)
     ptr = c_loc(gc)
   end function hoppet_cxx__grid_conv__new_from_fn

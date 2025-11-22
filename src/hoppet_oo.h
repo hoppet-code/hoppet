@@ -28,7 +28,7 @@
 // - [x] add the dglap_holder    
 // - [x] generic string conversion (hoppet_c_f_string_utils.f90)
 // - [~] add the pdf_table
-//       - [ ] grid_quant_3d
+//       - [ ] grid_quant_3d?
 //       - [x] evolution functions
 //       - [x] PDF access functions
 //       - [ ] does copying also copy the evolution operators? **NO**
@@ -42,6 +42,7 @@
 //       - [x] array creation
 //       - [ ] access to efficient at_xQ functions
 // - [ ] add the evln_operator class
+// - [ ] add split option when creating splitting functions
 // - [ ] functions to query & change flavour representations
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
@@ -128,11 +129,16 @@ public:
   /// return the size of the grid (i.e. total number of points)
   std::size_t size() const {return static_cast<std::size_t>(ny())+1;}
 
+  /// @brief return a vector of the y=ln(1/x) values for the grid points 
+  ///
+  /// The returned vector has size ny()+1, and for nested grids
+  /// some y points are likely to be repeated.
   std::vector<double> y_values() const {
     std::vector<double> yvals(ny()+1);
     hoppet_cxx__grid_def__y_values(valid_ptr(), yvals.data());
     return yvals;
   }
+  /// @brief return a vector of the x values for the grid points 
   std::vector<double> x_values() const {
     std::vector<double> xvals(ny()+1);
     hoppet_cxx__grid_def__x_values(valid_ptr(), xvals.data());
@@ -407,7 +413,7 @@ public:
 class grid_quant : public data_owner<grid_quant_view, grid_quant_f> {
 public:
 
-  typedef grid_quant_view view_t;
+  using view_t = grid_quant_view;
 
   grid_quant() {}
 
@@ -535,7 +541,7 @@ struct gq2d_extras {
 ///        indices
 class grid_quant_2d_view : public data_view<gq2d_extras> {
 public:  
-  typedef data_view<gq2d_extras> base_t;
+  using base_t = data_view<gq2d_extras>;
   using base_t::base_t; // ensures that constructors are inherited
 
   grid_quant_2d_view() {}
@@ -620,7 +626,7 @@ class grid_quant_2d : public data_owner<grid_quant_2d_view, grid_quant_2d_f> {
 
 public:
 
-  typedef grid_quant_2d_view view_t;
+  using view_t = grid_quant_2d_view;
 
   grid_quant_2d() {}
   grid_quant_2d(const grid_def_view & grid, std::size_t dim1_size) {
@@ -668,8 +674,9 @@ inline  grid_quant_2d pdf_qcd(grid_def_view const & grid) {return grid_quant_2d(
 /// @brief Object-oriented wrapper around the grid_conv Fortran type, non-owning
 class grid_conv_view : public obj_view<grid_conv_f> {
 public:
-  typedef obj_view<grid_conv_f> base_t;
+  using base_t = obj_view<grid_conv_f>;
   using base_t::base_t; // ensures that constructors are inherited
+  using view_t = grid_conv_view;
 
   grid_conv_view() = default;
   //grid_conv_view(const grid_def_view & grid) :  base_t(nullptr, grid) {}

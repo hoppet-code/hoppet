@@ -106,7 +106,8 @@ inline void generic_delete(grid_quant_2d_f * ptr) {if (ptr) hoppet_cxx__grid_qua
 
 /// grid_conv function wrappers
 extern "C" {
-  grid_conv_f * hoppet_cxx__grid_conv__new_from_fn(const grid_def_f * grid_ptr, void * conv_ignd_c_fn_obj);
+  grid_conv_f * hoppet_cxx__grid_conv__new_from_fn(const grid_def_f * grid_ptr, void * conv_ignd_c_fn_obj, 
+                                                   const double * split_array_ptr = nullptr, int * nsplit = nullptr);
   grid_conv_f * hoppet_cxx__grid_conv__new_from_gc(const grid_conv_f * gc_other);
   void  hoppet_cxx__grid_conv__copy_contents(grid_conv_f * dest, const grid_conv_f * src); //< src copied into dest
   //void  hoppet_cxx__grid_conv__delete(grid_conv_f ** gridconv);

@@ -453,7 +453,7 @@ TEST_CASE( "split_mat", "[hoppet]" ) {
 //-----------------------------------------------------------------------------
 TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
   typedef hoppet::mass_threshold_mat MTM;
-  MTM::view_type mtm_view;
+  MTM::view_t mtm_view;
   int nf_heavy = 4;
   int nloop    = 3;
   MTM mtm(nf_heavy);
@@ -525,7 +525,7 @@ TEST_CASE( "running_coupling", "[hoppet]" ) {
   REQUIRE(alphas3.ptr() != nullptr);
   REQUIRE(alphas2.ptr() == nullptr);
 
-  hoppet::running_coupling::view_type alphas_view;
+  hoppet::running_coupling::view_t alphas_view;
   alphas_view.take_view(alphas);
   REQUIRE(alphas_view(mz) == alphas(mz));
   REQUIRE(alphas_view.ptr() == alphas.ptr());
