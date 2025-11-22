@@ -147,6 +147,10 @@ __Files added__
 	conversion from C bool to Fortran logical now uses logical_from_cbool function,
 	defined once in streamlined_interface.f90.
 
+<<<<<<< HEAD
+=======
+>>>>>>> dev
+>>>>>>> refs/remotes/origin/2025-10-cxx-OO
 2025-11-15 Gavin
 
 	* pyinterface/hoppet.i:
