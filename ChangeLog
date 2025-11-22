@@ -27,6 +27,12 @@ __Files added__
 	provides access to the global C++ QCD constants and functions 
 	(wrapping qcd.f90)
 
+	* src/hoppet/reg_plus_delta.h:            *** ADDED ***
+	implements a reg_plus_delta class that can hold functions for the
+	regular, plus and delta components. An object of this class can then
+	be used as an argument to split_fn to define splitting functions.
+
+
 	* src/hoppet_oo.h:                        *** ADDED ***
 	- contains the C++ object-oriented interfaces
 

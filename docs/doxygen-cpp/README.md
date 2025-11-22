@@ -51,6 +51,7 @@ those objects are in use.
 | class | brief description |
 |-------|-------------------|
 | hoppet::split_fn  | a grid representation of a splitting function object (alias for hoppet::grid_conv)|
+| hoppet::reg_plus_delta | a class that combines regular, plus, and delta functions, to be passed as an argument to the constructor of hoppet::split_fn|
 | hoppet::split_mat | a (sparse) matrix of QCD splitting functions  |
 | hoppet::mass_threshold_mat | a (sparse) matrix of mass threshold terms |
 | hoppet::dglap_holder | an object that holds all the splitting functions and mass threshold terms needed for QCD DGLAP evolution |

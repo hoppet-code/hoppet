@@ -1,5 +1,6 @@
 #include "hoppet_oo.h"
 #include "hoppet/qcd.h"
+#include "hoppet/reg_plus_delta.h"
 #include "unit-test-helpers.h"
 #include <iostream>
 #include <cmath>
@@ -287,7 +288,27 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
 
   auto power = [](double powval) { return grid100 * [powval](double y) { return exp(-powval*y); }; };
 
+
   auto q = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
+  //-- generic test function to compare two splitting functions by convolving each with q
+  // Defined as a macro rather than a lambda so that we get correct line numbers on failure
+  #define test_p(p1,p2) \
+  { \
+    auto p1q = p1 * q; \
+    auto p2q = p2 * q; \
+    double q_mom1 = q.truncated_moment(1.0); \
+    REQUIRE_THAT( p1q.truncated_moment(1.0)/q_mom1, WithinAbs( p2q.truncated_moment(1.0)/q_mom1, 1e-6)); \
+    REQUIRE_THAT((p1*q).at_x(0.11), WithinAbs((p2*q).at_x(0.11), 1e-6)); \
+  }
+//  auto test_p = [&](const hoppet::split_fn_view & p1, const hoppet::split_fn_view & p2) {
+//    auto p1q = p1 * q;
+//    auto p2q = p2 * q;
+//    double q_mom1 = q.truncated_moment(1.0);
+//    REQUIRE_THAT( p1q.truncated_moment(1.0)/q_mom1, WithinAbs( p2q.truncated_moment(1.0)/q_mom1, 1e-6));
+//    REQUIRE_THAT((p1*q).at_x(0.11), WithinAbs((p2*q).at_x(0.11), 1e-6));
+//  };
+
+
   auto pqq_q = pqq * q;
   auto pgq_q = pgq * q;
   double pqq_q_mom1 = pqq_q.truncated_moment(1.0);
@@ -297,6 +318,44 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   REQUIRE_THAT(pqq_q_mom1/q_mom1, WithinAbs(pqq_mom1, 1e-6)); //< check momentum moment (1/6 * (-4/3))
   REQUIRE_THAT(          pqq_q.truncated_moment(0.0), WithinAbs(0.0, 1e-5));    //< check quark number conserved
   REQUIRE_THAT((pqq_q + pgq_q).truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved
+
+  //------- initialisation with an array of points at which to split  ----
+  hoppet::grid_conv pqq_split(big_grid, pqq_fn, {0.5, 2.0, 5.0, 8.0});
+  auto pqq_split_q = pqq_split * q;
+  double pqq_split_q_mom1 = pqq_split_q.truncated_moment(1.0);
+  REQUIRE_THAT(pqq_split_q_mom1/q_mom1, WithinAbs(pqq_mom1, 1e-6)); //< check momentum moment (1/6 * (-4/3))
+
+  //------- test reg_plus_delta
+  hoppet::split_fn pqq_rpd1(big_grid, hoppet::reg_plus_delta(
+    [](double x) {return -cf*(1+x); },
+    [](double x) {return 2*cf/(1-x); },
+    [](double x) {return cf * 3.0/2.0; }
+  ));
+  test_p(pqq_rpd1, pqq);
+  // now with an additional argument, to be passed by the reg_plus_delta object
+  double mm = 3.0;
+  hoppet::split_fn pqq_rpd2(big_grid, hoppet::reg_plus_delta(
+    [](double x, double mult) {return -cf*(1+x) * mult; },
+    [](double x, double mult) {return 2*cf/(1-x) * mult; },
+    [](double x, double mult) {return cf * 3.0/2.0 * mult; },
+    mm
+  ));
+  pqq_rpd2 /= mm;
+  test_p(pqq_rpd2, pqq);
+  // now with actual functions rather than lambdas
+  hoppet::split_fn pqq_rpd3(big_grid, hoppet::reg_plus_delta(pqq_reg, pqq_plus, pqq_delta));
+  test_p(pqq_rpd3, pqq);
+  // replacing some parts with direct arguments 
+  hoppet::split_fn pqq_rpd4(big_grid, hoppet::reg_plus_delta(
+    [](double x) {return -cf*(1+x); },
+    [](double x) {return 2*cf/(1-x); },
+    cf * 3.0/2.0
+  ));
+  test_p(pqq_rpd4, pqq);
+  // and writing in an even more compact way, exploiting the fact 
+  // that we can reshuffle terms between plus, regular and delta parts
+  hoppet::split_fn pqq_rpd5(big_grid, hoppet::reg_plus_delta(0.0, [](double x) {return cf*(1+x*x)/(1-x);}, 0.0));
+  test_p(pqq_rpd5, pqq);
 
   //------- compound operations ------------------------
   hoppet::grid_conv p2 = pqq;

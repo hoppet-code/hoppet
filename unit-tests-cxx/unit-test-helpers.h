@@ -4,6 +4,11 @@
 #include "hoppet_oo.h"
 
 constexpr double cf = 4.0/3.0;
+
+inline double pqq_reg(double x) {return -cf*(1.0 + x);}
+inline double pqq_plus(double x) {return 2.0*cf/(1.0 - x);}
+inline double pqq_delta(double /*x*/) {return cf * 3.0/2.0;}
+
 inline double pqq_fn(double y, int piece) {
   double x = exp(-y);
   double offset = -cf; // the result should be independent of the offset value

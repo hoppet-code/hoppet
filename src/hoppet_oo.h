@@ -716,8 +716,10 @@ public:
   ///@}
 };
 
+
 //-----------------------------------------------------------------------------
-/// @brief Object-oriented wrapper around the grid_conv Fortran type, with ownership
+/// @brief An object representing a convolution operator (splitting
+///        function) on a grid in y=ln(1/x)
 class grid_conv : public obj_owner<grid_conv_view> {
 public:
 
@@ -730,15 +732,33 @@ public:
   ///
   /// @param grid          the grid definition
   /// @param conv_ignd_fn  the convolution integrand function, double(double y, int piece)
+  /// @param split_array   optional array of points in y at which to split the adaptive integrations
   ///
-  grid_conv(const grid_def_ref & grid, DoubleFnDoubleInt auto && conv_ignd_fn) : base_t(nullptr) {
+  /// The function conv_ignd_fn should take two arguments:
+  ///
+  /// - y: the value of ln(1/x) at which to evaluate the integrand
+  /// - piece: an integer identifying which sub-interval of the grid is
+  ///   being integrated (one of hoppet::cc_REAL, hoppet::cc_REALVIRT, hoppet::cc_VIRT, hoppet::cc_DELTA)
+  /// - return value: the value of the convolution integrand at (y, piece), including
+  ///   a factor of x = exp(-y), reflecting the fact that the integration is over dy = dx/x
+  ///  
+  /// The split_array argument is only needed if the integrand has discontinuities
+  /// or non-smoothness at specific y values
+  grid_conv(const grid_def_ref & grid, 
+            DoubleFnDoubleInt auto && conv_ignd_fn, 
+            const std::vector<double> & split_array = {}) : base_t(nullptr) {
 
     //std::cout << "grid_conv: constructing from function object, grid = " << grid.ptr() <<" " << this->grid().ptr() << "\n";
     using FuncType = decltype(conv_ignd_fn);
     // under the hood, the fortran calls hoppet_grid_conv_f__wrapper
     // (defined in hoppet_oo.cc), with a pointer to the function object
     std::function<double(double,int)> fn_ptr = std::forward<FuncType>(conv_ignd_fn);
-    _ptr = hoppet_cxx__grid_conv__new_from_fn(grid.ptr(), &fn_ptr);
+    if (split_array.size() > 0) {
+      int split_array_size = split_array.size();
+      _ptr = hoppet_cxx__grid_conv__new_from_fn(grid.ptr(), &fn_ptr, split_array.data(), &split_array_size);
+    } else {
+      _ptr = hoppet_cxx__grid_conv__new_from_fn(grid.ptr(), &fn_ptr);
+    }
   }
 };
 
