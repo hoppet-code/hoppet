@@ -48,7 +48,8 @@ def main():
     
     asQ0 = 0.35
     Q0 = np.sqrt(2.0)
-    # Do the evolution. 
+    # Do the evolution (replace hp.BenchmarkPDFunpol with a function
+    # that acts like hera_lhc above to use your own initial condition)
     hp.Evolve(asQ0, Q0, nloop, 1.0, hp.BenchmarkPDFunpol, Q0)
 
     # Evaluate the PDFs at some x values and print them

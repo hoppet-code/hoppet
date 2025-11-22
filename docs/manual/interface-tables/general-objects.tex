@@ -1,0 +1,34 @@
+%\newcommand{\tabtt}[1]{\lstinline|#1|}
+\newcommand{\tabtt}[1]{\footnotesize\texttt{#1}}
+\begin{tabular}{ll}
+\toprule
+%\bf TYPES  & \bf DESCRIPTION \\
+%\hline
+\lstinline|type(grid_def :: grid| & \fn $x-$space grid definition \\ 
+\midrule
+\lstinline|real(dp), pointer :: gluon(:)| & \fn Holds a 
+`grid quantity' (\eg gluon PDF) \\
+%\hline
+\lstinline|real(dp), pointer :: PDFset(:,:)| & \fn
+Grid representation of a (13-flavour) PDF set \\
+\midrule
+\lstinline|type(grid_conv)  :: Pgg| 
+ & \fn Convolution operator ({\it i.e.} splitting function) \\ 
+%\hline
+\lstinline|type(split_mat)  :: Pmat|
+ & \fn Splitting matrix (with full flavour structure)\\ 
+%\hline
+ \lstinline|type(mass_threshold_mat) :: MTM|
+ & \fn Heavy quark mass-threshold matrix\\ 
+%\hline
+\lstinline|type(dglap_holder) :: dglap_h| & \fn DGLAP holder (\ie all
+splitting and mass-threshold matrices) \\
+\midrule
+\lstinline|type(running_coupling) :: coupling| & \fn Running coupling \\
+%\hline
+\lstinline|type(evln_operator) :: evop| & \fn Evolution operator (linked
+list of split \&  mass-threshold matrices)\\
+%\hline
+\lstinline|type(pdf_table) :: table| & \fn PDF set tabulated in $x$ \& $Q$\\
+\bottomrule\normalsize
+\end{tabular}

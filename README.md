@@ -22,7 +22,7 @@ Key features include:
 * QED evolution
 * massless structure function evaluation up to N3LO
 * polarized evolution up to NLO
-* simple access (in Fortran 90) to the objects representing splitting
+* simple access (in Fortran) to the objects representing splitting
   function and PDFs, making it possible for a user to extend the
   facilities already provided.
 
@@ -30,9 +30,29 @@ The latest version can always be obtained from
 
     git clone https://github.com/hoppet-code/hoppet
 
+If you want a specific version, check out the relevant tag, e.g. for a
+version 2.x.y, do
+
+    cd hoppet
+    git switch -d hoppet-2.x.y
+
 Summaries of main new features in each release are in
 [NEWS.md](NEWS.md). More detailed lists of changes are in the
 [ChangeLog](ChangeLog) file.
+
+
+## Documentation
+
+Detailed documentation is available at
+https://hoppet-code.github.io/hoppet/ and can be built also from source,
+see [docs/README.md](docs/README.md).
+
+
+If you use HOPPET in a scientific publication, please refer to
+[arXiv:0804.3755](https://arxiv.org/abs/0804.3755) (original v1 release) and
+[arXiv:2510.09310](https://arxiv.org/abs/2510.09310) (v2 features). The latter is now the
+primary reference.
+
 
 
 ## Note on changes in v2 series
@@ -150,18 +170,6 @@ could be configured with
 ```sh
 cmake -S . -B BUILD -Dhoppet_DIR=hoppet/installation/share/hoppet/cmake
 ```
-
-# Documentation
-
-Detailed documentation is available as
-[docs/manual/HOPPET-doc.tex](docs/manual/HOPPET-doc.tex) (available as a PDF on the [releases](https://github.com/hoppet-code/hoppet/releases) page), with further
-information available also at
-https://hoppet-code.github.io/hoppet/. 
-
-
-If you use HOPPET in a scientific publication, please refer to
-https://arxiv.org/abs/0804.3755 (original v1 release) and
-https://arxiv.org/abs/2510.09310 (v2 features).
 
 
 # Other notes

@@ -109,6 +109,44 @@ __Files added__
 	  fortran-C++ conversion utilities.
 
 --------- end 2025-10-cxx-OO branch ---------
+2025-11-21 Gavin
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.2-dev0
+
+2025-11-21 Gavin
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	Release 2.1.1
+
+	* NEWS.md:
+	set release date for 2.1.1
+
+2025-11-21 Alexander + Gavin
+
+	* dglap_objects.f90:
+	turned off the warnings about the use of parametrised MTM%PSHg
+	(since we don't warn about about other bits that use parametrisations).
+
+2025-11-20 Alexander + Gavin
+
+	* src/streamlined_interface.f90:
+	* src/structure_functions.f90:
+	conversion from C bool to Fortran logical now uses logical_from_cbool function,
+	defined once in streamlined_interface.f90.
+
 2025-11-15 Gavin
 
 	* pyinterface/hoppet.i:

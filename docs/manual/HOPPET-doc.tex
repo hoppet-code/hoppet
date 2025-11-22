@@ -12,6 +12,7 @@
 %\releasenotetrue % comment out to hide answers
 
 \input{preamble.tex}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \hypersetup{
   colorlinks = true,
   linkcolor  = blue,
@@ -25,7 +26,7 @@
 \title{A Higher Order Perturbative Parton Evolution Toolkit \\
 (\hoppet)\\
 %% DO NOT EDIT the next line -- it is modified automatically by scripts/set-version.sh
-version 2.1.1-dev0%% VERSION-NUMBER 
+version 2.1.2-dev0%% VERSION-NUMBER 
 %  a.k.a.\ HOPPETv1
 }
 \author{%
@@ -74,7 +75,7 @@ version 2.1.1-dev0%% VERSION-NUMBER
   evolution part of the code from F77, C/\CPP and Python.  \smallskip
 \end{abstract}
 
-\begin{textblock*}{2cm}(0.55\textwidth,0.1\textheight)  % (width)(x,y position)
+\begin{textblock*}{2cm}(0.52\textwidth,0.05\textheight)  % (width)(x,y position)
   %\includegraphics[width=3cm]{logo/2025-09-logo-cropped.pdf}
   \includegraphics[width=2cm]{logo/2025-09-logo.png}
 \end{textblock*}
@@ -3403,13 +3404,13 @@ end program tabulation_example_qed
 \subsection{Other general-interface examples}
 
 To help better illustrate the usage of the general interface,
-additional examples are available in the \ttt{examples\_f90/} and
+additional examples are available in the \ttt{examples/f90/} and
 \ttt{benchmarking/} directories. One,
-\ttt{examples\_f90/tabulation\_example\_2.f90}, summarised briefly
+\ttt{examples/f90/tabulation\_example\_2.f90}, summarised briefly
 below, illustrates how to distribute initialisation and evolution
 tasks across different parts of the program, and also illustrates how
 to verify sum rules. A second example for sum rules,
-\ttt{examples\_f90/sumrules.f90}, also illustrates the use of
+\ttt{examples/f90/sumrules.f90}, also illustrates the use of
 evolution without tabulation.
 %
 The programs in the \ttt{benchmarking/} directory are the ones that
@@ -3466,7 +3467,7 @@ end subroutine D
 A more detailed description of the above technique 
 can be found in a 
 second example program, called \ttt{tabulation\_example\_2.f90},
-which is available in the \ttt{example\_f90} 
+which is available in the \ttt{examples/f90} 
 directory. It generates exactly
 the same output as the previous example program, as well as additional
 output about truncated moments (sum rules), while
@@ -3517,94 +3518,11 @@ Table \ref{tab:streamlined} and for the general interface,
 Table  \ref{tab:general}.
 
 \begin{table}
-\begin{center}
-{\bf \large STREAMLINED INTERFACE}
-\\
-\vspace{0.2cm}
-\begin{tabular}{|c|c|}
-\hline
-\bf METHOD  & \bf DESCRIPTION \\
-\hline
-\bf Initialisation & \\
-\hline
-\begin{lstlisting}
- hoppetStart(dy,nloop)
-\end{lstlisting} 
-& \scriptsize
-Sets up a compound grid with
-spacing in $\ln 1/x$ of \ttt{dy} at small $x$,\\ &
-\fn~  extending to $y = 12$ and numerical
-order $\ttt=-6$. \\ & \fn~  The $Q$ range for the tabulation will be $1\GeV <
-Q<28 \TeV$, \\
-& \fn~ \ttt{dlnlnQ=dy/4} and the factorisation scheme is ${\overline{\rm MS}}$\\
-\hline
-\begin{lstlisting}
- hoppetStartExtended(ymax,dy,Qmin,
- Qmax,dlnlnQ,nloop,order,factscheme)
-\end{lstlisting} & \fn
-  ~More general initialisation \\
-\hline 
-\begin{lstlisting}
- hoppetSetFFN(fixed_nf)
- hoppetSetVFN(mc, mb, mt)
-\end{lstlisting} &
-\fn ~Set heavy flavour scheme
-\\
-\hline
-\begin{lstlisting}
-  alphas = hoppetAlphaS(Q)
-\end{lstlisting} &
-\fn~Accessing the coupling \\
-\hline&\\[-0.5em]
-\bf Normal evolution & \\
-\hline
-\texttt{\footnotesize
- hoppetEvolve(asQ,Q0alphas,}
-& \fn\ PDF evolution: specifies the coupling \ttt{asQ} at a 
-scale \ttt{Q0alphas}, \\
- \texttt{\footnotesize nloop,muR\_Q,LHAsub,Q0pdf)}&
- \fn the number of loops for  evol., \ttt{nloop}, \\
-&\fn the ratio (\ttt{muR\_Q}) of ren. to fact. scales. \\ 
-&  \fn the name of a subroutine \ttt{LHAsub} with an LHAPDF-like interface \\
-&  \fn and the scale
-\ttt{Q0pdf} at which one starts the PDF evolution \\
-&  \fn Note:  \ttt{LHAsub} only called at scale \ttt{Q0pdf}\\
-\hline
-\begin{lstlisting}
- hoppetEval(x,Q,f)
-\end{lstlisting} &
-\fn On return, \ttt{f(-6:6)} contains all flavours of the PDF set\\ 
-%The PDF at a given value of  is obtained \\
-& \fn ~
-(multiplied by $x$) at the given $\ttt{x}$ and $\ttt{Q}$ values \\
-\hline&\\[-0.5em]
-\bf Cached evolution & \\
-\hline
-\begin{lstlisting}
- hoppetPreEvolve(asQ,Q0alphas, 
-          nloop, muR_Q, Q0pdf)
-\end{lstlisting} & \fn ~
- Preparation of the cached evolution\\
-\hline
-\begin{lstlisting}
- hoppetCachedEvolve(LHAsub)
-\end{lstlisting} &
-\fn  Perform cached evolution with the initial condition\\
-& \fn at \ttt{Q0pdf} from a routine \ttt{LHAsub} 
-with LHAPDF-like interface\\
-&  \fn Notice  \ttt{LHAsub} only called at scale \ttt{Q0pdf}\\
-\hline
-\begin{lstlisting}
- hoppetEval(x,Q,f)
-\end{lstlisting} &
-\fn On return, \ttt{f(-6:6)} contains all flavours of the PDF set\\ 
-%The PDF at a given value of  is obtained \\
-& \fn ~
-(multiplied by $x$) at the given $\ttt{x}$ and $\ttt{Q}$ values \\
-& \fn [as for normal evolution]\\
-\hline
-\end{tabular}
-\end{center}
+  \centering
+ {\bf \large STREAMLINED INTERFACE}
+ \\
+ \vspace{0.2cm}
+  \input{interface-tables/streamlined.tex}
 \caption{\label{tab:streamlined} Reference guide for the streamlined
   interface. Note that \hoppet should be supplied with and returns parton
   densities multiplied by $x$.}

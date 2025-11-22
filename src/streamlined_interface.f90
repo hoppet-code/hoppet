@@ -134,7 +134,13 @@ contains
 
   end function tableIndexValue
 
-  
+  !! return a standard fortran logical from a C logical(c_bool)
+  function logical_from_cbool(cbool) result(lbool)
+    use iso_c_binding
+    logical(c_bool), intent(in) :: cbool
+    logical :: lbool
+    lbool = (cbool .neqv. .false._c_bool)
+  end function logical_from_cbool
   
 end module streamlined_interface
 
@@ -173,9 +179,9 @@ subroutine hoppetSetQED_c(use_qed, use_qcd_qed, use_Plq_nnlo) bind(C,name="hoppe
   logical :: use_qed_f
   logical :: use_qcd_qed_f, use_Plq_nnlo_f
 
-  use_qed_f      = (use_qed      .neqv. .false._c_bool)
-  use_qcd_qed_f  = (use_qcd_qed  .neqv. .false._c_bool)
-  use_Plq_nnlo_f = (use_Plq_nnlo .neqv. .false._c_bool)
+  use_qed_f      = logical_from_cbool(use_qed     )
+  use_qcd_qed_f  = logical_from_cbool(use_qcd_qed )
+  use_Plq_nnlo_f = logical_from_cbool(use_Plq_nnlo)
   call hoppetSetQED(use_qed_f, use_qcd_qed_f, use_Plq_nnlo_f)
 end subroutine hoppetSetQED_c
 
@@ -627,8 +633,8 @@ subroutine hoppetSetExactDGLAP_c(exact_nfthreshold, exact_splitting) bind(C,name
   logical(c_bool) :: exact_nfthreshold, exact_splitting
   logical :: exact_nfthreshold_f, exact_splitting_f
 
-  exact_nfthreshold_f = merge(.true._1,.false._1,exact_nfthreshold)
-  exact_splitting_f = merge(.true._1,.false._1,exact_splitting)
+  exact_nfthreshold_f = logical_from_cbool(exact_nfthreshold)
+  exact_splitting_f   = logical_from_cbool(exact_splitting)
 
   call hoppetSetExactDGLAP(exact_nfthreshold_f, exact_splitting_f)
 
@@ -728,21 +734,20 @@ end subroutine hoppetSetYLnlnQInterpOrders
 !! If QED has been enabled, the indices that will be set are 
 !! f(-6:ncompmaxLeptons), where ncompmaxLeptons=11.
 !! NB: f(7) is a dummy entry, f(8) is the photon and f(9:11) are 
-!! of (e+ + e-), (mu+ + mu-) and (tau+ + tau-)
+!! (e+ + e-), (mu+ + mu-) and (tau+ + tau-)
+!! 
+!! It is the user's responsibility to make sure f is of sufficient size.
 subroutine hoppetEval(x,Q,f)
   use streamlined_interface; use pdf_representation
   implicit none
   real(dp), intent(in)  :: x, Q
-  real(dp), intent(out) :: f(*) ! QED-TBD [check it still works without QED]
+  real(dp), intent(out) :: f(*) 
   integer, parameter :: iflv_offset = - ncompmin + 1
-  ! the interface does pass the size of the array, but the functions we
+  ! the interface does not pass the size of the array, but the functions we
   ! call have interfaces that do need the size; so here give it a dummy
   ! value that is the largest that could ever be used. The functions
   ! that we call will fill -6:6 with normal QCD evolution set and
   ! -6:ncompmaxLeptons with QED evolution set.
-  !real(dp), intent(out) :: f(-6:ncompmaxLeptons) ! QED-TBD [check it still works without QED]
-  !call EvalPdfTable_xQ(tables(0),x,Q,f)
-
   call EvalPdfTable_xQ(tables(0),x,Q,f(1:tables(0)%tab_iflv_max+iflv_offset))
 end subroutine hoppetEval
 
