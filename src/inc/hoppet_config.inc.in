@@ -1,0 +1,4 @@
+!! file that gets processed by CMake to help us with conditional
+!! builds inside the Fortran
+
+@HOPPET_ENABLE_N3LO_FORTRAN_MTM_DEFINE@

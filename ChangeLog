@@ -115,6 +115,36 @@ __Files added__
 	  fortran-C++ conversion utilities.
 
 --------- end 2025-10-cxx-OO branch ---------
+2025-11-24 Gavin + Alexander
+
+	* CMakeLists.txt:
+	added HOPPET_DYNLIB_NAME CMake option to allow user to set the dynamic library name, 
+	e.g. to avoid conflicts with other installations of hoppet. Default is "hoppet".
+	NB: include paths not yet changed to reflect this, so user must take care
+	when including modules and/or .h files.
+
+2025-11-24 Gavin
+
+	* CMakeLists.txt:
+	* src/inc/hoppet_config.inc.in: *** ADDED ***
+	* src/dglap_objects.f90 -> src/dglap_objects.F90:
+	* src/mass-thresholds/xa2hgp.f90 -> src/mass-thresholds-nnlo/xa2hgp.f90:
+	* src/mass_thresholds_n3lo.f90 -> src/mass-thresholds/mass_thresholds_n3lo.f90:
+	* unit-tests/CMakeLists.txt:
+	* unit-tests/test_libome.F90:
+	added HOPPET_ENABLE_N3LO_FORTRAN_MTM CMake option (defaults to ON)
+	to enable/disable the Fortran N3LO mass thresholds. 
+	- src/inc/hoppet_config.inc.in gets written depending on the option
+	- CMakeLists.txt writes build/src/inc/hoppet_config.inc accordingly
+	- CMakeLists.txt adds/removes the relevant source files (+dirs
+	  slightly reorganised)
+	- other files carry out conditional compilation
+
+	* src/convolution.f90:
+	added the gc_moment helper function to compute moments of grid convolutions
+	(to be used with considerable caution: slow, and accuracy will not be 
+	great for high moments).
+
 2025-11-21 Gavin
 
 	* CMakeLists.txt:

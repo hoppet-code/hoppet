@@ -49,6 +49,8 @@ option(HOPPET_BUILD_PYINTERFACE "Build Python interface." OFF)
 option(HOPPET_BUILD_PYWHEELS    "Build Python wheels. (developer option)" OFF)
 option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
 option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
+option(HOPPET_ENABLE_N3LO_FORTRAN_MTM "Compile-in N3LO fortran mass-thresholds." ON)
+option(HOPPET_DYNLIB_NAME       "Dynamic library name (to override default of hoppet)" "hoppet")
 
 # compile-time debugging info
 option(HOPPET_ENABLE_DEBUG "Turn on debug compiler information [default=ON]" ON)
@@ -232,6 +234,8 @@ message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
 message(STATUS "HOPPET: HOPPET_BUILD_TESTDIR=${HOPPET_BUILD_TESTDIR}")
 message(STATUS "HOPPET: HOPPET_ENABLE_FPES=${HOPPET_ENABLE_FPES}")
 message(STATUS "HOPPET: HOPPET_ENABLE_DEBUG: ${HOPPET_ENABLE_DEBUG}")
+message(STATUS "HOPPET: HOPPET_ENABLE_N3LO_FORTRAN_MTM: ${HOPPET_ENABLE_N3LO_FORTRAN_MTM}")
+message(STATUS "HOPPET: HOPPET_DYNLIB_NAME: ${HOPPET_DYNLIB_NAME}")
 
 
 if (HOPPET_BUILD_EXAMPLES)
@@ -245,8 +249,17 @@ endif()
 
 
 # Sources ==============================================================
-file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds/*.f90)
-file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/mass-thresholds/*.f src/param-coefs/*.f)
+file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds-nnlo/xa2hgp.f90)
+file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/param-coefs/*.f)
+
+if (HOPPET_ENABLE_N3LO_FORTRAN_MTM)
+  file(GLOB N3LOMTMF90 src/mass-thresholds/*.f90)
+  file(GLOB N3LOMTMF src/mass-thresholds/*.f) 
+  list(APPEND SOURCESf90 ${N3LOMTMF90})
+  list(APPEND SOURCESf ${N3LOMTMF})
+else()
+  message(STATUS "HOPPET: Excluding N3LO fortran mass-thresholds")  
+endif()
 
 file(GLOB SOURCESCXX src/*.cc)
 
@@ -302,23 +315,35 @@ else()
 endif()
 
 add_subdirectory(src/libome)
-#message(WARNING "SOURCESCXX is ${SOURCESCXX}\n")
-#message(WARNING "CXXINCLUDE is ${CXXINCLUDE}\n")
+
+# set up the hoppet_config.inc file
+if(HOPPET_ENABLE_N3LO_FORTRAN_MTM)
+    set(HOPPET_ENABLE_N3LO_FORTRAN_MTM_DEFINE "#define HOPPET_ENABLE_N3LO_FORTRAN_MTM")
+else()
+    set(HOPPET_ENABLE_N3LO_FORTRAN_MTM_DEFINE "! HOPPET_ENABLE_N3LO_FORTRAN_MTM disabled")
+endif()
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/inc/hoppet_config.inc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/src/inc/hoppet_config.inc
+)
+# and add it to the include path
+set(CXXINCLUDE ${CXXINCLUDE} ${PROJECT_BINARY_DIR}/src)
+#message(WARNING "CXXINCLUDE after append is ${CXXINCLUDE}\n")
 
 #  Libraries ===========================================================
-add_library(hoppet SHARED ${SOURCESf90} ${SOURCESf} ${SOURCESCXX})
-target_include_directories(hoppet PRIVATE ${CXXINCLUDE})
-target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
-target_include_directories(hoppet PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
-set_target_properties(hoppet PROPERTIES OUTPUT_NAME hoppet
+add_library(${HOPPET_DYNLIB_NAME} SHARED ${SOURCESf90} ${SOURCESf} ${SOURCESCXX})
+target_include_directories(${HOPPET_DYNLIB_NAME} PRIVATE ${CXXINCLUDE})
+target_include_directories(${HOPPET_DYNLIB_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hoppet> )
+target_include_directories(${HOPPET_DYNLIB_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
+set_target_properties(${HOPPET_DYNLIB_NAME} PROPERTIES OUTPUT_NAME ${HOPPET_DYNLIB_NAME}
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/$<0:>
     Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet_shared
     SOVERSION 0.0.0
-    EXPORT_NAME hoppet::hoppet
+    EXPORT_NAME ${HOPPET_DYNLIB_NAME}::${HOPPET_DYNLIB_NAME}
     )
-add_library(hoppet::hoppet ALIAS hoppet)
+add_library(${HOPPET_DYNLIB_NAME}::${HOPPET_DYNLIB_NAME} ALIAS ${HOPPET_DYNLIB_NAME})
 
 
 add_library(hoppet_static STATIC ${SOURCESf90} ${SOURCESf} ${SOURCESCXX})
@@ -583,7 +608,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/hoppet/cmake/hoppetConfig.cmake
 #  set(libdir \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")
 #  file(CREATE_LINK \"libhoppet.a\" \"\${libdir}/libhoppet_v1.a\" SYMBOLIC)
 #")
-install(TARGETS hoppet hoppet_static  EXPORT hoppetTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${HOPPET_DYNLIB_NAME} hoppet_static  EXPORT hoppetTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/hoppet DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ )
 
 # glob the list of .h files in src/ and src/hoppet/ and install them

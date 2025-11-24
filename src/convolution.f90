@@ -209,6 +209,7 @@ module convolution
     module procedure conv_TruncatedMoment_1d, conv_TruncatedMoment_2d
   end interface
   public :: TruncatedMoment
+  public :: gc_moment 
 
   !-- for calculating partonic luminosities
   interface PartonLuminosity
@@ -1765,6 +1766,19 @@ contains
    
   end function conv_TruncatedMoment_helper
   
+  ! a super inefficient (O N^2) way of getting the moment that also
+  ! suffers from a truncation error...
+  real(dp) function gc_moment(gc, momN) result(res)
+    type(grid_conv), intent(in) :: gc
+    real(dp), intent(in) :: momN
+    !-------------------------------
+    real(dp) :: powx(0:gc%grid%ny), conv_res(0:gc%grid%ny)
+    powx = xValues(gc%grid)**(-(momN-1))
+    conv_res = gc * powx
+    res = conv_res(gc%grid%ny) / powx(gc%grid%ny)
+  end function gc_moment
+
+
 
   !======================================================================
   ! Routines related to convolutions
