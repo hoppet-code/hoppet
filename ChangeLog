@@ -1,3 +1,11 @@
+2025-11-24 Gavin + Alexander
+
+	* CMakeLists.txt:
+	added HOPPET_DYNLIB_NAME CMake option to allow user to set the dynamic library name, 
+	e.g. to avoid conflicts with other installations of hoppet. Default is "hoppet".
+	NB: include paths not yet changed to reflect this, so user must take care
+	when including modules and/or .h files.
+
 2025-11-24 Gavin
 
 	* CMakeLists.txt:
