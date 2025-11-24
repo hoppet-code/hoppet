@@ -928,9 +928,11 @@ contains
   !! (2,2), (3,3) and (4,4), because these correspond to cases where
   !! there are specific routines with hard-coded orders
   subroutine PdfTableOverrideInterpOrders(yorder, lnlnQorder)
+    use hoppet_to_string
     integer, intent(in) :: yorder, lnlnQorder
 
-    if (yorder * lnlnQorder <= 0) call wae_error("PdfTableOverrideInterpOrders: both orders must be >0 or <0")
+    if (yorder * lnlnQorder <= 0) call wae_error("PdfTableOverrideInterpOrders: both orders must be >0 or <0, but got yorder="//to_string(yorder)&
+         &//", lnlnQorder="//to_string(lnlnQorder))
 
     if (yorder <= 0) then
       override_order_y = -1
