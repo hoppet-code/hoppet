@@ -46,6 +46,7 @@ option(HOPPET_BUILD_PYINTERFACE "Build Python interface." OFF)
 option(HOPPET_BUILD_PYWHEELS    "Build Python wheels. (developer option)" OFF)
 option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
 option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
+option(HOPPET_ENABLE_N3LO_FORTRAN_MTM "Compile-in N3LO fortran mass-thresholds." ON)
 
 # compile-time debugging info
 option(HOPPET_ENABLE_DEBUG "Turn on debug compiler information [default=ON]" ON)
@@ -229,6 +230,7 @@ message(STATUS "HOPPET: HOPPET_BUILD_BENCHMARK=${HOPPET_BUILD_BENCHMARK}")
 message(STATUS "HOPPET: HOPPET_BUILD_TESTDIR=${HOPPET_BUILD_TESTDIR}")
 message(STATUS "HOPPET: HOPPET_ENABLE_FPES=${HOPPET_ENABLE_FPES}")
 message(STATUS "HOPPET: HOPPET_ENABLE_DEBUG: ${HOPPET_ENABLE_DEBUG}")
+message(STATUS "HOPPET: HOPPET_ENABLE_N3LO_FORTRAN_MTM: ${HOPPET_ENABLE_N3LO_FORTRAN_MTM}")
 
 
 if (HOPPET_BUILD_EXAMPLES)
@@ -242,8 +244,17 @@ endif()
 
 
 # Sources ==============================================================
-file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds/*.f90)
-file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/mass-thresholds/*.f src/param-coefs/*.f)
+file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds-nnlo/xa2hgp.f90)
+file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/param-coefs/*.f)
+
+if (HOPPET_ENABLE_N3LO_FORTRAN_MTM)
+  file(GLOB N3LOMTMF90 src/mass-thresholds/*.f90)
+  file(GLOB N3LOMTMF src/mass-thresholds/*.f) 
+  list(APPEND SOURCESf90 ${N3LOMTMF90})
+  list(APPEND SOURCESf ${N3LOMTMF})
+else()
+  message(STATUS "HOPPET: Excluding N3LO fortran mass-thresholds")  
+endif()
 
 #------------------------------------------------------------------------- 
 # Define the two required variables before including
@@ -298,8 +309,20 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(src/libome)
-#message(WARNING "SOURCESCXX is ${SOURCESCXX}\n")
-#message(WARNING "CXXINCLUDE is ${CXXINCLUDE}\n")
+
+# set up the hoppet_config.inc file
+if(HOPPET_ENABLE_N3LO_FORTRAN_MTM)
+    set(HOPPET_ENABLE_N3LO_FORTRAN_MTM_DEFINE "#define HOPPET_ENABLE_N3LO_FORTRAN_MTM")
+else()
+    set(HOPPET_ENABLE_N3LO_FORTRAN_MTM_DEFINE "! HOPPET_ENABLE_N3LO_FORTRAN_MTM disabled")
+endif()
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/inc/hoppet_config.inc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/src/inc/hoppet_config.inc
+)
+# and add it to the include path
+set(CXXINCLUDE ${CXXINCLUDE} ${PROJECT_BINARY_DIR}/src)
+#message(WARNING "CXXINCLUDE after append is ${CXXINCLUDE}\n")
 
 #  Libraries ===========================================================
 add_library(hoppet SHARED ${SOURCESf90} ${SOURCESf} ${SOURCESCXX})

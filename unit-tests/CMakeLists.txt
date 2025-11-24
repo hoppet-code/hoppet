@@ -10,6 +10,7 @@ set(UNIT_TEST_SOURCES ${UNIT_TEST_SOURCES} test_convolution_C.cc)
 #    )
 add_executable(hoppet-unit-tests ${UNIT_TEST_SOURCES} ../benchmarking/io_utils.f90)
 target_include_directories(hoppet-unit-tests PUBLIC ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(hoppet-unit-tests PRIVATE ${PROJECT_SOURCE_DIR}/src ${CXXINCLUDE})
 target_link_libraries(hoppet-unit-tests hoppet_static)
 add_test(NAME hoppet-unit-tests-takes-up-to-10s COMMAND hoppet-unit-tests)
 

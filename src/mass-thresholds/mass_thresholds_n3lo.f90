@@ -416,16 +416,4 @@ contains
     res23(2) = (res_a4pi_lcl(1) - res23(3)*a4pi(1)**3)/a4pi(1)**2
   end function separate23
 
-  ! a super inefficient (O N^2) way of getting the moment that also
-  ! suffers from a truncation error...
-  real(dp) function gc_moment(gc, momN) result(res)
-    type(grid_conv), intent(in) :: gc
-    real(dp), intent(in) :: momN
-    !-------------------------------
-    real(dp) :: powx(0:gc%grid%ny), conv_res(0:gc%grid%ny)
-    powx = xValues(gc%grid)**(-(momN-1))
-    conv_res = gc * powx
-    res = conv_res(gc%grid%ny) / powx(gc%grid%ny)
-  end function gc_moment
-
 end module mass_thresholds_n3lo

@@ -1,7 +1,10 @@
 #include "inc/ftlMacros.inc"
+#include "inc/hoppet_config.inc"
 
 module test_libome
   use unit_tests
+  use qcd
+
 contains
   !! subroutine for testing the hoppet-libome interface
   !! 
@@ -126,14 +129,18 @@ contains
       use qcd, only: qcd_SetNf
       use convolution
       use streamlined_interface
+#ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM      
       use mass_thresholds_n3lo
+#endif
       real(dp) :: moment_N
       integer  :: imoment_N
       type(mass_threshold_mat) :: mtm2, mtm3, mtm3_fortran
 
       call InitMTMLibOME(grid, mtm2, nloop=3)
       call InitMTMLibOME(grid, mtm3, nloop=4)
+#ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM      
       call InitMTMN3LOExactFortran(grid, mtm3_fortran) ! fortran exact except AQg
+#endif
 
 
       do imoment_N = 2, 3
@@ -148,6 +155,7 @@ contains
         call check_moment("nloop=3, Sgq_H    ", moment_N,   mtm2%Sgq_H  , dh%allMTM(3,nf_int)%Sgq_H  )
         call check_moment("nloop=3, Sqg_H    ", moment_N,   mtm2%Sqg_H  , dh%allMTM(3,nf_int)%Sqg_H  )
   
+#ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM      
         ! AQg can differ at the 6e-6 relative level; in the fortran OME code, it is the only
         ! only one that is not exact. It appears to use expansions and, depending on the
         ! system and optimisation level, one can trigger differences, perhaps because of
@@ -161,12 +169,12 @@ contains
         call check_moment("nloop=4, Sgg_H    ", moment_N,   mtm3%Sgg_H  , mtm3_fortran%Sgg_H  )
         call check_moment("nloop=4, Sgq_H    ", moment_N,   mtm3%Sgq_H  , mtm3_fortran%Sgq_H  )
         call check_moment("nloop=4, Sqg_H    ", moment_N,   mtm3%Sqg_H  , mtm3_fortran%Sqg_H  )
+#endif
       end do
     end subroutine moment_check
 
     subroutine check_moment(name, momN, gc_test, gc_ref, override_tol)
       use assertions, only : default_or_opt
-      use mass_thresholds_n3lo, only : gc_moment
       character(len=*),   intent(in) :: name
       real(dp),           intent(in) :: momN
       type(grid_conv),    intent(in) :: gc_test, gc_ref
@@ -245,7 +253,7 @@ contains
   contains
 
     subroutine check_moment_sum(name, ptr, moment_Ns, refvals)
-      use mass_thresholds_n3lo
+      !use mass_thresholds_n3lo
 
       character(len=*), intent(in) :: name
       type(c_ptr),      intent(in) :: ptr

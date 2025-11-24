@@ -1,3 +1,5 @@
+#include "inc/hoppet_config.inc"
+
 !======================================================================
 ! 
 !! This module provide a type for matrices of splitting functions as
@@ -20,7 +22,10 @@
 !!
 !======================================================================
 module dglap_objects
-  use types; use consts_dp; use splitting_functions; use mass_thresholds_n3lo
+  use types; use consts_dp; use splitting_functions
+#ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM  
+  use mass_thresholds_n3lo
+#endif
   !use qcd
   use dglap_choices
   use warnings_and_errors
@@ -996,6 +1001,7 @@ contains
   !! (convolution's DefaultConvolutionEps(), which defaults to 1e-7)
   subroutine InitMTMLibOME(grid, MTM, nloop, LM)
     use iso_c_binding, only: c_double, c_int
+    use qcd
     use hoppet_libome_fortran
     type(grid_def),           intent(in)  :: grid
     type(mass_threshold_mat), intent(out) :: MTM
@@ -1052,6 +1058,9 @@ contains
     !! 203 uses just one extreme one and is faster while giving consistent results
     integer, parameter :: ord3 = 203 
     
+#ifndef HOPPET_ENABLE_N3LO_FORTRAN_MTM  
+    call wae_error('InitMTMN3LO', 'n3lo_nfthreshold = exact_fortran requested but code not compiled with HOPPET_ENABLE_N3LO_FORTRAN_MTM')
+#else
     if (first_time) then
         write(6,'(a)') 'Initialisation of Mass Threshold Matrices at N3LO. The paper'
         write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
@@ -1101,7 +1110,9 @@ contains
     MTM_N3LO%loops = 4
     MTM_N3LO%nf_int = nf_int
 
+#endif
   end subroutine InitMTMN3LOExactFortran
+
 
   subroutine InitMTM_from_MTM(MTM, MTM_in)
     type(mass_threshold_mat), intent(inout) :: MTM
