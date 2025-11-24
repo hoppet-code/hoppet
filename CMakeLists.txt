@@ -47,7 +47,8 @@ option(HOPPET_BUILD_PYWHEELS    "Build Python wheels. (developer option)" OFF)
 option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
 option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
 option(HOPPET_ENABLE_N3LO_FORTRAN_MTM "Compile-in N3LO fortran mass-thresholds." ON)
-option(HOPPET_DYNLIB_NAME       "Dynamic library name (to override default of hoppet)" "hoppet")
+set(HOPPET_DYNLIB_NAME "hoppet" CACHE STRING "Dynamic library name (to override default)")
+
 
 # compile-time debugging info
 option(HOPPET_ENABLE_DEBUG "Turn on debug compiler information [default=ON]" ON)
