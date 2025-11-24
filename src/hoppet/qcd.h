@@ -49,14 +49,14 @@ namespace hoppet {
 /// @brief namespace containing QCD-related global constants and functions  
 namespace qcd {
 
-  const double & ca     = hoppet__qcd__ca    ;  ///< $C_A$ colour factor
-  const double & cf     = hoppet__qcd__cf    ;  ///< $C_F$ colour factor
-  const double & tr     = hoppet__qcd__tr    ;  ///< $T_R$ colour factor
+  const double & ca     = hoppet__qcd__ca    ;  ///< \f$C_A\f$ colour factor
+  const double & cf     = hoppet__qcd__cf    ;  ///< \f$C_F\f$ colour factor
+  const double & tr     = hoppet__qcd__tr    ;  ///< \f$T_R\f$ colour factor
   const int    & nf_int = hoppet__qcd__nf_int;  ///< number of active flavours as an integer
   const int    & nf_u   = hoppet__qcd__nf_u  ;  ///< number of active up-type flavours
   const int    & nf_d   = hoppet__qcd__nf_d  ;  ///< number of active down-type flavours
   const double & nf     = hoppet__qcd__nf    ;  ///< number of active flavours as a double
-  const double & tf     = hoppet__qcd__tf    ;  ///< $T_F = n_f T_R$ factor
+  const double & tf     = hoppet__qcd__tf    ;  ///< \f$T_F = n_f T_R\f$ factor
 
   const double & beta0  = hoppet__qcd__beta0;
   const double & beta1  = hoppet__qcd__beta1;
@@ -90,13 +90,23 @@ namespace qcd {
   const double & mvv_A3G= hoppet__qcd__mvv_A3G;
 
   /// @brief  set the number of active flavours (nf) globally
+  ///
   /// @param nf_in  the new number of active flavours (integer)
+  ///
+  /// This function updates the values of all the QCD constants defined
+  /// in this namespace, including e.g. beta-function coefficients
   inline void set_nf(const int & nf_in) {hoppet__qcd__set_nf(nf_in);}
 
   /// @brief  set the QCD group constants globally
-  /// @param ca_in  the new value of C_A
-  /// @param cf_in  the new value of C_F
-  /// @param tr_in  the new value of T_R
-  auto & set_group = hoppet__qcd__set_group;
+  ///
+  /// @param ca_in  the new value of \f$C_A\f$
+  /// @param cf_in  the new value of \f$C_F\f$
+  /// @param tr_in  the new value of \f$T_R\f$
+  ///
+  /// This function updates the values of all the QCD constants defined
+  /// in this namespace, including e.g. beta-function coefficients
+  inline void set_group(const double & ca_in, const double & cf_in, const double & tr_in) {
+    hoppet__qcd__set_group(ca_in, cf_in, tr_in);
+  }
 }
 }

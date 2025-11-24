@@ -15,7 +15,7 @@
 // Elements to think about
 // - [~] do we separate things out into different files (done to some extent)
 // - [~] do we provide "physics" aliases: e.g. grid_quant -> pdf_flav, grid_conv -> split_fn
-// - [ ] make sure hoppet/qcd.h (etc) gets installed properly
+// - [x] make sure hoppet/qcd.h (etc) gets installed properly
 // - [ ] think about hoppet__qcd v hoppet_cxx__qcd naming conventions
 // - [x] making sure we treat default epsilon correctly
 // - [ ] where does hoppet_oo.h go?
@@ -42,6 +42,7 @@
 //       - [x] array creation
 //       - [ ] access to efficient at_xQ functions
 // - [ ] add the evln_operator class
+// - [ ] the evolution function
 // - [x] add split option when creating splitting functions
 // - [ ] functions to query & change flavour representations
 // - [x] add the mass thresholds 
