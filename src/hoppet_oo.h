@@ -133,16 +133,16 @@ public:
 
   /// @brief return a vector of the y=ln(1/x) values for the grid points 
   ///
-  /// The returned vector has size ny()+1, and for nested grids
+  /// The returned vector has size size()=ny()+1, and for nested grids
   /// some y points are likely to be repeated.
   std::vector<double> y_values() const {
-    std::vector<double> yvals(ny()+1);
+    std::vector<double> yvals(size());
     hoppet_cxx__grid_def__y_values(valid_ptr(), yvals.data());
     return yvals;
   }
   /// @brief return a vector of the x values for the grid points 
   std::vector<double> x_values() const {
-    std::vector<double> xvals(ny()+1);
+    std::vector<double> xvals(size());
     hoppet_cxx__grid_def__x_values(valid_ptr(), xvals.data());
     return xvals;
   }
@@ -436,7 +436,7 @@ public:
     _extras = grid;
     _ptr    = hoppet_cxx__grid_quant__new(grid.ptr());
     _data   = hoppet_cxx__grid_quant__data_ptr(_ptr);
-    _size   = static_cast<std::size_t>(grid.ny()+1);
+    _size   = static_cast<std::size_t>(grid.size());
   }
   void alloc_virtual(std::size_t /*sz*/, const grid_def_view & grid) override {alloc(grid);}
   
@@ -572,7 +572,7 @@ public:
     }
     std::vector<double> xvals = grid().x_values();
     std::vector<double> xpdf (size_flv());
-    for (std::size_t iy=0; iy < grid().ny()+1; ++iy) {
+    for (std::size_t iy=0; iy < grid().size(); ++iy) {
       fn(xvals[iy], Q, xpdf.data());
       for (std::size_t iflv=0; iflv < size_flv(); ++iflv) {
         (*this)(iflv,iy) = (iflv <= iflv_max) ? xpdf[iflv] : 0.0;
@@ -587,7 +587,7 @@ public:
     ensure_valid();
     std::vector<double> xvals = grid().x_values();
     std::vector<double> xpdf (size_flv());
-    for (std::size_t iy=0; iy < grid().ny()+1; ++iy) {
+    for (std::size_t iy=0; iy < grid().size(); ++iy) {
       fn(xvals[iy], Q, xpdf);
       // check only the first time around
       if (iy == 0 && xpdf.size() > size_flv()) {
@@ -1422,7 +1422,7 @@ public:
     double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
     // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
     size_t size_dim0 = size_flv();
-    size_t size_dim1 = static_cast<size_t>(grid().ny()+1);
+    size_t size_dim1 = static_cast<size_t>(grid().size());
     size_t iQ_size = size_dim0 * size_dim1;
     double * iQ_ptr  = tab_ptr + iQ * iQ_size;
     return grid_quant_2d_view(iQ_ptr, iQ_size, gq2d_extras(grid(), size_dim0));
@@ -1440,7 +1440,7 @@ public:
     double * tab_ptr = hoppet_cxx__pdf_table__tab_ptr(valid_ptr());
     // these are the sizes of the two dimensions of result (shifted by 1 index wrt table)
     size_t size_dim0 = size_flv();
-    size_t size_dim1 = static_cast<size_t>(grid().ny()+1);
+    size_t size_dim1 = static_cast<size_t>(grid().size());
     size_t iQ_size = size_dim0 * size_dim1;
     double * iQf_ptr  = tab_ptr + iQ * iQ_size + iflv * size_dim1;
     return grid_quant_view(iQf_ptr, size_dim1, grid());
