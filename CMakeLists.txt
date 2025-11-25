@@ -23,11 +23,8 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 include("GNUInstallDirs")
 
-# set the C++ standard to c++14 for the example
-set(CMAKE_CXX_STANDARD 20)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set(CMAKE_CXX_EXTENSIONS OFF)
+# set the C++ standard
+set(CMAKE_CXX_STANDARD 17)
 
 # add check to see if src/Makefile exists, and any src/*.mod, or any src/*.a
 # If so, then bail out because the user probably tried a build with the old build system

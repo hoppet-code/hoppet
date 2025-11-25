@@ -91,24 +91,24 @@ typedef std::size_t size_type;
 //concept DoubleFunction =
 //    std::is_invocable<F, double> &&
 //    std::same_as<std::invoke_result_t<F, double>, double>;
-template <typename F>
-concept DoubleFnDouble =
-    std::invocable<F, double> &&
-    std::same_as<std::invoke_result_t<F, double>, double>;
-
-template <typename F>
-concept DoubleFnDoubleInt =
-    std::invocable<F, double, int> &&
-    std::same_as<std::invoke_result_t<F, double, int>, double>;
-template <typename F>
-concept VoidFnDoubleDoubleDoubleptr =
-    std::invocable<F, double, double, double *> &&
-    std::same_as<std::invoke_result_t<F, double, double, double *>, void >;
-
-template <typename F>
-concept VoidFnDoubleDoubleDoublevec =
-    std::invocable<F, double, double, std::vector<double> &> &&
-    std::same_as<std::invoke_result_t<F, double, double, std::vector<double> &>, void >;
+//template <typename F>
+//concept DoubleFnDouble =
+//    std::invocable<F, double> &&
+//    std::same_as<std::invoke_result_t<F, double>, double>;
+//
+//template <typename F>
+//concept DoubleFnDoubleInt =
+//    std::invocable<F, double, int> &&
+//    std::same_as<std::invoke_result_t<F, double, int>, double>;
+//template <typename F>
+//concept VoidFnDoubleDoubleDoubleptr =
+//    std::invocable<F, double, double, double *> &&
+//    std::same_as<std::invoke_result_t<F, double, double, double *>, void >;
+//
+//template <typename F>
+//concept VoidFnDoubleDoubleDoublevec =
+//    std::invocable<F, double, double, std::vector<double> &> &&
+//    std::same_as<std::invoke_result_t<F, double, double, std::vector<double> &>, void >;
 
 
 
@@ -305,9 +305,9 @@ public:
   /// @tparam T generic function type
   /// @param  fn any double(double) callable
   ///
-  //template<typename F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double>>>
-  //void assign(const F & fn) {
-  void assign(const DoubleFnDouble auto & fn) {
+  template<typename F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double>>>
+  void assign(const F & fn) {
+  //void assign(const DoubleFnDouble auto & fn) {
     ensure_valid();
     // there is a design choice here: do we package whatever function
     // we have received into a Fortran-callable function, or do we
@@ -330,8 +330,8 @@ public:
   }
 
   /// @brief  assign from a function, similar to assign()
-  //template<typename F, IsDoubleFunction<F> = 0>
-  grid_quant_view & operator=(const DoubleFnDouble auto & fn) {assign(fn); return *this;}
+  template<typename F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double>>>
+  grid_quant_view & operator=(const F & fn) {assign(fn); return *this;}
 
   /// @brief  copy assignment operator, which copies data from other, assuming
   ///         that this is already allocated and of the correct size, etc.
@@ -443,13 +443,15 @@ public:
 
   /// construct and allocate a grid_quant for the given grid, and fill it
   /// with the specified function
-  //template<class F>
-  grid_quant(const grid_def_view & grid, const DoubleFnDouble auto & fn) : grid_quant(grid) {
+  template<class F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double>>>
+  grid_quant(const grid_def_view & grid, const F & fn) : grid_quant(grid) {
     assign(fn);
   }
 
-  //template<typename F>
-  grid_quant & operator=(const DoubleFnDouble auto & fn) {assign(fn); return *this;}
+  /// assign from a function, similar to assign()
+  template<class F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double>>>
+  grid_quant & operator=(const F & fn) {assign(fn); return *this;}
+
   grid_quant & operator=(double val) {assign(val); return *this;}
 
 //  /// @brief  assign from a function 
@@ -488,7 +490,8 @@ inline grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
 inline grid_quant operator-(const grid_quant_view & a) {return -1.0 * a;}
 
 //template<typename F> 
-inline grid_quant operator*(const grid_def_view & grid, DoubleFnDouble auto && fn) {
+template<typename F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double>>>
+inline grid_quant operator*(const grid_def_view & grid, const F & fn) {
   // create an output grid_quant
   grid_quant result(grid);
   result = fn;
@@ -556,10 +559,12 @@ public:
   double & operator()(std::size_t iflv, std::size_t iy) {return this->data()[iflv * extras().size_dim1 + iy];}
   const double & operator()(std::size_t iflv, std::size_t iy) const {return this->data()[iflv * extras().size_dim1 + iy];}  
 
+
   /// assign using a function f(x,Q, xpdf_array), similar to the LHAPDF
   /// "evolve" fortran interface, where xpdf_array is a double* pointing 
   /// to an array with at least 13 entries
-  void assign_xQ_into(const VoidFnDoubleDoubleDoubleptr auto & fn, double Q) {
+  template<typename F, std::enable_if_t<std::is_invocable_r_v<void, F, double, double, double*>, int> = 0>
+  void assign_xQ_into(const F & fn, double Q) {
     ensure_valid();
     if (size_flv() < iflv_max+1) {
       throw std::runtime_error("grid_quant_2d_view::assign(fn): grid_quant_2d_view size_flv() = " 
@@ -577,7 +582,8 @@ public:
 
   /// assign using a function f(x,Q, vector<double> & pdf_vec), similar to the LHAPDF
   /// C++ `PDF::xfxQ(x,Q,pdf_vec)` member function.
-  void assign_xQ_into(const VoidFnDoubleDoubleDoublevec auto & fn, double Q) {
+  template<typename F, std::enable_if_t<std::is_invocable_r_v<void, F, double, double, std::vector<double> &>, int> = 0>
+  void assign_xQ_into(const F & fn, double Q) {
     ensure_valid();
     std::vector<double> xvals = grid().x_values();
     std::vector<double> xpdf (size_flv());
@@ -746,8 +752,9 @@ public:
   ///  
   /// The split_array argument is only needed if the integrand has discontinuities
   /// or non-smoothness at specific y values
+  template<typename F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double, int>>>
   grid_conv(const grid_def_ref & grid, 
-            DoubleFnDoubleInt auto && conv_ignd_fn, 
+            F && conv_ignd_fn, 
             const std::vector<double> & split_array = {}) : base_t(nullptr) {
 
     //std::cout << "grid_conv: constructing from function object, grid = " << grid.ptr() <<" " << this->grid().ptr() << "\n";
@@ -773,7 +780,8 @@ inline grid_quant operator*(const grid_conv_view & conv, const grid_quant_view &
   return result;
 }
 
-inline grid_conv operator*(const grid_def_view & grid, DoubleFnDoubleInt auto && conv_ignd_fn) {
+template<typename F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double, int>>>
+inline grid_conv operator*(const grid_def_view & grid, F && conv_ignd_fn) {
   return grid_conv(grid, std::forward<decltype(conv_ignd_fn)>(conv_ignd_fn));
 }
 
@@ -1309,7 +1317,8 @@ public:
   ///           "evolve" fortran interface;  
   ///
   /// Any flavours beyond 13 (i.e. beyond iflv_top) are set to zero.
-  void assign_xQ_into(const VoidFnDoubleDoubleDoubleptr auto & fn) {
+  template<typename F, std::enable_if_t<std::is_invocable_r_v<void, F, double, double, double*>, int> = 0>
+  void assign_xQ_into(const F & fn) {
     ensure_valid();
     if (size_flv() < hoppet::iflv_max+1) {
       throw std::runtime_error("grid_quant_2d_view::assign(fn): pdf_table size_flv() = " 
@@ -1337,7 +1346,8 @@ public:
   ///           LHAPDF's C++ `PDF::xfxQ(x,Q,pdf_vec)` member function.
   ///
   /// Any flavours beyond the size of the xpdf_vector are set to zero.
-  void assign_xQ_into(const VoidFnDoubleDoubleDoublevec auto & fn) {
+  template<typename F, std::enable_if_t<std::is_invocable_r_v<void, F, double, double, std::vector<double> &>, int> = 0>
+  void assign_xQ_into(const F & fn) {
     ensure_valid();
     if (size_flv() < hoppet::iflv_max+1) {
       throw std::runtime_error("grid_quant_2d_view::assign(fn): pdf_table size_flv() = " 

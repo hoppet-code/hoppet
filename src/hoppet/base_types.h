@@ -73,8 +73,8 @@ template<typename V>
 class obj_owner : public V {
 public:
   using view_t = V;
-  using ptr_t = V::ptr_t;
-  using extras_t = V::extras_t;
+  using ptr_t    = typename V::ptr_t;
+  using extras_t = typename V::extras_t;
 
   obj_owner() noexcept = default;
   obj_owner(ptr_t * ptr) noexcept : V(ptr) {}
