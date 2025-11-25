@@ -52,6 +52,7 @@
 // - [ ] add qed support, including pdf_table allocators
 // - [x] add access to things like the beta function coefficients, qcd group constants, etc.
 // - [ ] add structure function support
+// - [ ] test installed version (re include paths)
 // - [~] add documentation
 
 // Things to perhaps add
