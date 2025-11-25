@@ -395,6 +395,7 @@ static PyObject* StrFctN3LO(const double & x, const double & Q, const double & m
 
 %rename(PreEvolve               )      hoppetpreevolve_;     
 %rename(AlphaS                  )      hoppetalphas_; 
+%rename(AlphaQED                )      hoppetalphaqed_; 
 %rename(SetCoupling             )      hoppetsetcoupling_;       
 %feature("docstring") SetCoupling "
 Set the strong coupling constant at a reference scale.
