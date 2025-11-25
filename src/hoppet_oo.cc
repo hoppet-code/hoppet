@@ -42,8 +42,10 @@ extern "C" {
 
   /// @brief set the pointers to the objects that contain the evolved information
   void hoppetSetEvolvedPointers(running_coupling_f * coupling_ptr, pdf_table_f * tab_ptr, int n_tables) {
-    hoppet::sl::coupling.take_view(coupling_ptr);
-    hoppet::sl::table.take_view(tab_ptr);
-    hoppet::sl::tables.take_view(hoppet::pdf_table_array_view(tab_ptr, n_tables));
+    if (coupling_ptr) hoppet::sl::coupling.take_view(coupling_ptr);
+    if (tab_ptr) {
+      hoppet::sl::table.take_view(tab_ptr);
+      hoppet::sl::tables.take_view(hoppet::pdf_table_array_view(tab_ptr, n_tables));
+    }
   }
 } // extern "C"

@@ -360,6 +360,15 @@ subroutine hoppetAssign(pdf_subroutine)
   ! convolutions with splitting matrices) have yet to be set up [they
   ! get set up "on demand" later].
   setup_done(1:) = .false.
+
+  block
+    use, intrinsic :: iso_c_binding, only : c_ptr, c_loc, c_null_ptr
+    type(c_ptr) :: coupling_cptr, tab_cptr
+    coupling_cptr = c_null_ptr        ! setting this to null means it is ignored on the C++ side
+    tab_cptr      = c_loc(tables(0))
+    call hoppetSetEvolvedPointers(coupling_cptr, tab_cptr, size(tables))
+  end block
+
 end subroutine hoppetAssign
 
 !======================================================================
@@ -402,6 +411,15 @@ subroutine hoppetSetCoupling(alphas_Q,Q,nloop)
   endif
   call AddNfInfoToPdfTable(tables,coupling)
   coupling_initialised = .true.
+
+  block
+    use, intrinsic :: iso_c_binding, only : c_ptr, c_loc, c_null_ptr
+    type(c_ptr) :: coupling_cptr, tab_cptr
+    coupling_cptr = c_loc(coupling)
+    tab_cptr      = c_null_ptr      ! setting this to null means it is ignored on the C++ side
+    call hoppetSetEvolvedPointers(coupling_cptr, tab_cptr, size(tables))
+  end block
+
 
 end subroutine hoppetSetCoupling
 
