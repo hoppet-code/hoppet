@@ -37,7 +37,12 @@ __Files added__
 	- contains the C++ object-oriented interfaces
 
 	* src/hoppet_oo.cc:                       *** ADDED ***
-	- FILL THIS IN, including hoppetStartCXX function
+	- contains the hoppet::sl namespace with the streamlined interface
+	  objects (grid, dh, coupling, table(s))
+	- contains a couple of helper functions (cstr allocation, 
+	  throwing exceptions from Fortran errors, wrappers)
+	- contains functions like hoppet_sl_register_tables to set up
+	  the C++ interface to the streamlined interface objects
 
 	* src/hoppet_cxx_oo.f90:		          *** ADDED ***
 	Fortran side of the C++ OO interface. Contains a series of 

@@ -10,6 +10,8 @@ module streamlined_interface
   use qcd, only: quark_masses_def
   use pdfs_for_benchmarks
   use warnings_and_errors
+  use, intrinsic :: iso_c_binding, only : c_ptr, c_loc, c_null_ptr
+
 
   implicit none
 
@@ -55,17 +57,22 @@ module streamlined_interface
   logical,  save :: with_Plq_nnloqed = .false.
 
   interface
-    subroutine hoppetStartCXX(grid_cptr, dh_cptr) bind(C, name="hoppetStartCXX")
+    subroutine hoppet_sl_register_objects(grid_cptr, dh_cptr) bind(C)
       use, intrinsic :: iso_c_binding, only : c_ptr
       type(c_ptr), value :: grid_cptr
       type(c_ptr), value :: dh_cptr
-    end subroutine hoppetStartCXX
-    subroutine hoppetSetEvolvedPointers(coupling_cptr,tab_cptr,tab_array_sz) bind(C, name="hoppetSetEvolvedPointers")
+    end subroutine hoppet_sl_register_objects
+
+    subroutine hoppet_sl_register_coupling(coupling_cptr) bind(C)
+      use, intrinsic :: iso_c_binding, only : c_ptr
+      type(c_ptr), value :: coupling_cptr
+    end subroutine hoppet_sl_register_coupling
+
+    subroutine hoppet_sl_register_tables(tab_cptr, tab_array_sz) bind(C)
       use, intrinsic :: iso_c_binding, only : c_ptr, c_int
-      type(c_ptr),    value :: coupling_cptr
       type(c_ptr),    value :: tab_cptr
       integer(c_int), value :: tab_array_sz
-    end subroutine hoppetSetEvolvedPointers
+    end subroutine hoppet_sl_register_tables
   end interface
 
 contains
@@ -293,7 +300,7 @@ subroutine hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,order,factscheme)
 
   ! set up a range of C-pointers, so that C++ can access the objects
   ! (for now, just one pointer, will expand later as needed)
-  call hoppetStartCXX(c_loc(grid), c_loc(dh))
+  call hoppet_sl_register_objects(c_loc(grid), c_loc(dh))
 
   ! indicate that allocations have already been done,
   ! to allow for cleanup if hoppetStartExtended is
@@ -361,13 +368,7 @@ subroutine hoppetAssign(pdf_subroutine)
   ! get set up "on demand" later].
   setup_done(1:) = .false.
 
-  block
-    use, intrinsic :: iso_c_binding, only : c_ptr, c_loc, c_null_ptr
-    type(c_ptr) :: coupling_cptr, tab_cptr
-    coupling_cptr = c_null_ptr        ! setting this to null means it is ignored on the C++ side
-    tab_cptr      = c_loc(tables(0))
-    call hoppetSetEvolvedPointers(coupling_cptr, tab_cptr, size(tables))
-  end block
+  call hoppet_sl_register_tables(c_loc(tables(0)), size(tables))
 
 end subroutine hoppetAssign
 
@@ -412,14 +413,7 @@ subroutine hoppetSetCoupling(alphas_Q,Q,nloop)
   call AddNfInfoToPdfTable(tables,coupling)
   coupling_initialised = .true.
 
-  block
-    use, intrinsic :: iso_c_binding, only : c_ptr, c_loc, c_null_ptr
-    type(c_ptr) :: coupling_cptr, tab_cptr
-    coupling_cptr = c_loc(coupling)
-    tab_cptr      = c_null_ptr      ! setting this to null means it is ignored on the C++ side
-    call hoppetSetEvolvedPointers(coupling_cptr, tab_cptr, size(tables))
-  end block
-
+  call hoppet_sl_register_coupling(c_loc(coupling))
 
 end subroutine hoppetSetCoupling
 
@@ -482,14 +476,8 @@ subroutine hoppetEvolve(asQ0, Q0alphas, nloop,  muR_Q, pdf_subroutine, Q0pdf)
   ! clean up
   call Delete(pdf0) 
   
-
-  block
-    use, intrinsic :: iso_c_binding, only : c_ptr, c_loc
-    type(c_ptr) :: coupling_cptr, tab_cptr
-    coupling_cptr = c_loc(coupling)
-    tab_cptr      = c_loc(tables(0))
-    call hoppetSetEvolvedPointers(coupling_cptr, tab_cptr, size(tables))
-  end block
+  call hoppet_sl_register_tables(c_loc(tables(0)), size(tables))
+  call hoppet_sl_register_coupling(c_loc(coupling))
 end subroutine hoppetEvolve
 
 
@@ -518,6 +506,10 @@ subroutine hoppetPreEvolve(asQ0, Q0alphas, nloop, muR_Q, Q0pdf)
   ! create the tabulation
   call PreEvolvePdfTable(tables(0), Q0pdf, dh, muR_Q=muR_Q, &
        &                 coupling=coupling, nloop=nloop)
+
+  call hoppet_sl_register_tables(c_loc(tables(0)), size(tables))
+  call hoppet_sl_register_coupling(c_loc(coupling))
+
 end subroutine hoppetPreEvolve
 
 
