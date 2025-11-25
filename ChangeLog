@@ -1,5 +1,16 @@
 2025-11-25  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
+ 	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.3-dev0
+
+2025-11-25  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
 	* CMakeLists.txt:
 	* src/welcome_message.f90:
 	* pyproject.toml:
