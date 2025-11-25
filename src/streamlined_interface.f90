@@ -514,7 +514,7 @@ end subroutine hoppetCachedEvolve
 
 
 !======================================================================
-!! Return the coupling at scale Q
+!! Return the strong coupling at scale Q
 function hoppetAlphaS(Q)
   use streamlined_interface ! this module which provides access to the array of tables
   use warnings_and_errors
@@ -524,9 +524,28 @@ function hoppetAlphaS(Q)
 
   if (.not. coupling_initialised) call wae_error('hoppetAlphaS',&
        &'coupling is not yet initialised (and will remain so until',&
-       &'first call to an evolution routine).')
+       &'first call to an evolution routine or hoppetSetCoupling).')
   hoppetAlphaS = Value(coupling, Q)
 end function hoppetAlphaS
+
+
+!======================================================================
+!! Return the QED coupling at scale Q
+function hoppetAlphaQED(Q)
+  use streamlined_interface ! this module which provides access to the array of tables
+  use warnings_and_errors
+  implicit none
+  real(dp)             :: hoppetAlphaQED
+  real(dp), intent(in) :: Q
+
+  if(.not.with_qed) call wae_error('hoppetAlphaQED',&
+       &'called but QED not initialised. Call hoppetSetQED.')
+
+  if (.not. coupling_initialised) call wae_error('hoppetAlphaQED',&
+       &'coupling is not yet initialised (and will remain so until',&
+       &'first call to an evolution routine or hoppetSetCoupling).')
+  hoppetAlphaQED = Value(coupling_qed, Q)
+end function hoppetAlphaQED
 
 
 !======================================================================

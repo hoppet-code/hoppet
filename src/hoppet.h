@@ -12,6 +12,7 @@
 #define hoppetPreEvolve                hoppetpreevolve_     
 #define hoppetCachedEvolve             hoppetcachedevolve_
 #define hoppetAlphaS                   hoppetalphas_ 
+#define hoppetAlphaQED                 hoppetalphaqed_ 
 #define hoppetSetFFN                   hoppetsetffn_       
 #define hoppetSetVFN                   hoppetsetvfn_       
 #define hoppetSetPoleMassVFN           hoppetsetpolemassvfn_       
@@ -362,6 +363,12 @@ extern "C" {
   /// @param Q Scale in GeV
   /// @return The strong coupling
   double hoppetAlphaS(const double & Q);
+
+  /// Return the QED coupling at scale Q
+  ///
+  /// @param Q Scale in GeV
+  /// @return The QED coupling
+  double hoppetAlphaQED(const double & Q);
 
   /// Return in f[0..N] the value of the internally stored pdf at
   /// the given x,Q. The indices of f correspond to the iflv

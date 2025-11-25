@@ -1,5 +1,13 @@
 # NEWS for HOPPET
 
+# Release 2.1.2, NOT PUBLISHED
+
+## New features
+
+* Added hoppetAlphaQED(Q) to the streamlined interface (AlphaQED in
+  Python) that gives access to the QED coupling at scale Q, if QED has
+  been turned on.
+
 # Release 2.1.1, 21 November 2025
 
 ## Bug fixes

@@ -1,3 +1,11 @@
+2025-11-25  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/streamlined_interface.f90:
+	* src/hoppet.h:
+	* pyinterface/hoppet.i:
+	Added hoppetAlphaQED(Q) that returns the QED coupling at Q if it
+	has been initialised
+
 2025-11-24 Gavin + Alexander
 
 	* CMakeLists.txt:
