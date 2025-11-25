@@ -1,12 +1,20 @@
 # NEWS for HOPPET
 
-# Release 2.1.2, NOT PUBLISHED
+# Release 2.1.2, 25 November 2025
 
-## New features
+## Small additions
 
 * Added hoppetAlphaQED(Q) to the streamlined interface (AlphaQED in
   Python) that gives access to the QED coupling at scale Q, if QED has
   been turned on.
+
+* Added CMake HOPPET_ENABLE_N3LO_FORTRAN_MTM option to enable/disable
+  compilation of the Fortran N3LO mass-threshold code. It is enabled
+  by default.
+
+* added CMake HOPPET_DYNLIB_NAME option to set the name of the
+  dynamic library (default "hoppet"). The include directory is not
+  affected, but this may change in the future.  
 
 # Release 2.1.1, 21 November 2025
 

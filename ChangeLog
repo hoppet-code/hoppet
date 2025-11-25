@@ -1,3 +1,8 @@
+2025-11-25 Tue  <gavin.salam@physics.ox.ac.uk>
+
+	* NEWS:
+	added entry for 2.1.2
+
 2025-11-25  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/streamlined_interface.f90:
