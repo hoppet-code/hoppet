@@ -177,10 +177,10 @@ MTM_REF(pshg_msbar) //< replaces PShg when masses are MSbar (not yet supported a
 
 /// running_coupling function wrappers
 extern "C" {
-  running_coupling_f * hoppet_cxx__running_coupling__new_fixnf(double alphaS, double Q, int nloop, int fixnf);
+  running_coupling_f * hoppet_cxx__running_coupling__new_fixnf(double alphaS, double Q, int nloop, int fixnf, const double * Qmax = nullptr);
   running_coupling_f * hoppet_cxx__running_coupling__new_varnf(double alphaS, double Q, int nloop,
                                                               double mc, double mb, double mt,
-                                                              bool masses_are_MSbar, double muMatch_mQuark);
+                                                              bool masses_are_MSbar, double muMatch_mQuark, const double * Qmax = nullptr);
   void hoppet_cxx__running_coupling__delete(running_coupling_f ** rc);
   double hoppet_cxx__running_coupling__value(const running_coupling_f * rc, double Q, int * fixnf = 0);
   int    hoppet_cxx__running_coupling__num_loops(const running_coupling_f * rc);

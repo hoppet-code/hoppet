@@ -1137,15 +1137,24 @@ public:
 
   running_coupling() {}
 
-  running_coupling(double alphas_at_Q, double Q, int nloop, int fixnf) {
-    _ptr = hoppet_cxx__running_coupling__new_fixnf(alphas_at_Q, Q, nloop, fixnf);
+  running_coupling(double alphas_at_Q, double Q, int nloop, int fixnf, const std::optional<double> & Qmax = std::nullopt) {
+    _ptr = hoppet_cxx__running_coupling__new_fixnf(alphas_at_Q, Q, nloop, fixnf, 
+                                                   Qmax.has_value() ? &(*Qmax) : nullptr);
   }
 
-  running_coupling(double alphas_at_Q, double Q, int nloop,
-                   double mc, double mb, double mt,
-                   bool masses_are_MSbar = false, double muMatch_mQuark = 1.0) {
+  running_coupling(double alphas_at_Q,    ///< value of alpha_s at scale Q
+                   double Q,              ///< scale at which the coupling is supplied
+                   int nloop,             ///< number of loops (1=LO, 2=NLO, etc)
+                   double mc,             ///< charm quark mass
+                   double mb,             ///< bottom quark mass
+                   double mt,             ///< top quark mass
+                   bool masses_are_MSbar = false,  ///< false: masses are pole masses; true: masses are MSbar
+                   double muMatch_mQuark = 1.0,    ///< matching scale / quark mass ratio
+                   const std::optional<double> & Qmax = std::nullopt ///< optional override of maximum Q value
+                  ) {
     _ptr = hoppet_cxx__running_coupling__new_varnf(alphas_at_Q, Q, nloop,
-                                                  mc, mb, mt, masses_are_MSbar, muMatch_mQuark);
+                                                  mc, mb, mt, masses_are_MSbar, muMatch_mQuark, 
+                                                  Qmax.has_value() ? &(*Qmax) : nullptr);
   }
 
 };

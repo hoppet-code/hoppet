@@ -983,23 +983,25 @@ module hoppet_cxx_oo_running_coupling
   implicit none
 contains
 
-  function hoppet_cxx__running_coupling__new_fixnf(alphas_at_Q, Q, nloop, fixnf) bind(C) result(res)
+  function hoppet_cxx__running_coupling__new_fixnf(alphas_at_Q, Q, nloop, fixnf, Qmax) bind(C) result(res)
     real(c_double), intent(in), value :: alphas_at_Q, Q
     integer(c_int), intent(in), value :: nloop, fixnf
+    real(c_double), intent(in), optional :: Qmax
     type(c_ptr) :: res
     !--
     type(running_coupling), pointer :: rc_f
     allocate(rc_f)
-    call InitRunningCoupling(rc_f, alphas_at_Q, Q, nloop, fixnf=fixnf)
+    call InitRunningCoupling(rc_f, alphas_at_Q, Q, nloop, fixnf=fixnf, Qmax=Qmax)
     res = c_loc(rc_f)
   end function hoppet_cxx__running_coupling__new_fixnf
 
-  function hoppet_cxx__running_coupling__new_varnf(alphas_at_Q, Q, nloop, mc, mb, mt, masses_are_MSbar, muMatch_mQuark) bind(C) result(res)
+  function hoppet_cxx__running_coupling__new_varnf(alphas_at_Q, Q, nloop, mc, mb, mt, masses_are_MSbar, muMatch_mQuark, Qmax) bind(C) result(res)
     real(c_double), intent(in), value :: alphas_at_Q, Q
     integer(c_int), intent(in), value :: nloop
     real(c_double), intent(in), value :: mc, mb, mt
     logical(c_bool), intent(in), value :: masses_are_MSbar
     real(c_double), intent(in), value :: muMatch_mQuark
+    real(c_double), intent(in), optional :: Qmax
     type(c_ptr) :: res
     !--
     type(running_coupling), pointer :: rc_f
@@ -1007,7 +1009,7 @@ contains
     masses_are_MSbar_f = (masses_are_MSbar .neqv. .false._c_bool) ! safely convert to fortran logical
     allocate(rc_f)
     call InitRunningCoupling(rc_f, alphas_at_Q, Q, nloop, quark_masses = [mc, mb, mt], &
-                             masses_are_MSbar = masses_are_MSbar_f, muMatch_mQuark = muMatch_mQuark)
+                             masses_are_MSbar = masses_are_MSbar_f, muMatch_mQuark = muMatch_mQuark, Qmax=Qmax)
     res = c_loc(rc_f)
   end function hoppet_cxx__running_coupling__new_varnf
 

@@ -9,6 +9,8 @@
 module assertions
   use types
   use warnings_and_errors
+  use iso_c_binding, only: c_null_ptr
+  use hoppet_c_f_string_utils
   implicit none
   private
   
@@ -80,7 +82,7 @@ contains
             string
        write(0,*) 'n1=',n1,' n2=',n2
        if (throw_cxx_exceptions) then
-          call hoppet_throw_runtime_error()
+          call hoppet_throw_runtime_error(cstr_from_fortran_string("assert_eq2 failed"))
        else
           ERROR STOP 'program terminated by assert_eq2'
        end if
@@ -97,7 +99,7 @@ contains
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
        if (throw_cxx_exceptions) then
-          call hoppet_throw_runtime_error()
+          call hoppet_throw_runtime_error(cstr_from_fortran_string("assert_eq3 failed"))
        else
           ERROR STOP 'program terminated by assert_eq3'
        end if
@@ -114,7 +116,7 @@ contains
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
        if (throw_cxx_exceptions) then
-          call hoppet_throw_runtime_error()
+          call hoppet_throw_runtime_error(cstr_from_fortran_string("assert_eq4 failed"))
        else
           ERROR STOP 'program terminated by assert_eq4'
        end if
@@ -130,7 +132,7 @@ contains
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
        if (throw_cxx_exceptions) then
-          call hoppet_throw_runtime_error()
+          call hoppet_throw_runtime_error(cstr_from_fortran_string("assert_eq5 failed"))
        else
           ERROR STOP 'program terminated by assert_eq5'
        end if
@@ -147,7 +149,7 @@ contains
        write (0,*) 'nrerror: an assert_eq failed with this tag:', &
             string
        if (throw_cxx_exceptions) then
-          call hoppet_throw_runtime_error()
+          call hoppet_throw_runtime_error(cstr_from_fortran_string("assert_eqn failed"))
        else
           ERROR STOP 'program terminated by assert_eqn'
        end if

@@ -29,7 +29,9 @@ module warnings_and_errors
   logical, public, save :: throw_cxx_exceptions = .false.
 
   interface 
-    subroutine hoppet_throw_runtime_error() bind(C,name="hoppet_throw_runtime_error")
+    subroutine hoppet_throw_runtime_error(cstr_ptr) bind(C,name="hoppet_throw_runtime_error")
+      use iso_c_binding
+      type(c_ptr), value :: cstr_ptr
     end subroutine hoppet_throw_runtime_error
   end interface
   public :: hoppet_throw_runtime_error
@@ -138,6 +140,9 @@ contains
   !! Report an error and then crash (by attempting floating point exception)
   !======================================================================
   subroutine wae_error(text1, text2, text3, text4, intval, dbleval)
+    use hoppet_to_string
+    use hoppet_term
+    use hoppet_c_f_string_utils
     character(len=*), intent(in) :: text1
     character(len=*), intent(in), optional :: text2
     character(len=*), intent(in), optional :: text3
@@ -145,22 +150,33 @@ contains
     integer,          intent(in), optional :: intval
     real(kind(1d0)),  intent(in), optional :: dbleval
     !real :: a,b
+    character(len=:), allocatable :: msg
+    type(c_ptr) :: msg_cstr_ptr
 
-    write(stddev,*)
-    write(stddev,'(a)') '============================================================='
-    write(stddev,'(a)', advance='no') 'FATAL ERROR in '
-    write(stddev,'(a)') text1
-    if (present(text2))   write(stddev,'(a)') text2
-    if (present(text3))   write(stddev,'(a)') text3
-    if (present(text4))   write(stddev,'(a)') text4
-    if (present(intval))  write(stddev,*) intval
-    if (present(dbleval)) write(stddev,*) dbleval
+    if (.not. throw_cxx_exceptions) then
+      write(stddev,*)
+      write(stddev,'(a)') '============================================================='
+      write(stddev,'(a)', advance='no') red//bold//'FATAL ERROR in '//reset
+    else
+      msg = 'FATAL HOPPET ERROR in '
+    end if
 
-    write(stddev,*)
+    msg = msg//trim(text1)
+    if (present(text2))   msg = msg//' '//trim(text2)
+    if (present(text3))   msg = msg//' '//trim(text3)
+    if (present(text4))   msg = msg//' '//trim(text4)
+    if (present(intval))  msg = msg//' (integer value: '//trim(to_string_int(intval))//')'
+    if (present(dbleval)) msg = msg//' (double value: '//trim(to_string_dp(dbleval))//')'
 
     if (throw_cxx_exceptions) then
-      call hoppet_throw_runtime_error()
+      msg_cstr_ptr = cstr_from_fortran_string(msg)
+      !! deallocate the Fortran string after conversion because
+      !! the C++ exceptions will not look after Fortran memory
+      deallocate(msg)
+      call hoppet_throw_runtime_error(msg_cstr_ptr)
     else
+      write(stddev,'(a)') msg
+      write(stddev,*)
       error stop 1
     end if
 

@@ -119,6 +119,16 @@ __Files added__
 	- replaced hoppetVersionC(...) with hoppetVersionCStr(), using the new 
 	  fortran-C++ conversion utilities.
 
+	* src/warnings_and_errors.f90:
+	- now has a wae_enable_cxx_exceptions() subroutine. If called, it
+	  enables throwing of C++ exceptions from Fortran errors. Seems to work
+	  on linux and MacOS (at least with gfortran and clang), but in not 
+	  generally portable (e.g. perhaps Windows?)
+	- wae-error function now uses some coloured printout and better formatting
+
+	* src/assertions.f90:
+	also throws C++ exceptions if enabled from wae
+
 --------- end 2025-10-cxx-OO branch ---------
 2025-11-26 Gavin
 
@@ -237,10 +247,6 @@ __Files added__
 	conversion from C bool to Fortran logical now uses logical_from_cbool function,
 	defined once in streamlined_interface.f90.
 
-<<<<<<< HEAD
-=======
->>>>>>> dev
->>>>>>> refs/remotes/origin/2025-10-cxx-OO
 2025-11-15 Gavin
 
 	* pyinterface/hoppet.i:

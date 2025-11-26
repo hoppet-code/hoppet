@@ -2,7 +2,13 @@
 #include <cstring>
 
 
-extern "C" void hoppet_throw_runtime_error() {throw std::runtime_error("hoppet wae_error");}
+extern "C" void hoppet_throw_runtime_error(char * msg) {
+  std::string msg_str(msg ? msg : "hoppet_throw_runtime_error: unknown error");
+  // we have ownership of msg, so now that we've copied it into a string, we must delete it
+  if (msg) delete[] msg;
+  //std::cout << "hoppet_throw_runtime_error: throwing runtime_error with message: " << msg_str << std::endl;
+  throw std::runtime_error(msg_str);
+}
 
 /// @brief  A wrapper to call a C++ convolution function object from Fortran
 /// @param y      the y-value at which to evaluate the function
