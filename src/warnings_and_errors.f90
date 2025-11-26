@@ -22,6 +22,7 @@ module warnings_and_errors
   end interface
   
   public :: wae_warn, wae_error, wae_setunit
+  public :: wae_enable_cxx_exceptions
 
   integer, parameter :: stddev_in = 0
   integer            :: stddev = stddev_in
