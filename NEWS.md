@@ -1,12 +1,27 @@
 # NEWS for HOPPET
 
-# Release 2.1.2, NOT PUBLISHED
+# Release 2.1.3, unreleased
 
-## New features
+## Small additions
+
+* Added Qmax argument to InitRunningCoupling for maximum Q value at
+  which the coupling can be evaluated (internal default: exp(93.0)). 
+
+# Release 2.1.2, 25 November 2025
+
+## Small additions
 
 * Added hoppetAlphaQED(Q) to the streamlined interface (AlphaQED in
   Python) that gives access to the QED coupling at scale Q, if QED has
   been turned on.
+
+* Added CMake HOPPET_ENABLE_N3LO_FORTRAN_MTM option to enable/disable
+  compilation of the Fortran N3LO mass-threshold code. It is enabled
+  by default.
+
+* added CMake HOPPET_DYNLIB_NAME option to set the name of the
+  dynamic library (default "hoppet"). The include directory is not
+  affected, but this may change in the future.  
 
 # Release 2.1.1, 21 November 2025
 
