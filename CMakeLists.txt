@@ -160,6 +160,12 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "ARM")
   set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -g")
 endif()
 
+# C++ options
+add_compile_options("$<$<COMPILE_LANG_AND_ID:CXX,Clang>:-Wall>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:CXX,AppleClang>:-Wall>")
+add_compile_options("$<$<COMPILE_LANG_AND_ID:CXX,GNU>:-Wall>")
+
+
 if (HOPPET_ENABLE_FPES)
   #add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-ffpe-trap=zero,overflow,underflow,invalid,denormal>")
   # note: underflow and denormal are potentially problematic with some parts of the code

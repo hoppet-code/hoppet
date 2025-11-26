@@ -286,7 +286,7 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
       return x*res;
     });
 
-  auto power = [](double powval) { return grid100 * [powval](double y) { return exp(-powval*y); }; };
+  //auto power = [](double powval) { return grid100 * [powval](double y) { return exp(-powval*y); }; };
 
 
   auto q = big_grid * [](double y) { double x = exp(-y); return 5*pow(1-x,4)*x;};
@@ -702,7 +702,7 @@ TEST_CASE("pdf_table", "[hoppet]") {
   hoppet::pdf p_pdf = hoppet::sl::dh.p(nloop,nf) * sl_tab.at_iQ(iQ);
   vector<double> p_pdf_raw(sl_tab.size_flv());
   hoppetEvalSplit(x, Q, nloop, nf, p_pdf_raw.data());
-  for (int i = 0; i <= sl_tab.iflv_max(); ++i) {
+  for (size_t i = 0; i <= sl_tab.iflv_max(); ++i) {
     REQUIRE_THAT(p_pdf[i].at_x(x), WithinAbs(p_pdf_raw[i], 1e-6));
   }
 
@@ -750,7 +750,7 @@ TEST_CASE("pdf_table_assignment", "[hoppet]") {
   vector<double> Qvals = {2.0, 10.0, 100.0, 1000.0};
   for (double x : xvals) {
     for (double Q : Qvals) {
-      for (int iflv = hoppet::iflv_min; iflv <= tab1.iflv_max(); ++iflv) {
+      for (size_t iflv = hoppet::iflv_min; iflv <= tab1.iflv_max(); ++iflv) {
         REQUIRE_THAT( tab1.at_xQf(x, Q, iflv), WithinAbs(silly_pdf(x,Q,iflv), 1e-6) );
         REQUIRE_THAT( tab2.at_xQf(x, Q, iflv), WithinAbs(silly_pdf(x,Q,iflv), 1e-6) );
       }

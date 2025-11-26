@@ -11,8 +11,8 @@ inline double pqq_delta(double /*x*/) {return cf * 3.0/2.0;}
 
 inline double pqq_fn(double y, int piece) {
   double x = exp(-y);
-  double offset = -cf; // the result should be independent of the offset value
 
+//  double offset = -cf; // the result should be independent of the offset value
 //  double res = 0.0;
 //  if      (piece == hoppet::cc_REAL    ) res =   cf * (1+x*x)/(1-x);
 //  else if (piece == hoppet::cc_VIRT    ) res = - cf * (1+x*x)/(1-x) + offset*(1+x);

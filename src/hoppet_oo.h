@@ -529,7 +529,7 @@ struct gq2d_extras {
   std::size_t   size_dim0;
   gq2d_extras() : grid(), size_dim1(0), size_dim0(0) {}
   gq2d_extras(const gq2d_extras & other) : grid(other.grid), size_dim1(other.size_dim1), size_dim0(other.size_dim0) {}
-  gq2d_extras(const grid_def_view & grid, std::size_t size_dim0) : grid(grid), size_dim1(grid.ny() + 1), size_dim0(size_dim0) {}
+  gq2d_extras(const grid_def_view & grid_in, std::size_t size_dim0_in) : grid(grid_in), size_dim1(grid_in.size()), size_dim0(size_dim0_in) {}
   void ensure_compatible(const gq2d_extras & other) const {
     if (size_dim0 != other.size_dim0) throw std::runtime_error("hoppet::gq2d_extras::ensure_compatible: incompatible grid_quant_2d dim1_sz");
     grid.ensure_compatible(other.grid);
