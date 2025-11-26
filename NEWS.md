@@ -1,5 +1,12 @@
 # NEWS for HOPPET
 
+# Release 2.1.3, unreleased
+
+## Small additions
+
+* Added Qmax argument to InitRunningCoupling for maximum Q value at
+  which the coupling can be evaluated (internal default: exp(93.0)). 
+
 # Release 2.1.2, 25 November 2025
 
 ## Small additions

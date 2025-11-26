@@ -7,6 +7,7 @@ module new_as
   type na_segment
      real(dp) :: tlo, thi, dt, invdt
      real(dp) :: beta0, beta1, beta2, beta3
+     ! array of 1/alpha_s values at steps of dt
      real(dp), pointer :: ra(:)
      !-- above iflip we evolve upwards, below iflip we evolve downwards
      integer  :: iflip, dummy
@@ -14,9 +15,11 @@ module new_as
   
   type na_handle
      private
+     ! segments for different nf values, gets allocated (nlo:nhi)
      type(na_segment), pointer :: seg(:)
      integer                   :: nlo, nhi
      integer                   :: nloop, fixnf
+     real(dp)                  :: tlo, thi
      !--- these are startoff parameters
      real(dp)                  :: alfas, Q
      real(dp)                  :: quark_masses(1:6)
@@ -29,8 +32,8 @@ module new_as
   real(dp) :: dt_base = 0.2_dp
   !real(dp), parameter :: dt_base = 0.1_dp
   !--------- go from 0.5 GeV to over 10^20 GeV
-  real(dp), parameter :: tlo = -1.3862944 !-3.2188758_dp
-  real(dp), parameter :: thi = 93.0_dp 
+  real(dp), parameter :: default_tlo = -1.3862944 !-3.2188758_dp
+  real(dp), parameter :: default_thi = 93.0_dp 
   integer,  parameter :: nofixnf = -1000000045
 
   public :: na_handle
@@ -70,7 +73,8 @@ contains
 
   !---------------------------------------------------
   
-  subroutine na_Init(nah, alfas, Q, nloop, fixnf, quark_masses, masses_are_MSbar, muMatch_mQuark)
+  subroutine na_Init(nah, alfas, Q, nloop, fixnf, &
+                     quark_masses, masses_are_MSbar, muMatch_mQuark, Qmax)
     use qcd; 
     type(na_handle),  intent(out), target :: nah
     real(dp), intent(in), optional :: alfas, Q
@@ -78,6 +82,7 @@ contains
     real(dp), intent(in), optional :: quark_masses(4:6)
     real(dp), intent(in), optional :: muMatch_mQuark
     logical,  intent(in), optional :: masses_are_MSbar
+    real(dp), intent(in), optional :: Qmax
     !---------------------------------------------
     !real(dp) :: alfas_lcl, Q_lcl
     !integer  :: nloop_lcl, fixnf_lcl
@@ -94,6 +99,14 @@ contains
 
     !-- we may well play with nf, so need to be able to reset it
     nf_store = nf_int
+
+    nah%tlo = default_tlo
+    if (present(Qmax)) then
+      nah%thi = tOfQ(Qmax)
+    else
+      nah%thi = default_thi
+    end if
+    if (present(Q)) nah%thi = max(nah%thi, tOfQ(Q))
 
     nah%alfas = default_or_opt(0.118_dp, alfas)
     nah%Q     = default_or_opt(91.2_dp, Q)
@@ -116,8 +129,8 @@ contains
     !   even in the fixnf case these are used as guides
     !   for when to switch dt?
     do i = lbound(nah%quark_masses, dim=1), ubound(nah%quark_masses, dim=1)
-       if (tlo > tOfQ(nah%muMatch_mQuark*nah%quark_masses(i))) nah%nlo = i
-       if (thi > tOfQ(nah%muMatch_mQuark*nah%quark_masses(i))) nah%nhi = i
+       if (nah%tlo > tOfQ(nah%muMatch_mQuark*nah%quark_masses(i))) nah%nlo = i
+       if (nah%thi > tOfQ(nah%muMatch_mQuark*nah%quark_masses(i))) nah%nhi = i
     end do
 
     ! check we have CA=3 and CF=4/3 for the nloop >=4 case
@@ -137,11 +150,11 @@ contains
     nbin_total = 0
     do i = nah%nlo, nah%nhi
        seg => nah%seg(i)
-       nah%seg(i)%tlo = max(tlo, tOfQ(nah%muMatch_mQuark*nah%quark_masses(i)))
+       nah%seg(i)%tlo = max(nah%tlo, tOfQ(nah%muMatch_mQuark*nah%quark_masses(i)))
        if (i < nah%nhi) then
           seg%thi = tOfQ(nah%muMatch_mQuark*nah%quark_masses(i+1))
        else
-          seg%thi = thi
+          seg%thi = nah%thi
        end if
 
        !-- now fix running coupling
@@ -338,7 +351,7 @@ contains
           call wae_error('na_Value_full:', 'the fixnf requested is&
                & outside the range supported this na_handle')
        end if
-       if (t < tlo .or. t > thi) then
+       if (t < nah%tlo .or. t > nah%thi) then
           call wae_error('na_Value_full:', 'the Q value is&
                & outside the range supported this na_handle')
        end if
@@ -574,14 +587,14 @@ contains
           Qhi = QOft(mthi(nseg))
        end if
     else
-       if (t > thi .or. t < tlo) then
+       if (t > nah%thi .or. t < nah%tlo) then
           call wae_Error('na_nfAtQ: Specified Q is not in supported range'&
             &,dbleval=Q)
        end if
        nfAtQ = nah%fixnf
        if (present(Qlo) .and. present(Qhi)) then
-          Qlo = QOft(tlo)
-          Qhi = QOft(thi)
+          Qlo = QOft(nah%tlo)
+          Qhi = QOft(nah%thi)
        end if
     end if
   end subroutine na_nfAtQ
@@ -621,8 +634,8 @@ contains
           write(string,'(a,i2,a)') 'nf value ',nflcl,' not supported'
           call wae_Error('QrangeAtNf', trim(string))
        end if
-       Qlo = QOft(tlo)
-       Qhi = QOft(thi)
+       Qlo = QOft(nah%tlo)
+       Qhi = QOft(nah%thi)
     end if
   end subroutine na_QRangeAtNf
   

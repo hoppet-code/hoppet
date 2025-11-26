@@ -1,3 +1,16 @@
+2025-11-26 Gavin
+
+	* ../src/new_as.f90:
+	* ../src/qcd_coupling.f90:
+	* ../unit-tests/test_alphas.F90:
+
+	added optional Qmax argument to InitRunningCoupling and added tlo
+	and thi as members of the internal na_handle class rather than
+	globals parameters. If the user initialises a coupling with a value
+	of Q > Qmax (or its default), the internal Qmax is set to Q.
+	Also added unit tests.
+
+
 2025-11-25  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
  	* CMakeLists.txt:
