@@ -1424,6 +1424,15 @@ public:
   void at_xQ_into(double x, double Q, double * result) const {
     at_yQ_into(-std::log(x), Q, result);
   }
+
+  /// @brief return a grid_quant_2d (i.e. full set of pdf flavours) at the specified Q
+  /// @param Q 
+  /// @return the grid_quant_2d at the specified Q
+  grid_quant_2d at_Q(double Q) const {
+    grid_quant_2d result(grid(), size_flv());
+    hoppet_cxx__pdf_table__at_q_into(ptr(), Q, result.data());
+    return result;
+  }
   ///@}
 
   

@@ -1295,6 +1295,22 @@ contains
     res = size(obj_f%tab,2)
   end function
 
+  subroutine hoppet_cxx__pdf_table__at_Q_into(tab, Q, pdf) bind(C)
+    implicit none
+    type(c_ptr),    intent(in), value :: tab
+    real(c_double), intent(in), value :: Q
+    type(c_ptr),    intent(out) :: pdf
+    !--------
+    type(pdf_table), pointer :: tab_f
+    real(c_double),  pointer :: pdf_f(:,:)
+
+    call c_f_pointer(tab, tab_f)
+    !                                           y             flv
+    call c_f_pointer(pdf, pdf_f, shape=[size(tab_f%tab,1), size(tab_f%tab,2)])
+    call EvalPdfTable_Q(tab_f, Q, pdf_f)
+  end subroutine
+
+
   !! return the interpolation of the pdf table at (y,Q,iflv)
   !! watch out iflv_cxx starts from zero, while iflv in fortran pdf_table starts from ncompmin
   function hoppet_cxx__pdf_table__at_yQf(obj, y, Q, iflv_cxx) result(res) bind(C)

@@ -228,6 +228,7 @@ extern "C" {
   void hoppet_cxx__pdf_table__add_nf_info(pdf_table_f * tab, const running_coupling_f * coupling);
   double * hoppet_cxx__pdf_table__tab_ptr(const pdf_table_f * tab);
   int      hoppet_cxx__pdf_table__size_flv(const pdf_table_f * tab);
+  void     hoppet_cxx__pdf_table__at_q_into(const pdf_table_f * tab, double Q, double * res);
   double   hoppet_cxx__pdf_table__at_yqf(const pdf_table_f * tab, double y, double Q, int iflv);
   void     hoppet_cxx__pdf_table__at_yq_into(const pdf_table_f * tab, double y, double Q, double * res);
   void     hoppet_cxx__pdf_table__evolve(pdf_table_f *tab, double q0, const double * pdf_at_q0,
