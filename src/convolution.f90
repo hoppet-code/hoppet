@@ -1684,6 +1684,10 @@ contains
   !!   M(moment_index) = \int_xmin^1 dx x^( moment_index - 1) * xpdf(x)
   !! 
   !! where xpdf(y) is gq .aty. (y .with. gd)
+  !!
+  !! In this definition, the 0th moment_index corresponds to the
+  !! number sum and the 1st moment_index to the momentum sum.
+  !!
   !-------------------------------------------------------------
   function conv_TruncatedMoment_1d(gd, gq, moment_index, y) result(res)
     use integrator
@@ -1766,14 +1770,20 @@ contains
    
   end function conv_TruncatedMoment_helper
   
-  ! a super inefficient (O N^2) way of getting the moment that also
-  ! suffers from a truncation error...
+  
+  !! a very inefficient (O N^2) way of getting the (truncated) moment of a 
+  !! grid_conv object, which also suffers from a truncation error...
+  !!
+  !! The moment is defined with the same convention as for conv_TruncatedMoment_1d
+  !! namely that the 0th moment corresponds to the number sum and the 1st moment to 
+  !! the momentum sum.
+  !! 
   real(dp) function gc_moment(gc, momN) result(res)
     type(grid_conv), intent(in) :: gc
     real(dp), intent(in) :: momN
     !-------------------------------
     real(dp) :: powx(0:gc%grid%ny), conv_res(0:gc%grid%ny)
-    powx = xValues(gc%grid)**(-(momN-1))
+    powx = xValues(gc%grid)**(-(momN))
     conv_res = gc * powx
     res = conv_res(gc%grid%ny) / powx(gc%grid%ny)
   end function gc_moment

@@ -130,6 +130,15 @@ __Files added__
 	also throws C++ exceptions if enabled from wae
 
 --------- end 2025-10-cxx-OO branch ---------
+
+2025-11-27 Gavin
+
+	* src/convolution.f90:
+	* unit-tests/test_libome.F90:
+	fixed the convention for the moment index in gc_moment to
+	match that of conv_TruncatedMoment_1d, namely that
+	the 0th moment corresponds to the number sum.
+
 2025-11-26 Gavin
 
 	* ../src/new_as.f90:
