@@ -764,9 +764,9 @@ public:
     std::function<double(double,int)> fn_ptr = std::forward<FuncType>(conv_ignd_fn);
     if (split_array.size() > 0) {
       int split_array_size = split_array.size();
-      _ptr = hoppet_cxx__grid_conv__new_from_fn(grid.ptr(), &fn_ptr, split_array.data(), &split_array_size);
+      _ptr = hoppet_cxx__grid_conv__new_from_fn(grid.valid_ptr(), &fn_ptr, split_array.data(), &split_array_size);
     } else {
-      _ptr = hoppet_cxx__grid_conv__new_from_fn(grid.ptr(), &fn_ptr);
+      _ptr = hoppet_cxx__grid_conv__new_from_fn(grid.valid_ptr(), &fn_ptr);
     }
   }
 };
