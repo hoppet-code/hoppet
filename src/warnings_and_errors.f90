@@ -158,6 +158,7 @@ contains
       write(stddev,*)
       write(stddev,'(a)') '============================================================='
       write(stddev,'(a)', advance='no') red//bold//'FATAL ERROR in '//reset
+      msg = ""
     else
       msg = 'FATAL HOPPET ERROR in '
     end if
