@@ -71,7 +71,7 @@ contains
 
 
     !--- test large ranges of evolution, and also use the rescaling trick to verify the result
-    !    (scaling alphas down and Q to that power should give the same evolution)
+    !    (for nloop=1, scaling alphas down and Q to that power should give the same evolution)
     call delete(alphas_nf4)
     raw_Qmax = 1e100_dp
     call InitRunningCoupling(alphas_nf4, 0.2_dp, Q=1.0_dp, fixnf=4, nloop=1, Qmax = raw_Qmax)
