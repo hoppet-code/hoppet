@@ -315,6 +315,7 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   double pgq_q_mom1 = pgq_q.truncated_moment(1.0);
   double q_mom1 = 1.0/6.0;
   double pqq_mom1 = -cf * 4.0/3.0;
+  REQUIRE_THAT(pqq.truncated_moment(1.0), WithinAbs(pqq_mom1, 1e-6));
   REQUIRE_THAT(pqq_q_mom1/q_mom1, WithinAbs(pqq_mom1, 1e-6)); //< check momentum moment (1/6 * (-4/3))
   REQUIRE_THAT(          pqq_q.truncated_moment(0.0), WithinAbs(0.0, 1e-5));    //< check quark number conserved
   REQUIRE_THAT((pqq_q + pgq_q).truncated_moment(1.0), WithinAbs(0.0, 1e-6));    //< check momentum conserved

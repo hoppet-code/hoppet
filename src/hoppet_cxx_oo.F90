@@ -684,6 +684,17 @@ contains
     res = c_loc(res_f)
   end function hoppet_cxx__grid_conv__alloc_and_conv
 
+  function hoppet_cxx__grid_conv__moment(conv, momN) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: conv
+    real(c_double), intent(in), value :: momN
+    real(c_double) :: res
+    type(grid_conv), pointer :: conv_f
+
+    call c_f_pointer(conv, conv_f)
+    res = gc_moment(conv_f, momN)
+  end function hoppet_cxx__grid_conv__moment
+
   !! finally the member accessors
   DEFINE_RETURN_OBJ_MEMBER(grid_conv,grid,grid_def)
 

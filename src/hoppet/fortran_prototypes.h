@@ -116,6 +116,7 @@ extern "C" {
   void hoppet_cxx__grid_conv__add(grid_conv_f * conv, const grid_conv_f * other, const double * factor = nullptr);
   void hoppet_cxx__grid_conv__multiply(grid_conv_f * conv, const double factor);
   grid_conv_f * hoppet_cxx__grid_conv__alloc_and_conv(const grid_conv_f * conv1, const grid_conv_f * conv2);
+  double hoppet_cxx__grid_conv__moment(const grid_conv_f * conv, double momN);
 }
 DEFINE_DELETE(grid_conv)
 DEFINE_RETURN_OBJ_MEMBER(grid_conv,grid,grid_def)

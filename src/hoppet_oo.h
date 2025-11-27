@@ -722,6 +722,17 @@ public:
     return *this;
   }
   ///@}
+
+  /// @brief  return an inefficiently computed (truncated) moment of the convolution operator
+  /// @param n the moment index, where n=1 corresponds to momentum, n=0 to number
+  /// @return the moment  
+  ///
+  /// Note that this is inefficient because it involves constructing
+  /// a temporary grid_quant object to perform the integration and
+  /// performing a full (grid.size()^2 operations) convolution.
+  double truncated_moment(double n) const {
+    return hoppet_cxx__grid_conv__moment(ptr(), n);
+  }
 };
 
 
