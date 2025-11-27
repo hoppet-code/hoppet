@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 --------- 2025-10-cxx-OO branch ---------
 
 2025-10-16 -> 2025-11-XX (Gavin): work on a C++ interface
@@ -132,8 +131,6 @@ __Files added__
 
 --------- end 2025-10-cxx-OO branch ---------
 
-=======
->>>>>>> dev
 2025-11-27 Gavin
 
 	* src/convolution.f90:
