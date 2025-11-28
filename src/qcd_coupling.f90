@@ -152,7 +152,7 @@ contains
   ! As of 2018-12-27: it should now accept nloop = 0, to provide a
   ! fixed-coupling class
   subroutine as_Init_ash(coupling, alfas, Q, nloop, fixnf, &
-       & quark_masses, masses_are_MSbar, muMatch_mQuark, use_nah, qcdl5)
+       & quark_masses, masses_are_MSbar, muMatch_mQuark, use_nah, qcdl5, Qmax)
     use assertions
     type(running_coupling) :: coupling
     real(dp), intent(in), optional :: alfas, Q, qcdl5
@@ -161,6 +161,7 @@ contains
     logical,  intent(in), optional :: masses_are_MSbar
     real(dp), intent(in), optional :: muMatch_mQuark
     logical,  intent(in), optional :: use_nah
+    real(dp), intent(in), optional :: Qmax
     real(dp) :: dummy, lower, upper, middle
     real(dp) :: Qloc
     real(dp), parameter :: mz = 91.1880_dp
@@ -169,7 +170,7 @@ contains
     coupling%use_nah = default_or_opt(.true., use_nah)
     if (coupling%use_nah) then
        call na_Init(coupling%nah, alfas, Q, nloop, fixnf, &
-            &           quark_masses, masses_are_MSbar, muMatch_mQuark)
+            &           quark_masses, masses_are_MSbar, muMatch_mQuark, Qmax=Qmax)
        return
     else
        call wae_error('as_Init_ash','old alphas (analytic approx to solution) is obsolete and will not run...')

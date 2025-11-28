@@ -185,8 +185,11 @@ contains
 
       tol = default_or_opt(1e-7_dp, override_tol)
 
-      res_test = gc_moment(gc_test, momN)
-      res_ref  = gc_moment(gc_ref, momN)
+      ! the hoppet convention is that the Nth moment is
+      ! \int_0^1 dx x^(N-1) xpdf(x)
+      ! which differs by one from the 
+      res_test = gc_moment(gc_test, momN-one)
+      res_ref  = gc_moment(gc_ref, momN-one)
       call check_approx_eq(name, answer=res_test, expected = res_ref, &
                                  tol_abs = tol, tol_rel = tol, tol_choice_or = .true.)
     end subroutine check_moment
@@ -275,7 +278,7 @@ contains
 
       do i = 1, size(moment_Ns)
         moment_N = real(moment_Ns(i), dp)
-        res = gc_moment(A3sum, moment_N)
+        res = gc_moment(A3sum, moment_N-one)
         call check_approx_eq(&
                     "libome "//name//", momN="//to_string(moment_Ns(i)), &
                      answer=res, expected=refvals(i), &

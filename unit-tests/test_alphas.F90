@@ -23,8 +23,9 @@ contains
     real(dp), parameter :: ref_4loop_vfn(*) = [4.830605117006e-01_dp, 2.536789691195e-01_dp, 1.827498038423e-01_dp, 7.181752397345e-02_dp]
     !-- end of reference results    
 
-    type(running_coupling) :: alphas_vfn, alphas_nf4
+    type(running_coupling) :: alphas_vfn, alphas_nf4, alphas_nf4_rescaled
     real(dp) :: default_dt, Q, abs_tol = 1e-9_dp
+    real(dp) :: raw_Qmax, rescaling_factor, rescaled_Qmax
 
     if (.not. do_test("unit_tests_alphas")) return
 
@@ -68,6 +69,20 @@ contains
       sum_alphas = sum_alphas + na_Value_full(alphas_vfn%nah,Qvals(mod(irep,size(Qvals))+1) ) !alphas_vfn%Value(Qvals(mod(irep,size(Qvals))+1))
     TIME_END(sum_alphas)
 
+
+    !--- test large ranges of evolution, and also use the rescaling trick to verify the result
+    !    (for nloop=1, scaling alphas down and Q to that power should give the same evolution)
+    call delete(alphas_nf4)
+    raw_Qmax = 1e100_dp
+    call InitRunningCoupling(alphas_nf4, 0.2_dp, Q=1.0_dp, fixnf=4, nloop=1, Qmax = raw_Qmax)
+    rescaling_factor = 3.0_dp
+    rescaled_Qmax = (raw_Qmax)**rescaling_factor
+    call InitRunningCoupling(alphas_nf4_rescaled, &
+                             alphas_nf4%value(raw_Qmax)/rescaling_factor, &
+                             Q=rescaled_Qmax, fixnf=4, nloop=1)
+    call check_approx_eq("alphas_nf4_rescaled at 1 GeV", &
+         alphas_nf4%Value(1.0_dp), &
+         alphas_nf4_rescaled%Value(1.0_dp)*rescaling_factor, abs_tol)
 
   end subroutine unit_tests_alphas
 
