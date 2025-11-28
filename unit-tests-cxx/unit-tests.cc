@@ -698,6 +698,9 @@ TEST_CASE("pdf_table", "[hoppet]") {
   sl_tab.at_xQ_into(x, Q, f_into);
   REQUIRE_THAT(gluon_sl, WithinAbs(f_into[hoppet::iflv_g], 1e-6));
 
+  // access via at_Q
+  auto pdf_atQ = sl_tab.at_Q(Q);
+  REQUIRE_THAT(gluon_sl, WithinAbs(pdf_atQ[hoppet::iflv_g].at_x(x), 1e-6));
 
   // explore applying splitting functions, locally versus streamlined
   hoppet::pdf p_pdf = hoppet::sl::dh.p(nloop,nf) * sl_tab.at_iQ(iQ);

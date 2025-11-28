@@ -10,6 +10,10 @@ extern "C" void hoppet_throw_runtime_error(char * msg) {
   throw std::runtime_error(msg_str);
 }
 
+extern "C" void hoppet_print_cloc(void * ptr) {
+  std::cout << "hoppet_print_cloc: pointer value = " << ptr << std::endl;
+}
+
 /// @brief  A wrapper to call a C++ convolution function object from Fortran
 /// @param y      the y-value at which to evaluate the function
 /// @param piece  the piece index (cc_REAL, etc.)

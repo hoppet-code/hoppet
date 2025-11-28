@@ -34,8 +34,12 @@ module warnings_and_errors
       use iso_c_binding
       type(c_ptr), value :: cstr_ptr
     end subroutine hoppet_throw_runtime_error
+    subroutine hoppet_print_cloc(cptr) bind(C,name="hoppet_print_cloc")
+      use iso_c_binding
+      type(c_ptr), value :: cptr
+    end subroutine hoppet_print_cloc
   end interface
-  public :: hoppet_throw_runtime_error
+  public :: hoppet_throw_runtime_error, hoppet_print_cloc
 
 
 

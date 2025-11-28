@@ -322,7 +322,10 @@ public:
 
   /// @brief assign a constant value to all elements
   /// @param val   the value to assign
-  void assign(double val) {ensure_valid(); std::fill(data(), data()+size(), val);}
+  void assign(double val) {
+    ensure_valid(); 
+    std::fill(data(), data()+size(), val);
+  }
 
   /// @brief  ensure that the grid_quant_view is valid (i.e. associated with data), otherwise throw an exception
   void ensure_valid() const {
@@ -610,6 +613,8 @@ public:
   inline std::size_t size_dim1() const {return extras().size_dim1;}
   /// return the size of the flavour dimension (dim0)
   inline std::size_t size_flv() const {return size_dim0();}
+  /// return the size of the y dimension (dim1)
+  inline std::size_t size_y() const {return size_dim1();}
 
   void ensure_valid() const {
     if (!data()) {
@@ -637,8 +642,8 @@ public:
   using view_t = grid_quant_2d_view;
 
   grid_quant_2d() {}
-  grid_quant_2d(const grid_def_view & grid, std::size_t dim1_size) {
-    alloc(gq2d_extras(grid, dim1_size));
+  grid_quant_2d(const grid_def_view & grid, std::size_t dim0_size) {
+    alloc(gq2d_extras(grid, dim0_size));
   }
   void alloc_virtual(std::size_t /*sz*/, const gq2d_extras & extras_in) override {
     alloc(extras_in);
@@ -1425,12 +1430,12 @@ public:
     at_yQ_into(-std::log(x), Q, result);
   }
 
-  /// @brief return a grid_quant_2d (i.e. full set of pdf flavours) at the specified Q
+  /// @brief return a grid_quant_2d (i.e. full set of pdf flavours across y) at the specified Q
   /// @param Q 
   /// @return the grid_quant_2d at the specified Q
   grid_quant_2d at_Q(double Q) const {
     grid_quant_2d result(grid(), size_flv());
-    hoppet_cxx__pdf_table__at_q_into(ptr(), Q, result.data());
+    hoppet_cxx__pdf_table__at_q_into(valid_ptr(), Q, result.data());
     return result;
   }
   ///@}

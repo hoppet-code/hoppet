@@ -1299,7 +1299,7 @@ contains
     implicit none
     type(c_ptr),    intent(in), value :: tab
     real(c_double), intent(in), value :: Q
-    type(c_ptr),    intent(out) :: pdf
+    type(c_ptr),    intent(in), value :: pdf
     !--------
     type(pdf_table), pointer :: tab_f
     real(c_double),  pointer :: pdf_f(:,:)

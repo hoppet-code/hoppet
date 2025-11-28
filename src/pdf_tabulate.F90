@@ -1400,9 +1400,10 @@ contains
   !! Sets the pdf(0:iflv_min:) for the PDF at this value of Q.
   !!
   subroutine EvalPdfTable_Q(tab,Q,pdf)
+    use iso_c_binding, only: c_loc
     type(pdf_table), intent(in) :: tab
     real(dp),    intent(in)  :: Q
-    real(dp),    intent(out) :: pdf(0:,iflv_min:)
+    real(dp),    intent(out), target :: pdf(0:,iflv_min:)
     !-----------------------------------------------
     real(dp) :: lnlnQ_wgts(0:tab%lnlnQ_order)
     integer  :: ilnlnQ_lo, ilnlnQ_hi
