@@ -77,3 +77,47 @@ extern "C" {
 //    }
 //  }
 } // extern "C"
+
+
+//--  implementations that don't need to be in the .hh files ----------------------------
+
+namespace hoppet {
+
+/// @brief  stream output operator for grid_quant_view objects
+///
+/// Outputs the monotonically increasing y values and the corresponding
+/// grid_quant_view values, one pair per line.
+///
+std::ostream & operator<<(std::ostream & os, const grid_quant_view & gq) {
+  using namespace std;
+  vector<int> unique_indices = gq.grid().monotonic_indices();
+  vector<double> yvals = gq.grid().y_values();
+  for (size_t i = 0; i < unique_indices.size(); ++i) {
+    int idx = unique_indices[i];
+    os << yvals[idx] << " " << gq[idx] << "\n";
+  }
+  return os;  
+}
+
+/// @brief  stream output operator for grid_quant_2d_view objects
+///
+/// Outputs the monotonically increasing y=ln(1/x) values and the corresponding
+/// grid_quant_2d_view values, xf(x,:) across all flavours, one line per y point.
+///
+std::ostream & operator<<(std::ostream & os, const grid_quant_2d_view & gq) {
+  using namespace std;
+  vector<int> unique_indices = gq.grid().monotonic_indices();
+  vector<double> yvals = gq.grid().y_values();
+  for (size_t i = 0; i < unique_indices.size(); ++i) {
+    int idx = unique_indices[i];
+    os << yvals[idx];
+    for (size_t flav = 0; flav < gq.size_flv(); ++flav) {
+      os << " " << gq(flav, idx);
+    }
+    os << "\n";
+  }
+  return os;  
+}
+
+
+}

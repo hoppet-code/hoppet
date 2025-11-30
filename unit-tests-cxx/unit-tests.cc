@@ -256,6 +256,7 @@ TEST_CASE( "pdf_qcd", "[hoppet]" ) {
   hoppet::pdf pdf = pdf_qcd(big_grid);
   double dummy_Q = 0.0;
   pdf.assign_xQ_into(hoppetBenchmarkPDFunpol, dummy_Q);
+
   // hard-coded values from the benchmark function
   auto fn_g    = [](double x) { return 1.7*pow(x,-0.1) * pow(1-x,5); };
   auto fn_ubar = [](double x) { return 0.387975*0.5*pow(x,-0.1)*pow(1-x,7); };

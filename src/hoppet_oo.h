@@ -420,6 +420,12 @@ public:
 
 };
 
+/// @brief  stream output operator for grid_quant_view objects
+///
+/// Outputs the monotonically increasing y=ln(1/x) values and the corresponding
+/// grid_quant_view values, xf(x), one pair per line.
+///
+std::ostream & operator<<(std::ostream & os, const grid_quant_view & gq);
 
 //-----------------------------------------------------------------------------
 /// @brief A function of y=ln(1/x) stored at fixed grid points in y (see grid_quant_view for core member functions)
@@ -641,6 +647,18 @@ public:
 
   grid_quant_2d_view & operator=(double value) {assign(value); return *this;}
 };
+
+
+/// @brief  stream output operator for grid_quant_2d_view objects
+///
+/// Outputs the monotonically increasing y=ln(1/x) values and the corresponding
+/// grid_quant_2d_view values, xf(x,:) across all flavours, one line per y point.
+///
+/// Note that QCD PDFs typically have an extra flavour index that
+/// encodes the representation (human v. evolution basis); this gets
+/// included in the output.
+std::ostream & operator<<(std::ostream & os, const grid_quant_2d_view & gq);
+
 
 
 //-----------------------------------------------------------------------------
