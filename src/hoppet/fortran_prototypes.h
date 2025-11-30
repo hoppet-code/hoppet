@@ -66,6 +66,7 @@ extern "C" {
   void   hoppet_cxx__grid_def__y_values(const grid_def_f * griddef, double * yvals);
   void   hoppet_cxx__grid_def__x_values(const grid_def_f * griddef, double * xvals);
   bool   hoppet_cxx__grid_def__equiv(const grid_def_f * griddef1, const grid_def_f * griddef2);
+  void   hoppet_cxx__grid_def__monotonic_indices(const grid_def_f * griddef, int * indices, int & nindices);
 }
 DEFINE_RETURN_DBL_MEMBER(grid_def,dy)
 DEFINE_RETURN_DBL_MEMBER(grid_def,ymax)

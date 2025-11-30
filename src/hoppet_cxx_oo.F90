@@ -299,6 +299,23 @@ contains
     res = (grid1_f == grid2_f)
   end function hoppet_cxx__grid_def__equiv
 
+  subroutine hoppet_cxx__grid_def__monotonic_indices(grid, indices, nindices) bind(C)
+    use convolution
+    implicit none
+    type(c_ptr), intent(in), value :: grid
+    integer(c_int), intent(out) :: indices(*)
+    integer(c_int), intent(out) :: nindices
+    !------
+    type(grid_def), pointer :: grid_f
+    real(dp), allocatable :: indices_f(:)
+    integer :: i
+
+    call c_f_pointer(grid, grid_f)
+    indices_f = MonotonicUniqueIndices(grid_f)
+    nindices = size(indices_f)
+    indices(1:nindices) = indices_f(:)
+  end subroutine hoppet_cxx__grid_def__monotonic_indices  
+
   DEFINE_RETURN_DBL_MEMBER(grid_def,dy)
   DEFINE_RETURN_DBL_MEMBER(grid_def,ymax)
   DEFINE_RETURN_DBL_MEMBER(grid_def,eps)

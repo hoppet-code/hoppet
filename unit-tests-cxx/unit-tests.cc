@@ -97,6 +97,13 @@ TEST_CASE( "grid_def", "[hoppet]" ) {
   REQUIRE(grid3.subgd(2) == grid100);
   REQUIRE(grid3.subiy(1) == 0);
   REQUIRE(grid3.subiy(2) == grid3.subgd(1).ny()+1);
+  //cout << red << "grid3 yvals:" << endc << endl;
+  //auto yvals3 = grid3.y_values();
+  //vector<int> mono_inds = grid3.monotonic_indices();
+  //cout << "Monotonic indices of grid3:" << endl;
+  //for (size_t i = 0; i < mono_inds.size(); ++i) {
+  //  cout << "  i=" << i << " index=" << mono_inds[i] << " " << yvals3[mono_inds[i]] << endl;
+  //}
 
   // now locked=false grid with subgrids, which should preserve order of input grids
   hoppet::grid_def grid4({grid100, hoppet::grid_def(0.03,0.3)}, false);

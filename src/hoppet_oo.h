@@ -168,6 +168,18 @@ public:
     }
   }
 
+  /// @brief  return a vector of the indices of the monotonically increasing subset of the grid
+  /// @return the vector
+  ///
+  /// Note: this is not optimally efficient, as it involves intermediate
+  /// allocations, but it is more than adequate e.g. for I/O purposes.
+  std::vector<int> monotonic_indices() const {
+    std::vector<int> indices(size());
+    int nindices;
+    hoppet_cxx__grid_def__monotonic_indices(valid_ptr(), indices.data(), nindices);
+    indices.resize(nindices);
+    return indices;
+  }
   
   RETURN_DBL_MEMBER(grid_def,dy)     ///< return the grid's dy spacing (coarsest if using subgrids)
   RETURN_DBL_MEMBER(grid_def,ymax)   ///< return the grid's maximum y value (largest among subgrids)
