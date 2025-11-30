@@ -931,6 +931,12 @@ public:
   split_mat(int nf) {
     _ptr = hoppet_cxx__split_mat__new(nf);
   }
+
+  /// (re-)initialize the split_mat, with nf flavours; deletes any existing data
+  void init(int nf) {
+    generic_delete(_ptr);
+    _ptr = hoppet_cxx__split_mat__new(nf);
+  }
 }; 
 
 // these all use a copy-and-modify strategy, exploiting the move semantics
