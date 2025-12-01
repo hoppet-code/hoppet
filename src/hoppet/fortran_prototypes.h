@@ -118,12 +118,14 @@ extern "C" {
   void hoppet_cxx__grid_conv__multiply(grid_conv_f * conv, const double factor);
   grid_conv_f * hoppet_cxx__grid_conv__alloc_and_conv(const grid_conv_f * conv1, const grid_conv_f * conv2);
   double hoppet_cxx__grid_conv__moment(const grid_conv_f * conv, double momN);
+  double * hoppet_cxx__grid_conv__conv_ptr(const grid_conv_f * gridconv, int & sz_y, int & sz_order);
 }
 DEFINE_DELETE(grid_conv)
-DEFINE_RETURN_OBJ_MEMBER(grid_conv,grid,grid_def)
 //inline void generic_delete(grid_conv_f * ptr) {if (ptr)hoppet_cxx__grid_conv__delete(&ptr);}
 inline grid_conv_f * generic_copy(const grid_conv_f * ptr) {return hoppet_cxx__grid_conv__new_from_gc(ptr);}
 //  if (ptr)  return hoppet_cxx__grid_conv__new_from_gc(ptr); else return nullptr;}
+DEFINE_RETURN_OBJ_MEMBER(grid_conv,grid,grid_def)
+DEFINE_RETURN_OBJ_MEMBER_I(grid_conv,subgc,grid_conv)
 
 
 /// split_mat function wrappers

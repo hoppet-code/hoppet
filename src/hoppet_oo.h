@@ -768,6 +768,32 @@ public:
   double truncated_moment(double n) const {
     return hoppet_cxx__grid_conv__moment(ptr(), n);
   }
+
+  /// @brief  return a view of the convolution data as a grid_quant_2d_view
+  /// @return the grid_quant_2d_view
+  ///
+  /// Note that this is low-level access to the internal data of the
+  /// convolution operator; modifying the returned data will likely
+  /// invalidate the convolution operator.
+  ///
+  /// The size of dimension 0 depends on the order (order<1 => size=1,
+  /// for other cases see hoppet manual). Note that normally a
+  /// grid_quant_2d_view dim0 is used to represent flavour indices, but
+  /// here it is just a convenient way to get the order-related
+  /// dimension
+  ///
+  /// The size of dimension 1 is grid().size()
+  grid_quant_2d_view conv_data() const {
+    int sz_y, sz_order;
+    double * conv_data = hoppet_cxx__grid_conv__conv_ptr(ptr(), sz_y, sz_order);
+    assert(static_cast<std::size_t>(sz_y) == grid().size());
+    return grid_quant_2d_view(conv_data, sz_y*sz_order, gq2d_extras(grid_def_view(grid().ptr()), sz_order));
+  }
+
+  /// return a view of the sub-convolution operator for subgrid i
+  /// @param i index of the subgrid (1 to grid().nsub())
+  /// @return the grid_conv_view for the subgrid
+  RETURN_OBJ_MEMBER_I(grid_conv, subgc, grid_conv)
 };
 
 

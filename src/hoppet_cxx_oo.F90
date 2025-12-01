@@ -712,8 +712,29 @@ contains
     res = gc_moment(conv_f, momN)
   end function hoppet_cxx__grid_conv__moment
 
+  !! return a pointer to the convolution object inside the grid_conv
+  !! or a null pointer if it not allocated
+  function hoppet_cxx__grid_conv__conv_ptr(gc, sz_y, sz_order) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: gc
+    integer(c_int), intent(out)       :: sz_y
+    integer(c_int), intent(out)       :: sz_order
+    type(c_ptr)                       :: res
+    type(grid_conv), pointer :: gc_f
+
+    call c_f_pointer(gc, gc_f)
+    if (associated(gc_f%conv)) then
+      res = c_loc(gc_f%conv(lbound(gc_f%conv,1), lbound(gc_f%conv,2)))
+      sz_y = size(gc_f%conv,1)
+      sz_order = size(gc_f%conv,2)
+    else
+      res = c_null_ptr
+    end if
+  end function hoppet_cxx__grid_conv__conv_ptr
+
   !! finally the member accessors
   DEFINE_RETURN_OBJ_MEMBER(grid_conv,grid,grid_def)
+  DEFINE_RETURN_OBJ_MEMBER_I(grid_conv,subgc,grid_conv)
 
 end module hoppet_cxx_oo_grid_conv
 

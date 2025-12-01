@@ -415,6 +415,22 @@ TEST_CASE( "grid_conv", "[hoppet]" ) {
   REQUIRE_THAT( (pgen  * q) .truncated_moment(1.0), WithinAbs(pgq_q_mom1, 1e-6)); // since pview was a view of pgen, pgen should also now be pgq
   pview += pgq;
   REQUIRE_THAT( (pgen * q) .truncated_moment(1.0), WithinAbs(2*pgq_q_mom1, 1e-6)); // pgen should be equal to 2*pgq
+
+
+  //-------- looking inside the grid_conv object
+  hoppet::grid_conv delta_100(grid100, hoppet::reg_plus_delta(0,0,1.0));
+  REQUIRE(delta_100.conv_data().size_dim0() == 1);
+  REQUIRE(delta_100.conv_data()(0,0) == 1.0); // delta function part should be 1.0 at lowest y
+  REQUIRE(delta_100.conv_data()(0,1) == 0.0); // delta function part should be 0.0 elsewhere
+
+  hoppet::grid_conv delta_big(big_grid, hoppet::reg_plus_delta(0,0,1.0));
+  for (int i = 1; i <= big_grid.nsub(); ++i) {
+    REQUIRE(delta_big.subgc(i).conv_data().size_dim0() == 1);
+    REQUIRE(delta_big.subgc(i).conv_data()(0,0) == 1.0); // delta function part should be 1.0 at lowest y
+    REQUIRE(delta_big.subgc(i).conv_data()(0,1) == 0.0); // delta function part should be 0.0 elsewhere
+  }
+
+
 }
 
 //-----------------------------------------------------------------------------
