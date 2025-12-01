@@ -867,7 +867,7 @@ public:
   }
 
   const grid_def_ref grid() const { return qq().grid(); }
-  int nf() const { return hoppet_cxx__split_mat__nf(ptr()); }
+  int nf() const { return hoppet_cxx__split_mat__nf(valid_ptr()); }
 
   /// views of the individual components of the splitting matrix
   ///@{
