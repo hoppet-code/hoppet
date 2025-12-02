@@ -38,13 +38,16 @@
 %% a development or pre-release version, specific tag corresponding to
 %% the the hoppet-x.y.z tag otherwise
 %\newcommand{\repolink}[2]{\href{https://github.com/hoppet-code/hoppet/blob/master/#1}{\ttt{#2}}}
-\newcommand{\repolink}[2]{\href{https://github.com/hoppet-code/hoppet/blob/hoppet-2.1.2/#1}{\ttt{#2}}}
+\newcommand{\repolink}[2]{\href{https://github.com/hoppet-code/hoppet/blob/hoppet-2.1.3/#1}{\ttt{#2}}}
 %%
 \newcommand{\masterlink}[1]{\repolink{#1}{\escapeunderscores{#1}}}
 
 
 \def\APFELPP{{APFEL\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}}
-\newcommand{\CPP}{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}\xspace}
+%\newcommand{\CPP}{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}\xspace}
+\DeclareRobustCommand{\CPP}{%
+  \mbox{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}\xspace
+}
 \newcommand{\be}{\begin{equation}}
 \newcommand{\ee}{\end{equation}}
 \newcommand{\bea}{\begin{eqnarray}}

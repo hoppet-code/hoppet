@@ -574,7 +574,7 @@ extern "C" {
 #endif
 
 // Proper C prototype for direct Fortran call (see bind(C) in Fortran)
-void hoppetwritelhapdfgrid_(const char* basename, const int* basename_len, const int* pdf_index);
+  void hoppetwritelhapdfwithlen_c(const int& basename_len, const char* basename, const int& pdf_index);
 
 #ifdef __cplusplus
 }
@@ -589,7 +589,9 @@ void hoppetwritelhapdfgrid_(const char* basename, const int* basename_len, const
     // Fortran expects a char array, its length, and the index (all as pointers)
     const char* basename_cstr = basename.c_str();
     int basename_len = basename.length();
-    hoppetwritelhapdfgrid_(basename_cstr, &basename_len, &pdf_index);
+
+    hoppetwritelhapdfwithlen_c(basename_len, basename_cstr, pdf_index);
+
   }
 
   void hoppetBenchmarkPDFunpol(const double & x,

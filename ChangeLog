@@ -1,3 +1,56 @@
+2025-12-02 Gavin
+
+	Release 2.1.3
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.3
+
+2025-12-02  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/hoppet.h:
+	* src/streamlined_interface.f90:
+	Fixed bug where hoppetWriteLHAPDFGrid resulted in a segmentation
+	fault. The issue was that the C++ interface was not calling the
+	right underlying Fortran interface function.
+
+2025-11-27 Gavin
+
+	* src/convolution.f90:
+	* unit-tests/test_libome.F90:
+	fixed the convention for the moment index in gc_moment to
+	match that of conv_TruncatedMoment_1d, namely that
+	the 0th moment corresponds to the number sum.
+
+2025-11-26 Gavin
+
+	* ../src/new_as.f90:
+	* ../src/qcd_coupling.f90:
+	* ../unit-tests/test_alphas.F90:
+
+	added optional Qmax argument to InitRunningCoupling and added tlo
+	and thi as members of the internal na_handle class rather than
+	globals parameters. If the user initialises a coupling with a value
+	of Q > Qmax (or its default), the internal Qmax is set to Q.
+	Also added unit tests.
+
+
+2025-11-25  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+ 	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.3-dev0
+
 2025-11-25  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* CMakeLists.txt:
