@@ -7,7 +7,8 @@
 * Fixed bug where hoppetWriteLHAPDFGrid resulted in a segmentation
   fault. The issue was that the C++ interface was not calling the
   right underlying Fortran interface function. The issue was there
-  only in the C++/Python call, not in any of the Fortran77/90 calls.
+  only in the C++/Python call, not in any of the Fortran77/90
+  calls. (Thanks to Rhorry Gauld for reporting).
 
 
 ## Small additions
