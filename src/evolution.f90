@@ -815,8 +815,8 @@ contains
     call ev_SetModuleConsts(coupling, muR_Q, nloop, untie_nf)
 
     if (ev_nloop > dh%nloop) &
-         &call wae_error('ev_evolve: dh%nloop='//to_string(dh%nloop)//' must be >= nloop='//&
-         & to_string(ev_nloop))
+         &call wae_error('ev_evolve: dh%nloop(='//to_string(dh%nloop)//') must be >= nloop argument (='//&
+         & to_string(ev_nloop)//')')
 
     ev_PLO  => dh%P_LO
     if (ev_nloop >= 2) ev_PNLO => dh%P_NLO
