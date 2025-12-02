@@ -76,6 +76,7 @@ contains
   subroutine na_Init(nah, alfas, Q, nloop, fixnf, &
                      quark_masses, masses_are_MSbar, muMatch_mQuark, Qmax)
     use qcd; 
+    use hoppet_to_string
     type(na_handle),  intent(out), target :: nah
     real(dp), intent(in), optional :: alfas, Q
     integer,  intent(in), optional :: nloop, fixnf
@@ -190,7 +191,7 @@ contains
           seg%beta2 = beta2
           seg%beta3 = beta3
        case default
-          call wae_Error('na_init: unsupported number of loops requested')
+          call wae_Error('na_init: unsupported number of loops requested, nloop=',intval=nah%nloop)
        end select
 
        !-- first guess, which then needs to be "adapted" to the range
@@ -215,7 +216,7 @@ contains
        if (tstart <= nah%seg(i)%thi .and. tstart >= nah%seg(i)%tlo) exit
     end do
     if (i > nah%nhi) &
-         &call wae_Error('na_init: Specified Q not in supported range')
+         &call wae_Error('na_init: Specified Q not in supported range, Q=', dbleval=nah%Q)
     nseg = i
 
     !-- fill up the starting segment
@@ -548,6 +549,7 @@ contains
   !! Also returns the range of Qvalues (Qlo, Qhi) for which 
   !! this value of nf remains the same.
   subroutine na_nfAtQ(nah, Q, nfAtQ, Qlo, Qhi, muM_mQ)
+    use hoppet_to_string
     type(na_handle), intent(in)  :: nah
     real(dp),        intent(in)  :: Q
     integer,         intent(out) :: nfAtQ
@@ -588,8 +590,9 @@ contains
        end if
     else
        if (t > nah%thi .or. t < nah%tlo) then
-          call wae_Error('na_nfAtQ: Specified Q is not in supported range'&
-            &,dbleval=Q)
+          call wae_Error('na_nfAtQ: Specified Q(='//to_string(Q)//') is not in supported range (='//&
+            &to_string(Qoft(nah%tlo))//'-'// &
+            &to_string(Qoft(nah%thi))//')')
        end if
        nfAtQ = nah%fixnf
        if (present(Qlo) .and. present(Qhi)) then
