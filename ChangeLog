@@ -1,3 +1,11 @@
+2025-12-02  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/hoppet.h:
+	* src/streamlined_interface.f90:
+	Fixed bug where hoppetWriteLHAPDFGrid resulted in a segmentation
+	fault. The issue was that the C++ interface was not calling the
+	right underlying Fortran interface function.
+
 2025-11-27 Gavin
 
 	* src/convolution.f90:

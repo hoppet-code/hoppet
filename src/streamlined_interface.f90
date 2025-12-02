@@ -823,13 +823,13 @@ subroutine hoppetWriteLHAPDFGrid(basename, pdf_index)
 end subroutine hoppetWriteLHAPDFGrid
 
 
-subroutine hoppetWriteLHAPDFWithLen(basename_len, basename, pdf_index) bind(C, name="hoppetwritelhapdfwithlen_")
+subroutine hoppetWriteLHAPDFWithLen(basename_len, basename, pdf_index) bind(C, name="hoppetwritelhapdfwithlen_c")
   use streamlined_interface; use warnings_and_errors
   use iso_c_binding
   implicit none
-  integer(c_int), value :: basename_len
+  integer(c_int) :: basename_len
   character(kind=c_char), dimension(*), intent(in) :: basename
-  integer(c_int), value :: pdf_index
+  integer(c_int) :: pdf_index
   character(len=:), allocatable :: f_basename
   integer :: i
 
