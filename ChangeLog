@@ -1,3 +1,14 @@
+2025-12-02 Gavin (later)
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.4-dev0
+	
 2025-12-02 Gavin
 
 	Release 2.1.3
