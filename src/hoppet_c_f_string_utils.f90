@@ -71,7 +71,7 @@ contains
     do i = 1, len
       cchars(i) = fstr(i:i)
     end do
-    cchars(len) = c_null_char  ! null terminator
+    cchars(len+1) = c_null_char  ! null terminator
 
   end function cstr_from_fortran_string
 
