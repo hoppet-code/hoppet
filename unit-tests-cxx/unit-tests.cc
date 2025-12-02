@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <filesystem>
 
 //#include "catch_amalgamated.hpp"
 #include <catch2/catch_test_macros.hpp>
@@ -838,4 +839,14 @@ TEST_CASE( "streamlined-objects", "[hoppet]" ) {
 
   // check pdf tables
   REQUIRE( hoppet::sl::tables[0].ptr() == hoppet::sl::table.ptr() );
+}
+
+//-----------------------------------------------------------------------------
+TEST_CASE("streamlined-interface", "[hoppet]") {
+  // try writing out a pdf table from the streamlined interface
+  namespace fs = std::filesystem;
+  hoppetWriteLHAPDFGrid("tmplhapdf",0);
+  cout << "# removing temporary LHAPDF files\n";
+  if (!fs::remove("tmplhapdf.info")) throw std::runtime_error("Could not remove tmplhapdf.info");
+  if (!fs::remove("tmplhapdf_0000.dat")) throw std::runtime_error("Could not remove tmplhapdf_0000.dat");
 }
