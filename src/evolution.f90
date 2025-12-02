@@ -782,6 +782,7 @@ contains
   subroutine ev_evolve(dh, pdf, coupling, Q_init, Q_end, muR_Q,&
        & nloop, untie_nf, du)
     use dglap_holders; use pdf_representation
+    use hoppet_to_string
     type(dglap_holder), intent(in), target :: dh
     real(dp),        intent(inout)         :: pdf(iflv_min:,0:)
     type(running_coupling), intent(in), target    :: coupling
@@ -814,7 +815,8 @@ contains
     call ev_SetModuleConsts(coupling, muR_Q, nloop, untie_nf)
 
     if (ev_nloop > dh%nloop) &
-         &call wae_error('ev_evolve: dh%nloop must be >= nloop')
+         &call wae_error('ev_evolve: dh%nloop='//to_string(dh%nloop)//' must be >= nloop='//&
+         & to_string(ev_nloop))
 
     ev_PLO  => dh%P_LO
     if (ev_nloop >= 2) ev_PNLO => dh%P_NLO
