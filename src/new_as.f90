@@ -590,8 +590,8 @@ contains
        end if
     else
        if (t > nah%thi .or. t < nah%tlo) then
-          call wae_Error('na_nfAtQ: Specified Q(='//to_string(Q)//') is not in supported range (='//&
-            &to_string(Qoft(nah%tlo))//'-'// &
+          call wae_Error('na_nfAtQ: Specified Q(='//to_string(Q)//') is not in supported range ('//&
+            &to_string(Qoft(nah%tlo))//' to '// &
             &to_string(Qoft(nah%thi))//')')
        end if
        nfAtQ = nah%fixnf
