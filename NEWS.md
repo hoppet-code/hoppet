@@ -1,6 +1,6 @@
 # NEWS for HOPPET
 
-# Release 2.1.3, unreleased
+# Release 2.1.3, 2 December 2025
 
 ## Bug fixes
 
@@ -10,11 +10,11 @@
   only in the C++/Python call, not in any of the Fortran77/90
   calls. (Thanks to Rhorry Gauld for reporting).
 
-
 ## Small additions
 
 * Added Qmax argument to InitRunningCoupling for maximum Q value at
   which the coupling can be evaluated (internal default: exp(93.0)). 
+
 
 # Release 2.1.2, 25 November 2025
 

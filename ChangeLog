@@ -130,6 +130,37 @@ __Files added__
 	also throws C++ exceptions if enabled from wae
 
 --------- end 2025-10-cxx-OO branch ---------
+2025-12-05 Gavin
+
+	* src/pdf_tabulate.F90:
+	fixed issue in WriteLHAPDFFromPdfTable where the lcl_flav_rescale(:)
+	array was being being misused (incorrect indexing). This should fix
+	an issue with writing QED tables reported by Rhorry Gauld.
+
+2025-12-02 Gavin (later)
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.4-dev0
+	
+2025-12-02 Gavin
+
+	Release 2.1.3
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.3
+
 2025-12-02  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/hoppet.h:
