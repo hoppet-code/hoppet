@@ -33,6 +33,9 @@ __Files added__
 	be used as an argument to split_fn to define splitting functions.
 
 
+	* src/hoppet/ostream.h:					  *** ADDED ***
+	- contains helper functions for outputting HOPPET objects to streams
+
 	* src/hoppet_oo.h:                        *** ADDED ***
 	- contains the C++ object-oriented interfaces
 
