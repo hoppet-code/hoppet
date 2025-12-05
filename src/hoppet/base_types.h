@@ -133,8 +133,8 @@ public:
 
   data_view() noexcept {}
 
-  data_view(D * data_ptr, std::size_t size, const extras_t & extras) noexcept
-    : _data(data_ptr), _size(size), _extras(extras) {}
+  data_view(const D * data_ptr, std::size_t size, const extras_t & extras) noexcept
+    : _data(const_cast<D *>(data_ptr)), _size(size), _extras(extras) {}
 
   explicit data_view(const data_view<E, D> & other) noexcept {
     take_view(other);

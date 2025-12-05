@@ -1,6 +1,7 @@
 #include "hoppet_oo.h"
 #include "hoppet/qcd.h"
 #include "hoppet/reg_plus_delta.h"
+#include "hoppet/ostream.h"
 #include "unit-test-helpers.h"
 #include <iostream>
 #include <cmath>
@@ -250,6 +251,10 @@ TEST_CASE( "grid_quant_2d", "[hoppet]" ) {
   //pdf4.assign_xQ_into(hoppetBenchmarkPDFunpol, 10.0);
   //cout << "g    " << pdf4[hoppet::iflv_g   ].at_y(5.0) << endl;
   //cout << "ubar " << pdf4[hoppet::iflv_ubar].at_y(5.0) << endl;
+
+  //hoppet::set_ostream_y_values({0.3, 0.5, 2.1});
+  //cout << red << "Printing grid_quant_2d pdf3:" << endc << endl;
+  //cout << pdf3 << endl;
 }
 
 //-----------------------------------------------------------------------------

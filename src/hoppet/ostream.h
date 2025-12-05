@@ -5,7 +5,13 @@
 #include "hoppet_oo.h"
 
 namespace hoppet {
-    
+
+/// @brief  set the y values to be used in ostream output functions
+/// @param y_values  the y=ln1/x values to use
+///
+/// If not set, the output functions will use the grid's monotonic x values.    
+void set_ostream_y_values(const std::vector<double> & y_values); 
+
 /// @brief  stream output operator for grid_quant_view objects
 ///
 /// Outputs the monotonically increasing y=ln(1/x) values and the corresponding

@@ -25,7 +25,8 @@
 
 // Next steps:
 // - [x] add the running_coupling class
-// - [x] add the dglap_holder    
+// - [x] add the dglap_holder
+// - [ ] at_x/y_into functions for grid_quant_2d_view
 // - [x] generic string conversion (hoppet_c_f_string_utils.f90)
 // - [~] add the pdf_table
 //       - [ ] grid_quant_3d?
@@ -309,7 +310,7 @@ public:
   /// @param data_ptr pointer to the data array
   /// @param size     size of the data array
   /// @param grid     associated grid definition
-  grid_quant_view(double * data_ptr, std::size_t size, const grid_def_view & grid) 
+  grid_quant_view(const double * data_ptr, std::size_t size, const grid_def_view & grid) 
     : data_view<grid_def_view>(data_ptr, size, grid) {}
 
 
@@ -566,7 +567,7 @@ public:
 
   grid_quant_2d_view() {}
   grid_def_view grid() const {return extras().grid;}
-  grid_quant_view operator[](std::size_t i) {
+  grid_quant_view operator[](std::size_t i) const {
     grid_quant_view result(this->data() + i * extras().size_dim1, extras().size_dim1, extras().grid);
     return result;
   }

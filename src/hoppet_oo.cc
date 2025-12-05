@@ -83,6 +83,11 @@ extern "C" {
 
 namespace hoppet {
 
+std::vector<double> ostream_y_values;
+void set_ostream_y_values(const std::vector<double> & y_values) {
+  ostream_y_values = y_values;
+}
+
 /// @brief  stream output operator for grid_quant_view objects
 ///
 /// Outputs the monotonically increasing y values and the corresponding
@@ -106,15 +111,25 @@ std::ostream & operator<<(std::ostream & os, const grid_quant_view & gq) {
 ///
 std::ostream & operator<<(std::ostream & os, const grid_quant_2d_view & gq) {
   using namespace std;
-  vector<int> unique_indices = gq.grid().monotonic_indices();
-  vector<double> yvals = gq.grid().y_values();
-  for (size_t i = 0; i < unique_indices.size(); ++i) {
-    int idx = unique_indices[i];
-    os << yvals[idx];
-    for (size_t flav = 0; flav < gq.size_flv(); ++flav) {
-      os << " " << gq(flav, idx);
+  if (ostream_y_values.size() == 0) {
+    vector<int> unique_indices = gq.grid().monotonic_indices();
+    vector<double> yvals = gq.grid().y_values();
+    for (size_t i = 0; i < unique_indices.size(); ++i) {
+      int idx = unique_indices[i];
+      os << yvals[idx];
+      for (size_t flav = 0; flav < gq.size_flv(); ++flav) {
+        os << " " << gq(flav, idx);
+      }
+      os << "\n";
     }
-    os << "\n";
+  } else {
+    for (double y : ostream_y_values) {
+      os << y;
+      for (std::size_t flav = 0; flav < gq.size_flv(); ++flav) {
+        os << " " << gq[flav].at_y(y);
+      }
+      os << "\n";
+    }
   }
   return os;  
 }
