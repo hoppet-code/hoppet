@@ -1615,7 +1615,7 @@ contains
              do ipdg = 1, ubound(lcl_flav_pdg_ids,1)
                 val = flavs(lcl_flav_indices(ipdg))
                 !print*, val, lcl_flav_rescale(ipdg), lcl_flav_indices(ipdg), ipdg
-                if (allocated(lcl_flav_rescale)) val = val * lcl_flav_rescale(lcl_flav_indices(ipdg))
+                if (allocated(lcl_flav_rescale)) val = val * lcl_flav_rescale(ipdg)
                 if (val == zero) then
                    write(dat_unit,'(a)',advance='no') '  0'
                 else

@@ -1,3 +1,10 @@
+2025-12-05 Gavin
+
+	* src/pdf_tabulate.F90:
+	fixed issue in WriteLHAPDFFromPdfTable where the lcl_flav_rescale(:)
+	array was being being misused (incorrect indexing). This should fix
+	an issue with writing QED tables reported by Rhorry Gauld.
+
 2025-12-02 Gavin (later)
 
 	* CMakeLists.txt:
