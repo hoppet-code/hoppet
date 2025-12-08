@@ -127,6 +127,28 @@ TEST_CASE( "grid_def", "[hoppet]" ) {
   // enforcement tests
   REQUIRE_THROWS_AS(null_grid.ensure_valid(), std::runtime_error);
   REQUIRE_THROWS_AS(grid100.ensure_compatible(big_grid), std::runtime_error);
+
+  // explicitly test construction from various forms of container / initializer_list
+  bool locked = true;
+  double dy = 0.1;
+  double ymax = 10.0;
+  int order = -6;
+  double epsilon = 1e-7;
+  hoppet::grid_def gd4(
+    { hoppet::grid_def(dy/27.0,  0.3, order, epsilon),
+      hoppet::grid_def(dy/ 9.0,  0.8, order, epsilon),
+      hoppet::grid_def(dy/ 3.0,  3.0, order, epsilon),
+      hoppet::grid_def(dy     , ymax, order, epsilon),
+    }, locked);
+
+  std::vector<hoppet::grid_def> gd_vec;
+  gd_vec.emplace_back(hoppet::grid_def(dy/27.0,  0.3, order, epsilon));
+  gd_vec.emplace_back(hoppet::grid_def(dy/ 9.0,  0.8, order, epsilon));
+  gd_vec.emplace_back(hoppet::grid_def(dy/ 3.0,  3.0, order, epsilon));
+  gd_vec.emplace_back(hoppet::grid_def(dy     , ymax, order, epsilon));
+  hoppet::grid_def gd5(gd_vec, locked);
+  REQUIRE( gd4 == gd5 );
+
 }
 
 

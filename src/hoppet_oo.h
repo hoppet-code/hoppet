@@ -246,17 +246,40 @@ public:
   explicit grid_def(double dy, double ymax, int order=-5, double eps=hoppet_default_conv_eps)
     : grid_def(hoppet_cxx__grid_def__new(dy, ymax, order, eps)) {}
 
-  /// @brief construct a grid_def from multiple grid_def objects
+
+  /// @brief construct a grid_def from multiple grid_def_view objects
   ///
-  /// @param grids   vector of grid_def objects
+  /// @param grids   container of objects that can be converted to a grid_def_ref
   /// @param locked  whether the new grid should be "locked"
-  explicit grid_def(const std::vector<grid_def_view> & grids, bool locked=false) {
-    int ngrids = static_cast<int>(grids.size());
-    std::vector<const grid_def_f *> grid_ptrs(ngrids);
-    for (int i=0; i<ngrids; ++i) {
-      grid_ptrs[i] = grids[i].ptr();
-    }
-    _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
+  template <typename Container,
+            typename T = typename Container::value_type,
+            typename = std::enable_if_t<
+                std::is_convertible_v<T, grid_def_ref>
+            >>
+  explicit grid_def(const Container& grids, bool locked=false)
+  {
+      int ngrids = static_cast<int>(grids.size());
+      std::vector<const grid_def_f*> grid_ptrs;
+      grid_ptrs.reserve(ngrids);
+      for (auto const& g : grids)
+          grid_ptrs.push_back(grid_def_ref(g).ptr());
+      _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
+  }
+
+  /// @brief construct a grid_def from multiple grid_def_view objects
+  ///
+  /// @param grids   an initializer list of grid_def_ref objects
+  /// @param locked  whether the new grid should be "locked"
+  explicit grid_def(std::initializer_list<grid_def_ref> grids, bool locked=false)
+  {
+      int ngrids = static_cast<int>(grids.size());
+      std::vector<const grid_def_f*> grid_ptrs;
+      grid_ptrs.reserve(ngrids);
+
+      for (auto const& g : grids)
+          grid_ptrs.push_back(g.ptr());
+
+      _ptr = hoppet_cxx__grid_def__new_from_grids(grid_ptrs.data(), ngrids, locked);
   }
 
   /// the copy constructor and copy assignment operator are disabled to avoid
