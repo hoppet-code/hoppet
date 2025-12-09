@@ -6,7 +6,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "HOPPET"
 # NOT EDIT the next line -- it is modified automatically by scripts/set-version.sh
-version = "2.1.4"
+version = "2.1.5-dev0"
 description = "HOPPET: A Higher Order Perturbative Parton Evolution Toolkit"
 authors = [
     {name = "Frederic Dreyer"},
