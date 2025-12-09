@@ -130,7 +130,7 @@ __Files added__
 	- wae-error function now uses some coloured printout and better formatting
 
 	* src/assertions.f90:
-	also throws C++ exceptions if enabled from wae
+	also throws C++ exceptions if they've been enabled with wae_enable_cxx_exceptions()
 
 --------- end 2025-10-cxx-OO branch ---------
 2025-12-09  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
