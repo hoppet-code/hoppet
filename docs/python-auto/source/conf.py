@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath('.'))
 project = 'HOPPET'
 copyright = '2025, Alexander Karlberg, Paolo Nason, Gavin Salam, Giulia Zanderighi, Frederic Dreyer, Juan Rojo'
 author = 'Alexander Karlberg, Paolo Nason, Gavin Salam, Giulia Zanderighi, Frederic Dreyer, Juan Rojo'
-release = "2.1.4-dev0"
+release = "2.1.5-dev0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
