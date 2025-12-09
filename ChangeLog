@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 --------- 2025-10-cxx-OO branch ---------
 
 2025-10-16 -> 2025-11-XX (Gavin): work on a C++ interface
@@ -126,7 +125,7 @@ __Files added__
 	* src/warnings_and_errors.f90:
 	- now has a wae_enable_cxx_exceptions() subroutine. If called, it
 	  enables throwing of C++ exceptions from Fortran errors. Seems to work
-	  on linux and MacOS (at least with gfortran and clang), but in not 
+	  on linux and MacOS (at least with gfortran and clang), but is not 
 	  generally portable (e.g. perhaps Windows?)
 	- wae-error function now uses some coloured printout and better formatting
 
@@ -134,7 +133,6 @@ __Files added__
 	also throws C++ exceptions if enabled from wae
 
 --------- end 2025-10-cxx-OO branch ---------
-=======
 2025-12-09  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* CMakeLists.txt:
@@ -157,7 +155,6 @@ __Files added__
 	* docs/manual/preamble.tex:
 	changed version to 2.1.4
 
->>>>>>> dev
 2025-12-05 Gavin
 
 	* src/pdf_tabulate.F90:
