@@ -1,5 +1,13 @@
 # NEWS for HOPPET
 
+# Release 2.1.4, 9 December 2025
+
+## Bug fix
+
+* fixed issue in WriteLHAPDFFromPdfTable where the lcl_flav_rescale(:)
+  array was being being misused (incorrect indexing). This should fix
+  an issue with writing QED tables reported by Rhorry Gauld.
+	
 # Release 2.1.3, 2 December 2025
 
 ## Bug fixes
