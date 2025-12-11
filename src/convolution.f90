@@ -1796,14 +1796,14 @@ contains
 
   !----------------------------------------------------------------------
   !! set the default integration precision
-  subroutine SetDefaultConvolutionEps(eps)
-    real(dp), intent(in) :: eps
+  subroutine SetDefaultConvolutionEps(eps) bind(C,name="hoppetSetDefaultConvolutionEps")
+    real(c_double), intent(in) :: eps
     default_conv_eps = eps
   end subroutine SetDefaultConvolutionEps
 
   !----------------------------------------------------------------------
-  !! set the default integration precision
-  real(dp) function DefaultConvolutionEps() result(res)
+  !! return the default integration precision
+  real(c_double) function DefaultConvolutionEps() result(res) bind(C,name="hoppetDefaultConvolutionEps")
     res = default_conv_eps
   end function DefaultConvolutionEps
   

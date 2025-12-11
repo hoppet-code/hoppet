@@ -184,6 +184,16 @@ extern "C" {
   /// This is to be called before hoppetStart
   void hoppetSetQED(const bool & withqed, const bool & qcdqed, const bool & plq);
 
+  /// Set the default convolution integration precision
+  ///
+  /// @param eps The desired precision
+  ///
+  /// This is to be called before hoppetStart
+  void hoppetSetDefaultConvolutionEps(const double & eps);  
+
+  /// Return the default convolution integration precision
+  double hoppetDefaultConvolutionEps();
+
   /// initialise the underlying grid, splitting functions and pdf-table
   /// objects, using the dy grid spacing and splitting functions up to
   /// nloop loops; all other parameters are set automatically
