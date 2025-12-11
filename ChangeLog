@@ -125,14 +125,36 @@ __Files added__
 	* src/warnings_and_errors.f90:
 	- now has a wae_enable_cxx_exceptions() subroutine. If called, it
 	  enables throwing of C++ exceptions from Fortran errors. Seems to work
-	  on linux and MacOS (at least with gfortran and clang), but in not 
+	  on linux and MacOS (at least with gfortran and clang), but is not 
 	  generally portable (e.g. perhaps Windows?)
 	- wae-error function now uses some coloured printout and better formatting
 
 	* src/assertions.f90:
-	also throws C++ exceptions if enabled from wae
+	also throws C++ exceptions if they've been enabled with wae_enable_cxx_exceptions()
 
 --------- end 2025-10-cxx-OO branch ---------
+2025-12-09  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.5-dev0
+
+2025-12-09  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.1.4
+
 2025-12-05 Gavin
 
 	* src/pdf_tabulate.F90:
@@ -150,6 +172,7 @@ __Files added__
 	* docs/manual/HOPPET-doc.tex:
 	* docs/manual/preamble.tex:
 	changed version to 2.1.4-dev0
+
 	
 2025-12-02 Gavin
 

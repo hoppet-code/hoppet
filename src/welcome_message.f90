@@ -2,7 +2,7 @@ module hoppet_version
   implicit none
   private
   ! DO NOT EDIT the next line -- it is modified automatically by scripts/set-version.sh
-  character(len=*), parameter :: private_version_string = "2.1.4-dev0"
+  character(len=*), parameter :: private_version_string = "2.1.5-dev0"
 
 public :: HoppetVersion
 
