@@ -95,6 +95,9 @@ void set_ostream_y_values(const std::vector<double> & y_values) {
 ///
 std::ostream & operator<<(std::ostream & os, const grid_quant_view & gq) {
   using namespace std;
+  if (ostream_y_values.size() != 0) 
+    throw std::runtime_error("operator<<(ostream&, grid_quant_view&): non-empty ostream_y_values not yet implemented");
+
   vector<int> unique_indices = gq.grid().monotonic_indices();
   vector<double> yvals = gq.grid().y_values();
   for (size_t i = 0; i < unique_indices.size(); ++i) {
@@ -125,6 +128,7 @@ std::ostream & operator<<(std::ostream & os, const grid_quant_2d_view & gq) {
   } else {
     for (double y : ostream_y_values) {
       os << y;
+      // not an efficient way of writing things...
       for (std::size_t flav = 0; flav < gq.size_flv(); ++flav) {
         os << " " << gq[flav].at_y(y);
       }
