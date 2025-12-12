@@ -8,4 +8,6 @@
 #else 
 #define STRINGIFY(x) #x
 #endif
-#endif // EXTRA_MACROS_INCLUDED
+
+#endif 
+! end of EXTRA_MACROS_INCLUDED
