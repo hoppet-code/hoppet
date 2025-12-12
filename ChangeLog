@@ -78,6 +78,8 @@ __Files added__
 	  being set to zero), e.g. to allow users to detect and decide on a
 	  appropriate dlnlnQ based on the grid.
 	- default_conv_eps is now accessible from C/C++ as hoppet_default_conv_eps.
+	- make setDefaultConvolutionEps and DefaultConvolutionEps bind(C) functions
+	  as hoppetSetDefaultConvolutionEps and hoppetDefaultConvolutionEps
 
 	* src/tabulation.f90:
 	fixed an issue where tab%allocated was .false. for tabulations
