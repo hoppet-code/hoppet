@@ -1,10 +1,10 @@
 #define DEFINE_SPLIT_FN(NAME) \
 extern "C" { \
-  double hoppet_cxx__split_fn__##NAME(double y, int piece); \
+  double hoppet_cxx__splitfn__##NAME(double y, int piece); \
 } \
 namespace hoppet::split_fns { \
   inline double NAME(double y, int piece) { \
-    return hoppet_cxx__split_fn__##NAME(y, piece); \
+    return hoppet_cxx__splitfn__##NAME(y, piece); \
   } \
 }
 

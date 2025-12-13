@@ -5,7 +5,7 @@
 
 ! a macro to generate the splitting function bind(C) interface functions
 #define DEFINE_SPLIT_FN(NAME) \
-  real(c_double) function CAT(hoppet__splitfn__,NAME)(y, piece) result(res) ;\
+  real(c_double) function CAT(hoppet_cxx__splitfn__,NAME)(y, piece) result(res) bind(C) ;\
     use splitting_functions; use convolution_communicator ;\
     real(c_double), intent(in), value :: y ;\
     integer(c_int), intent(in), value :: piece ;\

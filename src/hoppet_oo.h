@@ -42,6 +42,10 @@
 //       - [x] view creation and indexing
 //       - [x] array creation
 //       - [ ] access to efficient at_xQ functions
+// - [ ] tidying things up
+//       - [ ] move hoppet_oo.h -> hoppet/oo.h?
+//       - [ ] other c++-related sources into src/cpp-interface?
+//       - [ ] include reg_plus_delta from hoppet/oo.h?
 // - [ ] add the evln_operator class
 // - [ ] the evolution function
 // - [x] add split option when creating splitting functions
@@ -52,6 +56,7 @@
 // - [ ] support for probes
 // - [ ] add qed support, including pdf_table allocators
 // - [x] add access to things like the beta function coefficients, qcd group constants, etc.
+// - [~] add access to splitting-function functions? 
 // - [ ] add structure function support
 // - [ ] test installed version (re include paths)
 // - [~] add documentation

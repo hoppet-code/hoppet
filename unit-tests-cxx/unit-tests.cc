@@ -2,6 +2,8 @@
 #include "hoppet/qcd.h"
 #include "hoppet/reg_plus_delta.h"
 #include "hoppet/ostream.h"
+#include "hoppet/split_fns.h"
+
 #include "unit-test-helpers.h"
 #include <iostream>
 #include <cmath>
@@ -876,4 +878,17 @@ TEST_CASE("streamlined-interface", "[hoppet]") {
   cout << "# removing temporary LHAPDF files\n";
   if (!fs::remove("tmplhapdf.info")) throw std::runtime_error("Could not remove tmplhapdf.info");
   if (!fs::remove("tmplhapdf_0000.dat")) throw std::runtime_error("Could not remove tmplhapdf_0000.dat");
+}
+
+TEST_CASE("split-fns", "[hoppet]") {
+  using namespace hoppet;
+  namespace sf = hoppet::split_fns;
+
+  // THINK some more about these tests: they are potentially fragile, as well
+  // as incomplete
+
+  REQUIRE((split_fn(sl::grid, sf::pqq ) - sl::dh.p_lo().qq()).truncated_moment(2.5) == 0);
+  REQUIRE((split_fn(sl::grid, sf::pgg ) - sl::dh.p_lo().gg()).truncated_moment(2.5) == 0);
+
+  REQUIRE((split_fn(sl::grid, sf::p1gg) - sl::dh.p_nlo().gg()).truncated_moment(2.5) == 0);
 }
