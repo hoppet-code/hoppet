@@ -887,6 +887,8 @@ TEST_CASE("split-fns", "[hoppet]") {
   // THINK some more about these tests: they are potentially fragile, as well
   // as incomplete
 
+  sl::dh.set_nf(5);
+  
   REQUIRE((split_fn(sl::grid, sf::pqq ) - sl::dh.p_lo().qq()).truncated_moment(2.5) == 0);
   REQUIRE((split_fn(sl::grid, sf::pgg ) - sl::dh.p_lo().gg()).truncated_moment(2.5) == 0);
 

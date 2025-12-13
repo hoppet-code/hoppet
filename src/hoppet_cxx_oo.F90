@@ -1577,6 +1577,7 @@ contains
     call Delete(ptr_f%tables) ! clean up the storage in each pdf_table
     deallocate(ptr_f%tables)  ! deallocate the array of pdf_table pointers 
     deallocate(ptr_f)         ! deallocate the pdf_table_array itself
+    ptr = c_null_ptr
   end subroutine hoppet_cxx__pdf_table_array__delete
 
   function hoppet_cxx__pdf_tables__table_i(ptr, sz, i) bind(C) result(res)
