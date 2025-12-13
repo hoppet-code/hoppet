@@ -53,7 +53,7 @@ __Files added__
 
 	* src/hoppet/split_fns.h                 *** ADDED ***
 
-	* src/hoppet_cxx_oo.f90:		          *** ADDED ***
+	* src/hoppet_cxx_oo.F90:		 *** ADDED ***
 	Fortran side of the C++ OO interface. Contains a series of 
 	bind(C) routines that take or return a pointer to a Fortran
 	objects, allowing the C++ code to view and manipulate them.
