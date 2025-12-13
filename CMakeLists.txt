@@ -253,7 +253,7 @@ endif()
 
 
 # Sources ==============================================================
-file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds-nnlo/xa2hgp.f90)
+file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds-nnlo/xa2hgp.f90 src/cpp-interface/*.f90 src/cpp-interface/*.F90)
 file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/param-coefs/*.f)
 
 if (HOPPET_ENABLE_N3LO_FORTRAN_MTM)
@@ -265,7 +265,7 @@ else()
   message(STATUS "HOPPET: Excluding N3LO fortran mass-thresholds")  
 endif()
 
-file(GLOB SOURCESCXX src/*.cc)
+file(GLOB SOURCESCXX src/*.cc src/cpp-interface/*.cc)
 
 #------------------------------------------------------------------------- 
 # Define the two required variables before including

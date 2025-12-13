@@ -64,4 +64,9 @@ those objects are in use.
 
 ## Object-oriented access to streamlined-interface objects
 
-See the hoppet::sl namespace for C++ classes that wrap the streamlined interface objects.
+- See the hoppet::sl namespace for C++ classes that wrap the streamlined interface objects.
+
+## other namespaces and corresponding include files
+- see hoppet::split_fns namespace (`#include <hoppet/split_fns.h>`) for C++ bindings the functions
+  that implement the splitting functions
+- see hoppet::qcd namespace (`#include <hoppet/qcd.h>`) for C++ bindings to QCD constants and functions  

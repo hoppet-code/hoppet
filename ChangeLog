@@ -47,6 +47,13 @@ __Files added__
 	- contains functions like hoppet_sl_register_tables to set up
 	  the C++ interface to the streamlined interface objects
 
+	* src/cpp-interface/cpp_split_fns.F90:   *** ADDED ***
+	- contains bind(C) interfaces to the f90 sf_Pxy functions from 
+	  the splitting function modules
+
+	* src/hoppet/split_fns.h                 *** ADDED ***
+
+
 	* src/hoppet_cxx_oo.f90:		          *** ADDED ***
 	Fortran side of the C++ OO interface. Contains a series of 
 	bind(C) routines that take or return a pointer to a Fortran
