@@ -34,7 +34,13 @@ module dglap_choices
                                                                                     !< qg of 2307.04158 and gq and gg of 2310.05744
   integer, parameter, public :: n3lo_splitting_approximation_up_to_2404_09701 = 101 !< Replaces gq with that of 2404.09701
   integer, parameter, public :: n3lo_splitting_approximation_up_to_2410_08089 = 102 !< Additionally replaces gg with that of 2410.08089
-  integer, public :: n3lo_splitting_approximation =  n3lo_splitting_approximation_up_to_2410_08089 
+  ! Set up aliases that are slightly easier to remember, but keep the above for backwards compatibility.
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2310 = n3lo_splitting_approximation_up_to_2310_05744
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2404 = n3lo_splitting_approximation_up_to_2404_09701
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2410 = n3lo_splitting_approximation_up_to_2410_08089
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2512 = 103 !< Adds the nf=6 piece to the non-singlet and
+                                                                              !< adjusts the Pgq pieces just a bit (2512.10783)
+  integer, public :: n3lo_splitting_approximation =  n3lo_splitting_approximation_up_to_2410
 
   integer, parameter, public :: nnlo_nfthreshold_exact = -12
   integer, parameter, public :: nnlo_nfthreshold_param = -11

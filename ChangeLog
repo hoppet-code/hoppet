@@ -1,3 +1,21 @@
+2025-12-15  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/splitting-functions:
+	* src/splitting-functions/xpgq3a_2512.f90: *** ADDED ***
+	* src/splitting_functions_n3lo.f90:
+	* src/dglap_objects.F90:
+	* src/dglap_choices.f90:
+	Updated n3lo singlet splitting functions with nf=6 information
+	based on 2512.10783. The xpgq3a_2512.f90 splitting function also
+	has small adjustments for nf=3,4,5. Added option to use these new
+	splitting functions in dglap_choices
+	(n3lo_splitting_approximation_up_to_2512). Introduced short hand
+	aliases for the splitting function choices
+	(e.g. n3lo_splitting_approximation_up_to_2310_05744 is equivalent
+	to n3lo_splitting_approximation_up_to_2310). As a consequence the
+	code now works correctly with nf=6 as well (before we forced nf=5
+	in the n3lo splitting functions).
+
 2025-12-09  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* CMakeLists.txt:

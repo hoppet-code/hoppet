@@ -396,7 +396,7 @@ contains
     if (nf_int < 3) then
       nf_int = 3
       call wae_warn(nwarn_nf_lo, "InitSplitMatN3LO: nf_int < 3, setting to 3; nf_int was", intval = nf_store)
-    else if (nf_int > 5) then
+    else if (nf_int > 5 .and. n3lo_splitting_approximation .lt.n3lo_splitting_approximation_up_to_2512) then
       nf_int = 5
       call wae_warn(nwarn_nf_hi, "InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was", intval = nf_store)
     end if

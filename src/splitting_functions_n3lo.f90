@@ -476,7 +476,8 @@ module splitting_functions_n3lo_n
   use types; use consts_dp; use convolution_communicator
   use qcd; use dglap_choices; use warnings_and_errors
   use xpgg3a; use xpgg3a_2410; use xpgq3a; use xpgq3a_2404; use&
-       & xpqg3a; use xpps3a; use xpns3s; use xpns3p; use xpns3m
+       & xpgq3a_2512; use xpqg3a; use xpps3a; use xpns3s; use xpns3p;&
+       & use xpns3m
   implicit none
   private
 
@@ -497,7 +498,7 @@ contains
     x = exp(-y)
     res = zero
 
-    if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2410_08089) then
+    if(n3lo_splitting_approximation .ge. n3lo_splitting_approximation_up_to_2410_08089) then
        select case(cc_piece)
        case(cc_REAL,cc_REALVIRT)
           res = P3GGA_2410(x, nf_int, n3lo_splitting_variant) + P3GGB_2410(x, nf_int)
@@ -590,8 +591,10 @@ contains
     case(cc_REAL,cc_REALVIRT)
        if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2310_05744) then
           res = P3GQA(x, nf_int, n3lo_splitting_variant)
-       else
+       else if(n3lo_splitting_approximation .le. n3lo_splitting_approximation_up_to_2410) then
           res = P3GQA_2404(x, nf_int, n3lo_splitting_variant)
+       else
+          res = P3GQA_2512(x, nf_int, n3lo_splitting_variant)
        endif
     end select
     select case(cc_piece)
