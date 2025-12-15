@@ -40,7 +40,7 @@ module dglap_choices
   integer, parameter, public :: n3lo_splitting_approximation_up_to_2410 = n3lo_splitting_approximation_up_to_2410_08089
   integer, parameter, public :: n3lo_splitting_approximation_up_to_2512 = 103 !< Adds the nf=6 piece to the non-singlet and
                                                                               !< adjusts the Pgq pieces just a bit (2512.10783)
-  integer, public :: n3lo_splitting_approximation =  n3lo_splitting_approximation_up_to_2410
+  integer, public :: n3lo_splitting_approximation =  n3lo_splitting_approximation_up_to_2512
 
   integer, parameter, public :: nnlo_nfthreshold_exact = -12
   integer, parameter, public :: nnlo_nfthreshold_param = -11
