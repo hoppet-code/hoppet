@@ -86,8 +86,14 @@ module hoppet_splitting_function_interfaces
     procedure :: f => mvv_splitting_function_imod__f  !< f(y=ln1/x, piece)
   end type mvv_splitting_function_imod
   
-  public :: mvv_splitting_function, mvv_splitting_function_imod, P_x_nfint, P_x_nfint_imod
+  ! Alias types for coefficient functions — identical to the splitting
+  ! function types but with different names so callers can use a
+  ! semantically clearer type without duplicating code.
+  type, extends(mvv_splitting_function) :: mvv_coefficient_function
+  end type mvv_coefficient_function
 
+  public :: mvv_splitting_function, mvv_splitting_function_imod, &
+            mvv_coefficient_function, P_x_nfint, P_x_nfint_imod
 contains
 
 
