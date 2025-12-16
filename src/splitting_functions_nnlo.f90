@@ -16,6 +16,7 @@
 !----------------------------------------------------------------------
 module splitting_functions_nnlo_e
   use types; use consts_dp; use convolution_communicator
+  use hoppet_splitting_function_interfaces
   use qcd; use warnings_and_errors
   use xpij2e; use xpns2e
   implicit none
@@ -31,25 +32,14 @@ contains
   function sf_P2gg(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-
+    type(mvv_splitting_function)  :: p2
+   
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = X2GGA(x, nf_int) + X2GGB(x, nf_int)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - X2GGB(x, nf_int)
-    case(cc_DELTA)
-       res = X2GGC(zero, nf_int)
-    end select
+    p2 = mvv_splitting_function(X2GGA, X2GGB , X2GGC , 0.5_dp**3)
 
-    res = res / 8.0_dp   ! compensate (as/4pi)^3 -> (as/2pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p2%f(y, cc_piece)
   end function sf_P2gg
 
   ! ..This is the (regular) pure-singlet splitting functions P_ps^(2).    
@@ -57,25 +47,14 @@ contains
   function sf_P2PS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-
+    type(mvv_splitting_function)  :: p2
+   
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = X2PSA(x, nf_int) + zero
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    p2 = mvv_splitting_function(X2PSA, null() , null() , 0.5_dp**3)
 
-    res = res / 8.0_dp   ! compensate (as/4pi)^3 -> (as/2pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p2%f(y, cc_piece)
   end function sf_P2PS
 
   !--------------------------------------------------------------------
@@ -83,125 +62,70 @@ contains
   function sf_P2qg2nf(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function)  :: p2
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = X2QGA(x, nf_int)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - zero
-    case(cc_DELTA)
-       res = zero
-    end select
-
-    res = res / 8.0_dp   ! compensate (as/4pi)^3 -> (as/2pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    p2 = mvv_splitting_function(X2QGA, null() , null() , 0.5_dp**3)
+    
+    res = p2%f(y, cc_piece)
   end function sf_P2qg2nf
 
 
   function sf_P2gq(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function)  :: p2
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = X2GQA(x, nf_int)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    p2 = mvv_splitting_function(X2GQA, null() , null() , 0.5_dp**3)
 
-    res = res / 8.0_dp   ! compensate (as/4pi)^3 -> (as/2pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p2%f(y, cc_piece)
   end function sf_P2gq
 
   !------------------------- non-singlet pieces ------------------------
   function sf_P2NSPlus(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function)  :: p2
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = X2NSPA(x, nf_int) + X2NSB(x, nf_int)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - X2NSB(x, nf_int)
-    case(cc_DELTA)
-       res = X2NSC(zero, nf_int)
-    end select
+    p2 = mvv_splitting_function(X2NSPA, X2NSB , X2NSC , 0.5_dp**3)
 
-    res = res / 8.0_dp   ! compensate (as/4pi)^3 -> (as/2pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p2%f(y, cc_piece)
   end function sf_P2NSPlus
 
 
   function sf_P2NSMinus(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function)  :: p2
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = X2NSMA(x, nf_int) + X2NSB(x, nf_int)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - X2NSB(x, nf_int)
-    case(cc_DELTA)
-       res = X2NSC(zero, nf_int)
-    end select
+    p2 = mvv_splitting_function(X2NSMA, X2NSB , X2NSC , 0.5_dp**3)
 
-    res = res / 8.0_dp   ! compensate (as/4pi)^3 -> (as/2pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p2%f(y, cc_piece)
   end function sf_P2NSMinus
 
   !-- according to comments in Vogt code P_S = P_V - P_-
   function sf_P2NSS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function)  :: p2
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = X2NSSA(x, nf_int)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    p2 = mvv_splitting_function(X2NSSA, null() , null() , 0.5_dp**3)
 
-    res = res / 8.0_dp   ! compensate (as/4pi)^3 -> (as/2pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p2%f(y, cc_piece)
   end function sf_P2NSS
 
   !----------------------------------------------------------------
