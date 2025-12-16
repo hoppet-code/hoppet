@@ -192,9 +192,9 @@ contains
 ! ..The singular (soft) piece of P_gg^(3).
 !   Note: A4gluon is provided by a common block set in P3GGA
 !
-       FUNCTION P3GGB_2410 (Y, NF)
+       FUNCTION P3GGB_2410 (Y, NF, IMOD)
        IMPLICIT REAL*8 (A - Z)
-       INTEGER nf
+       INTEGER nf, IMOD
        COMMON / P3GSOFT / A4gluon
        !
        nf2 = nf*nf

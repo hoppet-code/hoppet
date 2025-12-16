@@ -21,6 +21,23 @@ module hoppet_splitting_function_interfaces
     end function P_x_nfint
   end interface
 
+  !! the interface for MVV functions like X2NSPA etc in xpns2e etc.
+  !! 
+  !! Note that the arguments are const in practice, but not ! declared
+  !as such, so to ensure we match the exact form ! of the functions in
+  !the splitting function modules. This version is needed when the
+  !splitting functions in question have an extra "mode" argument, as
+  !is the case for the approximate splitting functions.
+  abstract interface
+    !! returns P(x) for given nf and imod
+    real(dp) function P_x_nfint_imod(x, nf, imod) 
+      import dp
+      implicit none
+      real(dp) :: x   !< x value
+      integer  :: nf, imod  !< number of light flavours
+    end function P_x_nfint_imod
+  end interface
+
   !! a type that holds pointers to the regular, plus and delta parts
   !! of an MVV splitting function and implements the conv_ignd%f(y,piece) 
   !! interface
@@ -46,8 +63,30 @@ module hoppet_splitting_function_interfaces
   contains
     procedure :: f => mvv_splitting_function__f  !< f(y=ln1/x, piece)
   end type mvv_splitting_function
+
+  !! a type that holds pointers to the regular, plus and delta parts
+  !! of an MVV splitting function with an imod parameter and implements 
+  !! the conv_ignd%f(y,piece) interface
+  !!
+  !! This version is for splitting functions with an extra "mode" argument
+  !!
+  !! Users would typically create an mvv_splitting_function_imod via:
+  !!
+  !!     mvv_splitting_function_imod(P2GGA_imod, P2GGB_imod , P2GGC_imod , imod_val, 0.5_dp**3)
+  !!
+  !! where the imod_val is the mode argument passed to the splitting functions
+  !!
+  type, extends(conv_ignd) :: mvv_splitting_function_imod
+    procedure(P_x_nfint_imod), pointer, nopass :: reg   => null()  !< A, regular part 
+    procedure(P_x_nfint_imod), pointer, nopass :: plus  => null()  !< B, plus part
+    procedure(P_x_nfint_imod), pointer, nopass :: delta => null()  !< C, delta-function part (call with x=0)    
+    integer  :: imod !< mode argument for the splitting functions
+    real(dp) :: multiplier !< multiplier for the function
+  contains
+    procedure :: f => mvv_splitting_function_imod__f  !< f(y=ln1/x, piece)
+  end type mvv_splitting_function_imod
   
-  public :: mvv_splitting_function, P_x_nfint
+  public :: mvv_splitting_function, mvv_splitting_function_imod, P_x_nfint, P_x_nfint_imod
 
 contains
 
@@ -84,4 +123,37 @@ contains
 
     !write(6,*) y, piece, nf_lcl, res
   end function mvv_splitting_function__f
+
+  !! implementation of the mvv_splitting_function_imod%f
+  function mvv_splitting_function_imod__f(this, y, piece) result(res)
+    use qcd, only: nf_int
+    use convolution_pieces
+    class(mvv_splitting_function_imod), intent(in) :: this
+    real(dp),                          intent(in) :: y
+    integer,                           intent(in) :: piece
+    real(dp) :: res
+    real(dp) :: x
+    integer  :: nf_lcl
+
+    x = exp(-y)
+    nf_lcl = nf_int ! get the global nf_int
+    res = 0.0_dp
+
+    select case(piece)
+    case(cc_REAL)
+      if (associated(this%reg  )) res =       this%reg (x, nf_lcl, this%imod)
+      if (associated(this%plus )) res = res + this%plus(x, nf_lcl, this%imod)
+    case(cc_REALVIRT)
+      if (associated(this%reg  )) res = res + this%reg (x, nf_lcl, this%imod)
+    case(cc_VIRT)
+      if (associated(this%plus )) res =     - this%plus(x, nf_lcl, this%imod)
+    case(cc_DELTA)
+      if (associated(this%delta)) res =       this%delta(0.0_dp, nf_lcl, this%imod)
+    end select
+    if (piece /= cc_DELTA) res = res * x
+
+    res = res * this%multiplier
+
+    !write(6,*) y, piece, nf_lcl, res
+  end function mvv_splitting_function_imod__f
 end module hoppet_splitting_function_interfaces
