@@ -1,5 +1,4 @@
       MODULE XCDIFF3PNEW
-      USE XC2NS3P
       CONTAINS
 
 *
@@ -56,7 +55,7 @@
 * ..The `local' piece for F2, artificial but useful for maximal accuracy 
 *    of moments and convolutions
 *
-       FUNCTION c2q3dfPC (Y, NF)
+       FUNCTION C2Q3DFPC (Y, NF)
 *
        IMPLICIT REAL*8 (A-Z)
        INTEGER NF
@@ -130,6 +129,59 @@
 *
        RETURN
        END
+
+* ..For Y values close to 1, use the series expansion close 
+*   to Y1=0 instead of full value, for numerical convergence
+*     
+       FUNCTION Y1VAL (Y, DL)
+       IMPLICIT REAL*8 (A - Z)
+       DOUBLE PRECISION D2, D6, D24, D120
+       PARAMETER (D2 = 0.5D0, D6 = 1.0D0/6.0D0, D24 = 1.0D0/24.0D0, D120
+     $      = 1.0D0/120.0D0)
+       IF (ABS(DL).LT.1D-4) THEN
+          Y1VAL = - DL - DL**2*D2 - DL**3*D6 - DL**4*D24 - DL**5*D120
+       ELSE
+          Y1VAL = 1.0D0 - Y
+       ENDIF
+
+       RETURN
+       END FUNCTION
+
+
+* ..For Y values close to 1, use the series expansion close 
+*   to Y1=0 instead of full value, for numerical convergence
+*     
+       FUNCTION DL1VAL (Y, DL)
+       IMPLICIT REAL*8 (A - Z)
+       DOUBLE PRECISION D2, D24, D2880
+       PARAMETER (D2=0.5D0, D24=1.0D0/24.0D0, D2880=1.0D0/2880.0D0)
+
+       IF (ABS(DL).LT.1D-4) THEN
+          DL1VAL = LOG(-DL) +  DL*D2 + DL**2*D24 - DL**4*D2880
+       ELSE
+          DL1VAL = LOG(1.0D0 - Y)
+       ENDIF
+
+       RETURN
+       END FUNCTION
+
+* ..For Y values close to 1, use the series expansion close 
+*   to Y1=0 instead of full value, for numerical convergence
+*     
+       FUNCTION DMVAL (Y, DL)
+       IMPLICIT REAL*8 (A - Z)
+       DOUBLE PRECISION D2, D12, D720, D30240
+       PARAMETER (D2 = 0.5D0, D12 = 1.0D0/12.0D0, D720 = 1.0D0/720.0D0,
+     $      D30240=1.0D0/30240.0D0)
+
+       IF (ABS(DL).LT.1D-3) THEN
+          DMVAL  = D2 - 1.0D0/DL - DL*D12 + DL**3*D720 - DL**5*D30240
+       ELSE
+          DMVAL = 1.0D0/(1.0D0-Y)
+       ENDIF
+
+       RETURN
+       END FUNCTION
 *
 * =================================================================av==
        END MODULE XCDIFF3PNEW

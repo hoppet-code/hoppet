@@ -1,5 +1,6 @@
       MODULE XCLNS3P
       USE XC2NS3P
+      USE XCDIFF3PNEW
       CONTAINS
 *     
 * ..File: xclns3p.f    FL_NS
@@ -29,7 +30,6 @@
 *
        FUNCTION CLNP3A (Y, DL, NF, CC)
        IMPLICIT REAL*8 (A - Z)
-       COMPLEX*16 WGPLG
        INTEGER NF
        INTEGER CC ! charged current
        DIMENSION FL(6)
@@ -65,6 +65,16 @@
      $         Y
        ENDIF
 *     
+       RETURN
+       END FUNCTION
+
+       FUNCTION CLNM3A (Y, DL, NF, CC)
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+       INTEGER CC ! charged current
+
+       CLNM3A = CLNP3A(Y, DL, NF, CC) - cLq3dfP(Y, DL, NF)
+
        RETURN
        END FUNCTION
 *
