@@ -257,7 +257,7 @@ file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90
                      src/mass-thresholds-nnlo/xa2hgp.f90 
                      src/cpp-interface/*.f90 src/cpp-interface/*.F90)
 file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/param-coefs/*.f)
-message(SOURCESf90 is ${SOURCESf90})
+#message(SOURCESf90 is ${SOURCESf90})
 
 if (HOPPET_ENABLE_N3LO_FORTRAN_MTM)
   file(GLOB N3LOMTMF90 src/mass-thresholds/*.f90)
