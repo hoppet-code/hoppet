@@ -1,6 +1,7 @@
        MODULE xc3ns3e
        USE XC2NS3P
        USE XC3NS3P
+       USE XCDIFF3PNEW
        CONTAINS
 *
 * ..File: xc3ns3e.f    F3 NU+NU(BAR) ETC  
@@ -1544,21 +1545,31 @@ c    ,                         -223./4800.d0)
        RETURN
        END
 
-      FUNCTION X3NM3A_large_x (Y, DL, NF)
-      IMPLICIT REAL*8 (A - Z)
-      INTEGER NF
+       FUNCTION X3NP3A (X, DL, NF, V)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF, V
 
-      DL1 = DL1VAL(Y, DL)
-      
-      X3NM3A_large_x = 6889.89378009207d0*DL1 + 1581.208087862925d0*DL1
+       X3NP3A = X3NM3A (X, DL, NF, V) + C3Q3DFP (X, DL, NF)
+
+       RETURN
+       END FUNCTION
+
+       FUNCTION X3NM3A_large_x (Y, DL, NF)
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+ 
+       DL1 = DL1VAL(Y, DL)
+       
+       X3NM3A_large_x = 6889.89378009207d0*DL1 + 1581.208087862925d0*DL1
      $     **2 -1609.6420585153533d0*DL1**3 + 329.48148148148147d0*DL1
      $     **4 -18.962962962962962d0*DL1**5 +(859.380948706157d0*DL1 -
      $     675.1899801124716d0*DL1**2 +134.0576131687243d0*DL1**3 -
      $     7.901234567901234d0*DL1**4)*NF +(-50.144180884735974d0*DL1 +
      $     12.246913580246913d0*DL1**2 -0.7901234567901234d0*DL1**3)*NF
      $     **2
-      
-      END FUNCTION
+       
+       END FUNCTION
 *
 * ---------------------------------------------------------------------
 *
@@ -1658,6 +1669,16 @@ c    ,                         -223./4800.d0)
 *
        RETURN
        END
+
+       FUNCTION X3NP3C (Y, DL, NF)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+
+       X3NP3C = X3NS3C (Y, DL, NF) + c3q3dfPC (Y, NF)
+
+       RETURN
+       END FUNCTION
 *
 * =================================================================av==
        END MODULE xc3ns3e

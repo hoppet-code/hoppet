@@ -482,25 +482,14 @@ contains
     use xc3ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo_exact) :: c3
     
-    x = exp(-y)
     res = zero
     CALL SET_C3SOFT_N3LO(nf_int)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X3NM3A(x, -y, nf_int, 1) + X3NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = X3NM3A(x, -y, nf_int, 1)
-    case(cc_VIRT)
-       res = - X3NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = X3NS3C(zero, -y, nf_int) 
-    end select
+    c3 = mvv_coefficient_function_n3lo_exact(X3NM3A, X3NS3B, X3NS3C, 1, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F3NS_val_e
 
   !----------------------------------------------------------------------
@@ -511,25 +500,14 @@ contains
     use xc3ns3p
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo_exact) :: c3
     
-    x = exp(-y)
     res = zero
     CALL SET_C3SOFT_N3LO(nf_int)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X3NM3A(x, -y, nf_int, 0) + X3NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = X3NM3A(x, -y, nf_int, 0)
-    case(cc_VIRT)
-       res = - X3NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = X3NS3C(zero, -y, nf_int) 
-    end select
-    
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    c3 = mvv_coefficient_function_n3lo_exact(X3NM3A, X3NS3B, X3NS3C, 0, 0.125_dp)
+
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F3NS_minus_e
 
   !----------------------------------------------------------------------
@@ -549,13 +527,13 @@ contains
 
     select case(cc_piece)
     case(cc_REAL)
-       res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + X3NS3B(x, -y, nf_int)
+       res = X3NP3A(x, -y, nf_int, 0) + X3NS3B(x, -y, nf_int)
     case(cc_REALVIRT)
-       res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
+       res = X3NP3A(x, -y, nf_int, 0) 
     case(cc_VIRT)
        res = - X3NS3B(x, -y, nf_int)
     case(cc_DELTA)
-       res = X3NS3C(zero, -y, nf_int) + c3q3dfPC (zero, nf_int)
+       res = X3NP3C(zero, -y, nf_int) 
     end select
 
     res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3

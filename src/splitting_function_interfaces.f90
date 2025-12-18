@@ -123,8 +123,19 @@ module hoppet_splitting_function_interfaces
     procedure :: f => mvv_coefficient_function_n3lo__f  !< f(y=ln1/x, piece)
   end type mvv_coefficient_function_n3lo
 
+  type, extends(conv_ignd) :: mvv_coefficient_function_n3lo_exact
+    procedure(C_x_y_nfint_imod), pointer, nopass :: reg   => null()  !< A, regular part 
+    procedure(C_x_y_nfint), pointer, nopass :: plus  => null()  !< B, plus part
+    procedure(C_x_y_nfint), pointer, nopass :: delta => null()  !< C, delta-function part (call with x=0)    
+    integer  :: imod !< mode argument for the splitting functions
+    real(dp) :: multiplier !< multiplier for the function
+  contains
+    procedure :: f => mvv_coefficient_function_n3lo_exact__f  !< f(y=ln1/x, piece)
+  end type mvv_coefficient_function_n3lo_exact
+
   public :: mvv_splitting_function, mvv_splitting_function_imod, &
-            mvv_coefficient_function, mvv_coefficient_function_n3lo
+            mvv_coefficient_function, mvv_coefficient_function_n3lo, &
+            mvv_coefficient_function_n3lo_exact
 
 contains
 
@@ -227,5 +238,38 @@ contains
 
     !write(6,*) y, piece, nf_lcl, res
   end function mvv_coefficient_function_n3lo__f
+
+  !! implementation of the mvv_coefficient_function_n3lo_exact%f
+  function mvv_coefficient_function_n3lo_exact__f(this, y, piece) result(res)
+    use qcd, only: nf_int
+    use convolution_pieces
+    class(mvv_coefficient_function_n3lo_exact), intent(in) :: this
+    real(dp),                             intent(in) :: y
+    integer,                              intent(in) :: piece
+    real(dp) :: res
+    real(dp) :: x
+    integer  :: nf_lcl
+
+    x = exp(-y)
+    nf_lcl = nf_int ! get the global nf_int
+    res = 0.0_dp
+
+    select case(piece)
+    case(cc_REAL)
+      if (associated(this%reg  )) res =       this%reg (x, -y, nf_lcl, this%imod)
+      if (associated(this%plus )) res = res + this%plus(x, -y, nf_lcl)
+    case(cc_REALVIRT)
+      if (associated(this%reg  )) res = res + this%reg (x, -y, nf_lcl, this%imod)
+    case(cc_VIRT)
+      if (associated(this%plus )) res =     - this%plus(x, -y, nf_lcl)
+    case(cc_DELTA)
+      if (associated(this%delta)) res =       this%delta(0.0_dp, -y, nf_lcl)
+    end select
+    if (piece /= cc_DELTA) res = res * x
+
+    res = res * this%multiplier
+
+    !write(6,*) y, piece, nf_lcl, res
+  end function mvv_coefficient_function_n3lo_exact__f
 
 end module hoppet_splitting_function_interfaces
