@@ -1,4 +1,5 @@
       MODULE XC2NS2E
+      USE XCDIFF2E
       CONTAINS
 *
 * ..File: xc2ns2e.f    F2_NS  (even-N)
@@ -174,6 +175,16 @@
 *
        X2NP2A = C2QQ2 - C2QQ2L
 *
+       RETURN
+       END FUNCTION
+
+       FUNCTION X2NM2A (X, NF)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+
+       X2NM2A = X2NP2A (X, NF) - XC2DFF2 (X)
+
        RETURN
        END FUNCTION
 *
