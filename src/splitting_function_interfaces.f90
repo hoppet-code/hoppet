@@ -110,9 +110,12 @@ module hoppet_splitting_function_interfaces
   ! Alias types for coefficient functions — identical to the splitting
   ! function types but with different names so callers can use a
   ! semantically clearer type without duplicating code.
+  
   type, extends(mvv_splitting_function) :: mvv_coefficient_function
   end type mvv_coefficient_function
-  
+  type, extends(mvv_splitting_function_imod) :: mvv_coefficient_function_imod
+  end type mvv_coefficient_function_imod
+
   type, extends(conv_ignd) :: mvv_coefficient_function_n3lo
     procedure(C_x_y_nfint_imod), pointer, nopass :: reg   => null()  !< A, regular part 
     procedure(C_x_y_nfint), pointer, nopass :: plus  => null()  !< B, plus part
@@ -135,7 +138,7 @@ module hoppet_splitting_function_interfaces
 
   public :: mvv_splitting_function, mvv_splitting_function_imod, &
             mvv_coefficient_function, mvv_coefficient_function_n3lo, &
-            mvv_coefficient_function_n3lo_exact
+            mvv_coefficient_function_n3lo_exact, mvv_coefficient_function_imod
 
 contains
 
