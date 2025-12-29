@@ -163,6 +163,7 @@ public:
   data_view & set_data_ptr(D * data_in) noexcept {_data = data_in; return *this;}
   data_view & set_size(std::size_t size_in) noexcept {_size = size_in; return *this;}
   data_view & set_extras(const E & extras_in) noexcept {_extras = extras_in; return *this;}
+
   /// compound assignment arithmetic operators
   ///@{
   data_view<E, D> & operator+=(const data_view<E, D> & other) {
@@ -211,9 +212,15 @@ protected:
   std::size_t   _size = 0;
   E _extras = E();
 
-  /// @brief  prepare for a compound assignment operation
+  /// @brief  prepare for a compound assignment operation (internal use only)
   /// @param b  the other data_view to operate on
   /// @return  a tuple containing the size, this data pointer, and the other data pointer
+  ///
+  /// This prepares the information needed for compound assignment
+  /// operations (operations like `+=`, etc.): it ensures the compatibility
+  /// of any "extras" and returns a tuple with the size and data pointers for `*this`
+  /// and for `b`.
+  /// 
   inline std::tuple<std::size_t, double *, const double *> prepare_compound(const data_view<E> & b ) {
     extras().ensure_compatible(b.extras());
     return std::make_tuple(size(), data(), b.data());

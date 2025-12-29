@@ -374,6 +374,11 @@ public:
   }
 
   /// @brief  assign from a function, similar to assign()
+  ///
+  /// @param fn the fn(double y) should return \f$xf(x)\f$ at \f$x=\exp(-y)\f$
+  ///
+  /// Note that this does not allocate memory, so the object must
+  /// already be properly initialised (i.e. allocated and associated with a grid_def_view)
   template<typename F, typename = std::enable_if_t<std::is_invocable_r_v<double, F, double>>>
   grid_quant_view & operator=(const F & fn) {assign(fn); return *this;}
 
@@ -384,8 +389,8 @@ public:
   //template<> 
   grid_quant_view & operator=(const grid_quant_view & other) = default;// {copy_data(other); return *this;}
 
-  // /// @brief  assign a constant value to all elements
-  // /// @param val the value to assign
+  /// @brief  assign a constant value to all elements
+  /// @param val the value to assign
   grid_quant_view & operator=(double val) {assign(val); return *this;}
 
   /// @brief  indexing operator
