@@ -26,6 +26,7 @@ INPUT                  = groups.dox \
                          ../src/ome/AqqQNSOdd.h \
                          ../src/ome/AqqQPS.h \
                          ../src/ome/AQqPS.h \
+                         ../src/ome/AQqPSs.h \
                          ../src/ome/polAggQ.h \
                          ../src/ome/polAQg.h \
                          ../src/ome/polAqgQ.h \
@@ -33,7 +34,8 @@ INPUT                  = groups.dox \
                          ../src/ome/polAqqQNSEven.h \
                          ../src/ome/polAqqQNSOdd.h \
                          ../src/ome/polAqqQPS.h \
-                         ../src/ome/polAQqPS.h
+                         ../src/ome/polAQqPS.h \
+                         ../src/ome/polAQqPSs.h
 
 # The formulas in the documentation use amsmath commands such as \text
 EXTRA_PACKAGES         = amsmath

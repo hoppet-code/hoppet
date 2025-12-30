@@ -5,7 +5,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
 endif()
 
 project(libome
-  VERSION 1.0.2
+  VERSION 1.1.0
   DESCRIPTION "Implementation of massive operator matrix elements (OMEs) of the QCD twist-2 operators in x-space"
 )
 set(CMAKE_CXX_STANDARD 17)

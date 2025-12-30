@@ -17,9 +17,11 @@ There are seven unpolarised OMEs that contribute up to three-loop order:
 | \f$A_{qg,Q}\f$                         | `AqgQ`              |
 | \f$A_{qq,Q}^{\text{NS},+}\f$           | `AqqQNSEven`        |
 | \f$A_{qq,Q}^{\text{NS},-}\f$           | `AqqQNSOdd`         |
+| \f$A_{Qq}^\text{PS,s}\f$               | `AQqPSs`            |
 Regarding the analytic continuation, the implementation of all of these OMEs
 correspond to the analytic continuation from even moments, except for
-\f$A_{qq,Q}^{\text{NS},-}\f$, which is analytically continued from odd moments.
+\f$A_{qq,Q}^{\text{NS},-}\f$ and \f$A_{Qq}^\text{PS,s}\f$, which are
+analytically continued from odd moments.
 
 Similarly, there are seven polarised OMEs:
 | OME                                 | name used in libome    |
@@ -32,9 +34,11 @@ Similarly, there are seven polarised OMEs:
 | \f$\Delta A_{qg,Q}\f$               | `polAqgQ`              |
 | \f$\Delta A_{qq,Q}^{\text{NS},+}\f$ | `polAqqQNSEven`        |
 | \f$\Delta A_{qq,Q}^{\text{NS},-}\f$ | `polAqqQNSOdd`         |
+| \f$\Delta A_{Qq}^\text{PS,s}\f$     | `polAQqPSs`            |
 They are analytically continued from odd moments, except for
-\f$A_{qq,Q}^{\text{NS},+}\f$, which is analytically continued from even
-moments. The polarised OMEs were calculated in the Larin scheme.
+\f$\Delta A_{qq,Q}^{\text{NS},+}\f$ and \f$\Delta A_{Qq}^\text{PS,s}\f$, which
+are analytically continued from even moments. The polarised OMEs were calculated
+in the Larin scheme.
 
 The OMEs depend on four parameters:
 - the strong coupling \f$a_s = \frac{\alpha_s}{4 \pi} = \frac{g_s}{(4 \pi)^2}\f$
