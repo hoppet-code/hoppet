@@ -3,7 +3,11 @@
 This directory contains external code. For anything using git subtrees, you _must_
 record the remote and the commit hash, tag or branch used.
 
-## libome
+## libome (https://gitlab.com/libome/libome)
+
+### 2025-12-30: updated to 1.1.0 from the main repo
+
+git subtree pull --prefix external-code/libome git@gitlab.com:libome/libome.git v1.1.0 --squash
 
 ### 2025-11-01: updated to 1.0.2 from the main repo
 
