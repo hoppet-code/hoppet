@@ -65,7 +65,8 @@ program prec_and_timing
   character(len=999) :: lhapdf_out = ""
   integer            :: idev, y_interp_order
   integer, parameter :: lhapdf_unit = 99
-  integer            :: lhapdf_iyinc
+  integer            :: lhapdf_iyinc, lhapdf_imem 
+  character(len=:), allocatable :: n3lo_approx
   character(len=300) :: hostname
 
   idev = idev_open_opt("-o","/dev/stdout")    ! output file (required)
@@ -81,12 +82,13 @@ program prec_and_timing
 
   du = dble_val_opt('-du',0.1_dp) ! evolution step, overriden by dlnlnQ
 
-  order2 = int_val_opt('-order2',order) ! override interp order for finest grid
+  order2 = int_val_opt('-order2',order) ! override interp order for finest lhapdf
   order1 = int_val_opt('-order1',order) ! override interp order for finest second grid
 
   preev = log_val_opt('-preev',.true.)        ! use pre-evolution (cached evolution)
 
   lhapdf_out = string_val_opt("-lhapdf-out","") ! write out an LHAPDF file
+  lhapdf_imem = int_val_opt("-lhapdf-imem",0) ! output LHAPDF member number 
   lhapdf_iyinc = int_val_opt("-lhapdf-iyinc",1)
 
   if (log_val_opt('-eps')) call SetDefaultConvolutionEps(dble_val_opt('-eps')) ! precision for split.fn. adaptive integration 
@@ -133,6 +135,11 @@ program prec_and_timing
   if (log_val_opt('-exact-nnlo-sp')) &
        &   call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
  
+  n3lo_approx = trim(string_val_opt("-n3lo-approx","")) ! give e.g. 2512, 2410, etc.
+  if (n3lo_approx /= "") then
+    call dglap_Set_n3lo_splitting_approximation(CodeOfName("n3lo_splitting_approximation_up_to_"//n3lo_approx))
+  end if
+
 
   ! decide how many repetitions, and what form of output
   n_alphas = int_val_opt("-n-alphas",1)
@@ -272,7 +279,7 @@ program prec_and_timing
 
   if (trim(lhapdf_out) /= "") then
     call WriteLHAPDFFromPdfTable(table, coupling, lhapdf_out, &
-           pdf_index = 0, iy_increment = lhapdf_iyinc)
+           pdf_index = lhapdf_imem, iy_increment = lhapdf_iyinc)
   end if
 
 
@@ -311,6 +318,8 @@ contains
       &       trim(NameOfCode(n3lo_splitting_variant,'n3lo_splitting'))
       write(idev,'(a)') '# n3lo_spltting_approx = '// &
       &       trim(NameOfCode(n3lo_splitting_approximation,'n3lo_splitting_approx'))
+      write(idev,'(a)') '# n3lo_nfthreshold = '// &
+      &       trim(NameOfCode(n3lo_nfthreshold,'n3lo_nfthreshold'))
     else 
       write(idev,'(a)') '# n3lo_spltting = N/A'
       write(idev,'(a)') '# n3lo_spltting_approx = N/A'
