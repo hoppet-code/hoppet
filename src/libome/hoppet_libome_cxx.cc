@@ -7,6 +7,7 @@
 #include  "ome/AqqQNSEven.h"
 #include  "ome/AqqQNSOdd.h"
 #include  "ome/AqqQPS.h"
+#include  "ome/AQqPSs.h"
 
 #include "../hoppet.h"
 
@@ -27,6 +28,7 @@ extern "C" {
   const ome::ome_rpd * ome_AqqQNSEven = & ome::AqqQNSEven ; 
   const ome::ome_rpd * ome_AqqQNSOdd  = & ome::AqqQNSOdd  ;  
   const ome::ome_rpd * ome_AqqQPS     = & ome::AqqQPS     ; 
+  const ome::ome_rpd * ome_AQqPSs     = & ome::AQqPSs     ; 
 }
 
 /// @brief Get the name of an OME object
@@ -41,6 +43,7 @@ std::string ome_name(const ome::ome_rpd & rpd) {
   else if (&rpd == ome_AqqQNSEven) return "AqqQNSEven";
   else if (&rpd == ome_AqqQNSOdd ) return "AqqQNSOdd";
   else if (&rpd == ome_AqqQPS    ) return "AqqQPS";
+  else if (&rpd == ome_AQqPSs    ) return "AQqPSs";
   else return "unknown ome_rpd pointer";
 }
 

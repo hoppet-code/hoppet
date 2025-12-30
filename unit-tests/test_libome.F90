@@ -54,6 +54,14 @@ contains
     call sum_check("AqgQ_reg" ,   -73.710138327_dp   , AqgQ_ptr , reg, 3)
     call sum_check("AgqQ_reg" ,  -120.75198970_dp    , AgqQ_ptr , reg, 3)
 
+    ! for additions in 2512.13508, there's no table, so we compare against 
+    ! a reference value in libome/tests/AQqPSs.test.cpp
+    as4pi = 0.25_dp
+    LM    = -5.0_dp
+    nf_light_cdouble = 3.0_dp
+    x = 0.0625_dp
+    call sum_check("AQqPSs_reg" ,  -1.42143670137779381366114343548_dp  , AQqPSs_ptr , reg, 3)
+
     !! Run checks that the LM=0 and LM=eps results agree, since we take
     !! different paths within the libome interface in these two cases
     do ipiece = 1, size(pieces)
@@ -66,6 +74,7 @@ contains
       call LM_zero_check("AQg       "//", piece="//to_string(piece), AQg_ptr      , piece, 3)
       call LM_zero_check("AqgQ      "//", piece="//to_string(piece), AqgQ_ptr     , piece, 3)
       call LM_zero_check("AgqQ      "//", piece="//to_string(piece), AgqQ_ptr     , piece, 3)
+      call LM_zero_check("AQqPSs    "//", piece="//to_string(piece), AQqPSs_ptr   , piece, 3)
     end do
 
     call libome_moment_check_table4()

@@ -14,6 +14,7 @@ module hoppet_libome_fortran
   type(c_ptr), bind(C, name="ome_AqqQNSEven") :: AqqQNSEven_ptr ; 
   type(c_ptr), bind(C, name="ome_AqqQNSOdd ") :: AqqQNSOdd_ptr ;  
   type(c_ptr), bind(C, name="ome_AqqQPS"    ) :: AqqQPS_ptr ; 
+  type(c_ptr), bind(C, name="ome_AQqPSs"    ) :: AQqPSs_ptr ;
 
 
   !! interface to the ome_piece_hoppet function in libome

@@ -3,6 +3,12 @@
 	* external-code/libome/:
 	updated to v1.1.0
 
+	* src/libome/hoppet_libome_cxx.cc:
+	* src/libome/hoppet_libome_fortran.f90:
+	* unit-tests/test_libome.F90:
+	small changes to access and unit-test new AQqPSs threshold function
+	(for Q-Qbar).
+
 	* src/dglap_choices.f90:
 	split some constants over two lines to avoid being picked up by NameSelect.pl
 	(to avoid ambiguities when mapping from number -> string).
