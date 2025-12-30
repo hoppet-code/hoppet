@@ -66,8 +66,10 @@ contains
       code = nnlo_nfthreshold_param
     case('n3lo_nfthreshold_exact_fortran')
       code = n3lo_nfthreshold_exact_fortran
-    case('n3lo_nfthreshold_libOME')
-      code = n3lo_nfthreshold_libOME
+    case('n3lo_nfthreshold_libOME_2510')
+      code = n3lo_nfthreshold_libOME_2510
+    case('n3lo_nfthreshold_libOME_2512')
+      code = n3lo_nfthreshold_libOME_2512
     case('n3lo_nfthreshold_off')
       code = n3lo_nfthreshold_off
     case('factscheme_MSbar')
@@ -222,9 +224,14 @@ contains
        nocc = nocc + 1; name = 'n3lo_nfthreshold_exact_fortran'
     end if
 
-    if (PrefixMatches('n3lo_nfthreshold_libOME',prefix) &
-        .and. code == n3lo_nfthreshold_libOME) then
-       nocc = nocc + 1; name = 'n3lo_nfthreshold_libOME'
+    if (PrefixMatches('n3lo_nfthreshold_libOME_2510',prefix) &
+        .and. code == n3lo_nfthreshold_libOME_2510) then
+       nocc = nocc + 1; name = 'n3lo_nfthreshold_libOME_2510'
+    end if
+
+    if (PrefixMatches('n3lo_nfthreshold_libOME_2512',prefix) &
+        .and. code == n3lo_nfthreshold_libOME_2512) then
+       nocc = nocc + 1; name = 'n3lo_nfthreshold_libOME_2512'
     end if
 
     if (PrefixMatches('n3lo_nfthreshold_off',prefix) &

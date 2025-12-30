@@ -66,7 +66,7 @@ program prec_and_timing
   integer            :: idev, y_interp_order
   integer, parameter :: lhapdf_unit = 99
   integer            :: lhapdf_iyinc, lhapdf_imem 
-  character(len=:), allocatable :: n3lo_approx
+  character(len=:), allocatable :: n3lo_approx, n3lo_threshold
   character(len=300) :: hostname
 
   idev = idev_open_opt("-o","/dev/stdout")    ! output file (required)
@@ -138,6 +138,10 @@ program prec_and_timing
   n3lo_approx = trim(string_val_opt("-n3lo-approx","")) ! give e.g. 2512, 2410, etc.
   if (n3lo_approx /= "") then
     call dglap_Set_n3lo_splitting_approximation(CodeOfName("n3lo_splitting_approximation_up_to_"//n3lo_approx))
+  end if
+  n3lo_threshold = trim(string_val_opt("-n3lo-threshold","")) ! give e.g. libOME_2512, exact_fortran, etc.
+  if (n3lo_threshold /= "") then
+    call dglap_Set_n3lo_nfthreshold(CodeOfName("n3lo_nfthreshold_"//n3lo_threshold))
   end if
 
 
