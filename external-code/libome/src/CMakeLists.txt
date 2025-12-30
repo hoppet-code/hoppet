@@ -2,6 +2,7 @@ add_library(ome ome/integration_engine_gsl.cpp
                 ome/AqqQNSEven.cpp
                 ome/AqqQNSOdd.cpp
                 ome/AQqPS.cpp
+                ome/AQqPSs.cpp
                 ome/AgqQ.cpp
                 ome/AggQ.cpp
                 ome/AqgQ.cpp
@@ -10,6 +11,7 @@ add_library(ome ome/integration_engine_gsl.cpp
                 ome/polAqqQNSEven.cpp
                 ome/polAqqQNSOdd.cpp
                 ome/polAQqPS.cpp
+                ome/polAQqPSs.cpp
                 ome/polAgqQ.cpp
                 ome/polAggQ.cpp
                 ome/polAqgQ.cpp
@@ -33,6 +35,7 @@ install(FILES
                ome/AqqQNSEven.h
                ome/AqqQNSOdd.h
                ome/AQqPS.h
+               ome/AQqPSs.h
                ome/AgqQ.h
                ome/AggQ.h
                ome/AqgQ.h
@@ -41,10 +44,11 @@ install(FILES
                ome/polAqqQNSEven.h
                ome/polAqqQNSOdd.h
                ome/polAQqPS.h
+               ome/polAQqPSs.h
                ome/polAgqQ.h
                ome/polAggQ.h
                ome/polAqgQ.h
                ome/polAqqQPS.h
                ome/polAQg.h
-               TYPE INCLUDE
+               DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ome/
               )
