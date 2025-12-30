@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# perl script which parses STDIN (for now) and  produces
+# perl script which parses a Fortran 90 file and produces
 # as output a file which allows conversion between codes and
 # strings
 #
