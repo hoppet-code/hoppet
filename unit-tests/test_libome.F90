@@ -81,6 +81,8 @@ contains
 
     call moment_check()
 
+    call libome_QQbar_valence_check()
+
   contains
 
     !! sums the different orders from ome_piece_hoppet and compares to reference value
@@ -300,4 +302,82 @@ contains
 
   end subroutine libome_moment_check_table4
 
+
+  !! This routine carries out checks of the $\alpha_s^3 L$ contribution
+  !! to valence heavy-quark (and light-quark) evolution, checking
+  !! consistency between the splitting-function based determination
+  !! and the MTM-based determination in libOME.
+  !!
+  !! The essence of the test is look at
+  !!
+  !! - the difference between nf=4 and nf=3 evolution of a toy PDF with
+  !!   only u-ubar valence content as the initial condition
+  !! - the difference between the libOME MTM with LM=non-zero and LM=zero,
+  !!   applied to the same toy PDF
+  !!
+  !! The two results should agree for the c-cbar valence component,
+  !! and the s-sbar valence component should remain zero (by construction
+  !! in the MTM case).
+  !!
+  subroutine libome_QQbar_valence_check()
+    ! to be implemented
+    use qcd, only: qcd_SetNf
+    use pdf_representation
+    use convolution
+    use streamlined_interface
+
+    real(dp) :: toy_pdf(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: dtoy_nf3(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: dtoy_nf4(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: dtoy_mtm(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: xvals(0:grid%ny), x, xtest(3) = [0.01_dp, 0.1_dp, 0.5_dp]
+    real(dp) :: ln_Q2_over_M2 = 4.3_dp
+    type(mass_threshold_mat) :: mtm_lm0, mtm_lmQ2
+    integer  :: ix
+
+    xvals = xValues(grid)
+
+    ! set up a toy PDF with u - ubar valence only
+    toy_pdf = zero
+    toy_pdf(:,iflv_u) = xvals**0.5_dp * (1.0_dp - xvals)**3
+    toy_pdf(:,iflv_ubar) = -toy_pdf(:,iflv_u )
+
+    ! indices are nloop,nf
+    dtoy_nf3 = ln_Q2_over_M2 * (dh%allP(3,3) * toy_pdf)
+    dtoy_nf4 = ln_Q2_over_M2 * (dh%allP(3,4) * toy_pdf)
+    ! then get _just_ the part 
+    dtoy_nf4 = dtoy_nf4 - dtoy_nf3
+
+    call qcd_SetNf(4) ! set nf=4 means the number of flavours including the heavy one
+    call InitMTMLibOME(grid, mtm_lm0 , nloop=4, LM= 0.0_dp)
+    call InitMTMLibOME(grid, mtm_lmQ2, nloop=4, LM=-ln_Q2_over_M2)
+    ! subtract off the two results
+    call AddWithCoeff(mtm_lmQ2, mtm_lm0, -1.0_dp)
+    dtoy_mtm = mtm_lmQ2 * toy_pdf
+
+    x = 0.1_dp
+    do ix = 1, size(xtest)
+      x = xtest(ix)
+      call check_approx_eq("libome v evolution LM!=0 Q-Qbar valence check at x="//to_string(x), &
+                           answer=(dtoy_mtm(:, iflv_c) - dtoy_mtm(:, iflv_cbar)).atx.(x.with.grid),&
+                           expected=(dtoy_nf4(:, iflv_c) - dtoy_nf4(:, iflv_cbar)).atx.(x.with.grid),&
+                           tol_abs=1e-6_dp, tol_rel=1e-6_dp, tol_choice_or=.true.)
+
+      ! this one isn't really a test of libOME, but rather that the
+      ! absence of a specific term in libOME is consistent with a check
+      ! that, starting from just u-ubar valencem the s-sbar valence
+      ! evolves independently of nf at order $alpha_s^3 L$
+      call check_approx_eq("NNLO evolution (nf4-nf3 from pure u-ubar) s-sbar valence=0 check at x="//to_string(x), &
+                           answer=(dtoy_nf4(:, iflv_s) - dtoy_nf4(:, iflv_sbar)).atx.(x.with.grid),&
+                           expected=zero,&
+                           tol_abs=1e-8_dp, tol_choice_or=.true.)
+
+      !write(6,*) "x =", x
+      !write(6,*) "c-cbar (from split):", (dtoy_nf4(:, iflv_c) - dtoy_nf4(:, iflv_cbar)).atx.(x.with.grid)
+      !write(6,*) "c-cbar (from MTM  ):", (dtoy_mtm(:, iflv_c) - dtoy_mtm(:, iflv_cbar)).atx.(x.with.grid)
+      !write(6,*) "s-sbar (from split):", (dtoy_nf4(:, iflv_s) - dtoy_nf4(:, iflv_sbar)).atx.(x.with.grid)
+      !write(6,*) "s-sbar (from MTM  ):", (dtoy_mtm(:, iflv_s) - dtoy_mtm(:, iflv_sbar)).atx.(x.with.grid)
+    end do
+
+  end subroutine libome_QQbar_valence_check
 end module test_libome

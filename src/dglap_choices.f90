@@ -55,13 +55,19 @@ module dglap_choices
   integer, public :: nnlo_nfthreshold_variant = nnlo_nfthreshold_param
 
   integer, parameter, public :: n3lo_nfthreshold_exact_fortran = 2 !< exact except AQg
-  integer, parameter, public :: n3lo_nfthreshold_libOME = 1        !< C++ expansions, good to 2048*epsilon, https://gitlab.com/libome/libome 
+  integer, parameter, public :: n3lo_nfthreshold_libOME_2510 = 3   !< C++ expansions, no Q-Qbar, good to 2048*epsilon, https://gitlab.com/libome/libome 
+  integer, parameter, public :: n3lo_nfthreshold_libOME_2512 = 1   !< C++ expansions, with Q-Qbar (2512.13508), good to 2048*epsilon, https://gitlab.com/libome/libome 
   integer, parameter, public :: n3lo_nfthreshold_off = 0
-  integer, public :: n3lo_nfthreshold = n3lo_nfthreshold_libOME
+  integer, public :: n3lo_nfthreshold = n3lo_nfthreshold_libOME_2512
 
-  ! define n3lo_nfthreshold_on for compatibility with v2.0.x, split across two
-  ! lines to avoid being caught by NameSelect.pl
-  integer, parameter,&
+  ! define n3lo_nfthreshold_libOME, for compatibility with v.2.1.x
+  ! (but note, it now defaults to 2512 variant of hoppet 2.2.x), 
+  ! split across two lines to avoid being caught by NameSelect.pl
+  integer, parameter, &
+        & public :: n3lo_nfthreshold_libOME = n3lo_nfthreshold_libOME_2512
+
+  ! define n3lo_nfthreshold_on for compatibility with v2.0.x
+  integer, parameter, &
         & public :: n3lo_nfthreshold_on = n3lo_nfthreshold_libOME   
 
 

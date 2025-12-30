@@ -1,5 +1,20 @@
 # NEWS for HOPPET
 
+# Release 2.2.0 (as yet unreleased)
+
+## Additions
+
+* updated N3LO splitting functions in light of arXiv:2512.10783, which 
+  adds nf=6 support and further constrains Pgq using a new moment.
+  One gets this by choosing the option n3lo_splitting_approximation_up_to_2512 (new default). 
+
+* updated libOME to v1.1.0, which includes the Q-Qbar threshold
+  contribution that starts at N3LO (arXiv:2512.13508). One gets this by
+  choosing the option n3lo_nfthreshold_libOME_2512 (new default).
+
+* mass_threshold_mat has a new NShV component, to hold the Q-Qbar
+  threshold contribution
+
 # Release 2.1.4, 9 December 2025
 
 ## Bug fix

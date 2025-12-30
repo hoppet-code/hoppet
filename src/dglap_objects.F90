@@ -79,6 +79,7 @@ module dglap_objects
      type(grid_conv) :: PSqq_H  !!< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
      type(grid_conv) :: Sqg_H   !!< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
      type(grid_conv) :: NSmqq_H !!< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
+     type(grid_conv) :: NShV    !!< A_{Qq}^{PS,s}, gives (h-hbar) from valence(nflight) [=sum_i (q_i-qbar_i)]
      ! pieces related to the case of thresholds at MSbar masses
      ! NB: not supported yet at N3LO
      type(grid_conv) :: PShg_MSbar !!< replaces PShg when masses are MSbar
@@ -946,6 +947,7 @@ contains
     ! pieces that are zero at NNLO
     call InitGridConv(grid, MTM%PSqq_H)
     call InitGridConv(grid, MTM%Sqg_H)
+    call InitGridConv(grid, MTM%NShV)
 
     ! just store info that it is NNLO. For now it is obvious, but
     ! one day when we have NNNLO it may be useful, to indicate
@@ -965,8 +967,11 @@ contains
     type(mass_threshold_mat), intent(out) :: MTM_N3LO
     integer, save :: nwarn_n3lo_nfthreshold = 1
 
-    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME) then
-      call InitMTMLibOME(grid,MTM_N3LO,nloop=4)
+    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME_2510) then
+      call InitMTMLibOME(grid,MTM_N3LO,nloop=4, LM=zero, include_NShV=.false.)
+
+    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME_2512) then
+      call InitMTMLibOME(grid,MTM_N3LO,nloop=4, LM=zero, include_NShV=.true.)
 
     else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_exact_fortran) then
       call InitMTMN3LOExactFortran(grid,MTM_N3LO)
@@ -999,15 +1004,17 @@ contains
   !! as good as (2048 * epsilon(1.0_dp))~4.5e-13,  which will usually be
   !! significantly better than the standard global integration precision
   !! (convolution's DefaultConvolutionEps(), which defaults to 1e-7)
-  subroutine InitMTMLibOME(grid, MTM, nloop, LM)
+  subroutine InitMTMLibOME(grid, MTM, nloop, LM, include_NShV)
     use iso_c_binding, only: c_double, c_int
-    use qcd
+    use qcd, only: nf_int
     use hoppet_libome_fortran
     type(grid_def),           intent(in)  :: grid
     type(mass_threshold_mat), intent(out) :: MTM
     integer,                  intent(in)  :: nloop
     real(dp),  optional,      intent(in)  :: LM
+    logical,   optional,      intent(in)  :: include_NShV    
     !-----------
+    integer, save :: nwarn_NShV_zero = 2
     real(c_double) :: LM_c, nf_light_d
     integer(c_int) :: order_c
     logical, save :: first_time = .true.
@@ -1018,7 +1025,7 @@ contains
       write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
       write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
       write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
-      write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037), https://gitlab.com/libome/libome'
+      write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037), 2512.13508, https://gitlab.com/libome/libome'
     end if
 
     nf_light_d = real(nf_int-1,c_double)
@@ -1038,6 +1045,17 @@ contains
     call InitGridConv(grid, MTM%Sgq_H  , conv_OME(AgqQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
     call InitGridConv(grid, MTM%Sqg_H  , conv_OME(AqgQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
 
+    if (default_or_opt(.true., include_NShV)) then
+      call InitGridConv(grid, MTM%NShV  , conv_OME(AQqPSs_ptr   , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    else
+      if (nloop >= 4) call wae_warn(nwarn_NShV_zero, &
+                                    'InitMTMLibOME: initialising N3LO or higher with NShV component set to zero')
+      call InitGridConv(grid, MTM%NShV)
+    end if
+    !call InitGridConv(grid, MTM%NShV)
+    !call InitGridConv(grid, MTM%NShV  , conv_OME(AQqPSs_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
+
+
     ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
     ! to be there to avoid errors in the code.
     call InitGridConv(grid, MTM%PShg_MSbar)
@@ -1054,6 +1072,7 @@ contains
     type(grid_def),           intent(in)  :: grid
     type(mass_threshold_mat), intent(out) :: MTM_N3LO
     logical, save :: first_time = .true.
+    integer, save :: nwarn_NShV = 1
     !! 103 uses two alphas points to separate out aalphas**3 from alphas**2, 
     !! 203 uses just one extreme one and is faster while giving consistent results
     integer, parameter :: ord3 = 203 
@@ -1101,6 +1120,10 @@ contains
     call InitGridConv(grid, MTM_N3LO%Sqg_H  , JB(QGL, null(), null(), order=ord3))
     ! there is no AQGL, all is included in QGL
     
+    ! the NShV piece is not provided in the original fortran code, so we set it to zero here
+    call wae_warn(nwarn_NShV, 'InitMTMN3LOExactFortran: the N3LO exact Fortran MTM does not provide the NShV piece; setting it to zero')
+    call InitGridConv(grid, MTM_N3LO%NShV)
+
     ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
     ! to be there to avoid errors in the code.
     call InitGridConv(grid, MTM_N3LO%PShg_MSbar)
@@ -1122,6 +1145,7 @@ contains
     call InitGridConv(MTM%PSHg, MTM_in%PSHg)
     call InitGridConv(MTM%NSqq_H, MTM_in%NSqq_H)
     call InitGridConv(MTM%NSmqq_H, MTM_in%NSmqq_H)
+    call InitGridConv(MTM%NShV, MTM_in%NShV)
     call InitGridConv(MTM%Sgg_H, MTM_in%Sgg_H)
     call InitGridConv(MTM%Sgq_H, MTM_in%Sgq_H)
     call InitGridConv(MTM%PSqq_H, MTM_in%PSqq_H)
@@ -1140,14 +1164,15 @@ contains
    type(mass_threshold_mat), intent(inout) :: MTM
    real(dp),                 intent(in)    :: factor
 
-   call Multiply(MTM%PSHq,  factor)
-   call Multiply(MTM%PSHg,  factor)
-   call Multiply(MTM%NSqq_H, factor)
+   call Multiply(MTM%PSHq,    factor)
+   call Multiply(MTM%PSHg,    factor)
+   call Multiply(MTM%NSqq_H,  factor)
    call Multiply(MTM%NSmqq_H, factor)
-   call Multiply(MTM%Sgg_H,  factor)
-   call Multiply(MTM%Sgq_H,  factor)
-   call Multiply(MTM%PSqq_H, factor)
-   call Multiply(MTM%Sqg_H,  factor)
+   call Multiply(MTM%NShV,    factor)
+   call Multiply(MTM%Sgg_H,   factor)
+   call Multiply(MTM%Sgq_H,   factor)
+   call Multiply(MTM%PSqq_H,  factor)
+   call Multiply(MTM%Sqg_H,   factor)
    call Multiply(MTM%PShg_MSbar, factor)
    MTM%Sgg_H_extra_MSbar_delta = MTM%Sgg_H_extra_MSbar_delta * factor 
  end subroutine Multiply_MTM
@@ -1167,6 +1192,7 @@ contains
     call AddWithCoeff(MTM%PSHg, MTM_to_add%PSHg, factor)
     call AddWithCoeff(MTM%NSqq_H, MTM_to_add%NSqq_H, factor)
     call AddWithCoeff(MTM%NSmqq_H, MTM_to_add%NSmqq_H, factor)
+    call AddWithCoeff(MTM%NShV, MTM_to_add%NShV, factor)
     call AddWithCoeff(MTM%Sgg_H, MTM_to_add%Sgg_H, factor)
     call AddWithCoeff(MTM%Sgq_H, MTM_to_add%Sgq_H, factor)
     call AddWithCoeff(MTM%PSqq_H, MTM_to_add%PSqq_H, factor)
@@ -1209,7 +1235,7 @@ contains
     type(mass_threshold_mat), intent(in) :: MTM
     real(dp),   intent(in) :: q(0:,ncompmin:)
     real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ncompmax)
-    real(dp) :: singlet(0:ubound(q,dim=1))    
+    real(dp) :: singlet(0:ubound(q,dim=1)), valence(0:ubound(q,dim=1)), qbar_sum(0:ubound(q,dim=1))
     real(dp) :: dq_from_singlet(0:ubound(q,dim=1)) !!< addition to each flavour from singlet
     real(dp) :: plus(0:ubound(q,dim=1)), minus(0:ubound(q,dim=1))
     integer :: i, nf_light, nf_heavy
@@ -1234,6 +1260,11 @@ contains
     !     & call wae_error('cobj_ConvMTM:',&
     !     &'Distribution already has non-zero components at nf_heavy')
     
+    qbar_sum = sum(q(:,-nf_light:-1),dim=2)
+    singlet  = sum(q(:,1:nf_light),dim=2)   ! not yet the singlet, just the sum of light quarks
+    valence  = singlet - qbar_sum
+    singlet  = singlet + qbar_sum
+
     singlet = sum(q(:,-nf_light:-1),dim=2) + sum(q(:,1:nf_light),dim=2)
 
     if (MTM%masses_are_MSbar) then
@@ -1246,7 +1277,10 @@ contains
            &(MTM%PShq .conv. singlet) + (MTM%PShg .conv. q(:,iflv_g)) )
     end if
     
-    Pxq(:,-nf_heavy) = Pxq(:,nf_heavy)
+    minus = half * (MTM%NShV .conv. valence)
+    Pxq(:,-nf_heavy) = Pxq(:, nf_heavy) - minus
+    Pxq(:,+nf_heavy) = Pxq(:,+nf_heavy) + minus
+    
     Pxq(:,iflv_g)     = (MTM%Sgq_H.conv. singlet) + (MTM%Sgg_H.conv. q(:,iflv_g))
 
     ! the extra delta-function piece in the MSbar scheme
@@ -1290,6 +1324,7 @@ contains
     call Delete(MTM%PShg_MSbar)
     call Delete(MTM%NSqq_H)
     call Delete(MTM%NSmqq_H)
+    call Delete(MTM%NShV)
     call Delete(MTM%Sgg_H)
     call Delete(MTM%Sgq_H)
     call Delete(MTM%PSqq_H)
