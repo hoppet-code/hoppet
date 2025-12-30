@@ -1,3 +1,18 @@
+2025-12-30 Gavin
+
+	* src/dglap_choices.f90:
+	split some constants over two lines to avoid being picked up by NameSelect.pl
+	(to avoid ambiguities when mapping from number -> string).
+
+	* benchmarking/prec_and_timing.f90:
+	* benchmarking/NameSelect.f90:
+	Added -lhapdf-imem option, and -n3lo-approx to control which 
+	n3lo splitting functions we get; double-checked that -n3lo-approx 2410
+	reproduces previous results.
+
+	Also updated NameSelect with latest constants.
+
+
 2025-12-15  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* src/splitting-functions:
