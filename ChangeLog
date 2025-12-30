@@ -1,3 +1,9 @@
+2025-12-30  Gavin Salam  (later)
+
+	* examples/f90/tabulation_example_n3lo.f90:
+	* examples/f90/tabulation_example_n3lo.default_output:
+	updated example and reference output to use n3lo_nfthreshold_libOME_2512
+
 2025-12-30 Gavin
 
 	* external-code/libome/:

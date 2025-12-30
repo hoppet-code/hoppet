@@ -71,7 +71,7 @@ program tabulation_example_n3lo
   if(vfn) then 
      !n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2310_05744 ! Controls the approximation that we use the in n3lo splitting functions
      call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
-     call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_libOME_2510) ! To turn on/off the n3lo mass thresholds
+     call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_libOME_2512) ! To set the n3lo mass thresholds variant (libOME_2512 is complete)
      call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&
           &                      nloop=nloop,nflo=3,nfhi=5)
      write(6,'(a)') "Splitting functions initialised!"
