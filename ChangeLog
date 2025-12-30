@@ -1,5 +1,8 @@
 2025-12-30 Gavin
 
+	* external-code/libome/:
+	updated to v1.1.0
+
 	* src/dglap_choices.f90:
 	split some constants over two lines to avoid being picked up by NameSelect.pl
 	(to avoid ambiguities when mapping from number -> string).
