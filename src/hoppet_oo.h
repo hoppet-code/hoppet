@@ -217,7 +217,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-/// @brief A definition of a grid in \f$y=ln(1/x)\f$.
+/// @brief A definition of a grid in \f$y=\ln(1/x)\f$.
 ///
 /// Most users will want to construct the grid_def object with the function
 /// hoppet::grid_def_default, e.g. 

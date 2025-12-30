@@ -3,6 +3,8 @@
 
 #include <tuple>
 
+namespace hoppet {
+
 /// an empty class as a default for template parameters    
 struct Empty {};
 
@@ -317,5 +319,5 @@ protected:
   P * _ptr = nullptr;
 };
 
-
+} // namespace hoppet
 #endif // __HOPPET___BASE_TYPES__
