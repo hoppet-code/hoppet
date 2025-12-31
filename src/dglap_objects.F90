@@ -53,13 +53,6 @@ module dglap_objects
   public             :: split_mat
 
 
-  ! !-----------------------------------------------------------------
-  ! type, extends(split_mat) :: new_mass_threshold_mat
-  !   type(grid_conv) :: PShq !!< (h+hbar) from singlet(nflight)
-  !   type(grid_conv) :: PShg !!< (h+hbar) from gluon  (nflight)
-  !   type(grid_conv) :: NShV !!< (h-hbar) from valence(nflight) i.e. sum_i (q_i-qbar_i)
-  ! end type new_mass_threshold_mat
-
   !---------------------------------------------------------------
   ! for going from nf to nf+1. Currently contains pieces
   ! required for O(as^2), but not the full general structure.
@@ -98,6 +91,9 @@ module dglap_objects
 
   !-----------------------------------------------------------------
   ! holds the components of a coefficient function
+  !
+  ! NB: as of v1.2 this should be considered obsolete and will be
+  ! removed in future versions: split_mat objects should be used instead.
   type coeff_mat
      !private
      !-- need a grid def. Sometimes no g or q will be defined
@@ -1497,3 +1493,137 @@ contains
     
 end module dglap_objects
 !end module dglap_objects_hidden
+
+
+!-----------------------------------------------------------------
+!! module to help with development of new mass threshold matrix type
+!! and associated manipulations
+module dglap_objects_new_mtm
+  use types; use consts_dp
+  use convolution
+  use dglap_objects
+  implicit none
+
+  private
+
+  !-----------------------------------------------------------------
+  !! See logbooks/2025-12-flavour-struct for some discussion
+  !! of how this type will work
+  type :: new_mass_threshold_mat
+    type(split_mat) :: P_light !!< the part that acts on the light flavours
+    type(grid_conv) :: PShq !!< (h+hbar) from singlet(nflight)
+    type(grid_conv) :: PShg !!< (h+hbar) from gluon  (nflight)
+    type(grid_conv) :: NShV !!< (h-hbar) from valence(nflight) i.e. sum_i (q_i-qbar_i)
+  end type new_mass_threshold_mat
+
+  public :: new_mass_threshold_mat
+  public :: InitMTMFromSplitMat
+
+  interface operator(*)
+    module procedure ConvMTMNew
+  end interface
+  interface operator(.conv.)
+    module procedure ConvMTMNew
+  end interface
+  interface Delete
+    module procedure DelNewMTM
+  end interface
+  public :: operator(*), operator(.conv.), Delete
+
+contains
+
+  subroutine InitMTMFromSplitMat(mtm, P)
+    type(new_mass_threshold_mat), intent(out) :: mtm
+    type(split_mat),              intent(in)  :: P
+    !---------------------------------------------
+    integer :: nf_light_int
+    real(dp) :: nf_light_dp, nf_heavy_dp
+    type(grid_conv) :: ps_plus, ps_minus
+
+    nf_light_int = P%nf_int - 1
+    nf_light_dp  = real(nf_light_int, dp)
+    nf_heavy_dp  = real(nf_light_int + 1, dp)
+
+    call cobj_InitSplitLinks(mtm%P_light)
+    mtm%P_light%nf_int = nf_light_int
+
+    ! derivation of how to do this is given in logbooks/2025-12-flavour-struct
+    ! section 2
+
+    ! set up things that carry over directly
+    call InitGridConv(mtm%P_light%NS_plus , P%NS_plus )
+    call InitGridConv(mtm%P_light%NS_minus, P%NS_minus)
+    call InitGridConv(mtm%P_light%gq      , P%gq      )
+    call InitGridConv(mtm%P_light%gg      , P%gg      )
+
+    ! set up terms that just need an overall factor
+    call InitGridConv(mtm%P_light%qg      , P%qg      )
+    call Multiply    (mtm%P_light%qg, nf_light_dp / nf_heavy_dp)
+
+    call InitGridConv(mtm%PShg, P%qg)
+    call Multiply    (mtm%PShg, one / nf_heavy_dp)
+
+    ! now get the "pure singlet" (plus and minus -- i.e. pure singlet and pure valence)
+    call InitGridConv(ps_plus , P%qq)
+    call AddWithCoeff(ps_plus , P%NS_plus , -one)
+
+    call InitGridConv(ps_minus, P%NS_V)
+    call AddWithCoeff(ps_minus, P%NS_minus, -one)
+
+    ! and use those to set up the remaining terms
+    call InitGridConv(mtm%P_light%qq  , ps_plus)
+    call Multiply    (mtm%P_light%qq  , nf_light_dp / nf_heavy_dp)
+    call AddWithCoeff(mtm%P_light%qq  , P%NS_plus)
+  
+    call InitGridConv(mtm%P_light%NS_V, ps_minus)
+    call Multiply    (mtm%P_light%NS_V, nf_light_dp / nf_heavy_dp)
+    call AddWithCoeff(mtm%P_light%NS_V, P%NS_minus)
+
+    call InitGridConv(mtm%PShq, ps_plus)
+    call Multiply    (mtm%PShq, one / nf_heavy_dp)
+
+    call InitGridConv(mtm%NShV, ps_minus)
+    call Multiply    (mtm%NShV, one / nf_heavy_dp)
+
+    call Delete(ps_plus )
+    call Delete(ps_minus)
+
+  end subroutine InitMTMFromSplitMat
+
+  function ConvMTMNew(mtm,q) result(Pxq)
+    use pdf_representation
+    type(new_mass_threshold_mat), intent(in) :: mtm
+    real(dp),   intent(in) :: q(0:,ncompmin:)
+    real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ubound(q,dim=2))
+    real(dp) :: singlet(0:ubound(q,dim=1)), valence(0:ubound(q,dim=1)), qbar_sum(0:ubound(q,dim=1))
+    real(dp) :: dq_from_singlet(0:ubound(q,dim=1)) !!< addition to each flavour from singlet
+    real(dp) :: h_plus(0:ubound(q,dim=1)), h_minus(0:ubound(q,dim=1))
+    integer :: i, nf_light, nf_heavy
+
+    if (GetPdfRep(q) /= pdfr_Human) call wae_error('ConvMTMNew',&
+         &'q is not in Human representation')
+
+    PxQ = mtm%P_light * q
+
+    nf_light = mtm%P_light%nf_int
+
+    qbar_sum = sum(q(:,-nf_light:-1),dim=2)
+    singlet  = sum(q(:,1:nf_light),dim=2)   ! not yet the singlet, just the sum of light quarks
+    valence  = singlet - qbar_sum
+    singlet  = singlet + qbar_sum
+
+    h_plus  = mtm%PShg * q(:,0) + mtm%PShq * singlet    
+    h_minus = mtm%NShV * valence
+    Pxq(:,  nf_light+1 ) = half * (h_plus + h_minus)
+    Pxq(:,-(nf_light+1)) = half * (h_plus - h_minus)
+  end function ConvMTMNew
+
+  subroutine DelNewMTM(mtm)
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    call Delete(mtm%P_light)
+    call Delete(mtm%PShq)
+    call Delete(mtm%PShg)
+    call Delete(mtm%NShV)
+  end subroutine DelNewMTM
+
+end module dglap_objects_new_mtm

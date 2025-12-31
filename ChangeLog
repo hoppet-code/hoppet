@@ -1,3 +1,17 @@
+--------- 2025-12-new-mtm branch ---------
+
+2025-12-31 Gavin salam
+	* src/dglap_objects.F90:
+	starting to experiment with new structure for MTM, based on a splitting
+	matrix for the light flavours, and three extra pieces for the heavy-quark
+
+	* unit-tests/test_new_mtm.f90:   *** ADDED ***
+	* unit-tests/hoppet-unit-tests.F90:
+	* unit-tests/unit_tests.f90:
+	started adding unit tests for the new MTM structure
+	
+--------- end 2025-12-new-mtm branch ---------
+
 2025-12-31 Gavin Salam  
 
 	* CMakeLists.txt:
