@@ -1,3 +1,14 @@
+2025-12-31 Gavin Salam  
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.0-dev0
+
 2025-12-30  Gavin Salam  (later)
 
 	* examples/f90/tabulation_example_n3lo.f90:
