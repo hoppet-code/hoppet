@@ -2581,13 +2581,19 @@ contains
 
 
   !--------------------------------------------------------------
-  ! Carry out the convolution of two convolution functions
-  ! It is recommended that if one of them is singular at x=1, then this be 
-  ! gca: this helps minimise the discretisation error (in some cases).
-  !
-  ! NB: subroutine name is not quite consistent with things like
-  !     Add or Mult since the operands are completely distinct from the
-  !     result.
+  !! Carry out the convolution of two grid_conv objects and 
+  !! place put the result in gc, which will be allocated if it 
+  !! has not already been allocated. (If it has, then it must be
+  !! with a grid that is compatible).
+  !!
+  !! With positive interpolation orders, if one of the grid_conv objects
+  !! is singular at x=1, then it may be advantageous if this is gca: 
+  !! this helps minimise the discretisation error (in some cases).
+  !! In practice, this is something the code does not usually deal with.
+  !!
+  !! NB: subroutine name is not quite consistent with things like
+  !!     Add or Mult since the operands are completely distinct from the
+  !!     result.
   recursive subroutine conv_ConvGridConv_0d(gc,gca, gcb, reorder)
     type(grid_conv),  intent(inout) :: gc
     type(grid_conv),  intent(in)    :: gca, gcb
@@ -2685,8 +2691,8 @@ contains
   end subroutine conv_ConvGridConv_0d
 
   !--------------------------------------------------------------------
-  ! version for automatically doing convolution of two 2x2 arrays
-  ! with array multiplication in the usual fortran sense
+  !! version of ConvGridConv for automatically doing convolution of two 2x2 arrays
+  !! with array multiplication in the usual fortran sense
   subroutine conv_ConvGridConv_2dx2d(gc,gca, gcb)
     type(grid_conv),  intent(inout) :: gc(:,:)
     type(grid_conv),  intent(in)    :: gca(:,:), gcb(:,:)
