@@ -151,6 +151,13 @@ namespace hoppet {
             = 101; //< Replaces gq with that of 2404.09701
   constexpr int n3lo_splitting_approximation_up_to_2410_08089
             = 102; //< Additionally replaces gg with that of 2410.08089
+  // Alias for the above
+  const int n3lo_splitting_approximation_up_to_2310 = 100;
+  const int n3lo_splitting_approximation_up_to_2404 = 101; 
+  const int n3lo_splitting_approximation_up_to_2410 = 102;
+  
+  const int n3lo_splitting_approximation_up_to_2512 = 103; //< Adds the nf=6 piece to the non-singlet and
+                                                           //< adjusts the Pgq pieces just a bit (2512.10783)
   
   constexpr int nnlo_nfthreshold_exact = -12;
   constexpr int nnlo_nfthreshold_param = -11;

@@ -475,8 +475,10 @@ end module splitting_functions_n3lo_p
 module splitting_functions_n3lo_n
   use types; use consts_dp; use convolution_communicator
   use qcd; use dglap_choices; use warnings_and_errors
+  use hoppet_splitting_function_interfaces
   use xpgg3a; use xpgg3a_2410; use xpgq3a; use xpgq3a_2404; use&
-       & xpqg3a; use xpps3a; use xpns3s; use xpns3p; use xpns3m
+       & xpgq3a_2512; use xpqg3a; use xpps3a; use xpns3s; use xpns3p;&
+       & use xpns3m
   implicit none
   private
 
@@ -491,37 +493,18 @@ contains
   function sf_P3gg(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
-
-    if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2410_08089) then
-       select case(cc_piece)
-       case(cc_REAL,cc_REALVIRT)
-          res = P3GGA_2410(x, nf_int, n3lo_splitting_variant) + P3GGB_2410(x, nf_int)
-       end select
-       select case(cc_piece)
-       case(cc_VIRT,cc_REALVIRT)
-          res = res - P3GGB_2410(x, nf_int)
-       case(cc_DELTA)
-          res = P3GGC_2410(zero, nf_int, n3lo_splitting_variant)
-       end select
+    
+    if(n3lo_splitting_approximation .ge. n3lo_splitting_approximation_up_to_2410_08089) then
+       p3 = mvv_splitting_function_imod(P3GGA_2410, P3GGB_2410, P3GGC_2410, n3lo_splitting_variant, 0.5_dp**4)
     else
-       select case(cc_piece)
-       case(cc_REAL,cc_REALVIRT)
-          res = P3GGA(x, nf_int, n3lo_splitting_variant) + P3GGB(x, nf_int)
-       end select
-       select case(cc_piece)
-       case(cc_VIRT,cc_REALVIRT)
-          res = res - P3GGB(x, nf_int)
-       case(cc_DELTA)
-          res = P3GGC(zero, nf_int)
-       end select
+       p3 = mvv_splitting_function_imod(P3GGA, P3GGB, P3GGC, n3lo_splitting_variant, 0.5_dp**4)
     endif
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+
+    res = p3%f(y, cc_piece)
   end function sf_P3gg
 
   ! ..This is the (regular) pure-singlet splitting functions P_ps^(2).    
@@ -529,25 +512,14 @@ contains
   function sf_P3PS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = P3PSA(x, nf_int, n3lo_splitting_variant) + zero
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    p3 = mvv_splitting_function_imod(P3PSA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3PS
 
   !--------------------------------------------------------------------
@@ -555,129 +527,76 @@ contains
   function sf_P3qg2nf(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = P3QGA(x, nf_int, n3lo_splitting_variant)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    p3 = mvv_splitting_function_imod(P3QGA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3qg2nf
 
 
   function sf_P3gq(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2310_05744) then
-          res = P3GQA(x, nf_int, n3lo_splitting_variant)
-       else
-          res = P3GQA_2404(x, nf_int, n3lo_splitting_variant)
-       endif
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - zero
-    case(cc_DELTA)
-       res = zero
-    end select
-
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2310_05744) then
+       p3 = mvv_splitting_function_imod(P3GQA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    else if(n3lo_splitting_approximation .le. n3lo_splitting_approximation_up_to_2410) then
+       p3 = mvv_splitting_function_imod(P3GQA_2404, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    else
+       p3 = mvv_splitting_function_imod(P3GQA_2512, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    endif
+    
+    res = p3%f(y, cc_piece)
   end function sf_P3gq
 
   !------------------------- non-singlet pieces ------------------------
   function sf_P3NSPlus(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = P3NSPA(x, nf_int, n3lo_splitting_variant) + P3NSPB(x, nf_int, n3lo_splitting_variant)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - P3NSPB(x, nf_int, n3lo_splitting_variant)
-    case(cc_DELTA)
-       res = P3NSPC(zero, nf_int, n3lo_splitting_variant)
-    end select
+    p3 = mvv_splitting_function_imod(P3NSPA, P3NSPB, P3NSPC, n3lo_splitting_variant, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSPlus
 
 
   function sf_P3NSMinus(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = P3NSMA(x, nf_int, n3lo_splitting_variant) + P3NSMB(x, nf_int, n3lo_splitting_variant)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - P3NSMB(x, nf_int, n3lo_splitting_variant)
-    case(cc_DELTA)
-       res = P3NSMC(zero, nf_int, n3lo_splitting_variant)
-    end select
+    p3 = mvv_splitting_function_imod(P3NSMA, P3NSMB, P3NSMC, n3lo_splitting_variant, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSMinus
 
   !-- according to comments in Vogt code P_S = P_V - P_-
   function sf_P3NSS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-
+    type(mvv_splitting_function_imod)  :: p3
+    
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL,cc_REALVIRT)
-       res = P3NSSA(x, nf_int, n3lo_splitting_variant)
-    end select
-    select case(cc_piece)
-    case(cc_VIRT,cc_REALVIRT)
-       res = res - zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    p3 = mvv_splitting_function_imod(P3NSSA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSS
 
   !----------------------------------------------------------------

@@ -26,6 +26,7 @@
 #include <ome/AqqQNSEven.h>
 #include <ome/AqqQNSOdd.h>
 #include <ome/AQqPS.h>
+#include <ome/AQqPSs.h>
 #include <ome/AqqQPS.h>
 #include <ome/AqgQ.h>
 #include <ome/AgqQ.h>
@@ -35,6 +36,7 @@
 #include <ome/polAqqQNSEven.h>
 #include <ome/polAqqQNSOdd.h>
 #include <ome/polAQqPS.h>
+#include <ome/polAQqPSs.h>
 #include <ome/polAqqQPS.h>
 #include <ome/polAqgQ.h>
 #include <ome/polAgqQ.h>

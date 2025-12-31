@@ -52,18 +52,24 @@ contains
       code = n3lo_splitting_Nfiterr1
     case('n3lo_splitting_Nfiterr2')
       code = n3lo_splitting_Nfiterr2
-    case('n3lo_splitting_approximation_up_to_2310_05744')
-      code = n3lo_splitting_approximation_up_to_2310_05744
-    case('n3lo_splitting_approximation_up_to_2404_09701')
-      code = n3lo_splitting_approximation_up_to_2404_09701
-    case('n3lo_splitting_approximation_up_to_2410_08089')
-      code = n3lo_splitting_approximation_up_to_2410_08089
+    case('n3lo_splitting_approximation_up_to_2310')
+      code = n3lo_splitting_approximation_up_to_2310
+    case('n3lo_splitting_approximation_up_to_2404')
+      code = n3lo_splitting_approximation_up_to_2404
+    case('n3lo_splitting_approximation_up_to_2410')
+      code = n3lo_splitting_approximation_up_to_2410
+    case('n3lo_splitting_approximation_up_to_2512')
+      code = n3lo_splitting_approximation_up_to_2512
     case('nnlo_nfthreshold_exact')
       code = nnlo_nfthreshold_exact
     case('nnlo_nfthreshold_param')
       code = nnlo_nfthreshold_param
-    case('n3lo_nfthreshold_on')
-      code = n3lo_nfthreshold_on
+    case('n3lo_nfthreshold_exact_fortran')
+      code = n3lo_nfthreshold_exact_fortran
+    case('n3lo_nfthreshold_libOME_2510')
+      code = n3lo_nfthreshold_libOME_2510
+    case('n3lo_nfthreshold_libOME_2512')
+      code = n3lo_nfthreshold_libOME_2512
     case('n3lo_nfthreshold_off')
       code = n3lo_nfthreshold_off
     case('factscheme_MSbar')
@@ -92,7 +98,7 @@ contains
   !! fed to CodeOfName
   !!
   function code_val_opt(option, default, prefix) result(code)
-    use io_utils
+    use sub_defs_io
     character(len=*),           intent(in) :: option
     integer, optional,          intent(in) :: default
     character(len=*), optional, intent(in) :: prefix
@@ -183,19 +189,24 @@ contains
        nocc = nocc + 1; name = 'n3lo_splitting_Nfiterr2'
     end if
 
-    if (PrefixMatches('n3lo_splitting_approximation_up_to_2310_05744',prefix) &
-        .and. code == n3lo_splitting_approximation_up_to_2310_05744) then
-       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2310_05744'
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2310',prefix) &
+        .and. code == n3lo_splitting_approximation_up_to_2310) then
+       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2310'
     end if
 
-    if (PrefixMatches('n3lo_splitting_approximation_up_to_2404_09701',prefix) &
-        .and. code == n3lo_splitting_approximation_up_to_2404_09701) then
-       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2404_09701'
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2404',prefix) &
+        .and. code == n3lo_splitting_approximation_up_to_2404) then
+       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2404'
     end if
 
-    if (PrefixMatches('n3lo_splitting_approximation_up_to_2410_08089',prefix) &
-        .and. code == n3lo_splitting_approximation_up_to_2410_08089) then
-       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2410_08089'
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2410',prefix) &
+        .and. code == n3lo_splitting_approximation_up_to_2410) then
+       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2410'
+    end if
+
+    if (PrefixMatches('n3lo_splitting_approximation_up_to_2512',prefix) &
+        .and. code == n3lo_splitting_approximation_up_to_2512) then
+       nocc = nocc + 1; name = 'n3lo_splitting_approximation_up_to_2512'
     end if
 
     if (PrefixMatches('nnlo_nfthreshold_exact',prefix) &
@@ -208,9 +219,19 @@ contains
        nocc = nocc + 1; name = 'nnlo_nfthreshold_param'
     end if
 
-    if (PrefixMatches('n3lo_nfthreshold_on',prefix) &
-        .and. code == n3lo_nfthreshold_on) then
-       nocc = nocc + 1; name = 'n3lo_nfthreshold_on'
+    if (PrefixMatches('n3lo_nfthreshold_exact_fortran',prefix) &
+        .and. code == n3lo_nfthreshold_exact_fortran) then
+       nocc = nocc + 1; name = 'n3lo_nfthreshold_exact_fortran'
+    end if
+
+    if (PrefixMatches('n3lo_nfthreshold_libOME_2510',prefix) &
+        .and. code == n3lo_nfthreshold_libOME_2510) then
+       nocc = nocc + 1; name = 'n3lo_nfthreshold_libOME_2510'
+    end if
+
+    if (PrefixMatches('n3lo_nfthreshold_libOME_2512',prefix) &
+        .and. code == n3lo_nfthreshold_libOME_2512) then
+       nocc = nocc + 1; name = 'n3lo_nfthreshold_libOME_2512'
     end if
 
     if (PrefixMatches('n3lo_nfthreshold_off',prefix) &

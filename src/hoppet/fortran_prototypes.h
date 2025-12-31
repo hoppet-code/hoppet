@@ -169,6 +169,7 @@ DEFINE_RETURN_INT_MEMBER(mass_threshold_mat,nf_int)
 #define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
 MTM_REF(pshq      ) //< A^PS_Qq    Q+Qbar from singlet(nflight)
 MTM_REF(pshg      ) //< A^PS_Qg    Q+Qbar from gluon  (nflight)
+MTM_REF(nshv      ) //< A_{Qq}^{PS,s}, gives (h-hbar) from valence(nflight) [=sum_i (q_i-qbar_i)]   
 MTM_REF(nsqq_h    ) //< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
 MTM_REF(sgg_h     ) //< A^S_gg,Q   Δg(nfheavy) from g(nflight)
 MTM_REF(sgq_H     ) //< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)

@@ -1,4 +1,5 @@
       MODULE XCLNS3E
+      USE XCDIFF3PNEW
       CONTAINS
 *     
 * ..File: xclns3e.f    FL_NS
@@ -25,7 +26,7 @@
 *
 * ..There is only a regular piece. 
 *
-       FUNCTION XLNP3A (X, NF, CC)
+       FUNCTION XLNP3A (X, DL, NF, CC)
 *
        IMPLICIT REAL*8 (A - Z)
        COMPLEX*16 HC1, HC2, HC3, HC4, HC5
@@ -742,6 +743,16 @@ c    ,         + (1.-x)**2 * (-0.5*DL1-0.25*z2-0.5*z3+5./8.d0)
        XLNP3A = CLQQ3 + SP1 * 8.D0 * CF*(CA-2.*CF)**2
        endif
 *
+       RETURN
+       END FUNCTION
+
+       FUNCTION XLNM3A (X, DL, NF, CC)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF, CC
+
+       XLNM3A = XLNP3A(X, DL, NF, CC) - CLQ3DFP (X, DL, NF)
+
        RETURN
        END FUNCTION
 *

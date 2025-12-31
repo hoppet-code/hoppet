@@ -95,6 +95,14 @@ If you use the unpolarised operator matrix elements please cite:
   \textit{The Single-Mass Variable Flavor Number Scheme at Three-Loop Order},
   arXiv:2510.02175 [hep-ph].
 %-------------------------------------------------------------------------------
+%[10] AQqPSs
+\bibitem{Behring:2025avs}
+  A.~Behring, J.~Bl{\"u}mlein, A.~De Freitas, A.~von Manteuffel, C.~Schneider
+  and K.~Sch{\"o}nwald,
+  \textit{The heavy quark-antiquark asymmetry in the variable flavor number
+  scheme},
+  arXiv:2512.13508 [hep-ph].
+
 
 
 If you use the polarised operator matrix elements please cite:
@@ -172,3 +180,10 @@ If you use the polarised operator matrix elements please cite:
   \textit{The Single-Mass Variable Flavor Number Scheme at Three-Loop Order},
   arXiv:2510.02175 [hep-ph].
 %-------------------------------------------------------------------------------
+%[9] polAQqPSs
+\bibitem{Behring:2025avs}
+  A.~Behring, J.~Bl{\"u}mlein, A.~De Freitas, A.~von Manteuffel, C.~Schneider
+  and K.~Sch{\"o}nwald,
+  \textit{The heavy quark-antiquark asymmetry in the variable flavor number
+  scheme},
+  arXiv:2512.13508 [hep-ph].

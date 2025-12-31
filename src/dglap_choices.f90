@@ -25,29 +25,49 @@ module dglap_choices
   integer, parameter, public :: n3lo_splitting_Nfiterr1 =  1
   integer, parameter, public :: n3lo_splitting_Nfiterr2 =  2
   integer, public :: n3lo_splitting_variant = n3lo_splitting_Nfitav
-  ! As of 2024-04-16 there are several approximations available of the
+
+  ! As of 2024-04-16 there are several available approximations for the
   ! n3lo splitting functions. To maintain some backwards compatibility
   ! we have a switch below that allows the user to pick which set of
   ! approximations to use. The have progressively more moments.
-  integer, parameter, public :: n3lo_splitting_approximation_up_to_2310_05744 = 100 !< Uses non-singlet of 1610.07477+1707.08315,
+  ! 
+  ! Note: the "long" names below are split over two lines so that
+  ! they are not picked up by NameSelect.pl (which would lead to
+  ! ambiguities when mapping from number -> string as compared to the short names)
+  integer, parameter, &
+           public :: n3lo_splitting_approximation_up_to_2310_05744 = 100 !< Uses non-singlet of 1610.07477+1707.08315,
                                                                                     !< pure-singlet (qq) of 2302.07593,
                                                                                     !< qg of 2307.04158 and gq and gg of 2310.05744
-  integer, parameter, public :: n3lo_splitting_approximation_up_to_2404_09701 = 101 !< Replaces gq with that of 2404.09701
-  integer, parameter, public :: n3lo_splitting_approximation_up_to_2410_08089 = 102 !< Additionally replaces gg with that of 2410.08089
-  integer, public :: n3lo_splitting_approximation =  n3lo_splitting_approximation_up_to_2410_08089 
+  integer, parameter, &
+           public :: n3lo_splitting_approximation_up_to_2404_09701 = 101 !< Replaces gq with that of 2404.09701
+  integer, parameter, &
+           public :: n3lo_splitting_approximation_up_to_2410_08089 = 102 !< Additionally replaces gg with that of 2410.08089
+  ! Set up aliases that are slightly easier to remember, but keep the above for backwards compatibility.
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2310 = n3lo_splitting_approximation_up_to_2310_05744
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2404 = n3lo_splitting_approximation_up_to_2404_09701
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2410 = n3lo_splitting_approximation_up_to_2410_08089
+  integer, parameter, public :: n3lo_splitting_approximation_up_to_2512 = 103 !< Adds the nf=6 piece to the non-singlet and
+                                                                              !< adjusts the Pgq pieces just a bit (2512.10783)
+  integer, public :: n3lo_splitting_approximation =  n3lo_splitting_approximation_up_to_2512
 
   integer, parameter, public :: nnlo_nfthreshold_exact = -12
   integer, parameter, public :: nnlo_nfthreshold_param = -11
   integer, public :: nnlo_nfthreshold_variant = nnlo_nfthreshold_param
 
   integer, parameter, public :: n3lo_nfthreshold_exact_fortran = 2 !< exact except AQg
-  integer, parameter, public :: n3lo_nfthreshold_libOME = 1        !< C++ expansions, good to 2048*epsilon, https://gitlab.com/libome/libome 
+  integer, parameter, public :: n3lo_nfthreshold_libOME_2510 = 3   !< C++ expansions, no Q-Qbar, good to 2048*epsilon, https://gitlab.com/libome/libome 
+  integer, parameter, public :: n3lo_nfthreshold_libOME_2512 = 1   !< C++ expansions, with Q-Qbar (2512.13508), good to 2048*epsilon, https://gitlab.com/libome/libome 
   integer, parameter, public :: n3lo_nfthreshold_off = 0
-  integer, public :: n3lo_nfthreshold = n3lo_nfthreshold_libOME
+  integer, public :: n3lo_nfthreshold = n3lo_nfthreshold_libOME_2512
 
-  ! define n3lo_nfthreshold_on for compatibility with v2.0.x, split across two
-  ! lines to avoid being caught by NameSelect.pl
-  integer, parameter,&
+  ! define n3lo_nfthreshold_libOME, for compatibility with v.2.1.x
+  ! (but note, it now defaults to 2512 variant of hoppet 2.2.x), 
+  ! split across two lines to avoid being caught by NameSelect.pl
+  integer, parameter, &
+        & public :: n3lo_nfthreshold_libOME = n3lo_nfthreshold_libOME_2512
+
+  ! define n3lo_nfthreshold_on for compatibility with v2.0.x
+  integer, parameter, &
         & public :: n3lo_nfthreshold_on = n3lo_nfthreshold_libOME   
 
 

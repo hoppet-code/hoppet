@@ -35,8 +35,8 @@ module dglap_holders
      type(split_mat), pointer :: allP(:,   :)  
      
      type(split_mat), pointer :: P_LO, P_NLO, P_NNLO, P_N3LO ! pointers to allP(:,nf)
-     type(coeff_mat), pointer :: allC(:,:)
-     type(coeff_mat), pointer :: C2, C2_1, CL_1
+     type(coeff_mat), pointer :: allC(:,:)         ! use of these is deprecated as of hoppet v2.0
+     type(coeff_mat), pointer :: C2, C2_1, CL_1    ! use of these is deprecated as of hoppet v2.0
 
      !----------------------------------  nloop,nf
      type(mass_threshold_mat), pointer :: allMTM(:,:) => null()

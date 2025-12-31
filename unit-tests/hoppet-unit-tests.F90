@@ -68,6 +68,7 @@ contains
     ! and number of loops to initialise!
     nloop = int_val_opt("-nloop", 3)
     nnlo_nfthreshold_variant = nnlo_nfthreshold_exact
+    nnlo_splitting_variant = nnlo_splitting_exact
     call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,&
        &         order,factscheme_MSbar)
 

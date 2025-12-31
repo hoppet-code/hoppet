@@ -1,5 +1,6 @@
       MODULE XC3NS3P
       USE XC2NS3P
+      USE XCDIFF3PNEW
       CONTAINS
 *     
 * ..File: xc3ns3p.f    F3^NU+NU(BAR)
@@ -66,6 +67,18 @@
 *
        RETURN
        END FUNCTION
+
+* ---------------------------------------------------------------------
+*Non-singlet plus piece. In fact it should always be called with V=0 (to get minus piece plus difference).
+       FUNCTION C3NP3A (Y, DL, NF, V) 
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+       INTEGER V
+       
+       C3NP3A = C3NM3A(Y, DL, NF, V) + C3Q3DFP(Y, DL, NF)
+*
+       RETURN
+       END FUNCTION
 *
 * ---------------------------------------------------------------------
 *
@@ -116,6 +129,14 @@
      $      7.67505D0 * 5.D-1 * DL1**2 + 1.0083D0 * DL1 - 103.2521D0 -
      $      0.0081D0 )
 *
+       RETURN
+       END FUNCTION
+
+       FUNCTION C3NP3C (Y, NF)
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+
+       C3NP3C = C3NM3C(Y, NF) + C3Q3DFPC(Y, NF)
        RETURN
        END FUNCTION
 *

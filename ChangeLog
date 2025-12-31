@@ -141,6 +141,89 @@ __Files added__
 	also throws C++ exceptions if they've been enabled with wae_enable_cxx_exceptions()
 
 --------- end 2025-10-cxx-OO branch ---------
+2025-12-31 Gavin Salam  
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.0-dev0
+
+2025-12-30  Gavin Salam  (later)
+
+	* examples/f90/tabulation_example_n3lo.f90:
+	* examples/f90/tabulation_example_n3lo.default_output:
+	updated example and reference output to use n3lo_nfthreshold_libOME_2512
+
+2025-12-30 Gavin
+
+	* external-code/libome/:
+	updated to v1.1.0
+
+	* src/libome/hoppet_libome_cxx.cc:
+	* src/libome/hoppet_libome_fortran.f90:
+	- added interface for the new AQqPSs threshold function
+	  (for Q-Qbar).
+
+	* NEWS.md:
+	started drafting this to reflect the MTM/libOME and splitting function
+	updates
+
+	* unit-tests/hoppet-unit-tests.F90:
+	* unit-tests/test_libome.F90:
+	- now checks some values of AQqPSs function (against hard-coded values 
+	  from libOME test suite).
+	- checks compatibility between nf=4 v. nf=3 NNLO evolution effect
+	  on Q-Qbar, as compared to what comes out from LM dependence in libOME.
+	- hoppet-unit-tests now sets up exact NNLO splitting functions (to 
+	  get high accuracy on the AQqPSs tests)
+
+	* src/dglap_choices.f90:
+	- old (2.1.x) behaviour of n3lo_nfthreshold_libOME now obtained with
+  	  n3lo_nfthreshold_libOME_2510
+	- n3lo_nfthreshold_libOME_2512 option (new default) added to get
+	  Q-Qbar contribution from 2512.13508 and this is aliased to
+	  n3lo_nfthreshold_libOME = n3lo_nfthreshold_on, so users get the most sensible thing
+	- split some constants over two lines to avoid being picked up by NameSelect.pl
+	  (to avoid ambiguities when mapping from number -> string).
+
+	* src/dglap_objects.F90:
+	- added MTM%NShV, with Q-Qbar = MTM%NShV * valence(nf_light);
+	- set it either to zero or to AQqPSs from libOME (with a new arguments), depending on
+	  include_NShV flag in InitMTMLibOME and the order	
+
+
+	* benchmarking/prec_and_timing.f90:
+	* benchmarking/NameSelect.f90:
+	- Added -lhapdf-imem option, and -n3lo-approx to control which 
+	  n3lo splitting functions we get; double-checked that -n3lo-approx 2410
+	  reproduces previous results.
+	- Also updated NameSelect with latest constants.
+
+
+2025-12-15  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/splitting-functions:
+	* src/splitting-functions/xpgq3a_2512.f90: *** ADDED ***
+	* src/splitting_functions_n3lo.f90:
+	* src/dglap_objects.F90:
+	* src/dglap_choices.f90:
+	* src/hoppet.h:
+	Updated n3lo singlet splitting functions with nf=6 information
+	based on 2512.10783. The xpgq3a_2512.f90 splitting function also
+	has small adjustments for nf=3,4,5. Added option to use these new
+	splitting functions in dglap_choices
+	(n3lo_splitting_approximation_up_to_2512). Introduced short hand
+	aliases for the splitting function choices
+	(e.g. n3lo_splitting_approximation_up_to_2310_05744 is equivalent
+	to n3lo_splitting_approximation_up_to_2310). As a consequence the
+	code now works correctly with nf=6 as well (before we forced nf=5
+	in the n3lo splitting functions). Updated n3lo validation run to
+	use 2512 splitting functions.
+
 2025-12-09  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* CMakeLists.txt:

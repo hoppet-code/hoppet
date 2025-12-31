@@ -1,5 +1,6 @@
       MODULE XC2NS3E
       USE XC2NS3P
+      USE XCDIFF3PNEW
       CONTAINS
 *     
 * ..File: xc2ns3e.f    F2_NS
@@ -1655,6 +1656,16 @@ c    ,                         -1103./4800.d0)
        RETURN
        END
 
+       FUNCTION X2NM3A (X, DL, NF, CC)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF, CC
+
+       X2NM3A = X2NP3A (X, DL, NF, CC) - C2Q3DFP(X, DL, NF)
+
+       RETURN
+       END FUNCTION
+
       FUNCTION X2NP3A_large_x (Y, DL, NF)
       IMPLICIT REAL*8 (A - Z)
       INTEGER NF
@@ -1698,16 +1709,14 @@ c    ,                         -1103./4800.d0)
 *
 * ..The 'local' piece. Here the d_abc d_abc part does contribute.
 *
-       FUNCTION X2NP3C (Y, NF, CC)
+       FUNCTION X2NP3C (Y, NF)
 *
        IMPLICIT REAL*8 (A - Z)
-       INTEGER NF, NF2, CC
+       INTEGER NF, NF2
        PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0,
      ,             Z3 = 1.2020 56903 15959 42854 D0,
      ,             Z4 = 1.0823 23233 71113 81916 D0, 
      ,             Z5 = 1.0369 27755 14336 99263 D0 )
-       DIMENSION FL(6)
-       DATA FL  / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
 *
        COMMON / C2SOFTN3LO / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5
 *
@@ -1716,12 +1725,9 @@ c    ,                         -1103./4800.d0)
        CF  = 4./3.D0
        CA  = 3.D0
        NF2 = NF*NF
-       DABC2N = 5.D0/18.D0 * NF
-       FL11 = FL(NF)
 *
 * ...The coefficient of delta(1-x)
 *
-       if(CC.eq.1) then
        C3DELT =
      &     - 7255.D0/24.D0*cf**3
      &     - 1129.D0/2.D0*z2*cf**3
@@ -1774,13 +1780,45 @@ c    ,                         -1103./4800.d0)
        X2NP3C =   DL1**6 * C3A5/6.D0 + DL1**5 * C3A4/5.D0 
      ,          + DL1**4 * C3A3/4.D0 + DL1**3 * C3A2/3.D0 
      ,          + DL1**2 * C3A1/2.D0 + DL1 * C3A0 + C3DELT
-       else
-       X2NP3C = 64.D0*dabc2n*fl11
+*
+       RETURN
+       END
+
+       FUNCTION X2NM3C (Y, NF)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+
+       X2NM3C = X2NP3C (Y, NF) - c2q3dfPC (Y, NF)
+
+       RETURN
+       END FUNCTION
+
+       FUNCTION X2NP3C_fl11 (Y, NF)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+       PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0,
+     ,             Z3 = 1.2020 56903 15959 42854 D0,
+     ,             Z4 = 1.0823 23233 71113 81916 D0, 
+     ,             Z5 = 1.0369 27755 14336 99263 D0 )
+       DIMENSION FL(6)
+       DATA FL  / -1.d0, 0.5d0, 0.d0, 0.5d0, 0.2d0, 0.5d0 /
+*
+       COMMON / C2SOFTN3LO / C3A0, C3A1, C3A2, C3A3, C3A4, C3A5
+*
+* ...Colour factors
+*
+       DABC2N = 5.D0/18.D0 * NF
+       FL11 = FL(NF)
+*
+* ...The coefficient of delta(1-x)
+*
+       X2NP3C_fl11 = 64.D0*dabc2n*fl11
      &     + 160.D0*z2*dabc2n*fl11
      &     + 224.D0/3.D0*z3*dabc2n*fl11
      &     - 16.D0*z4*dabc2n*fl11
      &     - 1280.D0/3.D0*z5*dabc2n*fl11
-       endif
 *
        RETURN
        END

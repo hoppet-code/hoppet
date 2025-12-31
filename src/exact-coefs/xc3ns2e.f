@@ -1,4 +1,5 @@
       MODULE XC3NS2E
+      USE XCDIFF2E
       CONTAINS
 *     
 * ..File: xc3ns2e.f    F3  (NS, odd-N)
@@ -170,6 +171,16 @@ c     c3qq2 = nf*cf * (  - 116.D0/27.D0 - 302.D0/27.D0*x + 247.D
 *
        X3NM2A = C3QQ2 - C3QQ2L
 *
+       RETURN
+       END FUNCTION
+
+       FUNCTION X3NP2A (X, NF)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+
+       X3NP2A = X3NM2A (X, NF) + XC3DFF2(x)
+
        RETURN
        END FUNCTION
 *

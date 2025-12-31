@@ -580,10 +580,10 @@
 *
 * ..This is the 'local' piece due to the fl11 contribution.
 *
-       FUNCTION X2S3C (Y, NF)
+       FUNCTION X2S3C (Y, NF, IMOD)
 *
        IMPLICIT REAL*8 (A - Z)
-       INTEGER NF, NF2
+       INTEGER NF, NF2, IMOD
        PARAMETER ( Z2 = 1.6449 34066 84822 64365 D0,
      ,             Z3 = 1.2020 56903 15959 42854 D0,
      ,             Z4 = 1.0823 23233 71113 81916 D0, 

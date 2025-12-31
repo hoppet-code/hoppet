@@ -1039,6 +1039,7 @@ public:
   ///@{
   MTM_MEMBER(pshq      ) //< A^PS_Qq    Q+Qbar from singlet(nflight)
   MTM_MEMBER(pshg      ) //< A^PS_Qg    Q+Qbar from gluon  (nflight)
+  MTM_MEMBER(nshv      ) //< A_{Qq}^{PS,s}, gives (h-hbar) from valence(nflight) [=sum_i (q_i-qbar_i)]   
   MTM_MEMBER(nsqq_h    ) //< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
   MTM_MEMBER(sgg_h     ) //< A^S_gg,Q   Δg(nfheavy) from g(nflight)
   MTM_MEMBER(sgq_H     ) //< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)

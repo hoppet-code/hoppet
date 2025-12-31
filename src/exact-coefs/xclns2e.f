@@ -1,4 +1,5 @@
       MODULE XCLNS2E
+      USE XCDIFF2E
       CONTAINS
 *     
 * ..File: xclns2e.f    FL_NS  (even-N)
@@ -87,6 +88,16 @@
 * 
        XLNP2A = CLQQ2 
 *
+       RETURN
+       END FUNCTION
+
+       FUNCTION XLNM2A (X, NF)
+*
+       IMPLICIT REAL*8 (A - Z)
+       INTEGER NF
+
+       XLNM2A = XLNP2A (X, NF) - XCLDFF2 (X)
+
        RETURN
        END FUNCTION
 *

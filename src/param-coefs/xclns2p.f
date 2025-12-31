@@ -81,8 +81,9 @@
 *    in WvN's program, as it does not exist in the exact expressions.
 *    The value is fixed from the lowest integer moments.
 *
-       FUNCTION CLNN2C (Y)
+       FUNCTION CLNN2C (Y, NF)
        IMPLICIT REAL*8 (A-Z)
+       INTEGER NF
 *
        CLNN2C = -0.164D0
 *
@@ -96,9 +97,10 @@
 *    in WvN's program, as it does not exist in the exact expressions.  
 *    The value is fixed from the lowest integer moments.
 *
-       FUNCTION CLNC2C (Y)
+       FUNCTION CLNC2C (Y, NF)
        IMPLICIT REAL*8 (A-Z)
-*
+       INTEGER NF
+
        CLNC2C = -0.150D0
 *
        RETURN

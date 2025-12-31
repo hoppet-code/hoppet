@@ -7,6 +7,7 @@ module coefficient_functions_holder_exact
   use dglap_objects
   use coefficient_functions_holder 
   use coefficient_functions_holder_internal
+  use hoppet_splitting_function_interfaces
   implicit none
 
 contains
@@ -289,25 +290,14 @@ contains
     use xc3ns2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
     call set_c3soft(nf_int)
     
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X3NM2A(x, nf_int) + X3NS2B(x, nf_int)
-    case(cc_REALVIRT)
-       res = X3NM2A(x, nf_int)
-    case(cc_VIRT)
-       res = - X3NS2B(x, nf_int)
-    case(cc_DELTA)
-       res = X3NS2C(zero, nf_int)
-    end select
-    
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    c2 = mvv_coefficient_function(X3NM2A, X3NS2B, X3NS2C, 0.25_dp)
+
+    res = c2%f(y, cc_piece)
   end function cfNNLO_F3NS_minus_e
 
   !----------------------------------------------------------------------
@@ -318,25 +308,14 @@ contains
     use xcdiff2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
     call set_c3soft(nf_int)
     
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X3NM2A(x, nf_int) + XC3DFF2(x) + X3NS2B(x, nf_int)
-    case(cc_REALVIRT)
-       res = X3NM2A(x, nf_int) + XC3DFF2(x)
-    case(cc_VIRT)
-       res = - X3NS2B(x, nf_int)
-    case(cc_DELTA)
-       res = X3NS2C(zero, nf_int)
-    end select
+    c2 = mvv_coefficient_function(X3NP2A, X3NS2B, X3NS2C, 0.25_dp)
 
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_F3NS_plus_e
   
 
@@ -350,24 +329,14 @@ contains
     use xc2ns2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
     call set_c2soft(nf_int)
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2NP2A(x, nf_int) + X2NS2B(x, nf_int)
-    case(cc_REALVIRT)
-       res = X2NP2A(x, nf_int)
-    case(cc_VIRT)
-       res = - X2NS2B(x, nf_int)
-    case(cc_DELTA)
-       res = X2NS2C(zero, nf_int)
-    end select
+    
+    c2 = mvv_coefficient_function(X2NP2A, X2NS2B, X2NS2C, 0.25_dp)
 
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_F2NS_plus_e
 
   !----------------------------------------------------------------------
@@ -381,25 +350,14 @@ contains
     use xcdiff2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
     call set_c2soft(nf_int)
     
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2NP2A(x, nf_int) - XC2DFF2(x) + X2NS2B(x, nf_int)
-    case(cc_REALVIRT)
-       res = X2NP2A(x, nf_int) - XC2DFF2(x)
-    case(cc_VIRT)
-       res = - X2NS2B(x, nf_int)
-    case(cc_DELTA)
-       res = X2NS2C(zero, nf_int)
-    end select
+    c2 = mvv_coefficient_function(X2NM2A, X2NS2B, X2NS2C, 0.25_dp)
 
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_F2NS_minus_e
 
   !----------------------------------------------------------------------
@@ -410,24 +368,13 @@ contains
     use xc2sg2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
+    
+    c2 = mvv_coefficient_function(X2S2A, null(), null(), 0.25_dp)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2S2A(x, nf_int)
-    case(cc_REALVIRT)
-       res = X2S2A(x, nf_int)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
-
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_F2PS_e
 
   !----------------------------------------------------------------------
@@ -438,24 +385,13 @@ contains
     use xc2sg2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
+    
+    c2 = mvv_coefficient_function(X2G2A, null(), null(), 0.25_dp)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2G2A(x, nf_int)
-    case(cc_REALVIRT)
-       res = X2G2A(x, nf_int)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
-
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_F2G_e
 
   !----------------------------------------------------------------------
@@ -468,24 +404,13 @@ contains
     use xclns2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
+    
+    c2 = mvv_coefficient_function(XLNP2A, null(), null(), 0.25_dp)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLNP2A(x, nf_int)
-    case(cc_REALVIRT)
-       res = XLNP2A(x, nf_int)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
-
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_FLNS_plus_e
 
   !----------------------------------------------------------------------
@@ -499,24 +424,13 @@ contains
     use xcdiff2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
+    
+    c2 = mvv_coefficient_function(XLNM2A, null(), null(), 0.25_dp)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLNP2A(x, nf_int) - XCLDFF2(x)
-    case(cc_REALVIRT)
-       res = XLNP2A(x, nf_int) - XCLDFF2(x)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
-
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_FLNS_minus_e
 
   !----------------------------------------------------------------------
@@ -527,24 +441,13 @@ contains
     use xclsg2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
+    
+    c2 = mvv_coefficient_function(XLS2A, null(), null(), 0.25_dp)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLS2A(x, nf_int)
-    case(cc_REALVIRT)
-       res = XLS2A(x, nf_int)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
-
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_FLPS_e
 
   !----------------------------------------------------------------------
@@ -555,24 +458,13 @@ contains
     use xclsg2e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-    
-    x = exp(-y)
+    type(mvv_coefficient_function) :: c2
+
     res = zero
+    
+    c2 = mvv_coefficient_function(XLG2A, null(), null(), 0.25_dp)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLG2A(x, nf_int)
-    case(cc_REALVIRT)
-       res = XLG2A(x, nf_int)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
-
-    res = res * 0.25_dp ! since our convention is to multiply (as/2pi)^2, theirs is to multiply (as/4pi)^2
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c2%f(y, cc_piece)
   end function cfNNLO_FLG_e
 
 
@@ -590,25 +482,14 @@ contains
     use xc3ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo_exact) :: c3
     
-    x = exp(-y)
     res = zero
     CALL SET_C3SOFT_N3LO(nf_int)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X3NM3A(x, -y, nf_int, 1) + X3NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = X3NM3A(x, -y, nf_int, 1)
-    case(cc_VIRT)
-       res = - X3NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = X3NS3C(zero, -y, nf_int) 
-    end select
+    c3 = mvv_coefficient_function_n3lo_exact(X3NM3A, X3NS3B, X3NS3C, 1, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F3NS_val_e
 
   !----------------------------------------------------------------------
@@ -619,25 +500,14 @@ contains
     use xc3ns3p
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo_exact) :: c3
     
-    x = exp(-y)
     res = zero
     CALL SET_C3SOFT_N3LO(nf_int)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X3NM3A(x, -y, nf_int, 0) + X3NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = X3NM3A(x, -y, nf_int, 0)
-    case(cc_VIRT)
-       res = - X3NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = X3NS3C(zero, -y, nf_int) 
-    end select
-    
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    c3 = mvv_coefficient_function_n3lo_exact(X3NM3A, X3NS3B, X3NS3C, 0, 0.125_dp)
+
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F3NS_minus_e
 
   !----------------------------------------------------------------------
@@ -649,25 +519,15 @@ contains
     use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+        type(mvv_coefficient_function_n3lo_exact) :: c3
     
-    x = exp(-y)
     res = zero
-    CALL SET_C3SOFT_N3LO(nf_int)
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int) + X3NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = X3NM3A(x, -y, nf_int, 0) + C3Q3DFP(x, -y, nf_int)
-    case(cc_VIRT)
-       res = - X3NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = X3NS3C(zero, -y, nf_int) + c3q3dfPC (zero, nf_int)
-    end select
+    call SET_C3SOFT_N3LO(nf_int)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    c3 = mvv_coefficient_function_n3lo_exact(X3NP3A, X3NS3B, X3NP3C, 0, 0.125_dp)
+
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F3NS_plus_e
   
 
@@ -682,24 +542,15 @@ contains
     use xc2ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo) :: c3
     
-    x = exp(-y)
     res = zero
-    CALL SET_C2SOFT_N3LO(nf_int)
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2NP3A(x, -y, nf_int, 1) + X2NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = X2NP3A(x, -y, nf_int, 1)
-    case(cc_VIRT)
-       res = - X2NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = X2NP3C(zero, nf_int, 1)        
-    end select
-    
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+
+    call SET_C2SOFT_N3LO(nf_int)
+
+    c3 = mvv_coefficient_function_n3lo(X2NP3A, X2NS3B, X2NP3C, 1, 0.125_dp)
+
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F2NS_plus_e
   
   !----------------------------------------------------------------------
@@ -709,25 +560,15 @@ contains
     use xc2ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo) :: c3
     
-    x = exp(-y)
     res = zero
 
     call SET_C2SOFT_N3LO(nf_int)
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2NP3A(x, -y, nf_int, 0)
-    case(cc_REALVIRT)
-       res = X2NP3A(x, -y, nf_int, 0)
-    case(cc_VIRT)
-       res = res
-    case(cc_DELTA)
-       res = X2NP3C(zero, nf_int, 0) 
-    end select
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    c3 = mvv_coefficient_function_n3lo(X2NP3A, null(), X2NP3C_fl11, 0, 0.125_dp)
+
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F2NS_plus_fl11_e
 
   !----------------------------------------------------------------------
@@ -742,24 +583,15 @@ contains
     use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo) :: c3
     
-    x = exp(-y)
     res = zero
-    CALL SET_C2SOFT_N3LO(nf_int)
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int) + X2NS3B(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = X2NP3A(x, -y, nf_int, 1) - C2Q3DFP(x, -y, nf_int)
-    case(cc_VIRT)
-       res = - X2NS3B(x, -y, nf_int)
-    case(cc_DELTA)
-       res = X2NP3C(zero, nf_int, 1) - c2q3dfPC (zero, nf_int) 
-    end select
- 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+
+    call SET_C2SOFT_N3LO(nf_int)
+
+    c3 = mvv_coefficient_function_n3lo(X2NM3A, X2NS3B, X2NM3C, 1, 0.125_dp)
+
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F2NS_minus_e
 
 
@@ -770,25 +602,13 @@ contains
     use xc2ns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo) :: c3
     
-    x = exp(-y)
     res = zero
 
-    call SET_C2SOFT_N3LO(nf_int)
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2NP3A(x, -y, nf_int, 0)
-    case(cc_REALVIRT)
-       res = X2NP3A(x, -y, nf_int, 0)
-    case(cc_VIRT)
-       res = res
-    case(cc_DELTA)
-       res = X2NP3C(zero, nf_int, 0) 
-    end select
+    c3 = mvv_coefficient_function_n3lo(X2NP3A, null(), X2NP3C_fl11, 0, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F2NS_minus_fl11_e
 
   !----------------------------------------------------------------------
@@ -799,24 +619,13 @@ contains
     use xc2ps3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_imod) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2S3A(x, nf_int, 1)
-    case(cc_REALVIRT)
-       res = X2S3A(x, nf_int, 1)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    c3 = mvv_coefficient_function_imod(X2S3A, null(), null(), 1, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F2PS_e
   
   !----------------------------------------------------------------------
@@ -826,24 +635,13 @@ contains
     use xc2ps3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_imod) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2S3A(x, nf_int, 0)
-    case(cc_REALVIRT)
-       res = X2S3A(x, nf_int, 0)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = X2S3C (x, nf_int)
-    end select
+    c3 = mvv_coefficient_function_imod(X2S3A, null(), X2S3C, 0, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F2PS_fl11_e
 
   !----------------------------------------------------------------------
@@ -854,24 +652,13 @@ contains
     use xc2gl3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_imod) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2G3A(x, nf_int, 1)
-    case(cc_REALVIRT)
-       res = X2G3A(x, nf_int, 1)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    c3 = mvv_coefficient_function_imod(X2G3A, null(), null(), 1, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F2G_e
 
   !----------------------------------------------------------------------
@@ -881,24 +668,13 @@ contains
     use xc2gl3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_imod) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = X2G3A(x, nf_int, 0)
-    case(cc_REALVIRT)
-       res = X2G3A(x, nf_int, 0)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    c3 = mvv_coefficient_function_imod(X2G3A, null(), null(), 0, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_F2G_fl11_e
 
   !----------------------------------------------------------------------
@@ -911,23 +687,12 @@ contains
     use xclns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo_exact) :: c3
     
-    x = exp(-y)
     res = zero
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLNP3A(x, nf_int, 1)
-    case(cc_REALVIRT)
-       res = XLNP3A(x, nf_int, 1)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    c3 = mvv_coefficient_function_n3lo_exact(XLNP3A, null(), null(), 1, 0.125_dp)
+    res = c3%f(y, cc_piece)
   end function cfN3LO_FLNS_plus_e
   
   !----------------------------------------------------------------------
@@ -937,24 +702,13 @@ contains
     use xclns3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo_exact) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLNP3A(x, nf_int, 0)
-    case(cc_REALVIRT)
-       res = XLNP3A(x, nf_int, 0)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    c3 = mvv_coefficient_function_n3lo_exact(XLNP3A, null(), null(), 0, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_FLNS_plus_fl11_e
 
   !----------------------------------------------------------------------
@@ -965,54 +719,31 @@ contains
   ! multiplies.
   function cfN3LO_FLNS_minus_e(y) result(res)
     use xclns3e
-    use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo_exact) :: c3
     
-    x = exp(-y)
     res = zero
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLNP3A(x, nf_int, 1) - CLQ3DFP(x, -y, nf_int)
-    case(cc_REALVIRT)
-       res = XLNP3A(x, nf_int, 1) - CLQ3DFP(x, -y, nf_int)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero!
-    end select
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    c3 = mvv_coefficient_function_n3lo_exact(XLNM3A, null(), null(), 1, 0.125_dp)
+
+    res = c3%f(y, cc_piece)
   end function cfN3LO_FLNS_minus_e
   
   !----------------------------------------------------------------------
   ! This is the "minus" non-singlet coefficient function
   ! this is the fl11 part
   function cfN3LO_FLNS_minus_fl11_e(y) result(res)
-    use xclns3p
-    use xclns3e
-    use xcdiff3pnew
+    use xclns3p; use xclns3e; use xcdiff3pnew
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_n3lo) :: c3
     
-    x = exp(-y)
     res = zero
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLNP3A(x, nf_int, 0) 
-    case(cc_REALVIRT)
-       res = XLNP3A(x, nf_int, 0) 
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    c3 = mvv_coefficient_function_n3lo(XLNP3A, null(), null(), 0, 0.125_dp)
+
+    res = c3%f(y, cc_piece)
   end function cfN3LO_FLNS_minus_fl11_e
 
   !----------------------------------------------------------------------
@@ -1023,24 +754,13 @@ contains
     use xclps3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_imod) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLS3A(x, nf_int, 1)
-    case(cc_REALVIRT)
-       res = XLS3A(x, nf_int, 1)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    c3 = mvv_coefficient_function_imod(XLS3A, null(), null(), 1, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_FLPS_e
 
   !----------------------------------------------------------------------
@@ -1050,24 +770,13 @@ contains
     use xclps3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_imod) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLS3A(x, nf_int, 0)
-    case(cc_REALVIRT)
-       res = XLS3A(x, nf_int, 0)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    c3 = mvv_coefficient_function_imod(XLS3A, null(), null(), 0, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_FLPS_fl11_e
 
   !----------------------------------------------------------------------
@@ -1078,24 +787,13 @@ contains
     use xclgl3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_imod) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLG3A(x, nf_int, 1)
-    case(cc_REALVIRT)
-       res = XLG3A(x, nf_int, 1)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    c3 = mvv_coefficient_function_imod(XLG3A, null(), null(), 1, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_FLG_e
 
   !----------------------------------------------------------------------
@@ -1105,24 +803,13 @@ contains
     use xclgl3e
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_coefficient_function_imod) :: c3
     
-    x = exp(-y)
     res = zero
 
-    select case(cc_piece)
-    case(cc_REAL)
-       res = XLG3A(x, nf_int, 0)
-    case(cc_REALVIRT)
-       res = XLG3A(x, nf_int, 0)
-    case(cc_VIRT)
-       res = zero
-    case(cc_DELTA)
-       res = zero
-    end select
+    c3 = mvv_coefficient_function_imod(XLG3A, null(), null(), 0, 0.125_dp)
 
-    res = res * 0.125_dp ! since our convention is to multiply (as/2pi)^3, theirs is to multiply (as/4pi)^3
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = c3%f(y, cc_piece)
   end function cfN3LO_FLG_fl11_e
 
     

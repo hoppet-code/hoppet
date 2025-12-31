@@ -146,6 +146,29 @@ contains
      &      +   2285. * Y1*DL1       &
      &      +  19295. * Y1*DL1*DL1   &
      &      -  13719. * Y1*Y1*DL1*DL1
+      ELSE IF ( NF .EQ. 6 ) THEN
+         P3ggApp1 = P3gg01              &
+     &      - 476018. * Y1*DL*YM        &
+     &      - 469289. * Y1*YM           &
+     &      + 2049351. * Y1             &
+     &      - 1589000. * Y1*Y           &
+     &      + 3185549. * Y1*DL          &
+     &      + 1994521. * DL*DL          &
+     &      + 527723. * DL**3           &
+     &      - 340674. * Y1*DL1          &
+     &      +  22460. * Y1*DL1*DL1      &
+     &      - 394556. * DL*DL1             
+         P3ggApp2 = P3gg01              &
+     &      - 709863. *  Y1*DL*YM       &
+     &      - 2134347.* Y1*YM           &
+     &      + 1605315.* Y1*Y            &
+     &      + 360743. * Y1*(2.-Y*Y)     &
+     &      - 2426250.* Y1*DL           &
+     &      + 230631. * DL*DL           &
+     &      - 185804. * DL**3           &
+     &      - 7992.9 * Y1*DL1           &
+     &      + 15918. * Y1*DL1*DL1       &
+     &      - 32771. * Y1*Y1*DL1        
        ELSE
          WRITE(6,*) '  Error in function P3ggA: choice of nf   '
          CALL ABORT
@@ -169,9 +192,9 @@ contains
 ! ..The singular (soft) piece of P_gg^(3).
 !   Note: A4gluon is provided by a common block set in P3GGA
 !
-       FUNCTION P3GGB_2410 (Y, NF)
+       FUNCTION P3GGB_2410 (Y, NF, IMOD)
        IMPLICIT REAL*8 (A - Z)
-       INTEGER nf
+       INTEGER nf, IMOD
        COMMON / P3GSOFT / A4gluon
        !
        nf2 = nf*nf
