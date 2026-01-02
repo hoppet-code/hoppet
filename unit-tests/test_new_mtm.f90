@@ -12,30 +12,41 @@ contains
 
   subroutine test_new_mass_threshold_mat()
     use streamlined_interface
-    type(new_mass_threshold_mat) :: mtm_from_P, mtm_from_mtm_p
-    type(split_mat) :: tmp_split_mat
+    type(new_mass_threshold_mat) :: mtm_from_P, mtm_from_mtm_p, mtm_from_p_mtm
+    type(split_mat) :: tmp_split_mat, Pnf3, Pnf4a, Pnf4b
     type(grid_conv) :: test_conv
     integer :: nf_light, nloop, iflv, ix
-    real(dp), pointer :: P_q(:,:), mtm_q(:,:), q(:,:)
+    real(dp), pointer :: P_q(:,:), mtm_q(:,:), q(:,:), tmp(:,:)
     real(dp) :: xvals(3) = [0.01_dp, 0.1_dp, 0.4_dp], x
 
     if (.not. do_test("new_mtm")) return
     
+
     nf_light = 3
     nloop   = 4
     if (nloop > dh%nloop) call wae_error(&
           "test_new_mass_threshold_mat: nloop(="//trim(to_string(nloop))//&
           ") exceeds dh%nloop(="//trim(to_string(dh%nloop))//")")
 
+    ! set up some "dummy" splitting matrices that have all the structure we need
+    call InitSplitMat(Pnf4a, dh%allP(nloop,nf_light+1))
+    call AddWithCoeff(Pnf4a, dh%allP(nloop-1,nf_light+1), 0.36_dp)
+    call InitSplitMat(Pnf4b, dh%allP(nloop,nf_light+1))
+    call AddWithCoeff(Pnf4b, dh%allP(nloop-1,nf_light+1), pi)
+    call InitSplitMat(Pnf3 , dh%allP(nloop,nf_light))
+    call AddWithCoeff(Pnf3 , dh%allP(nloop-1,nf_light))
+
+
+
     call AllocPDF(grid, q)
     call AllocPDF(grid, P_q)
     call AllocPDF(grid, mtm_q)
 
     ! first check that mtm_from_P works the same as just multiplying by the corresponding P
-    call InitMTMFromSplitMat(mtm_from_P, dh%allP(nloop,nf_light+1))
+    call InitMTMFromSplitMat(mtm_from_P, Pnf4a)
     q = tables(0)%tab(:,:,0)
-    P_q   = dh%allP(nloop,nf_light+1) * q
-    mtm_q = mtm_from_P                * q
+    P_q   = Pnf4a      * q
+    mtm_q = mtm_from_P * q
 
     do iflv = -nf_light-1, nf_light+1
       call check_approx_eq_1d("new_mass_threshold_mat check matrix element iflv="//trim(to_string(iflv)), &
@@ -48,19 +59,46 @@ contains
     call DisableGridLocking()
 
     ! now check that we can multiply an mtm and a splitting matrix correctly
-    !q(:,2:6) = 0.0_dp
-    !q(:,-6:0) = 0.0_dp
     !call SetToConvolution(tmp_split_mat, dh%allP(nloop-1,nf_light), dh%allP(nloop,nf_light))
     !P_q = dh%allP(nloop-1,nf_light) * (dh%allP(nloop,nf_light) * q)
     !mtm_q = tmp_split_mat * q
 
-    call SetToConvolution(mtm_from_mtm_p, mtm_from_P, dh%allP(3,nf_light))
-    P_q = mtm_from_P * (dh%allP(3,nf_light) * q)
+    call SetToConvolution(mtm_from_mtm_p, mtm_from_P, Pnf3)
+    P_q = mtm_from_P * (Pnf3 * q)
     mtm_q = mtm_from_mtm_p * q
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat check matrix element iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mass_threshold_mat (mtm_from_P * Pnf3) element iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
+
+    ! and next, check that we convolute a splitting matrix and an mtm correctly
+    !q(:,0) = 0.0_dp
+    q(:,+2:+6:+1) = 0.0_dp
+    q(:,-2:-6:-1) = 0.0_dp
+    q(:,-1) = q(:,1)
+    !q(:,1) = q(:,-1)
+    !q(:,2) = 0.0*q(:,-1)
+    !q(:,3) = 0.0*q(:,-1)
+    !q(:,-3:-1) = q(:,3:1:-1)
+    !q(:,-6:0) = 0.0_dp
+    call SetToConvolution(mtm_from_p_mtm, Pnf4b, mtm_from_P)
+    write(0,*) mtm_from_p_mtm%PShq%subgc(1)%conv
+    P_q =  Pnf4b * (mtm_from_P * q)
+    !call AllocPDF(grid,tmp)
+    !p_Q = 
+    !tmp = mtm_from_P * q
+    !tmp(:,+4)=0.0_dp
+    !tmp(:,-4)=0.0_dp
+    !P_q = Pnf4b * tmp
+    mtm_q = mtm_from_p_mtm * q
+    !mtm_q(:,4) = 
+    do iflv = 0,0!-4,4,8!-nf_light, nf_light
+    !do iflv = -nf_light-1, nf_light+1
+      call check_approx_eq_1d("new_mass_threshold_mat check matrix element iflv="//trim(to_string(iflv)), &
+           answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-10_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
+    end do
+
+    !write(6,*) 
 
     ! restore grid locking
     call RestoreGridLocking()
@@ -70,6 +108,7 @@ contains
     call Delete(mtm_q)
 
     call Delete(mtm_from_P)
-    !call Delete(mtm_from_mtm_p)
+    call Delete(mtm_from_mtm_p)
+    call Delete(mtm_from_p_mtm)
   end subroutine test_new_mass_threshold_mat
 end module test_new_mtm

@@ -1531,7 +1531,7 @@ module dglap_objects_new_mtm
   public :: operator(*), operator(.conv.), Delete
 
   interface SetToConvolution
-    module procedure SetToConvolution_mtm_sm
+    module procedure SetToConvolution_mtm_sm, SetToConvolution_sm_mtm
   end interface
   public :: SetToConvolution
 
@@ -1626,14 +1626,7 @@ contains
     Pxq(:,-(nf_light+1)) = half * (h_plus - h_minus)
   end function ConvMTMNew
 
-  subroutine DelNewMTM(mtm)
-    type(new_mass_threshold_mat), intent(inout) :: mtm
-    call Delete(mtm%P_light)
-    call Delete(mtm%PShq)
-    call Delete(mtm%PShg)
-    call Delete(mtm%NShV)
-  end subroutine DelNewMTM
-
+  !-------------------------------------------------------
   !! Set MTM_A = MTM_B .conv. P_C, on condition that
   !! (MTM_B%P_light%nf_int == P_C%nf_int)
   subroutine SetToConvolution_mtm_sm(MTM_A, MTM_B, P_C)
@@ -1667,5 +1660,101 @@ contains
     call Delete(qg_gq)
     call Delete(gq_qg)
   end subroutine SetToConvolution_mtm_sm
+
+
+  !-------------------------------------------------------
+  !! Set MTM_A = P_B .conv. MTM_C, on condition that
+  !! (P_B%P_light%nf_int == MTM_C%P_light%nf_int+1)
+  subroutine SetToConvolution_sm_mtm(MTM_A, P_B, MTM_C)
+    use assertions
+    use hoppet_to_string
+    use convolution
+    type(new_mass_threshold_mat), intent(inout) :: MTM_A
+    type(split_mat),              intent(in)    :: P_B
+    type(new_mass_threshold_mat), intent(in)    :: MTM_C
+    !---------------------------------------------
+    type(grid_conv) :: tmp1, tmp2, P_B_PS_plus, P_B_PS_minus
+    integer  :: nf_light_int, nf_heavy_int
+    real(dp) :: nf_light_dp, nf_heavy_dp
+
+    nf_light_int = assert_eq(P_B%nf_int-1, MTM_C%P_light%nf_int,&
+                             "SetToConvolution_sm_mtm: nf_int mismatch between P_B and MTM_C")
+    nf_heavy_int = nf_light_int + 1
+    nf_light_dp = real(nf_light_int, dp)
+    nf_heavy_dp = real(nf_heavy_int, dp)
+
+    call cobj_InitSplitLinks(MTM_A%P_light)
+    MTM_A%P_light%nf_int = nf_light_int
+
+    ! set up the pure singlet terms
+    call InitGridConv(P_B_PS_plus, P_B%qq) 
+    call AddWithCoeff(P_B_PS_plus, P_B%NS_plus , -one)
+    call InitGridConv(P_B_PS_minus, P_B%NS_V) 
+    call AddWithCoeff(P_B_PS_minus, P_B%NS_minus , -one)
+
+    ! Get two non-singlet components
+    ! (here and below, see section 3 of 202-12-flavour-struct logbook)
+    call SetToConvolution(MTM_A%P_light%NS_plus , P_B%NS_plus , MTM_C%P_light%NS_plus )
+    call SetToConvolution(MTM_A%P_light%NS_minus, P_B%NS_minus, MTM_C%P_light%NS_minus)
+
+    ! now get the singlet-plus
+    call SetToConvolution(MTM_A%P_light%qq, P_B%NS_plus, MTM_C%P_light%qq) ! (P_+ * T_S+)
+    call InitGridConv(tmp1, MTM_C%P_light%qq)   ! (T_S+ 
+    call AddWithCoeff(tmp1, MTM_C%PShq)         !  + T_h+S+)
+    call SetToConvolution(tmp2, P_B_PS_plus, tmp1) ! (P_S+ * (T_S+ + T_h+S+))
+    call AddWithCoeff(MTM_A%P_light%qq, tmp2, nf_light_dp / nf_heavy_dp) ! nl/nh * (P_S+ * (T_S+ + T_h+S+))
+
+    ! and then the singlet-minus (i.e. valence)
+    call SetToConvolution(MTM_A%P_light%NS_V, P_B%NS_minus, MTM_C%P_light%NS_V) ! (P_- * T_S-)
+    call InitGridConv(tmp1, MTM_C%P_light%NS_V)   ! (T_S- 
+    call AddWithCoeff(tmp1, MTM_C%NShV)         !  + T_h-S-)
+    call SetToConvolution(tmp2, P_B_PS_minus, tmp1) ! (P_S- * (T_S- + T_h-S-))
+    call AddWithCoeff(MTM_A%P_light%NS_V, tmp2, nf_light_dp / nf_heavy_dp) ! nl/nh * (P_S- * (T_S- + T_h-S-))
+
+    ! the glue-glue piece
+    call SetToConvolution(MTM_A%P_light%gg, P_B%gg, MTM_C%P_light%gg)
+    call InitGridConv(tmp1, MTM_C%P_light%qg)
+    call AddWithCoeff(tmp1, MTM_C%PShg)
+    call SetToConvolution(tmp2, P_B%gq, tmp1)
+    call AddWithCoeff(MTM_A%P_light%gg, tmp2)
+
+    ! the gluon-quark
+    call SetToConvolution(MTM_A%P_light%gq, P_B%gg, MTM_C%P_light%gq)
+    call InitGridConv(tmp1, MTM_C%P_light%qq)
+    call AddWithCoeff(tmp1, MTM_C%PShq)
+    call SetToConvolution(tmp2, P_B%gq, tmp1)
+    call AddWithCoeff(MTM_A%P_light%gq, tmp2)
+
+    ! PShq piece
+    !call InitGridConv(P_B%qq%grid, MTM_A%PShq)
+    call SetToConvolution(MTM_A%PShq, P_B_PS_plus, MTM_C%P_light%qq)
+    call Multiply(MTM_A%PShq, one / nf_heavy_dp)
+    !call InitGridConv(tmp1, P_B%qq)
+    !call AddWithCoeff(tmp1, P_B_PS_plus, one / nf_heavy_dp)
+    !call SetToConvolution(tmp2, tmp1, MTM_C%PShq)
+    !call AddWithCoeff(MTM_A%PShq, tmp2)
+
+
+    call InitGridConv(tmp1%grid, MTM_A%P_light%qg)
+    ! call InitGridConv(tmp1%grid, MTM_A%P_light%gq)
+    ! call InitGridConv(tmp1%grid, MTM_A%P_light%gg)
+    call InitGridConv(tmp1%grid, MTM_A%PShq)
+    call InitGridConv(tmp1%grid, MTM_A%PShg)
+    call InitGridConv(tmp1%grid, MTM_A%NShV)
+
+    write(0,*) "MTM_A%PShq = ", MTM_A%PShq%subgc(1)%conv
+
+  end subroutine SetToConvolution_sm_mtm
+
+
+  !-------------------------------------------------------
+  subroutine DelNewMTM(mtm)
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    call Delete(mtm%P_light)
+    call Delete(mtm%PShq)
+    call Delete(mtm%PShg)
+    call Delete(mtm%NShV)
+  end subroutine DelNewMTM
+
 
 end module dglap_objects_new_mtm
