@@ -1530,8 +1530,15 @@ module dglap_objects_new_mtm
   end interface
   public :: operator(*), operator(.conv.), Delete
 
+  interface SetToConvolution
+    module procedure SetToConvolution_mtm_sm
+  end interface
+  public :: SetToConvolution
+
 contains
 
+  !! Initialise a mass threshold object from nf-1 -> nf from a splitting
+  !! matrix with nf flavours.
   subroutine InitMTMFromSplitMat(mtm, P)
     type(new_mass_threshold_mat), intent(out) :: mtm
     type(split_mat),              intent(in)  :: P
@@ -1590,6 +1597,7 @@ contains
 
   end subroutine InitMTMFromSplitMat
 
+
   function ConvMTMNew(mtm,q) result(Pxq)
     use pdf_representation
     type(new_mass_threshold_mat), intent(in) :: mtm
@@ -1625,5 +1633,39 @@ contains
     call Delete(mtm%PShg)
     call Delete(mtm%NShV)
   end subroutine DelNewMTM
+
+  !! Set MTM_A = MTM_B .conv. P_C, on condition that
+  !! (MTM_B%P_light%nf_int == P_C%nf_int)
+  subroutine SetToConvolution_mtm_sm(MTM_A, MTM_B, P_C)
+    use warnings_and_errors
+    use hoppet_to_string
+    type(new_mass_threshold_mat), intent(inout) :: MTM_A
+    type(new_mass_threshold_mat), intent(in)    :: MTM_B
+    type(split_mat),              intent(in)    :: P_C
+    !---------------------------------------------
+    type(grid_conv) :: qg_gq, gq_qg
+    integer :: nf_light_int
+
+    if (MTM_B%P_light%nf_int /= P_C%nf_int) &
+         call wae_error('SetToConvolution_mtm_sm: nf_int mismatch between MTM_B (P_light%nf_int='&
+                       // to_string(MTM_B%P_light%nf_int) // ') and P_C (nf_int=' &
+                       // to_string(P_C%nf_int) // ')')
+
+    call SetToConvolution(MTM_A%P_light, MTM_B%P_light, P_C)
+    call SetToConvolution(MTM_A%NShV, MTM_B%NShV, P_C%NS_V)
+
+    ! A%hq = B%hq * C%qq + B%hg * C%gq 
+    call SetToConvolution(MTM_A%PShq, MTM_B%PShq, P_C%qq)
+    call SetToConvolution(qg_gq, MTM_B%PShg, P_C%gq)
+    call AddWithCoeff    (MTM_A%PShq, qg_gq)
+
+    ! A%hg = B%hg * C%gg + B%hq * C%qg 
+    call SetToConvolution(MTM_A%PShg, MTM_B%PShg, P_C%gg)
+    call SetToConvolution(gq_qg, MTM_B%PShq, P_C%qg)
+    call AddWithCoeff    (MTM_A%PShg, gq_qg)
+
+    call Delete(qg_gq)
+    call Delete(gq_qg)
+  end subroutine SetToConvolution_mtm_sm
 
 end module dglap_objects_new_mtm
