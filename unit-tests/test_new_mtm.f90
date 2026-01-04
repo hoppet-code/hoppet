@@ -29,10 +29,13 @@ contains
           ") exceeds dh%nloop(="//trim(to_string(dh%nloop))//")")
 
     ! set up some "dummy" splitting matrices that have all the structure we need
+    ! Pnf4a (4-flavour) = P_4 + 0.36 * P_3
     call InitSplitMat(Pnf4a, dh%allP(nloop,nf_light+1))
     call AddWithCoeff(Pnf4a, dh%allP(nloop-1,nf_light+1), 0.36_dp)
+    ! Pnf4b (4-flavour) = P_4 + pi * P_3
     call InitSplitMat(Pnf4b, dh%allP(nloop,nf_light+1))
     call AddWithCoeff(Pnf4b, dh%allP(nloop-1,nf_light+1), pi)
+    ! Pnf3a (3-flavour) = P_4 + P_3 (3-flav)
     call InitSplitMat(Pnf3 , dh%allP(nloop,nf_light))
     call AddWithCoeff(Pnf3 , dh%allP(nloop-1,nf_light))
 
@@ -72,33 +75,37 @@ contains
     end do
 
     ! and next, check that we convolute a splitting matrix and an mtm correctly
-    !q(:,0) = 0.0_dp
-    q(:,+2:+6:+1) = 0.0_dp
-    q(:,-2:-6:-1) = 0.0_dp
-    q(:,-1) = q(:,1)
+    q(:,0) = 0.0_dp
+    !q(:,+2:+6:+1) = 0.0_dp
+    !q(:,-2:-6:-1) = 0.0_dp
+    !q(:, 1) =  q(:,1)
+    !q(:, 2) =  q(:,1)
+    !q(:,-3:-1) = q(:,1:3)
+
+    
     !q(:,1) = q(:,-1)
     !q(:,2) = 0.0*q(:,-1)
     !q(:,3) = 0.0*q(:,-1)
     !q(:,-3:-1) = q(:,3:1:-1)
     !q(:,-6:0) = 0.0_dp
     call SetToConvolution(mtm_from_p_mtm, Pnf4b, mtm_from_P)
-    write(0,*) mtm_from_p_mtm%PShq%subgc(1)%conv
-    P_q =  Pnf4b * (mtm_from_P * q)
-    !call AllocPDF(grid,tmp)
-    !p_Q = 
-    !tmp = mtm_from_P * q
+    !write(0,*) mtm_from_p_mtm%PShq%subgc(1)%conv
+    !P_q =  Pnf4b * (mtm_from_P * q)
+    call AllocPDF(grid,tmp)
+    tmp = mtm_from_P * q
     !tmp(:,+4)=0.0_dp
     !tmp(:,-4)=0.0_dp
-    !P_q = Pnf4b * tmp
+    P_q = Pnf4b * tmp
     mtm_q = mtm_from_p_mtm * q
     !mtm_q(:,4) = 
-    do iflv = 0,0!-4,4,8!-nf_light, nf_light
+    do iflv = -3,3!-4,4,8!-nf_light, nf_light
     !do iflv = -nf_light-1, nf_light+1
       call check_approx_eq_1d("new_mass_threshold_mat check matrix element iflv="//trim(to_string(iflv)), &
-           answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-10_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
+           answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
+           !answer=mtm_q(:,iflv)+mtm_q(:,-iflv), expected=P_q(:,iflv)+P_q(:,-iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
 
-    !write(6,*) 
+    !write(6,*) mtm_q(:,iflv)+mtm_q(:,-iflv)
 
     ! restore grid locking
     call RestoreGridLocking()

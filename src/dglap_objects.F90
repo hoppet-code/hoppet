@@ -1675,7 +1675,7 @@ contains
     !---------------------------------------------
     type(grid_conv) :: tmp1, tmp2, P_B_PS_plus, P_B_PS_minus
     integer  :: nf_light_int, nf_heavy_int
-    real(dp) :: nf_light_dp, nf_heavy_dp
+    real(dp) :: nf_light_dp , nf_heavy_dp
 
     nf_light_int = assert_eq(P_B%nf_int-1, MTM_C%P_light%nf_int,&
                              "SetToConvolution_sm_mtm: nf_int mismatch between P_B and MTM_C")
@@ -1687,8 +1687,8 @@ contains
     MTM_A%P_light%nf_int = nf_light_int
 
     ! set up the pure singlet terms
-    call InitGridConv(P_B_PS_plus, P_B%qq) 
-    call AddWithCoeff(P_B_PS_plus, P_B%NS_plus , -one)
+    call InitGridConv(P_B_PS_plus , P_B%qq) 
+    call AddWithCoeff(P_B_PS_plus , P_B%NS_plus , -one)
     call InitGridConv(P_B_PS_minus, P_B%NS_V) 
     call AddWithCoeff(P_B_PS_minus, P_B%NS_minus , -one)
 
@@ -1702,7 +1702,10 @@ contains
     call InitGridConv(tmp1, MTM_C%P_light%qq)   ! (T_S+ 
     call AddWithCoeff(tmp1, MTM_C%PShq)         !  + T_h+S+)
     call SetToConvolution(tmp2, P_B_PS_plus, tmp1) ! (P_S+ * (T_S+ + T_h+S+))
-    call AddWithCoeff(MTM_A%P_light%qq, tmp2, nf_light_dp / nf_heavy_dp) ! nl/nh * (P_S+ * (T_S+ + T_h+S+))
+    call AddWithCoeff(MTM_A%P_light%qq, tmp2, nf_light_dp / nf_heavy_dp) ! += nl/nh * (P_S+ * (T_S+ + T_h+S+))
+    call SetToConvolution(tmp2, P_B%qg, MTM_C%P_light%gq) ! (P_qg * T_gq)
+    call AddWithCoeff(MTM_A%P_light%qq, tmp2, nf_light_dp / nf_heavy_dp) ! += nl/nh * (P_qg * T_gq)
+
 
     ! and then the singlet-minus (i.e. valence)
     call SetToConvolution(MTM_A%P_light%NS_V, P_B%NS_minus, MTM_C%P_light%NS_V) ! (P_- * T_S-)
@@ -1726,23 +1729,30 @@ contains
     call AddWithCoeff(MTM_A%P_light%gq, tmp2)
 
     ! PShq piece
-    !call InitGridConv(P_B%qq%grid, MTM_A%PShq)
+    ! 1/nh (P_PS+ * T_{S+})
     call SetToConvolution(MTM_A%PShq, P_B_PS_plus, MTM_C%P_light%qq)
     call Multiply(MTM_A%PShq, one / nf_heavy_dp)
-    !call InitGridConv(tmp1, P_B%qq)
-    !call AddWithCoeff(tmp1, P_B_PS_plus, one / nf_heavy_dp)
-    !call SetToConvolution(tmp2, tmp1, MTM_C%PShq)
-    !call AddWithCoeff(MTM_A%PShq, tmp2)
+    ! += (P_+ + 1/nh P_{PS+}) * T_{h+S_+}
+    call InitGridConv(tmp1, P_B%qq)
+    call AddWithCoeff(tmp1, P_B_PS_plus, one / nf_heavy_dp)
+    call SetToConvolution(tmp2, tmp1, MTM_C%PShq)
+    call AddWithCoeff(MTM_A%PShq, tmp2)
+    ! += 1/nh (P_qg * T_gq)
+    call SetToConvolution(tmp2, P_B%qg, MTM_C%P_light%gq) ! (P_qg * T_gq)
+    call AddWithCoeff(MTM_A%PShq, tmp2, one / nf_heavy_dp) ! += 1/nh * (P_qg * T_gq)
+
+    ! NShV piece
+    !
 
 
     call InitGridConv(tmp1%grid, MTM_A%P_light%qg)
     ! call InitGridConv(tmp1%grid, MTM_A%P_light%gq)
     ! call InitGridConv(tmp1%grid, MTM_A%P_light%gg)
-    call InitGridConv(tmp1%grid, MTM_A%PShq)
+    ! call InitGridConv(tmp1%grid, MTM_A%PShq)
     call InitGridConv(tmp1%grid, MTM_A%PShg)
     call InitGridConv(tmp1%grid, MTM_A%NShV)
 
-    write(0,*) "MTM_A%PShq = ", MTM_A%PShq%subgc(1)%conv
+    !write(0,*) "MTM_A%PShq = ", MTM_A%PShq%subgc(1)%conv
 
   end subroutine SetToConvolution_sm_mtm
 
