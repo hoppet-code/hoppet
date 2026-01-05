@@ -1787,17 +1787,6 @@ contains
     ! T_{qg} += nl/nh * tmp2
     call AddWithCoeff(MTM_A%P_light%qg, tmp2, nf_light_dp/nf_heavy_dp)
 
-
-
-    !call InitGridConv(tmp1%grid, MTM_A%P_light%qg)
-    ! call InitGridConv(tmp1%grid, MTM_A%P_light%gq)
-    ! call InitGridConv(tmp1%grid, MTM_A%P_light%gg)
-    ! call InitGridConv(tmp1%grid, MTM_A%PShq)
-    !call InitGridConv(tmp1%grid, MTM_A%PShg)
-    !call InitGridConv(tmp1%grid, MTM_A%NShV)
-
-    !write(0,*) "MTM_A%PShq = ", MTM_A%PShq%subgc(1)%conv
-
   end subroutine SetToConvolution_sm_mtm
 
 
