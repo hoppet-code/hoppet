@@ -113,9 +113,8 @@ contains
     write(6,*) "tmp  :", real(tmp(0,-4:4))
     write(6,*) "P_q  :", real(P_q  (0,-4:4))
     write(6,*) "mtm_q:", real(mtm_q(0,-4:4))
-    !mtm_q(:,4) = 
-    do iflv = -4,4,8!-4,4,8!-nf_light, nf_light
-    !do iflv = -nf_light-1, nf_light+1
+    !do iflv = -4,4!-4,4,8!-nf_light, nf_light
+    do iflv = -nf_light-1, nf_light+1
       call check_approx_eq_1d("new_mass_threshold_mat check matrix element iflv="//trim(to_string(iflv)), &
            answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
            !answer=mtm_q(:,iflv)+mtm_q(:,-iflv), expected=P_q(:,iflv)+P_q(:,-iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)

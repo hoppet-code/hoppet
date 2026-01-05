@@ -1774,9 +1774,22 @@ contains
     call AddWithCoeff(tmp1,tmp2)
     call AddWithCoeff(MTM_A%PShg, tmp1, one/nf_heavy_dp)
     
+    ! qg piece
+    ! T_{qg} = P_+ * T_{S_+g}
+    call SetToConvolution(MTM_A%P_light%qg, P_B%NS_plus, MTM_C%P_light%qg)
+    ! tmp2 = P_{PS+} * (T_{S_+g} + T_{h+g})
+    call InitGridConv(tmp1, MTM_C%PShg)
+    call AddWithCoeff(tmp1, MTM_C%P_light%qg)
+    call SetToConvolution(tmp2, P_B_PS_plus, tmp1)
+    ! tmp2 += P_{S_+g} * T_{gg}
+    call SetToConvolution(tmp1, P_B%qg, MTM_C%P_light%gg)
+    call AddWithCoeff(tmp2,tmp1)
+    ! T_{qg} += nl/nh * tmp2
+    call AddWithCoeff(MTM_A%P_light%qg, tmp2, nf_light_dp/nf_heavy_dp)
 
 
-    call InitGridConv(tmp1%grid, MTM_A%P_light%qg)
+
+    !call InitGridConv(tmp1%grid, MTM_A%P_light%qg)
     ! call InitGridConv(tmp1%grid, MTM_A%P_light%gq)
     ! call InitGridConv(tmp1%grid, MTM_A%P_light%gg)
     ! call InitGridConv(tmp1%grid, MTM_A%PShq)
