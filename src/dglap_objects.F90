@@ -1517,7 +1517,11 @@ module dglap_objects_new_mtm
   end type new_mass_threshold_mat
 
   public :: new_mass_threshold_mat
-  public :: InitMTMFromSplitMat
+
+  interface InitMTM
+    module procedure InitMTM_from_split_mat, InitMTM_from_NewMTM
+  end interface
+  public :: InitMTM
 
   interface operator(*)
     module procedure ConvMTMNew
@@ -1531,7 +1535,10 @@ module dglap_objects_new_mtm
   interface Multiply
     module procedure Multiply_mtm
   end interface
-  public :: operator(*), operator(.conv.), Delete, Multiply
+  interface AddWithCoeff
+    module procedure AddWithCoeff_mtm_mtm, AddWithCoeff_mtm_splitmat
+  end interface
+  public :: operator(*), operator(.conv.), Delete, Multiply, AddWithCoeff
 
   interface SetToConvolution
     module procedure SetToConvolution_mtm_sm, SetToConvolution_sm_mtm
@@ -1542,7 +1549,7 @@ contains
 
   !! Initialise a mass threshold object from nf-1 -> nf from a splitting
   !! matrix with nf flavours.
-  subroutine InitMTMFromSplitMat(mtm, P)
+  subroutine InitMTM_from_split_mat(mtm, P)
     type(new_mass_threshold_mat), intent(out) :: mtm
     type(split_mat),              intent(in)  :: P
     !---------------------------------------------
@@ -1598,8 +1605,18 @@ contains
     call Delete(ps_plus )
     call Delete(ps_minus)
 
-  end subroutine InitMTMFromSplitMat
+  end subroutine InitMTM_from_split_mat
 
+  !! Initialise an mtm from another one
+  subroutine InitMTM_from_NewMTM(mtm, mtm_in)
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    type(new_mass_threshold_mat), intent(in)  :: mtm_in
+
+    call InitSplitMat(mtm%P_light, mtm_in%P_light)
+    call InitGridConv(mtm%PShg, mtm_in%PShg)
+    call InitGridConv(mtm%PShq, mtm_in%PShq)
+    call InitGridConv(mtm%NShV, mtm_in%NShV)
+  end subroutine InitMTM_from_NewMTM
 
   subroutine Multiply_mtm(mtm, fact)
     type(new_mass_threshold_mat), intent(inout) :: mtm
@@ -1609,6 +1626,43 @@ contains
     call Multiply(mtm%PShq, fact)
     call Multiply(mtm%NShV, fact)
   end subroutine Multiply_mtm
+
+  !! apply mtm += factor * mtm_to_add (factor is optional)
+  subroutine AddWithCoeff_mtm_mtm(mtm, mtm_to_add, factor)
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    type(new_mass_threshold_mat), intent(in)    :: mtm_to_add
+    real(dp),                     intent(in), optional :: factor
+
+    call AddWithCoeff(mtm%P_light, mtm_to_add%P_light, factor)
+    call AddWithCoeff(mtm%PShg, mtm_to_add%PShg, factor)
+    call AddWithCoeff(mtm%PShq, mtm_to_add%PShq, factor)
+    call AddWithCoeff(mtm%NShV, mtm_to_add%NShV, factor)
+  end subroutine AddWithCoeff_mtm_mtm
+
+  !! apply mtm += factor * sm_to_add (factor is optional)
+  !!
+  !! only works if sm_to_add has either nf_int = mtm%P_light%nf_int
+  !! or nf_int = mtm%P_light%nf_int + 1
+  subroutine AddWithCoeff_mtm_splitmat(mtm, sm_to_add, factor)
+    use warnings_and_errors
+    use hoppet_to_string, only : to_string
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    type(split_mat),              intent(in)    :: sm_to_add
+    real(dp),                     intent(in), optional :: factor
+    type(new_mass_threshold_mat) :: mtm_to_add
+
+    if (sm_to_add%nf_int == mtm%P_light%nf_int) then
+      call AddWithCoeff(mtm%P_light, sm_to_add, factor)
+    else if (sm_to_add%nf_int == mtm%P_light%nf_int+1) then
+      call InitMTM(mtm_to_add, sm_to_add)
+      call AddWithCoeff(mtm, mtm_to_add, factor)
+      call Delete(mtm_to_add)
+    else
+      call wae_error('AddWithCoeff_mtm_splitmat: nf_int mismatch between mtm (nf_light='&
+                     // to_string(mtm%P_light%nf_int) //&
+                      ') and split_mat to add (nf_int=' // to_string(sm_to_add%nf_int) // ')')
+    end if
+  end subroutine AddWithCoeff_mtm_splitmat
 
   function ConvMTMNew(mtm,q) result(Pxq)
     use pdf_representation
@@ -1787,6 +1841,10 @@ contains
     ! T_{qg} += nl/nh * tmp2
     call AddWithCoeff(MTM_A%P_light%qg, tmp2, nf_light_dp/nf_heavy_dp)
 
+    call Delete(tmp1)
+    call Delete(tmp2)
+    call Delete(P_B_PS_plus)
+    call Delete(P_B_PS_minus)
   end subroutine SetToConvolution_sm_mtm
 
 
