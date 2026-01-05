@@ -1528,7 +1528,10 @@ module dglap_objects_new_mtm
   interface Delete
     module procedure DelNewMTM
   end interface
-  public :: operator(*), operator(.conv.), Delete
+  interface Multiply
+    module procedure Multiply_mtm
+  end interface
+  public :: operator(*), operator(.conv.), Delete, Multiply
 
   interface SetToConvolution
     module procedure SetToConvolution_mtm_sm, SetToConvolution_sm_mtm
@@ -1597,6 +1600,15 @@ contains
 
   end subroutine InitMTMFromSplitMat
 
+
+  subroutine Multiply_mtm(mtm, fact)
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    real(dp),                     intent(in)    :: fact
+    call Multiply(mtm%P_light, fact)
+    call Multiply(mtm%PShg, fact)
+    call Multiply(mtm%PShq, fact)
+    call Multiply(mtm%NShV, fact)
+  end subroutine Multiply_mtm
 
   function ConvMTMNew(mtm,q) result(Pxq)
     use pdf_representation
@@ -1733,7 +1745,7 @@ contains
     call SetToConvolution(MTM_A%PShq, P_B_PS_plus, MTM_C%P_light%qq)
     call Multiply(MTM_A%PShq, one / nf_heavy_dp)
     ! += (P_+ + 1/nh P_{PS+}) * T_{h+S_+}
-    call InitGridConv(tmp1, P_B%qq)
+    call InitGridConv(tmp1, P_B%NS_plus)
     call AddWithCoeff(tmp1, P_B_PS_plus, one / nf_heavy_dp)
     call SetToConvolution(tmp2, tmp1, MTM_C%PShq)
     call AddWithCoeff(MTM_A%PShq, tmp2)
