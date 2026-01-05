@@ -1754,7 +1754,14 @@ contains
     call AddWithCoeff(MTM_A%PShq, tmp2, one / nf_heavy_dp) ! += 1/nh * (P_qg * T_gq)
 
     ! NShV piece
-    !
+    ! 1/nh (P_PS- * T_{S-})
+    call SetToConvolution(MTM_A%NShV, P_B_PS_minus, MTM_C%P_light%NS_V)
+    call Multiply(MTM_A%NShV, one / nf_heavy_dp)
+    ! += (P_+ + 1/nh P_{PS-}) * T_{h-S_-}
+    call InitGridConv(tmp1, P_B%NS_minus)
+    call AddWithCoeff(tmp1, P_B_PS_minus, one / nf_heavy_dp)
+    call SetToConvolution(tmp2, tmp1, MTM_C%NShV)
+    call AddWithCoeff(MTM_A%NShV, tmp2)
 
 
     call InitGridConv(tmp1%grid, MTM_A%P_light%qg)
@@ -1762,7 +1769,7 @@ contains
     ! call InitGridConv(tmp1%grid, MTM_A%P_light%gg)
     ! call InitGridConv(tmp1%grid, MTM_A%PShq)
     call InitGridConv(tmp1%grid, MTM_A%PShg)
-    call InitGridConv(tmp1%grid, MTM_A%NShV)
+    !call InitGridConv(tmp1%grid, MTM_A%NShV)
 
     !write(0,*) "MTM_A%PShq = ", MTM_A%PShq%subgc(1)%conv
 
