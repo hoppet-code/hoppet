@@ -2,6 +2,16 @@
 
 2025-01-06 Gavin
 
+	* CMakeLists.txt:
+	* benchmarking/prec_and_timing.f90:
+	* benchmarking/prec_and_timing.default_output/*.default_output:
+	* benchmarking/prec_and_timing.default_output/*.out:
+	- re-generated default outputs, making sure that they are the same 
+	  as before + added .out files for each (e.g. with command-line);
+	- also added output with a new `-msbar-masses` flag to prec_and_timing.f90
+	  and generated output with this, both with and without pre-evolution,
+	  so that we have some MSbar references.	
+
 	* src/dglap_objects.F90:
 	* unit-tests/test_new_mtm.f90:
 	- added GetDerivedMTMProbes(...) and SetDerivedMTM() to handle

@@ -19,6 +19,8 @@ runs=(\
   benchmarking/prec_and_timing:-dy:0.2:-olnlnQ:3:-yinterp-order:3 \
   benchmarking/prec_and_timing:-dy:0.2:-olnlnQ:4:-yinterp-order:4 \
   benchmarking/prec_and_timing:-dy:0.1:-exact-nnlo-th:-exact-nnlo-sp \
+  benchmarking/prec_and_timing:-dy:0.1:-msbar-masses \
+  benchmarking/prec_and_timing:-dy:0.1:-nopreev:-msbar-masses \
 )
 
 dummy=yes
@@ -38,7 +40,7 @@ reset="\033[0m"
 
 scriptdir=$(dirname "$(realpath "$0")")
 echo "Output files will go to $scriptdir"
-extraargs="-o /dev/null -output-benchmark"
+extraargs="-output -output-benchmark"
 
 for run in "${runs[@]}"
 do 
@@ -46,13 +48,16 @@ do
     echo -e "${blue}${bold}Preparing $run${reset}"
     testcmd=$(echo "$run" | sed -e 's/:/ /g')
     testcmd="${testcmd} ${extraargs}"
-    outfile=$(echo "$run" | sed -e 's/:/_/g' -e s'|benchmarking/||').default_output
+    outbase=$(echo "$run" | sed -e 's/:/_/g' -e s'|benchmarking/||')
+    outfile=$outbase.default_output
+    ofile=$outbase.out
     echo -e "Command is: ${bold}$testcmd${reset}"
 
     if [[ "$dummy" == "no" ]]; then
         echo -e "Output saved to: $scriptdir/$outfile"
         echo "=============================================================\n"
-        $testcmd | tee $scriptdir/$outfile 
+        echo "Default output to be sent to $scriptdir/$ofile"
+        $testcmd -o $scriptdir/$ofile | tee $scriptdir/$outfile 
     else
         echo -e "${bold}Dry-run${reset}, output would be saved to: $scriptdir/$outfile"
         echo "=============================================================\n"

@@ -1,0 +1,40 @@
+# benchmarking/prec_and_timing -dy 0.2 -olnlnQ 2 -yinterp-order 2 -output -output-benchmark -o /Users/gsalam/work/hoppet/branches/2025-12-new-mtm/benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.2_-olnlnQ_2_-yinterp-order_2.out
+# Grid properties:
+# dymax =   0.200000
+# dnsty =         27         9         3         1
+# ymax  =   0.200000  0.511111  2.000000 12.000000
+# order =         -6        -6        -6        -6
+# eps   =   1.00E-07  1.00E-07  1.00E-07  1.00E-07
+# Evolution: du =    0.10000,   coupling dt =    0.20000
+# Tabulation: dlnlnQ =    0.05000, olnlnQ =     2
+# nnlo_spltting = nnlo_splitting_param
+# n3lo_spltting = N/A
+# n3lo_spltting_approx = N/A
+# Stamped by benchmarking/prec_and_timing on  6/01/2026 at 14:36:42
+# host: ascpd210
+# hoppet compiled git info: dd8e1ce73e0ec1aaa90f0606ad977940de20ad91 , 2026-01-06 13:22:41 +0000, status:  M CMakeLists.txt; M benchmarking/prec_and_timing.default_output/gen-default-output.sh; M benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.1_-exact-nnlo-th_-exact-nnlo-sp.default_output; M benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.2_-olnlnQ_2_-yinterp-order_2.default_output; M benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.2_-olnlnQ_3_-yinterp-order_3.default_output; M benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.2_-olnlnQ_4_-yinterp-order_4.default_output; M benchmarking/prec_and_timing.f90
+# Q = Qmax - j*(Qmax-Qinit)/nn
+# y=ln1/x Q xf(x,0:4)
+
+
+# Q = 4.0_dp + j*5.0_dp/nn
+# y=ln1/x Q xf(x,0:4)
+
+
+# Q = Qmax*(1-j*0.2_dp/nn)
+# y=ln1/x Q xf(x,0:4)
+
+
+# Q = sqrt(Qinit*Qmax)*(1+j*0.2_dp/nn)
+# y=ln1/x Q xf(x,0:4)
+# Init Timings (init, preevln, evln, interp) =    0.08923100000   0.00458800000   0.00102000000   0.00000006032 s, nrep=      1, nrep_interp=   1000
+# Initialisation time =    0.08923 s
+# Pre-evolution time =    0.00459 s
+# Evolution time =    0.00102 s, nrep =       1
+# Interpolation time =   60.31746 ns, nrep_interp =   1000
+# Evaluation (all flav)  58.8 ns
+# Evaluation (all flav,o2)  58.4 ns
+# Evaluation (all flav,o3)  69.9 ns
+# Evaluation (all flav,o4)  87.0 ns
+# Evaluation (one flav)  27.8 ns
+# Evaluation (1fl,ord2)  25.3 ns

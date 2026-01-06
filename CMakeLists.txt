@@ -520,6 +520,8 @@ if (HOPPET_BUILD_BENCHMARK)
       benchmarking/prec_and_timing:-dy:0.2:-olnlnQ:3:-yinterp-order:3
       benchmarking/prec_and_timing:-dy:0.2:-olnlnQ:4:-yinterp-order:4
       benchmarking/prec_and_timing:-dy:0.1:-exact-nnlo-th:-exact-nnlo-sp
+      benchmarking/prec_and_timing:-dy:0.1:-msbar-masses
+      benchmarking/prec_and_timing:-dy:0.1:-nopreev:-msbar-masses
     )
     foreach (test ${prec_and_timing_tests})
       set(testName ${test})
