@@ -15,8 +15,8 @@ contains
     type(new_mass_threshold_mat) :: mtm_from_P, mtm_from_mtm_p, mtm_from_p_mtm, mtm_tmp
     type(split_mat) :: tmp_split_mat, Pnf3, Pnf4a, Pnf4b
     type(grid_conv) :: test_conv
-    integer :: nf_light, nloop, iflv, ix
-    real(dp), pointer :: P_q(:,:), mtm_q(:,:), q(:,:), tmp(:,:)
+    integer :: nf_light, nloop, iflv, ix, iprobe
+    real(dp), pointer :: P_q(:,:), mtm_q(:,:), q(:,:), tmp(:,:), probes(:,:,:)
     real(dp) :: xvals(3) = [0.01_dp, 0.1_dp, 0.4_dp], x
     !type(grid_conv) :: delta !! for diagnostics
 
@@ -59,20 +59,20 @@ contains
     ! check multiplication
     call InitMTM(mtm_tmp, mtm_from_P)
     call Multiply(mtm_tmp, two)
-    P_q   = two* (mtm_from_p * q)
+    P_q   = two * (mtm_from_p * q)
     mtm_q = mtm_tmp * q
     do iflv = -nf_light-1, nf_light+1
       call check_approx_eq_1d("new_mass_threshold_mat (multiply) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
-    ! check addition of MTM
-    call InitMTM(mtm_tmp, mtm_from_P)
-    call AddWithCoeff(mtm_tmp, mtm_from_P, 0.5_dp)
+    ! check initialisation to zero & addition of MTM
+    call InitMTM(grid, mtm_tmp, nf_light)
+    call AddWithCoeff(mtm_tmp, mtm_from_P, 1.5_dp)
     P_q   = 1.5_dp * (mtm_from_p * q)
     mtm_q = mtm_tmp * q
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (add mtm) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mass_threshold_mat (zero & add mtm) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -133,10 +133,48 @@ contains
       call check_approx_eq_1d("new_mass_threshold_mat (Pnf4b * mtm_from_P) iflv="//trim(to_string(iflv)), &
            answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
-
-
     ! restore grid locking
     call RestoreGridLocking()
+
+    ! we'll want to test derived probes with MTMs, but first do it with
+    ! splitting matrices to make sure the probes are correct
+    call GetDerivedSplitMatProbes(dh%grid, nf_light, probes)
+    do iprobe = 1, size(probes,dim=3)
+      call CopyEvlnPdfToHuman(nf_light, probes(:,:,iprobe), tmp)
+      tmp = Pnf3 * (Pnf3 * tmp)
+      call CopyHumanPdfToEvln(nf_light, tmp, probes(:,:,iprobe))
+    end do
+    call InitSplitMat(grid, tmp_split_mat, nf_light)
+    call SetDerivedSplitMat(tmp_split_mat, probes)
+    ! and then test it
+    call DisableGridLocking()
+    P_q = Pnf3 * (Pnf3 * q)
+    tmp = tmp_split_mat * q
+    call RestoreGridLocking()
+    do iflv = -nf_light-1, nf_light+1
+      call check_approx_eq_1d("new_mass_threshold_mat (SetDerivedSplitMat) iflv="//trim(to_string(iflv)), &
+           answer=tmp(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
+    end do
+
+
+    ! now test SetDerivedMTM
+    call GetDerivedMTMProbes(dh%grid, nf_light, probes)
+    do iprobe = 1, size(probes,dim=3)
+      probes(:,:,iprobe) = Pnf4b * (mtm_from_P * probes(:,:,iprobe))
+      !probes(:,:,iprobe) = Pnf3 * probes(:,:,iprobe)
+    end do
+    call InitMTM(grid, mtm_tmp, nf_light)
+    call SetDerivedMTM(mtm_tmp, probes)
+    call DisableGridLocking()
+    !P_q = Pnf3 * q
+    P_q = Pnf4b * (mtm_from_P * q)
+    mtm_q = mtm_tmp * q
+    call RestoreGridLocking()
+    do iflv = -nf_light-1, nf_light+1
+      call check_approx_eq_1d("new_mass_threshold_mat (SetDerivedMTM) iflv="//trim(to_string(iflv)), &
+           answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
+    end do
+
 
     call Delete(q)
     call Delete(P_q)
@@ -151,6 +189,7 @@ contains
     call Delete(Pnf3)
     call Delete(Pnf4a)
     call Delete(Pnf4b)
+    call Delete(tmp_split_mat)
   end subroutine test_new_mass_threshold_mat
 
 

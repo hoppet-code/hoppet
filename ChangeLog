@@ -1,5 +1,30 @@
 --------- 2025-12-new-mtm branch ---------
 
+2025-01-06 Gavin
+
+	* src/dglap_objects.F90:
+	* unit-tests/test_new_mtm.f90:
+	added GetDerivedMTMProbes(...) and SetDerivedMTM() to handle
+	make it possible to get derived version of the new MTM objects.
+	Also added basic test.
+
+	* src/pdf_representation.f90:
+	in CopyHumanPdfToEvln and CopyEvlnPdfToHuman (1d versions), added a
+	test that the input and output arrays are not the same underlying
+	object, using c_loc on their first element. This protection has
+	been put in after encountering incorect results when using the 
+	the same argument for input and output.
+
+2025-01-05 Gavin
+
+	* src/dglap_objects.F90:
+	* unit-tests/test_new_mtm.f90:
+	- added InitSplitMat(grid,sm,nf), which sets it up to zero
+	  with structure for nf
+	- added a range of functionality for the new MTM, including 
+	  basic arithmetic, convolution with splitting matrices, 
+	  and associated tests
+
 2025-12-31 Gavin salam
 	* src/dglap_objects.F90:
 	starting to experiment with new structure for MTM, based on a splitting
@@ -9,7 +34,7 @@
 	* unit-tests/hoppet-unit-tests.F90:
 	* unit-tests/unit_tests.f90:
 	started adding unit tests for the new MTM structure
-	
+
 --------- end 2025-12-new-mtm branch ---------
 
 2025-12-31 Gavin Salam  

@@ -1,5 +1,17 @@
 #include "inc/hoppet_config.inc"
 
+!! module with helpers for probes for setting derived splitting matrices etc.
+module hoppet_probes
+  use types; use consts_dp
+  implicit none
+
+  !! normalisations for each of the different flavour probes, designed
+  !! so that when we change representation from evolution to human there
+  !! are no accidental cancellations; the gluon one is used separately
+  !! from the others, so it can retain a simple normalisation
+  real(dp), parameter :: probe_norm(-2:2) = (/sqrt(5.0_dp), pi, one, sqrt(2.0_dp), one/)
+end module hoppet_probes
+
 !======================================================================
 ! 
 !! This module provide a type for matrices of splitting functions as
@@ -127,6 +139,9 @@ module dglap_objects
   public :: InitSplitMatTimeNLO
   public :: InitSplitMatPolLO, InitSplitMatPolNLO
 
+  interface InitSplitMat
+     module procedure InitSplitMat_sm_fact, InitSplitMat_zero
+  end interface
   public :: InitSplitMat!, Delete_sm
   !public :: AddWithCoeff_sm, Multiply_sm
   !public :: cobj_PConv, cobj_PConv_1d
@@ -590,9 +605,9 @@ contains
 
   !----------------------------------------------------------------------
   !! initialize a splitting function matrix with another one (potentially 
-  !! multiplied by some factor). Memory allocation should be automatically
+  !! multiplied by some factor). Memory allocation (if needed) is automatically
   !! handled by the subsiduary routines.
-  subroutine InitSplitMat(P, Pin, factor)
+  subroutine InitSplitMat_sm_fact(P, Pin, factor)
     type(split_mat),  intent(inout)        :: P
     type(split_mat),  intent(in)           :: Pin
     real(dp),         intent(in), optional :: factor
@@ -614,7 +629,28 @@ contains
     call InitGridConv(P%NS_minus, Pin%NS_minus, factor)
     call InitGridConv(P%NS_V,     Pin%NS_V,     factor)
     
-  end subroutine InitSplitMat
+  end subroutine InitSplitMat_sm_fact
+
+  !! Initialise the splitting matrix P to zero, with a structure
+  !! corresponding to the value of nf as supplied
+  subroutine InitSplitMat_zero(grid, P, nf)
+    use convolution, only: InitGridConv, grid_def
+    type(grid_def),   intent(in)    :: grid
+    type(split_mat),  intent(inout) :: P
+    integer,          intent(in)    :: nf
+    P%nf_int = nf
+    call cobj_InitSplitLinks(P)
+
+    call InitGridConv(grid, P%gg)
+    call InitGridConv(grid, P%qq)
+    call InitGridConv(grid, P%gq)
+    call InitGridConv(grid, P%qg)
+
+    call InitGridConv(grid, P%NS_plus )
+    call InitGridConv(grid, P%NS_minus)
+    call InitGridConv(grid, P%NS_V    )
+    
+  end subroutine InitSplitMat_zero
 
 
   !----------------------------------------------------------------------
@@ -838,6 +874,7 @@ contains
   !! Returns the set of probes needed to establish a matrix of
   !! "derived" effective splitting functions.
   subroutine GetDerivedSplitMatProbes(grid, nf_in, probes)
+    use hoppet_probes, only: probe_norm
     type(grid_def), intent(in) :: grid
     integer,        intent(in) :: nf_in
     real(dp),       pointer    :: probes(:,:,:)
@@ -864,13 +901,13 @@ contains
        call LabelPdfAsRep(probes(:,:,iprobe),nf_in)
     end do
 
-    probes(:,iflv_V, 1:nprobes_1d) = probes_1d       ! NS_V
-    probes(:,   2, 1:nprobes_1d) = probes_1d       ! NS+
-    probes(:,  -2, 1:nprobes_1d) = probes_1d       ! NS-
-    probes(:,iflv_sigma, 1:nprobes_1d) = probes_1d   ! Quark column of singlet
+    probes(:,    iflv_V, 1:nprobes_1d) = probe_norm(    iflv_V) * probes_1d ! NS_V
+    probes(:,         2, 1:nprobes_1d) = probe_norm(         2) * probes_1d ! NS+
+    probes(:,        -2, 1:nprobes_1d) = probe_norm(        -2) * probes_1d ! NS-
+    probes(:,iflv_sigma, 1:nprobes_1d) = probe_norm(iflv_sigma) * probes_1d ! Quark column of singlet
 
     ! gluon column of singlet
-    probes(:,iflv_g, nprobes_1d+1:nprobes) = probes_1d       
+    probes(:,iflv_g, nprobes_1d+1:nprobes) = probe_norm(iflv_g) * probes_1d       
 
     ! normally this would be part of housekeeping job of convolution
     ! module (SetDerivedConv), but since probes_1d is lost from 
@@ -883,6 +920,7 @@ contains
   !! Given an allocated split_mat and the results of operating on the probes
   !! determine the resulting "derived" splitting function.
   subroutine SetDerivedSplitMat(P,probes)
+    use hoppet_probes, only: probe_norm
     type(split_mat),  intent(inout) :: P
     real(dp),         pointer       :: probes(:,:,:)
     !-----------------------------------------
@@ -892,15 +930,15 @@ contains
     nprobes_1d = nprobes/2
 
     il = 1; ih = nprobes_1d
-    call SetDerivedConv_nodealloc(P%NS_V,     probes(:,iflv_V,il:ih))
-    call SetDerivedConv_nodealloc(P%NS_plus,  probes(:,2,il:ih))
-    call SetDerivedConv_nodealloc(P%NS_minus, probes(:,-2,il:ih))
-    call SetDerivedConv_nodealloc(P%gq,       probes(:,iflv_g,il:ih))
-    call SetDerivedConv_nodealloc(P%qq,       probes(:,iflv_sigma,il:ih))
+    call SetDerivedConv_nodealloc(P%NS_V,     probes(:,    iflv_V,il:ih)/probe_norm(    iflv_V))
+    call SetDerivedConv_nodealloc(P%NS_plus,  probes(:,         2,il:ih)/probe_norm(         2))
+    call SetDerivedConv_nodealloc(P%NS_minus, probes(:,        -2,il:ih)/probe_norm(        -2))
+    call SetDerivedConv_nodealloc(P%gq,       probes(:,    iflv_g,il:ih)/probe_norm(iflv_sigma))
+    call SetDerivedConv_nodealloc(P%qq,       probes(:,iflv_sigma,il:ih)/probe_norm(iflv_sigma))
     
     il = nprobes_1d+1; ih = nprobes
-    call SetDerivedConv_nodealloc(P%gg,       probes(:,iflv_g,il:ih))
-    call SetDerivedConv_nodealloc(P%qg,       probes(:,iflv_sigma,il:ih))
+    call SetDerivedConv_nodealloc(P%gg,       probes(:,iflv_g    ,il:ih)/probe_norm(iflv_g))
+    call SetDerivedConv_nodealloc(P%qg,       probes(:,iflv_sigma,il:ih)/probe_norm(iflv_g))
 
     deallocate(probes)
   end subroutine SetDerivedSplitMat
@@ -1519,7 +1557,7 @@ module dglap_objects_new_mtm
   public :: new_mass_threshold_mat
 
   interface InitMTM
-    module procedure InitMTM_from_split_mat, InitMTM_from_NewMTM
+    module procedure InitMTM_zero, InitMTM_from_split_mat, InitMTM_from_NewMTM
   end interface
   public :: InitMTM
 
@@ -1540,12 +1578,27 @@ module dglap_objects_new_mtm
   end interface
   public :: operator(*), operator(.conv.), Delete, Multiply, AddWithCoeff
 
+  public :: GetDerivedMTMProbes, SetDerivedMTM
+
   interface SetToConvolution
     module procedure SetToConvolution_mtm_sm, SetToConvolution_sm_mtm
   end interface
   public :: SetToConvolution
 
 contains
+
+  !! Initialise an mtm to zero, with the given value of nf_light
+  subroutine InitMTM_zero(grid, mtm, nf_light)
+    type(grid_def),               intent(in)    :: grid
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    integer,                      intent(in)    :: nf_light
+    !---------------------------------------------
+    call InitSplitMat(grid, mtm%P_light, nf=nf_light)
+
+    call InitGridConv(grid, mtm%PShg)
+    call InitGridConv(grid, mtm%PShq)
+    call InitGridConv(grid, mtm%NShV)
+  end subroutine InitMTM_zero
 
   !! Initialise a mass threshold object from nf-1 -> nf from a splitting
   !! matrix with nf flavours.
@@ -1618,6 +1671,36 @@ contains
     call InitGridConv(mtm%NShV, mtm_in%NShV)
   end subroutine InitMTM_from_NewMTM
 
+  !! return the convolution of mtm with q
+  function ConvMTMNew(mtm,q) result(Pxq)
+    use pdf_representation
+    type(new_mass_threshold_mat), intent(in) :: mtm
+    real(dp),   intent(in) :: q(0:,ncompmin:)
+    real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ubound(q,dim=2))
+    real(dp) :: singlet(0:ubound(q,dim=1)), valence(0:ubound(q,dim=1)), qbar_sum(0:ubound(q,dim=1))
+    real(dp) :: dq_from_singlet(0:ubound(q,dim=1)) !!< addition to each flavour from singlet
+    real(dp) :: h_plus(0:ubound(q,dim=1)), h_minus(0:ubound(q,dim=1))
+    integer :: i, nf_light, nf_heavy
+
+    if (GetPdfRep(q) /= pdfr_Human) call wae_error('ConvMTMNew',&
+         &'q is not in Human representation')
+
+    PxQ = mtm%P_light * q
+
+    nf_light = mtm%P_light%nf_int
+
+    qbar_sum = sum(q(:,-nf_light:-1),dim=2)
+    singlet  = sum(q(:,1:nf_light),dim=2)   ! not yet the singlet, just the sum of light quarks
+    valence  = singlet - qbar_sum
+    singlet  = singlet + qbar_sum
+
+    h_plus  = mtm%PShg * q(:,0) + mtm%PShq * singlet    
+    h_minus = mtm%NShV * valence
+    Pxq(:,  nf_light+1 ) = half * (h_plus + h_minus)
+    Pxq(:,-(nf_light+1)) = half * (h_plus - h_minus)
+  end function ConvMTMNew
+
+  !! mutliply the mtm by fact
   subroutine Multiply_mtm(mtm, fact)
     type(new_mass_threshold_mat), intent(inout) :: mtm
     real(dp),                     intent(in)    :: fact
@@ -1663,34 +1746,6 @@ contains
                       ') and split_mat to add (nf_int=' // to_string(sm_to_add%nf_int) // ')')
     end if
   end subroutine AddWithCoeff_mtm_splitmat
-
-  function ConvMTMNew(mtm,q) result(Pxq)
-    use pdf_representation
-    type(new_mass_threshold_mat), intent(in) :: mtm
-    real(dp),   intent(in) :: q(0:,ncompmin:)
-    real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ubound(q,dim=2))
-    real(dp) :: singlet(0:ubound(q,dim=1)), valence(0:ubound(q,dim=1)), qbar_sum(0:ubound(q,dim=1))
-    real(dp) :: dq_from_singlet(0:ubound(q,dim=1)) !!< addition to each flavour from singlet
-    real(dp) :: h_plus(0:ubound(q,dim=1)), h_minus(0:ubound(q,dim=1))
-    integer :: i, nf_light, nf_heavy
-
-    if (GetPdfRep(q) /= pdfr_Human) call wae_error('ConvMTMNew',&
-         &'q is not in Human representation')
-
-    PxQ = mtm%P_light * q
-
-    nf_light = mtm%P_light%nf_int
-
-    qbar_sum = sum(q(:,-nf_light:-1),dim=2)
-    singlet  = sum(q(:,1:nf_light),dim=2)   ! not yet the singlet, just the sum of light quarks
-    valence  = singlet - qbar_sum
-    singlet  = singlet + qbar_sum
-
-    h_plus  = mtm%PShg * q(:,0) + mtm%PShq * singlet    
-    h_minus = mtm%NShV * valence
-    Pxq(:,  nf_light+1 ) = half * (h_plus + h_minus)
-    Pxq(:,-(nf_light+1)) = half * (h_plus - h_minus)
-  end function ConvMTMNew
 
   !-------------------------------------------------------
   !! Set MTM_A = MTM_B .conv. P_C, on condition that
@@ -1848,6 +1903,62 @@ contains
   end subroutine SetToConvolution_sm_mtm
 
 
+  !! allocate and fill in probes to be used for deriving an 
+  !! MTM object from a set of convolutions
+  subroutine GetDerivedMTMProbes(grid, nf_light, probes)
+    use pdf_representation
+    type(grid_def), intent(in) :: grid
+    integer,        intent(in) :: nf_light
+    real(dp),       pointer    :: probes(:,:,:)
+    real(dp), allocatable :: tmp(:,:)
+    integer :: i
+
+    call GetDerivedSplitMatProbes(grid, nf_light, probes)
+    ! MTMs don't yet work in evolution representation, so convert
+    ! the probes to human
+    allocate(tmp(size(probes,dim=1), size(probes,dim=2)))
+    do i = 1, size(probes,dim=3)
+      call CopyEvlnPdfToHuman(nf_light, probes(:,:,i), tmp)
+      probes(:,:,i) = tmp
+    end do
+  end subroutine GetDerivedMTMProbes
+
+  !! Set the derived MTM from the probes, assuming
+  !! mtm has been already allocated for the correct nf_light
+  !!
+  !! The probes are automatically deallocated
+  subroutine SetDerivedMTM(mtm, probes)
+    use pdf_representation
+    use hoppet_probes, only : probe_norm
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    real(dp),   pointer,          intent(in) :: probes(:,:,:)
+    real(dp), allocatable :: tmp(:,:)
+    integer :: nprobes_1d,nprobes, il, ih, nh
+    integer :: i
+
+    nh = mtm%P_light%nf_int + 1
+
+    ! convert probes back to evolution representation as needed by 
+    ! SetDerivedSplitMat below
+    allocate(tmp(size(probes,dim=1), size(probes,dim=2)))
+    do i = 1, size(probes,dim=3)
+      tmp = probes(:,:,i)
+      call CopyHumanPdfToEvln(mtm%P_light%nf_int, tmp, probes(:,:,i))
+    end do
+
+    ! indices for probes here, and below, assume the standard structure
+    ! used in GetDerivedSplitMatProbes
+    nprobes   = size(probes,dim=3)
+    nprobes_1d = nprobes/2
+
+    il = 1; ih = nprobes_1d
+    call SetDerivedConv_nodealloc(mtm%PShq, (probes(:,+nh,il:ih)+probes(:,-nh,il:ih))/probe_norm((iflv_sigma)))
+    call SetDerivedConv_nodealloc(mtm%NShV, (probes(:,+nh,il:ih)-probes(:,-nh,il:ih))/probe_norm((iflv_V    )))
+    il = nprobes_1d+1; ih = nprobes
+    call SetDerivedConv_nodealloc(mtm%PShg, (probes(:,+nh,il:ih)+probes(:,-nh,il:ih))/probe_norm((iflv_g    )))
+
+    call SetDerivedSplitMat(mtm%P_light, probes)
+  end subroutine SetDerivedMTM
   !-------------------------------------------------------
   subroutine DelNewMTM(mtm)
     type(new_mass_threshold_mat), intent(inout) :: mtm
