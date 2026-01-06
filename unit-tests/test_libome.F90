@@ -146,6 +146,7 @@ contains
       real(dp) :: moment_N
       integer  :: imoment_N
       type(mass_threshold_mat) :: mtm2, mtm3, mtm3_fortran
+      type(grid_conv) :: psqq
 
       call InitMTMLibOME(grid, mtm2, nloop=3)
       call InitMTMLibOME(grid, mtm3, nloop=4)
@@ -153,18 +154,20 @@ contains
       call InitMTMN3LOExactFortran(grid, mtm3_fortran) ! fortran exact except AQg
 #endif
 
+      call InitGridConv(psqq, dh%allMTM(3,nf_int)%P_light%qq)
+      call AddWithCoeff(psqq, dh%allMTM(3,nf_int)%P_light%NS_plus,-one)
 
       do imoment_N = 2, 3
         moment_N = real(imoment_N, dp)
 
         call check_moment("nloop=3, PShq     ", moment_N,   mtm2%PShq   , dh%allMTM(3,nf_int)%PShq   )
         call check_moment("nloop=3, PShg     ", moment_N,   mtm2%PShg   , dh%allMTM(3,nf_int)%PShg   )
-        call check_moment("nloop=3, PSqq_H   ", moment_N,   mtm2%PSqq_H , dh%allMTM(3,nf_int)%PSqq_H )
-        call check_moment("nloop=3, NSqq_H   ", moment_N,   mtm2%NSqq_H , dh%allMTM(3,nf_int)%NSqq_H )
-        call check_moment("nloop=3, NSmqq_H  ", moment_N,   mtm2%NSmqq_H, dh%allMTM(3,nf_int)%NSmqq_H)      
-        call check_moment("nloop=3, Sgg_H    ", moment_N,   mtm2%Sgg_H  , dh%allMTM(3,nf_int)%Sgg_H  )
-        call check_moment("nloop=3, Sgq_H    ", moment_N,   mtm2%Sgq_H  , dh%allMTM(3,nf_int)%Sgq_H  )
-        call check_moment("nloop=3, Sqg_H    ", moment_N,   mtm2%Sqg_H  , dh%allMTM(3,nf_int)%Sqg_H  )
+        call check_moment("nloop=3, PSqq_H   ", moment_N,   mtm2%PSqq_H , psqq )
+        call check_moment("nloop=3, NSqq_H   ", moment_N,   mtm2%NSqq_H , dh%allMTM(3,nf_int)%P_light%NS_plus )
+        call check_moment("nloop=3, NSmqq_H  ", moment_N,   mtm2%NSmqq_H, dh%allMTM(3,nf_int)%P_light%NS_plus)
+        call check_moment("nloop=3, Sgg_H    ", moment_N,   mtm2%Sgg_H  , dh%allMTM(3,nf_int)%P_light%gg  )
+        call check_moment("nloop=3, Sgq_H    ", moment_N,   mtm2%Sgq_H  , dh%allMTM(3,nf_int)%P_light%gq  )
+        call check_moment("nloop=3, Sqg_H    ", moment_N,   mtm2%Sqg_H  , dh%allMTM(3,nf_int)%P_light%qg  )
   
 #ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM      
         ! AQg can differ at the 6e-6 relative level; in the fortran OME code, it is the only
@@ -182,6 +185,7 @@ contains
         call check_moment("nloop=4, Sqg_H    ", moment_N,   mtm3%Sqg_H  , mtm3_fortran%Sqg_H  )
 #endif
       end do
+      call Delete(psqq)
     end subroutine moment_check
 
     subroutine check_moment(name, momN, gc_test, gc_ref, override_tol)

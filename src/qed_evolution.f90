@@ -97,7 +97,7 @@ contains
        call qcd_SetNf(nf_new)
        ! we can only handle QCD evolution when nf >= 3
        if (nf_new >= 3) then
-          call SetNfDglapHolder(dhcopy, nf_new, QuarkMassesAreMSbar(coupling_qcd))
+          call SetNfDglapHolder(dhcopy, nf_new)
           ev_ash => coupling_qcd
           ev_force_old_dt = .false.
        else

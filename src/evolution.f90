@@ -50,7 +50,7 @@ module evolution_helper
   !!
   type evln_operator
      type(split_mat)              :: P
-     type(mass_threshold_mat)  :: MTM ! assume we have just one of these...
+     type(new_mass_threshold_mat)  :: MTM ! assume we have just one of these...
      real(dp)                :: MTM_coeff, Q_init, Q_end
      logical                 :: cross_mass_threshold ! better name: apply_mass_threshold
      logical                 :: owns_MTM = .false.
@@ -328,6 +328,7 @@ contains
   !!
   subroutine ev_CrossMassThreshold(dh,coupling,direction,pdf,evop)
     use dglap_holders; use pdf_representation; use dglap_choices
+    use hoppet_to_string
     type(dglap_holder),       intent(inout) :: dh
     type(running_coupling),   intent(in)    :: coupling
     integer,                  intent(in)    :: direction
@@ -337,7 +338,8 @@ contains
     integer, save      :: warn_DIS = 2, warn_Direction = 2
     real(dp) :: as2pi, muR
     real(dp) :: fourpibeta0_lnmuR_Q 
-    integer  :: nfstore
+    integer  :: nfstore, nf_light, nf_heavy
+    type(new_mass_threshold_mat), pointer :: mtm
     
     !-- CHANGE THIS IF HAVE MATCHING AT MUF/=MH
     if (ev_nloop < 3 .or. (.not. mass_steps_on)) then
@@ -362,7 +364,7 @@ contains
        ! nf value is that after crossing threshold; but for MTM
        ! (and other things) we need nf value above threshold, i.e. before
        ! crossing the threshold; so put in the correct value temporarily
-       call SetNfDglapHolder(dh, nfstore + 1, QuarkMassesAreMSbar(coupling))
+       call SetNfDglapHolder(dh, nfstore + 1)
     case default
        call wae_error('ev_CrossMassThreshold',&
             &  'direction had unsupported value of',intval=direction)
@@ -373,20 +375,48 @@ contains
     muR   = QuarkMass(coupling,nf_int) * ev_MuR_Q
     !write(0,*) 'evolution crossing threshold ', nf_int, muR
 
+    nf_heavy = nf_int
+    nf_light = nf_int - 1
+
     !-- fix nf so as to be sure of getting alpha value corresponding
     !   to the desired nf value, despite proximity to threshold.
     as2pi = Value(coupling, muR, fixnf=nf_int) / twopi
     if (ev_nloop == 3) then
-       if (present(pdf)) pdf = pdf + &
-            &                   (direction*as2pi**2) * (dh%MTM_NNLO .conv. pdf)
+       if (nf_light /= dh%MTM_NNLO%P_light%nf_int) call wae_error('ev_CrossMassThreshold',&
+                & 'DGLAP holder MTM_NNLO%P_light%nf_int='//to_string(dh%MTM_NNLO%P_light%nf_int)  &
+                // ' does not match expected value nf_light='//to_string(nf_light))
+
+       if (QuarkMassesAreMSbar(coupling)) then
+         allocate(mtm)
+         call InitMTM(mtm, dh%MTM_NNLO)
+         ! m_pole = m(MSbar) * (1 + 2 CF as2pi), cf e.g. Eq.(10) of hep-ph/9912391
+         ! so we add a contribution whereby we evolve up to m_pole with nf_light flavours
+         ! and back down to m_MSbar with nf_heavy flavours
+         call AddWithCoeff(mtm, dh%allP(1,nf_light), +4*CF)
+         call AddWithCoeff(mtm, dh%allP(1,nf_heavy), -4*CF)
+       else
+         mtm => dh%MTM_NNLO
+       end if
+      
+      
+
+       if (present(pdf)) then
+         pdf = pdf + (direction*as2pi**2) * (mtm .conv. pdf)
+       end if
        if (present(evop)) then
           evop%cross_mass_threshold = .true.
-          ! in this case, evop%MTM just copies pointers to the contents of
-          ! the underlying grid_conv objects, so we do not have ownership
-          evop%MTM = dh%MTM_NNLO  ! stores current nf value and quark-mass treatment
+          ! we will be creating a new MTM object, so the evop will have ownership
+          call InitMTM(evop%MTM, mtm)
+          evop%owns_MTM            = .true.
           evop%MTM_coeff = (direction*as2pi**2)
        end if
+       if (QuarkMassesAreMSbar(coupling)) then
+         call Delete(mtm)
+         deallocate(mtm)
+       end if
     else if (ev_nloop == 4) then
+      if (QuarkMassesAreMSbar(coupling)) call wae_error('ev_CrossMassThreshold',&
+           & 'N3LO mass thresholds not yet supported for MSbar quark masses')
       fourpibeta0_lnmuR_Q = four*pi*beta0*log(ev_muR_Q)
       ! if (present(pdf)) pdf = pdf + &
       ! &           (direction*as2pi**2) * (dh%MTM_NNLO * pdf + as2pi*(dh%MTM_N3LO * pdf))
@@ -409,7 +439,7 @@ contains
             &  'ev_nloop had unsupported value of',intval=ev_nloop)
     end if
        
-    if (nf_int /= nfstore) call SetNfDglapHolder(dh, nfstore, QuarkMassesAreMSbar(coupling))
+    if (nf_int /= nfstore) call SetNfDglapHolder(dh, nfstore)
 
   end subroutine ev_CrossMassThreshold
   
@@ -660,7 +690,7 @@ contains
        if (nflcl == shnf_end)  lcl_Q_end  = Q_end
        !-- this will also set the global (qcd) nf_int which will
        !   be used elsewhere in this module
-       call SetNfDglapHolder(dhcopy, nflcl, QuarkMassesAreMSbar(coupling))
+       call SetNfDglapHolder(dhcopy, nflcl)
 
        ! convention: cross mass thresholds before a step in the evolution
        if (nflcl /= shnf_init) then

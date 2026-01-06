@@ -1,5 +1,17 @@
 --------- 2025-12-new-mtm branch ---------
 
+2025-01-06 Gavin (later)
+
+	* src/dglap_holders.f90:
+	* src/evolution.f90:
+	* src/qed_evolution.f90:
+	* unit-tests/test_libome.F90:
+	- switched to new mass threshold structure (MSbar quark masses still only supported at NNLO)
+	- this makes the quark_masses_are_MSbar optional argument of SetNfDglapHolder obsolete;
+	  added warning if user tries to use it with it set to .true.
+	- note that underlying initialisation of new MTM objects still uses old MTM
+	  as an intermediate step, to minimise rewriting of quite a number of routines.
+
 2025-01-06 Gavin
 
 	* CMakeLists.txt:
