@@ -4,9 +4,11 @@
 
 	* src/dglap_objects.F90:
 	* unit-tests/test_new_mtm.f90:
-	added GetDerivedMTMProbes(...) and SetDerivedMTM() to handle
-	make it possible to get derived version of the new MTM objects.
-	Also added basic test.
+	- added GetDerivedMTMProbes(...) and SetDerivedMTM() to handle
+	  make it possible to get derived version of the new MTM objects.
+	- added InitMTM(mtm_new, mtm_old) to allow us to convert an old
+	  MTM object into a new MTM object.
+	- Also added basic tests
 
 	* src/pdf_representation.f90:
 	in CopyHumanPdfToEvln and CopyEvlnPdfToHuman (1d versions), added a

@@ -1557,7 +1557,8 @@ module dglap_objects_new_mtm
   public :: new_mass_threshold_mat
 
   interface InitMTM
-    module procedure InitMTM_zero, InitMTM_from_split_mat, InitMTM_from_NewMTM
+    module procedure InitMTM_zero, InitMTM_from_split_mat, InitMTM_from_new_mtm
+    module procedure InitMTM_from_old_mtm
   end interface
   public :: InitMTM
 
@@ -1660,17 +1661,46 @@ contains
 
   end subroutine InitMTM_from_split_mat
 
+  !----------------------------------------------
   !! Initialise an mtm from another one
-  subroutine InitMTM_from_NewMTM(mtm, mtm_in)
+  subroutine InitMTM_from_new_mtm(mtm, mtm_in)
     type(new_mass_threshold_mat), intent(inout) :: mtm
     type(new_mass_threshold_mat), intent(in)  :: mtm_in
 
     call InitSplitMat(mtm%P_light, mtm_in%P_light)
+
     call InitGridConv(mtm%PShg, mtm_in%PShg)
     call InitGridConv(mtm%PShq, mtm_in%PShq)
     call InitGridConv(mtm%NShV, mtm_in%NShV)
-  end subroutine InitMTM_from_NewMTM
+  end subroutine InitMTM_from_new_mtm
 
+  !----------------------------------------------
+  !! Initialise an mtm from an old-style one
+  subroutine InitMTM_from_old_mtm(mtm, mtm_in)
+    type(new_mass_threshold_mat), intent(inout) :: mtm
+    type(mass_threshold_mat),     intent(in)    :: mtm_in
+    integer :: nf_light
+
+    nf_light = mtm_in%nf_int - 1
+    call cobj_InitSplitLinks(mtm%P_light)
+    mtm%P_light%nf_int = nf_light
+
+    call InitGridConv(mtm%P_light%NS_plus , mtm_in%NSqq_H)
+    call InitGridConv(mtm%P_light%NS_minus, mtm_in%NSmqq_H)
+    call InitGridConv(mtm%P_light%NS_V    , mtm_in%NSmqq_H) ! V & minus not distinguished in old struct.
+    call InitGridConv(mtm%P_light%qq      , mtm%P_light%NS_plus)
+    call AddWithCoeff(mtm%P_light%qq      , mtm_in%PSqq_H)        ! qq = NS_plus + PSqq_H
+
+    call InitGridConv(mtm%P_light%qg      , mtm_in%Sqg_H)
+    call InitGridConv(mtm%P_light%gq      , mtm_in%Sgq_H)
+    call InitGridConv(mtm%P_light%gg      , mtm_in%Sgg_H)
+
+    call InitGridConv(mtm%PShg, mtm_in%PShg)
+    call InitGridConv(mtm%PShq, mtm_in%PShq)
+    call InitGridConv(mtm%NShV, mtm_in%NShV)
+  end subroutine InitMTM_from_old_mtm
+
+  !----------------------------------------------
   !! return the convolution of mtm with q
   function ConvMTMNew(mtm,q) result(Pxq)
     use pdf_representation

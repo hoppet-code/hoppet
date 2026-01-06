@@ -156,7 +156,6 @@ contains
            answer=tmp(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
 
-
     ! now test SetDerivedMTM
     call GetDerivedMTMProbes(dh%grid, nf_light, probes)
     do iprobe = 1, size(probes,dim=3)
@@ -174,6 +173,17 @@ contains
       call check_approx_eq_1d("new_mass_threshold_mat (SetDerivedMTM) iflv="//trim(to_string(iflv)), &
            answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
+
+    ! next, check that we can get a new mtm from an old one and that they act in the same way
+    if (nloop >= 3) then
+      call InitMTM(mtm_tmp, dh%allMTM(nloop,nf_light+1))
+      P_q = dh%allMTM(nloop,nf_light+1) * q
+      mtm_Q = (mtm_tmp * q)
+      do iflv = -nf_light-1, nf_light+1
+        call check_approx_eq_1d("new_mass_threshold_mat (new from old) iflv="//trim(to_string(iflv)), &
+             answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
+      end do
+    end if
 
 
     call Delete(q)
