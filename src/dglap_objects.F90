@@ -33,7 +33,7 @@ end module hoppet_probes
 !! - tools for getting "derived" splitting matrices.
 !!
 !======================================================================
-module dglap_objects
+module dglap_objects_sm_oldmtm
   use types; use consts_dp; use splitting_functions
 #ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM  
   use mass_thresholds_n3lo
@@ -1529,7 +1529,7 @@ contains
     call cobj_DelCoeff (C2L)
   end function cobj_Eval2LConv
     
-end module dglap_objects
+end module dglap_objects_sm_oldmtm
 !end module dglap_objects_hidden
 
 
@@ -1539,7 +1539,7 @@ end module dglap_objects
 module dglap_objects_new_mtm
   use types; use consts_dp
   use convolution
-  use dglap_objects
+  use dglap_objects_sm_oldmtm
   implicit none
 
   private
@@ -1730,6 +1730,7 @@ contains
     Pxq(:,-(nf_light+1)) = half * (h_plus - h_minus)
   end function ConvMTMNew
 
+  !----------------------------------------------
   !! mutliply the mtm by fact
   subroutine Multiply_mtm(mtm, fact)
     type(new_mass_threshold_mat), intent(inout) :: mtm
@@ -1740,6 +1741,7 @@ contains
     call Multiply(mtm%NShV, fact)
   end subroutine Multiply_mtm
 
+  !----------------------------------------------
   !! apply mtm += factor * mtm_to_add (factor is optional)
   subroutine AddWithCoeff_mtm_mtm(mtm, mtm_to_add, factor)
     type(new_mass_threshold_mat), intent(inout) :: mtm
@@ -1752,6 +1754,7 @@ contains
     call AddWithCoeff(mtm%NShV, mtm_to_add%NShV, factor)
   end subroutine AddWithCoeff_mtm_mtm
 
+  !----------------------------------------------
   !! apply mtm += factor * sm_to_add (factor is optional)
   !!
   !! only works if sm_to_add has either nf_int = mtm%P_light%nf_int
@@ -2000,3 +2003,8 @@ contains
 
 
 end module dglap_objects_new_mtm
+
+module dglap_objects
+  use dglap_objects_sm_oldmtm
+  use dglap_objects_new_mtm
+end module dglap_objects

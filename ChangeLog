@@ -9,6 +9,8 @@
 	- added InitMTM(mtm_new, mtm_old) to allow us to convert an old
 	  MTM object into a new MTM object.
 	- Also added basic tests
+	- new dglap_objects module includes the modules with old and new mtm
+	  definitions, to allow both to co-exist for the time being.
 
 	* src/pdf_representation.f90:
 	in CopyHumanPdfToEvln and CopyEvlnPdfToHuman (1d versions), added a
