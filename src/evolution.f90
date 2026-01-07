@@ -50,7 +50,7 @@ module evolution_helper
   !!
   type evln_operator
      type(split_mat)              :: P
-     type(new_mass_threshold_mat)  :: MTM ! assume we have just one of these...
+     type(new_mtm_obj)  :: MTM ! assume we have just one of these...
      real(dp)                :: MTM_coeff, Q_init, Q_end
      logical                 :: cross_mass_threshold ! better name: apply_mass_threshold
      logical                 :: owns_MTM = .false.
@@ -339,7 +339,7 @@ contains
     real(dp) :: as2pi, muR
     real(dp) :: fourpibeta0_lnmuR_Q 
     integer  :: nfstore, nf_light, nf_heavy
-    type(new_mass_threshold_mat), pointer :: mtm
+    type(new_mtm_obj), pointer :: mtm
     
     !-- CHANGE THIS IF HAVE MATCHING AT MUF/=MH
     if (ev_nloop < 3 .or. (.not. mass_steps_on)) then

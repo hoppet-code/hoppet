@@ -6,13 +6,13 @@ module test_new_mtm
 
   private
 
-  public :: test_new_mass_threshold_mat
+  public :: test_new_mtm_obj
 
 contains
 
-  subroutine test_new_mass_threshold_mat()
+  subroutine test_new_mtm_obj()
     use streamlined_interface
-    type(new_mass_threshold_mat) :: mtm_from_P, mtm_from_mtm_p, mtm_from_p_mtm, mtm_tmp
+    type(new_mtm_obj) :: mtm_from_P, mtm_from_mtm_p, mtm_from_p_mtm, mtm_tmp
     type(split_mat) :: tmp_split_mat, Pnf3, Pnf4a, Pnf4b
     type(grid_conv) :: test_conv
     integer :: nf_light, nloop, iflv, ix, iprobe
@@ -25,7 +25,7 @@ contains
     nf_light = 3
     nloop    = dh%nloop
     if (nloop > dh%nloop .or. nloop < 2) call wae_error(&
-          "test_new_mass_threshold_mat: nloop(="//trim(to_string(nloop))//&
+          "test_new_mtm_obj: nloop(="//trim(to_string(nloop))//&
           ") exceeds dh%nloop(="//trim(to_string(dh%nloop))//") or is below 2")
 
     !call InitGridConv(dh%grid, delta, delta_fn)
@@ -52,7 +52,7 @@ contains
     P_q   = Pnf4a      * q
     mtm_q = mtm_from_P * q
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (mtm from sm) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (mtm from sm) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -62,7 +62,7 @@ contains
     P_q   = two * (mtm_from_p * q)
     mtm_q = mtm_tmp * q
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (multiply) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (multiply) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -72,7 +72,7 @@ contains
     P_q   = 1.5_dp * (mtm_from_p * q)
     mtm_q = mtm_tmp * q
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (zero & add mtm) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (zero & add mtm) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -82,7 +82,7 @@ contains
     P_q   = mtm_from_p * q + 0.5_dp * (Pnf3 * q)
     mtm_q = mtm_tmp * q
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (add Pnf3) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (add Pnf3) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -92,7 +92,7 @@ contains
     P_q   = mtm_from_p * q + 0.5_dp * (Pnf4b * q)
     mtm_q = mtm_tmp * q
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (add Pnf4b) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (add Pnf4b) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -105,7 +105,7 @@ contains
     P_q = mtm_from_P * (Pnf3 * q)
     mtm_q = mtm_from_mtm_p * q
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (mtm_from_P * Pnf3) element iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (mtm_from_P * Pnf3) element iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -130,7 +130,7 @@ contains
     !write(6,*) "P_q  :", real(P_q  (0,-4:4))
     !write(6,*) "mtm_q:", real(mtm_q(0,-4:4))
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (Pnf4b * mtm_from_P) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (Pnf4b * mtm_from_P) iflv="//trim(to_string(iflv)), &
            answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
     ! restore grid locking
@@ -152,7 +152,7 @@ contains
     tmp = tmp_split_mat * q
     call RestoreGridLocking()
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (SetDerivedSplitMat) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (SetDerivedSplitMat) iflv="//trim(to_string(iflv)), &
            answer=tmp(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -170,7 +170,7 @@ contains
     mtm_q = mtm_tmp * q
     call RestoreGridLocking()
     do iflv = -nf_light-1, nf_light+1
-      call check_approx_eq_1d("new_mass_threshold_mat (SetDerivedMTM) iflv="//trim(to_string(iflv)), &
+      call check_approx_eq_1d("new_mtm_obj (SetDerivedMTM) iflv="//trim(to_string(iflv)), &
            answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
 
@@ -180,7 +180,7 @@ contains
       P_q = dh%allMTM(nloop,nf_light+1) * q
       mtm_Q = (mtm_tmp * q)
       do iflv = -nf_light-1, nf_light+1
-        call check_approx_eq_1d("new_mass_threshold_mat (new from old) iflv="//trim(to_string(iflv)), &
+        call check_approx_eq_1d("new_mtm_obj (new from old) iflv="//trim(to_string(iflv)), &
              answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
       end do
     end if
@@ -200,7 +200,7 @@ contains
     call Delete(Pnf4a)
     call Delete(Pnf4b)
     call Delete(tmp_split_mat)
-  end subroutine test_new_mass_threshold_mat
+  end subroutine test_new_mtm_obj
 
 
   function delta_fn(y) result(res)
