@@ -920,9 +920,9 @@ contains
     !--
     type(mass_threshold_mat), pointer :: f_ptr
 
-    allocate(f_ptr)    
-    f_ptr%nf_int = lcl_nf
-    f_ptr%loops  = 0
+    allocate(f_ptr)
+    call cobj_InitSplitLinks(f_ptr%P_light)
+    f_ptr%P_light%nf_int = lcl_nf
     mass_threshold_mat_ptr = c_loc(f_ptr)
   end function hoppet_cxx__mass_threshold_mat__new
 
@@ -953,18 +953,6 @@ contains
   end subroutine hoppet_cxx__mass_threshold_mat__copy_contents
 
   DEFINE_DELETE(mass_threshold_mat)
-
-  !! set the nf(heavy) value of the mass_threshold_mat
-  subroutine hoppet_cxx__mass_threshold_mat__set_nf(mtm, nf_lcl) bind(C)
-    implicit none
-    type(c_ptr), intent(in), value :: mtm
-    integer(c_int), intent(in), value :: nf_lcl
-    !--
-    type(mass_threshold_mat), pointer :: mtm_f
-
-    call c_f_pointer(mtm, mtm_f)
-    call SetNfMTM(mtm_f, nf_lcl)
-  end subroutine hoppet_cxx__mass_threshold_mat__set_nf
 
   !! result_data = mass_threshold_mat_ptr * q_data
   subroutine hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(mass_threshold_mat_ptr, q_data, result_data) bind(C)
@@ -1007,21 +995,14 @@ contains
   end subroutine hoppet_cxx__mass_threshold_mat__multiply
 
 
+#define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,split_mat)
+  MTM_REF(p_light   ) !!< the a split_mat for the light flavours
+#undef MTM_REF
 #define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
   MTM_REF(pshq      ) !!< A^PS_Qq    Q+Qbar from singlet(nflight)
   MTM_REF(pshg      ) !!< A^PS_Qg    Q+Qbar from gluon  (nflight)
   MTM_REF(nshv      ) !!< A_{Qq}^{PS,s}, gives (h-hbar) from valence(nflight) [=sum_i (q_i-qbar_i)]   
-  MTM_REF(nsqq_h    ) !!< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
-  MTM_REF(sgg_h     ) !!< A^S_gg,Q   Δg(nfheavy) from g(nflight)
-  MTM_REF(sgq_H     ) !!< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
-  MTM_REF(psqq_h    ) !!< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
-  MTM_REF(sqg_h     ) !!< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
-  MTM_REF(nsmqq_h   ) !!< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
-  MTM_REF(pshg_msbar) !!< replaces PShg when masses are MSbar
-
-#define MTM_INT(NAME)  DEFINE_RETURN_INT_MEMBER(mass_threshold_mat,NAME)
-  MTM_INT(nf_int)
-  MTM_INT(loops)
+#undef MTM_REF
 
 end module hoppet_cxx_oo_mass_threshold_mat
 

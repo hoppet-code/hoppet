@@ -1,0 +1,41 @@
+# benchmarking/prec_and_timing -dy 0.1 -nloop 4 -muRQ 2 -nopreev -output -output-benchmark -o /Users/gsalam/work/hoppet/branches/2025-12-new-mtm/benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.1_-nloop_4_-muRQ_2_-nopreev.out
+# Grid properties:
+# dymax =   0.100000
+# dnsty =         27         9         3         1
+# ymax  =   0.200000  0.500000  2.000000 12.000000
+# order =         -6        -6        -6        -6
+# eps   =   1.00E-07  1.00E-07  1.00E-07  1.00E-07
+# Evolution: du =    0.10000,   coupling dt =    0.20000
+# Tabulation: dlnlnQ =    0.02500, olnlnQ =     4
+# nnlo_spltting = nnlo_splitting_param
+# n3lo_spltting = n3lo_splitting_Nfitav
+# n3lo_spltting_approx = n3lo_splitting_approximation_up_to_2512
+# n3lo_nfthreshold = n3lo_nfthreshold_libOME_2512
+# Stamped by benchmarking/prec_and_timing on  7/01/2026 at 15:32:00
+# host: ascpd210
+# hoppet compiled git info: 291eb0cf573e1e8a3354b5cd3e7d740a0281655b , 2026-01-07 15:27:53 +0000, status:  M CMakeLists.txt; M ChangeLog;M  benchmarking/prec_and_timing.default_output/gen-default-output.sh;A  benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.1_-nloop_4_-muRQ_2_-nopreev.default_output;A  benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.1_-nloop_4_-muRQ_2_-nopreev.out;A  benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.1_-nloop_4_-muRQ_2_-preev.default_output;A  benchmarking/prec_and_timing.default_output/prec_and_timing_-dy_0.1_-nloop_4_-muRQ_2_-preev.out
+# Q = Qmax - j*(Qmax-Qinit)/nn
+# y=ln1/x Q xf(x,0:4)
+
+
+# Q = 4.0_dp + j*5.0_dp/nn
+# y=ln1/x Q xf(x,0:4)
+
+
+# Q = Qmax*(1-j*0.2_dp/nn)
+# y=ln1/x Q xf(x,0:4)
+
+
+# Q = sqrt(Qinit*Qmax)*(1+j*0.2_dp/nn)
+# y=ln1/x Q xf(x,0:4)
+# Init Timings (init, preevln, evln, interp) =    0.53020700000   0.00020100000   0.02932600000   0.00000011217 s, nrep=      1, nrep_interp=   1000
+# Initialisation time =    0.53021 s
+# Pre-evolution time =    0.00020 s
+# Evolution time =    0.02933 s, nrep =       1
+# Interpolation time =  112.16931 ns, nrep_interp =   1000
+# Evaluation (all flav) 105.5 ns
+# Evaluation (all flav,o2)  59.0 ns
+# Evaluation (all flav,o3)  69.3 ns
+# Evaluation (all flav,o4)  87.6 ns
+# Evaluation (one flav)  37.2 ns
+# Evaluation (1fl,ord2)  25.5 ns

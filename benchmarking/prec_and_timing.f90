@@ -60,6 +60,8 @@ program prec_and_timing
   real(dp)           :: time_start, time_init_done, time_prev_done, time_ev_done, time_interp_start, time_end
   real(dp), pointer  :: initial_condition(:,:)
   type(pdf_table)    :: table
+  logical            :: masses_are_MSbar = .false.
+  real(dp)           :: muR_Q
   logical            :: output, outputgrid, output_benchmark, preev, auto_nrep
   logical            :: write_lhapdf
   character(len=999) :: lhapdf_out = ""
@@ -134,7 +136,7 @@ program prec_and_timing
        &   call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
   if (log_val_opt('-exact-nnlo-sp')) &
        &   call dglap_Set_nnlo_splitting(nnlo_splitting_exact)
- 
+
   n3lo_approx = trim(string_val_opt("-n3lo-approx","")) ! give e.g. 2512, 2410, etc.
   if (n3lo_approx /= "") then
     call dglap_Set_n3lo_splitting_approximation(CodeOfName("n3lo_splitting_approximation_up_to_"//n3lo_approx))
@@ -144,6 +146,8 @@ program prec_and_timing
     call dglap_Set_n3lo_nfthreshold(CodeOfName("n3lo_nfthreshold_"//n3lo_threshold))
   end if
 
+  masses_are_MSbar = log_val_opt("-msbar-masses", masses_are_MSbar)
+  muR_Q = dble_val_opt("-muRQ",1.0_dp) ! renormalization scale / evolution scale
 
   ! decide how many repetitions, and what form of output
   n_alphas = int_val_opt("-n-alphas",1)
@@ -184,7 +188,7 @@ program prec_and_timing
   do i = 1, n_alphas 
      if (i /= 1) call Delete(coupling)
      call InitRunningCoupling(coupling, alfas=0.35_dp, Q=Qinit, &
-          &nloop=nloop)
+          &nloop=nloop, quark_masses=quark_masses_def(4:6), masses_are_MSbar=masses_are_MSbar)
   end do
   !AV commented out because it is an error in non-GNU compilers 
   !write(0,*) Value(coupling,91.2d0)
@@ -192,7 +196,7 @@ program prec_and_timing
   ! set up the table
   call AllocPdfTable(grid,table,Qmin,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
   call AddNfInfoToPdfTable(table,coupling)
-  if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
+  if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling,muR_Q=muR_Q)
   call cpu_time(time_prev_done)
 
   !call PDFTableSetYInterpOrder(y_interp_order)
@@ -208,7 +212,7 @@ program prec_and_timing
      if (preev) then
         call EvolvePdfTable(table,initial_condition)
      else
-        call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
+        call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling,muR_Q=muR_Q)
      end if     
   end do
   call cpu_time(time_ev_done)

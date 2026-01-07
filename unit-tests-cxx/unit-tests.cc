@@ -585,7 +585,7 @@ TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
   REQUIRE(dpdf[hoppet::iflv_b].at_y(5.0) == 0.0);
 
   // try replacing a one of the entries in the mtm and check that it propagates
-  mtm.sgg_h() = dh.p_lo().gg(); // set to LO gg->gg (physically wrong, but serves the purpose)
+  mtm.p_light().gg() = dh.p_lo().gg(); // set to LO gg->gg (physically wrong, but serves the purpose)
   auto ddpdf = mtm * pdf;
   REQUIRE(ddpdf[hoppet::iflv_g].at_y(5.0) != dpdf[hoppet::iflv_g].at_y(5.0));
   REQUIRE(ddpdf[hoppet::iflv_c].at_y(5.0) == dpdf[hoppet::iflv_c].at_y(5.0));

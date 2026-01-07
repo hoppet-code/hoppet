@@ -141,6 +141,111 @@ __Files added__
 	also throws C++ exceptions if they've been enabled with wae_enable_cxx_exceptions()
 
 --------- end 2025-10-cxx-OO branch ---------
+2025-01-07 Gavin (later)
+
+	* NEWS.md:
+	updated with developments from the 2025-12-new-mtm branch, prior
+	to merging into dev.
+
+	* src/dglap_objects.F90:
+	arranged for more sensible naming of the different individual modules:
+	- hoppet_split_mat: defines split_mat type and associated functions
+	- hoppet_mass_threshold_mat: defines mass_threshold_mat type and associated functions
+	- hoppet_init_mtm: defines InitMTM... functions to set up mass_threshold_mat objects
+	- dglap_objects: module that provides a single point of usage for split_mat,
+	  mass_threshold_mat and related routines, as before.
+
+	* src/dglap_holders.f90           :
+	* src/dglap_objects.F90           :
+	* src/evolution.f90               :
+	* unit-tests/hoppet-unit-tests.F90:
+	* unit-tests/test_libome.F90      :
+	* unit-tests/test_new_mtm.f90     :
+	new_mass_threshold_mat -> mass_threshold_mat and removed was was the
+	old mass_threshold_mat type and associated functions.
+	NB: done in steps, so look at preceding commits for intermediate stages,
+	including code with the old MTMs named as old_mass_threshold_mat	
+
+2025-01-07 Gavin 
+
+	* src/evolution.f90:
+	* benchmarking/prec_and_timing.f90:
+	* benchmarking/prec_and_timing.default_output/gen-default-output.sh:
+	- Fixed bug in handling of muR/Q != 1 in preparation of cached N3LO evolution, 
+	  specifically handling of thresholds
+	- added -muRQ option to prec_and_timing to allow testing of muR/Q != 1
+	- added validation tests to gen-default-output.sh for muR/Q != 1 both
+	  with and without pre-evolution
+
+	* src/dglap_holders.f90:
+	* src/dglap_objects.F90:
+	* unit-tests/test_libome.F90:
+	- added versions of InitMTMNNLO etc. that directly set up the new MTM
+	  objects
+	- unit tests for libOME now directly use these functions
+	- dglap_holders now uses these functions too
+
+2025-01-06 Gavin (later)
+
+	* src/dglap_holders.f90:
+	* src/evolution.f90:
+	* src/qed_evolution.f90:
+	* unit-tests/test_libome.F90:
+	- switched to new mass threshold structure (MSbar quark masses still only supported at NNLO)
+	- this makes the quark_masses_are_MSbar optional argument of SetNfDglapHolder obsolete;
+	  added warning if user tries to use it with it set to .true.
+	- note that underlying initialisation of new MTM objects still uses old MTM
+	  as an intermediate step, to minimise rewriting of quite a number of routines.
+
+2025-01-06 Gavin
+
+	* CMakeLists.txt:
+	* benchmarking/prec_and_timing.f90:
+	* benchmarking/prec_and_timing.default_output/*.default_output:
+	* benchmarking/prec_and_timing.default_output/*.out:
+	- re-generated default outputs, making sure that they are the same 
+	  as before + added .out files for each (e.g. with command-line);
+	- also added output with a new `-msbar-masses` flag to prec_and_timing.f90
+	  and generated output with this, both with and without pre-evolution,
+	  so that we have some MSbar references.	
+
+	* src/dglap_objects.F90:
+	* unit-tests/test_new_mtm.f90:
+	- added GetDerivedMTMProbes(...) and SetDerivedMTM() to handle
+	  make it possible to get derived version of the new MTM objects.
+	- added InitMTM(mtm_new, mtm_old) to allow us to convert an old
+	  MTM object into a new MTM object.
+	- Also added basic tests
+	- new dglap_objects module includes the modules with old and new mtm
+	  definitions, to allow both to co-exist for the time being.
+
+	* src/pdf_representation.f90:
+	in CopyHumanPdfToEvln and CopyEvlnPdfToHuman (1d versions), added a
+	test that the input and output arrays are not the same underlying
+	object, using c_loc on their first element. This protection has
+	been put in after encountering incorect results when using the 
+	the same argument for input and output.
+
+2025-01-05 Gavin
+
+	* src/dglap_objects.F90:
+	* unit-tests/test_new_mtm.f90:
+	- added InitSplitMat(grid,sm,nf), which sets it up to zero
+	  with structure for nf
+	- added a range of functionality for the new MTM, including 
+	  basic arithmetic, convolution with splitting matrices, 
+	  and associated tests
+
+2025-12-31 Gavin salam
+	* src/dglap_objects.F90:
+	starting to experiment with new structure for MTM, based on a splitting
+	matrix for the light flavours, and three extra pieces for the heavy-quark
+
+	* unit-tests/test_new_mtm.f90:   *** ADDED ***
+	* unit-tests/hoppet-unit-tests.F90:
+	* unit-tests/unit_tests.f90:
+	started adding unit tests for the new MTM structure
+
 2025-12-31 Gavin Salam  
 
 	* CMakeLists.txt:

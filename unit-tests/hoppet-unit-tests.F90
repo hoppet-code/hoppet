@@ -8,6 +8,7 @@ program hoppet_unit_tests
   use test_alphas
   use test_convolution
   use test_libome
+  use test_new_mtm
   use io_utils
   implicit none
 
@@ -36,6 +37,7 @@ program hoppet_unit_tests
   call unit_tests_alphas()
   call test_InitGridConv()
   call test_libome_interface()
+  call test_mass_threshold_mat()
 
   if (unit_test_failures > 0) then
     ! print a message in red
@@ -60,13 +62,13 @@ contains
 
     order = -6
     ymax  = 12.0_dp
-    dy    = 0.1_dp
+    dy    = dble_val_opt("-dy", 0.1_dp)
     ! and parameters for Q tabulation
     Qmin=1.0_dp
     Qmax=28000.0_dp
     dlnlnQ = dy/4.0_dp
     ! and number of loops to initialise!
-    nloop = int_val_opt("-nloop", 3)
+    nloop = int_val_opt("-nloop", 4)
     nnlo_nfthreshold_variant = nnlo_nfthreshold_exact
     nnlo_splitting_variant = nnlo_splitting_exact
     call hoppetStartExtended(ymax,dy,Qmin,Qmax,dlnlnQ,nloop,&

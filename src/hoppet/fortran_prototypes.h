@@ -164,21 +164,16 @@ extern "C" {
 }
 DEFINE_COPY(mass_threshold_mat)
 DEFINE_DELETE(mass_threshold_mat)
-DEFINE_RETURN_INT_MEMBER(mass_threshold_mat,nf_int)
+
+#define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,split_mat)
+MTM_REF(p_light   ) //< the a split_mat for the light flavours
+#undef MTM_REF
 
 #define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
 MTM_REF(pshq      ) //< A^PS_Qq    Q+Qbar from singlet(nflight)
 MTM_REF(pshg      ) //< A^PS_Qg    Q+Qbar from gluon  (nflight)
 MTM_REF(nshv      ) //< A_{Qq}^{PS,s}, gives (h-hbar) from valence(nflight) [=sum_i (q_i-qbar_i)]   
-MTM_REF(nsqq_h    ) //< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
-MTM_REF(sgg_h     ) //< A^S_gg,Q   Δg(nfheavy) from g(nflight)
-MTM_REF(sgq_H     ) //< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
-MTM_REF(psqq_h    ) //< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
-MTM_REF(sqg_h     ) //< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
-MTM_REF(nsmqq_h   ) //< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
-MTM_REF(pshg_msbar) //< replaces PShg when masses are MSbar (not yet supported at N3LO)
 #undef MTM_REF
-
 
 /// running_coupling function wrappers
 extern "C" {

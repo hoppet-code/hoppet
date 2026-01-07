@@ -82,18 +82,28 @@ contains
     end if
   end subroutine check_approx_eq_0d
 
-  subroutine check_approx_eq_1d(testname, answer, expected, tol_abs, tol_rel)
+  subroutine check_approx_eq_1d(testname, answer, expected, tol_abs, tol_rel, tol_choice_or)
+    use assertions
     implicit none
     character(len=*), intent(in) :: testname
     real(dp), intent(in) :: answer(:)
     real(dp), intent(in) :: expected(:)
     real(dp), intent(in) :: tol_abs
     real(dp), intent(in), optional :: tol_rel
+    logical, intent(in),  optional :: tol_choice_or ! if true, use OR for tol checks, else (default) AND
     logical :: is_equal
+    logical :: is_equal_abs(size(answer)), is_equal_rel(size(answer))
 
-    is_equal = all(abs(answer - expected) < tol_abs)
+    is_equal_abs = abs(answer - expected) < tol_abs
     if (present(tol_rel)) then
-      is_equal = is_equal .and. all(abs(answer - expected) < tol_rel*max(abs(expected), abs(answer)))
+      is_equal_rel = abs(answer - expected) < tol_rel*max(abs(expected), abs(answer))
+      if (default_or_opt(.false., tol_choice_or)) then
+        is_equal = all(is_equal_abs .or. is_equal_rel)
+      else 
+        is_equal = all(is_equal_abs .and. is_equal_rel)
+      end if
+    else
+      is_equal = all(is_equal_abs)
     end if
 
     if (.not. is_equal) then

@@ -1032,23 +1032,20 @@ public:
   }
 
   const grid_def_ref grid() const { return pshq().grid(); }
-  int nf_heavy() const { return hoppet_cxx__mass_threshold_mat__nf_int(ptr()); }
+  int nf_heavy() const { return p_light().nf()+1; }
+  int nf_light() const { return p_light().nf(); }
 
-  #define MTM_MEMBER(NAME) RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
   /// views of the individual components of the splitting matrix
   ///@{
-  MTM_MEMBER(pshq      ) //< A^PS_Qq    Q+Qbar from singlet(nflight)
-  MTM_MEMBER(pshg      ) //< A^PS_Qg    Q+Qbar from gluon  (nflight)
-  MTM_MEMBER(nshv      ) //< A_{Qq}^{PS,s}, gives (h-hbar) from valence(nflight) [=sum_i (q_i-qbar_i)]   
-  MTM_MEMBER(nsqq_h    ) //< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
-  MTM_MEMBER(sgg_h     ) //< A^S_gg,Q   Δg(nfheavy) from g(nflight)
-  MTM_MEMBER(sgq_H     ) //< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
-  MTM_MEMBER(psqq_h    ) //< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
-  MTM_MEMBER(sqg_h     ) //< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
-  MTM_MEMBER(nsmqq_h   ) //< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
-  MTM_MEMBER(pshg_msbar) //< replaces PShg when masses are MSbar (not yet supported at N3LO)
-  ///@}
+  #define MTM_MEMBER(NAME) RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,split_mat)
+  MTM_MEMBER(p_light) //< the a split_mat for the light flavours
   #undef MTM_MEMBER
+  #define MTM_MEMBER(NAME) RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,grid_conv)
+  MTM_MEMBER(pshq   ) //< A^PS_Qq    Q+Qbar from singlet(nflight)
+  MTM_MEMBER(pshg   ) //< A^PS_Qg    Q+Qbar from gluon  (nflight)
+  MTM_MEMBER(nshv   ) //< A_{Qq}^{PS,s}, gives (h-hbar) from valence(nflight) [=sum_i (q_i-qbar_i)]   
+  #undef MTM_MEMBER
+  ///@}
 
   /// compound assignment arithmetic operators
   ///@{

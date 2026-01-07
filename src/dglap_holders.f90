@@ -38,7 +38,7 @@ module dglap_holders
      type(coeff_mat), pointer :: allC(:,:)         ! use of these is deprecated as of hoppet v2.0
      type(coeff_mat), pointer :: C2, C2_1, CL_1    ! use of these is deprecated as of hoppet v2.0
 
-     !----------------------------------  nloop,nf
+     !----------------------------------  nloop,nf_heavy
      type(mass_threshold_mat), pointer :: allMTM(:,:) => null()
      type(mass_threshold_mat), pointer :: MTM2 ! legacy, deprecated, pointer to MTM(3,nf)
      type(mass_threshold_mat), pointer :: MTM_NNLO, MTM_N3LO ! will be pointers to MTM(3,nf) and MTM(4,nf)
@@ -85,6 +85,7 @@ contains
     integer, optional,  intent(in)    :: nflo, nfhi
     !-- holds temporary results
     type(grid_conv) :: dconv
+    ! 
     !-- holds all possible combinations of coefficient and splitting functions
     !   needed for DIS schemes
     type(grid_conv) :: Cq,Cg
@@ -121,7 +122,7 @@ contains
     ! mass steps not always supported. Work out if they are
     need_MTM = dh%nloop >= 3 .and. dh%factscheme == factscheme_MSbar .and. mass_steps_on &
             &.and. lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2)
-    if (need_MTM) allocate(dh%allMTM(3:nloop,nflo:nfhi))
+    if (need_MTM) allocate(dh%allMTM(3:nloop,nflo+1:nfhi))
 
     !-- want to reset it at end
     nfstore = nf_int
@@ -140,12 +141,15 @@ contains
              call InitSplitMatNNLO(grid, dh%P_NNLO, dh%factscheme)
              if (need_MTM) then
                if (nflcl == lbound(dh%allP,dim=2)+1) then
+                  ! carries out initialisation for nf_heavy = current global nf_int, i.e. nflcl
                   call InitMTMNNLO(grid,dh%MTM_NNLO)
                else if (nflcl > lbound(dh%allP,dim=2) + 1) then
-                  ! try to be efficient by recycling MTMs from lower nf
-                  ! since all that changes is nf_int variable inside MTM_NNLO
+                  ! try to be efficient by recycling MTMs from lower nf,
+                  ! since all that changes is nf_int variable inside MTM_NNLO%P_light
                   call InitMTM(dh%MTM_NNLO, dh%allMTM(3, lbound(dh%allP,dim=2) + 1))
-                  call SetNfMTM(dh%MTM_NNLO, nflcl)
+                  dh%MTM_NNLO%P_light%nf_int = nflcl-1
+                  ! Alternatively, explicitly initialise each time
+                  ! call InitMTMNNLO(grid,dh%MTM_NNLO)
                end if
              end if
           end if
@@ -153,7 +157,9 @@ contains
              call InitSplitMatN3LO(grid, dh%P_N3LO, dh%factscheme)
              ! we do not need this for the lower nf, because it takes
              ! us from nf-1->nf
-             if (nflcl /= lbound(dh%allP,dim=2)) call InitMTMN3LO(grid,dh%MTM_N3LO)
+             if (nflcl /= lbound(dh%allP,dim=2)) then
+               call InitMTMN3LO(grid,dh%MTM_N3LO)
+             end if
              !-- do this once, and only if really needed
 !             if (lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2) &
 !                  &.and. mass_steps_on &
@@ -378,6 +384,7 @@ contains
     type(dglap_holder), intent(inout) :: dh
     integer, intent(in) :: nflcl
     logical, optional, intent(in) :: quark_masses_are_MSbar
+    integer, save :: nwarn_msbar = 5
 
     if (nflcl < lbound(dh%allP,dim=2) .or. nflcl > ubound(dh%allP,dim=2)) then
       call wae_Error('SetNfDglapHolder: tried to set unsupported nf; requested nf was',intval=nflcl)
@@ -397,12 +404,20 @@ contains
        nullify(dh%P_NLO)
     end if
     
+    if (default_or_opt(.false., present(quark_masses_are_MSbar))) then
+      call wae_warn(nwarn_msbar, &
+                    "SetNfDglapHolder: quark_masses_are_MSbar=.true. argument no longer does anything as of hoppet v2.x",&
+                    "MSbar treatment of mass thresholds should be handled with manual corrections to MTM, cf. evolution.f90" )
+    end if
+
     if (dh%nloop >= 3) then
        dh%P_NNLO => dh%allP(3,nflcl)
        if (associated(dh%allMTM) .and. nflcl >= lbound(dh%allMTM,2)) then
          dh%MTM_NNLO => dh%allMTM(3,nflcl)
          dh%MTM2     => dh%allMTM(3,nflcl)
-         if (present(quark_masses_are_MSbar)) call SetMassSchemeMTM(dh%MTM_NNLO, quark_masses_are_MSbar)
+         ! As of hoppet v2.x (2.2 or 2.3), we are using the new MTMs, which don't have the 
+         ! kludge to get MSbar masses, which anyway worked only at NNLO
+         !if (present(quark_masses_are_MSbar)) call SetMassSchemeMTM(dh%MTM_NNLO, quark_masses_are_MSbar)
          dh%MTM2_exists = .true.
        else
          nullify(dh%MTM_NNLO)
@@ -420,7 +435,7 @@ contains
        dh%P_N3LO => dh%allP(4,nflcl)
        if (associated(dh%allMTM) .and. nflcl >= lbound(dh%allMTM,2)) then
          dh%MTM_N3LO => dh%allMTM(4,nflcl)
-         if (present(quark_masses_are_MSbar)) call SetMassSchemeMTM(dh%MTM_N3LO, quark_masses_are_MSbar)
+         !gpstmp! if (present(quark_masses_are_MSbar)) call SetMassSchemeMTM(dh%MTM_N3LO, quark_masses_are_MSbar)
        else
          nullify(dh%MTM_N3LO)
        end if

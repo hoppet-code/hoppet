@@ -1871,11 +1871,12 @@ contains
     !GridConvAllocated = .false.
   end function GridConvAllocated
   
-  !--------------------------------------------------------------------
-  ! initialise a grid convolution with zero
-  ! Default for alloc is .true.; writing it this way allows
-  ! in principle the possibility of a more levels of recursion
-  ! in the grid def, should one ever want to have the option...
+  !-------------------------------------------------------------------------
+  !! Initialise a grid convolution with zero, with a structure according to the grid_def
+  !!
+  !! The gc is allocated if it is not already allocated, unless alloc=.false.
+  !! If the gc is already allocated, then its grid_def must be identical
+  !! the supplied grid_def.
   recursive subroutine conv_InitGridConv_zero(grid,gc,alloc)
     type(grid_def),  intent(in)    :: grid
     type(grid_conv), intent(inout) :: gc
@@ -2097,10 +2098,12 @@ contains
           call conv_DelGridConv_0d(gc%subgc(isub))
        end do
        deallocate(gc%subgc,stat=istat)
-       nullify(gc%subgc)  ! to make sure it isn't left dangling (necessary?)
+       nullify(gc%subgc)  ! to make sure it isn't left dangling 
+                          ! (necessary so that a second call doesn't try to delete twice)
     else
        deallocate(gc%conv,stat=istat)
-       nullify(gc%conv) ! to make sure it isn't left dangling (necessary?)
+       nullify(gc%conv) ! to make sure it isn't left dangling
+                        ! (necessary so that a second call doesn't try to delete twice)
     end if
 
     if (istat /= 0) then

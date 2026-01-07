@@ -1,0 +1,18 @@
+Initialisation of Mass Threshold Matrices with code from libOME
+*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,
+*     A. von Manteuffel, C. Schneider, and K. Schönwald,
+*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",
+*     arXiv:2510.02175 (DESY 24-037), 2512.13508, https://gitlab.com/libome/libome
+
+           Evaluating PDFs at Q =  100.000 GeV
+    x      u-ubar      d-dbar    2(ubr+dbr)    c+cbar       gluon
+1.0E-05  2.9652E-03  1.7622E-03  3.4066E+01  1.5576E+01  2.1963E+02
+1.0E-04  1.3611E-02  7.9825E-03  1.5189E+01  6.5766E+00  8.7904E+01
+1.0E-03  5.9373E-02  3.4205E-02  6.2635E+00  2.4196E+00  3.0114E+01
+1.0E-02  2.3153E-01  1.2970E-01  2.2512E+00  6.6848E-01  7.7558E+00
+1.0E-01  5.5155E-01  2.7144E-01  3.8773E-01  6.4732E-02  8.5600E-01
+3.0E-01  3.4942E-01  1.2968E-01  3.5196E-02  3.8925E-03  7.9818E-02
+5.0E-01  1.2041E-01  3.1309E-02  2.3754E-03  2.1406E-04  7.7690E-03
+7.0E-01  1.9897E-02  3.0588E-03  5.3823E-05  4.3537E-06  3.7899E-04
+9.0E-01  3.4646E-04  1.7536E-05  2.5632E-08  2.2920E-09  1.2105E-06
+Timings (init, preevln, evln, interp) =    0.53020700000   0.00020100000   0.02932600000   0.00000011217 s, nrep=      1, nrep_interp=   1000

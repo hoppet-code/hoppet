@@ -118,14 +118,17 @@ contains
   !------------------------------------------------
   !! a vector version of the above
   subroutine pdfr_HumanToEvln_1d(prep, qh, qe)
+    use iso_c_binding, only : c_loc, c_associated
     type(pdf_rep), intent(in)  :: prep
-    real(dp),      intent(in)  :: qh(:,ncompmin:)
-    real(dp),      intent(out) :: qe(:,ncompmin:)
+    real(dp),      intent(in) , target :: qh(:,ncompmin:)
+    real(dp),      intent(out), target :: qe(:,ncompmin:)
     integer :: n, i
 
     n = assert_eq(size(qh,dim=1),size(qe,dim=1),'pdfr_HumanToEvln_1d')
     if (GetPdfRep(qh) /= pdfr_Human) call wae_error('pdfr_HumanToEvln_1d',&
          &'qh is not in "Human" format')
+    if (c_associated(c_loc(qe(1,ncompmin)), c_loc(qh(1,ncompmin)) )) &
+         &call wae_error('pdf_HumanToEvln_1d', 'qe and qh point to same memory location, which is not safe')
 
     do i = 1, n
        call pdfr_HumanToEvln_sc(prep, qh(i,:), qe(i,:))
@@ -179,15 +182,18 @@ contains
 
   !------------------------------------------------
   !! a vector version of the above
-  subroutine pdfr_EvlnToHuman_1d(prep, qe, qh)
+  subroutine pdfr_EvlnToHuman_1d(prep, qe, qh)    
+    use iso_c_binding, only : c_loc, c_associated
     type(pdf_rep), intent(in)  :: prep
-    real(dp),      intent(in)  :: qe(:,ncompmin:)
-    real(dp),      intent(out) :: qh(:,ncompmin:)
+    real(dp),      intent(in) , target :: qe(:,ncompmin:)
+    real(dp),      intent(out), target :: qh(:,ncompmin:)
     integer :: n, i
     n = assert_eq(size(qh,dim=1),size(qe,dim=1),'pdfr_EvlnToHuman_1d')
     !if (GetPdfRep(qe) /= pdfr_Evln) &
     if (GetPdfRep(qe) /= prep%nf) &
          &call wae_error('pdf_EvlnToHuman_1d', 'qe is not in correct "Evln" format')
+    if (c_associated(c_loc(qe(1,ncompmin)), c_loc(qh(1,ncompmin)) )) &
+         &call wae_error('pdf_EvlnToHuman_1d', 'qe and qh point to same memory location, which is not safe')
     do i = 1, n
        call pdfr_EvlnToHuman_sc(prep, qe(i,:), qh(i,:))
     end do
