@@ -2013,7 +2013,7 @@ module hoppet_init_new_mtm
   use mass_thresholds_n3lo
 #endif
   use qcd
-  use dglap_objects, only: cobj_InitSplitLinks
+  use dglap_objects_sm_oldmtm, only: cobj_InitSplitLinks
   use dglap_objects_new_mtm
   use dglap_choices
   use warnings_and_errors
