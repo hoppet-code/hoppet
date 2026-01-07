@@ -2,6 +2,15 @@
 
 2025-01-07 Gavin 
 
+	* src/evolution.f90:
+	* benchmarking/prec_and_timing.f90:
+	* benchmarking/prec_and_timing.default_output/gen-default-output.sh:
+	- Fixed bug in handling of muR/Q != 1 in preparation of cached N3LO evolution, 
+	  specifically handling of thresholds
+	- added -muRQ option to prec_and_timing to allow testing of muR/Q != 1
+	- added validation tests to gen-default-output.sh for muR/Q != 1 both
+	  with and without pre-evolution
+
 	* src/dglap_holders.f90:
 	* src/dglap_objects.F90:
 	* unit-tests/test_libome.F90:
