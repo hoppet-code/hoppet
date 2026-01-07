@@ -12,8 +12,24 @@
   contribution that starts at N3LO (arXiv:2512.13508). One gets this by
   choosing the option n3lo_nfthreshold_libOME_2512 (new default).
 
-* mass_threshold_mat has a new NShV component, to hold the Q-Qbar
-  threshold contribution
+* mass_threshold_mat structure has been refactored to have the full
+  structure that can appear at any order in perturbation theory:
+  - Organised as a nf_light split mat (P_light) and three grid_conv objects 
+    (PHhq,PShg,NShV). 
+  - SetToConvolution and AddWithCoeff can now be used between split_mat 
+    and mass_threshold_mat objects, and a mass_threshold_mat can be 
+    initialised from an nf_heavy split_mat object.
+  - Some (limited) breakage of backwards compatibility: some components 
+    of a mass_threshold_mat now have to be accessed through P_light,
+    MSbar scheme masses no longer handled simultaneously with pole masses
+    (did not easily generalise beyond NNLO), and functions to set
+    the scheme and the nf value have been removed.
+
+## Bug fixes
+
+* fixed bug in cached variant of N3LO evolution with mu_R!=mu_Q, where
+  the mass threshold left out the scale-compensating term at N3LO. 
+  Normal (non-cached) evolution was unaffected.
 
 # Release 2.1.4, 9 December 2025
 

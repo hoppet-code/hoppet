@@ -2,6 +2,10 @@
 
 2025-01-07 Gavin (later)
 
+	* NEWS.md:
+	updated with developments from the 2025-12-new-mtm branch, prior
+	to merging into dev.
+
 	* src/dglap_objects.F90:
 	arranged for more sensible naming of the different individual modules:
 	- hoppet_split_mat: defines split_mat type and associated functions
