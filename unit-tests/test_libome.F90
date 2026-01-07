@@ -145,7 +145,7 @@ contains
 #endif
       real(dp) :: moment_N
       integer  :: imoment_N
-      type(new_mtm_obj) :: mtm2, mtm3, mtm3_fortran
+      type(mass_threshold_mat) :: mtm2, mtm3, mtm3_fortran
       type(grid_conv) :: mtm2_psqq, mtm3_psqq, dh_psqq, mtm3_fortran_psqq
 
       call InitMTMLibOME(grid, mtm2, nloop=3)
@@ -348,7 +348,7 @@ contains
     real(dp) :: dtoy_mtm(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: xvals(0:grid%ny), x, xtest(3) = [0.01_dp, 0.1_dp, 0.5_dp]
     real(dp) :: ln_Q2_over_M2 = 4.3_dp
-    type(new_mtm_obj) :: mtm_lm0, mtm_lmQ2
+    type(mass_threshold_mat) :: mtm_lm0, mtm_lmQ2
     integer  :: ix
 
     xvals = xValues(grid)

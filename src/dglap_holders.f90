@@ -39,9 +39,9 @@ module dglap_holders
      type(coeff_mat), pointer :: C2, C2_1, CL_1    ! use of these is deprecated as of hoppet v2.0
 
      !----------------------------------  nloop,nf_heavy
-     type(new_mtm_obj), pointer :: allMTM(:,:) => null()
-     type(new_mtm_obj), pointer :: MTM2 ! legacy, deprecated, pointer to MTM(3,nf)
-     type(new_mtm_obj), pointer :: MTM_NNLO, MTM_N3LO ! will be pointers to MTM(3,nf) and MTM(4,nf)
+     type(mass_threshold_mat), pointer :: allMTM(:,:) => null()
+     type(mass_threshold_mat), pointer :: MTM2 ! legacy, deprecated, pointer to MTM(3,nf)
+     type(mass_threshold_mat), pointer :: MTM_NNLO, MTM_N3LO ! will be pointers to MTM(3,nf) and MTM(4,nf)
      logical    :: MTM2_exists=.false.
      integer    :: factscheme, nloop
      !--------------------------------  nf  ------------

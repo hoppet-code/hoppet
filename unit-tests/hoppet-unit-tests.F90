@@ -37,7 +37,7 @@ program hoppet_unit_tests
   call unit_tests_alphas()
   call test_InitGridConv()
   call test_libome_interface()
-  call test_new_mtm_obj()
+  call test_mass_threshold_mat()
 
   if (unit_test_failures > 0) then
     ! print a message in red

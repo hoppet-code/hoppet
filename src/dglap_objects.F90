@@ -1548,14 +1548,14 @@ module dglap_objects_new_mtm
   !-----------------------------------------------------------------
   !! See logbooks/2025-12-flavour-struct for some discussion
   !! of how this type will work
-  type :: new_mtm_obj
+  type :: mass_threshold_mat
     type(split_mat) :: P_light !!< the part that acts on the light flavours
     type(grid_conv) :: PShq !!< (h+hbar) from singlet(nflight)
     type(grid_conv) :: PShg !!< (h+hbar) from gluon  (nflight)
     type(grid_conv) :: NShV !!< (h-hbar) from valence(nflight) i.e. sum_i (q_i-qbar_i)
-  end type new_mtm_obj
+  end type mass_threshold_mat
 
-  public :: new_mtm_obj
+  public :: mass_threshold_mat
 
   interface InitMTM
     module procedure InitMTM_zero, InitMTM_from_split_mat, InitMTM_from_new_mtm
@@ -1592,7 +1592,7 @@ contains
   !! Initialise an mtm to zero, with the given value of nf_light
   subroutine InitMTM_zero(grid, mtm, nf_light)
     type(grid_def),               intent(in)    :: grid
-    type(new_mtm_obj), intent(inout) :: mtm
+    type(mass_threshold_mat), intent(inout) :: mtm
     integer,                      intent(in)    :: nf_light
     !---------------------------------------------
     call InitSplitMat(grid, mtm%P_light, nf=nf_light)
@@ -1605,7 +1605,7 @@ contains
   !! Initialise a mass threshold object from nf-1 -> nf from a splitting
   !! matrix with nf flavours.
   subroutine InitMTM_from_split_mat(mtm, P)
-    type(new_mtm_obj), intent(out) :: mtm
+    type(mass_threshold_mat), intent(out) :: mtm
     type(split_mat),              intent(in)  :: P
     !---------------------------------------------
     integer :: nf_light_int
@@ -1665,8 +1665,8 @@ contains
   !----------------------------------------------
   !! Initialise an mtm from another one
   subroutine InitMTM_from_new_mtm(mtm, mtm_in)
-    type(new_mtm_obj), intent(inout) :: mtm
-    type(new_mtm_obj), intent(in)  :: mtm_in
+    type(mass_threshold_mat), intent(inout) :: mtm
+    type(mass_threshold_mat), intent(in)  :: mtm_in
 
     call InitSplitMat(mtm%P_light, mtm_in%P_light)
 
@@ -1678,7 +1678,7 @@ contains
   !----------------------------------------------
   !! Initialise an mtm from an old-style one
   subroutine InitMTM_from_old_mtm(mtm, mtm_in)
-    type(new_mtm_obj), intent(inout) :: mtm
+    type(mass_threshold_mat), intent(inout) :: mtm
     type(old_mass_threshold_mat),     intent(in)    :: mtm_in
     integer :: nf_light
 
@@ -1706,7 +1706,7 @@ contains
   !! return the convolution of mtm with q
   function ConvMTMNew(mtm,q) result(Pxq)
     use pdf_representation
-    type(new_mtm_obj), intent(in) :: mtm
+    type(mass_threshold_mat), intent(in) :: mtm
     real(dp),   intent(in) :: q(0:,ncompmin:)
     real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ubound(q,dim=2))
     real(dp) :: singlet(0:ubound(q,dim=1)), valence(0:ubound(q,dim=1)), qbar_sum(0:ubound(q,dim=1))
@@ -1735,7 +1735,7 @@ contains
   !----------------------------------------------
   !! mutliply the mtm by fact
   subroutine Multiply_mtm(mtm, fact)
-    type(new_mtm_obj), intent(inout) :: mtm
+    type(mass_threshold_mat), intent(inout) :: mtm
     real(dp),                     intent(in)    :: fact
     call Multiply(mtm%P_light, fact)
     call Multiply(mtm%PShg, fact)
@@ -1746,8 +1746,8 @@ contains
   !----------------------------------------------
   !! apply mtm += factor * mtm_to_add (factor is optional)
   subroutine AddWithCoeff_mtm_mtm(mtm, mtm_to_add, factor)
-    type(new_mtm_obj), intent(inout) :: mtm
-    type(new_mtm_obj), intent(in)    :: mtm_to_add
+    type(mass_threshold_mat), intent(inout) :: mtm
+    type(mass_threshold_mat), intent(in)    :: mtm_to_add
     real(dp),                     intent(in), optional :: factor
 
     call AddWithCoeff(mtm%P_light, mtm_to_add%P_light, factor)
@@ -1764,10 +1764,10 @@ contains
   subroutine AddWithCoeff_mtm_splitmat(mtm, sm_to_add, factor)
     use warnings_and_errors
     use hoppet_to_string, only : to_string
-    type(new_mtm_obj), intent(inout) :: mtm
+    type(mass_threshold_mat), intent(inout) :: mtm
     type(split_mat),              intent(in)    :: sm_to_add
     real(dp),                     intent(in), optional :: factor
-    type(new_mtm_obj) :: mtm_to_add
+    type(mass_threshold_mat) :: mtm_to_add
 
     if (sm_to_add%nf_int == mtm%P_light%nf_int) then
       call AddWithCoeff(mtm%P_light, sm_to_add, factor)
@@ -1788,8 +1788,8 @@ contains
   subroutine SetToConvolution_mtm_sm(MTM_A, MTM_B, P_C)
     use warnings_and_errors
     use hoppet_to_string
-    type(new_mtm_obj), intent(inout) :: MTM_A
-    type(new_mtm_obj), intent(in)    :: MTM_B
+    type(mass_threshold_mat), intent(inout) :: MTM_A
+    type(mass_threshold_mat), intent(in)    :: MTM_B
     type(split_mat),              intent(in)    :: P_C
     !---------------------------------------------
     type(grid_conv) :: qg_gq, gq_qg
@@ -1825,9 +1825,9 @@ contains
     use assertions
     use hoppet_to_string
     use convolution
-    type(new_mtm_obj), intent(inout) :: MTM_A
+    type(mass_threshold_mat), intent(inout) :: MTM_A
     type(split_mat),              intent(in)    :: P_B
-    type(new_mtm_obj), intent(in)    :: MTM_C
+    type(mass_threshold_mat), intent(in)    :: MTM_C
     !---------------------------------------------
     type(grid_conv) :: tmp1, tmp2, P_B_PS_plus, P_B_PS_minus
     integer  :: nf_light_int, nf_heavy_int
@@ -1965,7 +1965,7 @@ contains
   subroutine SetDerivedMTM(mtm, probes)
     use pdf_representation
     use hoppet_probes, only : probe_norm
-    type(new_mtm_obj), intent(inout) :: mtm
+    type(mass_threshold_mat), intent(inout) :: mtm
     real(dp),   pointer,          intent(in) :: probes(:,:,:)
     real(dp), allocatable :: tmp(:,:)
     integer :: nprobes_1d,nprobes, il, ih, nh
@@ -1996,7 +1996,7 @@ contains
   end subroutine SetDerivedMTM
   !-------------------------------------------------------
   subroutine DelNewMTM(mtm)
-    type(new_mtm_obj), intent(inout) :: mtm
+    type(mass_threshold_mat), intent(inout) :: mtm
     call Delete(mtm%P_light)
     call Delete(mtm%PShq)
     call Delete(mtm%PShg)
@@ -2034,7 +2034,7 @@ contains
   subroutine InitMTMNNLO(grid,MTM)
     use qcd
     type(grid_def),           intent(in)  :: grid
-    type(new_mtm_obj), intent(out) :: MTM
+    type(mass_threshold_mat), intent(out) :: MTM
     integer :: nf_light
     !logical, parameter :: vogt_A2PShg = .false.
     !logical, parameter :: vogt_A2PShg = .true.
@@ -2089,7 +2089,7 @@ contains
   !! the global variable n3lo_nfthreshold
   subroutine InitMTMN3LO(grid,MTM_N3LO)
     type(grid_def),           intent(in)  :: grid
-    type(new_mtm_obj), intent(out) :: MTM_N3LO
+    type(mass_threshold_mat), intent(out) :: MTM_N3LO
     integer, save :: nwarn_n3lo_nfthreshold = 1
 
     if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME_2510) then
@@ -2134,7 +2134,7 @@ contains
     use qcd, only: nf_int
     use hoppet_libome_fortran
     type(grid_def),           intent(in)  :: grid
-    type(new_mtm_obj), intent(out) :: MTM
+    type(mass_threshold_mat), intent(out) :: MTM
     integer,                  intent(in)  :: nloop
     real(dp),  optional,      intent(in)  :: LM
     logical,   optional,      intent(in)  :: include_NShV    
@@ -2202,7 +2202,7 @@ contains
 
   subroutine InitMTMN3LOExactFortran(grid,MTM_N3LO)
     type(grid_def),           intent(in)  :: grid
-    type(new_mtm_obj), intent(out) :: MTM_N3LO
+    type(mass_threshold_mat), intent(out) :: MTM_N3LO
     logical, save :: first_time = .true.
     integer, save :: nwarn_NShV = 1
     !! 103 uses two alphas points to separate out aalphas**3 from alphas**2, 
