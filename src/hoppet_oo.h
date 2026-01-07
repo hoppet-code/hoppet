@@ -1093,7 +1093,8 @@ public:
 
   mass_threshold_mat() {}
 
-  /// construct and allocate a mass_threshold_mat object for the given number of flavours
+  /// construct and allocate a mass_threshold_mat object for the given number of flavours,
+  /// including the heavy one
   mass_threshold_mat(int nf_heavy) {
     _ptr = hoppet_cxx__mass_threshold_mat__new(nf_heavy);
   }

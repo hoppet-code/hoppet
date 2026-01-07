@@ -912,17 +912,17 @@ module hoppet_cxx_oo_mass_threshold_mat
   implicit none
 contains
 
-  !! return a C pointer to a new mass_threshold_mat with the given lcl_nf
-  function hoppet_cxx__mass_threshold_mat__new(lcl_nf) bind(C) result(mass_threshold_mat_ptr)
+  !! return a C pointer to a new mass_threshold_mat with the given nf_heavy
+  function hoppet_cxx__mass_threshold_mat__new(nf_heavy) bind(C) result(mass_threshold_mat_ptr)
     implicit none
-    integer(c_int), intent(in), value :: lcl_nf
+    integer(c_int), intent(in), value :: nf_heavy
     type(c_ptr) :: mass_threshold_mat_ptr
     !--
     type(mass_threshold_mat), pointer :: f_ptr
 
     allocate(f_ptr)
     call cobj_InitSplitLinks(f_ptr%P_light)
-    f_ptr%P_light%nf_int = lcl_nf
+    f_ptr%P_light%nf_int = nf_heavy - 1
     mass_threshold_mat_ptr = c_loc(f_ptr)
   end function hoppet_cxx__mass_threshold_mat__new
 

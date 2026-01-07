@@ -156,7 +156,6 @@ inline split_mat_f * generic_copy(const split_mat_f * ptr) {return hoppet_cxx__s
 /// mass_threshold_mat function wrappers
 extern "C" {
   mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__new(int nf_heavy);
-  void hoppet_cxx__mass_threshold_mat__set_nf(mass_threshold_mat_f * ptr, int nf_lcl);
   void hoppet_cxx__mass_threshold_mat__multiply(mass_threshold_mat_f * ptr, const double factor);
   void hoppet_cxx__mass_threshold_mat__add     (mass_threshold_mat_f * ptr, const mass_threshold_mat_f * other, double * factor = nullptr);
   mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(const mass_threshold_mat_f * mtm, const double * q_in_data, double * q_out_data);
