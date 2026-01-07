@@ -61,6 +61,7 @@ program prec_and_timing
   real(dp), pointer  :: initial_condition(:,:)
   type(pdf_table)    :: table
   logical            :: masses_are_MSbar = .false.
+  real(dp)           :: muR_Q
   logical            :: output, outputgrid, output_benchmark, preev, auto_nrep
   logical            :: write_lhapdf
   character(len=999) :: lhapdf_out = ""
@@ -146,6 +147,7 @@ program prec_and_timing
   end if
 
   masses_are_MSbar = log_val_opt("-msbar-masses", masses_are_MSbar)
+  muR_Q = dble_val_opt("-muRQ",1.0_dp) ! renormalization scale / evolution scale
 
   ! decide how many repetitions, and what form of output
   n_alphas = int_val_opt("-n-alphas",1)
@@ -194,7 +196,7 @@ program prec_and_timing
   ! set up the table
   call AllocPdfTable(grid,table,Qmin,Qmax,dlnlnQ,lnlnQ_order=olnlnQ)
   call AddNfInfoToPdfTable(table,coupling)
-  if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling)
+  if (preev) call PreEvolvePdfTable(table,Qinit,dh,coupling,muR_Q=muR_Q)
   call cpu_time(time_prev_done)
 
   !call PDFTableSetYInterpOrder(y_interp_order)
@@ -210,7 +212,7 @@ program prec_and_timing
      if (preev) then
         call EvolvePdfTable(table,initial_condition)
      else
-        call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling)
+        call EvolvePdfTable(table,Qinit,initial_condition,dh,coupling,muR_Q=muR_Q)
      end if     
   end do
   call cpu_time(time_ev_done)
