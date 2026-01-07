@@ -1,5 +1,18 @@
 --------- 2025-12-new-mtm branch ---------
 
+2025-01-07 Gavin (later)
+
+	* src/dglap_holders.f90           :
+	* src/dglap_objects.F90           :
+	* src/evolution.f90               :
+	* unit-tests/hoppet-unit-tests.F90:
+	* unit-tests/test_libome.F90      :
+	* unit-tests/test_new_mtm.f90     :
+	new_mass_threshold_mat -> mass_threshold_mat and removed was was the
+	old mass_threshold_mat type and associated functions.
+	NB: done in steps, so look at preceding commits for intermediate stages,
+	including code with the old MTMs named as old_mass_threshold_mat	
+
 2025-01-07 Gavin 
 
 	* src/evolution.f90:

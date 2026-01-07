@@ -86,7 +86,6 @@ contains
     !-- holds temporary results
     type(grid_conv) :: dconv
     ! 
-    type(old_mass_threshold_mat) :: old_mtm_nnlo, old_mtm_n3lo
     !-- holds all possible combinations of coefficient and splitting functions
     !   needed for DIS schemes
     type(grid_conv) :: Cq,Cg
@@ -144,9 +143,6 @@ contains
                if (nflcl == lbound(dh%allP,dim=2)+1) then
                   ! carries out initialisation for nf_heavy = current global nf_int, i.e. nflcl
                   call InitMTMNNLO(grid,dh%MTM_NNLO)
-                  !call InitMTMNNLO(grid,old_mtm_NNLO)
-                  !call InitMTM(dh%MTM_NNLO, old_mtm_NNLO)
-                  !call Delete(old_mtm_NNLO)
                else if (nflcl > lbound(dh%allP,dim=2) + 1) then
                   ! try to be efficient by recycling MTMs from lower nf,
                   ! since all that changes is nf_int variable inside MTM_NNLO%P_light
@@ -154,8 +150,6 @@ contains
                   dh%MTM_NNLO%P_light%nf_int = nflcl-1
                   ! Alternatively, explicitly initialise each time
                   ! call InitMTMNNLO(grid,dh%MTM_NNLO)
-                  ! !!call InitMTM(dh%MTM_NNLO, old_mtm_NNLO)
-                  ! !!call Delete(old_mtm_NNLO)
                end if
              end if
           end if
@@ -165,7 +159,6 @@ contains
              ! us from nf-1->nf
              if (nflcl /= lbound(dh%allP,dim=2)) then
                call InitMTMN3LO(grid,dh%MTM_N3LO)
-               !call InitMTM(dh%MTM_N3LO, old_mtm_n3lo)
              end if
              !-- do this once, and only if really needed
 !             if (lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2) &

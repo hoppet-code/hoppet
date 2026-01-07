@@ -65,42 +65,6 @@ module dglap_objects_sm_oldmtm
   public             :: split_mat
 
 
-  !---------------------------------------------------------------
-  ! for going from nf to nf+1. Currently contains pieces
-  ! required for O(as^2), but not the full general structure.
-  !
-  ! The full (flavor-symmetric) structure is given in Eqs.(32-35) of
-  ! 1403.6356, and 1406.4654 eq. 7.1 for the non-singlet part (note
-  ! different NF convention between the two papers. We use the
-  ! latter)..
-  type old_mass_threshold_mat
-     ! pieces that start at NNLO
-     type(grid_conv) :: PShq   !!< A^PS_Qq    Q+Qbar from singlet(nflight)
-     type(grid_conv) :: PShg   !!< A^PS_Qg    Q+Qbar from gluon  (nflight)
-     type(grid_conv) :: NSqq_H !!< A^NS_qq,Q  ΔNS(nfheavy) from NS(nflight)
-     type(grid_conv) :: Sgg_H  !!< A^S_gg,Q   Δg(nfheavy) from g(nflight)
-     type(grid_conv) :: Sgq_H  !!< A^S_gq,Q   Δg(nfheavy) from singlet(nflight)
-     ! pieces that start at N3LO
-     type(grid_conv) :: PSqq_H  !!< A^PS_qq,Q  Δsinglet(nfheavy) from singlet(nflight)
-     type(grid_conv) :: Sqg_H   !!< A^S_qg,Q   Δsinglet(nfheavy) from gluon(nflight)
-     type(grid_conv) :: NSmqq_H !!< A^{NSm}_qq,Q ΔNSminus(1:nflight) from NSminus(1:nflight)
-     type(grid_conv) :: NShV    !!< A_{Qq}^{PS,s}, gives (h-hbar) from valence(nflight) [=sum_i (q_i-qbar_i)]
-     ! pieces related to the case of thresholds at MSbar masses
-     ! NB: not supported yet at N3LO
-     type(grid_conv) :: PShg_MSbar !!< replaces PShg when masses are MSbar
-     real(dp)        :: Sgg_H_extra_MSbar_delta
-     !! LOOPS == 1+POWER OF AS2PI,
-     !! NB: if adding two pieces with different numbers of loops
-     !!     this contains the maximum among the two pieces
-     integer         :: loops
-     !! nf_int = nf including heavy quark.
-     integer         :: nf_int
-     !! a flag to indicate that this MTM is to be used for a transition
-     !! at an MSbar mass
-     logical         :: masses_are_MSbar
-  end type old_mass_threshold_mat
-  public :: old_mass_threshold_mat
-
   !-----------------------------------------------------------------
   ! holds the components of a coefficient function
   !
@@ -145,14 +109,6 @@ module dglap_objects_sm_oldmtm
   public :: InitSplitMat!, Delete_sm
   !public :: AddWithCoeff_sm, Multiply_sm
   !public :: cobj_PConv, cobj_PConv_1d
-
-  interface InitMTM
-    module procedure InitMTM_from_MTM
-  end interface
-  public :: InitMTM
-  public :: InitMTMNNLO, InitMTMN3LO
-  public :: InitMTMLibOME, InitMTMN3LOExactFortran
-  public :: SetMassSchemeMTM, SetNfMTM 
   
   !-------- things for splitting functions --------------------
   interface cobj_InitCoeff
@@ -165,11 +121,11 @@ module dglap_objects_sm_oldmtm
 
 
   interface operator(*)
-     module procedure cobj_PConv, cobj_PConv_1d, cobj_CConv, cobj_ConvMTM
+     module procedure cobj_PConv, cobj_PConv_1d, cobj_CConv
   end interface
   public :: operator(*)
   interface operator(.conv.)
-     module procedure cobj_PConv, cobj_PConv_1d, cobj_CConv, cobj_ConvMTM
+     module procedure cobj_PConv, cobj_PConv_1d, cobj_CConv
   end interface
   public  :: operator(.conv.)
   public  :: cobj_Eval2LConv
@@ -182,12 +138,12 @@ module dglap_objects_sm_oldmtm
   public :: SetToZero
 
   interface Multiply
-     module procedure Multiply_sm, Multiply_MTM
+     module procedure Multiply_sm
   end interface
   public :: Multiply
 
   interface AddWithCoeff
-     module procedure AddWithCoeff_sm, AddWithCoeff_MTM
+     module procedure AddWithCoeff_sm
   end interface
   public :: AddWithCoeff
 
@@ -202,7 +158,7 @@ module dglap_objects_sm_oldmtm
   public :: SetToCommutator
 
   interface Delete
-     module procedure Delete_sm, cobj_DelMTM,  cobj_DelCoeff
+     module procedure Delete_sm, cobj_DelCoeff
   end interface
   public :: Delete
 
@@ -944,430 +900,6 @@ contains
     deallocate(probes)
   end subroutine SetDerivedSplitMat
   
-  !======================================================================
-  !         MASS THRESHOLDS
-  !======================================================================
-  ! Here we keep all things to do with mass thresholds
-
-  subroutine InitMTMNNLO(grid,MTM)
-    use qcd
-    type(grid_def),           intent(in)  :: grid
-    type(old_mass_threshold_mat), intent(out) :: MTM
-    !logical, parameter :: vogt_A2PShg = .false.
-    !logical, parameter :: vogt_A2PShg = .true.
-
-    call InitGridConv(grid, MTM%PSHq, sf_A2PShq)
-    select case (nnlo_nfthreshold_variant)
-    case(nnlo_nfthreshold_param)
-       call InitGridConv(grid, MTM%PSHg, sf_A2PShg_vogt)
-    case(nnlo_nfthreshold_exact)
-       call InitGridConv(grid, MTM%PSHg, sf_A2PShg)
-    case default
-       call wae_error('InitMTMNNLO', 'Unknown nnlo_threshold_variant',&
-            &intval=nnlo_nfthreshold_variant)
-    end select
-   
-    call InitGridConv(grid, MTM%NSqq_H, sf_A2NSqq_H)
-    call InitGridConv(MTM%NSmqq_H, MTM%NSqq_H) ! the plus and minus non-singlet pieces are the same
-    call InitGridConv(grid, MTM%Sgg_H, sf_A2Sgg_H)
-    call InitGridConv(grid, MTM%Sgq_H, sf_A2Sgq_H)
-
-    ! things specific to MSbar (CCN32-57)
-    MTM%Sgg_H_extra_MSbar_delta = 8.0_dp/three * CF * TR
-    ! here we need an extra -4CF * P_{q+qbar,g} = -8CF*P_{qg}
-    call InitGridConv(grid, MTM%PShg_MSbar, sf_Pqg)
-    call Multiply(MTM%PShg_MSbar, -8.0_dp*CF)
-    call AddWithCoeff(MTM%PShg_MSbar, MTM%PSHg)
-
-    ! pieces that are zero at NNLO
-    call InitGridConv(grid, MTM%PSqq_H)
-    call InitGridConv(grid, MTM%Sqg_H)
-    call InitGridConv(grid, MTM%NShV)
-
-    ! just store info that it is NNLO. For now it is obvious, but
-    ! one day when we have NNNLO it may be useful, to indicate
-    ! which structures exist and which do not. 
-    ! (Mind you inexistent structures have yet to be implemented here...)
-    MTM%loops = 3
-    !-- no default value
-    MTM%nf_int = nf_int
-    !-- by default 
-    MTM%masses_are_MSbar = .false.
-  end subroutine InitMTMNNLO
-
-  !! Initialise an N3LO MTM object based on the choice in 
-  !! the global variable n3lo_nfthreshold
-  subroutine InitMTMN3LO(grid,MTM_N3LO)
-    type(grid_def),           intent(in)  :: grid
-    type(old_mass_threshold_mat), intent(out) :: MTM_N3LO
-    integer, save :: nwarn_n3lo_nfthreshold = 1
-
-    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME_2510) then
-      call InitMTMLibOME(grid,MTM_N3LO,nloop=4, LM=zero, include_NShV=.false.)
-
-    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME_2512) then
-      call InitMTMLibOME(grid,MTM_N3LO,nloop=4, LM=zero, include_NShV=.true.)
-
-    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_exact_fortran) then
-      call InitMTMN3LOExactFortran(grid,MTM_N3LO)
-
-    else if (n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
-      call InitMTMNNLO(grid,MTM_N3LO) !! dummy initialisation to NNLO, just to get started
-      MTM_N3LO%loops = 4
-      call Multiply(MTM_N3LO, zero)
-
-      call wae_warn(nwarn_n3lo_nfthreshold, 'InitMTMN3LO: n3lo_nfthreshold = off not recommended for nloop=4')
-
-    else
-      call wae_error('InitMTMN3LO', 'Unknown n3lo_threshold_variant',&
-           &intval=n3lo_nfthreshold)
-    end if
-
-  end subroutine InitMTMN3LO
-
-
-  !! Initialise an MTM object using the libome routines of arXiv:2510.02175
-  !!
-  !! \param grid    The grid to use
-  !! \param MTM     The MTM object to initialise
-  !! \param nloop   The perturbative (hoppet) nloops; libOME order = nloop-1 = # of powers of alpha_s
-  !! \param LM      log(m^2/mu^2) where m is the heavy quark mass and mu the factorisation scale
-  !!
-  !! The number of light flavours is the global nf_int-1
-  !!
-  !! The expected relative accuracy on the underlying libOME is at least
-  !! as good as (2048 * epsilon(1.0_dp))~4.5e-13,  which will usually be
-  !! significantly better than the standard global integration precision
-  !! (convolution's DefaultConvolutionEps(), which defaults to 1e-7)
-  subroutine InitMTMLibOME(grid, MTM, nloop, LM, include_NShV)
-    use iso_c_binding, only: c_double, c_int
-    use qcd, only: nf_int
-    use hoppet_libome_fortran
-    type(grid_def),           intent(in)  :: grid
-    type(old_mass_threshold_mat), intent(out) :: MTM
-    integer,                  intent(in)  :: nloop
-    real(dp),  optional,      intent(in)  :: LM
-    logical,   optional,      intent(in)  :: include_NShV    
-    !-----------
-    integer, save :: nwarn_NShV_zero = 2
-    real(c_double) :: LM_c, nf_light_d
-    integer(c_int) :: order_c
-    logical, save :: first_time = .true.
-
-    if (first_time) then
-      first_time = .false.
-      write(6,'(a)') 'Initialisation of Mass Threshold Matrices with code from libOME'
-      write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
-      write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
-      write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
-      write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037), 2512.13508, https://gitlab.com/libome/libome'
-    end if
-
-    nf_light_d = real(nf_int-1,c_double)
-    if (present(LM)) then
-      LM_c = real(LM,c_double)
-    else
-      LM_c = zero
-    end if
-    order_c = nloop - 1
-
-    call InitGridConv(grid, MTM%PShq   , conv_OME(AQqPS_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%PShg   , conv_OME(AQg_ptr       , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%PSqq_H , conv_OME(AqqQPS_ptr    , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%NSqq_H , conv_OME(AqqQNSEven_ptr, order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%NSmqq_H, conv_OME(AqqQNSOdd_ptr , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%Sgg_H  , conv_OME(AggQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%Sgq_H  , conv_OME(AgqQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    call InitGridConv(grid, MTM%Sqg_H  , conv_OME(AqgQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
-
-    if (default_or_opt(.true., include_NShV)) then
-      call InitGridConv(grid, MTM%NShV  , conv_OME(AQqPSs_ptr   , order=order_c, nf_light=nf_light_d, LM=LM_c))
-    else
-      if (nloop >= 4) call wae_warn(nwarn_NShV_zero, &
-                                    'InitMTMLibOME: initialising N3LO or higher with NShV component set to zero')
-      call InitGridConv(grid, MTM%NShV)
-    end if
-    !call InitGridConv(grid, MTM%NShV)
-    !call InitGridConv(grid, MTM%NShV  , conv_OME(AQqPSs_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
-
-
-    ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
-    ! to be there to avoid errors in the code.
-    call InitGridConv(grid, MTM%PShg_MSbar)
-    MTM%masses_are_MSbar = .false.
-    MTM%Sgg_H_extra_MSbar_delta = zero
-
-    MTM%loops  = nloop
-    MTM%nf_int = nf_int
-
-  end subroutine InitMTMLibOME
-
-
-  subroutine InitMTMN3LOExactFortran(grid,MTM_N3LO)
-    type(grid_def),           intent(in)  :: grid
-    type(old_mass_threshold_mat), intent(out) :: MTM_N3LO
-    logical, save :: first_time = .true.
-    integer, save :: nwarn_NShV = 1
-    !! 103 uses two alphas points to separate out aalphas**3 from alphas**2, 
-    !! 203 uses just one extreme one and is faster while giving consistent results
-    integer, parameter :: ord3 = 203 
-    
-#ifndef HOPPET_ENABLE_N3LO_FORTRAN_MTM  
-    call wae_error('InitMTMN3LO', 'n3lo_nfthreshold = exact_fortran requested but code not compiled with HOPPET_ENABLE_N3LO_FORTRAN_MTM')
-#else
-    if (first_time) then
-        write(6,'(a)') 'Initialisation of Mass Threshold Matrices at N3LO. The paper'
-        write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
-        write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
-        write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
-        write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
-        write(6,'(a)') '* shall be cited at any use. Corresponding code from J. Bluemlein, March 19 2024 and '
-        write(6,'(a)') '* K. Schönwald, March 15 2024, including results from arXiv:2207.00027, arXiv:2403.00513'
-        write(6,'(a)') '*'
-        write(6,'(a)') "The initialisation could take up to a minute, depending on the machine."
-        first_time = .false.
-    end if
-    
-    write(6,'(a,i1,a,i1)') 'Initialising N3LO mass (exact Fortran) threshold matrices for nf = ', nf_int-1,' -> ', nf_int
-    call InitGridConv(grid, MTM_N3LO%PShq  , JB( PS, null(), null(), order=ord3))
-    call AddWithCoeff(      MTM_N3LO%PShq  , JB(APS, null(), null(), order=  3))
-    
-    call InitGridConv(grid, MTM_N3LO%PShg  , JB( QG, null(), null(), order=ord3))
-    call AddWithCoeff(      MTM_N3LO%PShg  , JB(AQGtotal, null(), null(), order=  3)) ! The full thing
-    !
-    call InitGridConv(grid, MTM_N3LO%PSqq_H, JB(PSL, null(), null(), order=ord3))
-    !! there is no APSL, all is included in PSL
-
-    !
-    call InitGridConv(grid, MTM_N3LO%NSqq_H, JB( NSREG,  NSPLU,  NSDEL, order=ord3))
-    call AddWithCoeff(      MTM_N3LO%NSqq_H, JB(ANSREG, ANSPLU, ANSDEL, order=  3))
-
-    
-    call InitGridConv(grid, MTM_N3LO%NSmqq_H, JB(OREG_znfasLL, OPLUS_znfasLL, ODEL_znfasLL, ord3))
-
-    !
-    call InitGridConv(grid, MTM_N3LO%Sgg_H, JB( GGREG,  GGPLU,  GGDEL, order=ord3))
-    call AddWithCoeff(      MTM_N3LO%Sgg_H, JB(AGGREG, AGGPLU, AGGDEL, order=  3))
-    !
-    call InitGridConv(grid, MTM_N3LO%Sgq_H  , JB( GQ, null(), null(), order=ord3))
-    call AddWithCoeff(      MTM_N3LO%Sgq_H  , JB(AGQ, null(), null(), order=  3))
-    !
-    call InitGridConv(grid, MTM_N3LO%Sqg_H  , JB(QGL, null(), null(), order=ord3))
-    ! there is no AQGL, all is included in QGL
-    
-    ! the NShV piece is not provided in the original fortran code, so we set it to zero here
-    call wae_warn(nwarn_NShV, 'InitMTMN3LOExactFortran: the N3LO exact Fortran MTM does not provide the NShV piece; setting it to zero')
-    call InitGridConv(grid, MTM_N3LO%NShV)
-
-    ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
-    ! to be there to avoid errors in the code.
-    call InitGridConv(grid, MTM_N3LO%PShg_MSbar)
-    MTM_N3LO%masses_are_MSbar = .false.
-    MTM_N3LO%Sgg_H_extra_MSbar_delta = zero
-
-    MTM_N3LO%loops = 4
-    MTM_N3LO%nf_int = nf_int
-
-#endif
-  end subroutine InitMTMN3LOExactFortran
-
-
-  subroutine InitMTM_from_MTM(MTM, MTM_in)
-    type(old_mass_threshold_mat), intent(inout) :: MTM
-    type(old_mass_threshold_mat), intent(in)    :: MTM_in
-
-    call InitGridConv(MTM%PSHq, MTM_in%PSHq)
-    call InitGridConv(MTM%PSHg, MTM_in%PSHg)
-    call InitGridConv(MTM%NSqq_H, MTM_in%NSqq_H)
-    call InitGridConv(MTM%NSmqq_H, MTM_in%NSmqq_H)
-    call InitGridConv(MTM%NShV, MTM_in%NShV)
-    call InitGridConv(MTM%Sgg_H, MTM_in%Sgg_H)
-    call InitGridConv(MTM%Sgq_H, MTM_in%Sgq_H)
-    call InitGridConv(MTM%PSqq_H, MTM_in%PSqq_H)
-    call InitGridConv(MTM%Sqg_H, MTM_in%Sqg_H)
-
-    call InitGridConv(MTM%PShg_MSbar, MTM_in%PShg_MSbar)
-    MTM%Sgg_H_extra_MSbar_delta = MTM_in%Sgg_H_extra_MSbar_delta
-    MTM%loops = MTM_in%loops
-    MTM%nf_int = MTM_in%nf_int
-    MTM%masses_are_MSbar = MTM_in%masses_are_MSbar
-  end subroutine InitMTM_from_MTM
-
-
-  subroutine Multiply_MTM(MTM, factor)
-   use assertions
-   type(old_mass_threshold_mat), intent(inout) :: MTM
-   real(dp),                 intent(in)    :: factor
-
-   call Multiply(MTM%PSHq,    factor)
-   call Multiply(MTM%PSHg,    factor)
-   call Multiply(MTM%NSqq_H,  factor)
-   call Multiply(MTM%NSmqq_H, factor)
-   call Multiply(MTM%NShV,    factor)
-   call Multiply(MTM%Sgg_H,   factor)
-   call Multiply(MTM%Sgq_H,   factor)
-   call Multiply(MTM%PSqq_H,  factor)
-   call Multiply(MTM%Sqg_H,   factor)
-   call Multiply(MTM%PShg_MSbar, factor)
-   MTM%Sgg_H_extra_MSbar_delta = MTM%Sgg_H_extra_MSbar_delta * factor 
- end subroutine Multiply_MTM
-
- subroutine AddWithCoeff_MTM(MTM, MTM_to_add, factor)
-    use assertions
-    type(old_mass_threshold_mat), intent(inout) :: MTM
-    type(old_mass_threshold_mat), intent(in)    :: MTM_to_add
-    real(dp),                 intent(in), optional :: factor
-
-    if (MTM%nf_int /= MTM_to_add%nf_int) call wae_error('AddWithCoeff_MTM, nf values are inconsistent')
-    if (MTM%masses_are_MSbar .neqv. MTM_to_add%masses_are_MSbar) &
-                           call wae_error('AddWithCoeff_MTM, masses_are_MSbar values are inconsistent')
-    MTM%loops = max(MTM%loops, MTM_to_add%loops)
-
-    call AddWithCoeff(MTM%PSHq, MTM_to_add%PSHq, factor)
-    call AddWithCoeff(MTM%PSHg, MTM_to_add%PSHg, factor)
-    call AddWithCoeff(MTM%NSqq_H, MTM_to_add%NSqq_H, factor)
-    call AddWithCoeff(MTM%NSmqq_H, MTM_to_add%NSmqq_H, factor)
-    call AddWithCoeff(MTM%NShV, MTM_to_add%NShV, factor)
-    call AddWithCoeff(MTM%Sgg_H, MTM_to_add%Sgg_H, factor)
-    call AddWithCoeff(MTM%Sgq_H, MTM_to_add%Sgq_H, factor)
-    call AddWithCoeff(MTM%PSqq_H, MTM_to_add%PSqq_H, factor)
-    call AddWithCoeff(MTM%Sqg_H, MTM_to_add%Sqg_H, factor)
-    call AddWithCoeff(MTM%PShg_MSbar, MTM_to_add%PShg_MSbar, factor)
-    MTM%Sgg_H_extra_MSbar_delta = MTM%Sgg_H_extra_MSbar_delta + &
-         & default_or_opt(one, factor)*MTM_to_add%Sgg_H_extra_MSbar_delta
-
-  end subroutine AddWithCoeff_MTM
-
-
-  !---------------------------------------------------------------------
-  ! want to be able to set nf, defined as number of flavours
-  ! after heavy matching
-  subroutine SetNfMTM(MTM,nf_lcl)
-    type(old_mass_threshold_mat), intent(inout) :: MTM
-    integer,                intent(in)    :: nf_lcl
-    if (MTM%loops > 3) then
-       call wae_Error('SetNfMTM: MTM had loops > 3; nf is probably fixed')
-    end if
-    MTM%nf_int = nf_lcl
-  end subroutine SetNfMTM
-  
-  !---------------------------------------------------------------------
-  ! set the quark mass scheme for the MTM matching
-  subroutine SetMassSchemeMTM(MTM, masses_are_MSbar)
-    type(old_mass_threshold_mat), intent(inout) :: MTM
-    logical,                  intent(in)    :: masses_are_MSbar
-    MTM%masses_are_MSbar = masses_are_MSbar
-  end subroutine SetMassSchemeMTM
-  
-
-  !----------------------------------------------------------------------
-  ! Returns the amount to be added to go from nf-1 to nf flavours.
-  ! Will try some tests to make sure that nf is consistent?
-  !
-  ! PDFs are assumed to be in "HUMAN" REPRESENTATION.
-  function cobj_ConvMTM(MTM,q) result(Pxq)
-    use qcd
-    type(old_mass_threshold_mat), intent(in) :: MTM
-    real(dp),   intent(in) :: q(0:,ncompmin:)
-    real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ncompmax)
-    real(dp) :: singlet(0:ubound(q,dim=1)), valence(0:ubound(q,dim=1)), qbar_sum(0:ubound(q,dim=1))
-    real(dp) :: dq_from_singlet(0:ubound(q,dim=1)) !!< addition to each flavour from singlet
-    real(dp) :: plus(0:ubound(q,dim=1)), minus(0:ubound(q,dim=1))
-    integer :: i, nf_light, nf_heavy
-
-    !-- general sanity checks
-    if (MTM%loops <=0 .or. MTM%nf_int <=0) call wae_error('cobj_ConvMTM:',&
-         &'Mass threshold matrix is undefined')
-
-    if (GetPdfRep(q) /= pdfr_Human) call wae_error('cobj_ConvMTM',&
-         &'q is not in Human representation')
-
-    nf_heavy = MTM%nf_int
-    nf_light = nf_heavy - 1
-    !write(0,*) 'Doing a MT convolution with nf_heavy =',nf_heavy
-
-    if (ncomponents < nf_heavy) call wae_error('cobj_ConvMTM:',&
-            &'ncomponents in representation is < nf in MTM.')
-    if (iflv_g /= 0) call wae_Error('cobj_ConvMTM:','iflv_g/=0')
-    
-    !-- sanity check on nf
-    !if (any(q(:,-nf_heavy)/=zero) .or. any(q(:,nf_heavy)/=zero)) &
-    !     & call wae_error('cobj_ConvMTM:',&
-    !     &'Distribution already has non-zero components at nf_heavy')
-    
-    qbar_sum = sum(q(:,-nf_light:-1),dim=2)
-    singlet  = sum(q(:,1:nf_light),dim=2)   ! not yet the singlet, just the sum of light quarks
-    valence  = singlet - qbar_sum
-    singlet  = singlet + qbar_sum
-
-    singlet = sum(q(:,-nf_light:-1),dim=2) + sum(q(:,1:nf_light),dim=2)
-
-    if (MTM%masses_are_MSbar) then
-      if (MTM%loops /= 3) call wae_error('cobj_ConvMTM:',&
-            &'masses_are_MSbar but MTM is not NNLO')
-      Pxq(:,nf_heavy) = half*(&
-           &(MTM%PShq .conv. singlet) + (MTM%PShg_MSbar .conv. q(:,iflv_g)) )
-    else 
-      Pxq(:,nf_heavy) = half*(&
-           &(MTM%PShq .conv. singlet) + (MTM%PShg .conv. q(:,iflv_g)) )
-    end if
-    
-    minus = half * (MTM%NShV .conv. valence)
-    Pxq(:,-nf_heavy) = Pxq(:, nf_heavy) - minus
-    Pxq(:,+nf_heavy) = Pxq(:,+nf_heavy) + minus
-    
-    Pxq(:,iflv_g)     = (MTM%Sgq_H.conv. singlet) + (MTM%Sgg_H.conv. q(:,iflv_g))
-
-    ! the extra delta-function piece in the MSbar scheme
-    if (MTM%masses_are_MSbar) then
-      Pxq(:,iflv_g) = Pxq(:,iflv_g) + MTM%Sgg_H_extra_MSbar_delta*q(:,iflv_g)
-    end if
-    
-    ! the singlet contributions to the individual light-quark flavours,
-    ! which we compute once and for all here, per flavour. 
-    !  
-    ! The convention that we use is that PSqq_H and Sqg_H provide with the 
-    ! contribution to the total light singlet quark flavour; so to get
-    ! the contribution to the singlet quark flavour we need to divide by
-    ! by (2*nf_light)
-    dq_from_singlet = (half/nf_light) * ((MTM%PSqq_H * singlet) + (MTM%Sqg_H * q(:,iflv_g)))
-
-    ! finally do all individual light-quark flavours
-    do i = 1, ncomponents
-       if (i > nf_heavy) then
-          Pxq(:, i) = zero
-          Pxq(:,-i) = zero
-       else if (i == iflv_g .or. abs(i) == nf_heavy) then
-          cycle
-       else
-          plus  = MTM%NSqq_H  * (q(:,i)+q(:,-i))
-          minus = MTM%NSmqq_H * (q(:,i)-q(:,-i))
-          Pxq(:, i) = half*(plus+minus) + dq_from_singlet
-          Pxq(:,-i) = half*(plus-minus) + dq_from_singlet
-       end if
-    end do
-
-    call LabelPdfAsRep(Pxq,pdfr_Human)
-  end function cobj_ConvMTM
-  
-
-  !---- usual cleaning up --------------------------------------------
-  subroutine cobj_DelMTM(MTM)
-    type(old_mass_threshold_mat), intent(inout) :: MTM
-    call Delete(MTM%PSHq)
-    call Delete(MTM%PSHg)
-    call Delete(MTM%PShg_MSbar)
-    call Delete(MTM%NSqq_H)
-    call Delete(MTM%NSmqq_H)
-    call Delete(MTM%NShV)
-    call Delete(MTM%Sgg_H)
-    call Delete(MTM%Sgq_H)
-    call Delete(MTM%PSqq_H)
-    call Delete(MTM%Sqg_H)
-    MTM%loops = -1
-    MTM%nf_int = -1
-  end subroutine cobj_DelMTM
-
 
   !======================================================================
   ! From here onwards we have things to do with coefficient functions
@@ -1546,8 +1078,14 @@ module dglap_objects_new_mtm
   private
 
   !-----------------------------------------------------------------
+  !! A type to hold the general structure of a mass threshold matrix,
+  !! consisting of a standard splitting matrix acting on the light flavours,
+  !! plus three extra pieces to handle the heavy quark contributions.
+  !!
+  !! Note: a subset of the structure is discussed in 
   !! See logbooks/2025-12-flavour-struct for some discussion
-  !! of how this type will work
+  !! of how this type will work Eqs.(32-35) of 1403.6356, and 1406.4654
+  !! plus new terms for Q-Qbar heavy-quark contributions in 2512.13508
   type :: mass_threshold_mat
     type(split_mat) :: P_light !!< the part that acts on the light flavours
     type(grid_conv) :: PShq !!< (h+hbar) from singlet(nflight)
@@ -1559,7 +1097,6 @@ module dglap_objects_new_mtm
 
   interface InitMTM
     module procedure InitMTM_zero, InitMTM_from_split_mat, InitMTM_from_new_mtm
-    module procedure InitMTM_from_old_mtm
   end interface
   public :: InitMTM
 
@@ -1674,33 +1211,6 @@ contains
     call InitGridConv(mtm%PShq, mtm_in%PShq)
     call InitGridConv(mtm%NShV, mtm_in%NShV)
   end subroutine InitMTM_from_new_mtm
-
-  !----------------------------------------------
-  !! Initialise an mtm from an old-style one
-  subroutine InitMTM_from_old_mtm(mtm, mtm_in)
-    type(mass_threshold_mat), intent(inout) :: mtm
-    type(old_mass_threshold_mat),     intent(in)    :: mtm_in
-    integer :: nf_light
-
-    nf_light = mtm_in%nf_int - 1
-    call cobj_InitSplitLinks(mtm%P_light)
-    mtm%P_light%nf_int = nf_light
-
-    call InitGridConv(mtm%P_light%NS_plus , mtm_in%NSqq_H)
-    call InitGridConv(mtm%P_light%NS_minus, mtm_in%NSmqq_H)
-    call InitGridConv(mtm%P_light%NS_V    , mtm_in%NSmqq_H) ! V & minus not distinguished in old struct.
-    call InitGridConv(mtm%P_light%qq      , mtm%P_light%NS_plus)
-    call AddWithCoeff(mtm%P_light%qq      , mtm_in%PSqq_H)        ! qq = NS_plus + PSqq_H
-
-    call InitGridConv(mtm%P_light%qg      , mtm_in%Sqg_H)
-    call InitGridConv(mtm%P_light%gq      , mtm_in%Sgq_H)
-    call InitGridConv(mtm%P_light%gg      , mtm_in%Sgg_H)
-
-    call InitGridConv(mtm%PShg, mtm_in%PShg)
-    call InitGridConv(mtm%PShq, mtm_in%PShq)
-    call InitGridConv(mtm%NShV, mtm_in%NShV)
-  end subroutine InitMTM_from_old_mtm
-
 
   !----------------------------------------------
   !! return the convolution of mtm with q
@@ -2278,37 +1788,9 @@ contains
 end module hoppet_init_new_mtm
   
 module dglap_objects
-  use dglap_objects_sm_oldmtm, &
-     InitMTMNNLO_old => InitMTMNNLO, &
-     InitMTMN3LO_old => InitMTMN3LO, &
-     InitMTMLibOME_old => InitMTMLibOME, &
-     InitMTMN3LOExactFortran_old => InitMTMN3LOExactFortran
-
-
+  use dglap_objects_sm_oldmtm
   use dglap_objects_new_mtm 
   
-  use hoppet_init_new_mtm, &
-     InitMTMNNLO_new => InitMTMNNLO, &
-     InitMTMN3LO_new => InitMTMN3LO, &
-     InitMTMLibOME_new => InitMTMLibOME, &
-     InitMTMN3LOExactFortran_new => InitMTMN3LOExactFortran
-
-
-  interface InitMTMNNLO
-     module procedure InitMTMNNLO_old
-     module procedure InitMTMNNLO_new
-  end interface InitMTMNNLO
-  interface InitMTMN3LO
-     module procedure InitMTMN3LO_old
-     module procedure InitMTMN3LO_new
-  end interface InitMTMN3LO
-  interface InitMTMLibOME
-     module procedure InitMTMLibOME_old
-     module procedure InitMTMLibOME_new
-  end interface InitMTMLibOME
-  interface InitMTMN3LOExactFortran
-     module procedure InitMTMN3LOExactFortran_old
-     module procedure InitMTMN3LOExactFortran_new
-  end interface InitMTMN3LOExactFortran 
+  use hoppet_init_new_mtm
 
 end module dglap_objects
