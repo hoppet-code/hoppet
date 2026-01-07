@@ -73,7 +73,7 @@ module dglap_objects_sm_oldmtm
   ! 1403.6356, and 1406.4654 eq. 7.1 for the non-singlet part (note
   ! different NF convention between the two papers. We use the
   ! latter)..
-  type mass_threshold_mat
+  type old_mass_threshold_mat
      ! pieces that start at NNLO
      type(grid_conv) :: PShq   !!< A^PS_Qq    Q+Qbar from singlet(nflight)
      type(grid_conv) :: PShg   !!< A^PS_Qg    Q+Qbar from gluon  (nflight)
@@ -98,8 +98,8 @@ module dglap_objects_sm_oldmtm
      !! a flag to indicate that this MTM is to be used for a transition
      !! at an MSbar mass
      logical         :: masses_are_MSbar
-  end type mass_threshold_mat
-  public :: mass_threshold_mat
+  end type old_mass_threshold_mat
+  public :: old_mass_threshold_mat
 
   !-----------------------------------------------------------------
   ! holds the components of a coefficient function
@@ -952,7 +952,7 @@ contains
   subroutine InitMTMNNLO(grid,MTM)
     use qcd
     type(grid_def),           intent(in)  :: grid
-    type(mass_threshold_mat), intent(out) :: MTM
+    type(old_mass_threshold_mat), intent(out) :: MTM
     !logical, parameter :: vogt_A2PShg = .false.
     !logical, parameter :: vogt_A2PShg = .true.
 
@@ -999,7 +999,7 @@ contains
   !! the global variable n3lo_nfthreshold
   subroutine InitMTMN3LO(grid,MTM_N3LO)
     type(grid_def),           intent(in)  :: grid
-    type(mass_threshold_mat), intent(out) :: MTM_N3LO
+    type(old_mass_threshold_mat), intent(out) :: MTM_N3LO
     integer, save :: nwarn_n3lo_nfthreshold = 1
 
     if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME_2510) then
@@ -1044,7 +1044,7 @@ contains
     use qcd, only: nf_int
     use hoppet_libome_fortran
     type(grid_def),           intent(in)  :: grid
-    type(mass_threshold_mat), intent(out) :: MTM
+    type(old_mass_threshold_mat), intent(out) :: MTM
     integer,                  intent(in)  :: nloop
     real(dp),  optional,      intent(in)  :: LM
     logical,   optional,      intent(in)  :: include_NShV    
@@ -1105,7 +1105,7 @@ contains
 
   subroutine InitMTMN3LOExactFortran(grid,MTM_N3LO)
     type(grid_def),           intent(in)  :: grid
-    type(mass_threshold_mat), intent(out) :: MTM_N3LO
+    type(old_mass_threshold_mat), intent(out) :: MTM_N3LO
     logical, save :: first_time = .true.
     integer, save :: nwarn_NShV = 1
     !! 103 uses two alphas points to separate out aalphas**3 from alphas**2, 
@@ -1173,8 +1173,8 @@ contains
 
 
   subroutine InitMTM_from_MTM(MTM, MTM_in)
-    type(mass_threshold_mat), intent(inout) :: MTM
-    type(mass_threshold_mat), intent(in)    :: MTM_in
+    type(old_mass_threshold_mat), intent(inout) :: MTM
+    type(old_mass_threshold_mat), intent(in)    :: MTM_in
 
     call InitGridConv(MTM%PSHq, MTM_in%PSHq)
     call InitGridConv(MTM%PSHg, MTM_in%PSHg)
@@ -1196,7 +1196,7 @@ contains
 
   subroutine Multiply_MTM(MTM, factor)
    use assertions
-   type(mass_threshold_mat), intent(inout) :: MTM
+   type(old_mass_threshold_mat), intent(inout) :: MTM
    real(dp),                 intent(in)    :: factor
 
    call Multiply(MTM%PSHq,    factor)
@@ -1214,8 +1214,8 @@ contains
 
  subroutine AddWithCoeff_MTM(MTM, MTM_to_add, factor)
     use assertions
-    type(mass_threshold_mat), intent(inout) :: MTM
-    type(mass_threshold_mat), intent(in)    :: MTM_to_add
+    type(old_mass_threshold_mat), intent(inout) :: MTM
+    type(old_mass_threshold_mat), intent(in)    :: MTM_to_add
     real(dp),                 intent(in), optional :: factor
 
     if (MTM%nf_int /= MTM_to_add%nf_int) call wae_error('AddWithCoeff_MTM, nf values are inconsistent')
@@ -1243,7 +1243,7 @@ contains
   ! want to be able to set nf, defined as number of flavours
   ! after heavy matching
   subroutine SetNfMTM(MTM,nf_lcl)
-    type(mass_threshold_mat), intent(inout) :: MTM
+    type(old_mass_threshold_mat), intent(inout) :: MTM
     integer,                intent(in)    :: nf_lcl
     if (MTM%loops > 3) then
        call wae_Error('SetNfMTM: MTM had loops > 3; nf is probably fixed')
@@ -1254,7 +1254,7 @@ contains
   !---------------------------------------------------------------------
   ! set the quark mass scheme for the MTM matching
   subroutine SetMassSchemeMTM(MTM, masses_are_MSbar)
-    type(mass_threshold_mat), intent(inout) :: MTM
+    type(old_mass_threshold_mat), intent(inout) :: MTM
     logical,                  intent(in)    :: masses_are_MSbar
     MTM%masses_are_MSbar = masses_are_MSbar
   end subroutine SetMassSchemeMTM
@@ -1267,7 +1267,7 @@ contains
   ! PDFs are assumed to be in "HUMAN" REPRESENTATION.
   function cobj_ConvMTM(MTM,q) result(Pxq)
     use qcd
-    type(mass_threshold_mat), intent(in) :: MTM
+    type(old_mass_threshold_mat), intent(in) :: MTM
     real(dp),   intent(in) :: q(0:,ncompmin:)
     real(dp)               :: Pxq(0:ubound(q,dim=1),ncompmin:ncompmax)
     real(dp) :: singlet(0:ubound(q,dim=1)), valence(0:ubound(q,dim=1)), qbar_sum(0:ubound(q,dim=1))
@@ -1353,7 +1353,7 @@ contains
 
   !---- usual cleaning up --------------------------------------------
   subroutine cobj_DelMTM(MTM)
-    type(mass_threshold_mat), intent(inout) :: MTM
+    type(old_mass_threshold_mat), intent(inout) :: MTM
     call Delete(MTM%PSHq)
     call Delete(MTM%PSHg)
     call Delete(MTM%PShg_MSbar)
@@ -1679,7 +1679,7 @@ contains
   !! Initialise an mtm from an old-style one
   subroutine InitMTM_from_old_mtm(mtm, mtm_in)
     type(new_mtm_obj), intent(inout) :: mtm
-    type(mass_threshold_mat),     intent(in)    :: mtm_in
+    type(old_mass_threshold_mat),     intent(in)    :: mtm_in
     integer :: nf_light
 
     nf_light = mtm_in%nf_int - 1

@@ -86,7 +86,7 @@ contains
     !-- holds temporary results
     type(grid_conv) :: dconv
     ! 
-    type(mass_threshold_mat) :: old_mtm_nnlo, old_mtm_n3lo
+    type(old_mass_threshold_mat) :: old_mtm_nnlo, old_mtm_n3lo
     !-- holds all possible combinations of coefficient and splitting functions
     !   needed for DIS schemes
     type(grid_conv) :: Cq,Cg
