@@ -1124,7 +1124,7 @@ public:
 }; 
 
 // these all use a copy-and-modify strategy, exploiting the move semantics
-// for copy elision
+// for copy elision, at least to some extent
 inline mass_threshold_mat operator+(mass_threshold_mat a, const mass_threshold_mat_view & b) {a += b; return a;}
 inline mass_threshold_mat operator-(mass_threshold_mat a, const mass_threshold_mat_view & b) {a -= b; return a;}
 inline mass_threshold_mat operator*(mass_threshold_mat a, double b) {a *= b; return a;}
@@ -1134,6 +1134,8 @@ inline mass_threshold_mat operator-(const mass_threshold_mat_view & a) {return -
 
 inline mass_threshold_mat operator+(mass_threshold_mat a, const split_mat_view & b) {a += b; return a;}
 inline mass_threshold_mat operator+(const split_mat_view & b, mass_threshold_mat a) {a += b; return a;}
+inline mass_threshold_mat operator-(mass_threshold_mat a, const split_mat_view & b) {a -= b; return a;}
+inline mass_threshold_mat operator-(const split_mat_view & b, mass_threshold_mat a) {a -= b; a*=-1; return a;}
 
 inline grid_quant_2d operator*(const mass_threshold_mat_view & mtm, const grid_quant_2d_view & q) {
   mtm.grid().ensure_compatible(q.grid());

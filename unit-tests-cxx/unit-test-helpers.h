@@ -2,6 +2,8 @@
 #define UNIT_TEST_HELPERS_H
 
 #include "hoppet_oo.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 constexpr double cf = 4.0/3.0;
 
@@ -107,4 +109,17 @@ inline double silly_pdf(double x, double Q, int iflv){
   return log(x) + 2*log(Q) + 0.5*(iflv-6 + 0.5);
 };
 
+#define REQUIRE_PDF_APPROX_EQUAL(q1, q2, tol)                     \
+  do {                                                            \
+    for (int i = hoppet::iflv_min; i < hoppet::iflv_max; ++i) {   \
+      REQUIRE_THAT(                                               \
+        ((q1)[i] - (q2)[i]).truncated_moment(2.0),                    \
+        Catch::Matchers::WithinAbs(0.0, tol)                      \
+      );                                                          \
+      REQUIRE_THAT(                                               \
+        ((q1)[i] - (q2)[i]).truncated_moment(1.5),                    \
+        Catch::Matchers::WithinAbs(0.0, tol)                      \
+      );                                                          \
+    }                                                             \
+  } while (false)
 #endif // UNIT_TEST_HELPERS_H

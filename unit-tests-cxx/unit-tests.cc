@@ -35,6 +35,8 @@ string endc= "\033[0m";
 hoppet::grid_def grid100;
 hoppet::grid_def big_grid;
 
+
+
 extern "C" void hoppet_cxx__print_c_str(const char * cstr_ptr); // declaration of fortran routine
 
 //-----------------------------------------------------------------------------
@@ -583,12 +585,12 @@ TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
   hoppet::split_mat_view p(dh.p(nloop, nf_heavy - 1));
   assert(nf_heavy == 4);
   auto q = hoppet::sl::tables[0][0];
-  auto q1 = (mtm + p) * q; // apply mtm + DGLAP to the pdf
-  auto q2 = mtm*q + p*q; // apply mtm and DGLAP separately and add
   // check that they are the same
-  for (int i = hoppet::iflv_min; i < hoppet::ncompmax; ++i) {
-    REQUIRE_THAT( (q1[i] - q2[i]).truncated_moment(2.0), WithinAbs(0.0, 1e-6) );
-  }
+  auto qref = mtm*q + p*q; // apply mtm and DGLAP separately and add
+  REQUIRE_PDF_APPROX_EQUAL((mtm+p)*q, qref, 1e-6);
+  REQUIRE_PDF_APPROX_EQUAL((p+mtm)*q, qref, 1e-6);
+  REQUIRE_PDF_APPROX_EQUAL((mtm-p)*q, mtm*q-p*q, 1e-6);
+  REQUIRE_PDF_APPROX_EQUAL((p-mtm)*q, p*q-mtm*q, 1e-6);
 
   hoppet::qcd::set_nf(nf_heavy - 1); // set
 
