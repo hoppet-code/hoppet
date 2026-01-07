@@ -149,9 +149,10 @@ module dglap_objects_sm_oldmtm
   interface InitMTM
     module procedure InitMTM_from_MTM
   end interface
-  public :: InitMTM, InitMTMNNLO, InitMTMN3LO, SetNfMTM !, cobj_ConvMTM  , cobj_DelMTM
+  public :: InitMTM
+  public :: InitMTMNNLO, InitMTMN3LO
   public :: InitMTMLibOME, InitMTMN3LOExactFortran
-  public :: SetMassSchemeMTM
+  public :: SetMassSchemeMTM, SetNfMTM 
   
   !-------- things for splitting functions --------------------
   interface cobj_InitCoeff
@@ -1700,6 +1701,7 @@ contains
     call InitGridConv(mtm%NShV, mtm_in%NShV)
   end subroutine InitMTM_from_old_mtm
 
+
   !----------------------------------------------
   !! return the convolution of mtm with q
   function ConvMTMNew(mtm,q) result(Pxq)
@@ -2001,10 +2003,306 @@ contains
     call Delete(mtm%NShV)
   end subroutine DelNewMTM
 
-
 end module dglap_objects_new_mtm
 
-module dglap_objects
-  use dglap_objects_sm_oldmtm
+
+!! Module with routines to initialise mass threshold matrix at NNLO/N3LO
+module hoppet_init_new_mtm
+  use types; use consts_dp; use splitting_functions
+#ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM  
+  use mass_thresholds_n3lo
+#endif
+  use qcd
+  use dglap_objects, only: cobj_InitSplitLinks
   use dglap_objects_new_mtm
+  use dglap_choices
+  use warnings_and_errors
+  use pdf_representation
+  use convolution
+  use assertions
+
+  implicit none
+
+  private
+
+  public :: InitMTMNNLO, InitMTMN3LO
+  public :: InitMTMLibOME, InitMTMN3LOExactFortran
+
+contains
+
+
+  subroutine InitMTMNNLO(grid,MTM)
+    use qcd
+    type(grid_def),           intent(in)  :: grid
+    type(new_mass_threshold_mat), intent(out) :: MTM
+    integer :: nf_light
+    !logical, parameter :: vogt_A2PShg = .false.
+    !logical, parameter :: vogt_A2PShg = .true.
+
+    ! our convention is that nf_int is the number of flavours including the
+    ! heavy quark
+    call cobj_InitSplitLinks(MTM%P_light)
+    MTM%P_light%nf_int = nf_int - 1
+
+    call InitGridConv(grid, MTM%PSHq, sf_A2PShq)
+    select case (nnlo_nfthreshold_variant)
+    case(nnlo_nfthreshold_param)
+       call InitGridConv(grid, MTM%PSHg, sf_A2PShg_vogt)
+    case(nnlo_nfthreshold_exact)
+       call InitGridConv(grid, MTM%PSHg, sf_A2PShg)
+    case default
+       call wae_error('InitMTMNNLO', 'Unknown nnlo_threshold_variant',&
+            &intval=nnlo_nfthreshold_variant)
+    end select
+   
+    call InitGridConv(grid, MTM%P_light%NS_plus, sf_A2NSqq_H)
+    call InitGridConv(MTM%P_light%NS_minus, MTM%P_light%NS_plus) ! the plus and minus non-singlet pieces are the same
+    call InitGridConv(grid, MTM%P_light%gg, sf_A2Sgg_H)
+    call InitGridConv(grid, MTM%P_light%gq, sf_A2Sgq_H)
+
+    !! ! things specific to MSbar (CCN32-57)
+    !! MTM%P_light%gg_extra_MSbar_delta = 8.0_dp/three * CF * TR
+    !! ! here we need an extra -4CF * P_{q+qbar,g} = -8CF*P_{qg}
+    !! call InitGridConv(grid, MTM%PShg_MSbar, sf_Pqg)
+    !! call Multiply(MTM%PShg_MSbar, -8.0_dp*CF)
+    !! call AddWithCoeff(MTM%PShg_MSbar, MTM%PSHg)
+
+    ! pieces that are zero at NNLO
+    call InitGridConv(MTM%P_light%qq, MTM%P_light%NS_plus)  ! qq = NS_plus + PSqq_H, but PSqq_H = 0 at NNLO
+
+    call InitGridConv(grid, MTM%P_light%qg)
+    call InitGridConv(grid, MTM%NShV)
+
+    ! just store info that it is NNLO. For now it is obvious, but
+    ! one day when we have NNNLO it may be useful, to indicate
+    ! which structures exist and which do not. 
+    ! (Mind you inexistent structures have yet to be implemented here...)
+    !! MTM%loops = 3
+    !! !-- no default value
+    !! MTM%nf_int = nf_int
+    !! !-- by default 
+    !! MTM%masses_are_MSbar = .false.
+  end subroutine InitMTMNNLO
+
+  !! Initialise an N3LO MTM object based on the choice in 
+  !! the global variable n3lo_nfthreshold
+  subroutine InitMTMN3LO(grid,MTM_N3LO)
+    type(grid_def),           intent(in)  :: grid
+    type(new_mass_threshold_mat), intent(out) :: MTM_N3LO
+    integer, save :: nwarn_n3lo_nfthreshold = 1
+
+    if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME_2510) then
+      call InitMTMLibOME(grid,MTM_N3LO,nloop=4, LM=zero, include_NShV=.false.)
+
+    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_libOME_2512) then
+      call InitMTMLibOME(grid,MTM_N3LO,nloop=4, LM=zero, include_NShV=.true.)
+
+    else if(n3lo_nfthreshold .eq. n3lo_nfthreshold_exact_fortran) then
+      call InitMTMN3LOExactFortran(grid,MTM_N3LO)
+
+    else if (n3lo_nfthreshold .eq. n3lo_nfthreshold_off) then
+      call InitMTMNNLO(grid,MTM_N3LO) !! dummy initialisation to NNLO, just to get started
+      !! MTM_N3LO%loops = 4
+      call Multiply(MTM_N3LO, zero)
+
+      call wae_warn(nwarn_n3lo_nfthreshold, 'InitMTMN3LO: n3lo_nfthreshold = off not recommended for nloop=4')
+
+    else
+      call wae_error('InitMTMN3LO', 'Unknown n3lo_threshold_variant',&
+           &intval=n3lo_nfthreshold)
+    end if
+
+  end subroutine InitMTMN3LO
+
+
+  !! Initialise an MTM object using the libome routines of arXiv:2510.02175
+  !!
+  !! \param grid    The grid to use
+  !! \param MTM     The MTM object to initialise
+  !! \param nloop   The perturbative (hoppet) nloops; libOME order = nloop-1 = # of powers of alpha_s
+  !! \param LM      log(m^2/mu^2) where m is the heavy quark mass and mu the factorisation scale
+  !!
+  !! The number of light flavours is the global nf_int-1
+  !!
+  !! The expected relative accuracy on the underlying libOME is at least
+  !! as good as (2048 * epsilon(1.0_dp))~4.5e-13,  which will usually be
+  !! significantly better than the standard global integration precision
+  !! (convolution's DefaultConvolutionEps(), which defaults to 1e-7)
+  subroutine InitMTMLibOME(grid, MTM, nloop, LM, include_NShV)
+    use iso_c_binding, only: c_double, c_int
+    use qcd, only: nf_int
+    use hoppet_libome_fortran
+    type(grid_def),           intent(in)  :: grid
+    type(new_mass_threshold_mat), intent(out) :: MTM
+    integer,                  intent(in)  :: nloop
+    real(dp),  optional,      intent(in)  :: LM
+    logical,   optional,      intent(in)  :: include_NShV    
+    !-----------
+    integer, save :: nwarn_NShV_zero = 2
+    real(c_double) :: LM_c, nf_light_d
+    integer(c_int) :: order_c
+    logical, save :: first_time = .true.
+
+    if (first_time) then
+      first_time = .false.
+      write(6,'(a)') 'Initialisation of Mass Threshold Matrices with code from libOME'
+      write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
+      write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
+      write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
+      write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037), 2512.13508, https://gitlab.com/libome/libome'
+    end if
+
+    ! our convention is that nf_int is the number of flavours including the
+    ! heavy quark
+    call cobj_InitSplitLinks(MTM%P_light)
+    MTM%P_light%nf_int = nf_int - 1
+
+    nf_light_d = real(nf_int-1,c_double)
+    if (present(LM)) then
+      LM_c = real(LM,c_double)
+    else
+      LM_c = zero
+    end if
+    order_c = nloop - 1
+
+    call InitGridConv(grid, MTM%PShq            , conv_OME(AQqPS_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%PShg            , conv_OME(AQg_ptr       , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%P_light%NS_plus , conv_OME(AqqQNSEven_ptr, order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%P_light%NS_minus, conv_OME(AqqQNSOdd_ptr , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%P_light%gg      , conv_OME(AggQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%P_light%gq      , conv_OME(AgqQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%P_light%qg      , conv_OME(AqgQ_ptr      , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call InitGridConv(grid, MTM%P_light%qq      , conv_OME(AqqQPS_ptr    , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    call AddWithCoeff(MTM%P_light%qq, MTM%P_light%NS_plus)  ! qq = NS_plus + PSqq_H
+
+    if (default_or_opt(.true., include_NShV)) then
+      call InitGridConv(grid, MTM%NShV  , conv_OME(AQqPSs_ptr   , order=order_c, nf_light=nf_light_d, LM=LM_c))
+    else
+      if (nloop >= 4) call wae_warn(nwarn_NShV_zero, &
+                                    'InitMTMLibOME: initialising N3LO or higher with NShV component set to zero')
+      call InitGridConv(grid, MTM%NShV)
+    end if
+    !call InitGridConv(grid, MTM%NShV)
+    !call InitGridConv(grid, MTM%NShV  , conv_OME(AQqPSs_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
+
+
+    ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
+    ! to be there to avoid errors in the code.
+    !call InitGridConv(grid, MTM%PShg_MSbar)
+    !MTM%masses_are_MSbar = .false.
+    !MTM%P_light%gg_extra_MSbar_delta = zero
+    !MTM%loops  = nloop
+    !MTM%nf_int = nf_int
+
+  end subroutine InitMTMLibOME
+
+
+  subroutine InitMTMN3LOExactFortran(grid,MTM_N3LO)
+    type(grid_def),           intent(in)  :: grid
+    type(new_mass_threshold_mat), intent(out) :: MTM_N3LO
+    logical, save :: first_time = .true.
+    integer, save :: nwarn_NShV = 1
+    !! 103 uses two alphas points to separate out aalphas**3 from alphas**2, 
+    !! 203 uses just one extreme one and is faster while giving consistent results
+    integer, parameter :: ord3 = 203 
+    
+#ifndef HOPPET_ENABLE_N3LO_FORTRAN_MTM  
+    call wae_error('InitMTMN3LO', 'n3lo_nfthreshold = exact_fortran requested but code not compiled with HOPPET_ENABLE_N3LO_FORTRAN_MTM')
+#else
+    if (first_time) then
+        write(6,'(a)') 'Initialisation of Mass Threshold Matrices at N3LO. The paper'
+        write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
+        write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
+        write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
+        write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
+        write(6,'(a)') '* shall be cited at any use. Corresponding code from J. Bluemlein, March 19 2024 and '
+        write(6,'(a)') '* K. Schönwald, March 15 2024, including results from arXiv:2207.00027, arXiv:2403.00513'
+        write(6,'(a)') '*'
+        write(6,'(a)') "The initialisation could take up to a minute, depending on the machine."
+        first_time = .false.
+    end if
+
+    ! our convention is that nf_int is the number of flavours including the
+    ! heavy quark
+    call cobj_InitSplitLinks(MTM_N3LO%P_light)
+    MTM_N3LO%P_light%nf_int = nf_int - 1
+    
+    write(6,'(a,i1,a,i1)') 'Initialising N3LO mass (exact Fortran) threshold matrices for nf = ', nf_int-1,' -> ', nf_int
+    call InitGridConv(grid, MTM_N3LO%PShq  , JB( PS, null(), null(), order=ord3))
+    call AddWithCoeff(      MTM_N3LO%PShq  , JB(APS, null(), null(), order=  3))
+    
+    call InitGridConv(grid, MTM_N3LO%PShg  , JB( QG, null(), null(), order=ord3))
+    call AddWithCoeff(      MTM_N3LO%PShg  , JB(AQGtotal, null(), null(), order=  3)) ! The full thing
+
+    call InitGridConv(grid, MTM_N3LO%P_light%NS_plus, JB( NSREG,  NSPLU,  NSDEL, order=ord3))
+    call AddWithCoeff(      MTM_N3LO%P_light%NS_plus, JB(ANSREG, ANSPLU, ANSDEL, order=  3))
+
+    
+    call InitGridConv(grid, MTM_N3LO%P_light%NS_minus, JB(OREG_znfasLL, OPLUS_znfasLL, ODEL_znfasLL, ord3))
+
+    !
+    call InitGridConv(grid, MTM_N3LO%P_light%gg, JB( GGREG,  GGPLU,  GGDEL, order=ord3))
+    call AddWithCoeff(      MTM_N3LO%P_light%gg, JB(AGGREG, AGGPLU, AGGDEL, order=  3))
+    !
+    call InitGridConv(grid, MTM_N3LO%P_light%gq  , JB( GQ, null(), null(), order=ord3))
+    call AddWithCoeff(      MTM_N3LO%P_light%gq  , JB(AGQ, null(), null(), order=  3))
+    !
+    call InitGridConv(grid, MTM_N3LO%P_light%qg  , JB(QGL, null(), null(), order=ord3))
+    ! there is no AQGL, all is included in QGL
+
+    !! there is no APSL, all is included in PSL
+    call InitGridConv(grid, MTM_N3LO%P_light%qq, JB(PSL, null(), null(), order=ord3))
+    call AddWithCoeff(MTM_N3LO%P_light%qq, MTM_N3LO%P_light%NS_plus)  ! qq = NS_plus + PSqq_H
+    
+    ! the NShV piece is not provided in the original fortran code, so we set it to zero here
+    call wae_warn(nwarn_NShV, 'InitMTMN3LOExactFortran: the N3LO exact Fortran MTM does not provide the NShV piece; setting it to zero')
+    call InitGridConv(grid, MTM_N3LO%NShV)
+
+    ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
+    ! to be there to avoid errors in the code.
+    !call InitGridConv(grid, MTM_N3LO%PShg_MSbar)
+    !MTM_N3LO%masses_are_MSbar = .false.
+    !MTM_N3LO%P_light%gg_extra_MSbar_delta = zero
+    !MTM_N3LO%loops = 4
+    !MTM_N3LO%nf_int = nf_int
+
+#endif
+  end subroutine InitMTMN3LOExactFortran
+
+end module hoppet_init_new_mtm
+  
+module dglap_objects
+  use dglap_objects_sm_oldmtm, &
+     InitMTMNNLO_old => InitMTMNNLO, &
+     InitMTMN3LO_old => InitMTMN3LO, &
+     InitMTMLibOME_old => InitMTMLibOME, &
+     InitMTMN3LOExactFortran_old => InitMTMN3LOExactFortran
+
+
+  use dglap_objects_new_mtm 
+  
+  use hoppet_init_new_mtm, &
+     InitMTMNNLO_new => InitMTMNNLO, &
+     InitMTMN3LO_new => InitMTMN3LO, &
+     InitMTMLibOME_new => InitMTMLibOME, &
+     InitMTMN3LOExactFortran_new => InitMTMN3LOExactFortran
+
+
+  interface InitMTMNNLO
+     module procedure InitMTMNNLO_old
+     module procedure InitMTMNNLO_new
+  end interface InitMTMNNLO
+  interface InitMTMN3LO
+     module procedure InitMTMN3LO_old
+     module procedure InitMTMN3LO_new
+  end interface InitMTMN3LO
+  interface InitMTMLibOME
+     module procedure InitMTMLibOME_old
+     module procedure InitMTMLibOME_new
+  end interface InitMTMLibOME
+  interface InitMTMN3LOExactFortran
+     module procedure InitMTMN3LOExactFortran_old
+     module procedure InitMTMN3LOExactFortran_new
+  end interface InitMTMN3LOExactFortran 
+
 end module dglap_objects
