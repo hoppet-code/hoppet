@@ -158,6 +158,7 @@ extern "C" {
   mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__new(int nf_heavy);
   void hoppet_cxx__mass_threshold_mat__multiply(mass_threshold_mat_f * ptr, const double factor);
   void hoppet_cxx__mass_threshold_mat__add     (mass_threshold_mat_f * ptr, const mass_threshold_mat_f * other, double * factor = nullptr);
+  void hoppet_cxx__mass_threshold_mat__add_sm  (mass_threshold_mat_f * ptr, const split_mat_f * other, double * factor = nullptr);
   mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(const mass_threshold_mat_f * mtm, const double * q_in_data, double * q_out_data);
   void hoppet_cxx__mass_threshold_mat__copy_contents(mass_threshold_mat_f * dest, const mass_threshold_mat_f * src); //< src copied into dest
 }

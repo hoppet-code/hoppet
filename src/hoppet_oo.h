@@ -532,7 +532,10 @@ public:
 // these all use a copy-and-modify strategy, exploiting the move semantics
 // for copy elision
 inline grid_quant operator+(grid_quant a, const grid_quant_view & b) {a += b; return a;}
+//template<typename L,typename = std::enable_if_t<!std::is_same<L, grid_quant>::value>>
+//inline grid_quant operator+(const L & b, grid_quant a) {a += b; std::cout<<"HI\n";return a;}
 inline grid_quant operator-(grid_quant a, const grid_quant_view & b) {a -= b; return a;}
+
 inline grid_quant operator*(grid_quant a, double b) {a *= b; return a;}
 inline grid_quant operator*(double b, grid_quant a) {a *= b; return a;}
 inline grid_quant operator/(grid_quant a, double b) {a /= b; return a;}
@@ -1060,6 +1063,17 @@ public:
     hoppet_cxx__mass_threshold_mat__add(_ptr, other.ptr(), &minus_one);
     return *this;
   }
+  mass_threshold_mat_view & operator+=(const split_mat_view & other) {
+    ensure_compatible_for_sum(other);
+    hoppet_cxx__mass_threshold_mat__add_sm(_ptr, other.ptr());
+    return *this;
+  }
+  mass_threshold_mat_view & operator-=(const split_mat_view & other) {
+    ensure_compatible_for_sum(other);
+    double minus_one = -1.0;
+    hoppet_cxx__mass_threshold_mat__add_sm(_ptr, other.ptr(), &minus_one);
+    return *this;
+  }
   mass_threshold_mat_view & operator*=(double factor) {
     grid().ensure_valid();
     hoppet_cxx__mass_threshold_mat__multiply(_ptr, factor);
@@ -1076,6 +1090,15 @@ public:
   void ensure_compatible(const mass_threshold_mat_view & other) const {
     if (nf_heavy() != other.nf_heavy()) {
       throw std::runtime_error("hoppet::mass_threshold_mat_view::ensure_compatible: incompatible mass_threshold_mat nf");
+    }
+    grid().ensure_compatible(other.grid());
+  }
+  void ensure_compatible_for_sum(const split_mat_view & other) const {
+    int sm_nf = other.nf();
+    int this_nf_heavy = nf_heavy();
+    if (! (this_nf_heavy == sm_nf || this_nf_heavy == sm_nf + 1) ) {
+      throw std::runtime_error("hoppet::mass_threshold_mat_view::ensure_compatible_for_sum: incompatible split_mat nf="
+                              +std::to_string(sm_nf)+" for mass_threshold_mat nf_heavy="+std::to_string(this_nf_heavy));
     }
     grid().ensure_compatible(other.grid());
   }
@@ -1109,6 +1132,8 @@ inline mass_threshold_mat operator*(double b, mass_threshold_mat a) {a *= b; ret
 inline mass_threshold_mat operator/(mass_threshold_mat a, double b) {a /= b; return a;}
 inline mass_threshold_mat operator-(const mass_threshold_mat_view & a) {return -1.0 * a;}
 
+inline mass_threshold_mat operator+(mass_threshold_mat a, const split_mat_view & b) {a += b; return a;}
+inline mass_threshold_mat operator+(const split_mat_view & b, mass_threshold_mat a) {a += b; return a;}
 
 inline grid_quant_2d operator*(const mass_threshold_mat_view & mtm, const grid_quant_2d_view & q) {
   mtm.grid().ensure_compatible(q.grid());

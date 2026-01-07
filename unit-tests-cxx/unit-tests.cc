@@ -207,8 +207,11 @@ TEST_CASE( "grid_quant", "[hoppet]" ) {
   q4 = q*2.0; REQUIRE ( q4[iy] == 2.0 * q[iy] );
   q4 = 2.0*q; REQUIRE ( q4[iy] == 2.0 * q[iy] );
   q4 = q/2.0; REQUIRE ( q4[iy] == 0.5 * q[iy] );
+  q4 = (2*q) + q; REQUIRE ( q4[iy] == 3.0 * q[iy] );
+  q4 = q + (2*q); REQUIRE ( q4[iy] == 3.0 * q[iy] );
 
   //-- test operations with views ------------------------
+  q4 = 0.5 * q;
   hoppet::grid_quant_view qv(q); // "view" copy constructor (effectively a reference)
   REQUIRE( q.data() == qv.data() ); 
   q4 += qv;   REQUIRE ( q4[iy] == 1.5 * q[iy] );
@@ -575,6 +578,19 @@ TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
   auto & dh   = hoppet::sl::dh;
   mtm_view.take_view(dh.mtm(nloop, nf_heavy));
   mtm = mtm_view; // test assignment from view
+
+  // get a test pdf at the low scale, where we should have 3 flavours
+  hoppet::split_mat_view p(dh.p(nloop, nf_heavy - 1));
+  assert(nf_heavy == 4);
+  auto q = hoppet::sl::tables[0][0];
+  auto q1 = (mtm + p) * q; // apply mtm + DGLAP to the pdf
+  auto q2 = mtm*q + p*q; // apply mtm and DGLAP separately and add
+  // check that they are the same
+  for (int i = hoppet::iflv_min; i < hoppet::ncompmax; ++i) {
+    REQUIRE_THAT( (q1[i] - q2[i]).truncated_moment(2.0), WithinAbs(0.0, 1e-6) );
+  }
+
+  hoppet::qcd::set_nf(nf_heavy - 1); // set
 
   // now do some basic logic checks, namely that heavy-quark entries are zero/non-zero as appropriate
   hoppet::pdf pdf = pdf_qcd(grid);

@@ -994,6 +994,17 @@ contains
     call Multiply(mtm1_f,factor)
   end subroutine hoppet_cxx__mass_threshold_mat__multiply
 
+  !! mtm1 += sm
+  subroutine hoppet_cxx__mass_threshold_mat__add_sm(mtm1, sm, factor) bind(C)
+    implicit none
+    type(c_ptr),    intent(in), value    :: mtm1, sm
+    real(c_double), intent(in), optional :: factor
+    type(mass_threshold_mat), pointer :: mtm1_f
+    type(split_mat),          pointer :: sm_f
+    call c_f_pointer(mtm1, mtm1_f)
+    call c_f_pointer(sm, sm_f)
+    call AddWithCoeff(mtm1_f,sm_f,factor)
+  end subroutine hoppet_cxx__mass_threshold_mat__add_sm
 
 #define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,split_mat)
   MTM_REF(p_light   ) !!< the a split_mat for the light flavours
