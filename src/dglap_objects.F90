@@ -308,13 +308,6 @@ contains
     !P%loops = 3
     P%nf_int = nf_int
 
-    ! NO LONGER NECESSARY
-!!$    !-- dummy to initialize Vogt routines (needed in exact cases 
-!!$    !   for the A3 piece to be set up). Do it better later on if it works?
-!!$    cc_piece = cc_real
-!!$    dummy = sf_P2NSMinus(0.5_dp)
-!!$    dummy = sf_P2gg(0.5_dp)
-
     call cobj_InitSplitLinks(P)
 
     call InitGridConv(grid, P%NS_plus, sf_P2NSPlus)
@@ -371,13 +364,6 @@ contains
     !nf_int = min(max(nf_int,3),5)
     P%nf_int = nf_store
 
-    ! NO LONGER NECESSARY
-!!$    !-- dummy to initialize Vogt routines (needed in exact cases 
-!!$    !   for the A3 piece to be set up). Do it better later on if it works?
-!!$    cc_piece = cc_real
-!!$    dummy = sf_P3NSMinus(0.5_dp)
-!!$    dummy = sf_P3gg(0.5_dp)
-
     call cobj_InitSplitLinks(P)
 
     call InitGridConv(grid, P%NS_plus, sf_P3NSPlus)
@@ -401,7 +387,7 @@ contains
     nf_int = nf_store
   end subroutine InitSplitMatN3LO
 
-    !======================================================================
+  !======================================================================
   !! Initialise a NLO unpolarised splitting matrix, with the nf value that
   !! is current from the qcd module. (MSbar scheme)
   subroutine InitSplitMatTimeNLO(grid, P)
