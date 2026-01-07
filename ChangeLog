@@ -1,5 +1,3 @@
---------- 2025-12-new-mtm branch ---------
-
 2025-01-07 Gavin (later)
 
 	* NEWS.md:
@@ -104,8 +102,6 @@
 	* unit-tests/hoppet-unit-tests.F90:
 	* unit-tests/unit_tests.f90:
 	started adding unit tests for the new MTM structure
-
---------- end 2025-12-new-mtm branch ---------
 
 2025-12-31 Gavin Salam  
 
