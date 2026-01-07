@@ -430,6 +430,7 @@ contains
         ! and so we set a flag so as to know to delete it when the evop is deleted
         evop%owns_MTM             = .true.
         call InitMTM(evop%MTM, dh%MTM_NNLO)
+        if (fourpibeta0_lnmuR_Q /= zero) call Multiply(evop%MTM, one + two*fourpibeta0_lnmuR_Q * as2pi)
         call AddWithCoeff(evop%MTM, dh%MTM_N3LO, as2pi)
         evop%MTM_coeff = (direction*as2pi**2)
       end if
