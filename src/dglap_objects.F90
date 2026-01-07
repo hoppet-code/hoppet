@@ -2013,7 +2013,7 @@ module hoppet_init_new_mtm
   use mass_thresholds_n3lo
 #endif
   use qcd
-  use dglap_objects_sm_oldmtm, only: cobj_InitSplitLinks
+  use dglap_objects, only: cobj_InitSplitLinks
   use dglap_objects_new_mtm
   use dglap_choices
   use warnings_and_errors
@@ -2056,7 +2056,8 @@ contains
     end select
    
     call InitGridConv(grid, MTM%P_light%NS_plus, sf_A2NSqq_H)
-    call InitGridConv(MTM%P_light%NS_minus, MTM%P_light%NS_plus) ! the plus and minus non-singlet pieces are the same
+    call InitGridConv(MTM%P_light%NS_minus, MTM%P_light%NS_plus)  ! the plus and minus non-singlet pieces are the same
+    call InitGridConv(MTM%P_light%NS_V,     MTM%P_light%NS_minus) ! the valence and minus non-singlet pieces are the same
     call InitGridConv(grid, MTM%P_light%gg, sf_A2Sgg_H)
     call InitGridConv(grid, MTM%P_light%gq, sf_A2Sgq_H)
 
@@ -2067,12 +2068,10 @@ contains
     !! call Multiply(MTM%PShg_MSbar, -8.0_dp*CF)
     !! call AddWithCoeff(MTM%PShg_MSbar, MTM%PSHg)
 
-    ! qq and NS_plus are identical, because pure singlet is zero
+    ! pieces that are zero at NNLO
     call InitGridConv(MTM%P_light%qq, MTM%P_light%NS_plus)  ! qq = NS_plus + PSqq_H, but PSqq_H = 0 at NNLO
 
-    ! pieces that are zero at NNLO
     call InitGridConv(grid, MTM%P_light%qg)
-    call InitGridConv(grid, MTM%P_light%NS_V)
     call InitGridConv(grid, MTM%NShV)
 
     ! just store info that it is NNLO. For now it is obvious, but
@@ -2187,8 +2186,8 @@ contains
     !call InitGridConv(grid, MTM%NShV)
     !call InitGridConv(grid, MTM%NShV  , conv_OME(AQqPSs_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
 
-    ! this is always zero in the orders that are available in libOME (up to alphas^3)
-    call InitGridConv(grid, MTM%P_light%NS_V)
+    ! the valence and minus non-singlet pieces are the same up to the orders (alphas^3) available in libOME
+    call InitGridConv(MTM%P_light%NS_V,     MTM%P_light%NS_minus) 
 
     ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
     ! to be there to avoid errors in the code.
@@ -2262,8 +2261,8 @@ contains
     call wae_warn(nwarn_NShV, 'InitMTMN3LOExactFortran: the N3LO exact Fortran MTM does not provide the NShV piece; setting it to zero')
     call InitGridConv(grid, MTM_N3LO%NShV)
 
-    ! this is always zero up to N3LO
-    call InitGridConv(grid, MTM_N3LO%P_light%NS_V)
+    ! the valence and minus non-singlet pieces are the same
+    call InitGridConv(MTM_N3LO%P_light%NS_V, MTM_N3LO%P_light%NS_minus) 
 
     ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
     ! to be there to avoid errors in the code.
