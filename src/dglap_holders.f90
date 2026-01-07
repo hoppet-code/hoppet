@@ -143,18 +143,19 @@ contains
              if (need_MTM) then
                if (nflcl == lbound(dh%allP,dim=2)+1) then
                   ! carries out initialisation for nf_heavy = current global nf_int, i.e. nflcl
-                  call InitMTMNNLO(grid,old_mtm_NNLO)
-                  call InitMTM(dh%MTM_NNLO, old_mtm_NNLO)
-                  call Delete(old_mtm_NNLO)
+                  call InitMTMNNLO(grid,dh%MTM_NNLO)
+                  !call InitMTMNNLO(grid,old_mtm_NNLO)
+                  !call InitMTM(dh%MTM_NNLO, old_mtm_NNLO)
+                  !call Delete(old_mtm_NNLO)
                else if (nflcl > lbound(dh%allP,dim=2) + 1) then
                   ! try to be efficient by recycling MTMs from lower nf,
                   ! since all that changes is nf_int variable inside MTM_NNLO%P_light
                   call InitMTM(dh%MTM_NNLO, dh%allMTM(3, lbound(dh%allP,dim=2) + 1))
                   dh%MTM_NNLO%P_light%nf_int = nflcl-1
                   ! Alternatively, explicitly initialise each time
-                  ! call InitMTMNNLO(grid,old_mtm_NNLO)
-                  ! call InitMTM(dh%MTM_NNLO, old_mtm_NNLO)
-                  ! call Delete(old_mtm_NNLO)
+                  ! call InitMTMNNLO(grid,dh%MTM_NNLO)
+                  ! !!call InitMTM(dh%MTM_NNLO, old_mtm_NNLO)
+                  ! !!call Delete(old_mtm_NNLO)
                end if
              end if
           end if
@@ -163,8 +164,8 @@ contains
              ! we do not need this for the lower nf, because it takes
              ! us from nf-1->nf
              if (nflcl /= lbound(dh%allP,dim=2)) then
-               call InitMTMN3LO(grid,old_mtm_n3lo)
-               call InitMTM(dh%MTM_N3LO, old_mtm_n3lo)
+               call InitMTMN3LO(grid,dh%MTM_N3LO)
+               !call InitMTM(dh%MTM_N3LO, old_mtm_n3lo)
              end if
              !-- do this once, and only if really needed
 !             if (lbound(dh%allP,dim=2) /= ubound(dh%allP,dim=2) &

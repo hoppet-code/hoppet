@@ -145,29 +145,36 @@ contains
 #endif
       real(dp) :: moment_N
       integer  :: imoment_N
-      type(mass_threshold_mat) :: mtm2, mtm3, mtm3_fortran
-      type(grid_conv) :: psqq
+      type(new_mass_threshold_mat) :: mtm2, mtm3, mtm3_fortran
+      type(grid_conv) :: mtm2_psqq, mtm3_psqq, dh_psqq, mtm3_fortran_psqq
 
       call InitMTMLibOME(grid, mtm2, nloop=3)
       call InitMTMLibOME(grid, mtm3, nloop=4)
+      call InitGridConv(dh_psqq, dh%allMTM(3,nf_int)%P_light%qq)
+      call AddWithCoeff(dh_psqq, dh%allMTM(3,nf_int)%P_light%NS_plus,-one)
+      call InitGridConv(mtm2_psqq, mtm2%P_light%qq)
+      call AddWithCoeff(mtm2_psqq, mtm2%P_light%NS_plus,-one)
+      call InitGridConv(mtm3_psqq, mtm3%P_light%qq)
+      call AddWithCoeff(mtm3_psqq, mtm3%P_light%NS_plus,-one)
+
 #ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM      
       call InitMTMN3LOExactFortran(grid, mtm3_fortran) ! fortran exact except AQg
+      call InitGridConv(mtm3_fortran_psqq, mtm3_fortran%P_light%qq)
+      call AddWithCoeff(mtm3_fortran_psqq, mtm3_fortran%P_light%NS_plus,-one)
 #endif
 
-      call InitGridConv(psqq, dh%allMTM(3,nf_int)%P_light%qq)
-      call AddWithCoeff(psqq, dh%allMTM(3,nf_int)%P_light%NS_plus,-one)
 
       do imoment_N = 2, 3
         moment_N = real(imoment_N, dp)
 
         call check_moment("nloop=3, PShq     ", moment_N,   mtm2%PShq   , dh%allMTM(3,nf_int)%PShq   )
         call check_moment("nloop=3, PShg     ", moment_N,   mtm2%PShg   , dh%allMTM(3,nf_int)%PShg   )
-        call check_moment("nloop=3, PSqq_H   ", moment_N,   mtm2%PSqq_H , psqq )
-        call check_moment("nloop=3, NSqq_H   ", moment_N,   mtm2%NSqq_H , dh%allMTM(3,nf_int)%P_light%NS_plus )
-        call check_moment("nloop=3, NSmqq_H  ", moment_N,   mtm2%NSmqq_H, dh%allMTM(3,nf_int)%P_light%NS_plus)
-        call check_moment("nloop=3, Sgg_H    ", moment_N,   mtm2%Sgg_H  , dh%allMTM(3,nf_int)%P_light%gg  )
-        call check_moment("nloop=3, Sgq_H    ", moment_N,   mtm2%Sgq_H  , dh%allMTM(3,nf_int)%P_light%gq  )
-        call check_moment("nloop=3, Sqg_H    ", moment_N,   mtm2%Sqg_H  , dh%allMTM(3,nf_int)%P_light%qg  )
+        call check_moment("nloop=3, PSqq_H   ", moment_N,   mtm2_psqq , dh_psqq )
+        call check_moment("nloop=3, NSqq_H   ", moment_N,   mtm2%P_light%NS_plus , dh%allMTM(3,nf_int)%P_light%NS_plus )
+        call check_moment("nloop=3, NSmqq_H  ", moment_N,   mtm2%P_light%NS_minus, dh%allMTM(3,nf_int)%P_light%NS_plus)
+        call check_moment("nloop=3, Sgg_H    ", moment_N,   mtm2%P_light%gg  , dh%allMTM(3,nf_int)%P_light%gg  )
+        call check_moment("nloop=3, Sgq_H    ", moment_N,   mtm2%P_light%gq  , dh%allMTM(3,nf_int)%P_light%gq  )
+        call check_moment("nloop=3, Sqg_H    ", moment_N,   mtm2%P_light%qg  , dh%allMTM(3,nf_int)%P_light%qg  )
   
 #ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM      
         ! AQg can differ at the 6e-6 relative level; in the fortran OME code, it is the only
@@ -177,15 +184,20 @@ contains
         call check_moment("nloop=4, PShg     ", moment_N,   mtm3%PShg   , mtm3_fortran%PShg, override_tol=1e-5_dp ) 
         ! all others should be precise.
         call check_moment("nloop=4, PShq     ", moment_N,   mtm3%PShq   , mtm3_fortran%PShq   )
-        call check_moment("nloop=4, PSqq_H   ", moment_N,   mtm3%PSqq_H , mtm3_fortran%PSqq_H )
-        call check_moment("nloop=4, NSqq_H   ", moment_N,   mtm3%NSqq_H , mtm3_fortran%NSqq_H )
-        call check_moment("nloop=4, NSmqq_H  ", moment_N,   mtm3%NSmqq_H, mtm3_fortran%NSmqq_H)      
-        call check_moment("nloop=4, Sgg_H    ", moment_N,   mtm3%Sgg_H  , mtm3_fortran%Sgg_H  )
-        call check_moment("nloop=4, Sgq_H    ", moment_N,   mtm3%Sgq_H  , mtm3_fortran%Sgq_H  )
-        call check_moment("nloop=4, Sqg_H    ", moment_N,   mtm3%Sqg_H  , mtm3_fortran%Sqg_H  )
+        call check_moment("nloop=4, PSqq_H   ", moment_N,   mtm3_psqq   , mtm3_fortran_psqq )
+        call check_moment("nloop=4, NSqq_H   ", moment_N,   mtm3%P_light%NS_plus , mtm3_fortran%P_light%NS_plus )
+        call check_moment("nloop=4, NSmqq_H  ", moment_N,   mtm3%P_light%NS_minus, mtm3_fortran%P_light%NS_minus)      
+        call check_moment("nloop=4, Sgg_H    ", moment_N,   mtm3%P_light%gg  , mtm3_fortran%P_light%gg  )
+        call check_moment("nloop=4, Sgq_H    ", moment_N,   mtm3%P_light%gq  , mtm3_fortran%P_light%gq  )
+        call check_moment("nloop=4, Sqg_H    ", moment_N,   mtm3%P_light%qg  , mtm3_fortran%P_light%qg  )
 #endif
       end do
-      call Delete(psqq)
+      call Delete(dh_psqq)
+      call Delete(mtm2_psqq)
+      call Delete(mtm3_psqq)
+#ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM
+      call Delete(mtm3_fortran_psqq)
+#endif
     end subroutine moment_check
 
     subroutine check_moment(name, momN, gc_test, gc_ref, override_tol)
@@ -336,7 +348,7 @@ contains
     real(dp) :: dtoy_mtm(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: xvals(0:grid%ny), x, xtest(3) = [0.01_dp, 0.1_dp, 0.5_dp]
     real(dp) :: ln_Q2_over_M2 = 4.3_dp
-    type(mass_threshold_mat) :: mtm_lm0, mtm_lmQ2
+    type(new_mass_threshold_mat) :: mtm_lm0, mtm_lmQ2
     integer  :: ix
 
     xvals = xValues(grid)

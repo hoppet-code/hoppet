@@ -1,5 +1,15 @@
 --------- 2025-12-new-mtm branch ---------
 
+2025-01-07 Gavin 
+
+	* src/dglap_holders.f90:
+	* src/dglap_objects.F90:
+	* unit-tests/test_libome.F90:
+	- added versions of InitMTMNNLO etc. that directly set up the new MTM
+	  objects
+	- unit tests for libOME now directly use these functions
+	- dglap_holders now uses these functions too
+
 2025-01-06 Gavin (later)
 
 	* src/dglap_holders.f90:

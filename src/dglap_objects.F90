@@ -2013,7 +2013,7 @@ module hoppet_init_new_mtm
   use mass_thresholds_n3lo
 #endif
   use qcd
-  use dglap_objects, only: cobj_InitSplitLinks
+  use dglap_objects_sm_oldmtm, only: cobj_InitSplitLinks
   use dglap_objects_new_mtm
   use dglap_choices
   use warnings_and_errors
@@ -2067,10 +2067,12 @@ contains
     !! call Multiply(MTM%PShg_MSbar, -8.0_dp*CF)
     !! call AddWithCoeff(MTM%PShg_MSbar, MTM%PSHg)
 
-    ! pieces that are zero at NNLO
+    ! qq and NS_plus are identical, because pure singlet is zero
     call InitGridConv(MTM%P_light%qq, MTM%P_light%NS_plus)  ! qq = NS_plus + PSqq_H, but PSqq_H = 0 at NNLO
 
+    ! pieces that are zero at NNLO
     call InitGridConv(grid, MTM%P_light%qg)
+    call InitGridConv(grid, MTM%P_light%NS_V)
     call InitGridConv(grid, MTM%NShV)
 
     ! just store info that it is NNLO. For now it is obvious, but
@@ -2185,6 +2187,8 @@ contains
     !call InitGridConv(grid, MTM%NShV)
     !call InitGridConv(grid, MTM%NShV  , conv_OME(AQqPSs_ptr     , order=order_c, nf_light=nf_light_d, LM=LM_c))
 
+    ! this is always zero in the orders that are available in libOME (up to alphas^3)
+    call InitGridConv(grid, MTM%P_light%NS_V)
 
     ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
     ! to be there to avoid errors in the code.
@@ -2257,6 +2261,9 @@ contains
     ! the NShV piece is not provided in the original fortran code, so we set it to zero here
     call wae_warn(nwarn_NShV, 'InitMTMN3LOExactFortran: the N3LO exact Fortran MTM does not provide the NShV piece; setting it to zero')
     call InitGridConv(grid, MTM_N3LO%NShV)
+
+    ! this is always zero up to N3LO
+    call InitGridConv(grid, MTM_N3LO%P_light%NS_V)
 
     ! set the MSbar piece to zero -- MSbar thresholds not yet supported, but still needs
     ! to be there to avoid errors in the code.
