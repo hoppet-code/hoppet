@@ -13,12 +13,9 @@ module hoppet_probes
 end module hoppet_probes
 
 !======================================================================
-! 
-!! This module provide a type for matrices of splitting functions as
-!! well as for coefficient functions and mass-threshold matrices. The
-!! two latter ones are liable to evolve.
-!!
-!! The module also provides:
+!  
+!! This module provide a type for matrices of splitting functions, i.e. split_mat
+!! objects. It also provides associated 
 !!
 !! - subroutines for manipulating the splitting matrices (similarly 
 !!   to the subroutine for grid_conv objects)
@@ -28,12 +25,14 @@ end module hoppet_probes
 !!
 !! - subroutines for initialising Polarised LO and NLO splitting matrices. 
 !!
-!! - mass thresholds, coefficient functions, 
-!!
 !! - tools for getting "derived" splitting matrices.
 !!
+!! Note that it also contains some older routines for coefficient functions,
+!! but these are to be considered deprecated since v1.2 of hoppet, since
+!! all structure associated with coefficient functions can (and usually should)
+!! be held in a split_mat object.
 !======================================================================
-module dglap_objects_sm_oldmtm
+module hoppet_split_mat
   use types; use consts_dp; use splitting_functions
 #ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM  
   use mass_thresholds_n3lo
@@ -1062,17 +1061,17 @@ contains
     call cobj_DelCoeff (C2L)
   end function cobj_Eval2LConv
     
-end module dglap_objects_sm_oldmtm
+end module hoppet_split_mat
 !end module dglap_objects_hidden
 
 
 !-----------------------------------------------------------------
-!! module to help with development of new mass threshold matrix type
+!! module that defines mass threshold matrices
 !! and associated manipulations
-module dglap_objects_new_mtm
+module hoppet_mass_threshold_mat
   use types; use consts_dp
   use convolution
-  use dglap_objects_sm_oldmtm
+  use hoppet_split_mat
   implicit none
 
   private
@@ -1513,18 +1512,18 @@ contains
     call Delete(mtm%NShV)
   end subroutine DelNewMTM
 
-end module dglap_objects_new_mtm
+end module hoppet_mass_threshold_mat
 
 
 !! Module with routines to initialise mass threshold matrix at NNLO/N3LO
-module hoppet_init_new_mtm
+module hoppet_init_mtm
   use types; use consts_dp; use splitting_functions
 #ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM  
   use mass_thresholds_n3lo
 #endif
   use qcd
-  use dglap_objects_sm_oldmtm, only: cobj_InitSplitLinks
-  use dglap_objects_new_mtm
+  use hoppet_split_mat, only: cobj_InitSplitLinks
+  use hoppet_mass_threshold_mat
   use dglap_choices
   use warnings_and_errors
   use pdf_representation
@@ -1785,12 +1784,13 @@ contains
 #endif
   end subroutine InitMTMN3LOExactFortran
 
-end module hoppet_init_new_mtm
+end module hoppet_init_mtm
   
+!! Module that provides a single point of usage for split_mat,
+!! mass_threshold_mat and related routines
 module dglap_objects
-  use dglap_objects_sm_oldmtm
-  use dglap_objects_new_mtm 
-  
-  use hoppet_init_new_mtm
+  use hoppet_split_mat
+  use hoppet_mass_threshold_mat   
+  use hoppet_init_mtm
 
 end module dglap_objects

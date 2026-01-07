@@ -1,6 +1,6 @@
 module test_new_mtm
   use hoppet
-  use dglap_objects_new_mtm
+  use hoppet_mass_threshold_mat
   use unit_tests
   implicit none
 

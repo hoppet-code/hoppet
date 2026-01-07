@@ -2,6 +2,14 @@
 
 2025-01-07 Gavin (later)
 
+	* src/dglap_objects.F90:
+	arranged for more sensible naming of the different individual modules:
+	- hoppet_split_mat: defines split_mat type and associated functions
+	- hoppet_mass_threshold_mat: defines mass_threshold_mat type and associated functions
+	- hoppet_init_mtm: defines InitMTM... functions to set up mass_threshold_mat objects
+	- dglap_objects: module that provides a single point of usage for split_mat,
+	  mass_threshold_mat and related routines, as before.
+
 	* src/dglap_holders.f90           :
 	* src/dglap_objects.F90           :
 	* src/evolution.f90               :
