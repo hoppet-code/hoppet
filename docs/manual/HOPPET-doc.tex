@@ -1748,7 +1748,7 @@ The relevant calls are
 % higher number of flavours).
 
 
-As for the NNLO splitting functions, the mass threshold corrections
+As for the NNLO splitting functions, the NNLO mass threshold corrections
 come in exact and parametrised variants. By default it is the latter
 that is used (provided by Vogt \cite{VogtMTMParam}).  The cost of
 initialising with the exact variants of the mass thresholds is much
@@ -1759,15 +1759,57 @@ warrant parametrisation). The variant can be chosen by the user
 before initialising the \ttt{mass\_threshold\_mat} by making the
 following subroutine call:
 \begin{lstlisting}
-  integer :: threshold_variant
-  call dglap_Set_nnlo_nfthreshold(threshold_variant)
+  integer :: nnlo_threshold_variant
+  call dglap_set_nnlo_nfthreshold(nnlo_threshold_choice)
 \end{lstlisting}
-with the following variants defined (as integer parameters), again in
+with the following choices defined (as integer parameters), again in
 the module \ttt{dglap\_choices}:
 \begin{lstlisting}
   nnlo_nfthreshold_exact
   nnlo_nfthreshold_param                 [default]
 \end{lstlisting}
+
+At \ntlo,  the
+single-mass thresholds have been calculated in
+Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt,Behring:2025avs}.
+%
+They are available in two forms,
+using code from Refs.~\cite{BlumleinCode,Fael:2022miw}.
+%
+One can choose which form to use by calling
+\ttt{dglap\_set\_n3lo\_nfthreshold(n3lo\_threshold\_choice)},
+with one of the following values for \ttt{n3lo\_threshold\_choice}:
+\begin{itemize}
+\item \ttt{n3lo\_nfthreshold\_libOME} (default):
+  %
+  this uses piecewise high-order Laurent-series expansions in different
+  regions of $x$, with a stated accuracy of at least $2048\epsilon$
+  where $\epsilon$ is the precision of a 64-bit real variable.
+  % 
+  It relies on the
+  \ttt{libome} \CPP library from \url{https://gitlab.com/libome/libome}.
+  %
+  Initialisation time is below $1\,\text{s}$.
+  %
+  This is the default choice.\footnote{Users wishing to investigate
+    the effect of the \ttt{NShV} piece calculated in
+    Ref.~\cite{Behring:2025avs} can turn it off by selecting
+    \ttt{n3lo\_nfthreshold\_libOME\_2510}.}
+  
+\item \ttt{n3lo\_nfthreshold\_exact\_fortran}: all contributions are
+  exact, except for the $A_\text{hg}^\text{S}$ term in
+  Eq.~(\ref{eq:hp-nf1}), which is based on piecewise expansions, and
+  the \ttt{NShV} term, which is available with
+  Ref.~\cite{Behring:2025avs} but, as of v2.2.0, has yet to be
+  incorporated in \hoppet and is instead set to zero.
+  %
+  The exact contributions make extensive use of
+  \texttt{hplog5}~\cite{FortranPolyLog} calls and lead to an
+  initialisation time of $10{-}30\,\text{s}$.
+  %
+  The piecewise expansions for $A_\text{hg}^\text{S}$ are less
+  accurate than with the \ttt{n3lo\_nfthreshold\_libOME} choice.
+\end{itemize}
 
 
 %......................................................................
