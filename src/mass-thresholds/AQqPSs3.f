@@ -1,6 +1,10 @@
 * 
 * Downloaded 2026-01-08 from https://arxiv.org/src/2512.13508v1/anc/OME.f
-* 
+* Put into a module by GPS on 2026-01-08
+
+      module AQqPSs3_mod
+      implicit none
+      contains
 
       REAL*8 FUNCTION AQqPSs3(x,NF,LM,as)
 *     -------==--------------------------
@@ -9,7 +13,7 @@
 *     J. Bluemlein, 1.12.2025
 *
       IMPLICIT NONE
-      REAL*8 x,NF,LM,AUNPM1,AUNP0,as
+      REAL*8 x,NF,LM,as!,AUNPM1,AUNP0
 *
       AQqPSs3=as**3*(1.0D0/2.0D0*LM*AUNPM1(x,NF)+AUNP0(x,NF))/NF
 *
@@ -22,7 +26,7 @@
 *     J. Bluemlein, 1.12.2025
 *
       IMPLICIT NONE
-      REAL*8 x,NF,LM,APOLM1,APOL0,as
+      REAL*8 x,NF,LM,as!,APOLM1,APOL0
 *
       DAQqPSs3=as**3*(1.0D0/2.0D0*LM*APOLM1(x,NF)+APOL0(x,NF))/NF
 *
@@ -1065,3 +1069,4 @@
 *      include 'daind1.f'
 *      include 'POLDIS.f'
 
+      end module AQqPSs3_mod
