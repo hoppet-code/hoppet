@@ -20,7 +20,7 @@ contains
     real(dp) :: xvals(3) = [0.01_dp, 0.1_dp, 0.4_dp], x
     !type(grid_conv) :: delta !! for diagnostics
 
-    if (.not. do_test("new_mtm")) return
+    if (.not. do_test("test_mtm")) return
 
     nf_light = 3
     nloop    = dh%nloop
@@ -51,7 +51,7 @@ contains
     call InitMTM(mtm_from_P, Pnf4a)
     P_q   = Pnf4a      * q
     mtm_q = mtm_from_P * q
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (mtm from sm) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -61,7 +61,7 @@ contains
     call Multiply(mtm_tmp, two)
     P_q   = two * (mtm_from_p * q)
     mtm_q = mtm_tmp * q
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (multiply) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -71,7 +71,7 @@ contains
     call AddWithCoeff(mtm_tmp, mtm_from_P, 1.5_dp)
     P_q   = 1.5_dp * (mtm_from_p * q)
     mtm_q = mtm_tmp * q
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (zero & add mtm) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -81,7 +81,7 @@ contains
     call AddWithCoeff(mtm_tmp, Pnf3, 0.5_dp)
     P_q   = mtm_from_p * q + 0.5_dp * (Pnf3 * q)
     mtm_q = mtm_tmp * q
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (add Pnf3) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -91,7 +91,7 @@ contains
     call AddWithCoeff(mtm_tmp, Pnf4b, 0.5_dp)
     P_q   = mtm_from_p * q + 0.5_dp * (Pnf4b * q)
     mtm_q = mtm_tmp * q
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (add Pnf4b) iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -104,7 +104,7 @@ contains
     call SetToConvolution(mtm_from_mtm_p, mtm_from_P, Pnf3)
     P_q = mtm_from_P * (Pnf3 * q)
     mtm_q = mtm_from_mtm_p * q
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (mtm_from_P * Pnf3) element iflv="//trim(to_string(iflv)), &
            mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -129,7 +129,7 @@ contains
     !write(6,*) "tmp  :", real(tmp(0,-4:4))
     !write(6,*) "P_q  :", real(P_q  (0,-4:4))
     !write(6,*) "mtm_q:", real(mtm_q(0,-4:4))
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (Pnf4b * mtm_from_P) iflv="//trim(to_string(iflv)), &
            answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -151,7 +151,7 @@ contains
     P_q = Pnf3 * (Pnf3 * q)
     tmp = tmp_split_mat * q
     call RestoreGridLocking()
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (SetDerivedSplitMat) iflv="//trim(to_string(iflv)), &
            answer=tmp(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -169,7 +169,7 @@ contains
     P_q = Pnf4b * (mtm_from_P * q)
     mtm_q = mtm_tmp * q
     call RestoreGridLocking()
-    do iflv = -nf_light-1, nf_light+1
+    do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (SetDerivedMTM) iflv="//trim(to_string(iflv)), &
            answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
     end do
@@ -179,7 +179,7 @@ contains
       call InitMTM(mtm_tmp, dh%allMTM(nloop,nf_light+1))
       P_q = dh%allMTM(nloop,nf_light+1) * q
       mtm_Q = (mtm_tmp * q)
-      do iflv = -nf_light-1, nf_light+1
+      do iflv = iflv_tbar, iflv_t
         call check_approx_eq_1d("mass_threshold_mat (new from old) iflv="//trim(to_string(iflv)), &
              answer=mtm_q(:,iflv), expected=P_q(:,iflv), tol_abs=1.0e-8_dp, tol_rel=1.0e-10_dp, tol_choice_or=.true.)
       end do
