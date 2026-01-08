@@ -86,6 +86,8 @@ __Files added__
 	- default_conv_eps is now accessible from C/C++ as hoppet_default_conv_eps.
 	- make setDefaultConvolutionEps and DefaultConvolutionEps bind(C) functions
 	  as hoppetSetDefaultConvolutionEps and hoppetDefaultConvolutionEps
+	- exposed DisableGridLocking and RestoreGridLocking to C as
+	  hoppetDisableGridLocking and hoppetRestoreGridLocking
 
 	* src/tabulation.f90:
 	fixed an issue where tab%allocated was .false. for tabulations
@@ -139,6 +141,7 @@ __Files added__
 
 	* src/assertions.f90:
 	also throws C++ exceptions if they've been enabled with wae_enable_cxx_exceptions()
+	(assert_eq2 is clean, the others still give some printout)
 
 --------- end 2025-10-cxx-OO branch ---------
 2025-01-07 Gavin (later)

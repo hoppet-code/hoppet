@@ -1006,6 +1006,38 @@ contains
     call AddWithCoeff(mtm1_f,sm_f,factor)
   end subroutine hoppet_cxx__mass_threshold_mat__add_sm
 
+
+  !! allocate a new mass_threshold_mat that is the convolution of mtm1 and sm2 and return a pointer to it
+  function hoppet_cxx__mass_threshold_mat__alloc_and_conv__mtm_sm(mtm1, sm2) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: mtm1, sm2
+    type(c_ptr) :: res
+    type(mass_threshold_mat), pointer :: mtm1_f, res_f
+    type(split_mat), pointer :: sm2_f
+
+    call c_f_pointer(mtm1, mtm1_f)
+    call c_f_pointer(sm2 , sm2_f )
+    allocate(res_f)
+    call SetToConvolution(res_f, mtm1_f, sm2_f)
+    res = c_loc(res_f)
+  end function hoppet_cxx__mass_threshold_mat__alloc_and_conv__mtm_sm
+
+  !! allocate a new mass_threshold_mat that is the convolution of sm1 and mtm2 and return a pointer to it
+  function hoppet_cxx__mass_threshold_mat__alloc_and_conv__sm_mtm(sm1, mtm2) bind(C) result(res)
+    implicit none
+    type(c_ptr),    intent(in), value :: sm1, mtm2
+    type(c_ptr) :: res
+    type(mass_threshold_mat), pointer :: mtm2_f, res_f
+    type(split_mat), pointer :: sm1_f
+
+    call c_f_pointer(sm1 , sm1_f )
+    call c_f_pointer(mtm2, mtm2_f)
+    allocate(res_f)
+    call SetToConvolution(res_f, sm1_f, mtm2_f)
+    res = c_loc(res_f)
+  end function hoppet_cxx__mass_threshold_mat__alloc_and_conv__sm_mtm
+  
+
 #define MTM_REF(NAME)  DEFINE_RETURN_OBJ_MEMBER(mass_threshold_mat,NAME,split_mat)
   MTM_REF(p_light   ) !!< the a split_mat for the light flavours
 #undef MTM_REF

@@ -109,17 +109,48 @@ inline double silly_pdf(double x, double Q, int iflv){
   return log(x) + 2*log(Q) + 0.5*(iflv-6 + 0.5);
 };
 
-#define REQUIRE_PDF_APPROX_EQUAL(q1, q2, tol)                     \
+/// if the two PDFs are identical to within the tolerance, return
+/// an empty string; otherwise return a string describing the
+/// first location where they differ by more than the tolerance
+///
+/// The difference is considered significant if it is larger than
+/// tol in absolute terms and larger than tol times the larger
+/// of the two values (i.e. a combined absolute and relative tolerance)
+inline
+std::string pdf_approx_equal_str(const hoppet::pdf::view_t & pdf1, const hoppet::pdf::view_t & pdf2, double tol = 1e-8) {
+  for (int iflv = hoppet::iflv_min; iflv <= hoppet::iflv_max; ++iflv) {
+    int ny = pdf1[iflv].grid().ny();
+    for (int iy = ny; iy >= 0; --iy) {
+      double diff = std::abs(pdf1[iflv][iy] - pdf2[iflv][iy]);
+      if (diff > tol && diff > tol * std::max(std::abs(pdf1[iflv][iy]), std::abs(pdf2[iflv][iy]))) {
+        return "Difference at iflv=" + std::to_string(iflv)
+             + ", iy=" + std::to_string(iy)
+             + ": pdf1=" + std::to_string(pdf1[iflv][iy])
+             + ", pdf2=" + std::to_string(pdf2[iflv][iy])
+             + ", diff=" + std::to_string(diff);
+      }
+    }
+  }
+  return "";
+}
+
+#define REQUIRE_PDF_APPROX_EQUAL(q1, q2, tol)                    \
   do {                                                            \
-    for (int i = hoppet::iflv_min; i < hoppet::iflv_max; ++i) {   \
-      REQUIRE_THAT(                                               \
-        ((q1)[i] - (q2)[i]).truncated_moment(2.0),                    \
-        Catch::Matchers::WithinAbs(0.0, tol)                      \
-      );                                                          \
-      REQUIRE_THAT(                                               \
-        ((q1)[i] - (q2)[i]).truncated_moment(1.5),                    \
-        Catch::Matchers::WithinAbs(0.0, tol)                      \
-      );                                                          \
-    }                                                             \
+    REQUIRE(pdf_approx_equal_str(q1, q2, tol) == "");                                     \
   } while (false)
+
+//#define REQUIRE_PDF_APPROX_EQUAL(q1, q2, tol)                     \
+//  do {                                                            \
+//    for (int i = hoppet::iflv_min; i <= hoppet::iflv_max; ++i) { \
+//      std::cout << "iflv="<<i<<" "<<((q1)[i].truncated_moment(2.0)) << "\n";  \
+//      REQUIRE_THAT(                                               \
+//        ((q1)[i] - (q2)[i]).truncated_moment(2.0),                    \
+//        Catch::Matchers::WithinAbs(0.0, tol)                      \
+//      );                                                          \
+//      REQUIRE_THAT(                                               \
+//        ((q1)[i] - (q2)[i]).truncated_moment(1.5),                    \
+//        Catch::Matchers::WithinAbs(0.0, tol)                      \
+//      );                                                          \
+//    }                                                             \
+//  } while (false)
 #endif // UNIT_TEST_HELPERS_H

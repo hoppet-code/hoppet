@@ -53,6 +53,7 @@
 // - [x] add the mass thresholds 
 // - [ ] grid_quant_3d?
 // - [~] add streamlined interface functions
+// - [x] disable/restore grid locking
 // - [ ] support for probes
 // - [ ] add qed support, including pdf_table allocators
 // - [x] add access to things like the beta function coefficients, qcd group constants, etc.
@@ -1147,7 +1148,17 @@ inline grid_quant_2d operator*(const mass_threshold_mat_view & mtm, const grid_q
   return result;
 }
 
+inline mass_threshold_mat operator*(mass_threshold_mat_view const & a, split_mat_view const & b) {
+  a.grid().ensure_compatible(b.grid());
+  mass_threshold_mat_f * ptr = hoppet_cxx__mass_threshold_mat__alloc_and_conv__mtm_sm(a.ptr(), b.ptr());
+  return mass_threshold_mat(ptr);
+}
 
+inline mass_threshold_mat operator*(split_mat_view const & a, mass_threshold_mat_view const & b) {
+  a.grid().ensure_compatible(b.grid());
+  mass_threshold_mat_f * ptr = hoppet_cxx__mass_threshold_mat__alloc_and_conv__sm_mtm(a.ptr(), b.ptr());
+  return mass_threshold_mat(ptr);
+}
 //-----------------------------------------------------------------------------
 /// @brief Object-oriented wrapper around the running_coupling Fortran type, non-owning
 ///
@@ -1765,8 +1776,28 @@ public:
 } // end namespace hoppet -------------------------------------
 
 
+// now aliases to functions hoppet
+namespace hoppet {
+  /// Globally disable grid locking for all grids. Mainly used internally,
+  /// though useful also for testing purposes, e.g. checking
+  /// equivalence of (P1*P2)*q and P1*(P2*q). When done, call
+  /// hoppet::restore_grid_locking() to restore the default behaviour.
+  inline void disable_grid_locking() {hoppet_cxx__disable_grid_locking();}
 
-/// objects globally defined in the streamlined interface
+  /// Restore the default grid locking behaviour after a call to
+  /// hoppet::disable_grid_locking()
+  inline void restore_grid_locking() {hoppet_cxx__restore_grid_locking();}
+
+  /// @brief  create this class to disable grid locking within the class's scope
+  class grid_unlock {
+  public:
+    grid_unlock() {hoppet::disable_grid_locking();}
+    ~grid_unlock() {hoppet::restore_grid_locking();}
+  };
+
+} // end namespace hoppet -------------------------------------
+
+// now objects globally defined in the streamlined interface
 namespace hoppet {
 
 /// Namespace for access to the globally defined objects from the streamlined interface  

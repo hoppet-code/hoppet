@@ -161,6 +161,8 @@ extern "C" {
   void hoppet_cxx__mass_threshold_mat__add_sm  (mass_threshold_mat_f * ptr, const split_mat_f * other, double * factor = nullptr);
   mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__times_grid_quant_2d(const mass_threshold_mat_f * mtm, const double * q_in_data, double * q_out_data);
   void hoppet_cxx__mass_threshold_mat__copy_contents(mass_threshold_mat_f * dest, const mass_threshold_mat_f * src); //< src copied into dest
+  mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__alloc_and_conv__mtm_sm(const mass_threshold_mat_f * mtm1, const split_mat_f * sm2);
+  mass_threshold_mat_f * hoppet_cxx__mass_threshold_mat__alloc_and_conv__sm_mtm(const split_mat_f * sm1, const mass_threshold_mat_f * mtm2);
 }
 DEFINE_COPY(mass_threshold_mat)
 DEFINE_DELETE(mass_threshold_mat)
@@ -272,4 +274,10 @@ extern "C" {
   pdf_table_f * hoppet_cxx__pdf_tables__table_i(const pdf_table_f * arr_start, int sz, int i);
 }
 DEFINE_DELETE(pdf_table_array)
+
+//----- generic functions 
+extern "C" {
+  void hoppet_cxx__disable_grid_locking();
+  void hoppet_cxx__restore_grid_locking();
+}
 #endif // __HOPPET_FORTRAN_PROTOTYPES_H__

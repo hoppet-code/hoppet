@@ -582,15 +582,33 @@ TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
   mtm = mtm_view; // test assignment from view
 
   // get a test pdf at the low scale, where we should have 3 flavours
-  hoppet::split_mat_view p(dh.p(nloop, nf_heavy - 1));
+  hoppet::split_mat_view p3(dh.p(nloop, nf_heavy - 1));
+  hoppet::split_mat_view p4(dh.p(nloop, nf_heavy));
+  hoppet::split_mat_view p5(dh.p(nloop, nf_heavy+1));
   assert(nf_heavy == 4);
   auto q = hoppet::sl::tables[0][0];
-  // check that they are the same
-  auto qref = mtm*q + p*q; // apply mtm and DGLAP separately and add
-  REQUIRE_PDF_APPROX_EQUAL((mtm+p)*q, qref, 1e-6);
-  REQUIRE_PDF_APPROX_EQUAL((p+mtm)*q, qref, 1e-6);
-  REQUIRE_PDF_APPROX_EQUAL((mtm-p)*q, mtm*q-p*q, 1e-6);
-  REQUIRE_PDF_APPROX_EQUAL((p-mtm)*q, p*q-mtm*q, 1e-6);
+
+  // check that various operations that are mathematically equivalent
+  // but implemented very differently give the same result; this notably
+  // helps check multiplication and addition operations
+  //-------
+  // disable grid locking for these tests, which should make them exact to within numerical precision
+  auto grid_unlock = std::make_unique<hoppet::grid_unlock>();
+  hoppet::disable_grid_locking(); // high-accuracy tests with not-so-small dy best done with grid locking off
+  auto qref = mtm*q + p3*q; // apply mtm and DGLAP separately and add
+  REQUIRE_PDF_APPROX_EQUAL((mtm+p3)*q, qref      , 1e-12);
+  REQUIRE_PDF_APPROX_EQUAL((p3+mtm)*q, qref      , 1e-12);
+  REQUIRE_PDF_APPROX_EQUAL((mtm-p3)*q, mtm*q-p3*q, 1e-12);
+  REQUIRE_PDF_APPROX_EQUAL((p3-mtm)*q, p3*q-mtm*q, 1e-12);
+  REQUIRE_PDF_APPROX_EQUAL((mtm-p4)*q, mtm*q-p4*q, 1e-12);
+  REQUIRE_THROWS_AS( (mtm - p5)*q , std::runtime_error ); // should throw because of incompatible nf
+
+  REQUIRE_PDF_APPROX_EQUAL( (mtm*p3)*q, mtm*(p3*q), 1e-12); // test mutiplication between mtm & p
+  REQUIRE_PDF_APPROX_EQUAL( (p4*mtm)*q, p4*(mtm*q), 1e-12); // test mutiplication between p & mtm
+  REQUIRE_THROWS_AS( mtm*p4 , std::runtime_error ); // should throw because of incompatible nf
+  REQUIRE_THROWS_AS( p3*mtm , std::runtime_error ); // should throw because of incompatible nf
+
+  grid_unlock.reset(); // restore grid locking
 
   hoppet::qcd::set_nf(nf_heavy - 1); // set
 
