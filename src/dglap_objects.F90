@@ -1328,9 +1328,9 @@ contains
     integer  :: nf_light_int, nf_heavy_int
     real(dp) :: nf_light_dp , nf_heavy_dp
 
-    nf_light_int = assert_eq(P_B%nf_int-1, MTM_C%P_light%nf_int,&
-                             "SetToConvolution_sm_mtm: nf_int mismatch between P_B and MTM_C")
-    nf_heavy_int = nf_light_int + 1
+    nf_heavy_int = assert_eq(P_B%nf_int, MTM_C%P_light%nf_int+1,&
+                             "SetToConvolution_sm_mtm: P_B(nf_int) must be equal to MTM_C(nf_heavy)")
+    nf_light_int = nf_heavy_int - 1
     nf_light_dp = real(nf_light_int, dp)
     nf_heavy_dp = real(nf_heavy_int, dp)
 
