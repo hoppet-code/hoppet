@@ -3216,16 +3216,21 @@ contains
   end subroutine SetDerivedConv_nodealloc
   
   !------------------------------------------------------------
-  !! Globally disables grid locking -- use with extreme
-  !! care, and when done call RestoreGridLocking
-  subroutine DisableGridLocking()
+  !! Globally disable grid locking for all grids. Mainly used internally,
+  !! though useful also for testing purposes, e.g. checking
+  !! equivalence of (P1*P2)*q and P1*(P2*q). When done, call
+  !! RestoreGridLocking() to restore the default behaviour.
+  subroutine DisableGridLocking() bind(C,name="hoppet_cxx__disable_grid_locking")
+   use iso_c_binding
     override_grid_locking = .true.
     nconv_with_override_off = 0
   end subroutine DisableGridLocking
 
   !------------------------------------------------------------
-  !! Globally restores normal grid locking
-  subroutine RestoreGridLocking()
+  !! Restore the default grid locking behaviour after a call to
+  !! DisableGridLocking()
+  subroutine RestoreGridLocking() bind(C,name="hoppet_cxx__restore_grid_locking")
+   use iso_c_binding
    if (nconv_with_override_off /= 0) call wae_error(&
      &'RestoreGridLocking',&
       &'Detected unexpected convolutions with lock override off')
