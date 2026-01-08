@@ -18,3 +18,10 @@ which can be built locally if desired. There are two parts:
   in that directory to generate the HTML documentation from the source.
   You will need a working Python environment, with pip able to install
   the required packages. 
+
+- [doxygen-fortran/](doxygen-fortran/): Doxygen configuration file for generating
+  documentation from the Fortran source code. From the top-level directory,
+  run `doxygen docs/doxygen-fortran/Doxyfile` to generate the documentation, which 
+  will be placed in `docs/doxygen-fortran-output/html/`. Note that
+  much of the documentation will remain incomplete until hoppet has replaced
+  "!!" comments with proper "!>" Doxygen comments.
