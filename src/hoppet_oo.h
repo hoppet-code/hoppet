@@ -1029,6 +1029,9 @@ public:
   typedef grid_def_view extra_t;
   using base_t::base_t; // ensures that constructors are inherited
 
+  /// @brief copy the contents of other into *this, overwriting existing data
+  /// @param other  the mass_threshold_mat_view to copy from
+  /// @return *this
   mass_threshold_mat_view & operator=(const mass_threshold_mat_view & other) {
     if (!ptr()) throw std::runtime_error("mass_threshold_mat_view::operator=: mass_threshold_mat_view object not associated");
     hoppet_cxx__mass_threshold_mat__copy_contents(ptr(), other.ptr());
@@ -1036,7 +1039,9 @@ public:
   }
 
   const grid_def_ref grid() const { return pshq().grid(); }
+  /// @brief  return the number of flavours including the heavy one
   int nf_heavy() const { return p_light().nf()+1; }
+  /// @brief  return the number of flavours excluding the heavy one
   int nf_light() const { return p_light().nf(); }
 
   /// views of the individual components of the splitting matrix
