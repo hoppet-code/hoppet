@@ -72,18 +72,19 @@ contains
 
 
   FUNCTION assert_eq2(n1,n2,string)
+    use hoppet_to_string, only: to_string
     CHARACTER(LEN=*), INTENT(IN) :: string
     INTEGER, INTENT(IN) :: n1,n2
     INTEGER :: assert_eq2
+    character(len=:), allocatable :: err_msg
     if (n1 == n2) then
        assert_eq2=n1
     else
-       write (0,*) 'nrerror: an assert_eq failed with this tag:', &
-            string
-       write(0,*) 'n1=',n1,' n2=',n2
+       err_msg = "assert_eq2 failed: " // string // ", values are " // to_string(n1) // " != " // to_string(n2) 
        if (throw_cxx_exceptions) then
-          call hoppet_throw_runtime_error(cstr_from_fortran_string("assert_eq2 failed"))
+         call hoppet_throw_runtime_error(cstr_from_fortran_string(err_msg))
        else
+          write(0,*) err_msg
           ERROR STOP 'program terminated by assert_eq2'
        end if
     end if
