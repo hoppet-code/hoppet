@@ -1604,59 +1604,148 @@ crossing heavy quark mass thresholds.
   type(grid_def)           :: grid
   type(mass_threshold_mat) :: MTM_NNLO
 
-  call InitMTMNNLO(grid, MTM_NNLO)   ! MTM_NNLO is coeff of (as/2pi)**2
+  call InitMTMNNLO(grid, MTM_NNLO)   !< MTM_NNLO is coeff of $(\as/2\pi)^2$
+  call InitMTMN3LO(grid, MTM_N3LO)   !< MTM_N3LO is coeff of $(\as/2\pi)^3$
 \end{lstlisting}
-This is the coefficient of $(\as/2\pi)^2$ for the convolution matrix
-that accounts for crossing a heavy flavour threshold in $\MSbar$
-factorisation scheme, at $\mu_F = m_h$, where $m_h$ is the heavy-quark
-pole mass (or $\MSbar$ mass), as has been described in
+These set up the coefficient of $(\as/2\pi)^{2,3}$ respectively for
+the convolution matrix that accounts for crossing a heavy flavour
+threshold in $\MSbar$ factorisation scheme, at $\mu_F = m_h$, where
+$m_h$ is the heavy-quark pole mass, as has been described in
 section~\ref{sec:pqcd}. Since the corresponding NLO term is zero, the
-number of flavours in $\as$ is immaterial at NNLO.
+number of flavours in $\as$ is immaterial up to and including \ntlo.
+%
+The \ttt{mass\_threshold\_mat} objects are composed of four
+pieces\footnote{This structure has been substantially revised as of
+  \hoppet v2.2.0, and was introduced to allow for the general flavour
+  structure that can appear at any order. } 
+\begin{lstlisting}
+  type :: mass_threshold_mat
+    type(split_mat) :: P_light !< the part that acts on the light flavours
+    type(grid_conv) :: PShq    !< (h+hbar) from singlet(nflight)
+    type(grid_conv) :: PShg    !< (h+hbar) from gluon  (nflight)
+    type(grid_conv) :: NShV    !< (h-hbar) from valence(nflight) i.e. sum_i (q_i-qbar_i)
+  end type mass_threshold_mat
+\end{lstlisting}
+This provides the complete flavour structure at any order of
+perturbation theory.
+%
+As with normal splitting functions, at lower orders some terms are
+either equal to others or zero (e.g.\ NShV is zero at NNLO).
 
-The treatment of $n_f$ in the \ttt{mass\_threshold\_mat} is very
-specific because at NNLO, the only order in the $\MSbar$ factorisation
-scheme at which it's non-zero and currently known, it is independent of $n_f$.
-Its action does of course however depend on $n_f$. 
+A different \ttt{mass\_threshold\_mat} is needed for each different
+number of flavours, with the valid number of light flavours accessible
+as \ttt{P\_light\%nf\_int}.
 %
-Since, as for \ttt{split\_mat} objects, we don't want the action of
-the \ttt{mass\_threshold\_mat} to depend on the availability of the
-current $n_f$ information from the \ttt{qcd} module, instead we
-require that before using a \ttt{mass\_threshold\_mat}, you should
-explicitly indicate the number of flavours (defined as including the
-new heavy flavour).
-%
-This is done using a call to the
-\ttt{SetNfMTM(MTM\_NNLO,nf\_incl\_heavy)} subroutine. A similar function
-\ttt{SetMassSchemeMTM( MTM\_NNLO, masses\_are\_MSbar)} can be used to
-specify whether the threshold is being crossed at a pole mass or
-$\MSbar$ mass.
-%
-So for example to take a PDF in the effective theory with $n_f=3$
+With an \ttt{MTM\_NNLO} object where that number of light flavours is
+equal to 3 then to take a PDF in the effective theory with $n_f=3$
 active flavours \ttt{pdf\_nf3}, and convert it to the corresponding
 PDF in the effective theory with $n_f=4$ active flavours
-\ttt{pdf\_nf4} at $m_h^2$ (pole mass), one uses code analogous to the following
+\ttt{pdf\_nf4} at $m_h^2$ (pole mass), one uses code analogous to the
+following
 \begin{lstlisting}
   real(dp) :: pdf_nf3(:,:), pdf_nf4(:,:)
-  logical  :: masses_are_MSbar = .false.
   [ ... ]
-  call SetNfMTM(MTM, 4)
-  call SetMassSchemeMTM(MTM, masses_are_MSbar)
-  pdf_nf4 = pdf_nf3 + (as2pi)**2 * (MTM_NNLO.conv.pdf_nf3)
+  pdf_nf4 = pdf_nf3 + (as2pi)**2 * (MTM_NNLO * pdf_nf3)
 \end{lstlisting}
 The convolution only works if the \ttt{pdf}'s are in the \ttt{human}
 representation and an error is given if this is not the case. Any
 heavy flavour (like for example intrinsic charm) 
 present in \ttt{pdf\_nf3} would be left in unchanged.
 
-Note that the type {\tt mass\_threshold\_mat}
-is not currently suitable for general changes of
-flavour-number. For example if you wish to carry out a change in the
-DIS scheme or at a scale $\mu_F \neq m_h$ then you have
-to combine a series of different convolutions (essentially correcting
-with the lower number of flavours to the $\MSbar$ factorisation scheme
-at $\mu_F = m_h$ before changing the number of flavours
-and then correcting back to the original scheme and scale using the
-higher number of flavours).
+Labelling \ttt{nl} and \ttt{nh} as the number of light and light+heavy
+flavours respectively, the following further operations are valid
+\begin{lstlisting}
+  type(split_mat)          :: sm_nl   !< split_mat for nf=nl flavours
+  type(split_mat)          :: sm_nh   !< split_mat for nf=nh=nl+1 flavours
+  type(mass_threshold_mat) :: mtm     !< a pre-existing mass_threshold_mat (nl->nh)
+  type(mass_threshold_mat) :: new_mtm !< a new mass_threshold_mat to be created
+  [ ... ]
+  
+  ! creation
+  call InitMTM(grid, mtm_new, nl)    !< allocates and sets mtm_new to zero
+  call InitMTM(mtm_new, mtm)         !< copies mtm
+  call InitMTM(mtm_new, sm_nh)       !< mtm_new*q (nl->nh) gives the same result as sm_nh*q
+
+  ! addition (with optional factor multiplying the second argument)
+  call AddWithCoeff(mtm_new, mtm  , [factor])  !< mtm_new += mtm[*factor]
+  call AddWithCoeff(mtm_new, sm_nl, [factor])  !< adds just to P_light
+  call AddWithCoeff(mtm_new, sm_nh, [factor])  !< converts sm_nh to an mtm and adds it
+
+  ! multiplication / convolution
+  call Multiply(mtm_new, fact)
+  call SetToConvolution(mtm_new, mtm, sm_nl)   !< mtm_new = mtm * sm_nl
+  call SetToConvolution(mtm_new, sm_nh, mtm)   !< mtm_new = sm_nh * mtm
+
+  ! deallocation of associated memory
+  call Delete(mtm_new)
+\end{lstlisting}
+The \ttt{InitMTM} and \ttt{SetToConvolution} operations allocate
+memory if \ttt{mtm\_new} has not been allocated, otherwise they reuse
+the existing memory, requiring a consistent underlying grid.
+%
+The above operations effectively provide the full valid algebra
+associated with mass thresholds for a single additional heavy flavour.
+
+In addition, \hoppet allows the user to create ``derived''
+\ttt{mass\_threshold\_mat} objects, in analogy with the derived
+\ttt{split\_mat} objects discussed in
+Section~\ref{sec:derived-split-matrices}.
+%
+The relevant calls are 
+\begin{lstlisting}
+  integer                  :: nl            !< number of light flavours
+  real(dp), pointer        :: probes(:,:,:) !< the temporary probes
+  type(mass_threshold_mat) :: mtm           !< output mass_threshold_mat
+
+  call GetDerivedMTMProbes(grid, nl, probes)
+  [... operate on each of the probes as if it were a normal PDF ]
+  call InitMTM(grid, mtm, nl)
+  call SetDerivedMTM(mtm, probes)  !< mtm*q now reproduces operations carried out on probes
+\end{lstlisting}
+%
+% The \ttt{P\_light} splitting matrix is specific to a given number of
+% light flavours (\ttt{P\_light\%nf\_int}) and so a different \ttt{mass\_threshold\_mat}
+% 
+% The treatment of $n_f$ in the \ttt{mass\_threshold\_mat} is very
+% specific because at NNLO, the only order in the $\MSbar$ factorisation
+% scheme at which it's non-zero and currently known, it is independent of $n_f$.
+% Its action does of course however depend on $n_f$. 
+% %
+% Since, as for \ttt{split\_mat} objects, we don't want the action of
+% the \ttt{mass\_threshold\_mat} to depend on the availability of the
+% current $n_f$ information from the \ttt{qcd} module, instead we
+% require that before using a \ttt{mass\_threshold\_mat}, you should
+% explicitly indicate the number of flavours (defined as including the
+% new heavy flavour).
+% %
+% This is done using a call to the
+% \ttt{SetNfMTM(MTM\_NNLO,nf\_incl\_heavy)} subroutine. A similar function
+% \ttt{SetMassSchemeMTM( MTM\_NNLO, masses\_are\_MSbar)} can be used to
+% specify whether the threshold is being crossed at a pole mass or
+% $\MSbar$ mass.
+% %
+% So for example to take a PDF in the effective theory with $n_f=3$
+% active flavours \ttt{pdf\_nf3}, and convert it to the corresponding
+% PDF in the effective theory with $n_f=4$ active flavours
+% \ttt{pdf\_nf4} at $m_h^2$ (pole mass), one uses code analogous to the following
+% \begin{lstlisting}
+%   real(dp) :: pdf_nf3(:,:), pdf_nf4(:,:)
+%   logical  :: masses_are_MSbar = .false.
+%   [ ... ]
+%   call SetNfMTM(MTM, 4)
+%   call SetMassSchemeMTM(MTM, masses_are_MSbar)
+%   pdf_nf4 = pdf_nf3 + (as2pi)**2 * (MTM_NNLO.conv.pdf_nf3)
+% \end{lstlisting}
+
+% Note that the type {\tt mass\_threshold\_mat}
+% is not currently suitable for general changes of
+% flavour-number. For example if you wish to carry out a change in the
+% DIS scheme or at a scale $\mu_F \neq m_h$ then you have
+% to combine a series of different convolutions (essentially correcting
+% with the lower number of flavours to the $\MSbar$ factorisation scheme
+% at $\mu_F = m_h$ before changing the number of flavours
+% and then correcting back to the original scheme and scale using the
+% higher number of flavours).
 
 
 As for the NNLO splitting functions, the mass threshold corrections
@@ -1745,8 +1834,9 @@ Having initialised a \ttt{dglap\_holder} one has access to various components:
 \begin{lstlisting}
   type dglap_holder
     type(split_mat), pointer :: allP(1:nloop, nflo:nfhi)  ! FFNS: nflo=nfhi=nf_lcl
-    type(split_mat), pointer :: P_LO, P_NLO, P_NNLO
-    type(mass_threshold_mat) :: MTM2
+    type(split_mat), pointer :: P_LO, P_NLO, P_NNLO, P_N3LO
+    type(mass_threshold_mat), pointer :: allMTM(3:nloop,nflo+1:nfhi)
+    type(mass_threshold_mat), pointer :: MTM_NNLO, MTM_N3LO ! pointers to MTM(3,nf) and MTM(4,nf)
     logical                  :: MTM2_exists
     integer                  :: factscheme, nloop
     integer                  :: nf
@@ -1754,12 +1844,17 @@ Having initialised a \ttt{dglap\_holder} one has access to various components:
   end type dglap holder
 \end{lstlisting}
 Some just record information passed on initialisation, for example
-\ttt{factscheme} and \ttt{nloop}. Other parts are set up once and for
-all on initialisation, notably the \ttt{allP} matrix, which contains
+\ttt{factscheme} and \ttt{nloop}.
+%
+Other parts are set up once and for
+all on initialisation, notably the \ttt{allP} array, which contains
 the 1-loop, 2-loop, etc. splitting matrices for the requested $n_f$
-range.
+range, and, analogously the \ttt{allMTM} array, whose flavour index
+corresponds to the number of \emph{heavy} flavours.
 
-Yet other parts of the \ttt{dglap\_holder} type depend on $n_f$.
+Pointers such as \ttt{P\_LO} are shorthands for the objects at the
+current number of flavours.
+%
 Before accessing these, one should first perform the following call:
 \begin{lstlisting}
   call SetNfDglapHolder(dglap_h, nf_lcl)
@@ -1770,10 +1865,9 @@ This creates links:
   dglap_h%P_NLO  => dglap_h%allP(2,nf_lcl)
   dglap_h%P_NNLO => dglap_h%allP(3,nf_lcl)
 \end{lstlisting}
-for convenient named access to the various splitting matrices, and it
-also sets the global (\ttt{qcd}) $n_f$ value (via a call to
-\ttt{qcd\_SetNf}) and where relevant updates the internal $n_f$ value
-associated with \ttt{MTM2} (via a call to \ttt{SetNfMTM}).
+for convenient named access to the various splitting matrices, and
+similarly for the mass threshold matrices (with \ttt{nf\_lcl}
+corresponding to the number of flavours including the heavy quark).
 
 As with other types that allocate memory for derived types, that
 memory can be freed via a call to the \ttt{Delete} subroutine,
