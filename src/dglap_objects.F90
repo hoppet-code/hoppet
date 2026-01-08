@@ -1113,9 +1113,9 @@ contains
 
   !! Initialise an mtm to zero, with the given value of nf_light
   subroutine InitMTM_zero(grid, mtm, nf_light)
-    type(grid_def),               intent(in)    :: grid
-    type(mass_threshold_mat), intent(inout) :: mtm
-    integer,                      intent(in)    :: nf_light
+    type(grid_def),           intent(in)    :: grid      !< the grid to use
+    type(mass_threshold_mat), intent(inout) :: mtm       !< the mass threshold matrix to initialise
+    integer,                  intent(in)    :: nf_light  !< number of light flavours
     !---------------------------------------------
     call InitSplitMat(grid, mtm%P_light, nf=nf_light)
 
