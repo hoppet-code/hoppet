@@ -24,7 +24,7 @@ a very long time.
 On the other hand the intricate calculations of the three-loop
 matching relations needed for both the single and two mass VFNS were
 only very recently
-completed~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt,Ablinger:2025awb}.
+completed~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt,Ablinger:2025awbt,Behring:2025avs}.
 %
 Finally the four-loop splitting functions entering the DGLAP equation
 are currently not known exactly, except for certain $n_f$-dependent
@@ -133,7 +133,7 @@ They can make the choice by calling \ttt{hoppetSetSplittingN3LO(variant)}, where
 
 Besides the splitting functions, we have also incorporated the
 single-mass thresholds up to N$^3$LO, as calculated in
-Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}.
+Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xttt,Behring:2025avs}.
 %
 As of version 2.1.0, the \ntlo thresholds are available in two forms,
 using code from Refs.~\cite{BlumleinCode,Fael:2022miw}.
@@ -153,7 +153,10 @@ with one of the following values for \ttt{n3lo\_threshold\_choice}:
   %
   Initialisation time is below $1\,\text{s}$.
   %
-  This is the default choice.
+  This is the default choice.\footnote{Users wishing to investigate
+    the effect of the \ttt{NShV} piece calculated in
+    Ref.~\cite{Behring:2025avs}, and added to \hoppet in version 2.2.0, can turn it off by selecting
+    \ttt{n3lo\_nfthreshold\_libOME\_2510}.}
   
 \item \ttt{n3lo\_nfthreshold\_exact\_fortran}: all contributions are
   exact, except for the $A_\text{hg}^\text{S}$ term in
