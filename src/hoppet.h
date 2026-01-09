@@ -163,10 +163,13 @@ namespace hoppet {
   const int nnlo_nfthreshold_exact = -12;
   const int nnlo_nfthreshold_param = -11;
 
-  constexpr int n3lo_nfthreshold_libOME        = 1;
-  constexpr int n3lo_nfthreshold_exact_fortran = 2;
+  constexpr int n3lo_nfthreshold_libOME_2512   = 1; //< C++ expansions, with Q-Qbar (2512.13508), good to 2048*epsilon, https://gitlab.com/libome/libome 
+  constexpr int n3lo_nfthreshold_libOME_2510   = 3; //< C++ expansions, no Q-Qbar, good to 2048*epsilon, https://gitlab.com/libome/libome 
+  constexpr int n3lo_nfthreshold_exact_fortran = 2; //< exact except AQg; includes Q-Qbar contributions from 2512.13508
   constexpr int n3lo_nfthreshold_off = 0;
-  constexpr int n3lo_nfthreshold_on = n3lo_nfthreshold_libOME;
+  constexpr int n3lo_nfthreshold_on = n3lo_nfthreshold_libOME_2512;     //< an alias, for symmetry with nnlo_nfthreshold_off
+  constexpr int n3lo_nfthreshold_libOME = n3lo_nfthreshold_libOME_2512; //< an alias, for compactness
+
 
   const int factscheme_MSbar    = 1;
   const int factscheme_DIS      = 2;

@@ -1,5 +1,9 @@
 2025-01-09 Gavin
 
+	* hoppet.h:
+	updated mass threshold constants to reflect addition of NShV term
+	and match those in the Fortran code
+
 	* src/mass-thresholds/AQqPSs3.f:  *** ADDED ***
 	* src/mass-thresholds/mass_thresholds_n3lo.f90:
 	added Fortran implementation of AQqPSs3 function from corresponding ancillary 
