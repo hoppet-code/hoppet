@@ -1712,7 +1712,7 @@ contains
         write(6,'(a)') '*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,'
         write(6,'(a)') '*     A. von Manteuffel, C. Schneider, and K. Schönwald,'
         write(6,'(a)') '*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",'
-        write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037)'
+        write(6,'(a)') '*     arXiv:2510.02175 (DESY 24-037) and 2512.13508'
         write(6,'(a)') '* shall be cited at any use. Corresponding code from J. Bluemlein, March 19 2024 and '
         write(6,'(a)') '* K. Schönwald, March 15 2024, including results from arXiv:2207.00027, arXiv:2403.00513'
         write(6,'(a)') '*'
@@ -1753,8 +1753,8 @@ contains
     call AddWithCoeff(MTM_N3LO%P_light%qq, MTM_N3LO%P_light%NS_plus)  ! qq = NS_plus + PSqq_H
     
     ! the NShV piece is not provided in the original fortran code, so we set it to zero here
-    call wae_warn(nwarn_NShV, 'InitMTMN3LOExactFortran: the N3LO exact Fortran MTM does not provide the NShV piece; setting it to zero')
-    call InitGridConv(grid, MTM_N3LO%NShV)
+    !call wae_warn(nwarn_NShV, 'InitMTMN3LOExactFortran: the N3LO exact Fortran MTM does not provide the NShV piece; setting it to zero')
+    call InitGridConv(grid, MTM_N3LO%NShV, JB(AQqPSs3_znfasLL, null(), null(), order=3))
 
     ! the valence and minus non-singlet pieces are the same
     call InitGridConv(MTM_N3LO%P_light%NS_V, MTM_N3LO%P_light%NS_minus) 

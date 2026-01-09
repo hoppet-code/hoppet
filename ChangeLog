@@ -1,3 +1,22 @@
+2025-01-09 Gavin
+
+	* src/mass-thresholds/AQqPSs3.f:  *** ADDED ***
+	* src/mass-thresholds/mass_thresholds_n3lo.f90:
+	added Fortran implementation of AQqPSs3 function from corresponding ancillary 
+	file of 2512.13508 (adapted to be in a module) and interfaced it 
+	with standard argument set in mass_thresholds_n3lo.f90
+
+	* src/dglap_objects.F90:
+	* src/dglap_choices.f90:
+    updated InitMTMN3LOExactFortran(grid,MTM_N3LO) to include the NShV term 
+	from the Fortran code, and clarified this in comments around def of 
+	n3lo_nfthreshold_exact_fortran
+
+	* unit-tests/test_libome.F90:
+	added unit test that N3LO NShV term is numerically the same between
+	libOME and new Fortran implementation.
+
+
 2025-01-07 Gavin (later)
 
 	* NEWS.md:

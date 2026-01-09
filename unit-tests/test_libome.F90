@@ -184,6 +184,7 @@ contains
         call check_moment("nloop=4, PShg     ", moment_N,   mtm3%PShg   , mtm3_fortran%PShg, override_tol=1e-5_dp ) 
         ! all others should be precise.
         call check_moment("nloop=4, PShq     ", moment_N,   mtm3%PShq   , mtm3_fortran%PShq   )
+        call check_moment("nloop=4, PShq     ", moment_N,   mtm3%NShV   , mtm3_fortran%NShV   )
         call check_moment("nloop=4, PSqq_H   ", moment_N,   mtm3_psqq   , mtm3_fortran_psqq )
         call check_moment("nloop=4, NSqq_H   ", moment_N,   mtm3%P_light%NS_plus , mtm3_fortran%P_light%NS_plus )
         call check_moment("nloop=4, NSmqq_H  ", moment_N,   mtm3%P_light%NS_minus, mtm3_fortran%P_light%NS_minus)      

@@ -96,6 +96,14 @@ contains
     !AQGtotal = (RED+nf*AQG3NF(z))*as**3
   end function AQGtotal
 
+  !! 2026-01-09: interface to AQqPSs3 from Blumlein et al,
+  !! with arguments in our standard order
+  double precision function AQqPSs3_znfasLL(z,nf,as,LL)
+    use AQqPSs3_mod
+    double precision :: z,nf,as,LL
+    AQqPSs3_znfasLL = AQqPSs3(z,nf,LL,as)
+  end function AQqPSs3_znfasLL
+
 end module blumlein_interfaces
 
 module mass_thresholds_n3lo

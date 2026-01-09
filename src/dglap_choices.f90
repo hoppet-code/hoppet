@@ -54,7 +54,7 @@ module dglap_choices
   integer, parameter, public :: nnlo_nfthreshold_param = -11
   integer, public :: nnlo_nfthreshold_variant = nnlo_nfthreshold_param
 
-  integer, parameter, public :: n3lo_nfthreshold_exact_fortran = 2 !< exact except AQg
+  integer, parameter, public :: n3lo_nfthreshold_exact_fortran = 2 !< exact except AQg; includes Q-Qbar contributions from 2512.13508
   integer, parameter, public :: n3lo_nfthreshold_libOME_2510 = 3   !< C++ expansions, no Q-Qbar, good to 2048*epsilon, https://gitlab.com/libome/libome 
   integer, parameter, public :: n3lo_nfthreshold_libOME_2512 = 1   !< C++ expansions, with Q-Qbar (2512.13508), good to 2048*epsilon, https://gitlab.com/libome/libome 
   integer, parameter, public :: n3lo_nfthreshold_off = 0
