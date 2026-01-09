@@ -1585,9 +1585,11 @@ expressions, which are very fast
 to evaluate. Other possibilities, like
 the exact splitting functions or a previous set of approximated NNLO
 splitting functions which was used before the full
-calculation was available are described in Appendix \ref{sect:nnlo}.
+calculation was available are described in Appendix \ref{sect:nnlo},
+together with the current options for the \ntlo approximations.
+%
 Note that the QCD colour factors introduced in section~\ref{sec:qcd}
-cannot be modified if the interpolated NNLO splitting functions
+cannot be modified if the approximate NNLO splitting functions
 are used, since these expressions use the default QCD values.
 
 
@@ -3917,7 +3919,7 @@ pdf_at_y = EvalGridQuant(grid,pdf_set(:,-6:6),y)
 where an example of  the \ttt{LHAsub} subroutine can be found in
 section~\ref{sec:human-rep}
 
-\section{NNLO splitting functions}
+\section{NNLO and \ntlo splitting functions}
 \label{sect:nnlo}
 The exact NNLO splitting
 functions derived by Moch, Vermaseren and Vogt
@@ -3969,6 +3971,32 @@ constants be varied (with the caveat about $d^{abc}d_{abc}$, as
 discussed in section~\ref{sec:qcd}). For the other options the
 NNLO splitting functions have been computed using the QCD values
 for the colour factors.
+
+At \ntlo~\cite{Gracey:1994nn,Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd,Falcioni:2025hfz}, the user can call
+\begin{lstlisting}
+  integer :: n3lo_splitting_approximation, n3lo_splitting_variant
+  call dglap_Set_n3lo_approximation(n3lo_splitting_variant)
+  call dglap_Set_n3lo_variant(n3lo_splitting_variant)
+\end{lstlisting}
+with one of the following options for the approximation
+\begin{itemize}
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310}, with the
+  approximations in papers up to and including Ref.~\cite{Moch:2023tdj};
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2404}, with the
+  approximations in papers up to and including
+  Ref.~\cite{Falcioni:2024xyt};
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2410}, with the approximations in papers up to and including
+  Ref.~\cite{Falcioni:2024qpd}.
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2512}, the default value at the time of
+  writing (v2.2.0), with the approximations in papers up to and including
+  Ref.~\cite{Falcioni:2025hfz},
+\end{itemize}
+and one of the following three for the variant
+\begin{lstlisting}
+  nnlo_splitting_Nfitav     !< default
+  nnlo_splitting_Nfiterr1
+  nnlo_splitting_Nfiterr2
+\end{lstlisting}
 
 %======================================================================
 \section{Useful tips on Fortran~95}

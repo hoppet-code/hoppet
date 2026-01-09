@@ -34,7 +34,7 @@ However, enough Mellin-moments have been computed that together with
 the exact pieces just mentioned and known small- and large-$x$
 behaviours, approximate splitting functions suitable for phenomenology
 can be reliably
-determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd}.
+determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd,Falcioni:2025hfz}.
 %
 We have therefore incorporated the aforementioned pieces, using code
 that is publicly available with those references, with the intention of
@@ -44,7 +44,7 @@ updating the splitting functions as they become more precisely known.
 
 For the specific implementation in \hoppet version 2.0.0 we rely on
 the approximations computed in
-Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd} (FHMPRUVV),
+Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd,Falcioni:2025hfz} (FHMPRUVV),
 the implementation of the three-loop (single-mass) VFNS coefficients as found in
 Ref.~\cite{BlumleinCode}, which contains code associated with
 Refs.~\cite{Ablinger:2024xtt,Fael:2022miw} and our own implementation
@@ -71,17 +71,19 @@ splitting functions.
 The user can control which series of approximation to use by making a
 call to the subroutine \ttt{hoppetSetApproximateDGLAPN3LO(splitting\_approx)}.
 %
-At the time of writing, three options are available for the \ttt{splitting\_approx}:
+At the time of writing, four options are available for the \ttt{splitting\_approx}:
 %
 \begin{itemize}
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310\_05744}, with the
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310}, with the
   approximations in papers up to and including Ref.~\cite{Moch:2023tdj};
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}, with the
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2404}, with the
   approximations in papers up to and including
   Ref.~\cite{Falcioni:2024xyt};
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089}, the default value at the time of
-  writing, with the approximations in papers up to and including
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2410}, with the approximations in papers up to and including
   Ref.~\cite{Falcioni:2024qpd}.
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2512}, the default value at the time of
+  writing (v2.2.0), with the approximations in papers up to and including
+  Ref.~\cite{Falcioni:2025hfz}.
 \end{itemize}
 These constants, and the others discussed in this section, are defined
 in the \repolink{src/dglap_choices.f90}{dglap\_choices} module in
