@@ -1798,10 +1798,7 @@ with one of the following values for \ttt{n3lo\_threshold\_choice}:
   
 \item \ttt{n3lo\_nfthreshold\_exact\_fortran}: all contributions are
   exact, except for the $A_\text{hg}^\text{S}$ term in
-  Eq.~(\ref{eq:hp-nf1}), which is based on piecewise expansions, and
-  the \ttt{NShV} term, which is available with
-  Ref.~\cite{Behring:2025avs} but, as of v2.2.0, has yet to be
-  incorporated in \hoppet and is instead set to zero.
+  Eq.~(\ref{eq:hp-nf1}), which is based on piecewise expansions.
   %
   The exact contributions make extensive use of
   \texttt{hplog5}~\cite{FortranPolyLog} calls and lead to an
