@@ -14,6 +14,12 @@
 % \definecolor{teal}{rgb}{0.0,0.4,0.4}
 % \definecolor{navy}{rgb}{0.0,0.1,0.3}
 
+% fontenc is needed to ensure that underscores can be copy/pasted
+% from the PDF
+\usepackage[T1]{fontenc}
+% chatgpt recommends using this as well
+\usepackage{lmodern}
+
 %\usepackage{hyperref}
 
 \usepackage{subcaption}
@@ -99,7 +105,7 @@
 \newcommand{\ttt}[1]{\texttt{#1}}
 \newcommand{\order}[1]{{\cal O}\left(#1\right)}
 \newcommand{\fn}{\scriptsize}
-
+\newcommand{\NS}{\text{\textsc{ns}}}
 \newcommand{\AllDGLAP}{Botje,Schoeffel:1998tz,Pegasus,Pascaud:2001bi,Weinzierl:2002mv,Cafarella:2003jr,Cafarella:2005zj,Cafarella:2008du,GuzziThesis,nnpdf,Kosower:1997hg,Ratcliffe:2000kp}
 
 \newcommand{\myparagraph}[1]{\paragraph{#1}}
