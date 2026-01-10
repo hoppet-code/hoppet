@@ -11,61 +11,113 @@
 
 First of all we set up the notation and
 conventions that are used throughout \hoppet. The DGLAP
-equation for a non-singlet parton distribution reads
+equation for a full flavour set of parton distributions, $q$, reads
 \begin{equation}
   \label{eq:dglap-ns}
   \frac{\partial q(x,Q^2)}{\partial \ln Q^2} = 
-\frac{\aq}{2\pi}\int_x^1 \frac{dz}{z}
-  P(z,\aq) q\lp \frac{x}{z},Q^2\rp \equiv 
-\frac{\aq}{2\pi}  P(x,\aq) \otimes q\lp x,Q^2\rp \ .
+  \int_x^1 \frac{dz}{z}
+  P\left(z,\aq \right) q\lp \frac{x}{z},Q^2\rp \equiv 
+  P\left(x,\aq\right) \otimes q\lp x,Q^2\rp,
 \end{equation}
-The related variable $t\equiv \ln Q^2$ is also used
-in various places in \hoppet.
-The splitting functions in eq.~(\ref{eq:dglap-ns})
-are known exactly up to NNLO in the 
-unpolarised case \cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}, and approximately at N$^3$LO~\cite{Gracey:1994nn,Davies:2016jie,Moch:2017uml,Gehrmann:2023cqm,Falcioni:2023tzp,Gehrmann:2023iah,McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd,Falcioni:2025hfz}:
+where $P$ is a matrix in flavour space and is expressed as an
+expansion in powers of the strong coupling $\alpha_s$
 \begin{equation}
   \label{eq:dpdf}
-   P(z,\aq)=P^{(0)}(z)+\frac{\aq}{2\pi}P^{(1)}(z)+
-\lp \frac{\aq}{2\pi} \rp^2 P^{(2)}(z) 
-+
-\lp \frac{\aq}{2\pi} \rp^3 P^{(3)}(z) \ ,
+  P\left( z,\aq \right)
+  =
+  \sum_{n=1}   \lp \frac{\aq}{2\pi} \rp^n P^{(n)}(z)
+  %
+  %\frac{\aq}{2\pi} P^{(1)}(z)
+  % +
+  % +
+  % \lp \frac{\aq}{2\pi} \rp^3 P^{(3)}(z) 
+  % +
+  % \lp \frac{\aq}{2\pi} \rp^4 P^{(4)}(z) \ ,
 \end{equation}
-and up to NNLO \cite{Mertig:1995ny,Vogelsang:1996im,Moch:2014sna,Moch:2015usa,Blumlein:2021enk,Blumlein:2021ryt} in the polarised case.
-The generalisation to the singlet case is straightforward, as it
-is 
+%
+The splitting functions in eq.~(\ref{eq:dglap-ns}) are known exactly
+up to NNLO ($n\le 3$) in the unpolarised case
+\cite{Furmanski:1980cm,Curci:1980uw,NNLO-NS,NNLO-singlet}, and
+approximately at
+N$^3$LO ($n\le 4$)~\cite{Gracey:1994nn,Davies:2016jie,Moch:2017uml,Gehrmann:2023cqm,Falcioni:2023tzp,Gehrmann:2023iah,McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd,Falcioni:2025hfz};
+and up to NNLO
+\cite{Mertig:1995ny,Vogelsang:1996im,Moch:2014sna,Moch:2015usa,Blumlein:2021enk,Blumlein:2021ryt}
+in the polarised case.  The generalisation to the singlet case is
+straightforward, as it is
 %the generalisation of eq.~(\ref{eq:dglap-ns}) 
-to the case of time-like evolution\footnote{
+to the case of time-like evolution,\footnote{
 The general structure of the relation between space-like
 and time-like evolution and splitting functions
  has been investigated in
  \cite{Furmanski:1980cm,Curci:1980uw,Stratmann:1996hn,Dokshitzer:2005bf,Mitov:2006ic,Basso:2006nk,Dokshitzer:2006nm,Beccaria:2007bb}.
  %
  See references to those articles for more recent updates.
-}, 
+}
 relevant for example for fragmentation function analysis,
 where NNLO results
 are also available \cite{Mitov:2006ic,Moch:2007tx,Almasy:2011eq}.
 
-
-As with the splitting functions, most perturbative quantities in
-\hoppet are defined to be coefficients of powers of $\as/2\pi$.
+In terms of the flavour structure of Eq.~(\ref{eq:dglap-ns}), there
+are different possible flavour bases for representing both the parton
+distributions $q$ and the splitting functions.
 %
-However there are some places where a different convention is used,
-either for historical reasons or because external code uses a
-different convention.
-%
-In particular the $\beta$-function coefficients of the running
-coupling equation,
+Using $q_i$ to denote the $i^\text{th}$ quark, $i=1,\ldots,6$, $\bar
+q_i$ for the corresponding anti-quark, and $g$ for the gluon, it is
+common to use a basis expressed in terms of flavour and anti-flavour
+combinations,
+\begin{subequations}
+  \label{eq:flavour-basis}
+  \begin{align}
+    q_{i}^\pm            &= q_i \pm \bar q_i\,, \\
+    \intertext{and from those, non-singlet (NS), singlet ($\Sigma$) and valence (V) combinations~\cite{vanNeerven:1999ca,vanNeerven:2000uj},}
+    q_{\NS,ik}^\pm &= q_i^\pm - q_k^\pm\,, \\
+    q^V_\NS        &= \sum_{i=1}^{n_f} q_i^-\,,\\
+    \Sigma               &= \sum_{i=1}^{n_f} q_i^+\,,
+  \end{align}
+\end{subequations}
+with the evolution then taking the form
+\begin{subequations}\label{eq:P-flavour-basis}
+  \begin{alignat}{2}
+    &\partial_{\ln Q^2} \, q_{\NS,ik}^\pm &&= P_\NS^\pm \otimes q_{\NS,ik}^\pm\,, \\
+    &\partial_{\ln Q^2} \, q_{\NS}^V      &&= P_\NS^V   \otimes q_{\NS}^V\,, \\
+    &\partial_{\ln Q^2} \, \Sigma         &&= P_{qq}    \otimes \Sigma + P_{qg} \otimes g\,\\
+    &\partial_{\ln Q^2} \, g              &&= P_{gq}    \otimes \Sigma + P_{gg} \otimes g\,.
+  \end{alignat}
+\end{subequations}
+The QCD coupling also satisfies a renormalisation group equation,
 \begin{equation}
   \label{eq:as-ev}
   \frac{d\as}{d\ln Q^2} = \beta\lp \aq\rp = -\as (\beta_0\as +
   \beta_1\as^2 + 
   \beta_2\as^3 + 
-  \beta_3\as^4) \,,
+  \beta_3\as^4) \,.
 \end{equation}
-are defined internally in \hoppet as multiplying powers of $\alpha_s$
-directly.
+Generally, our convention in \hoppet will be that perturbative quantities 
+\hoppet are defined to be coefficients of powers of $\as/2\pi$, but
+note the different convention specifically in the case of the
+$\beta$-function in Eq.~(\ref{eq:as-ev}).
+%
+This is for historical reasons and has been maintained because of the
+significant number of external codes that rely on that convention.
+
+% As with the splitting functions, most perturbative quantities in
+% \hoppet are defined to be coefficients of powers of $\as/2\pi$.
+% %
+% However there are some places where a different convention is used,
+% either for historical reasons or because external code uses a
+% different convention.
+% %
+% In particular the $\beta$-function coefficients of the running
+% coupling equation,
+% \begin{equation}
+%   \label{eq:as-ev}
+%   \frac{d\as}{d\ln Q^2} = \beta\lp \aq\rp = -\as (\beta_0\as +
+%   \beta_1\as^2 + 
+%   \beta_2\as^3 + 
+%   \beta_3\as^4) \,,
+% \end{equation}
+% are defined internally in \hoppet as multiplying powers of $\alpha_s$
+% directly.
 
 The evolution of the strong coupling and the parton distributions can
 be performed in both the fixed flavour-number scheme (FFNS) and the 
@@ -76,95 +128,162 @@ coupling $\aq$ and the parton distributions at the heavy quark
 mass threshold $m_h^2$.
 
 These matching conditions for the parton distributions
-receive non-trivial contributions at higher orders. In the $\MSbar$
-(factorisation) scheme, for example,
-carrying out the matching at a scale equal to the heavy-quark mass,
-these begin at NNLO:\footnote{In
-  a general scheme they would start at NLO.} %
-for light quarks $q_{l,i}$ of flavour $i$ 
-(quarks that are considered massless
-below the heavy quark mass threshold $m_h^2$) the matching between
-their values in the $n_f$ and
-$n_f+1$ effective theories reads\footnote{Note that the literature
-  focuses on the $q_{l,i}+q_{l,-i}$ combination. We thank Johannes
-  Bl\"umlein for having provided the $A^{\rm NS,-}_{qq,h}(x)$ code
-  needed for the $q_{l,i}-q_{l,-i}$ combination.}:
-%\begin{equation}
-%\label{eq:lp-nf1}
-%  q_{l,i}^{\,(n_f+1)}(x,m_h^2) \: = \:  q_{l,i}^{\,(\nf}(x,m_h^2) +
-%\lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
-%   A^{\rm ns,(2)}_{qq,h}(x) \otimes
-%  q_{l,i}^{\, (\nf}(x,m_h^2) \ ,
-%\end{equation}
-\begin{align}
-\label{eq:lp-nf1}
-  q_{l,i}^{\,(n_f+1)}(x,m_h^2) + q_{l,-i}^{\,(n_f+1)}(x,m_h^2)  & =   q_{l,i}^{\,(\nf}(x,m_h^2) + q_{l,-i}^{\,(\nf}(x,m_h^2) \notag \\ &+
-   A^{\rm NS,+}_{qq,h}(x) \otimes \left(
-   q_{l,i}^{\, (\nf}(x,m_h^2) + q_{l,-i}^{\, (\nf}(x,m_h^2)\right) \notag\\
-   & + \frac{1}{n_f} \Big\{A^{\rm PS}_{qq,h}(x) \otimes \Sigma^{\, (\nf}(x,m_h^2) \notag\\
-   & + A^{\rm S}_{qg,h}(x) \otimes g^{\, (\nf}(x,m_h^2)\Big\} \ , \notag \\
-  q_{l,i}^{\,(n_f+1)}(x,m_h^2) - q_{l,-i}^{\,(n_f+1)}(x,m_h^2)  & =   q_{l,i}^{\,(\nf}(x,m_h^2) - q_{l,-i}^{\,(\nf}(x,m_h^2) \notag \\ &+
-   A^{\rm NS,-}_{qq,h}(x) \otimes \left(
-   q_{l,i}^{\, (\nf}(x,m_h^2) - q_{l,-i}^{\, (\nf}(x,m_h^2)\right) \ ,
-\end{align}
-where $i = 1,\ldots n_f$, while for the gluon distribution, the heavy
-quark PDF $q_h$, and the singlet PDF $\Sigma(x,Q^2)$ (defined in
-Table~\ref{eq:diag_split}) one has :
-\begin{align}
-\label{eq:hp-nf1}
-  g^{(n_f+1)}(x,m_h^2)  &=
-    g^{\, (\nf}(x,m_h^2) +
-    A_{\rm gq,h}^{\rm S}(x) \otimes \Sigma^{(\nf}(x,m_h^2) +
-    A_{\rm gg,h}^{\rm S}(x) \otimes g^{(\nf}(x,m_h^2) \ ,
-  \nn \\[0.3cm]
-  (q_h+\bar{q}_{h})^{(n_f+1)}(x,m_h^2)  &=
-  A_{\rm hq}^{\rm S}(x)\otimes \Sigma^{(\nf}(x,m_h^2) 
-  + A_{\rm hg}^{\rm S}(x)\otimes g^{(\nf}(x,m_h^2)\ ,  \nn \\[0.3cm]
-  \Sigma^{(n_f+1)}(x,m_h^2)  &= \Sigma^{\, (\nf}(x,m_h^2) + \left[ A^{\rm NS,+}_{qq,h}(x) + A^{\rm PS}_{qq,h}(x) + A_{\rm hq}^{\rm S}(x)\right] \otimes \Sigma^{(\nf}(x,m_h^2) \nn \\
-  & + \left[ A^{\rm S}_{qg,h}(x) + A_{\rm hg}^{\rm S}(x) \right] \otimes g^{(\nf}(x,m_h^2)
-\end{align}
-with $q_h=\bar{q}_h$. Up to N$^3$LO the matching coefficients have the
-following expansions in $\alpha_s$
-\begin{align}
-  A^{\rm NS,\pm}_{qq,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
-  A^{\rm NS,\pm,(2)}_{qq,h}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
-  A^{\rm NS,\pm,(3)}_{qq,h}(x) \ , \nn \\
-  A^{\rm S}_{gk,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
-  A^{\rm S,(2)}_{gk,h}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
-  A^{\rm S,(3)}_{gk,h}(x), \quad k=q,g \ , \nn \\
-  %A^{\rm S}_{gg,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
-  %A^{\rm S,(2)}_{gg,h}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
-  %A^{\rm S,(3)}_{gg,h}(x) \ , \nn \\
-  A^{\rm S}_{hk}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
-  A^{\rm S,(2)}_{hk}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
-  A^{\rm S,(3)}_{hk}(x), \quad k=q,g \ , \nn \\
-  %A^{\rm S}_{hg}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
-  %A^{\rm S,(2)}_{hg}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
-  %A^{\rm S,(3)}_{hg}(x) \ , \nn \\
-  A^{\rm PS}_{qq,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
-  A^{\rm PS,(3)}_{qq,h}(x) \, , \nn \\
-  A^{\rm S}_{qg,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
-  A^{\rm S,(3)}_{qg,h}(x)\,.
-\end{align}
-At $\mathcal{O}(\alpha_S^2)$ we have that $A^{\rm NS,+}_{qq,h}(x) =
-A^{\rm NS,-}_{qq,h}(x)$ whereas they start to differ at
-$\mathcal{O}(\alpha_S^3)$. The NNLO matching coefficients were
-computed in \cite{NNLO-MTM}\footnote{We thank the authors for the
-code corresponding to the calculation.} and the N$^3$LO matching
-coefficients
-in~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Fael:2022miw,Ablinger:2023ahe,Ablinger:2024xtt,BlumleinCode}.\footnote{We
-thank Johannes Bl\"umlein for sharing a pre-release version the code from
-Ref.~\cite{BlumleinCode} with us, which also contains code associated
-with Refs.~\cite{Ablinger:2024xtt,Fael:2022miw}.
+receive non-trivial contributions at higher orders.
 %
-}
+To understand the flavour structure of the matching conditions, it is
+useful to introduce $q_{i\le n_\ell}^{(n_f)}$ to refer to the gluon
+and quark flavours with $i\le n_\ell$ in a effective theory with $n_f$
+flavours.
 %
-Notice that the above
-conditions will lead to small discontinuities of the PDFs in its
-evolution in $Q^2$, which are cancelled by similar matching terms in
-the coefficient functions in massive VFN schemes, resulting in continuous physical
-observables. In particular, the heavy-quark PDFs start from a non-zero
-value at threshold at NNLO, which sometimes can even be negative.
+Then in going from $n_\ell \to n_h = n_\ell+1$ flavours, the matching
+condition takes the form
+\begin{align}
+  \label{eq:lp-nf1}
+  q_{i\le n_\ell}^{(n_h)} = q_{i\le n_\ell}^{(n_\ell)} + A_{i\le n_\ell} \otimes q_{i\le n_\ell}^{(n_h)}
+\end{align}
+for the light flavours and the gluon, where $A_{i\le n_\ell}$ has the
+same flavour structure as an $n_\ell$-flavour splitting matrix, cf.\
+Eq.~(\ref{eq:P-flavour-basis}).
+%
+Additionally the $\pm$ combinations for heavy-flavour $h$ in the
+$n_h$-flavour effective theory, $q_h^{\pm(n_h)}$, are given by
+\begin{subequations}
+  \label{eq:hp-nf1}
+  \begin{align}
+    q_h^{+(n_h)} &= A_{h\Sigma} \otimes \Sigma^{(n_\ell)} + A_{hg} \otimes g^{(n_\ell)} \\
+    q_h^{-(n_h)} &= A_{hV     } \otimes q_\NS^{V(n_\ell)}
+  \end{align}
+\end{subequations}
+As with the splitting functions, the matching matrices are calculated
+as an expansion in powers of the strong coupling.
+%
+In the $\MSbar$ (factorisation) scheme, carrying out the matching at a
+scale equal to the heavy-quark mass, the series starts at order
+$\alpha_s^2$~\cite{NNLO-MTM}, which in terms of the logarithmic accuracy is equivalent
+to NNLO in the evolution.
+%
+The are currently known up to
+\ntlo~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Fael:2022miw,Ablinger:2023ahe,Ablinger:2024xtt,BlumleinCode}.
+%
+The exact functional form depends on the choice of scheme for the
+mass, e.g.\ pole v.\ $\MSbar$ mass.\footnote{In a general
+  factorisation scheme, and when matching at scales other than the
+  heavy-quark mass, the matching terms start at order $\as$.}
+%
+Note that at lower orders some of the flavour structures are trivially
+equal to others, or are zero (e.g.\ $A_{hV}$ is zero at NNLO).
+%
+As is evident from Eqs.~(\ref{eq:lp-nf1}) and (\ref{eq:hp-nf1}), the matching
+conditions lead to small discontinuities of the PDFs between the
+$n_\ell$ and $n_h$-flavour effective theories.
+%
+Similarly, from at NNLO onwards, the heavy-quark PDFs start from a
+non-zero value at threshold, which sometimes can even be negative.
+%
+Physical predictions intended to be used at scales close to a heavy
+quark mass and that take into account full quark-mass effects
+generally include terms that compensate for these effects as one
+crosses the mass threshold.
+%
+Most DGLAP evolution codes take the approximation that different heavy
+quarks are well separated in mass.
+%
+However if one relaxes this assumption, then there are additional
+terms that correlate nearby thresholds of different heavy
+quarks~\cite{Ablinger:2025nnq}.
+%
+These are not yet included in \hoppet.
+
+
+% its
+% evolution in $Q^2$, which are cancelled by similar matching terms in
+% the coefficient functions in massive VFN schemes, resulting in continuous physical
+% observables. In particular, the heavy-quark PDFs start from a non-zero
+% value at threshold at NNLO, which sometimes can even be negative.
+% 
+% for light quarks $q_{l,i}$ of flavour $i$ (quarks that are considered
+% massless below the heavy quark mass threshold $m_h^2$) the matching
+% between their values in the $n_f$ and $n_f+1$ effective theories
+% reads:\footnote{Note that the literature focuses on the
+%   $q_{l,i}+q_{l,-i}$ combination. We thank Johannes Bl\"umlein for
+%   having provided the $A^{\rm NS,-}_{qq,h}(x)$ code needed for the
+%   $q_{l,i}-q_{l,-i}$ combination.}:
+% %\begin{equation}
+% %\label{eq:lp-nf1}
+% %  q_{l,i}^{\,(n_f+1)}(x,m_h^2) \: = \:  q_{l,i}^{\,(\nf}(x,m_h^2) +
+% %\lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
+% %   A^{\rm ns,(2)}_{qq,h}(x) \otimes
+% %  q_{l,i}^{\, (\nf}(x,m_h^2) \ ,
+% %\end{equation}
+% \begin{align}
+% \label{eq:lp-nf1}
+%   q_{l,i}^{\,(n_f+1)}(x,m_h^2) + q_{l,-i}^{\,(n_f+1)}(x,m_h^2)  & =   q_{l,i}^{\,(\nf}(x,m_h^2) + q_{l,-i}^{\,(\nf}(x,m_h^2) \notag \\ &+
+%    A^{\rm NS,+}_{qq,h}(x) \otimes \left(
+%    q_{l,i}^{\, (\nf}(x,m_h^2) + q_{l,-i}^{\, (\nf}(x,m_h^2)\right) \notag\\
+%    & + \frac{1}{n_f} \Big\{A^{\rm PS}_{qq,h}(x) \otimes \Sigma^{\, (\nf}(x,m_h^2) \notag\\
+%    & + A^{\rm S}_{qg,h}(x) \otimes g^{\, (\nf}(x,m_h^2)\Big\} \ , \notag \\
+%   q_{l,i}^{\,(n_f+1)}(x,m_h^2) - q_{l,-i}^{\,(n_f+1)}(x,m_h^2)  & =   q_{l,i}^{\,(\nf}(x,m_h^2) - q_{l,-i}^{\,(\nf}(x,m_h^2) \notag \\ &+
+%    A^{\rm NS,-}_{qq,h}(x) \otimes \left(
+%    q_{l,i}^{\, (\nf}(x,m_h^2) - q_{l,-i}^{\, (\nf}(x,m_h^2)\right) \ ,
+% \end{align}
+% where $i = 1,\ldots n_f$, while for the gluon distribution, the heavy
+% quark PDF $q_h$, and the singlet PDF $\Sigma(x,Q^2)$ (defined in
+% Table~\ref{eq:diag_split}) one has :
+% \begin{align}
+% \label{eq:hp-nf1}
+%   g^{(n_f+1)}(x,m_h^2)  &=
+%     g^{\, (\nf}(x,m_h^2) +
+%     A_{\rm gq,h}^{\rm S}(x) \otimes \Sigma^{(\nf}(x,m_h^2) +
+%     A_{\rm gg,h}^{\rm S}(x) \otimes g^{(\nf}(x,m_h^2) \ ,
+%   \nn \\[0.3cm]
+%   (q_h+\bar{q}_{h})^{(n_f+1)}(x,m_h^2)  &=
+%   A_{\rm hq}^{\rm S}(x)\otimes \Sigma^{(\nf}(x,m_h^2) 
+%   + A_{\rm hg}^{\rm S}(x)\otimes g^{(\nf}(x,m_h^2)\ ,  \nn \\[0.3cm]
+%   \Sigma^{(n_f+1)}(x,m_h^2)  &= \Sigma^{\, (\nf}(x,m_h^2) + \left[ A^{\rm NS,+}_{qq,h}(x) + A^{\rm PS}_{qq,h}(x) + A_{\rm hq}^{\rm S}(x)\right] \otimes \Sigma^{(\nf}(x,m_h^2) \nn \\
+%   & + \left[ A^{\rm S}_{qg,h}(x) + A_{\rm hg}^{\rm S}(x) \right] \otimes g^{(\nf}(x,m_h^2)
+% \end{align}
+% with $q_h=\bar{q}_h$. Up to N$^3$LO the matching coefficients have the
+% following expansions in $\alpha_s$
+% \begin{align}
+%   A^{\rm NS,\pm}_{qq,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
+%   A^{\rm NS,\pm,(2)}_{qq,h}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
+%   A^{\rm NS,\pm,(3)}_{qq,h}(x) \ , \nn \\
+%   A^{\rm S}_{gk,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
+%   A^{\rm S,(2)}_{gk,h}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
+%   A^{\rm S,(3)}_{gk,h}(x), \quad k=q,g \ , \nn \\
+%   %A^{\rm S}_{gg,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
+%   %A^{\rm S,(2)}_{gg,h}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
+%   %A^{\rm S,(3)}_{gg,h}(x) \ , \nn \\
+%   A^{\rm S}_{hk}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
+%   A^{\rm S,(2)}_{hk}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
+%   A^{\rm S,(3)}_{hk}(x), \quad k=q,g \ , \nn \\
+%   %A^{\rm S}_{hg}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^2
+%   %A^{\rm S,(2)}_{hg}(x) + \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
+%   %A^{\rm S,(3)}_{hg}(x) \ , \nn \\
+%   A^{\rm PS}_{qq,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
+%   A^{\rm PS,(3)}_{qq,h}(x) \, , \nn \\
+%   A^{\rm S}_{qg,h}(x) & = \lp \frac{\alpha_s(m_h^2)}{2\pi} \rp^3
+%   A^{\rm S,(3)}_{qg,h}(x)\,.
+% \end{align}
+% At $\mathcal{O}(\alpha_S^2)$ we have that $A^{\rm NS,+}_{qq,h}(x) =
+% A^{\rm NS,-}_{qq,h}(x)$ whereas they start to differ at
+% $\mathcal{O}(\alpha_S^3)$. The NNLO matching coefficients were
+% computed in \cite{NNLO-MTM}\footnote{We thank the authors for the
+% code corresponding to the calculation.} and the N$^3$LO matching
+% coefficients
+% in~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Fael:2022miw,Ablinger:2023ahe,Ablinger:2024xtt,BlumleinCode}.\footnote{We
+% thank Johannes Bl\"umlein for sharing a pre-release version the code from
+% Ref.~\cite{BlumleinCode} with us, which also contains code associated
+% with Refs.~\cite{Ablinger:2024xtt,Fael:2022miw}.
+% %
+% }
+% %
+% Notice that the above
+% conditions will lead to small discontinuities of the PDFs in its
+% evolution in $Q^2$, which are cancelled by similar matching terms in
+% the coefficient functions in massive VFN schemes, resulting in continuous physical
+% observables. In particular, the heavy-quark PDFs start from a non-zero
+% value at threshold at NNLO, which sometimes can even be negative.
 
 The corresponding N$^3$LO relation for the matching of the $\MSbar$
 coupling constant at the heavy quark threshold $m^2_h$ is given by 
@@ -182,9 +301,14 @@ eqs.~(\ref{eq:lp-nf1},\ref{eq:hp-nf1}) depend on the scheme used for
 the quark masses; by default in \hoppet quark masses are taken to be
 pole masses, though the option exists for the user to supply and have
 thresholds crossed at $\MSbar$ masses, but only up to NNLO. We note
-that in the current implementation in \hoppet the matching can only be
+that in the current implementation in \hoppet, the matching can only be
 performed at the matching point that corresponds to the heavy-quark masses
 themselves.
+%
+As for the PDFs, when two heavy-quark thresholds are considered close,
+there are additional terms from the simultaneous decoupling of the two
+heavy quarks~\cite{Grozin:2011nk}, which are not yet included in
+\hoppet. 
 
 Both evolution and threshold matching preserve the momentum sum rule
 \begin{equation}
@@ -287,3 +411,8 @@ The extension to QED is conceptually straightforward.
 %
 Further discussion of that is given in
 Section~\ref{sec:qed-evolution}.
+
+
+%%% Local Variables:
+%%% TeX-master: "HOPPET-doc.tex"
+%%% End:
