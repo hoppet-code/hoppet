@@ -24,7 +24,7 @@ a very long time.
 On the other hand the intricate calculations of the three-loop
 matching relations needed for both the single and two mass VFNS were
 only very recently
-completed~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt,Ablinger:2025awb}.
+completed~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt,Ablinger:2025awb,Behring:2025avs}.
 %
 Finally the four-loop splitting functions entering the DGLAP equation
 are currently not known exactly, except for certain $n_f$-dependent
@@ -34,7 +34,7 @@ However, enough Mellin-moments have been computed that together with
 the exact pieces just mentioned and known small- and large-$x$
 behaviours, approximate splitting functions suitable for phenomenology
 can be reliably
-determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd}.
+determined~\cite{McGowan:2022nag,NNPDF:2024nan,Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd,Falcioni:2025hfz}.
 %
 We have therefore incorporated the aforementioned pieces, using code
 that is publicly available with those references, with the intention of
@@ -44,7 +44,7 @@ updating the splitting functions as they become more precisely known.
 
 For the specific implementation in \hoppet version 2.0.0 we rely on
 the approximations computed in
-Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd} (FHMPRUVV),
+Refs.~\cite{Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd,Falcioni:2025hfz} (FHMPRUVV),
 the implementation of the three-loop (single-mass) VFNS coefficients as found in
 Ref.~\cite{BlumleinCode}, which contains code associated with
 Refs.~\cite{Ablinger:2024xtt,Fael:2022miw} and our own implementation
@@ -71,17 +71,19 @@ splitting functions.
 The user can control which series of approximation to use by making a
 call to the subroutine \ttt{hoppetSetApproximateDGLAPN3LO(splitting\_approx)}.
 %
-At the time of writing, three options are available for the \ttt{splitting\_approx}:
+At the time of writing, four options are available for the \ttt{splitting\_approx}:
 %
 \begin{itemize}
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310\_05744}, with the
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310}, with the
   approximations in papers up to and including Ref.~\cite{Moch:2023tdj};
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2404\_09701}, with the
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2404}, with the
   approximations in papers up to and including
   Ref.~\cite{Falcioni:2024xyt};
-\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2410\_08089}, the default value at the time of
-  writing, with the approximations in papers up to and including
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2410}, with the approximations in papers up to and including
   Ref.~\cite{Falcioni:2024qpd}.
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2512}, the default value at the time of
+  writing (v2.2.0), with the approximations in papers up to and including
+  Ref.~\cite{Falcioni:2025hfz}.
 \end{itemize}
 These constants, and the others discussed in this section, are defined
 in the \repolink{src/dglap_choices.f90}{dglap\_choices} module in
@@ -100,8 +102,7 @@ They can make the choice by calling \ttt{hoppetSetSplittingN3LO(variant)}, where
 \begin{itemize}
 \item \ttt{n3lo\_splitting\_Nfitav}: the average (the default),
 \item \ttt{n3lo\_splitting\_Nfiterr1}: one of the two extremities,
-\item \ttt{n3lo\_splitting\_Nfiterr2}: the other of the two.
-  extremities
+\item \ttt{n3lo\_splitting\_Nfiterr2}: the other of the two extremities
 \end{itemize}
 
 % each can in three variants: a
@@ -134,7 +135,7 @@ They can make the choice by calling \ttt{hoppetSetSplittingN3LO(variant)}, where
 
 Besides the splitting functions, we have also incorporated the
 single-mass thresholds up to N$^3$LO, as calculated in
-Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt}.
+Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt,Behring:2025avs}.
 %
 As of version 2.1.0, the \ntlo thresholds are available in two forms,
 using code from Refs.~\cite{BlumleinCode,Fael:2022miw}.
@@ -154,7 +155,10 @@ with one of the following values for \ttt{n3lo\_threshold\_choice}:
   %
   Initialisation time is below $1\,\text{s}$.
   %
-  This is the default choice.
+  This is the default choice.\footnote{Users wishing to investigate
+    the effect of the \ttt{NShV} piece calculated in
+    Ref.~\cite{Behring:2025avs}, and added to \hoppet in version 2.2.0, can turn it off by selecting
+    \ttt{n3lo\_nfthreshold\_libOME\_2510}.}
   
 \item \ttt{n3lo\_nfthreshold\_exact\_fortran}: all contributions are
   exact, except for the $A_\text{hg}^\text{S}$ term in
@@ -164,7 +168,7 @@ with one of the following values for \ttt{n3lo\_threshold\_choice}:
   \texttt{hplog5}~\cite{FortranPolyLog} calls and lead to an
   initialisation time of $10{-}30\,\text{s}$.
   %
-  The piecewise expansions for $A_\text{hg}^\text{S}$ are less
+  The piecewise expansions for $A_\text1{hg}^\text{S}$ are less
   accurate than with the \ttt{n3lo\_nfthreshold\_libOME} choice.
 \end{itemize}
 
@@ -246,7 +250,9 @@ $0.9$    &  $3.3153^{-4}$ &  $1.6737^{-5}$ &  $8.0961^{-9}$ &  $2.5214^{-8}$ &  
     (\texttt{nnlo\_splitting\_variant = nnlo\_splitting\_param}), to 
     facilitate comparisons by other groups, and the \ntlo splitting
     functions use the
-    \ttt{n3lo\_splitting\_approximation = n3lo\_splitting\_approximation\_up\_to\_2410\_08089} choice.}
+    \ttt{n3lo\_splitting\_approximation =
+      n3lo\_splitting\_approximation\_up\_to\_2410} choice,
+    and the \ttt{n3lo\_nfthreshold\_libOME\_2510} mass threshold choice.}
   \label{tab:n3lo-evolve}
 \end{table}
 
@@ -279,7 +285,7 @@ $0.9$    &  $3.5128^{-4}$ &  $1.7793^{-5}$ &  $8.6472^{-9}$ &  $2.6378^{-8}$ &  
     facilitate comparisons by other groups, and the \ntlo splitting
     functions use the
     \ttt{n3lo\_splitting\_approximation =
-      n3lo\_splitting\_approximation\_up\_to\_2310\_05744} choice.
+      n3lo\_splitting\_approximation\_up\_to\_2310} choice.
     %
     This table can be directly compared to tables 1 and 2 in Ref.~\cite{Cooper-Sarkar:2024crx}}
   \label{tab:n3lo-evolve-nf4}

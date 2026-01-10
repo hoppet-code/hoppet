@@ -4,15 +4,16 @@
 
 ## Additions
 
-* updated N3LO splitting functions in light of arXiv:2512.10783, which 
-  adds nf=6 support and further constrains Pgq using a new moment.
-  One gets this by choosing the option n3lo_splitting_approximation_up_to_2512 (new default). 
+* updated N3LO splitting functions in light of arXiv:2512.10783, which
+  adds nf=6 support and further constrains Pgq using a new moment. One
+  gets this by choosing the option
+  n3lo_splitting_approximation_up_to_2512 (new default). 
 
 * updated libOME to v1.1.0, which includes the Q-Qbar threshold
   contribution that starts at N3LO (arXiv:2512.13508). One gets this by
   choosing the option n3lo_nfthreshold_libOME_2512 (new default).
 
-* mass_threshold_mat structure has been refactored to have the full
+* refactored mass_threshold_mat to have the full
   structure that can appear at any order in perturbation theory:
   - Organised as a nf_light split mat (P_light) and three grid_conv objects 
     (PHhq,PShg,NShV). 
@@ -24,6 +25,8 @@
     MSbar scheme masses no longer handled simultaneously with pole masses
     (did not easily generalise beyond NNLO), and functions to set
     the scheme and the nf value have been removed.
+  Section 2 of the manual ("Perturbative evolution in QCD") has been updated
+  so as to express mass thresholds in the same language.
 
 ## Bug fixes
 

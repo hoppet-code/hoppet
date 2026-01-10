@@ -353,7 +353,9 @@ as used in the LHAPDF PDF library \cite{LHAPDF}.
 We briefly introduce now the numerical techniques used to perform
 parton evolution: the discretisation of PDFs and
 their convolutions with splitting functions on a grid in $x$,
-and the subsequent DGLAP evolution in $Q^2$. 
+and the subsequent DGLAP evolution in $Q^2$.
+%
+Note that \hoppet often uses the shorthand $t \equiv \ln Q^2$.
 
 The first aspect that we discuss is how to represent PDFs
 and associated convolutions in terms of an interpolating grid
@@ -1155,10 +1157,12 @@ What takes a bit more getting used to is that its
 upper bound is \textbf{7}. The reason is as follows: the flavour
 information can be represented in different ways, for example each
 flavour separately, or alternatively as singlet and non-singlet
-combinations. In practice both are used inside the program and it is
+combinations, cf.\ Eq.~(\ref{eq:flavour-basis}).
+%
+In practice both are used inside the program and it is
 useful for a PDF distribution to have information about the
 representation, and this is stored in
-\texttt{PDF(:,7)}\footnote{
+\texttt{PDF(:,7)}.\footnote{
 In the current release of \hoppet, 
 in particular, for PDFs in the \ttt{human} representation one
 has \texttt{PDF(:,7)=0}, while for PDFs in the \ttt{evln}
@@ -1169,18 +1173,35 @@ so that it is conserved under linear operations.
 %
 However the details of the encoding may evolve in future
 versions of the program.
-}.
+}
 
 
 %......................................................................
 \subsubsection{Human representation.}
 \label{sec:human-rep}
 When a PDF is allocated it is automatically labelled as being in the
-\ttt{human} representation, described in
-section~\ref{sec:pqcd}. Constants with names like
+\ttt{human} representation, such that 
+ the entries in an array
+ \ttt{pdf(-6:6)} of PDFs correspond to,
+ %
+\bea 
+\bar t={-6} \ ,  \bar b={-5} \ ,  \bar c={-4}
+\ , \nn   \bar s&=&{-3} \ , \nn  \bar u={-2} \ , \nn
+ \bar d={-1} \ , \\  g&=&{0} \ , \\ \nn   d={1} \ , \nn  u={2} 
+\ , \nn  
+s={3} \ , \nn   c&=&{4} \ , \nn b={5} \ , \nn  t={6} \ . \nn 
+\eea
+%
+%
+%described in
+%section~\ref{sec:pqcd}.
+Constants with names like
 \ttt{iflv\_bbar}, \ttt{iflv\_g}, \ttt{iflv\_b}, are defined in
 \ttt{module pdf\_representation}, to facilitate symbolic access to the
 different flavours.
+%
+Note that in \CPP and Python the corresponding values are offset by
+$6$, since arrays can only start with index $0$.
 
 If you are creating a PDF as an automatic array (one whose bounds are
 decided not by the allocation routine, but on the fly), for example in
@@ -1269,28 +1290,62 @@ the flavours, \ttt{-6:6}, that we want.\footnote{If instead we had
 %......................................................................
 \subsubsection{Evolution representation} 
 \label{sec:evln-rep}
-%
+
+
 For the purpose of carrying out convolutions, the \ttt{human}
 representation is not very advantageous because the splitting matrix
-in flavour space is quite complicated. Accordingly \hoppet uses a
-different representation of the flavour internally when carrying out
-convolution of splitting matrices with PDFs. For most purposes the
-user need not be aware of this. The two exceptions are when a user
-plans to create derived splitting matrices (being careless about the
-flavour representation will lead to mistakes) or wishes to carry out
-repeated convolutions for a fixed $n_f$ value (appropriate manual
-changes of the flavour representation can speed things up).
+in flavour space is quite complicated. Accordingly \hoppet uses a an
+``evolution'' representation of the flavour internally when carrying
+out convolution of splitting matrices with PDFs, corresponding to
+Eq.~(\ref{eq:flavour-basis}).
+%
+In the code this is referred to as the \ttt{evln} representation.
+%
+For most purposes the user need not be aware of this. The two
+exceptions are when a user plans to create derived splitting matrices,
+cf.\ Section~\ref{sec:derived-split-matrices}
+(being careless about the flavour representation will lead to
+mistakes), or wishes to carry out repeated convolutions for a fixed
+$n_f$ value (appropriate manual changes of the flavour representation
+can speed things up).
 
+\begin{table}
+\begin{center}
+\begin{tabular}{|r | c | l |}
+\hline
+     i & \mbox{name} & $q_i$ \\ \hline
+     $ -6\ldots-(n_f+1)$ & $q_i$ & $q_i$\\
+     $-n_f\ldots -2$ & $q_{\mathrm{NS},i}^{-}$ & 
+$(q_i -  {\bar q}_i) - (q_1 - {\bar q}_1)$\\
+      -1           & $q_{\mathrm{NS}}^{V}$ & 
+$\sum_{j=1}^{n_f} (q_j -  {\bar q}_j)$\\
+       0           & g & \textrm{gluon} \\
+       1           & $\Sigma$ & $\sum_{j=1}^{n_f} (q_j +  {\bar q}_j)$\\
+     $2\ldots n_f$ & $q_{\mathrm{NS},i}^{+}$ &
+$ (q_i +  {\bar q}_i) - (q_1 + {\bar q}_1)$\\
+      $(n_f+1)\ldots6$ & $q_i$ & $q_i$ \\
+\hline
+\end{tabular}
+\caption{}{\label{eq:diag_split} The evolution representation 
+(called \ttt{evln} in \hoppet)
+of PDFs with $n_f$ active quark flavours
+in terms of the \ttt{human} representation.}  
+\end{center}
+\end{table}
 
-The splitting matrix can be simplified considerably by switching to a different
-flavour representation, as can be seen in Table \ref{eq:diag_split}. 
- When carrying out a convolution, the only non-diagonal part is the
-block containing indices $0,1$. This representation is referred to as
-the \ttt{evln} representation. Whereas the \ttt{human} representation
-is $n_f$-independent, the \ttt{evln} depends on $n_f$ through the
-$\Sigma$ and $q_{\mathrm{NS}}^{V}$ entries and the fact that flavours
-beyond $n_f$ are left in the human representation (since they are
-inactive for evolution with $n_f$ flavours).
+% The splitting matrix can be simplified considerably by switching to a different
+% flavour representation, as can be seen in Table \ref{eq:diag_split}.
+The internal representation of the  \ttt{evln} representation is as laid
+out in Table~\ref{eq:diag_split}.
+% 
+When carrying out a convolution, the only non-diagonal part is the
+block containing indices $0,1$.
+%
+Whereas the \ttt{human} representation is $n_f$-independent, the
+\ttt{evln} form depends on $n_f$ through the $\Sigma$ and
+$q_{\mathrm{NS}}^{V}$ entries and the fact that flavours beyond $n_f$
+are left in the human representation (since they are inactive for
+evolution with $n_f$ flavours).
 
 To take a PDF in the \ttt{human} representation and make a copy in an
 \ttt{evln} representation, one uses the \ttt{CopyHumanPdfToEvln} routine
@@ -1340,7 +1395,7 @@ The allocation of \ttt{split\_mat} objects,
 is similar to that for \ttt{grid\_conv} objects. The crucial difference is
 that one must supply a value for $n_f$, so that when the splitting
 matrix acts on a PDF it knows which flavours are decoupled. From the
-point of view of subsequent initialisation a \ttt{split\_mat} object
+point of view of subsequent initialisation, a \ttt{split\_mat} object
 just consists of a set of splitting functions. 
 If need be, they can be
 initialised by hand, for example
@@ -1585,9 +1640,11 @@ expressions, which are very fast
 to evaluate. Other possibilities, like
 the exact splitting functions or a previous set of approximated NNLO
 splitting functions which was used before the full
-calculation was available are described in Appendix \ref{sect:nnlo}.
+calculation was available are described in Appendix \ref{sect:nnlo},
+together with the current options for the \ntlo approximations.
+%
 Note that the QCD colour factors introduced in section~\ref{sec:qcd}
-cannot be modified if the interpolated NNLO splitting functions
+cannot be modified if the approximate NNLO splitting functions
 are used, since these expressions use the default QCD values.
 
 
@@ -1604,62 +1661,151 @@ crossing heavy quark mass thresholds.
   type(grid_def)           :: grid
   type(mass_threshold_mat) :: MTM_NNLO
 
-  call InitMTMNNLO(grid, MTM_NNLO)   ! MTM_NNLO is coeff of (as/2pi)**2
+  call InitMTMNNLO(grid, MTM_NNLO)   !< MTM_NNLO is coeff of $(\as/2\pi)^2$
+  call InitMTMN3LO(grid, MTM_N3LO)   !< MTM_N3LO is coeff of $(\as/2\pi)^3$
 \end{lstlisting}
-This is the coefficient of $(\as/2\pi)^2$ for the convolution matrix
-that accounts for crossing a heavy flavour threshold in $\MSbar$
-factorisation scheme, at $\mu_F = m_h$, where $m_h$ is the heavy-quark
-pole mass (or $\MSbar$ mass), as has been described in
+These set up the coefficient of $(\as/2\pi)^{2,3}$ respectively for
+the convolution matrix that accounts for crossing a heavy flavour
+threshold in $\MSbar$ factorisation scheme, at $\mu_F = m_h$, where
+$m_h$ is the heavy-quark pole mass, as has been described in
 section~\ref{sec:pqcd}. Since the corresponding NLO term is zero, the
-number of flavours in $\as$ is immaterial at NNLO.
+number of flavours in $\as$ is immaterial up to and including \ntlo.
+%
+The \ttt{mass\_threshold\_mat} objects are composed of four
+pieces\footnote{This structure has been substantially revised as of
+  \hoppet v2.2.0, and was introduced to allow for the general flavour
+  structure that can appear at any order. } 
+\begin{lstlisting}
+  type :: mass_threshold_mat
+    type(split_mat) :: P_light !< the part that acts on the light flavours
+    type(grid_conv) :: PShq    !< (h+hbar) from singlet(nflight)
+    type(grid_conv) :: PShg    !< (h+hbar) from gluon  (nflight)
+    type(grid_conv) :: NShV    !< (h-hbar) from valence(nflight) i.e. sum_i (q_i-qbar_i)
+  end type mass_threshold_mat
+\end{lstlisting}
+This provides the complete flavour structure at any order of
+perturbation theory.
+%
+As with normal splitting functions, at lower orders some terms are
+either equal to others or zero (e.g.\ NShV is zero at NNLO).
 
-The treatment of $n_f$ in the \ttt{mass\_threshold\_mat} is very
-specific because at NNLO, the only order in the $\MSbar$ factorisation
-scheme at which it's non-zero and currently known, it is independent of $n_f$.
-Its action does of course however depend on $n_f$. 
+A different \ttt{mass\_threshold\_mat} is needed for each different
+number of flavours, with the valid number of light flavours accessible
+as \ttt{P\_light\%nf\_int}.
 %
-Since, as for \ttt{split\_mat} objects, we don't want the action of
-the \ttt{mass\_threshold\_mat} to depend on the availability of the
-current $n_f$ information from the \ttt{qcd} module, instead we
-require that before using a \ttt{mass\_threshold\_mat}, you should
-explicitly indicate the number of flavours (defined as including the
-new heavy flavour).
-%
-This is done using a call to the
-\ttt{SetNfMTM(MTM\_NNLO,nf\_incl\_heavy)} subroutine. A similar function
-\ttt{SetMassSchemeMTM( MTM\_NNLO, masses\_are\_MSbar)} can be used to
-specify whether the threshold is being crossed at a pole mass or
-$\MSbar$ mass.
-%
-So for example to take a PDF in the effective theory with $n_f=3$
+With an \ttt{MTM\_NNLO} object where that number of light flavours is
+equal to 3 then to take a PDF in the effective theory with $n_f=3$
 active flavours \ttt{pdf\_nf3}, and convert it to the corresponding
 PDF in the effective theory with $n_f=4$ active flavours
-\ttt{pdf\_nf4} at $m_h^2$ (pole mass), one uses code analogous to the following
+\ttt{pdf\_nf4} at $m_h^2$ (pole mass), one uses code analogous to the
+following
 \begin{lstlisting}
   real(dp) :: pdf_nf3(:,:), pdf_nf4(:,:)
-  logical  :: masses_are_MSbar = .false.
   [ ... ]
-  call SetNfMTM(MTM, 4)
-  call SetMassSchemeMTM(MTM, masses_are_MSbar)
-  pdf_nf4 = pdf_nf3 + (as2pi)**2 * (MTM_NNLO.conv.pdf_nf3)
+  pdf_nf4 = pdf_nf3 + (as2pi)**2 * (MTM_NNLO * pdf_nf3)
 \end{lstlisting}
 The convolution only works if the \ttt{pdf}'s are in the \ttt{human}
 representation and an error is given if this is not the case. Any
 heavy flavour (like for example intrinsic charm) 
 present in \ttt{pdf\_nf3} would be left in unchanged.
 
-Note that the type {\tt mass\_threshold\_mat}
-is not currently suitable for general changes of
-flavour-number. For example if you wish to carry out a change in the
-DIS scheme or at a scale $\mu_F \neq m_h$ then you have
-to combine a series of different convolutions (essentially correcting
-with the lower number of flavours to the $\MSbar$ factorisation scheme
-at $\mu_F = m_h$ before changing the number of flavours
-and then correcting back to the original scheme and scale using the
-higher number of flavours).
+Labelling \ttt{nl} and \ttt{nh} as the number of light and light+heavy
+flavours respectively, the following further operations are valid
+\begin{lstlisting}
+  type(split_mat)          :: sm_nl   !< split_mat for nf=nl flavours
+  type(split_mat)          :: sm_nh   !< split_mat for nf=nh=nl+1 flavours
+  type(mass_threshold_mat) :: mtm     !< a pre-existing mass_threshold_mat (nl->nh)
+  type(mass_threshold_mat) :: new_mtm !< a new mass_threshold_mat to be created
+  [ ... ]
+  
+  ! creation
+  call InitMTM(grid, mtm_new, nl)    !< allocates and sets mtm_new to zero
+  call InitMTM(mtm_new, mtm)         !< copies mtm
+  call InitMTM(mtm_new, sm_nh)       !< mtm_new*q (nl->nh) gives the same result as sm_nh*q
+
+  ! addition (with optional factor multiplying the second argument)
+  call AddWithCoeff(mtm_new, mtm  , [factor])  !< mtm_new += mtm[*factor]
+  call AddWithCoeff(mtm_new, sm_nl, [factor])  !< adds just to P_light
+  call AddWithCoeff(mtm_new, sm_nh, [factor])  !< converts sm_nh to an mtm and adds it
+
+  ! multiplication / convolution
+  call Multiply(mtm_new, fact)
+  call SetToConvolution(mtm_new, mtm, sm_nl)   !< mtm_new = mtm * sm_nl
+  call SetToConvolution(mtm_new, sm_nh, mtm)   !< mtm_new = sm_nh * mtm
+
+  ! deallocation of associated memory
+  call Delete(mtm_new)
+\end{lstlisting}
+The \ttt{InitMTM} and \ttt{SetToConvolution} operations allocate
+memory if \ttt{mtm\_new} has not been allocated, otherwise they reuse
+the existing memory, requiring a consistent underlying grid.
+%
+The above operations effectively provide the full valid algebra
+associated with mass thresholds for a single additional heavy flavour.
+
+In addition, \hoppet allows the user to create ``derived''
+\ttt{mass\_threshold\_mat} objects, in analogy with the derived
+\ttt{split\_mat} objects discussed in
+Section~\ref{sec:derived-split-matrices}.
+%
+The relevant calls are 
+\begin{lstlisting}
+  integer                  :: nl            !< number of light flavours
+  real(dp), pointer        :: probes(:,:,:) !< the temporary probes
+  type(mass_threshold_mat) :: mtm           !< output mass_threshold_mat
+
+  call GetDerivedMTMProbes(grid, nl, probes)
+  [... operate on each of the probes as if it were a normal PDF ]
+  call InitMTM(grid, mtm, nl)
+  call SetDerivedMTM(mtm, probes)  !< mtm*q now reproduces operations carried out on probes
+\end{lstlisting}
+%
+% The \ttt{P\_light} splitting matrix is specific to a given number of
+% light flavours (\ttt{P\_light\%nf\_int}) and so a different \ttt{mass\_threshold\_mat}
+% 
+% The treatment of $n_f$ in the \ttt{mass\_threshold\_mat} is very
+% specific because at NNLO, the only order in the $\MSbar$ factorisation
+% scheme at which it's non-zero and currently known, it is independent of $n_f$.
+% Its action does of course however depend on $n_f$. 
+% %
+% Since, as for \ttt{split\_mat} objects, we don't want the action of
+% the \ttt{mass\_threshold\_mat} to depend on the availability of the
+% current $n_f$ information from the \ttt{qcd} module, instead we
+% require that before using a \ttt{mass\_threshold\_mat}, you should
+% explicitly indicate the number of flavours (defined as including the
+% new heavy flavour).
+% %
+% This is done using a call to the
+% \ttt{SetNfMTM(MTM\_NNLO,nf\_incl\_heavy)} subroutine. A similar function
+% \ttt{SetMassSchemeMTM( MTM\_NNLO, masses\_are\_MSbar)} can be used to
+% specify whether the threshold is being crossed at a pole mass or
+% $\MSbar$ mass.
+% %
+% So for example to take a PDF in the effective theory with $n_f=3$
+% active flavours \ttt{pdf\_nf3}, and convert it to the corresponding
+% PDF in the effective theory with $n_f=4$ active flavours
+% \ttt{pdf\_nf4} at $m_h^2$ (pole mass), one uses code analogous to the following
+% \begin{lstlisting}
+%   real(dp) :: pdf_nf3(:,:), pdf_nf4(:,:)
+%   logical  :: masses_are_MSbar = .false.
+%   [ ... ]
+%   call SetNfMTM(MTM, 4)
+%   call SetMassSchemeMTM(MTM, masses_are_MSbar)
+%   pdf_nf4 = pdf_nf3 + (as2pi)**2 * (MTM_NNLO.conv.pdf_nf3)
+% \end{lstlisting}
+
+% Note that the type {\tt mass\_threshold\_mat}
+% is not currently suitable for general changes of
+% flavour-number. For example if you wish to carry out a change in the
+% DIS scheme or at a scale $\mu_F \neq m_h$ then you have
+% to combine a series of different convolutions (essentially correcting
+% with the lower number of flavours to the $\MSbar$ factorisation scheme
+% at $\mu_F = m_h$ before changing the number of flavours
+% and then correcting back to the original scheme and scale using the
+% higher number of flavours).
 
 
-As for the NNLO splitting functions, the mass threshold corrections
+As for the NNLO splitting functions, the NNLO mass threshold corrections
 come in exact and parametrised variants. By default it is the latter
 that is used (provided by Vogt \cite{VogtMTMParam}).  The cost of
 initialising with the exact variants of the mass thresholds is much
@@ -1670,15 +1816,54 @@ warrant parametrisation). The variant can be chosen by the user
 before initialising the \ttt{mass\_threshold\_mat} by making the
 following subroutine call:
 \begin{lstlisting}
-  integer :: threshold_variant
-  call dglap_Set_nnlo_nfthreshold(threshold_variant)
+  integer :: nnlo_threshold_variant
+  call dglap_set_nnlo_nfthreshold(nnlo_threshold_choice)
 \end{lstlisting}
-with the following variants defined (as integer parameters), again in
+with the following choices defined (as integer parameters), again in
 the module \ttt{dglap\_choices}:
 \begin{lstlisting}
   nnlo_nfthreshold_exact
   nnlo_nfthreshold_param                 [default]
 \end{lstlisting}
+
+At \ntlo,  the
+single-mass thresholds have been calculated in
+Refs.~\cite{Bierenbaum:2009mv,Ablinger:2010ty,Kawamura:2012cr,Blumlein:2012vq,ABLINGER2014263,Ablinger:2014nga,Ablinger:2014vwa,Behring:2014eya,Ablinger:2019etw,Behring:2021asx,Ablinger:2023ahe,Ablinger:2024xtt,Behring:2025avs}.
+%
+They are available in two forms,
+using code from Refs.~\cite{BlumleinCode,Fael:2022miw}.
+%
+One can choose which form to use by calling
+\ttt{dglap\_set\_n3lo\_nfthreshold(n3lo\_threshold\_choice)},
+with one of the following values for \ttt{n3lo\_threshold\_choice}:
+\begin{itemize}
+\item \ttt{n3lo\_nfthreshold\_libOME} (default):
+  %
+  this uses piecewise high-order Laurent-series expansions in different
+  regions of $x$, with a stated accuracy of at least $2048\epsilon$
+  where $\epsilon$ is the precision of a 64-bit real variable.
+  % 
+  It relies on the
+  \ttt{libome} \CPP library from \url{https://gitlab.com/libome/libome}.
+  %
+  Initialisation time is below $1\,\text{s}$.
+  %
+  This is the default choice.\footnote{Users wishing to investigate
+    the effect of the \ttt{NShV} piece calculated in
+    Ref.~\cite{Behring:2025avs} can turn it off by selecting
+    \ttt{n3lo\_nfthreshold\_libOME\_2510}.}
+  
+\item \ttt{n3lo\_nfthreshold\_exact\_fortran}: all contributions are
+  exact, except for the $A_\text{hg}^\text{S}$ term in
+  Eq.~(\ref{eq:hp-nf1}), which is based on piecewise expansions.
+  %
+  The exact contributions make extensive use of
+  \texttt{hplog5}~\cite{FortranPolyLog} calls and lead to an
+  initialisation time of $10{-}30\,\text{s}$.
+  %
+  The piecewise expansions for $A_\text{hg}^\text{S}$ are less
+  accurate than with the \ttt{n3lo\_nfthreshold\_libOME} choice.
+\end{itemize}
 
 
 %......................................................................
@@ -1745,8 +1930,9 @@ Having initialised a \ttt{dglap\_holder} one has access to various components:
 \begin{lstlisting}
   type dglap_holder
     type(split_mat), pointer :: allP(1:nloop, nflo:nfhi)  ! FFNS: nflo=nfhi=nf_lcl
-    type(split_mat), pointer :: P_LO, P_NLO, P_NNLO
-    type(mass_threshold_mat) :: MTM2
+    type(split_mat), pointer :: P_LO, P_NLO, P_NNLO, P_N3LO
+    type(mass_threshold_mat), pointer :: allMTM(3:nloop,nflo+1:nfhi)
+    type(mass_threshold_mat), pointer :: MTM_NNLO, MTM_N3LO ! pointers to MTM(3,nf) and MTM(4,nf)
     logical                  :: MTM2_exists
     integer                  :: factscheme, nloop
     integer                  :: nf
@@ -1754,12 +1940,17 @@ Having initialised a \ttt{dglap\_holder} one has access to various components:
   end type dglap holder
 \end{lstlisting}
 Some just record information passed on initialisation, for example
-\ttt{factscheme} and \ttt{nloop}. Other parts are set up once and for
-all on initialisation, notably the \ttt{allP} matrix, which contains
+\ttt{factscheme} and \ttt{nloop}.
+%
+Other parts are set up once and for
+all on initialisation, notably the \ttt{allP} array, which contains
 the 1-loop, 2-loop, etc. splitting matrices for the requested $n_f$
-range.
+range, and, analogously the \ttt{allMTM} array, whose flavour index
+corresponds to the number of \emph{heavy} flavours.
 
-Yet other parts of the \ttt{dglap\_holder} type depend on $n_f$.
+Pointers such as \ttt{P\_LO} are shorthands for the objects at the
+current number of flavours.
+%
 Before accessing these, one should first perform the following call:
 \begin{lstlisting}
   call SetNfDglapHolder(dglap_h, nf_lcl)
@@ -1770,10 +1961,9 @@ This creates links:
   dglap_h%P_NLO  => dglap_h%allP(2,nf_lcl)
   dglap_h%P_NNLO => dglap_h%allP(3,nf_lcl)
 \end{lstlisting}
-for convenient named access to the various splitting matrices, and it
-also sets the global (\ttt{qcd}) $n_f$ value (via a call to
-\ttt{qcd\_SetNf}) and where relevant updates the internal $n_f$ value
-associated with \ttt{MTM2} (via a call to \ttt{SetNfMTM}).
+for convenient named access to the various splitting matrices, and
+similarly for the mass threshold matrices (with \ttt{nf\_lcl}
+corresponding to the number of flavours including the heavy quark).
 
 As with other types that allocate memory for derived types, that
 memory can be freed via a call to the \ttt{Delete} subroutine,
@@ -3784,7 +3974,7 @@ pdf_at_y = EvalGridQuant(grid,pdf_set(:,-6:6),y)
 where an example of  the \ttt{LHAsub} subroutine can be found in
 section~\ref{sec:human-rep}
 
-\section{NNLO splitting functions}
+\section{NNLO and \ntlo splitting functions}
 \label{sect:nnlo}
 The exact NNLO splitting
 functions derived by Moch, Vermaseren and Vogt
@@ -3836,6 +4026,32 @@ constants be varied (with the caveat about $d^{abc}d_{abc}$, as
 discussed in section~\ref{sec:qcd}). For the other options the
 NNLO splitting functions have been computed using the QCD values
 for the colour factors.
+
+At \ntlo~\cite{Gracey:1994nn,Davies:2016jie,Moch:2017uml,Falcioni:2023luc,Falcioni:2023vqq,Moch:2023tdj,Falcioni:2024xyt,Falcioni:2024qpd,Falcioni:2025hfz}, the user can call
+\begin{lstlisting}
+  integer :: n3lo_splitting_approximation, n3lo_splitting_variant
+  call dglap_Set_n3lo_approximation(n3lo_splitting_variant)
+  call dglap_Set_n3lo_variant(n3lo_splitting_variant)
+\end{lstlisting}
+with one of the following options for the approximation
+\begin{itemize}
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2310}, with the
+  approximations in papers up to and including Ref.~\cite{Moch:2023tdj};
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2404}, with the
+  approximations in papers up to and including
+  Ref.~\cite{Falcioni:2024xyt};
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2410}, with the approximations in papers up to and including
+  Ref.~\cite{Falcioni:2024qpd}.
+\item \ttt{n3lo\_splitting\_approximation\_up\_to\_2512}, the default value at the time of
+  writing (v2.2.0), with the approximations in papers up to and including
+  Ref.~\cite{Falcioni:2025hfz},
+\end{itemize}
+and one of the following three for the variant
+\begin{lstlisting}
+  nnlo_splitting_Nfitav     !< default
+  nnlo_splitting_Nfiterr1
+  nnlo_splitting_Nfiterr2
+\end{lstlisting}
 
 %======================================================================
 \section{Useful tips on Fortran~95}
@@ -4127,3 +4343,9 @@ will do the same thing.
 
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "HOPPET-doc.tex"
+%%% TeX-master: t
+%%% End:
