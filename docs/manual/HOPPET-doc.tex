@@ -1157,10 +1157,12 @@ What takes a bit more getting used to is that its
 upper bound is \textbf{7}. The reason is as follows: the flavour
 information can be represented in different ways, for example each
 flavour separately, or alternatively as singlet and non-singlet
-combinations. In practice both are used inside the program and it is
+combinations, cf.\ Eq.~(\ref{eq:flavour-basis}).
+%
+In practice both are used inside the program and it is
 useful for a PDF distribution to have information about the
 representation, and this is stored in
-\texttt{PDF(:,7)}\footnote{
+\texttt{PDF(:,7)}.\footnote{
 In the current release of \hoppet, 
 in particular, for PDFs in the \ttt{human} representation one
 has \texttt{PDF(:,7)=0}, while for PDFs in the \ttt{evln}
@@ -1171,18 +1173,35 @@ so that it is conserved under linear operations.
 %
 However the details of the encoding may evolve in future
 versions of the program.
-}.
+}
 
 
 %......................................................................
 \subsubsection{Human representation.}
 \label{sec:human-rep}
 When a PDF is allocated it is automatically labelled as being in the
-\ttt{human} representation, described in
-section~\ref{sec:pqcd}. Constants with names like
+\ttt{human} representation, such that 
+ the entries in an array
+ \ttt{pdf(-6:6)} of PDFs correspond to,
+ %
+\bea 
+\bar t={-6} \ ,  \bar b={-5} \ ,  \bar c={-4}
+\ , \nn   \bar s&=&{-3} \ , \nn  \bar u={-2} \ , \nn
+ \bar d={-1} \ , \\  g&=&{0} \ , \\ \nn   d={1} \ , \nn  u={2} 
+\ , \nn  
+s={3} \ , \nn   c&=&{4} \ , \nn b={5} \ , \nn  t={6} \ . \nn 
+\eea
+%
+%
+%described in
+%section~\ref{sec:pqcd}.
+Constants with names like
 \ttt{iflv\_bbar}, \ttt{iflv\_g}, \ttt{iflv\_b}, are defined in
 \ttt{module pdf\_representation}, to facilitate symbolic access to the
 different flavours.
+%
+Note that in \CPP and Python the corresponding values are offset by
+$6$, since arrays can only start with index $0$.
 
 If you are creating a PDF as an automatic array (one whose bounds are
 decided not by the allocation routine, but on the fly), for example in
@@ -1271,28 +1290,62 @@ the flavours, \ttt{-6:6}, that we want.\footnote{If instead we had
 %......................................................................
 \subsubsection{Evolution representation} 
 \label{sec:evln-rep}
-%
+
+
 For the purpose of carrying out convolutions, the \ttt{human}
 representation is not very advantageous because the splitting matrix
-in flavour space is quite complicated. Accordingly \hoppet uses a
-different representation of the flavour internally when carrying out
-convolution of splitting matrices with PDFs. For most purposes the
-user need not be aware of this. The two exceptions are when a user
-plans to create derived splitting matrices (being careless about the
-flavour representation will lead to mistakes) or wishes to carry out
-repeated convolutions for a fixed $n_f$ value (appropriate manual
-changes of the flavour representation can speed things up).
+in flavour space is quite complicated. Accordingly \hoppet uses a an
+``evolution'' representation of the flavour internally when carrying
+out convolution of splitting matrices with PDFs, corresponding to
+Eq.~(\ref{eq:flavour-basis}).
+%
+In the code this is referred to as the \ttt{evln} representation.
+%
+For most purposes the user need not be aware of this. The two
+exceptions are when a user plans to create derived splitting matrices,
+cf.\ Section~\ref{sec:derived-split-matrices}
+(being careless about the flavour representation will lead to
+mistakes), or wishes to carry out repeated convolutions for a fixed
+$n_f$ value (appropriate manual changes of the flavour representation
+can speed things up).
 
+\begin{table}
+\begin{center}
+\begin{tabular}{|r | c | l |}
+\hline
+     i & \mbox{name} & $q_i$ \\ \hline
+     $ -6\ldots-(n_f+1)$ & $q_i$ & $q_i$\\
+     $-n_f\ldots -2$ & $q_{\mathrm{NS},i}^{-}$ & 
+$(q_i -  {\bar q}_i) - (q_1 - {\bar q}_1)$\\
+      -1           & $q_{\mathrm{NS}}^{V}$ & 
+$\sum_{j=1}^{n_f} (q_j -  {\bar q}_j)$\\
+       0           & g & \textrm{gluon} \\
+       1           & $\Sigma$ & $\sum_{j=1}^{n_f} (q_j +  {\bar q}_j)$\\
+     $2\ldots n_f$ & $q_{\mathrm{NS},i}^{+}$ &
+$ (q_i +  {\bar q}_i) - (q_1 + {\bar q}_1)$\\
+      $(n_f+1)\ldots6$ & $q_i$ & $q_i$ \\
+\hline
+\end{tabular}
+\caption{}{\label{eq:diag_split} The evolution representation 
+(called \ttt{evln} in \hoppet)
+of PDFs with $n_f$ active quark flavours
+in terms of the \ttt{human} representation.}  
+\end{center}
+\end{table}
 
-The splitting matrix can be simplified considerably by switching to a different
-flavour representation, as can be seen in Table \ref{eq:diag_split}. 
- When carrying out a convolution, the only non-diagonal part is the
-block containing indices $0,1$. This representation is referred to as
-the \ttt{evln} representation. Whereas the \ttt{human} representation
-is $n_f$-independent, the \ttt{evln} depends on $n_f$ through the
-$\Sigma$ and $q_{\mathrm{NS}}^{V}$ entries and the fact that flavours
-beyond $n_f$ are left in the human representation (since they are
-inactive for evolution with $n_f$ flavours).
+% The splitting matrix can be simplified considerably by switching to a different
+% flavour representation, as can be seen in Table \ref{eq:diag_split}.
+The internal representation of the  \ttt{evln} representation is as laid
+out in Table~\ref{eq:diag_split}.
+% 
+When carrying out a convolution, the only non-diagonal part is the
+block containing indices $0,1$.
+%
+Whereas the \ttt{human} representation is $n_f$-independent, the
+\ttt{evln} form depends on $n_f$ through the $\Sigma$ and
+$q_{\mathrm{NS}}^{V}$ entries and the fact that flavours beyond $n_f$
+are left in the human representation (since they are inactive for
+evolution with $n_f$ flavours).
 
 To take a PDF in the \ttt{human} representation and make a copy in an
 \ttt{evln} representation, one uses the \ttt{CopyHumanPdfToEvln} routine
@@ -1342,7 +1395,7 @@ The allocation of \ttt{split\_mat} objects,
 is similar to that for \ttt{grid\_conv} objects. The crucial difference is
 that one must supply a value for $n_f$, so that when the splitting
 matrix acts on a PDF it knows which flavours are decoupled. From the
-point of view of subsequent initialisation a \ttt{split\_mat} object
+point of view of subsequent initialisation, a \ttt{split\_mat} object
 just consists of a set of splitting functions. 
 If need be, they can be
 initialised by hand, for example
@@ -4290,3 +4343,9 @@ will do the same thing.
 
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "HOPPET-doc.tex"
+%%% TeX-master: t
+%%% End:

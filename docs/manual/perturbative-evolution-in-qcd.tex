@@ -328,68 +328,68 @@ as long as they hold at the initial scale (occasionally not the case,
 \eg in modified LO sets for Monte Carlo
 generators~\cite{Sherstnev:2008dm}).
 
-The default basis for the PDFs, called the \ttt{human} 
-representation in \hoppet, is such that 
- the entries in an array
-\ttt{pdf(-6:6)} of PDFs correspond to:
-\bea 
-\bar t={-6} \ ,  \bar b={-5} \ ,  \bar c={-4}
-\ , \nn   \bar s&=&{-3} \ , \nn  \bar u={-2} \ , \nn
- \bar d={-1} \ , \\  g&=&{0} \ , \\ \nn   d={1} \ , \nn  u={2} 
-\ , \nn  
-s={3} \ , \nn   c&=&{4} \ , \nn b={5} \ , \nn  t={6} \ . \nn 
-\eea
-%  This representation is the
-% same as that used in the \ttt{LHAPDF} library \cite{LHAPDF}. 
-%
-However, this representation leads
-to a complicated form of the evolution equations.
-The splitting matrix can be simplified considerably (made diagonal
-except for a $2\times2$ singlet block) by switching to a different
-flavour representation, which is named
-the \ttt{evln} representation, for the PDF set, as explained in detail in
-\cite{vanNeerven:1999ca,vanNeerven:2000uj}. This representation
-is described in Table \ref{eq:diag_split}.
-
-In the {\tt evln} basis, 
-the gluon evolves coupled to the singlet  PDF $\Sigma$,
-and all non-singlet PDFs evolve independently.
-Notice that the representations of the PDFs
-are preserved under linear operations, so in particular
-they are preserved under DGLAP evolution.
-The conversion from the \ttt{human} to the \ttt{evln}
-representations of PDFs requires that the number of
-active quark flavours $n_f$ be specified by the user, as described in
-\ifreleasenote
-Section~5.1.2 of Ref.~\cite{Salam:2008qg}.
-\else
-Section~\ref{sec:evln-rep}.
-\fi
-
-\begin{table}
-\begin{center}
-\begin{tabular}{|r | c | l |}
-\hline
-     i & \mbox{name} & $q_i$ \\ \hline
-     $ -6\ldots-(n_f+1)$ & $q_i$ & $q_i$\\
-     $-n_f\ldots -2$ & $q_{\mathrm{NS},i}^{-}$ & 
-$(q_i -  {\bar q}_i) - (q_1 - {\bar q}_1)$\\
-      -1           & $q_{\mathrm{NS}}^{V}$ & 
-$\sum_{j=1}^{n_f} (q_j -  {\bar q}_j)$\\
-       0           & g & \textrm{gluon} \\
-       1           & $\Sigma$ & $\sum_{j=1}^{n_f} (q_j +  {\bar q}_j)$\\
-     $2\ldots n_f$ & $q_{\mathrm{NS},i}^{+}$ &
-$ (q_i +  {\bar q}_i) - (q_1 + {\bar q}_1)$\\
-      $(n_f+1)\ldots6$ & $q_i$ & $q_i$ \\
-\hline
-\end{tabular}
-\caption{}{\label{eq:diag_split} The evolution representation 
-(called \ttt{evln} in \hoppet)
-of PDFs with $n_f$ active quark flavours
-in terms of the \ttt{human} representation.}  
-\end{center}
-\end{table}
-
+% The default basis for the PDFs, called the \ttt{human} 
+% representation in \hoppet, is such that 
+%  the entries in an array
+% \ttt{pdf(-6:6)} of PDFs correspond to:
+% \bea 
+% \bar t={-6} \ ,  \bar b={-5} \ ,  \bar c={-4}
+% \ , \nn   \bar s&=&{-3} \ , \nn  \bar u={-2} \ , \nn
+%  \bar d={-1} \ , \\  g&=&{0} \ , \\ \nn   d={1} \ , \nn  u={2} 
+% \ , \nn  
+% s={3} \ , \nn   c&=&{4} \ , \nn b={5} \ , \nn  t={6} \ . \nn 
+% \eea
+% %  This representation is the
+% % same as that used in the \ttt{LHAPDF} library \cite{LHAPDF}. 
+% %
+% However, this representation leads
+% to a complicated form of the evolution equations.
+% The splitting matrix can be simplified considerably (made diagonal
+% except for a $2\times2$ singlet block) by switching to a different
+% flavour representation, which is named
+% the \ttt{evln} representation, for the PDF set, as explained in detail in
+% \cite{vanNeerven:1999ca,vanNeerven:2000uj}. This representation
+% is described in Table \ref{eq:diag_split}.
+% 
+% In the {\tt evln} basis, 
+% the gluon evolves coupled to the singlet  PDF $\Sigma$,
+% and all non-singlet PDFs evolve independently.
+% Notice that the representations of the PDFs
+% are preserved under linear operations, so in particular
+% they are preserved under DGLAP evolution.
+% The conversion from the \ttt{human} to the \ttt{evln}
+% representations of PDFs requires that the number of
+% active quark flavours $n_f$ be specified by the user, as described in
+% \ifreleasenote
+% Section~5.1.2 of Ref.~\cite{Salam:2008qg}.
+% \else
+% Section~\ref{sec:evln-rep}.
+% \fi
+% 
+% \begin{table}
+% \begin{center}
+% \begin{tabular}{|r | c | l |}
+% \hline
+%      i & \mbox{name} & $q_i$ \\ \hline
+%      $ -6\ldots-(n_f+1)$ & $q_i$ & $q_i$\\
+%      $-n_f\ldots -2$ & $q_{\mathrm{NS},i}^{-}$ & 
+% $(q_i -  {\bar q}_i) - (q_1 - {\bar q}_1)$\\
+%       -1           & $q_{\mathrm{NS}}^{V}$ & 
+% $\sum_{j=1}^{n_f} (q_j -  {\bar q}_j)$\\
+%        0           & g & \textrm{gluon} \\
+%        1           & $\Sigma$ & $\sum_{j=1}^{n_f} (q_j +  {\bar q}_j)$\\
+%      $2\ldots n_f$ & $q_{\mathrm{NS},i}^{+}$ &
+% $ (q_i +  {\bar q}_i) - (q_1 + {\bar q}_1)$\\
+%       $(n_f+1)\ldots6$ & $q_i$ & $q_i$ \\
+% \hline
+% \end{tabular}
+% \caption{}{\label{eq:diag_split} The evolution representation 
+% (called \ttt{evln} in \hoppet)
+% of PDFs with $n_f$ active quark flavours
+% in terms of the \ttt{human} representation.}  
+% \end{center}
+% \end{table}
+ 
 In \hoppet, unpolarised DGLAP evolution is available up to N$^3$LO
 in the $\MSbar$ scheme, while for the DIS scheme
 only evolution up to NLO is available, but without the NLO heavy-quark
