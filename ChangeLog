@@ -144,6 +144,11 @@ __Files added__
 	(assert_eq2 is clean, the others still give some printout)
 
 --------- end 2025-10-cxx-OO branch ---------
+2025-01-12 gavin
+	* CMakeLists.txt:
+	renamed GIT_WATCHER -> HOPPET_GIT_WATCHER to avoid risk of clashes
+	with other projects.
+
 2025-01-09 Gavin
 
 	* hoppet.h:
