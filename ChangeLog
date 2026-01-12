@@ -1,7 +1,9 @@
 2025-01-12 gavin
+
 	* CMakeLists.txt:
+	* cmake/git_watcher.cmake -> cmake/hoppet_git_watcher.cmake:
 	renamed GIT_WATCHER -> HOPPET_GIT_WATCHER to avoid risk of clashes
-	with other projects.
+	with other projects, and similarly with git_watcher.cmake
 
 2025-01-09 Gavin
 

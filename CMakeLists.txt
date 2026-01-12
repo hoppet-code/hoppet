@@ -268,7 +268,8 @@ set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/hoppet_git_state.f90")
 if (HOPPET_GIT_WATCHER)
   message("-- HOPPET: Enabling the git watcher support")
   set(GIT_FAIL_IF_NONZERO_EXIT FALSE)
-  include(cmake/git_watcher.cmake)  
+  include(cmake/hoppet_git_watcher.cmake)
+  unset(GIT_FAIL_IF_NONZERO_EXIT)  # reset this in case another project uses this variable
 else()
   message("-- HOPPET: Disabling the git watcher support")  
   # just copy PRE_CONFIGURE_FILE to POST_CONFIGURE_FILE
