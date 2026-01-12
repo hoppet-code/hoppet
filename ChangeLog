@@ -1,3 +1,8 @@
+2025-01-12 gavin
+	* CMakeLists.txt:
+	renamed GIT_WATCHER -> HOPPET_GIT_WATCHER to avoid risk of clashes
+	with other projects.
+
 2025-01-09 Gavin
 
 	* hoppet.h:

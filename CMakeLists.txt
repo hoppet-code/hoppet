@@ -262,15 +262,15 @@ endif()
 #------------------------------------------------------------------------- 
 # Define the two required variables before including
 # the source code for watching a git repository.
-option(GIT_WATCHER "Add source code which allows runs for watching the status of the git repository" ON)
+option(HOPPET_GIT_WATCHER "Add source code which allows runs for watching the status of the hoppet git repository" ON)
 set(PRE_CONFIGURE_FILE "src/config/hoppet_git_state.f90.in")
 set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/hoppet_git_state.f90")
-if (GIT_WATCHER)
-  message("-- Enabling the git watcher support")
+if (HOPPET_GIT_WATCHER)
+  message("-- HOPPET: Enabling the git watcher support")
   set(GIT_FAIL_IF_NONZERO_EXIT FALSE)
   include(cmake/git_watcher.cmake)  
 else()
-  message("-- Disabling the git watcher support")  
+  message("-- HOPPET: Disabling the git watcher support")  
   # just copy PRE_CONFIGURE_FILE to POST_CONFIGURE_FILE
   configure_file(${PRE_CONFIGURE_FILE} ${POST_CONFIGURE_FILE} COPYONLY)
 endif()
