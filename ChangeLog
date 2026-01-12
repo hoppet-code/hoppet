@@ -147,9 +147,13 @@ __Files added__
 2025-01-12 gavin
 
 	* CMakeLists.txt:
+	- renamed GIT_WATCHER -> HOPPET_GIT_WATCHER  to avoid risk of clashes
+	  with other projects
+
 	* cmake/git_watcher.cmake -> cmake/hoppet_git_watcher.cmake:
-	renamed GIT_WATCHER -> HOPPET_GIT_WATCHER to avoid risk of clashes
-	with other projects, and similarly with git_watcher.cmake
+	renamed and significantly refactored to avoid clashes with other projects.
+	Now introduces a target that is configured when calling a hoppet_git_watcher_add
+	function, target name is a parameter. (Done with significant ChatGPT-5.2 assistance).
 
 2025-01-09 Gavin
 

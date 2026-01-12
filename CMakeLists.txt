@@ -9,7 +9,7 @@
 # To see the HOPPET-specific CMake options, run `cmake -L ..`
 
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 
 # set the project name and version, including a pre-release label
 ## DO NOT EDIT THIS: set it instead with `scripts/set-version.sh version number`
@@ -274,19 +274,28 @@ file(GLOB SOURCESCXX src/*.cc src/cpp-interface/*.cc)
 # Define the two required variables before including
 # the source code for watching a git repository.
 option(HOPPET_GIT_WATCHER "Add source code which allows runs for watching the status of the hoppet git repository" ON)
-set(PRE_CONFIGURE_FILE "src/config/hoppet_git_state.f90.in")
-set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/hoppet_git_state.f90")
+set(HOPPET_GW_PRE_CONFIGURE_FILE "src/config/hoppet_git_state.f90.in")
+set(HOPPET_GW_POST_CONFIGURE_FILE "hoppet_git_state.f90")
 if (HOPPET_GIT_WATCHER)
   message("-- HOPPET: Enabling the git watcher support")
-  set(GIT_FAIL_IF_NONZERO_EXIT FALSE)
   include(cmake/hoppet_git_watcher.cmake)
-  unset(GIT_FAIL_IF_NONZERO_EXIT)  # reset this in case another project uses this variable
+
+  hoppet_git_watcher_add(
+    TARGET         hoppet_check_git
+    PRE_CONFIGURE  ${HOPPET_GW_PRE_CONFIGURE_FILE}
+    POST_CONFIGURE ${HOPPET_GW_POST_CONFIGURE_FILE}
+    # WORKING_DIR    ${CMAKE_CURRENT_SOURCE_DIR}
+    # optional:
+    # STATE_FILE   ${CMAKE_BINARY_DIR}/git-state-hash
+    # GIT_EXECUTABLE /usr/bin/git
+    FAIL_ON_ERROR OFF
+  )
 else()
   message("-- HOPPET: Disabling the git watcher support")  
   # just copy PRE_CONFIGURE_FILE to POST_CONFIGURE_FILE
-  configure_file(${PRE_CONFIGURE_FILE} ${POST_CONFIGURE_FILE} COPYONLY)
+  configure_file(${HOPPET_GW_PRE_CONFIGURE_FILE} ${HOPPET_GW_POST_CONFIGURE_FILE} COPYONLY)
 endif()
-list(APPEND SOURCESf90 ${POST_CONFIGURE_FILE})
+list(APPEND SOURCESf90 ${HOPPET_GW_POST_CONFIGURE_FILE})
 
 
 # alternative is a manual list (NB: this specific list is not complete)
