@@ -1,4 +1,4 @@
-# This file derive from the original
+# This file derives from the original
 #
 # git_watcher.cmake
 # https://raw.githubusercontent.com/andrew-hardin/cmake-git-version-tracking/master/git_watcher.cmake
@@ -33,7 +33,7 @@ cmake_minimum_required(VERSION 3.15)
 
 # needed so that the function below can correctly identify the directory this file is
 # in 
-set(HOPPET_GW_MODULE_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+set(HOPPET_GW_MODULE_FILE "${CMAKE_CURRENT_LIST_FILE}")
 
 
 function(hoppet_git_watcher_add)
@@ -109,7 +109,7 @@ function(hoppet_git_watcher_add)
   endif()
   
   # this should work in older CMake versions
-  set(_GW_SCRIPT "${HOPPET_GW_MODULE_BASE_DIR}/hoppet_git_watcher.cmake")
+  set(_GW_SCRIPT "${HOPPET_GW_MODULE_FILE}")
   # this needs CMake 3.17
   #set(_GW_SCRIPT "${CMAKE_CURRENT_FUNCTION_LIST_FILE}")
 
