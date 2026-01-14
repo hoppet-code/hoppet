@@ -13,7 +13,7 @@
 # Still released under the MIT License
 
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.15)
 
 # =============================================================================
 # Public API
@@ -30,6 +30,11 @@ cmake_minimum_required(VERSION 3.16)
 #   [ENABLE           <ON|OFF>]             # whether to enable the target (default ON)
 # )
 # =============================================================================
+
+# needed so that the function below can correctly identify the directory this file is
+# in 
+set(HOPPET_GW_MODULE_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+
 
 function(hoppet_git_watcher_add)
   set(oneValueArgs
@@ -103,7 +108,10 @@ function(hoppet_git_watcher_add)
     endif()
   endif()
   
-  set(_GW_SCRIPT "${CMAKE_CURRENT_FUNCTION_LIST_FILE}")
+  # this should work in older CMake versions
+  set(_GW_SCRIPT "${HOPPET_GW_MODULE_BASE_DIR}/hoppet_git_watcher.cmake")
+  # this needs CMake 3.17
+  #set(_GW_SCRIPT "${CMAKE_CURRENT_FUNCTION_LIST_FILE}")
 
   if (GW_VERBOSE)
     message(STATUS "git_watcher_add() for ${GW_TARGET}: GW_PRE_CONFIGURE='${GW_PRE_CONFIGURE}'")

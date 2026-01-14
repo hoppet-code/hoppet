@@ -1,4 +1,11 @@
-2025-01-12 gavin
+2026-01-14 Gavin
+
+	* CMakeLists.txt:
+	* cmake/hoppet_git_watcher.CMake:
+	reduced CMakeLists.txt requirement to 3.15 to facilitate use on some
+	older clusters
+
+2026-01-12 gavin
 
 	* CMakeLists.txt:
 	- renamed GIT_WATCHER -> HOPPET_GIT_WATCHER  to avoid risk of clashes
@@ -9,7 +16,7 @@
 	Now introduces a target that is configured when calling a hoppet_git_watcher_add
 	function, target name is a parameter. (Done with significant ChatGPT-5.2 assistance).
 
-2025-01-09 Gavin
+2026-01-09 Gavin
 
 	* hoppet.h:
 	updated mass threshold constants to reflect addition of NShV term
@@ -32,7 +39,7 @@
 	libOME and new Fortran implementation.
 
 
-2025-01-07 Gavin (later)
+2026-01-07 Gavin (later)
 
 	* NEWS.md:
 	updated with developments from the 2025-12-new-mtm branch, prior
@@ -57,7 +64,7 @@
 	NB: done in steps, so look at preceding commits for intermediate stages,
 	including code with the old MTMs named as old_mass_threshold_mat	
 
-2025-01-07 Gavin 
+2026-01-07 Gavin 
 
 	* src/evolution.f90:
 	* benchmarking/prec_and_timing.f90:
@@ -76,7 +83,7 @@
 	- unit tests for libOME now directly use these functions
 	- dglap_holders now uses these functions too
 
-2025-01-06 Gavin (later)
+2026-01-06 Gavin (later)
 
 	* src/dglap_holders.f90:
 	* src/evolution.f90:
@@ -88,7 +95,7 @@
 	- note that underlying initialisation of new MTM objects still uses old MTM
 	  as an intermediate step, to minimise rewriting of quite a number of routines.
 
-2025-01-06 Gavin
+2026-01-06 Gavin
 
 	* CMakeLists.txt:
 	* benchmarking/prec_and_timing.f90:
@@ -117,7 +124,7 @@
 	been put in after encountering incorect results when using the 
 	the same argument for input and output.
 
-2025-01-05 Gavin
+2026-01-05 Gavin
 
 	* src/dglap_objects.F90:
 	* unit-tests/test_new_mtm.f90:

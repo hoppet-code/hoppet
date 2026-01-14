@@ -9,7 +9,7 @@
 # To see the HOPPET-specific CMake options, run `cmake -L ..`
 
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.15)
 
 # set the project name and version, including a pre-release label
 ## DO NOT EDIT THIS: set it instead with `scripts/set-version.sh version number`
