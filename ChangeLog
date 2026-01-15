@@ -144,6 +144,20 @@ __Files added__
 	(assert_eq2 is clean, the others still give some printout)
 
 --------- end 2025-10-cxx-OO branch ---------
+2026-01-15 Gavin
+
+	* src/streamlined_interface.f90:
+	- when setting up a fixed-nf coupling (either from hoppetSetCoupling
+	  or from an evolution routine), the global nf and the dglap holder nf
+	  get set correspondingly.
+	- if hoppetSetCoupling is called before hoppetStart[Extended],
+	  an error is raised.
+
+	* src/dglap_holders.f90:
+	in Delete(holder), after deallocating dh%allP and dh%allC, they get
+	nullified. They also now start off as null pointers when a holder is created.
+	This makes it safe for a user to check whether they are associated.
+
 2026-01-14 Gavin
 
 	* CMakeLists.txt:

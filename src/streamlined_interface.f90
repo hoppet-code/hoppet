@@ -394,12 +394,18 @@ subroutine hoppetSetCoupling(alphas_Q,Q,nloop)
   real(dp), intent(in) :: alphas_Q, Q
   integer, intent(in) :: nloop
 
+  if (.not. alloc_already_done) then
+     call wae_error("hoppetSetCoupling",&
+          "hoppetStart[Extended] should have been called before setting coupling, but was not")
+  end if
+
   ! get a running coupling with the desired scale
   if (coupling_initialised) then
     call Delete(coupling) 
     if (with_qed) call Delete(coupling_qed)
   end if
   if (ffn_nf > 0) then
+     call SetNfDglapHolder(dh, ffn_nf)
      call InitRunningCoupling(coupling, alfas=alphas_Q, Q=Q, nloop=nloop, &
           &                   fixnf=ffn_nf)
   else 
@@ -494,6 +500,7 @@ subroutine hoppetPreEvolve(asQ0, Q0alphas, nloop, muR_Q, Q0pdf)
   ! get a running coupling with the desired scale
   if (coupling_initialised) call Delete(coupling) 
   if (ffn_nf > 0) then
+     call SetNfDglapHolder(dh, ffn_nf)
      call InitRunningCoupling(coupling, alfas=asQ0, Q=Q0alphas, nloop=nloop, &
           &                   fixnf=ffn_nf)
   else 
