@@ -35,4 +35,20 @@ contains
   DEFINE_SPLIT_FN(p1gq)
   DEFINE_SPLIT_FN(p1gg)
 
+  DEFINE_SPLIT_FN(p2gg)
+  DEFINE_SPLIT_FN(p2qg2nf)
+  DEFINE_SPLIT_FN(p2ps)
+  DEFINE_SPLIT_FN(p2gq)
+  DEFINE_SPLIT_FN(p2nsplus)
+  DEFINE_SPLIT_FN(p2nsminus)
+  DEFINE_SPLIT_FN(p2nss)
+
+  DEFINE_SPLIT_FN(p3gg)
+  DEFINE_SPLIT_FN(p3qg2nf)
+  DEFINE_SPLIT_FN(p3ps)
+  DEFINE_SPLIT_FN(p3gq)
+  DEFINE_SPLIT_FN(p3nsplus)
+  DEFINE_SPLIT_FN(p3nsminus)
+  DEFINE_SPLIT_FN(p3nss)
+
 end module hoppet_cpp_split_fns
