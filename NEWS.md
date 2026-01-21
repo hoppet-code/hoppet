@@ -1,6 +1,6 @@
 # NEWS for HOPPET
 
-# Release 2.2.0 (as yet unreleased)
+# Release 2.2.0, 21 January 2026
 
 ## Additions
 
