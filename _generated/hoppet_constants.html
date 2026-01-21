@@ -6,17 +6,17 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HOPPET constants &mdash; HOPPET 2.1.4 documentation</title>
+  <title>HOPPET constants &mdash; HOPPET 2.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=dc13204d"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/documentation_options.js?v=b21de401"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -92,9 +92,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#n3lo-splitting-function-approximations">N3LO splitting function approximations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_splitting_approximation_up_to_2310"><code class="docutils literal notranslate"><span class="pre">n3lo_splitting_approximation_up_to_2310</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_splitting_approximation_up_to_2310_05744"><code class="docutils literal notranslate"><span class="pre">n3lo_splitting_approximation_up_to_2310_05744</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_splitting_approximation_up_to_2404"><code class="docutils literal notranslate"><span class="pre">n3lo_splitting_approximation_up_to_2404</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_splitting_approximation_up_to_2404_09701"><code class="docutils literal notranslate"><span class="pre">n3lo_splitting_approximation_up_to_2404_09701</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_splitting_approximation_up_to_2410"><code class="docutils literal notranslate"><span class="pre">n3lo_splitting_approximation_up_to_2410</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_splitting_approximation_up_to_2410_08089"><code class="docutils literal notranslate"><span class="pre">n3lo_splitting_approximation_up_to_2410_08089</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_splitting_approximation_up_to_2512"><code class="docutils literal notranslate"><span class="pre">n3lo_splitting_approximation_up_to_2512</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#n3lo-splitting-function-choices">N3LO splitting function choices</a><ul>
@@ -108,6 +112,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#n3lo-mass-threshold-choices">N3LO mass threshold choices</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_nfthreshold_exact_fortran"><code class="docutils literal notranslate"><span class="pre">n3lo_nfthreshold_exact_fortran</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_nfthreshold_libOME"><code class="docutils literal notranslate"><span class="pre">n3lo_nfthreshold_libOME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_nfthreshold_libOME_2510"><code class="docutils literal notranslate"><span class="pre">n3lo_nfthreshold_libOME_2510</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_nfthreshold_libOME_2512"><code class="docutils literal notranslate"><span class="pre">n3lo_nfthreshold_libOME_2512</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_nfthreshold_off"><code class="docutils literal notranslate"><span class="pre">n3lo_nfthreshold_off</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hoppet.n3lo_nfthreshold_on"><code class="docutils literal notranslate"><span class="pre">n3lo_nfthreshold_on</span></code></a></li>
 </ul>
@@ -188,107 +194,107 @@
 </dl>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_b">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_b</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#hoppet.iflv_b" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_b</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></span><a class="headerlink" href="#hoppet.iflv_b" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_bbar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_bbar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.iflv_bbar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_bbar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.iflv_bbar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_c">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_c</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#hoppet.iflv_c" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_c</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></span><a class="headerlink" href="#hoppet.iflv_c" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_cbar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_cbar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#hoppet.iflv_cbar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_cbar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#hoppet.iflv_cbar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_d">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_d</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#hoppet.iflv_d" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_d</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></span><a class="headerlink" href="#hoppet.iflv_d" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_dbar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_dbar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#hoppet.iflv_dbar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_dbar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#hoppet.iflv_dbar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_electron">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_electron</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#hoppet.iflv_electron" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_electron</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></span><a class="headerlink" href="#hoppet.iflv_electron" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_g">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_g</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#hoppet.iflv_g" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_g</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#hoppet.iflv_g" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_info">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_info</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#hoppet.iflv_info" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_info</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></span><a class="headerlink" href="#hoppet.iflv_info" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_max">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_max</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#hoppet.iflv_max" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_max</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#hoppet.iflv_max" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_min">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_min</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#hoppet.iflv_min" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_min</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#hoppet.iflv_min" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_min_fortran">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_min_fortran</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-6</span></em><a class="headerlink" href="#hoppet.iflv_min_fortran" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_min_fortran</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-6</span></span><a class="headerlink" href="#hoppet.iflv_min_fortran" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_muon">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_muon</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#hoppet.iflv_muon" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_muon</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></span><a class="headerlink" href="#hoppet.iflv_muon" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_photon">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_photon</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#hoppet.iflv_photon" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_photon</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></span><a class="headerlink" href="#hoppet.iflv_photon" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_s">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_s</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#hoppet.iflv_s" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_s</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></span><a class="headerlink" href="#hoppet.iflv_s" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_sbar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_sbar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#hoppet.iflv_sbar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_sbar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#hoppet.iflv_sbar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_t">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_t</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#hoppet.iflv_t" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_t</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#hoppet.iflv_t" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_tau">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_tau</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#hoppet.iflv_tau" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_tau</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></span><a class="headerlink" href="#hoppet.iflv_tau" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_tbar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_tbar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#hoppet.iflv_tbar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_tbar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#hoppet.iflv_tbar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_u">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_u</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#hoppet.iflv_u" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_u</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></span><a class="headerlink" href="#hoppet.iflv_u" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iflv_ubar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_ubar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#hoppet.iflv_ubar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iflv_ubar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#hoppet.iflv_ubar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -296,22 +302,22 @@
 <h2>Factorisation schemes<a class="headerlink" href="#factorisation-schemes" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.factscheme_DIS">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">factscheme_DIS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#hoppet.factscheme_DIS" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">factscheme_DIS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#hoppet.factscheme_DIS" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.factscheme_FragMSbar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">factscheme_FragMSbar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#hoppet.factscheme_FragMSbar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">factscheme_FragMSbar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#hoppet.factscheme_FragMSbar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.factscheme_MSbar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">factscheme_MSbar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.factscheme_MSbar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">factscheme_MSbar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.factscheme_MSbar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.factscheme_PolMSbar">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">factscheme_PolMSbar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#hoppet.factscheme_PolMSbar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">factscheme_PolMSbar</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#hoppet.factscheme_PolMSbar" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -319,27 +325,27 @@
 <h2>NNLO splitting function choices<a class="headerlink" href="#nnlo-splitting-function-choices" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.nnlo_splitting_Nfitav">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_Nfitav</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#hoppet.nnlo_splitting_Nfitav" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_Nfitav</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#hoppet.nnlo_splitting_Nfitav" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.nnlo_splitting_Nfiterr1">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_Nfiterr1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.nnlo_splitting_Nfiterr1" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_Nfiterr1</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.nnlo_splitting_Nfiterr1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.nnlo_splitting_Nfiterr2">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_Nfiterr2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#hoppet.nnlo_splitting_Nfiterr2" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_Nfiterr2</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#hoppet.nnlo_splitting_Nfiterr2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.nnlo_splitting_exact">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_exact</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-2</span></em><a class="headerlink" href="#hoppet.nnlo_splitting_exact" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_exact</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-2</span></span><a class="headerlink" href="#hoppet.nnlo_splitting_exact" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.nnlo_splitting_param">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_param</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#hoppet.nnlo_splitting_param" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_splitting_param</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></span><a class="headerlink" href="#hoppet.nnlo_splitting_param" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -347,30 +353,50 @@
 <h2>NNLO mass threshold choices<a class="headerlink" href="#nnlo-mass-threshold-choices" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.nnlo_nfthreshold_exact">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_nfthreshold_exact</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-12</span></em><a class="headerlink" href="#hoppet.nnlo_nfthreshold_exact" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_nfthreshold_exact</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-12</span></span><a class="headerlink" href="#hoppet.nnlo_nfthreshold_exact" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.nnlo_nfthreshold_param">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_nfthreshold_param</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-11</span></em><a class="headerlink" href="#hoppet.nnlo_nfthreshold_param" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">nnlo_nfthreshold_param</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-11</span></span><a class="headerlink" href="#hoppet.nnlo_nfthreshold_param" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="n3lo-splitting-function-approximations">
 <h2>N3LO splitting function approximations<a class="headerlink" href="#n3lo-splitting-function-approximations" title="Link to this heading"></a></h2>
 <dl class="py data">
+<dt class="sig sig-object py" id="hoppet.n3lo_splitting_approximation_up_to_2310">
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2310</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2310" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_splitting_approximation_up_to_2310_05744">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2310_05744</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2310_05744" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2310_05744</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2310_05744" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hoppet.n3lo_splitting_approximation_up_to_2404">
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2404</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">101</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2404" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_splitting_approximation_up_to_2404_09701">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2404_09701</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">101</span></em><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2404_09701" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2404_09701</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">101</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2404_09701" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hoppet.n3lo_splitting_approximation_up_to_2410">
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2410</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">102</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2410" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_splitting_approximation_up_to_2410_08089">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2410_08089</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">102</span></em><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2410_08089" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2410_08089</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">102</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2410_08089" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hoppet.n3lo_splitting_approximation_up_to_2512">
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_approximation_up_to_2512</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">103</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_approximation_up_to_2512" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -378,27 +404,27 @@
 <h2>N3LO splitting function choices<a class="headerlink" href="#n3lo-splitting-function-choices" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_splitting_Nfitav">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_Nfitav</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#hoppet.n3lo_splitting_Nfitav" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_Nfitav</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_Nfitav" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_splitting_Nfiterr1">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_Nfiterr1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.n3lo_splitting_Nfiterr1" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_Nfiterr1</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_Nfiterr1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_splitting_Nfiterr2">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_Nfiterr2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#hoppet.n3lo_splitting_Nfiterr2" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_Nfiterr2</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_Nfiterr2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_splitting_exact">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_exact</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-2</span></em><a class="headerlink" href="#hoppet.n3lo_splitting_exact" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_exact</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-2</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_exact" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_splitting_param">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_param</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#hoppet.n3lo_splitting_param" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_splitting_param</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></span><a class="headerlink" href="#hoppet.n3lo_splitting_param" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -406,22 +432,32 @@
 <h2>N3LO mass threshold choices<a class="headerlink" href="#n3lo-mass-threshold-choices" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_nfthreshold_exact_fortran">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_exact_fortran</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#hoppet.n3lo_nfthreshold_exact_fortran" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_exact_fortran</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#hoppet.n3lo_nfthreshold_exact_fortran" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_nfthreshold_libOME">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_libOME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.n3lo_nfthreshold_libOME" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_libOME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.n3lo_nfthreshold_libOME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hoppet.n3lo_nfthreshold_libOME_2510">
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_libOME_2510</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#hoppet.n3lo_nfthreshold_libOME_2510" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hoppet.n3lo_nfthreshold_libOME_2512">
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_libOME_2512</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.n3lo_nfthreshold_libOME_2512" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_nfthreshold_off">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_off</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#hoppet.n3lo_nfthreshold_off" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_off</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#hoppet.n3lo_nfthreshold_off" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.n3lo_nfthreshold_on">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_on</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.n3lo_nfthreshold_on" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">n3lo_nfthreshold_on</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.n3lo_nfthreshold_on" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -429,22 +465,22 @@
 <h2>Convolution communicator pieces<a class="headerlink" href="#convolution-communicator-pieces" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.cc_DELTA">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">cc_DELTA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#hoppet.cc_DELTA" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">cc_DELTA</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#hoppet.cc_DELTA" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.cc_REAL">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">cc_REAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.cc_REAL" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">cc_REAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.cc_REAL" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.cc_REALVIRT">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">cc_REALVIRT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#hoppet.cc_REALVIRT" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">cc_REALVIRT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#hoppet.cc_REALVIRT" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.cc_VIRT">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">cc_VIRT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#hoppet.cc_VIRT" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">cc_VIRT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#hoppet.cc_VIRT" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -474,72 +510,72 @@
 </div></blockquote>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF1EM">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1EM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#hoppet.iF1EM" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1EM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#hoppet.iF1EM" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF1Wm">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1Wm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#hoppet.iF1Wm" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1Wm</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#hoppet.iF1Wm" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF1Wp">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1Wp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#hoppet.iF1Wp" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1Wp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></span><a class="headerlink" href="#hoppet.iF1Wp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF1Z">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1Z</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#hoppet.iF1Z" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1Z</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></span><a class="headerlink" href="#hoppet.iF1Z" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF1gZ">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1gZ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#hoppet.iF1gZ" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF1gZ</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#hoppet.iF1gZ" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF2EM">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2EM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.iF2EM" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2EM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.iF2EM" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF2Wm">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2Wm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#hoppet.iF2Wm" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2Wm</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#hoppet.iF2Wm" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF2Wp">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2Wp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#hoppet.iF2Wp" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2Wp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></span><a class="headerlink" href="#hoppet.iF2Wp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF2Z">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2Z</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#hoppet.iF2Z" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2Z</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></span><a class="headerlink" href="#hoppet.iF2Z" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF2gZ">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2gZ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#hoppet.iF2gZ" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF2gZ</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#hoppet.iF2gZ" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF3Wm">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF3Wm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#hoppet.iF3Wm" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF3Wm</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#hoppet.iF3Wm" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF3Wp">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF3Wp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#hoppet.iF3Wp" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF3Wp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></span><a class="headerlink" href="#hoppet.iF3Wp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF3Z">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF3Z</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#hoppet.iF3Z" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF3Z</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#hoppet.iF3Z" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.iF3gZ">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF3gZ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#hoppet.iF3gZ" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">iF3gZ</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></span><a class="headerlink" href="#hoppet.iF3gZ" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -547,17 +583,17 @@
 <h2>Structure function scale choices<a class="headerlink" href="#structure-function-scale-choices" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.scale_choice_Q">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">scale_choice_Q</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#hoppet.scale_choice_Q" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">scale_choice_Q</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#hoppet.scale_choice_Q" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.scale_choice_arbitrary">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">scale_choice_arbitrary</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#hoppet.scale_choice_arbitrary" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">scale_choice_arbitrary</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#hoppet.scale_choice_arbitrary" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.scale_choice_fixed">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">scale_choice_fixed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#hoppet.scale_choice_fixed" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">scale_choice_fixed</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#hoppet.scale_choice_fixed" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -565,12 +601,12 @@
 <h2>Other constants<a class="headerlink" href="#other-constants" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.ncompmax">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">ncompmax</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#hoppet.ncompmax" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">ncompmax</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></span><a class="headerlink" href="#hoppet.ncompmax" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hoppet.ncompmin">
-<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">ncompmin</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#hoppet.ncompmin" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">hoppet.</span></span><span class="sig-name descname"><span class="pre">ncompmin</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#hoppet.ncompmin" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>

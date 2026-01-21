@@ -85,11 +85,19 @@ NNLO mass threshold choices
 N3LO splitting function approximations
 --------------------------------------
 
+.. autodata:: hoppet.n3lo_splitting_approximation_up_to_2310
+
 .. autodata:: hoppet.n3lo_splitting_approximation_up_to_2310_05744
+
+.. autodata:: hoppet.n3lo_splitting_approximation_up_to_2404
 
 .. autodata:: hoppet.n3lo_splitting_approximation_up_to_2404_09701
 
+.. autodata:: hoppet.n3lo_splitting_approximation_up_to_2410
+
 .. autodata:: hoppet.n3lo_splitting_approximation_up_to_2410_08089
+
+.. autodata:: hoppet.n3lo_splitting_approximation_up_to_2512
 
 N3LO splitting function choices
 -------------------------------
@@ -110,6 +118,10 @@ N3LO mass threshold choices
 .. autodata:: hoppet.n3lo_nfthreshold_exact_fortran
 
 .. autodata:: hoppet.n3lo_nfthreshold_libOME
+
+.. autodata:: hoppet.n3lo_nfthreshold_libOME_2510
+
+.. autodata:: hoppet.n3lo_nfthreshold_libOME_2512
 
 .. autodata:: hoppet.n3lo_nfthreshold_off
 
