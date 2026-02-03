@@ -1,3 +1,4 @@
+#pragma once
 
 extern "C" {
   extern double hoppet__qcd__ca;
