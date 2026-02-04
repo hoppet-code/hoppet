@@ -6,6 +6,16 @@
 	* docs/python-auto/source/conf.py:
 	* docs/manual/HOPPET-doc.tex:
 	* docs/manual/preamble.tex:
+	changed version to 2.2.2-dev0
+
+2026-02-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
 	changed version to 2.2.1
 
 	* src/mass-thresholds/AQg3mod.f90:

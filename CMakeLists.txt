@@ -13,8 +13,8 @@ cmake_minimum_required(VERSION 3.15)
 
 # set the project name and version, including a pre-release label
 ## DO NOT EDIT THIS: set it instead with `scripts/set-version.sh version number`
-project(hoppet VERSION 2.2.1 LANGUAGES C CXX Fortran)
-set(PROJECT_VERSION_PRERELEASE "")
+project(hoppet VERSION 2.2.2 LANGUAGES C CXX Fortran)
+set(PROJECT_VERSION_PRERELEASE "-dev0")
 
 set(HOPPET_VERSION "${PROJECT_VERSION}${PROJECT_VERSION_PRERELEASE}")
 message(STATUS "HOPPET: HOPPET_VERSION=${HOPPET_VERSION}")
