@@ -1,3 +1,14 @@
+2026-02-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* src/mass-thresholds/AQg3mod.f90:
+
+	Bug fix thanks to report by meiyasan (issue #44 on github). The
+	coeff array was declared with dimension(65), but was then passed
+	to chebev as an array with dimension(0:65). This lead to
+	unitialised memory on the stack. This could lead the unit tests to
+	fail on certain systems (and could have caused problems if using
+	the Fortran version of the N3LO mass thresholds).
+
 2026-01-21  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* CMakeLists.txt:
