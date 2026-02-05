@@ -1,3 +1,9 @@
+2026-02-06 Gavin Salam + Melissa van Beekveld
+
+	* src/splitting_functions.f90:
+	added a omx_fn(y,x) and used it in LO splitting functions (qq,gg), to
+	allow users to explore y->0 limit for them at high accuracy.
+
 2026-02-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 	* CMakeLists.txt:
 	* src/welcome_message.f90:
