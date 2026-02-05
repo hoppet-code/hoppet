@@ -144,6 +144,40 @@ __Files added__
 	(assert_eq2 is clean, the others still give some printout)
 
 --------- end 2025-10-cxx-OO branch ---------
+2026-02-06 Gavin Salam + Melissa van Beekveld
+
+	* src/splitting_functions.f90:
+	added a omx_fn(y,x) and used it in LO splitting functions (qq,gg), to
+	allow users to explore y->0 limit for them at high accuracy.
+
+2026-02-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.2-dev0
+
+2026-02-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.1
+
+	* src/mass-thresholds/AQg3mod.f90:
+	Bug fix thanks to report by meiyasan (issue #44 on github). The
+	coeff array was declared with dimension(65), but was then passed
+	to chebev as an array with dimension(0:65). This lead to
+	unitialised memory on the stack. This could lead the unit tests to
+	fail on certain systems (and could have caused undefined behaviour
+	if using the Fortran version of the N3LO mass thresholds).
+
 2026-01-21  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* CMakeLists.txt:

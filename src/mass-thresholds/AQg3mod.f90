@@ -75,10 +75,15 @@ module AQg3mod
     implicit none
 !    double precision, external :: chebev
     double precision, intent(in) :: x
-    double precision, dimension(65) :: coeff
+    double precision, dimension(0:64) :: coeff
     double precision :: Lx, y, Ly
     !0<x<25/100
     ! what intervals do we need?
+    ! Initialise to sensible default values to avoid issue with uninitialised values on stack.
+    coeff = 0.0d0
+    Lx = 0.0d0
+    Ly = 0.0d0
+    y = 0.0d0
     IF (x > 0.92D0) THEN !expansion around x=1, good for 0.92<x<1
         y = 1.0D0 - x 
         Ly = log(y) 
@@ -169,7 +174,7 @@ module AQg3mod
         1.98643407300325D-9, &
         -1.42290234845722D-9]
 
-        aQg3 = chebev(x,0.05D0,0.92D0,65,coeff)
+        aQg3 = chebev(x,0.05D0,0.92D0,64,coeff)
     ELSE !expansion around x=0, good for 0<x<0.05
         Lx = log(x)
 
