@@ -15,7 +15,7 @@ my $grey="\033[1;30m";
 my $blue="\033[0;34m";
 my $nocolor="\033[0m";
 print "${red}\n";
-print "ERROR:$nocolor the hoppet configure script is no longer support as of version 2.1.0\n";
+print "ERROR:$nocolor the hoppet configure script is no longer supported as of version 2.1.0\n";
 print "You should use cmake instead:\n\n";
 print "    make distclean  ${blue}# only if you've already run configure$nocolor\n";
 print "    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/install/path $blue<+optional flags>$nocolor\n";
