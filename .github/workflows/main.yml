@@ -145,6 +145,12 @@ jobs:
       run: |
           source /opt/intel/oneapi/compiler/latest/env/vars.sh
           ctest --test-dir BUILDifx -j 2 --output-on-failure
+
+    # for debugging
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      if: ${{ failure() }}
+
     # - name: Compile_with_ifort
     #   run: |
     #       source /opt/intel/oneapi/compiler/latest/env/vars.sh
