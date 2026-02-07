@@ -106,7 +106,11 @@ contains
     mtm_q = mtm_from_mtm_p * q
     do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (mtm_from_P * Pnf3) element iflv="//trim(to_string(iflv)), &
-           mtm_q(:,iflv), P_q(:,iflv), 1.0e-10_dp, 1.0e-10_dp, tol_choice_or=.true.)
+      ! GPS 2026-02-07: for iflv=-2, line 186 fails in Intel CI, with 
+      ! 94  -6.5823150747746695E-01  -6.5823150757933035E-01   1.019E-10   1.548E-10
+      ! On Mac the numbers are
+      ! 94 -6.5823150808864739E-01  -6.5823150805954356E-01  -2.910E-11  -4.422E-11
+      mtm_q(:,iflv), P_q(:,iflv), 1.0e-11_dp, 1.0e-11_dp, tol_choice_or=.true.)
     end do
 
     !! for diagnostics
