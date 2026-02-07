@@ -144,7 +144,29 @@ __Files added__
 	(assert_eq2 is clean, the others still give some printout)
 
 --------- end 2025-10-cxx-OO branch ---------
-2026-02-06 Gavin Salam + Melissa van Beekveld
+2026-02-07 gavin
+
+	* unit-tests/hoppet-unit-tests.F90:
+	* unit-tests/test_splitfn_limits.F90: *** ADDED ***
+	added -eps argument to control dgauss integration precision;
+	added tests of extreme y->0 (x->1) limits of the LO splitting functions
+	to make sure we don't accidentally break the use of the new omx_fn
+	in that limit.
+
+	* unit-tests/test_new_mtm.f90:
+    for one of the mtm convolution tests (mtm_from_P * Pnf3), upped
+    absolute precision limit from 1e-10 to 1e-9 to avoid failures that
+    were appearing with ifx 2025.3.2 and AMD processors. Investigation
+    (documented near the test), showed that things were generally
+	within a factor of a few 1e-11 across the board, and it seems
+	the ifx+AMD combination brought it just above threshold
+
+2026-02-06 Gavin
+
+	* unit-tests/unit_tests.f90:
+	added more readable output for failures of array comparisons
+
+2026-02-05 Gavin Salam + Melissa van Beekveld
 
 	* src/splitting_functions.f90:
 	added a omx_fn(y,x) and used it in LO splitting functions (qq,gg), to
