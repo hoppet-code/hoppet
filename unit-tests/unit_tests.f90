@@ -116,9 +116,11 @@ contains
       print '(a6,2a25,2a12)', "i", "Answer", "Expected", "Abs Diff", "Rel Diff"
       do i = 1, size(answer)
         if (.not. is_equal(i)) write(*,'(a)', advance='no') red
-        print '(i6,2es25.16,2es12.3)', i, answer(i), expected(i), answer(i) - expected(i), &
+        write(*,'(i6,2es25.16,2es12.3)',advance='no')&
+                 i, answer(i), expected(i), answer(i) - expected(i), &
                    (answer(i) - expected(i))/max(abs(expected(i)), abs(answer(i)))
-        if (.not. is_equal(i)) write(*,'(a)', advance='no') reset
+        if (.not. is_equal(i)) write(*,'(a)', advance='no') '  FAIL'//reset
+        write(*,'(a)') ''
       end do
       unit_test_failures = unit_test_failures + 1
     else
