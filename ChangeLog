@@ -3,6 +3,14 @@
 	* unit-tests/hoppet-unit-tests.F90:
 	added -eps argument to control dgauss integration precision
 
+	* unit-tests/test_new_mtm.f90:
+    for one of the mtm convolution tests (mtm_from_P * Pnf3), upped
+    absolute precision limit from 1e-10 to 1e-9 to avoid failures that
+    were appearing with ifx 2025.3.2 and AMD processors. Investigation
+    (documented near the test), showed that things were generally
+	within a factor of a few 1e-11 across the board, and it seems
+	the ifx+AMD combination brought it just above threshold
+
 2026-02-06 Gavin
 
 	* unit-tests/unit_tests.f90:

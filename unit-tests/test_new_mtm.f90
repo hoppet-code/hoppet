@@ -111,7 +111,9 @@ contains
       ! 94  -6.5823150747746695E-01  -6.5823150757933035E-01   1.019E-10   1.548E-10
       ! On Mac the numbers are
       ! 94  -6.5823150808864739E-01  -6.5823150805954356E-01  -2.910E-11  -4.422E-11
-      ! Hydra with ifx 2025.3.2
+      ! Hydra with ifx 2025.3.2 + Intel
+      ! 94  -6.5823150750657078E-01  -6.5823150744108716E-01  -6.548E-11  -9.948E-11
+      ! Hydra with ifx 2025.2.1 + Intel
       ! 94  -6.5823150750657078E-01  -6.5823150744108716E-01  -6.548E-11  -9.948E-11
       !
       ! Turning off the recent 1-x improvement, we get
@@ -119,8 +121,9 @@ contains
       ! 94  -6.5823150725191226E-01  -6.5823150723008439E-01  -2.183E-11  -3.316E-11  Mac, epsilon=1e-7
       ! 94  -6.5822994041081984E-01  -6.5822994041081984E-01   0.000E+00   0.000E+00  Mac, epsilon=1e-9
       !
-      ! Conclusion: it just doesn't seem very stable
-      mtm_q(:,iflv), P_q(:,iflv), 1.0e-12_dp, 1.0e-12_dp, tol_choice_or=.true.)
+      ! Conclusion: it just doesn't seem very stable, so increase tolerance from 1e-10 abs/rel
+      ! to 1e-9 abs and 1e-10 rel
+      mtm_q(:,iflv), P_q(:,iflv), 1.0e-9_dp, 1.0e-10_dp, tol_choice_or=.true.)
     end do
 
     !! for diagnostics
