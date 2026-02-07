@@ -1,4 +1,118 @@
-2025-01-09 Gavin
+2026-02-07 gavin
+
+	* unit-tests/hoppet-unit-tests.F90:
+	* unit-tests/test_splitfn_limits.F90: *** ADDED ***
+	added -eps argument to control dgauss integration precision;
+	added tests of extreme y->0 (x->1) limits of the LO splitting functions
+	to make sure we don't accidentally break the use of the new omx_fn
+	in that limit.
+
+	* unit-tests/test_new_mtm.f90:
+    for one of the mtm convolution tests (mtm_from_P * Pnf3), upped
+    absolute precision limit from 1e-10 to 1e-9 to avoid failures that
+    were appearing with ifx 2025.3.2 and AMD processors. Investigation
+    (documented near the test), showed that things were generally
+	within a factor of a few 1e-11 across the board, and it seems
+	the ifx+AMD combination brought it just above threshold
+
+2026-02-06 Gavin
+
+	* unit-tests/unit_tests.f90:
+	added more readable output for failures of array comparisons
+
+2026-02-05 Gavin Salam + Melissa van Beekveld
+
+	* src/splitting_functions.f90:
+	added a omx_fn(y,x) and used it in LO splitting functions (qq,gg), to
+	allow users to explore y->0 limit for them at high accuracy.
+
+2026-02-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.2-dev0
+
+2026-02-04  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.1
+
+	* src/mass-thresholds/AQg3mod.f90:
+	Bug fix thanks to report by meiyasan (issue #44 on github). The
+	coeff array was declared with dimension(65), but was then passed
+	to chebev as an array with dimension(0:65). This lead to
+	unitialised memory on the stack. This could lead the unit tests to
+	fail on certain systems (and could have caused undefined behaviour
+	if using the Fortran version of the N3LO mass thresholds).
+
+2026-01-21  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.1-dev0
+
+
+2026-01-21  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	Release 2.2.0
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.0
+
+
+2026-01-15 Gavin
+
+	* src/streamlined_interface.f90:
+	- when setting up a fixed-nf coupling (either from hoppetSetCoupling
+	  or from an evolution routine), the global nf and the dglap holder nf
+	  get set correspondingly.
+	- if hoppetSetCoupling is called before hoppetStart[Extended],
+	  an error is raised.
+
+	* src/dglap_holders.f90:
+	in Delete(holder), after deallocating dh%allP and dh%allC, they get
+	nullified. They also now start off as null pointers when a holder is created.
+	This makes it safe for a user to check whether they are associated.
+
+2026-01-14 Gavin
+
+	* CMakeLists.txt:
+	* cmake/hoppet_git_watcher.CMake:
+	reduced CMakeLists.txt requirement to 3.15 to facilitate use on some
+	older clusters
+
+2026-01-12 gavin
+
+	* CMakeLists.txt:
+	- renamed GIT_WATCHER -> HOPPET_GIT_WATCHER  to avoid risk of clashes
+	  with other projects
+
+	* cmake/git_watcher.cmake -> cmake/hoppet_git_watcher.cmake:
+	renamed and significantly refactored to avoid clashes with other projects.
+	Now introduces a target that is configured when calling a hoppet_git_watcher_add
+	function, target name is a parameter. (Done with significant ChatGPT-5.2 assistance).
+
+2026-01-09 Gavin
 
 	* hoppet.h:
 	updated mass threshold constants to reflect addition of NShV term
@@ -21,7 +135,7 @@
 	libOME and new Fortran implementation.
 
 
-2025-01-07 Gavin (later)
+2026-01-07 Gavin (later)
 
 	* NEWS.md:
 	updated with developments from the 2025-12-new-mtm branch, prior
@@ -46,7 +160,7 @@
 	NB: done in steps, so look at preceding commits for intermediate stages,
 	including code with the old MTMs named as old_mass_threshold_mat	
 
-2025-01-07 Gavin 
+2026-01-07 Gavin 
 
 	* src/evolution.f90:
 	* benchmarking/prec_and_timing.f90:
@@ -65,7 +179,7 @@
 	- unit tests for libOME now directly use these functions
 	- dglap_holders now uses these functions too
 
-2025-01-06 Gavin (later)
+2026-01-06 Gavin (later)
 
 	* src/dglap_holders.f90:
 	* src/evolution.f90:
@@ -77,7 +191,7 @@
 	- note that underlying initialisation of new MTM objects still uses old MTM
 	  as an intermediate step, to minimise rewriting of quite a number of routines.
 
-2025-01-06 Gavin
+2026-01-06 Gavin
 
 	* CMakeLists.txt:
 	* benchmarking/prec_and_timing.f90:
@@ -106,7 +220,7 @@
 	been put in after encountering incorect results when using the 
 	the same argument for input and output.
 
-2025-01-05 Gavin
+2026-01-05 Gavin
 
 	* src/dglap_objects.F90:
 	* unit-tests/test_new_mtm.f90:

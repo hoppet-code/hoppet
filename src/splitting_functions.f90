@@ -55,21 +55,43 @@ module splitting_functions
   real(dp),  parameter :: four_thirds = four/three
 
 contains
+
+  !! return 1-x, in such a way that most of the precision is retained for x close to 1.
+  !!
+  !! \param y = -ln(x), assumed to be fully accurate for small y
+  !! \param x           assumed to be fully accurate for small x
+  !!
+  !! The accuracy should always be within about 100 times the double-precision epsilon.
+  !! The code uses a Taylor expansion for |y| < 0.01 and a direct evaluation of 1-x otherwise.
+  function omx_fn(y,x) result(omx)
+      real(dp), intent(in) :: y, x
+      real(dp)             :: omx
+      if (abs(y) > 0.01_dp) then
+        omx = one - x
+      else
+        !omx = y - y**2/2._dp + y**3/6._dp - y**4/24._dp + y**5/120._dp - y**6/720._dp
+        !omx = y * (1 + y*(-half + y*(one/6._dp + y*(-one/24._dp + y/120._dp - y**2/720._dp))))
+        omx = y * (one + y*(-half + y*(one/6._dp + y*(-one/24._dp + y*(one/120._dp - y/720._dp)))))
+      end if
+   end function omx_fn
+
   !----------------------------------------------------------------------
   function sf_Pgg(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    real(dp)             :: x, omx
     x = exp(-y)
+    omx = omx_fn(y,x)
+    
     res = zero
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
-       res = two*ca*(x/(one-x) + (one-x)/x + x*(1-x))
+       res = two*ca*(x/omx + omx/x + x*omx)
     end select
     select case(cc_piece)
     case(cc_VIRT,cc_REALVIRT)
-       res = res - two*ca*one/(one-x)
+       res = res - two*ca*one/omx
     case(cc_DELTA)
        res = (11.0_dp*ca - four*nf*tr)/6.0_dp
     end select
@@ -81,17 +103,18 @@ contains
   function sf_Pqq(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    real(dp)             :: x, omx
     x = exp(-y)
+    omx = omx_fn(y,x)
     res = zero
 
     select case(cc_piece)
     case(cc_REAL,cc_REALVIRT)
-       res = cf*(one+x**2)/(one-x)
+       res = cf*(one+x**2)/omx
     end select
     select case(cc_piece)
     case(cc_VIRT,cc_REALVIRT)
-       res = res - cf*two/(one-x)
+       res = res - cf*two/omx
     case(cc_DELTA)
        res = cf*three*half
     end select

@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.15)
 
 # set the project name and version, including a pre-release label
 ## DO NOT EDIT THIS: set it instead with `scripts/set-version.sh version number`
-project(hoppet VERSION 2.2.0 LANGUAGES C CXX Fortran)
+project(hoppet VERSION 2.2.2 LANGUAGES C CXX Fortran)
 set(PROJECT_VERSION_PRERELEASE "-dev0")
 
 set(HOPPET_VERSION "${PROJECT_VERSION}${PROJECT_VERSION_PRERELEASE}")
@@ -262,19 +262,29 @@ endif()
 #------------------------------------------------------------------------- 
 # Define the two required variables before including
 # the source code for watching a git repository.
-option(GIT_WATCHER "Add source code which allows runs for watching the status of the git repository" ON)
-set(PRE_CONFIGURE_FILE "src/config/hoppet_git_state.f90.in")
-set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/hoppet_git_state.f90")
-if (GIT_WATCHER)
-  message("-- Enabling the git watcher support")
-  set(GIT_FAIL_IF_NONZERO_EXIT FALSE)
-  include(cmake/git_watcher.cmake)  
+option(HOPPET_GIT_WATCHER "Add source code which allows runs for watching the status of the hoppet git repository" ON)
+set(HOPPET_GW_PRE_CONFIGURE_FILE "src/config/hoppet_git_state.f90.in")
+set(HOPPET_GW_POST_CONFIGURE_FILE "hoppet_git_state.f90")
+if (HOPPET_GIT_WATCHER)
+  message("-- HOPPET: Enabling the git watcher support")
+  include(cmake/hoppet_git_watcher.cmake)
+
+  hoppet_git_watcher_add(
+    TARGET         hoppet_check_git
+    PRE_CONFIGURE  ${HOPPET_GW_PRE_CONFIGURE_FILE}
+    POST_CONFIGURE ${HOPPET_GW_POST_CONFIGURE_FILE}
+    # WORKING_DIR    ${CMAKE_CURRENT_SOURCE_DIR}
+    # optional:
+    # STATE_FILE   ${CMAKE_BINARY_DIR}/git-state-hash
+    # GIT_EXECUTABLE /usr/bin/git
+    FAIL_ON_ERROR OFF
+  )
 else()
-  message("-- Disabling the git watcher support")  
+  message("-- HOPPET: Disabling the git watcher support")  
   # just copy PRE_CONFIGURE_FILE to POST_CONFIGURE_FILE
-  configure_file(${PRE_CONFIGURE_FILE} ${POST_CONFIGURE_FILE} COPYONLY)
+  configure_file(${HOPPET_GW_PRE_CONFIGURE_FILE} ${HOPPET_GW_POST_CONFIGURE_FILE} COPYONLY)
 endif()
-list(APPEND SOURCESf90 ${POST_CONFIGURE_FILE})
+list(APPEND SOURCESf90 ${HOPPET_GW_POST_CONFIGURE_FILE})
 
 
 # alternative is a manual list (NB: this specific list is not complete)
