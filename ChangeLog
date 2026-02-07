@@ -1,4 +1,14 @@
-2026-02-06 Gavin Salam + Melissa van Beekveld
+2026-02-07 gavin
+
+	* unit-tests/hoppet-unit-tests.F90:
+	added -eps argument to control dgauss integration precision
+
+2026-02-06 Gavin
+
+	* unit-tests/unit_tests.f90:
+	added more readable output for failures of array comparisons
+
+2026-02-05 Gavin Salam + Melissa van Beekveld
 
 	* src/splitting_functions.f90:
 	added a omx_fn(y,x) and used it in LO splitting functions (qq,gg), to
