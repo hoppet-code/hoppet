@@ -66,6 +66,8 @@ contains
   function omx_fn(y,x) result(omx)
       real(dp), intent(in) :: y, x
       real(dp)             :: omx
+      omx = one - x
+      return ! GPS debugging 2026-02-07
       if (abs(y) > 0.01_dp) then
         omx = one - x
       else

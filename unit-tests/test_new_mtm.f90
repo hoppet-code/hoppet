@@ -106,11 +106,17 @@ contains
     mtm_q = mtm_from_mtm_p * q
     do iflv = iflv_tbar, iflv_t
       call check_approx_eq_1d("mass_threshold_mat (mtm_from_P * Pnf3) element iflv="//trim(to_string(iflv)), &
-      ! GPS 2026-02-07: for iflv=-2, line 186 fails in Intel CI, with 
+      ! GPS 2026-02-07: for iflv=-2, line 186 fails in Intel CI (AMD EPYC 7763 64-Core Processor), with 
       ! 94  -6.5823150747746695E-01  -6.5823150757933035E-01   1.019E-10   1.548E-10
       ! On Mac the numbers are
-      ! 94 -6.5823150808864739E-01  -6.5823150805954356E-01  -2.910E-11  -4.422E-11
-      mtm_q(:,iflv), P_q(:,iflv), 1.0e-11_dp, 1.0e-11_dp, tol_choice_or=.true.)
+      ! 94  -6.5823150808864739E-01  -6.5823150805954356E-01  -2.910E-11  -4.422E-11
+      ! Hydra with ifx 2025.3.2
+      ! 94  -6.5823150750657078E-01  -6.5823150744108716E-01  -6.548E-11  -9.948E-11
+      !
+      ! Turning off the recent 1-x improvement, we get
+      ! 94  -6.5823150725191226E-01  -6.5823150723008439E-01  -2.183E-11  -3.316E-11  Mac, epsilon=1e-7
+      ! 94  -6.5822994041081984E-01  -6.5822994041081984E-01   0.000E+00   0.000E+00  Mac, epsilon=1e-9
+      mtm_q(:,iflv), P_q(:,iflv), 1.0e-12_dp, 1.0e-12_dp, tol_choice_or=.true.)
     end do
 
     !! for diagnostics
