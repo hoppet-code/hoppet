@@ -1,3 +1,8 @@
+2026-02-07 gavin
+
+	* unit-tests/hoppet-unit-tests.F90:
+	added -eps argument to control dgauss integration precision
+
 2026-02-06 Gavin
 
 	* unit-tests/unit_tests.f90:
