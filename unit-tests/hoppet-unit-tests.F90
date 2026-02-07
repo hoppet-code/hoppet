@@ -9,6 +9,7 @@ program hoppet_unit_tests
   use test_convolution
   use test_libome
   use test_new_mtm
+  use test_splitfn_limits
   use io_utils
   implicit none
 
@@ -40,6 +41,7 @@ program hoppet_unit_tests
   call test_InitGridConv()
   call test_libome_interface()
   call test_mass_threshold_mat()
+  call test_splitfn_lims()
 
   if (unit_test_failures > 0) then
     ! print a message in red
