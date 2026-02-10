@@ -1673,7 +1673,7 @@ public:
   RETURN_DBL_MEMBER(pdf_table,lnlnQ_min)          ///< return the minimum ln(ln(Q/Λ)) value of the table
   RETURN_DBL_MEMBER(pdf_table,lnlnQ_max)          ///< return the maximum ln(ln(Q/Λ)) value of the table
   RETURN_DBL_MEMBER(pdf_table,lambda_eff)         ///< return the effective Λ value of the table
-  RETURN_DBL_MEMBER(pdf_table,dlnlnQ)             ///< return the spacing in ln(ln(Q/Λ)) of the table
+  RETURN_DBL_MEMBER(pdf_table,dlnlnQ)             ///< return the spacing in ln(ln(Q/Λ)) of the table (if the table has nf_info_associated, returns 0.0 -- then see individual segments for their dlnlnQ)
   RETURN_OBJ_MEMBER(pdf_table,seginfo_no_nf,pdfseginfo)  ///< return the pdfseginfo object when there is no nf info
   RETURN_OBJ_MEMBER_I(pdf_table,seginfo,pdfseginfo) ///< return the pdfseginfo object for segment with nf == i
   RETURN_DBL_MEMBER_I(pdf_table,as2pi)            ///< return \f$\alpha_s(Q_i)/2\pi\f$ where \f$Q_i\f$ is Q_vals(i)
