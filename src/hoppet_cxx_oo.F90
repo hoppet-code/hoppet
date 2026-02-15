@@ -1317,7 +1317,9 @@ contains
 
     call c_f_pointer(src, src_f)
     call c_f_pointer(dest, dest_f)
+    ! this copies all metadata (e.g. lnlnQ_vals, etc.), but not the actual %tab
     call AllocPDFTable(dest_f, src_f)
+    ! so copy the tab contents separately
     dest_f%tab = src_f%tab
   end subroutine hoppet_cxx__pdf_table__copy_contents
 
