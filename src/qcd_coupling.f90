@@ -22,10 +22,10 @@ module qcd_coupling
   private
 
 
-type running_coupling 
+  type running_coupling 
     !private
     type(na_handle) :: nah      ! simply "redirect" to new coupling
-    logical         :: use_nah
+    logical         :: use_nah = .true.
     !-- following components are related to old analytical approximations
     real(dp) :: QCDL5
     real(dp) :: BN(3:6), CN(3:6), CN5(3:6)
@@ -51,7 +51,7 @@ type running_coupling
      !-- for digital f90 the second one causes problems
      module procedure  as_Del_ash!, as_Del_noash
   end interface
-  public :: Delete
+  public :: Delete, CopyRunningCoupling
   public :: NfRange, NfAtQ, QRangeAtNf, QuarkMass, QuarkMassesAreMSbar
   interface NumberOfLoops
      module procedure NumLoops_in_coupling
@@ -242,6 +242,21 @@ contains
     end if
   end subroutine as_Init_ash
 
+
+  !! Copy the contents of src into dest, including handling any memory
+  !! deallocation/allocation as needed. 
+  subroutine CopyRunningCoupling(src, dest)
+    type(running_coupling), intent(in)    :: src
+    type(running_coupling), intent(inout) :: dest
+    
+    if (src%use_nah) then
+      dest%use_nah = .true.
+      call na_copy_contents(src%nah, dest%nah)
+      return
+    else
+      call wae_error('CopyRunningCoupling','old alphas (analytic approx to solution) is obsolete and will not run...')
+    end if
+  end subroutine CopyRunningCoupling
 
   !======================================================================
   function as_Value_ash(coupling, Q, fixnf) result(Value)

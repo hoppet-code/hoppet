@@ -8,7 +8,7 @@ module new_as
      real(dp) :: tlo, thi, dt, invdt
      real(dp) :: beta0, beta1, beta2, beta3
      ! array of 1/alpha_s values at steps of dt
-     real(dp), pointer :: ra(:)
+     real(dp), pointer :: ra(:) => null()
      !-- above iflip we evolve upwards, below iflip we evolve downwards
      integer  :: iflip, dummy
   end type na_segment
@@ -16,7 +16,7 @@ module new_as
   type na_handle
      private
      ! segments for different nf values, gets allocated (nlo:nhi)
-     type(na_segment), pointer :: seg(:)
+     type(na_segment), pointer :: seg(:) => null()
      integer                   :: nlo, nhi
      integer                   :: nloop, fixnf
      real(dp)                  :: tlo, thi
@@ -37,7 +37,8 @@ module new_as
   integer,  parameter :: nofixnf = -1000000045
 
   public :: na_handle
-  public :: na_Init, na_Value, na_Value_full, na_Del, na_NumberOfLoops
+  public :: na_Init, na_copy_contents, na_Del
+  public :: na_Value, na_Value_full, na_NumberOfLoops
   public :: na_nfRange, na_nfAtQ, na_QrangeAtNf, na_QuarkMass
   public :: na_QuarkMassesAreMSbar
   public :: na_Set_dt_base
@@ -319,6 +320,28 @@ contains
     call qcd_SetNf(nf_store)
   end subroutine na_init
   
+
+  !! Copy the contents of src into dest, including handling any memory
+  !! deallocation/allocation as needed. 
+  subroutine na_copy_contents(src,dest)
+    type(na_handle), intent(in)    :: src
+    type(na_handle), intent(inout) :: dest ! must be inout, otherwise won't deallocate existing contents
+    integer :: i, status
+    if (associated(dest%seg)) then
+      call na_Del(dest)
+    end if
+    ! copy everything -- this works fine except for the segments, 
+    ! which we need to allocate and copy separately 
+    dest = src
+    allocate(dest%seg(src%nlo:src%nhi), stat=status)
+    if (status /= 0) call wae_error('na_copy_contents: error allocating memory for segments')
+    do i = src%nlo, src%nhi
+       dest%seg(i) = src%seg(i)
+       allocate(dest%seg(i)%ra(lbound(src%seg(i)%ra,dim=1):ubound(src%seg(i)%ra,dim=1)), stat=status)
+       if (status /= 0) call wae_error('na_copy_contents: error allocating memory for ra array')
+       dest%seg(i)%ra = src%seg(i)%ra
+    end do
+  end subroutine na_copy_contents
 
   !-------------------------------------------------------------------------
   ! If fixnf is present, then the program will force (within limits of +-dt)

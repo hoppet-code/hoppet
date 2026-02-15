@@ -23,7 +23,7 @@ contains
     real(dp), parameter :: ref_4loop_vfn(*) = [4.830605117006e-01_dp, 2.536789691195e-01_dp, 1.827498038423e-01_dp, 7.181752397345e-02_dp]
     !-- end of reference results    
 
-    type(running_coupling) :: alphas_vfn, alphas_nf4, alphas_nf4_rescaled
+    type(running_coupling) :: alphas_vfn, alphas_nf4, alphas_nf4_rescaled, alphas_copy
     real(dp) :: default_dt, Q, abs_tol = 1e-9_dp
     real(dp) :: raw_Qmax, rescaling_factor, rescaled_Qmax
 
@@ -36,10 +36,13 @@ contains
     call InitRunningCoupling(alphas_vfn, alphas_mz, Q=mz, quark_masses=(/ mc, mb, mt /), nloop=4)
     call InitRunningCoupling(alphas_nf4, alphas_vfn%Value(2.0_dp), Q=2.0_dp, fixnf=4, nloop=4)
 
+    call CopyRunningCoupling(alphas_vfn, alphas_copy)
     do iQ = 1, size(Qvals)
       Q = Qvals(iQ)
       call check_approx_eq_0d("alphas_vfn at Q="//trim(to_string(Q)), alphas_vfn%Value(Q), ref_4loop_vfn(iQ), abs_tol)
+      call check_approx_eq_0d("alphas_copy at Q="//trim(to_string(Q)), alphas_copy%Value(Q), ref_4loop_vfn(iQ), abs_tol)
     end do
+
 
     ! make sure that extraction outside of the range with fixnf works too
     call check_approx_eq("alphas_nf4_1GeV", alphas_nf4%Value(1.0_dp), alphas_vfn%Value(1.0_dp, fixnf=4), abs_tol)
@@ -53,6 +56,17 @@ contains
                            alphas_vfn%Value(Q), &
                            na_Value_full(alphas_vfn%nah,Q), abs_tol)
     end do
+
+    ! perform another copy into the same alphas_copy variable 
+    ! (with valgrind, useful in checking we don't have memory leaks) 
+    call CopyRunningCoupling(alphas_nf4, alphas_copy)
+    do iQ = 1, ubound(Qvals,1)
+      Q = Qvals(iQ)
+      call check_approx_eq("alphas: nf4 v copy of nf4 at Q="//to_string(Q), &
+                           alphas_nf4%Value(Q), &
+                           alphas_copy%Value(Q), abs_tol)
+    end do
+
 
     TIME_START("alphas_vfn",10**7)
     real(dp) :: sum_alphas = 0.0_dp
@@ -83,6 +97,11 @@ contains
     call check_approx_eq("alphas_nf4_rescaled at 1 GeV", &
          alphas_nf4%Value(1.0_dp), &
          alphas_nf4_rescaled%Value(1.0_dp)*rescaling_factor, abs_tol)
+
+    call Delete(alphas_vfn)
+    call Delete(alphas_nf4)
+    call Delete(alphas_nf4_rescaled)
+    call Delete(alphas_copy)
 
   end subroutine unit_tests_alphas
 

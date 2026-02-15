@@ -94,6 +94,14 @@ __Files added__
 	where nf info had been added, causing memory leaks in some 
 	scenarios.
 
+	* src/new_as.f90:
+	* src/qcd_coupling.f90:
+	- made sure the running_coupling and new_as types start off in a sensible
+	  state (i.e. use_nah=.true. and new_as pointers set to null), so that we
+	  can reliably detect if it has already been initialised.
+	- added CopyRunningCoupling (and underlying na_copy_contents), which copies 
+	  the contents of one running_coupling object into another.
+
 	* src/streamlined_interface.f90:
 	- in some functions introduced hard-coded parameter for offset for
 	  upper bound of arrays passed from C-style binding
