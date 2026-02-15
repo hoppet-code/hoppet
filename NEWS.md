@@ -1,5 +1,12 @@
 # NEWS for HOPPET
 
+# Release 2.2.2, unreleased, work in progress
+
+## Small additions
+
+* LO splitting functions can now be evaluated for y(=-ln x) arbitrarily
+  close to zero without significant loss of relative precision
+
 # Release 2.2.1, 4 February 2026
 
 ## Bug fixes
