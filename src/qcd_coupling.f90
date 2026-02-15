@@ -245,13 +245,13 @@ contains
 
   !! Copy the contents of src into dest, including handling any memory
   !! deallocation/allocation as needed. 
-  subroutine CopyRunningCoupling(src, dest)
-    type(running_coupling), intent(in)    :: src
+  subroutine CopyRunningCoupling(dest, src)
     type(running_coupling), intent(inout) :: dest ! must be inout, otherwise won't deallocate existing contents
+    type(running_coupling), intent(in)    :: src
     
     if (src%use_nah) then
       dest%use_nah = .true.
-      call na_copy_contents(src%nah, dest%nah)
+      call na_copy_contents( dest%nah, src%nah)
       return
     else
       call wae_error('CopyRunningCoupling','old alphas (analytic approx to solution) is obsolete and will not run...')

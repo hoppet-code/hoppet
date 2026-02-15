@@ -36,7 +36,7 @@ contains
     call InitRunningCoupling(alphas_vfn, alphas_mz, Q=mz, quark_masses=(/ mc, mb, mt /), nloop=4)
     call InitRunningCoupling(alphas_nf4, alphas_vfn%Value(2.0_dp), Q=2.0_dp, fixnf=4, nloop=4)
 
-    call CopyRunningCoupling(alphas_vfn, alphas_copy)
+    call CopyRunningCoupling(alphas_copy, alphas_vfn)
     do iQ = 1, size(Qvals)
       Q = Qvals(iQ)
       call check_approx_eq_0d("alphas_vfn at Q="//trim(to_string(Q)), alphas_vfn%Value(Q), ref_4loop_vfn(iQ), abs_tol)
@@ -59,7 +59,7 @@ contains
 
     ! perform another copy into the same alphas_copy variable 
     ! (with valgrind, useful in checking we don't have memory leaks) 
-    call CopyRunningCoupling(alphas_nf4, alphas_copy)
+    call CopyRunningCoupling(alphas_copy, alphas_nf4)
     do iQ = 1, ubound(Qvals,1)
       Q = Qvals(iQ)
       call check_approx_eq("alphas: nf4 v copy of nf4 at Q="//to_string(Q), &

@@ -323,9 +323,9 @@ contains
 
   !! Copy the contents of src into dest, including handling any memory
   !! deallocation/allocation as needed. 
-  subroutine na_copy_contents(src,dest)
-    type(na_handle), intent(in)    :: src
+  subroutine na_copy_contents(dest, src)
     type(na_handle), intent(inout) :: dest ! must be inout, otherwise won't deallocate existing contents
+    type(na_handle), intent(in)    :: src
     integer :: i, status
     if (associated(dest%seg)) then
       call na_Del(dest)
