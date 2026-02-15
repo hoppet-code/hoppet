@@ -327,9 +327,14 @@ contains
     type(na_handle), intent(inout) :: dest ! must be inout, otherwise won't deallocate existing contents
     type(na_handle), intent(in)    :: src
     integer :: i, status
-    if (associated(dest%seg)) then
-      call na_Del(dest)
-    end if
+
+    ! if they're the same (non-null) object, for whatever reason, then just return
+    if (associated(dest%seg,src%seg)) return
+    ! delete any memory associated with dest, to avoid memory leaks. 
+    if (associated(dest%seg)) call na_Del(dest)
+    ! if src is not initialised, then we just want to end up with dest not initialised, so return now
+    if (.not. associated(src%seg)) return
+
     ! copy everything -- this works fine except for the segments, 
     ! which we need to allocate and copy separately 
     dest = src
