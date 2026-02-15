@@ -247,7 +247,7 @@ contains
   !! deallocation/allocation as needed. 
   subroutine CopyRunningCoupling(src, dest)
     type(running_coupling), intent(in)    :: src
-    type(running_coupling), intent(inout) :: dest
+    type(running_coupling), intent(inout) :: dest ! must be inout, otherwise won't deallocate existing contents
     
     if (src%use_nah) then
       dest%use_nah = .true.
