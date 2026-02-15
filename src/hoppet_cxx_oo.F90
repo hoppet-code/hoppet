@@ -1087,6 +1087,19 @@ contains
     res = c_loc(rc_f)
   end function hoppet_cxx__running_coupling__new_varnf
 
+  !! make dest a copy of the contents of src, including memory 
+  !! deallocation of dest if required, and its (re)allocation.
+  subroutine hoppet_cxx__running_coupling__copy_contents(dest, src) bind(C)
+    implicit none
+    type(c_ptr), intent(in), value :: dest, src
+    !-- local Fortran pointers
+    type(running_coupling), pointer :: src_f, dest_f
+  
+    call c_f_pointer(src, src_f)
+    call c_f_pointer(dest, dest_f)
+    call CopyRunningCoupling(dest_f, src_f)
+  end subroutine hoppet_cxx__running_coupling__copy_contents
+
   subroutine hoppet_cxx__running_coupling__delete(rc) bind(C)
     implicit none
     type(c_ptr), intent(inout) :: rc

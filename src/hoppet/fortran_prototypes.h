@@ -183,6 +183,7 @@ extern "C" {
   running_coupling_f * hoppet_cxx__running_coupling__new_varnf(double alphaS, double Q, int nloop,
                                                               double mc, double mb, double mt,
                                                               bool masses_are_MSbar, double muMatch_mQuark, const double * Qmax = nullptr);
+  void hoppet_cxx__running_coupling__copy_contents(running_coupling_f * dest, const running_coupling_f * src); //< src copied into dest                                                              
   void hoppet_cxx__running_coupling__delete(running_coupling_f ** rc);
   double hoppet_cxx__running_coupling__value(const running_coupling_f * rc, double Q, int * fixnf = 0);
   int    hoppet_cxx__running_coupling__num_loops(const running_coupling_f * rc);

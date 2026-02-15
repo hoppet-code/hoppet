@@ -735,6 +735,22 @@ TEST_CASE( "running_coupling", "[hoppet]" ) {
   // sanity check: MSbar masses would be lower, but we've kept them the same numerical values as the pole
   // which means the switch is effectively higher, giving more running 
 
+  // now test that copying into a view copies the contents
+  // First start by taking a view of the alphas object, which is a VFN object
+  alphas_view.take_view(alphas);
+  REQUIRE(alphas_view.ptr() == alphas.ptr()); // should point to the same data
+  REQUIRE(alphas_view(1.0) == alphas(1.0));   // should give the same result
+  // then assign to the view from the alphas2 (FFN) object, 
+  // which should copy the contents into the alphas fortran object
+  // (leavingits ptr unchanged)
+  alphas_view = alphas2; // test assignment from a different object with different contents
+  REQUIRE(alphas_view.ptr() == alphas.ptr());  // alphas_view should still point to the same fortran obj
+  REQUIRE(alphas_view.ptr() != alphas2.ptr()); // and be distinct from alphas2's fortran obj
+  REQUIRE(alphas_view(1.0) == alphas2(1.0));   // values should be the same as alphas2
+  REQUIRE(alphas     (1.0) == alphas2(1.0));   // values should be the same as alphas2
+
+  alphas_view = alphas; // make sure copy from same underlying object also works
+  REQUIRE(alphas     (1.0) == alphas2(1.0));   // values should be the same as alphas2
 }
 
 //-----------------------------------------------------------------------------

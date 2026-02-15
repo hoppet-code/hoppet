@@ -1172,6 +1172,12 @@ public:
   typedef obj_view<running_coupling_f> base_t;
   using base_t::base_t; // ensures that constructors are inherited
 
+  running_coupling_view & operator=(const running_coupling_view & other) {
+    if (!ptr()) throw std::runtime_error("running_coupling_view::operator=: running_coupling_view object not associated");
+    hoppet_cxx__running_coupling__copy_contents(ptr(), other.ptr());
+    return *this;
+  }
+
   /// @brief Evaluate the running coupling at a given scale Q
   /// @param Q 
   /// @return the value of alpha_s(Q)
