@@ -625,6 +625,13 @@ TEST_CASE( "mass_threshold_mat", "[hoppet]" ) {
   auto ddpdf = mtm * pdf;
   REQUIRE(ddpdf[hoppet::iflv_g].at_y(5.0) != dpdf[hoppet::iflv_g].at_y(5.0));
   REQUIRE(ddpdf[hoppet::iflv_c].at_y(5.0) == dpdf[hoppet::iflv_c].at_y(5.0));
+
+  // check assignment to view is working
+  MTM mtm_plus_p4 = mtm+p4;
+  mtm_view.take_view(mtm);
+  mtm_view = mtm_plus_p4;
+  REQUIRE_PDF_APPROX_EQUAL(mtm*q, mtm_plus_p4*q, 1e-12);
+
 }
 
 //-----------------------------------------------------------------------------

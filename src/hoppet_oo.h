@@ -749,6 +749,8 @@ public:
 
   grid_conv_view & operator=(const grid_conv_view & other) {
     if (!ptr()) throw std::runtime_error("grid_conv_view::operator=: grid_conv_view object not associated");
+    if (!other.ptr()) throw std::runtime_error("grid_conv_view::operator=: other grid_conv_view object not associated");
+    if (ptr() == other.ptr()) return *this; // self-assignment, do nothing
     hoppet_cxx__grid_conv__copy_contents(ptr(), other.ptr());
     return *this;
   }
@@ -908,6 +910,8 @@ public:
 
   split_mat_view & operator=(const split_mat_view & other) {
     if (!ptr()) throw std::runtime_error("split_mat_view::operator=: split_mat_view object not associated");
+    if (!other.ptr()) throw std::runtime_error("split_mat_view::operator=: other split_mat_view object not associated");
+    if (ptr() == other.ptr()) return *this; // self-assignment, do nothing
     hoppet_cxx__split_mat__copy_contents(ptr(), other.ptr());
     return *this;
   }
@@ -1034,6 +1038,8 @@ public:
   /// @return *this
   mass_threshold_mat_view & operator=(const mass_threshold_mat_view & other) {
     if (!ptr()) throw std::runtime_error("mass_threshold_mat_view::operator=: mass_threshold_mat_view object not associated");
+    if (!other.ptr()) throw std::runtime_error("mass_threshold_mat_view::operator=: other mass_threshold_mat_view object not associated");
+    if (ptr() == other.ptr()) return *this; // self-assignment, do nothing
     hoppet_cxx__mass_threshold_mat__copy_contents(ptr(), other.ptr());
     return *this;
   }
@@ -1174,6 +1180,8 @@ public:
 
   running_coupling_view & operator=(const running_coupling_view & other) {
     if (!ptr()) throw std::runtime_error("running_coupling_view::operator=: running_coupling_view object not associated");
+    if (!other.ptr()) throw std::runtime_error("running_coupling_view::operator=: other running_coupling_view object not associated");
+    if (ptr() == other.ptr()) return *this; // self-assignment, do nothing
     hoppet_cxx__running_coupling__copy_contents(ptr(), other.ptr());
     return *this;
   }
@@ -1400,6 +1408,8 @@ public:
   /// Note that currently this does _not_ copy the cached evolution operators
   pdf_table_view & operator=(const pdf_table_view & other) {
     if (!ptr()) throw std::runtime_error("pdf_table_view::operator=: pdf_table_view object not associated");
+    if (!other.ptr()) throw std::runtime_error("pdf_table_view::operator=: other pdf_table_view object not associated");
+    if (ptr() == other.ptr()) return *this; // self-assignment, do nothing
     hoppet_cxx__pdf_table__copy_contents(ptr(), other.ptr());
     return *this;
   }

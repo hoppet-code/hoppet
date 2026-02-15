@@ -941,15 +941,16 @@ contains
   end function hoppet_cxx__mass_threshold_mat__copy
 
   !! return a C pointer to a copy of the other mass_threshold_mat
-  subroutine hoppet_cxx__mass_threshold_mat__copy_contents(dest,other) bind(C)
+  subroutine hoppet_cxx__mass_threshold_mat__copy_contents(dest,src) bind(C)
     implicit none
-    type(c_ptr), intent(in), value :: dest,other
+    type(c_ptr), intent(in), value :: dest,src
     type(c_ptr) :: mass_threshold_mat_ptr
     !--
-    type(mass_threshold_mat), pointer :: f_ptr, other_f_ptr
+    type(mass_threshold_mat), pointer :: dest_f_ptr, src_f_ptr
 
-    call c_f_pointer(other, other_f_ptr)
-    call InitMTM(other_f_ptr, f_ptr)
+    call c_f_pointer(src, src_f_ptr)
+    call c_f_pointer(dest, dest_f_ptr)
+    call InitMTM(dest_f_ptr, src_f_ptr)
   end subroutine hoppet_cxx__mass_threshold_mat__copy_contents
 
   DEFINE_DELETE(mass_threshold_mat)
