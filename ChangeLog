@@ -4,7 +4,7 @@
 	was encountered whenever InitStrFct was called after a cached
 	evolution. There was a dangling reference to the evolution
 	operator which caused the seg fault. Thanks to github user arx7
-	for reporting.
+	(XiaoMin Shen) for reporting.
 
 2026-02-07 gavin
 

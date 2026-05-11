@@ -7,7 +7,7 @@
 * Fixed issue #45 on github where a seg fault was encountered whenever
   InitStrFct was called after a cached evolution. There was a dangling
   reference to the evolution operator which caused the seg
-  fault. Thanks to github user arx7 for reporting.
+  fault. Thanks to github user arx7 (XiaoMin Shen) for reporting.
 
 ## Small additions
 
