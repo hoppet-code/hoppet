@@ -1,10 +1,22 @@
 2026-05-11  Alexander Karlberg  <karlberg@Latitude-E7470>
 
+	Release 2.2.2
+
 	* pdf_tabulate.F90: Fixed issue #45 on github where a seg fault
 	was encountered whenever InitStrFct was called after a cached
 	evolution. There was a dangling reference to the evolution
 	operator which caused the seg fault. Thanks to github user arx7
 	(XiaoMin Shen) for reporting.
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.2.2
+
 
 2026-02-07 gavin
 
