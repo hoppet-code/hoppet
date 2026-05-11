@@ -792,7 +792,7 @@ contains
     if (precalc_lcl) then
        if (associated(tab%evops)) call wae_error('EvolvePdfTableGen',&
             &'tab%evops has already been calculated. Delete the tab first,',&
-            &'if you want to recalculated it.')
+            &'if you want to recalculate it.')
        allocate(tab%evops(0:tab%nQ))
     end if
     
