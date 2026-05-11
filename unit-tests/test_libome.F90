@@ -196,8 +196,11 @@ contains
       call Delete(dh_psqq)
       call Delete(mtm2_psqq)
       call Delete(mtm3_psqq)
+      call Delete(mtm2)
+      call Delete(mtm3)
 #ifdef HOPPET_ENABLE_N3LO_FORTRAN_MTM
       call Delete(mtm3_fortran_psqq)
+      call Delete(mtm3_fortran)
 #endif
     end subroutine moment_check
 
@@ -395,6 +398,7 @@ contains
       !write(6,*) "s-sbar (from split):", (dtoy_nf4(:, iflv_s) - dtoy_nf4(:, iflv_sbar)).atx.(x.with.grid)
       !write(6,*) "s-sbar (from MTM  ):", (dtoy_mtm(:, iflv_s) - dtoy_mtm(:, iflv_sbar)).atx.(x.with.grid)
     end do
-
+    call Delete(mtm_lm0)
+    call Delete (mtm_lmQ2)
   end subroutine libome_QQbar_valence_check
 end module test_libome

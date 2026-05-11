@@ -32,11 +32,11 @@ module dglap_holders
      !*********** for interpolated splitting functions ****************
 
      !-----------------------  nloop, nf  --------------
-     type(split_mat), pointer :: allP(:,   :)  
+     type(split_mat), pointer :: allP(:,   :) => null()
      
      type(split_mat), pointer :: P_LO, P_NLO, P_NNLO, P_N3LO ! pointers to allP(:,nf)
-     type(coeff_mat), pointer :: allC(:,:)         ! use of these is deprecated as of hoppet v2.0
-     type(coeff_mat), pointer :: C2, C2_1, CL_1    ! use of these is deprecated as of hoppet v2.0
+     type(coeff_mat), pointer :: allC(:,:) => null() ! use of these is deprecated as of hoppet v2.0
+     type(coeff_mat), pointer :: C2, C2_1, CL_1      ! use of these is deprecated as of hoppet v2.0
 
      !----------------------------------  nloop,nf_heavy
      type(mass_threshold_mat), pointer :: allMTM(:,:) => null()
@@ -478,6 +478,8 @@ contains
 
     deallocate(dh%allP)
     deallocate(dh%allC)
+    nullify(dh%allP)
+    nullify(dh%allC)
     !deallocate(dh%all_prep)
   end subroutine holder_Delete
   

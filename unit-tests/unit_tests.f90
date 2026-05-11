@@ -91,25 +91,37 @@ contains
     real(dp), intent(in) :: tol_abs
     real(dp), intent(in), optional :: tol_rel
     logical, intent(in),  optional :: tol_choice_or ! if true, use OR for tol checks, else (default) AND
-    logical :: is_equal
-    logical :: is_equal_abs(size(answer)), is_equal_rel(size(answer))
+    logical :: is_equal_all
+    logical :: is_equal_abs(size(answer)), is_equal_rel(size(answer)), is_equal(size(answer))
+    integer :: i
 
     is_equal_abs = abs(answer - expected) < tol_abs
     if (present(tol_rel)) then
       is_equal_rel = abs(answer - expected) < tol_rel*max(abs(expected), abs(answer))
       if (default_or_opt(.false., tol_choice_or)) then
-        is_equal = all(is_equal_abs .or. is_equal_rel)
+        is_equal = is_equal_abs .or. is_equal_rel
       else 
-        is_equal = all(is_equal_abs .and. is_equal_rel)
+        is_equal = is_equal_abs .and. is_equal_rel
       end if
     else
-      is_equal = all(is_equal_abs)
+      is_equal = is_equal_abs
     end if
+    is_equal_all = all(is_equal)
 
-    if (.not. is_equal) then
+    if (.not. is_equal_all) then
       print *, red//"Failed: ", testname,reset
-      print *, "  Expected: ", expected
-      print *, "  Actual:   ", answer
+      print *, "  abs tol:  ", tol_abs
+      if (present(tol_rel)) print *, "  rel tol:  ", tol_rel, &
+              merge(" (tol choice OR) ", " (tol choice AND)", default_or_opt(.false., tol_choice_or))
+      print '(a6,2a25,2a12)', "i", "Answer", "Expected", "Abs Diff", "Rel Diff"
+      do i = 1, size(answer)
+        if (.not. is_equal(i)) write(*,'(a)', advance='no') red
+        write(*,'(i6,2es25.16,2es12.3)',advance='no')&
+                 i, answer(i), expected(i), answer(i) - expected(i), &
+                   (answer(i) - expected(i))/max(abs(expected(i)), abs(answer(i)))
+        if (.not. is_equal(i)) write(*,'(a)', advance='no') '  FAIL'//reset
+        write(*,'(a)') ''
+      end do
       unit_test_failures = unit_test_failures + 1
     else
       unit_test_successes = unit_test_successes + 1

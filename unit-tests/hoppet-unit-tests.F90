@@ -9,6 +9,7 @@ program hoppet_unit_tests
   use test_convolution
   use test_libome
   use test_new_mtm
+  use test_splitfn_limits
   use io_utils
   implicit none
 
@@ -21,6 +22,8 @@ program hoppet_unit_tests
     print *, "  -only TEST_GROUP    Run only the specified test group(s) (substring match)"
     print *, "  -verbose            Print a message for each passed test"
     print *, "  -nloop N            Set the number of loops for hoppet startup (default: 3)"
+    print *, "  -dy DY              Set the grid spacing in y (default: 0.1)"
+    print *, "  -eps EPSILON        Set the convolution epsilon (default: 1e-7)"
     stop 0
   end if
   print '(a)', "Running HOPPET unit tests"
@@ -38,6 +41,7 @@ program hoppet_unit_tests
   call test_InitGridConv()
   call test_libome_interface()
   call test_mass_threshold_mat()
+  call test_splitfn_lims()
 
   if (unit_test_failures > 0) then
     ! print a message in red
@@ -58,11 +62,14 @@ contains
     real(dp) :: dy, ymax, dlnlnQ, Qmin, Qmax, muR_Q
     real(dp) :: asQ, Q0alphas, Q0pdf
     real(dp) :: mc,mb,mt
+    real(dp) :: epsilon
     integer  :: order, nloop
 
     order = -6
-    ymax  = 12.0_dp
+    ymax  = 12.0_dp    
     dy    = dble_val_opt("-dy", 0.1_dp)
+    epsilon = dble_val_opt("-eps", DefaultConvolutionEps())
+    call SetDefaultConvolutionEps(epsilon)
     ! and parameters for Q tabulation
     Qmin=1.0_dp
     Qmax=28000.0_dp
