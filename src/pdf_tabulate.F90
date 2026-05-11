@@ -573,6 +573,11 @@ contains
     integer                      :: iflv_max_table
     
     tab = origtab
+    ! Nullify evops pointer to prevent dangling references after shallow copy.
+    ! This ensures that if tab is later deleted, it won't try to deallocate
+    ! evolution operators that may not belong to this instance or have already
+    ! been deallocated.
+    nullify(tab%evops)
     !-- the next things are those not taken care of automatically by the assignment;
     !   we allow for arbitrary numbers of flavours
     iflv_max_table = ubound(tab%tab,dim=2)
