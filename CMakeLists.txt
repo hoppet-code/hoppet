@@ -85,6 +85,7 @@ endif()
 # GNU
 #add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-fstack-arrays>") # stack allocation of arrays seems to have no impact
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-ffree-line-length-none>") # allow lines>132 characters (as in recent std)
+# Note: -ffixed-line-length-none is applied selectively to hplog6 files only (see below)
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wall>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wextra;-Wno-unused-parameter;-Wno-unused-variable>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-unused-dummy-argument;-Wno-maybe-uninitialized>")
@@ -248,7 +249,9 @@ endif()
 
 # Sources ==============================================================
 file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds-nnlo/xa2hgp.f90)
-file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/param-coefs/*.f)
+file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/param-coefs/*.f src/hplog6/*.f)
+# Exclude hplog.f since hplog6 contains its updated version with extended function signatures
+list(REMOVE_ITEM SOURCESf "${PROJECT_SOURCE_DIR}/src/hplog.f")
 
 if (HOPPET_ENABLE_N3LO_FORTRAN_MTM)
   file(GLOB N3LOMTMF90 src/mass-thresholds/*.f90)
@@ -318,6 +321,15 @@ if(HOPPET_USE_EXACT_COEF)
 else()
   set(SOURCESf90 ${SOURCESf90} ${NO_EXACT_COEF_SOURCESf90})
   set(SOURCESf ${SOURCESf} ${NO_EXACT_COEF_SOURCESf})
+endif()
+
+# Apply -ffixed-line-length-none only to hplog6 files (required for their compilation)
+# This flag breaks splitting-functions/xpij2e.f, so it must be selective
+file(GLOB HPLOG6_SOURCES src/hplog6/*.f)
+if(${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+  set_source_files_properties(${HPLOG6_SOURCES} PROPERTIES
+    COMPILE_FLAGS "-ffixed-line-length-none"
+  )
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
