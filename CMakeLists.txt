@@ -38,14 +38,15 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/src/Makefile"
 endif()
 
 # Add options ==========================================================
-option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
-option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
-option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
-option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
-option(HOPPET_BUILD_PYINTERFACE "Build Python interface." OFF)
-option(HOPPET_BUILD_PYWHEELS    "Build Python wheels. (developer option)" OFF)
-option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
-option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
+option(HOPPET_USE_EXACT_COEF       "Compile exact coefficient functions"  OFF)
+option(HOPPET_USE_EXACT_N3LO_SPLIT "Compile exact N3LO splitting functions"  OFF)
+option(HOPPET_BUILD_EXAMPLES       "Build examples" ON)
+option(HOPPET_ENABLE_TESTING       "Enable testing. Requires building the examples." ON)
+option(HOPPET_BUILD_BENCHMARK      "Build benchmark." ON)
+option(HOPPET_BUILD_PYINTERFACE    "Build Python interface." OFF)
+option(HOPPET_BUILD_PYWHEELS       "Build Python wheels. (developer option)" OFF)
+option(HOPPET_ENABLE_FPES          "Enable trapping for the floating point exceptions." OFF)
+option(HOPPET_BUILD_TESTDIR        "Enable build of the code in the test directory." OFF)
 option(HOPPET_ENABLE_N3LO_FORTRAN_MTM "Compile-in N3LO fortran mass-thresholds." ON)
 set(HOPPET_DYNLIB_NAME "hoppet" CACHE STRING "Dynamic library name (to override default)")
 
@@ -225,6 +226,7 @@ message(STATUS "HOPPET: CMAKE_Fortran_FLAGS, CMAKE_Fortran_FLAGS_${CMAKE_BUILD_T
 message(STATUS "HOPPET: CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
 message(STATUS "HOPPET: CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "HOPPET: HOPPET_USE_EXACT_COEF=${HOPPET_USE_EXACT_COEF}")
+message(STATUS "HOPPET: HOPPET_USE_EXACT_N3LO_SPLIT=${HOPPET_USE_EXACT_N3LO_SPLIT}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
 message(STATUS "HOPPET: HOPPET_BUILD_PYINTERFACE=${HOPPET_BUILD_PYINTERFACE_NOCACHE}")
 message(STATUS "HOPPET: HOPPET_BUILD_PYWHEELS=${HOPPET_BUILD_PYWHEELS}")
@@ -249,9 +251,7 @@ endif()
 
 # Sources ==============================================================
 file(GLOB SOURCESf90 src/*.f90 src/*.F90 src/splitting-functions/*.f90 src/mass-thresholds-nnlo/xa2hgp.f90)
-file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/param-coefs/*.f src/hplog6/*.f)
-# Exclude hplog.f since hplog6 contains its updated version with extended function signatures
-list(REMOVE_ITEM SOURCESf "${PROJECT_SOURCE_DIR}/src/hplog.f")
+file(GLOB SOURCESf src/*.f src/splitting-functions/*.f src/param-coefs/*.f)
 
 if (HOPPET_ENABLE_N3LO_FORTRAN_MTM)
   file(GLOB N3LOMTMF90 src/mass-thresholds/*.f90)
@@ -308,6 +308,9 @@ file(GLOB EXACT_COEF_SOURCESf src/exact-coefs/*.f)
 file(GLOB NO_EXACT_COEF_SOURCES src/no-exact-coefs/*.f src/no-exact-coefs/*.f90)
 file(GLOB NO_EXACT_COEF_SOURCESf90 src/no-exact-coefs/*.f90)
 file(GLOB NO_EXACT_COEF_SOURCESf src/no-exact-coefs/*.f)
+file(GLOB EXACT_SPLIT_SOURCESf90 src/splitting-functions/exact-n3lo-split/*.f90)
+file(GLOB EXACT_SPLIT_SOURCESf src/hplog6/*.f)
+file(GLOB NO_EXACT_SPLIT_SOURCESf90 src/splitting-functions/no-exact-n3lo-split/*.f90)
 
 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
@@ -321,6 +324,15 @@ if(HOPPET_USE_EXACT_COEF)
 else()
   set(SOURCESf90 ${SOURCESf90} ${NO_EXACT_COEF_SOURCESf90})
   set(SOURCESf ${SOURCESf} ${NO_EXACT_COEF_SOURCESf})
+endif()
+# if HOPPET_USE_EXACT_N3LO_SPLIT is ON, use the exact coefficient functions sources
+if(HOPPET_USE_EXACT_N3LO_SPLIT)
+  set(SOURCESf90 ${SOURCESf90} ${EXACT_SPLIT_SOURCESf90})
+  set(SOURCESf ${SOURCESf} ${EXACT_SPLIT_SOURCESf})
+  # Exclude hplog.f since hplog6 contains its updated version with extended function signatures
+  list(REMOVE_ITEM SOURCESf "${PROJECT_SOURCE_DIR}/src/hplog.f")
+else()
+  set(SOURCESf90 ${SOURCESf90} ${NO_EXACT_SPLIT_SOURCESf90})
 endif()
 
 # Apply -ffixed-line-length-none only to hplog6 files (required for their compilation)
