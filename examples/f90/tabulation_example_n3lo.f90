@@ -69,7 +69,9 @@ program tabulation_example_n3lo
   ! initialise the splitting-function holder
   nloop = 4 ! 1; LO, 2; NLO, 3; NNLO; 4; N3LO
   if(vfn) then 
-     !n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2310_05744 ! Controls the approximation that we use the in n3lo splitting functions
+! Below are flags to control the varios degress of
+! approximations/exact. The values can be found in dglap_choices.f90
+     call dglap_Set_nnlo_splitting(nnlo_splitting_param)
      call dglap_Set_n3lo_splitting(n3lo_splitting_param)
      call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
      call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_libOME_2512) ! To set the n3lo mass thresholds variant (libOME_2512 is complete)
