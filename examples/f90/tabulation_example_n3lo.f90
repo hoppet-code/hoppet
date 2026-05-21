@@ -69,8 +69,8 @@ program tabulation_example_n3lo
   ! initialise the splitting-function holder
   nloop = 4 ! 1; LO, 2; NLO, 3; NNLO; 4; N3LO
   if(vfn) then 
-! Below are flags to control the varios degress of
-! approximations/exact. The values can be found in dglap_choices.f90
+     ! Below are flags to control the various degrees of
+     ! approximations/exactness. The values can be found in dglap_choices.f90
      call dglap_Set_nnlo_splitting(nnlo_splitting_param)
      call dglap_Set_n3lo_splitting(n3lo_splitting_param)
      call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
