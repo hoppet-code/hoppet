@@ -9,7 +9,7 @@
 # To see the HOPPET-specific CMake options, run `cmake -L ..`
 
 
-cmake_minimum_required(VERSION 3.15)
+CMAKE_minimum_required(VERSION 3.15)
 
 # set the project name and version, including a pre-release label
 ## DO NOT EDIT THIS: set it instead with `scripts/set-version.sh version number`
@@ -236,7 +236,7 @@ message(STATUS "HOPPET: CMAKE_Fortran_FLAGS, CMAKE_Fortran_FLAGS_${CMAKE_BUILD_T
 message(STATUS "HOPPET: CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
 message(STATUS "HOPPET: CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXACT_COEF=${HOPPET_BUILD_EXACT_COEF}")
-message(STATUS "HOPPET: HOPPET_USE_EXACT_N3LO_SPLIT=${HOPPET_USE_EXACT_N3LO_SPLIT}")
+message(STATUS "HOPPET: HOPPET_BUILD_EXACT_N3LO_SPLIT=${HOPPET_BUILD_EXACT_N3LO_SPLIT}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
 message(STATUS "HOPPET: HOPPET_BUILD_PYINTERFACE=${HOPPET_BUILD_PYINTERFACE_NOCACHE}")
 message(STATUS "HOPPET: HOPPET_BUILD_PYWHEELS=${HOPPET_BUILD_PYWHEELS}")
@@ -335,8 +335,8 @@ else()
   set(SOURCESf90 ${SOURCESf90} ${NO_EXACT_COEF_SOURCESf90})
   set(SOURCESf ${SOURCESf} ${NO_EXACT_COEF_SOURCESf})
 endif()
-# if HOPPET_USE_EXACT_N3LO_SPLIT is ON, use the exact coefficient functions sources
-if(HOPPET_USE_EXACT_N3LO_SPLIT)
+# if HOPPET_BUILD_EXACT_N3LO_SPLIT is ON, use the exact coefficient functions sources
+if(HOPPET_BUILD_EXACT_N3LO_SPLIT)
   set(SOURCESf90 ${SOURCESf90} ${EXACT_SPLIT_SOURCESf90})
   set(SOURCESf ${SOURCESf} ${EXACT_SPLIT_SOURCESf})
   # Exclude hplog.f since hplog6 contains its updated version with extended function signatures
@@ -522,9 +522,15 @@ if (HOPPET_BUILD_EXAMPLES)
     if(HOPPET_BUILD_EXACT_COEF)
       list(APPEND execs structure_functions_example:exact )
     endif()
+    if(HOPPET_BUILD_EXACT_N3LO_SPLIT)
+      list(APPEND execs tabulation_example_n3lo:exact )
+    endif()
     foreach (ex ${execs})
       set(testName ${ex})
       if (ex MATCHES "structure_functions_example:exact")
+        set(testName "${testName}_takes_up_to_30s")
+      endif()
+      if (ex MATCHES "tabulation_example_n3lo:exact")
         set(testName "${testName}_takes_up_to_30s")
       endif()
       add_test(NAME ${testName} COMMAND 

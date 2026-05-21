@@ -24,6 +24,11 @@
   default, since they increase the compilation time significantly. They
   can be turned on with the cmake flag `-DHOPPET_BUILD_EXACT_N3LO_SPLIT=ON`.
 
+## Small additions
+
+* HOPPET_USE_EXACT_COEF has been renamed to HOPPET_BUILD_EXACT_COEF
+  but we have retained backwards compatibility.
+
 # Release 2.2.2, 11 May 2026
 
 ## Bug fixes

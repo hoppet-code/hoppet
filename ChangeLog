@@ -19,6 +19,9 @@
 	HOPPET_BUILD_EXACT_N3LO_SPLIT=[ON/OFF] to avoid very slow
 	compilation.
 
+	HOPPET_USE_EXACT_COEF has been renamed to HOPPET_BUILD_EXACT_COEF
+	but we have retained backwards compatibility.
+
 	
 2026-05-13  Alexander Karlberg  <karlberg@Latitude-E7470>
 

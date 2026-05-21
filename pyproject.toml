@@ -54,6 +54,7 @@ cmake.define.HOPPET_BUILD_EXAMPLES = "OFF"
 cmake.define.HOPPET_BUILD_TESTDIR = "OFF"
 cmake.define.HOPPET_ENABLE_TESTING = "OFF"
 cmake.define.HOPPET_BUILD_EXACT_COEF = "ON"
+cmake.define.HOPPET_BUILD_EXACT_N3LO_SPLIT = "ON"
 wheel.packages = ["hoppet"]
 # Use Unix Makefiles instead of Ninja
 cmake.args = ["-G", "Unix Makefiles"]
