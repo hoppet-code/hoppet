@@ -38,15 +38,25 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/src/Makefile"
 endif()
 
 # Add options ==========================================================
-option(HOPPET_USE_EXACT_COEF       "Compile exact coefficient functions"  OFF)
-option(HOPPET_USE_EXACT_N3LO_SPLIT "Compile exact N3LO splitting functions"  OFF)
-option(HOPPET_BUILD_EXAMPLES       "Build examples" ON)
-option(HOPPET_ENABLE_TESTING       "Enable testing. Requires building the examples." ON)
-option(HOPPET_BUILD_BENCHMARK      "Build benchmark." ON)
-option(HOPPET_BUILD_PYINTERFACE    "Build Python interface." OFF)
-option(HOPPET_BUILD_PYWHEELS       "Build Python wheels. (developer option)" OFF)
-option(HOPPET_ENABLE_FPES          "Enable trapping for the floating point exceptions." OFF)
-option(HOPPET_BUILD_TESTDIR        "Enable build of the code in the test directory." OFF)
+# Backward-compatibility for old option name
+if(DEFINED HOPPET_USE_EXACT_COEF AND NOT DEFINED HOPPET_BUILD_EXACT_COEF)
+  set(HOPPET_BUILD_EXACT_COEF ${HOPPET_USE_EXACT_COEF}
+      CACHE BOOL "Compile exact coefficient functions" FORCE)
+
+  message(DEPRECATION
+    "HOPPET_USE_EXACT_COEF is deprecated; "
+    "please use HOPPET_BUILD_EXACT_COEF")
+endif()
+
+option(HOPPET_BUILD_EXACT_COEF        "Compile exact coefficient functions"  OFF)
+option(HOPPET_BUILD_EXACT_N3LO_SPLIT  "Compile exact N3LO splitting functions"  OFF)
+option(HOPPET_BUILD_EXAMPLES          "Build examples" ON)
+option(HOPPET_ENABLE_TESTING          "Enable testing. Requires building the examples." ON)
+option(HOPPET_BUILD_BENCHMARK         "Build benchmark." ON)
+option(HOPPET_BUILD_PYINTERFACE       "Build Python interface." OFF)
+option(HOPPET_BUILD_PYWHEELS          "Build Python wheels. (developer option)" OFF)
+option(HOPPET_ENABLE_FPES             "Enable trapping for the floating point exceptions." OFF)
+option(HOPPET_BUILD_TESTDIR           "Enable build of the code in the test directory." OFF)
 option(HOPPET_ENABLE_N3LO_FORTRAN_MTM "Compile-in N3LO fortran mass-thresholds." ON)
 set(HOPPET_DYNLIB_NAME "hoppet" CACHE STRING "Dynamic library name (to override default)")
 
@@ -225,7 +235,7 @@ message(STATUS "HOPPET: CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
 message(STATUS "HOPPET: CMAKE_Fortran_FLAGS, CMAKE_Fortran_FLAGS_${CMAKE_BUILD_TYPE} ${CMAKE_Fortran_FLAGS} ${CMAKE_Fortran_FLAGS_${CMAKE_BUILD_TYPE}}" )
 message(STATUS "HOPPET: CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
 message(STATUS "HOPPET: CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "HOPPET: HOPPET_USE_EXACT_COEF=${HOPPET_USE_EXACT_COEF}")
+message(STATUS "HOPPET: HOPPET_BUILD_EXACT_COEF=${HOPPET_BUILD_EXACT_COEF}")
 message(STATUS "HOPPET: HOPPET_USE_EXACT_N3LO_SPLIT=${HOPPET_USE_EXACT_N3LO_SPLIT}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
 message(STATUS "HOPPET: HOPPET_BUILD_PYINTERFACE=${HOPPET_BUILD_PYINTERFACE_NOCACHE}")
@@ -317,8 +327,8 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL")
  set_source_files_properties( ${SOURCESf}  PROPERTIES COMPILE_OPTIONS "-qfixed")
 endif()
 
-# if HOPPET_USE_EXACT_COEF is ON, use the exact coefficient functions sources
-if(HOPPET_USE_EXACT_COEF)
+# if HOPPET_BUILD_EXACT_COEF is ON, use the exact coefficient functions sources
+if(HOPPET_BUILD_EXACT_COEF)
   set(SOURCESf90 ${SOURCESf90} ${EXACT_COEF_SOURCESf90})
   set(SOURCESf ${SOURCESf} ${EXACT_COEF_SOURCESf})
 else()
@@ -509,7 +519,7 @@ if (HOPPET_BUILD_EXAMPLES)
       tabulation_example_qed_streamlined
       #tabulation_example_up_and_down 
       )
-    if(HOPPET_USE_EXACT_COEF)
+    if(HOPPET_BUILD_EXACT_COEF)
       list(APPEND execs structure_functions_example:exact )
     endif()
     foreach (ex ${execs})

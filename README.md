@@ -96,7 +96,7 @@ Key `<extra flags>` include:
   * `-DCMAKE_BUILD_TYPE=RelWithDebInfo` (default is `Release`, which gives highest speed; an additional `-g` is included by default to help with debugging), 
   * `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`, to see the exact compilation commands as a json file
 - flags pointing to the dependencies, `-DLHAPDF_DIR=/where/the/LHAPDF/is`,
-- `-DHOPPET_USE_EXACT_COEF=ON`:    Compile-in exact coefficient functions.
+- `-DHOPPET_BUILD_EXACT_COEF=ON`:    Compile-in exact coefficient functions.
 
 # Example programs
 
@@ -129,7 +129,6 @@ evolution spread across different subroutines is given as
 [examples/f90/tabulation_example_2.f90](examples/f90/tabulation_example_2.f90).
 
 ## Building the examples
-
 The Fortran and C++ examples are all
 compiled by default (unless `-DHOPPET_BUILD_EXAMPLES=OFF`) and
 executables are to be found in `build/example_*/` directories. 
