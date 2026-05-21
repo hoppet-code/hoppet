@@ -29,7 +29,7 @@ module splitting_functions_n3lo_e
   use hoppet_splitting_function_interfaces
   use xpgg3a; use xpgg3a_2410; use xpgq3a; use xpgq3a_2404; use&
        & xpgq3a_2512; use xpqg3a; use xpps3a; use xpns3s_2604_exact;&
-       & use xpns3p_2604_fit; use xpns3m_2604_fit
+       & use xpns3p_2604_exact; use xpns3m_2604_exact
   implicit none
   private
 
@@ -126,7 +126,7 @@ contains
     call sf_VogtValidate
     res = zero
 
-    p3 = mvv_splitting_function(P3NSPA_2604_fit, P3NSPB_2604_fit, P3NSPC_2604_fit, 0.5_dp**4)
+    p3 = mvv_splitting_function(P3NSPA_2604_exact, P3NSPB_2604_exact, P3NSPC_2604_exact, 0.5_dp**4)
 
     res = p3%f(y, cc_piece)
   end function sf_P3NSPlus
@@ -140,7 +140,7 @@ contains
     call sf_VogtValidate
     res = zero
 
-    p3 = mvv_splitting_function(P3NSMA_2604_fit, P3NSMB_2604_fit, P3NSMC_2604_fit, 0.5_dp**4)
+    p3 = mvv_splitting_function(P3NSMA_2604_exact, P3NSMB_2604_exact, P3NSMC_2604_exact, 0.5_dp**4)
 
     res = p3%f(y, cc_piece)
   end function sf_P3NSMinus
