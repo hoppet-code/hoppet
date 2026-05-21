@@ -22,7 +22,7 @@
 
 * The exact splitting functions and hplog6 are **NOT** compiled by
   default, since they increase the compilation time significantly. They
-  can be turned on with the cmake flag `-DHOPPET_USE_EXACT_N3LO_SPLIT=ON`.
+  can be turned on with the cmake flag `-DHOPPET_BUILD_EXACT_N3LO_SPLIT=ON`.
 
 # Release 2.2.2, 11 May 2026
 

@@ -16,7 +16,7 @@
 	splitting functions where available. It uses approximations where
 	not. Added conditional compilation for the exact n3lo splitting
 	functions (and hplog6) through the cmake flag
-	HOPPET_USE_EXACT_N3LO_SPLIT=[ON/OFF] to avoid very slow
+	HOPPET_BUILD_EXACT_N3LO_SPLIT=[ON/OFF] to avoid very slow
 	compilation.
 
 	
