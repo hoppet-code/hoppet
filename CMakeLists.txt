@@ -343,6 +343,11 @@ if(${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
     COMPILE_FLAGS "-ffixed-line-length-none"
   )
 endif()
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
+  set_source_files_properties(${HPLOG6_SOURCES} PROPERTIES
+    COMPILE_FLAGS "-extend-source"
+  )
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(src/libome)
