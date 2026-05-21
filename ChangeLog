@@ -1,15 +1,24 @@
 2026-05-20  Alexander Karlberg  <karlberg@Latitude-E7470>
 
-	* splitting-functions/xpns3*_2604*.f90 (Added):
+	* splitting-functions/no-exact-n3lo-split/xpns3*_2604*.f90 (Added):
+	* splitting-functions/exact-n3lo-split/xpns3*_2604*.f90 (Added):
 	* splitting_functions_n3lo.f90:
 	* hplog6 (Directory added):
+	* hplog.f
 	* CmakeLists.txt:
 	Implemented both the exact and fitted 4-loop non-singlet splitting
 	functions from 2604.09534. Included hplog6 in a modified version
 	where subroutines have been split into separate files to allow
-	parallel compilation. Chnaged default behaviour of hoppet to use
-	the parametrised/fitted 4-loop splitting functions where
-	available. It uses approximations where not.
+	parallel compilation. To avoid conflicts with hplog.f it does not
+	get compiled when hplog6 is compiled. Instead a wrapper has been
+	introduced in hplog6 with the same signature as hplog. Changed
+	default behaviour of hoppet to use the parametrised/fitted 4-loop
+	splitting functions where available. It uses approximations where
+	not. Added conditional compilation for the exact n3lo splitting
+	functions (and hplog6) through the cmake flag
+	HOPPET_USE_EXACT_N3LO_SPLIT=[ON/OFF] to avoid very slow
+	compilation.
+
 	
 2026-05-13  Alexander Karlberg  <karlberg@Latitude-E7470>
 
