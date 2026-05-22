@@ -2,16 +2,22 @@ module xpns3p_2604_exact
   character(len=*), parameter :: name_xpns3p = "xpns3p_2604_exact"
 contains
 !
-! ..The 4-loop MSbar splitting function P_ns^(3) for the evolution  
-!    of non-singlet_ combinations of quark and anti-quark densities.
-!    The expansion parameter is alpha_s/(4 pi), the scale mu_r = mu_f.
+! ..The exact 4-loop MSbar splitting function P_ns^(3,+) for the
+!    evolution of non-singlet combinations of quark and anti-quark
+!    densities. The expansion parameter is alpha_s/(4 pi), the scale
+!    mu_r = mu_f.
 !
-!   Expressions extracted from ancilliary material of 2604.09534
+!    The expressions have been extracted from the Mathematica files
+!    that form the ancilliary materials of 2604.09534. Permission to
+!    extract and include the code in hoppet in the form of this
+!    Fortran file has been explicitly granted by the authors of
+!    2604.09534. The Fortran code and its correctness are the sole
+!    responsibility of the hoppet authors.
 !
 ! =====================================================================
 !
 !
-! ..The regular piece of P_ns^(3)-. 
+! ..The regular piece of P_ns^(3,+). 
 !
        FUNCTION P3NSPA_2604_exact (Y, NF)
 !
