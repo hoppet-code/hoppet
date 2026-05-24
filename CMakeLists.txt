@@ -9,11 +9,11 @@
 # To see the HOPPET-specific CMake options, run `cmake -L ..`
 
 
-cmake_minimum_required(VERSION 3.15)
+CMAKE_minimum_required(VERSION 3.15)
 
 # set the project name and version, including a pre-release label
 ## DO NOT EDIT THIS: set it instead with `scripts/set-version.sh version number`
-project(hoppet VERSION 2.2.2 LANGUAGES C CXX Fortran)
+project(hoppet VERSION 2.3.0 LANGUAGES C CXX Fortran)
 set(PROJECT_VERSION_PRERELEASE "-dev0")
 
 set(HOPPET_VERSION "${PROJECT_VERSION}${PROJECT_VERSION_PRERELEASE}")
@@ -38,14 +38,25 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/src/Makefile"
 endif()
 
 # Add options ==========================================================
-option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
-option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
-option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
-option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
-option(HOPPET_BUILD_PYINTERFACE "Build Python interface." OFF)
-option(HOPPET_BUILD_PYWHEELS    "Build Python wheels. (developer option)" OFF)
-option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
-option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
+# Backward-compatibility for old option name
+if(DEFINED HOPPET_USE_EXACT_COEF AND NOT DEFINED HOPPET_BUILD_EXACT_COEF)
+  set(HOPPET_BUILD_EXACT_COEF ${HOPPET_USE_EXACT_COEF}
+      CACHE BOOL "Compile exact coefficient functions" FORCE)
+
+  message(DEPRECATION
+    "HOPPET_USE_EXACT_COEF is deprecated; "
+    "please use HOPPET_BUILD_EXACT_COEF")
+endif()
+
+option(HOPPET_BUILD_EXACT_COEF        "Compile exact coefficient functions"  OFF)
+option(HOPPET_BUILD_EXACT_N3LO_SPLIT  "Compile exact N3LO splitting functions"  OFF)
+option(HOPPET_BUILD_EXAMPLES          "Build examples" ON)
+option(HOPPET_ENABLE_TESTING          "Enable testing. Requires building the examples." ON)
+option(HOPPET_BUILD_BENCHMARK         "Build benchmark." ON)
+option(HOPPET_BUILD_PYINTERFACE       "Build Python interface." OFF)
+option(HOPPET_BUILD_PYWHEELS          "Build Python wheels. (developer option)" OFF)
+option(HOPPET_ENABLE_FPES             "Enable trapping for the floating point exceptions." OFF)
+option(HOPPET_BUILD_TESTDIR           "Enable build of the code in the test directory." OFF)
 option(HOPPET_ENABLE_N3LO_FORTRAN_MTM "Compile-in N3LO fortran mass-thresholds." ON)
 set(HOPPET_DYNLIB_NAME "hoppet" CACHE STRING "Dynamic library name (to override default)")
 
@@ -85,6 +96,7 @@ endif()
 # GNU
 #add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-fstack-arrays>") # stack allocation of arrays seems to have no impact
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-ffree-line-length-none>") # allow lines>132 characters (as in recent std)
+# Note: -ffixed-line-length-none is applied selectively to hplog6 files only (see below)
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wall>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wextra;-Wno-unused-parameter;-Wno-unused-variable>")
 add_compile_options("$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-Wno-unused-dummy-argument;-Wno-maybe-uninitialized>")
@@ -229,7 +241,8 @@ message(STATUS "HOPPET: CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
 message(STATUS "HOPPET: CMAKE_Fortran_FLAGS, CMAKE_Fortran_FLAGS_${CMAKE_BUILD_TYPE} ${CMAKE_Fortran_FLAGS} ${CMAKE_Fortran_FLAGS_${CMAKE_BUILD_TYPE}}" )
 message(STATUS "HOPPET: CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
 message(STATUS "HOPPET: CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "HOPPET: HOPPET_USE_EXACT_COEF=${HOPPET_USE_EXACT_COEF}")
+message(STATUS "HOPPET: HOPPET_BUILD_EXACT_COEF=${HOPPET_BUILD_EXACT_COEF}")
+message(STATUS "HOPPET: HOPPET_BUILD_EXACT_N3LO_SPLIT=${HOPPET_BUILD_EXACT_N3LO_SPLIT}")
 message(STATUS "HOPPET: HOPPET_BUILD_EXAMPLES=${HOPPET_BUILD_EXAMPLES}")
 message(STATUS "HOPPET: HOPPET_BUILD_PYINTERFACE=${HOPPET_BUILD_PYINTERFACE_NOCACHE}")
 message(STATUS "HOPPET: HOPPET_BUILD_PYWHEELS=${HOPPET_BUILD_PYWHEELS}")
@@ -316,19 +329,45 @@ file(GLOB EXACT_COEF_SOURCESf src/exact-coefs/*.f)
 file(GLOB NO_EXACT_COEF_SOURCES src/no-exact-coefs/*.f src/no-exact-coefs/*.f90)
 file(GLOB NO_EXACT_COEF_SOURCESf90 src/no-exact-coefs/*.f90)
 file(GLOB NO_EXACT_COEF_SOURCESf src/no-exact-coefs/*.f)
+file(GLOB EXACT_SPLIT_SOURCESf90 src/splitting-functions/exact-n3lo-split/*.f90)
+file(GLOB EXACT_SPLIT_SOURCESf src/hplog6/*.f)
+file(GLOB NO_EXACT_SPLIT_SOURCESf90 src/splitting-functions/no-exact-n3lo-split/*.f90)
 
 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "XL") 
  set_source_files_properties( ${SOURCESf}  PROPERTIES COMPILE_OPTIONS "-qfixed")
 endif()
 
-# if HOPPET_USE_EXACT_COEF is ON, use the exact coefficient functions sources
-if(HOPPET_USE_EXACT_COEF)
+# if HOPPET_BUILD_EXACT_COEF is ON, use the exact coefficient functions sources
+if(HOPPET_BUILD_EXACT_COEF)
   set(SOURCESf90 ${SOURCESf90} ${EXACT_COEF_SOURCESf90})
   set(SOURCESf ${SOURCESf} ${EXACT_COEF_SOURCESf})
 else()
   set(SOURCESf90 ${SOURCESf90} ${NO_EXACT_COEF_SOURCESf90})
   set(SOURCESf ${SOURCESf} ${NO_EXACT_COEF_SOURCESf})
+endif()
+# if HOPPET_BUILD_EXACT_N3LO_SPLIT is ON, use the exact coefficient functions sources
+if(HOPPET_BUILD_EXACT_N3LO_SPLIT)
+  set(SOURCESf90 ${SOURCESf90} ${EXACT_SPLIT_SOURCESf90})
+  set(SOURCESf ${SOURCESf} ${EXACT_SPLIT_SOURCESf})
+  # Exclude hplog.f since hplog6 contains its updated version with extended function signatures
+  list(REMOVE_ITEM SOURCESf "${PROJECT_SOURCE_DIR}/src/hplog.f")
+else()
+  set(SOURCESf90 ${SOURCESf90} ${NO_EXACT_SPLIT_SOURCESf90})
+endif()
+
+# Apply -ffixed-line-length-none only to hplog6 files (required for their compilation)
+# This flag breaks splitting-functions/xpij2e.f, so it must be selective
+file(GLOB HPLOG6_SOURCES src/hplog6/*.f)
+if(${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+  set_source_files_properties(${HPLOG6_SOURCES} PROPERTIES
+    COMPILE_FLAGS "-ffixed-line-length-none"
+  )
+endif()
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel*")
+  set_source_files_properties(${HPLOG6_SOURCES} PROPERTIES
+    COMPILE_FLAGS "-extend-source"
+  )
 endif()
 
 add_subdirectory(src/libome)
@@ -498,12 +537,18 @@ if (HOPPET_BUILD_EXAMPLES)
       tabulation_example_qed_streamlined
       #tabulation_example_up_and_down 
       )
-    if(HOPPET_USE_EXACT_COEF)
+    if(HOPPET_BUILD_EXACT_COEF)
       list(APPEND execs structure_functions_example:exact )
+    endif()
+    if(HOPPET_BUILD_EXACT_N3LO_SPLIT)
+      list(APPEND execs tabulation_example_n3lo:exact )
     endif()
     foreach (ex ${execs})
       set(testName ${ex})
       if (ex MATCHES "structure_functions_example:exact")
+        set(testName "${testName}_takes_up_to_30s")
+      endif()
+      if (ex MATCHES "tabulation_example_n3lo:exact")
         set(testName "${testName}_takes_up_to_30s")
       endif()
       add_test(NAME ${testName} COMMAND 

@@ -24,7 +24,7 @@ module dglap_choices
   integer, parameter, public :: n3lo_splitting_Nfitav   =  0
   integer, parameter, public :: n3lo_splitting_Nfiterr1 =  1
   integer, parameter, public :: n3lo_splitting_Nfiterr2 =  2
-  integer, public :: n3lo_splitting_variant = n3lo_splitting_Nfitav
+  integer, public :: n3lo_splitting_variant = n3lo_splitting_param
 
   ! As of 2024-04-16 there are several available approximations for the
   ! n3lo splitting functions. To maintain some backwards compatibility

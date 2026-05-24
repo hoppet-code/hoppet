@@ -43,6 +43,18 @@ program tabulation_example_n3lo
   integer  :: i, ix
   real(dp) :: x
   logical :: vfn = .true. ! Change to false to run nf = 4 FFN for comparison with 2406.16188
+  integer :: nargs
+  character(len=5) :: arg_string
+  logical :: param_n3lo_split = .true.
+
+  ! Get the number of command line arguments
+  nargs = COMMAND_ARGUMENT_COUNT()
+
+  ! Very simple commandline.
+  if(nargs == 1) then
+     call GET_COMMAND_ARGUMENT(1, arg_string)
+     if(arg_string == "exact") param_n3lo_split = .false.
+  endif
 
   !! define the interfaces for LHA pdf (by default not used)
   !! (NB: unfortunately this conflicts with an internal hoppet name,
@@ -69,7 +81,11 @@ program tabulation_example_n3lo
   ! initialise the splitting-function holder
   nloop = 4 ! 1; LO, 2; NLO, 3; NNLO; 4; N3LO
   if(vfn) then 
-     !n3lo_splitting_approximation = n3lo_splitting_approximation_up_to_2310_05744 ! Controls the approximation that we use the in n3lo splitting functions
+     ! Below are flags to control the various degrees of
+     ! approximations/exactness. The values can be found in dglap_choices.f90
+     call dglap_Set_nnlo_splitting(nnlo_splitting_param)
+     call dglap_Set_n3lo_splitting(n3lo_splitting_param)
+     if(.not.param_n3lo_split) call dglap_Set_n3lo_splitting(n3lo_splitting_exact)
      call dglap_Set_nnlo_nfthreshold(nnlo_nfthreshold_exact)
      call dglap_Set_n3lo_nfthreshold(n3lo_nfthreshold_libOME_2512) ! To set the n3lo mass thresholds variant (libOME_2512 is complete)
      call InitDglapHolder(grid,dh,factscheme=factscheme_MSbar,&

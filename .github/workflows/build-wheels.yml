@@ -7,7 +7,7 @@ on:
 #    types: [published]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
   
@@ -44,7 +44,8 @@ jobs:
           cmake -S . -B BUILD \
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DHOPPET_USE_EXACT_COEF=ON \
+            -DHOPPET_BUILD_EXACT_COEF=ON \
+            -DHOPPET_BUILD_EXACT_N3LO_SPLIT=ON \
             -DHOPPET_BUILD_PYWHEELS=ON \
             -DHOPPET_BUILD_PYINTERFACE=OFF \
             -DHOPPET_BUILD_BENCHMARK=OFF \
@@ -71,7 +72,8 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL \
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DHOPPET_USE_EXACT_COEF=ON \
+            -DHOPPET_BUILD_EXACT_COEF=ON \
+            -DHOPPET_BUILD_EXACT_N3LO_SPLIT=ON \
             -DHOPPET_BUILD_PYWHEELS=ON \
             -DHOPPET_BUILD_PYINTERFACE=OFF \
             -DHOPPET_BUILD_BENCHMARK=OFF \
@@ -145,7 +147,8 @@ jobs:
           cmake -S . -B BUILD \
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DHOPPET_USE_EXACT_COEF=ON \
+            -DHOPPET_BUILD_EXACT_COEF=ON \
+            -DHOPPET_BUILD_EXACT_N3LO_SPLIT=ON \
             -DHOPPET_BUILD_PYWHEELS=ON \
             -DHOPPET_BUILD_PYINTERFACE=OFF \
             -DHOPPET_BUILD_BENCHMARK=OFF \
@@ -172,7 +175,8 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=$(pwd)/../INSTALL \
             -DHOPPET_ENABLE_FPES=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DHOPPET_USE_EXACT_COEF=ON \
+            -DHOPPET_BUILD_EXACT_COEF=ON \
+            -DHOPPET_BUILD_EXACT_N3LO_SPLIT=ON \
             -DHOPPET_BUILD_PYWHEELS=ON \
             -DHOPPET_BUILD_PYINTERFACE=OFF \
             -DHOPPET_BUILD_BENCHMARK=OFF \
@@ -307,7 +311,7 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GH_PAGES_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./docs/python-auto/_build/html
           # you can set commit_name, commit_email if desired

@@ -576,6 +576,11 @@ contains
     call Delete(tab) ! in case it was already allocated
 
     tab = origtab
+    ! Nullify evops pointer to prevent dangling references after shallow copy.
+    ! This ensures that if tab is later deleted, it won't try to deallocate
+    ! evolution operators that may not belong to this instance or have already
+    ! been deallocated.
+    nullify(tab%evops)
     !-- the next things are those not taken care of automatically by the assignment;
     !   we allow for arbitrary numbers of flavours
     iflv_max_table = ubound(tab%tab,dim=2)
@@ -790,7 +795,7 @@ contains
     if (precalc_lcl) then
        if (associated(tab%evops)) call wae_error('EvolvePdfTableGen',&
             &'tab%evops has already been calculated. Delete the tab first,',&
-            &'if you want to recalculated it.')
+            &'if you want to recalculate it.')
        allocate(tab%evops(0:tab%nQ))
     end if
     

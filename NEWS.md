@@ -1,6 +1,42 @@
 # NEWS for HOPPET
 
-# Release 2.2.2, unreleased, work in progress
+# Release 2.3.0, XX May 2026
+
+## Major additions
+
+* hoppet now includes the exact and fitted n3lo non-singlet splitting
+  functions computed in 2604.09534. They have been extracted from the
+  mathematica files provided with the paper and translated into
+  Fortran90.
+
+* The default behaviour of hoppet is to use the fitted versions for
+  the non-singlet splitting functions and approximations elsewhere.
+
+* The exact splitting functions rely on hplog6 which has kindly been
+  provided by Thomas Gehrmann and is included here in a slightly
+  modified form, where the subroutines have been put in separate files
+  to allow for paralle compilation. hplog6 also contains an explicit
+  `subrotuine hplog`, which behanves identically to `hplog` from
+  hplog.f. This is done to avoid issues with multiple-defined
+  subroutines in hplog.f and hplog6.
+
+* The exact splitting functions and hplog6 are **NOT** compiled by
+  default, since they increase the compilation time significantly. They
+  can be turned on with the cmake flag `-DHOPPET_BUILD_EXACT_N3LO_SPLIT=ON`.
+
+## Small additions
+
+* HOPPET_USE_EXACT_COEF has been renamed to HOPPET_BUILD_EXACT_COEF
+  but we have retained backwards compatibility.
+
+# Release 2.2.2, 11 May 2026
+
+## Bug fixes
+
+* Fixed issue #45 on github where a seg fault was encountered whenever
+  InitStrFct was called after a cached evolution. There was a dangling
+  reference to the evolution operator which caused the seg
+  fault. Thanks to github user arx7 (XiaoMin Shen) for reporting.
 
 ## Small additions
 
@@ -14,7 +50,7 @@
 * Bug fix to `src/mass-thresholds/AQg3mod.f90` thanks to report by
   meiyasan (issue #44 on github). The `coeff` array was declared with
   `dimension(65)`, but was then passed to `chebev` as an array with
-  `dimension(0:65)`. This lead to unitialised memory on the
+  `dimension(0:65)`. This led to unitialised memory on the
   stack. This could lead the unit tests to fail on certain systems
   (and could have caused undefined behaviour if using the Fortran
   version of the N3LO mass thresholds).

@@ -1451,17 +1451,18 @@ by a call to \ttt{cmake -LH ..} from the \ttt{build} directory.
 
 Of particular note to most users are 
 \begin{lstlisting}
-  option(HOPPET_USE_EXACT_COEF    "Use exact coefficient functions"  OFF)
-  option(HOPPET_BUILD_EXAMPLES    "Build examples" ON)
-  option(HOPPET_ENABLE_TESTING    "Enable testing. Requires building the examples." ON)
-  option(HOPPET_BUILD_BENCHMARK   "Build benchmark." ON)
-  option(HOPPET_BUILD_PYINTERFACE "Build python interface." OFF)
-  option(HOPPET_ENABLE_FPES       "Enable trapping for the floating point exceptions." OFF)
-  option(HOPPET_BUILD_TESTDIR     "Enable build of the code in the test directory." OFF)
+  option(HOPPET_BUILD_EXACT_COEF       "Use exact coefficient functions"  OFF)
+  option(HOPPET_BUILD_EXACT_N3LO_SPLIT "Use exact n3lo splitting functions"  OFF)
+  option(HOPPET_BUILD_EXAMPLES         "Build examples" ON)
+  option(HOPPET_ENABLE_TESTING         "Enable testing. Requires building the examples." ON)
+  option(HOPPET_BUILD_BENCHMARK        "Build benchmark." ON)
+  option(HOPPET_BUILD_PYINTERFACE      "Build python interface." OFF)
+  option(HOPPET_ENABLE_FPES            "Enable trapping for the floating point exceptions." OFF)
+  option(HOPPET_BUILD_TESTDIR          "Enable build of the code in the test directory." OFF)
 \end{lstlisting}
 They can be set in the usual \ttt{cmake} way, e.g.\
 \begin{lstlisting}
-  cmake -S . -B build -DHOPPET_USE_EXACT_COEF=ON
+  cmake -S . -B build -DHOPPET_BUILD_EXACT_COEF=ON
 \end{lstlisting}
 to compile \hoppet with the exact coefficient functions.
 %

@@ -6,7 +6,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "HOPPET"
 # NOT EDIT the next line -- it is modified automatically by scripts/set-version.sh
-version = "2.2.2-dev0"
+version = "2.3.0-dev0"
 description = "HOPPET: A Higher Order Perturbative Parton Evolution Toolkit"
 authors = [
     {name = "Frederic Dreyer"},
@@ -53,7 +53,8 @@ cmake.define.HOPPET_BUILD_BENCHMARK = "OFF"
 cmake.define.HOPPET_BUILD_EXAMPLES = "OFF"
 cmake.define.HOPPET_BUILD_TESTDIR = "OFF"
 cmake.define.HOPPET_ENABLE_TESTING = "OFF"
-cmake.define.HOPPET_USE_EXACT_COEF = "ON"
+cmake.define.HOPPET_BUILD_EXACT_COEF = "ON"
+cmake.define.HOPPET_BUILD_EXACT_N3LO_SPLIT = "ON"
 wheel.packages = ["hoppet"]
 # Use Unix Makefiles instead of Ninja
 cmake.args = ["-G", "Unix Makefiles"]

@@ -81,17 +81,17 @@ def main():
         lhapdf_n3lo_novfn3_all = np.concatenate((lhapdf_n3lo_novfn3_log, lhapdf_n3lo_novfn3_lin))
 
 
-    with PdfPages("n3lo_k_factors.pdf") as pdf:
+    with PdfPages("n3lo_k_factors_v2.3.0.pdf") as pdf:
         stdlims = (0.94, 1.08)
         evol_label = r"Evln from $Q_0=\sqrt{2}$ GeV ($<m_c$)""\nto $Q=100$ GeV"
         # Standard benchmark, including VFN3
         ratios, labels = compute_ratios_labels(n3lo_all, nnlo_all, flavour_names)
-        plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=stdlims)
-        plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=(0,1.35))
+        plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.3.0', evol_label=evol_label, pdf=pdf, ylim=stdlims)
+        plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.3.0', evol_label=evol_label, pdf=pdf, ylim=(0,1.35))
 
         # Standard benchmark, without VFN3
         ratios, labels = compute_ratios_labels(n3lo_novfn3_all, nnlo_all, flavour_names)
-        plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.0.0', 
+        plot_ratios(x_all, ratios, labels, 'Benchmark init. cond.', 'hoppet v2.3.0', 
                     n3lomt=False, evol_label=evol_label, pdf=pdf, ylim=stdlims)
 
 
@@ -100,12 +100,12 @@ def main():
             evol_label = f"Evln from $Q_0={global_Q0:.2f}$ GeV{global_Q0_mc_text}\nto $Q=100$ GeV"
             # LHAPDF, including VFN3
             ratios, labels = compute_ratios_labels(lhapdf_n3lo_all, lhapdf_nnlo_all, flavour_names)
-            plot_ratios(x_all, ratios, labels, f'{pdf_name} init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=stdlims)
-            plot_ratios(x_all, ratios, labels, f'{pdf_name} init. cond.', 'hoppet v2.0.0', evol_label=evol_label, pdf=pdf, ylim=(0,1.35))
+            plot_ratios(x_all, ratios, labels, f'{pdf_name} init. cond.', 'hoppet v2.3.0', evol_label=evol_label, pdf=pdf, ylim=stdlims)
+            plot_ratios(x_all, ratios, labels, f'{pdf_name} init. cond.', 'hoppet v2.3.0', evol_label=evol_label, pdf=pdf, ylim=(0,1.35))
 
             # LHAPDF, without VFN3
             ratios, labels = compute_ratios_labels(lhapdf_n3lo_novfn3_all, lhapdf_nnlo_all, flavour_names)
-            plot_ratios(x_all, ratios, labels, f'{pdf_name} init. cond.', 'hoppet v2.0.0', 
+            plot_ratios(x_all, ratios, labels, f'{pdf_name} init. cond.', 'hoppet v2.3.0', 
                         n3lomt=False, evol_label=evol_label, pdf=pdf, ylim=stdlims)
 
 

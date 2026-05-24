@@ -25,9 +25,11 @@
 !----------------------------------------------------------------------
 module splitting_functions_n3lo_e
   use types; use consts_dp; use convolution_communicator
-  use qcd; use warnings_and_errors
-  use xpij2e; use xpns2e
-  use dglap_choices
+  use qcd; use dglap_choices; use warnings_and_errors
+  use hoppet_splitting_function_interfaces
+  use xpgg3a; use xpgg3a_2410; use xpgq3a; use xpgq3a_2404; use&
+       & xpgq3a_2512; use xpqg3a; use xpps3a; use xpns3s_2604_exact;&
+       & use xpns3p_2604_exact; use xpns3m_2604_exact
   implicit none
   private
 
@@ -35,33 +37,27 @@ module splitting_functions_n3lo_e
   public :: sf_P3NSPlus, sf_P3NSMinus, sf_P3NSS
   ! these are of help elsewhere in identifying (run-time) the sets of 
   ! splitting functions that have been used?
-  public :: name_xpij2, name_xpns2
-
+  public :: name_xpgg3, name_xpgq3, name_xpqg3, name_xpps3,&
+       & name_xpns3s, name_xpns3m, name_xpns3p
 contains
   function sf_P3gg(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
+    integer, save        :: warn_n = 1
 
-    call wae_Error('Exact N3LO splitting functions not yet available.')
+    call wae_warn(warn_n,'Exact N3LO splitting functions not yet available for Pgg. Using approximation instead.')
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = X2GGA(x, nf_int) + X2GGB(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - X2GGB(x, nf_int)
-!    case(cc_DELTA)
-!       res = X2GGC(zero, nf_int)
-!    end select
+    if(n3lo_splitting_approximation .ge. n3lo_splitting_approximation_up_to_2410_08089) then
+       p3 = mvv_splitting_function_imod(P3GGA_2410, P3GGB_2410, P3GGC_2410, n3lo_splitting_variant, 0.5_dp**4)
+    else
+       p3 = mvv_splitting_function_imod(P3GGA, P3GGB, P3GGC, n3lo_splitting_variant, 0.5_dp**4)
+    endif
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3gg
 
   ! ..This is the (regular) pure-singlet splitting functions P_ps^(2).    
@@ -69,27 +65,17 @@ contains
   function sf_P3PS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3  
+    integer, save        :: warn_n = 1
 
-    call wae_Error('Exact N3LO splitting functions not yet available.')
+    call wae_warn(warn_n,'Exact N3LO splitting functions not yet available for PPS. Using approximation instead.')
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = X2PSA(x, nf_int) + zero
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - zero
-!    case(cc_DELTA)
-!       res = zero
-!    end select
+    p3 = mvv_splitting_function_imod(P3PSA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3PS
 
   !--------------------------------------------------------------------
@@ -97,154 +83,101 @@ contains
   function sf_P3qg2nf(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
+    integer, save        :: warn_n = 1
 
-    call wae_Error('Exact N3LO splitting functions not yet available.')
+    call wae_warn(warn_n,'Exact N3LO splitting functions not yet available for Pqg2nf. Using approximation instead.')
 
     call sf_VogtValidate
-    x = exp(-y)
-    res = zero
+    p3 = mvv_splitting_function_imod(P3QGA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = X2QGA(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - zero
-!    case(cc_DELTA)
-!       res = zero
-!    end select
-
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3qg2nf
 
 
   function sf_P3gq(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
+    integer, save        :: warn_n = 1
 
-    call wae_Error('Exact N3LO splitting functions not yet available.')
+    call wae_warn(warn_n,'Exact N3LO splitting functions not yet available for Pgq. Using approximation instead.')
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = X2GQA(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - zero
-!    case(cc_DELTA)
-!       res = zero
-!    end select
-
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2310_05744) then
+       p3 = mvv_splitting_function_imod(P3GQA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    else if(n3lo_splitting_approximation .le. n3lo_splitting_approximation_up_to_2410) then
+       p3 = mvv_splitting_function_imod(P3GQA_2404, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    else
+       p3 = mvv_splitting_function_imod(P3GQA_2512, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    endif
+    
+    res = p3%f(y, cc_piece)
   end function sf_P3gq
 
   !------------------------- non-singlet pieces ------------------------
   function sf_P3NSPlus(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-
-    call wae_Error('Exact N3LO splitting functions not yet available.')
+    type(mvv_splitting_function)  :: p3
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = X2NSPA(x, nf_int) + X2NSB(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - X2NSB(x, nf_int)
-!    case(cc_DELTA)
-!       res = X2NSC(zero, nf_int)
-!    end select
+    p3 = mvv_splitting_function(P3NSPA_2604_exact, P3NSPB_2604_exact, P3NSPC_2604_exact, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSPlus
 
 
   function sf_P3NSMinus(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-
-    call wae_Error('Exact N3LO splitting functions not yet available.')
-
+    type(mvv_splitting_function)  :: p3
+    
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = X2NSMA(x, nf_int) + X2NSB(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - X2NSB(x, nf_int)
-!    case(cc_DELTA)
-!       res = X2NSC(zero, nf_int)
-!    end select
+    p3 = mvv_splitting_function(P3NSMA_2604_exact, P3NSMB_2604_exact, P3NSMC_2604_exact, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSMinus
 
   !-- according to comments in Vogt code P_S = P_V - P_-
   function sf_P3NSS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-
-    call wae_Error('Exact N3LO splitting functions not yet available.')
-
+    type(mvv_splitting_function)  :: p3
+    
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = X2NSSA(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - zero
-!    case(cc_DELTA)
-!       res = zero
-!    end select
+    p3 = mvv_splitting_function(P3NSSA_2604_exact, null(), null(), 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSS
 
   !----------------------------------------------------------------
   ! The Vogt expressions are valid only for standard colour factors
   ! This routine makes sure that the appropriate conditions hold
   subroutine sf_VogtValidate
-    if (tr == half) return
+    if (ca == three .and. tr == half .and. cf == four/three) return
     call wae_Error('sf_VogtValidate: &
          &colour factors must be set to default values', &
          &'in order to use the Vogt splitting function parameterisations')
   end subroutine sf_VogtValidate
-
 end module splitting_functions_n3lo_e
 
 
 module splitting_functions_n3lo_p
   use types; use consts_dp; use convolution_communicator
-  use qcd; use warnings_and_errors
-  use xpij2p; use xpns2p
+  use qcd; use dglap_choices; use warnings_and_errors
+  use hoppet_splitting_function_interfaces
+  use xpgg3a; use xpgg3a_2410; use xpgq3a; use xpgq3a_2404; use&
+      & xpgq3a_2512; use xpqg3a; use xpps3a; use xpns3s_2604_fit;&
+      & use xpns3p_2604_fit; use xpns3m_2604_fit
   implicit none
   private
 
@@ -252,33 +185,27 @@ module splitting_functions_n3lo_p
   public :: sf_P3NSPlus, sf_P3NSMinus, sf_P3NSS
   ! these are of help elsewhere in identifying (run-time) the sets of 
   ! splitting functions that have been used?
-  public :: name_xpij2, name_xpns2
-
+  public :: name_xpgg3, name_xpgq3, name_xpqg3, name_xpps3,&
+       & name_xpns3s, name_xpns3m, name_xpns3p
 contains
   function sf_P3gg(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
+    integer, save        :: warn_n = 1
 
-    call wae_Error('Parametrised N3LO splitting functions not yet available.')
+    call wae_warn(warn_n,'Parametrised N3LO splitting functions not yet available for Pgg. Using approximation instead.')
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = P3GGA(x, nf_int) + P3GGB(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - P3GGB(x, nf_int)
-!    case(cc_DELTA)
-!       res = P3GGC(zero, nf_int)
-!    end select
+    if(n3lo_splitting_approximation .ge. n3lo_splitting_approximation_up_to_2410_08089) then
+       p3 = mvv_splitting_function_imod(P3GGA_2410, P3GGB_2410, P3GGC_2410, n3lo_splitting_variant, 0.5_dp**4)
+    else
+       p3 = mvv_splitting_function_imod(P3GGA, P3GGB, P3GGC, n3lo_splitting_variant, 0.5_dp**4)
+    endif
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3gg
 
   ! ..This is the (regular) pure-singlet splitting functions P_ps^(2).    
@@ -286,27 +213,17 @@ contains
   function sf_P3PS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3  
+    integer, save        :: warn_n = 1
 
-    call wae_Error('Parametrised N3LO splitting functions not yet available.')
+    call wae_warn(warn_n,'Parametrised N3LO splitting functions not yet available for PPS. Using approximation instead.')
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = P3PSA(x, nf_int) + zero
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - zero
-!    case(cc_DELTA)
-!       res = zero
-!    end select
+    p3 = mvv_splitting_function_imod(P3PSA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3PS
 
   !--------------------------------------------------------------------
@@ -314,135 +231,80 @@ contains
   function sf_P3qg2nf(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
+    integer, save        :: warn_n = 1
 
-    call wae_Error('Parametrised N3LO splitting functions not yet available.')
+    call wae_warn(warn_n,'Parametrised N3LO splitting functions not yet available for Pqg2nf. Using approximation instead.')
 
     call sf_VogtValidate
-    x = exp(-y)
-    res = zero
+    p3 = mvv_splitting_function_imod(P3QGA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = P3QGA(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - zero
-!    case(cc_DELTA)
-!       res = zero
-!    end select
-
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3qg2nf
 
 
   function sf_P3gq(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function_imod)  :: p3
+    integer, save        :: warn_n = 1
 
-    call wae_Error('Parametrised N3LO splitting functions not yet available.')
+    call wae_warn(warn_n,'Parametrised N3LO splitting functions not yet available for Pgq. Using approximation instead.')
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = P3GQA(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - zero
-!    case(cc_DELTA)
-!       res = zero
-!    end select
-
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    if(n3lo_splitting_approximation .eq. n3lo_splitting_approximation_up_to_2310_05744) then
+       p3 = mvv_splitting_function_imod(P3GQA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    else if(n3lo_splitting_approximation .le. n3lo_splitting_approximation_up_to_2410) then
+       p3 = mvv_splitting_function_imod(P3GQA_2404, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    else
+       p3 = mvv_splitting_function_imod(P3GQA_2512, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    endif
+    
+    res = p3%f(y, cc_piece)
   end function sf_P3gq
 
   !------------------------- non-singlet pieces ------------------------
   function sf_P3NSPlus(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-
-    call wae_Error('Parametrised N3LO splitting functions not yet available.')
+    type(mvv_splitting_function)  :: p3
 
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = P3NSPA(x, nf_int) + P3NSB(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - P3NSB(x, nf_int)
-!    case(cc_DELTA)
-!       res = P3NSPC(zero, nf_int)
-!    end select
+    p3 = mvv_splitting_function(P3NSPA_2604_fit, P3NSPB_2604_fit, P3NSPC_2604_fit, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSPlus
 
 
   function sf_P3NSMinus(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
-
-    call wae_Error('Parametrised N3LO splitting functions not yet available.')
-
+    type(mvv_splitting_function)  :: p3
+    
     call sf_VogtValidate
-    x = exp(-y)
     res = zero
 
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = P3NSMA(x, nf_int) + P3NSB(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - P3NSB(x, nf_int)
-!    case(cc_DELTA)
-!       res = P3NSMC(zero, nf_int)
-!    end select
+    p3 = mvv_splitting_function(P3NSMA_2604_fit, P3NSMB_2604_fit, P3NSMC_2604_fit, 0.5_dp**4)
 
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSMinus
 
   !-- according to comments in Vogt code P_S = P_V - P_-
   function sf_P3NSS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    real(dp)             :: x
+    type(mvv_splitting_function)  :: p3
+    
+    call sf_VogtValidate
+    res = zero
 
-    call wae_Error('Parametrised N3LO splitting functions not yet available.')
+    p3 = mvv_splitting_function(P3NSSA_2604_fit, null(), null(), 0.5_dp**4)
 
-!    call sf_VogtValidate
-!    x = exp(-y)
-!    res = zero
-!
-!    select case(cc_piece)
-!    case(cc_REAL,cc_REALVIRT)
-!       res = P3NSSA(x, nf_int)
-!    end select
-!    select case(cc_piece)
-!    case(cc_VIRT,cc_REALVIRT)
-!       res = res - zero
-!    case(cc_DELTA)
-!       res = zero
-!    end select
-
-    res = res / 16.0_dp   ! compensate (as/4pi)^4 -> (as/2pi)^4
-    if (cc_piece /= cc_DELTA) res = res * x
+    res = p3%f(y, cc_piece)
   end function sf_P3NSS
 
   !----------------------------------------------------------------

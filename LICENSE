@@ -11,7 +11,8 @@ under GPLv3, or which the respective authors have allowed us to
 distribute with HOPPET under the same GPLv3 terms:
 
 - the src/hplog.f and (hep-ph/0107173) by Gehrmann and Remiddi, and the
-  weight 5 extension, src/exact-coefs/hplog5.f by Gehrmann.
+  weight 5 extension, src/hplog5.f and src/hplog6 by Gehrmann (the latter 
+  split up into individual files to allow faster compilation).
 
 - code for the NNLO splitting functions and NNLO/N3LO coefficient
   functions by Moch, Vermaseren and Vogt, see
@@ -22,7 +23,8 @@ distribute with HOPPET under the same GPLv3 terms:
   https://github.com/svenolafmoch/Conformal-EIC
 
 - code for the N3LO mass thresholds by J. Blümlein and K. Schönwald
-  DESY 24-037.
+  DESY 24-037, and from libome (https://gitlab.com/libome/libome) by
+  A. Behring and K. Schönwald.
 
 It also contains 
 
