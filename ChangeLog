@@ -1,3 +1,17 @@
+2026-05-27  Alexander Karlberg  <karlberg@Latitude-E7470>
+
+	Release 2.3.0
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.3.0
+
+
 2026-05-20  Alexander Karlberg  <karlberg@Latitude-E7470>
 
 	* splitting-functions/no-exact-n3lo-split/xpns3*_2604*.f90 (Added):
