@@ -1,3 +1,14 @@
+2026-06-30  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* examples/f90/structure_functions_example_flavour.f90:
+	* src/structure_functions.f90:
+	Added functionality to get the structure functions FL, F2, F3 as
+	arrays in flavour (before the user had to ask for a specific
+	flavour). The functions are `F_NLO_allflav(x, Q, muR, muF)`
+	etc. and they return an array res(3,-6:6) with FL(-6:6), F2(-6:6),
+	F3(-6:6).
+
+
 2026-05-27  Alexander Karlberg  <karlberg@Latitude-E7470>
 
 	* CMakeLists.txt:

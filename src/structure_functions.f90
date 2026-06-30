@@ -20,8 +20,10 @@ module structure_functions
   !!
   !! those for evaluating the structure functions
   !!
-  public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct
-  public :: F_LO_flav, F_NLO_flav, StrFct_flav
+  ! Should be accessed through parameters iF1Wp etc. as defined just below.
+  public :: F_LO, F_NLO, F_NNLO, F_N3LO, StrFct 
+  public :: F_LO_flav, F_NLO_flav, StrFct_flav ! returns and array(3) with FL, F2, F3 for a given iflav
+  public :: F_LO_allflav, F_NLO_allflav, StrFct_allflav ! returns and array(3,-6:6) with FL(-6:6), F2(-6:6), F3(-6:6)
   !!
   !! those for querying the scale choices being used
   !!
@@ -1704,6 +1706,45 @@ contains
     
   end function StrFct_Flav
 
+  !---------------------------------------------------------------------
+  !> @brief calculate the structure function at x, Q, muR, muF summed over all orders
+  !!
+  !! Calculate the structure function at x, Q, muR, muF summed over
+  !! all orders. muR and muF are only needed if we are using the
+  !! scale_choice_arbitrary, as otherwise they are already included in
+  !! the sf_tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in,opt]   muR        renormalisation scale 
+  !! @param[in,opt]   muF        factorisation scale
+  !! @return          a flavour array for each of FL, F2, F3, in that order
+  !!
+  function StrFct_allflav (x, Q, muR, muF) result(res)
+    real(dp), intent(in) :: x, Q
+    real(dp), intent(in), optional :: muR, muF
+    real(dp) :: res(1:3,-6:6)
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    if(.not.inc_flavour_decomposition) call wae_error('StrFct_flav', &
+               'You did not initialise the Structure Functions with flavour decomposition. Exiting.')
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
+
+    if (use_sep_orders) then
+      ! if we kept each order separate, then add up all the fixed order terms one by one
+      if (order_setup.ge.1) res =        F_LO_allflav(x, Q, muR_lcl, muF_lcl)
+      if (order_setup.ge.2) res = res + F_NLO_allflav(x, Q, muR_lcl, muF_lcl)
+      if (order_setup.ge.3) call wae_error('StrFct_flav: Flavour decomposed structure functions only implemneted up to NLO.')
+    else
+      ! if we haven't kept each order separate, then everything is in sf_tables(1:3)
+      call EvalPdfTable_xQ(sf_tables_flav(1), x, mu_table, res(1,:))
+      call EvalPdfTable_xQ(sf_tables_flav(2), x, mu_table, res(2,:))
+      call EvalPdfTable_xQ(sf_tables_flav(3), x, mu_table, res(3,:))
+    endif
+    
+  end function StrFct_allFlav
+
   !> @brief calculate the leading order structure function at x, Q, muR, muF 
   !!
   !! Calculate the leading order structure function at x, Q, muR,
@@ -1766,7 +1807,41 @@ contains
     res(2) = EvalPdfTable_xQf(sf_tables_flav(2), x, mu_table, iflav)
     res(3) = EvalPdfTable_xQf(sf_tables_flav(3), x, mu_table, iflav)
     
-  end function F_LO_FLAV
+  end function F_LO_flav
+
+  !> @brief calculate the leading order structure function at x, Q, muR, muF 
+  !!
+  !! Calculate the leading order structure function at x, Q, muR,
+  !! muF. muR and muF are only needed if we are using the
+  !! scale_choice_arbitrary, as otherwise they are already included in
+  !! the sf_tables.
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
+  !! @return          a flavour array of each of FL, F2, F3, in that order
+  !!
+  function F_LO_allflav (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
+    real(dp) :: res(1:3,-6:6)
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
+
+    if(.not.use_sep_orders) call wae_error('F_LO_flav: you did not   &
+         &       initialise the Structure Functions with separate&
+         & orders.                   Exiting.')
+    
+    if(.not.inc_flavour_decomposition) call wae_error('F_LO_flav',&
+         & 'You          did not initialise the Structure Functions&
+         & with flavour          decomposition. Exiting.')
+
+    call EvalPdfTable_xQ(sf_tables_flav(1), x, mu_table, res(1,:))
+    call EvalPdfTable_xQ(sf_tables_flav(2), x, mu_table, res(2,:))
+    call EvalPdfTable_xQ(sf_tables_flav(3), x, mu_table, res(3,:))
+    
+  end function F_LO_allflav
 
   !> @brief calculate the NLO structure function at x, Q, muR, muF 
   !!
@@ -1835,7 +1910,7 @@ contains
     real(dp), intent(in)  :: x, Q, muR, muF
     integer, intent(in) :: iflav
     real(dp) :: res(1:3), as2pi, LFQ2
-    real(dp) :: C1f(1:3), C0P0f(1:3)
+    real(dp) :: C0P0f(1:3)
     real(dp) :: muR_lcl, muF_lcl, mu_table
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
@@ -1873,6 +1948,62 @@ contains
     res = res * as2pi
     
   end function F_NLO_flav
+
+  !> @brief calculate the NLO structure function at x, Q, muR, muF 
+  !!
+  !! Calculate the pure NLO contribution to the structure function at x, Q, muR, muF. muR and
+  !! muF are only needed if we are using the scale_choice_arbitrary,
+  !! as otherwise they are already included in the sf_tables.
+  !!
+  !! The result includes a factor of (as/2pi)
+  !!
+  !! @param[in]       x          x value
+  !! @param[in]       Q          Q value
+  !! @param[in]       muR        renormalisation scale 
+  !! @param[in]       muF        factorisation scale
+  !! @return          a flavour array of each of FL, F2, F3, in that order
+  !!
+  function F_NLO_allflav (x, Q, muR, muF) result(res)
+    real(dp), intent(in)  :: x, Q, muR, muF
+    real(dp) :: res(1:3,-6:6), as2pi, LFQ2
+    real(dp) :: C0P0f(1:3,-6:6)
+    real(dp) :: muR_lcl, muF_lcl, mu_table
+
+    call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
+
+    if(.not.use_sep_orders) call wae_error('F_NLO_flav', 'You did not&
+         & initialise the Structure Functions with separate orders.&
+         & Exiting.')
+    
+    if(.not.inc_flavour_decomposition) call wae_error('F_NLO_flav',&
+         & 'You did not initialise the Structure Functions with&
+         & flavour decomposition. Exiting.')
+    
+    if (order_setup < 2) then
+      res = zero
+      return
+    end if
+
+    as2pi = alphasLocal(muR) / (twopi)
+    
+    ! C_NLO x f (x) in C1f(:)
+    call EvalPdfTable_xQ(sf_tables_flav(4), x, mu_table, res(1,:))
+    call EvalPdfTable_xQ(sf_tables_flav(5), x, mu_table, res(2,:))
+    call EvalPdfTable_xQ(sf_tables_flav(6), x, mu_table, res(3,:))
+    
+    ! if scale_choice = 0,1 then this term is already taken care of
+    if (scale_choice_save.ge.scale_choice_arbitrary) then
+       LFQ2 = two*log(muF/Q)
+       ! C_LO x P_LO x f (x) in C0P0f(:)
+       call EvalPdfTable_xQ(sf_tables_flav(7), x, mu_table, C0P0f(1,:))
+       call EvalPdfTable_xQ(sf_tables_flav(8), x, mu_table, C0P0f(2,:))
+       call EvalPdfTable_xQ(sf_tables_flav(9), x, mu_table, C0P0f(3,:))
+       res = res - C0P0f * LFQ2
+    endif
+    
+    res = res * as2pi
+    
+  end function F_NLO_allflav
 
 
   !> @brief calculate the NNLO structure function at x, Q, muR, muF 

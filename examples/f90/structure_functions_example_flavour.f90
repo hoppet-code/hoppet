@@ -11,6 +11,7 @@ program structure_functions_example_flavour
   integer  :: nloop_coefs, sc_choice,nloop, order, i, ny, iy 
   real(dp) :: F(-6:7), FLO(-6:7), FNLO(-6:7)
   real(dp) :: Fflav(-6:6,3), FLOflav(-6:6,3), FNLOflav(-6:6,3)
+  real(dp) :: Fallflav(3,-6:6), FLOallflav(3,-6:6), FNLOallflav(3,-6:6)
   
   Qmax = 13000.0_dp 
   nloop_coefs = 2
@@ -81,12 +82,16 @@ program structure_functions_example_flavour
   do iy = ny, 1, -1
     ytest = iy * ymax / ny
     x = exp(-ytest)
-    do i =-6,6
-      FLOflav(i,:) = F_LO_flav(x,Q,muR,muF,i)
-      FNLOflav(i,:) = F_NLO_flav(x,Q,muR,muF,i)
-      Fflav(i,:)   = StrFct_flav(x,Q,muR,muF,i)
-    enddo
-    call fill_structure_functions(x,Fflav(:,1),Fflav(:,2),Fflav(:,3),F)
+!    do i =-6,6
+!      FLOflav(i,:) = F_LO_flav(x,Q,muR,muF,i)
+!      FNLOflav(i,:) = F_NLO_flav(x,Q,muR,muF,i)
+!      Fflav(i,:)   = StrFct_flav(x,Q,muR,muF,i)
+!    enddo
+    FLOallflav(:,:) = F_LO_allflav(x,Q,muR,muF)
+    FNLOallflav(:,:) = F_NLO_allflav(x,Q,muR,muF)
+    Fallflav(:,:)   = StrFct_allflav(x,Q,muR,muF)
+!    call fill_structure_functions(x,Fflav(:,1),Fflav(:,2),Fflav(:,3),F)
+    call fill_structure_functions(x,Fallflav(1,:),Fallflav(2,:),Fallflav(3,:),F)
     write(*,'(15es12.4)') x, F
   enddo
 
