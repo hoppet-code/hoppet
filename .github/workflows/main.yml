@@ -218,6 +218,7 @@ jobs:
           uname -a
           brew install wget coreutils gcc gfortran python3 swig numpy
           brew tap davidchall/hep
+          brew trust --formula davidchall/hep/lhapdf
           brew install lhapdf
           ls /opt/homebrew/bin/gfortran*
     - name: Set up Python venv
