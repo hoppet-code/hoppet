@@ -1,5 +1,14 @@
 # NEWS for HOPPET
 
+# Release 2.3.1, XX 2026
+
+## Minor additions
+
+* Added functionality to get the structure functions FL, F2, F3 as
+  arrays in flavour up to NLO (before the user had to ask for a specific
+  flavour). The functions are `F_NLO_allflav(x, Q, muR, muF)` etc. and
+  they return an array res(3,-6:6) with FL(-6:6), F2(-6:6), F3(-6:6).
+	
 # Release 2.3.0, 27 May 2026
 
 ## Major additions
