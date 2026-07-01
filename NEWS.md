@@ -1,13 +1,22 @@
 # NEWS for HOPPET
 
-# Release 2.3.0, XX May 2026
+# Release 2.3.1, XX 2026
+
+## Minor additions
+
+* Added functionality to get the structure functions FL, F2, F3 as
+  arrays in flavour up to NLO (before the user had to ask for a specific
+  flavour). The functions are `F_NLO_allflav(x, Q, muR, muF)` etc. and
+  they return an array res(3,-6:6) with FL(-6:6), F2(-6:6), F3(-6:6).
+	
+# Release 2.3.0, 27 May 2026
 
 ## Major additions
 
 * hoppet now includes the exact and fitted n3lo non-singlet splitting
   functions computed in 2604.09534. They have been extracted from the
   mathematica files provided with the paper and translated into
-  Fortran90.
+  Fortran90. 
 
 * The default behaviour of hoppet is to use the fitted versions for
   the non-singlet splitting functions and approximations elsewhere.
@@ -15,8 +24,8 @@
 * The exact splitting functions rely on hplog6 which has kindly been
   provided by Thomas Gehrmann and is included here in a slightly
   modified form, where the subroutines have been put in separate files
-  to allow for paralle compilation. hplog6 also contains an explicit
-  `subrotuine hplog`, which behanves identically to `hplog` from
+  to allow for parallel compilation. hplog6 also contains an explicit
+  `subrotuine hplog`, which behaves identically to `hplog` from
   hplog.f. This is done to avoid issues with multiple-defined
   subroutines in hplog.f and hplog6.
 

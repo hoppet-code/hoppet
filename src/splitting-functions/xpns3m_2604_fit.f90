@@ -1,3 +1,23 @@
+!HoppetSTARTHEADER
+!
+! Copyright (c) 2008-2026, Hoppet Authors
+!
+!----------------------------------------------------------------------
+! This file is part of Hoppet <https://github.com/hoppet-code/hoppet>.
+!
+! Hoppet is free software; you can redistribute it and/or modify it
+! under the terms of the GNU General Public License as published by
+! the Free Software Foundation; either version 3 of the License, or
+! (at your option) any later version.
+!
+! Hoppet is distributed in the hope that it will be useful, but
+! WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+! General Public License for more details
+! <http://www.gnu.org/licenses/>.
+! ----------------------------------------------------------------------
+!
+!HoppetENDHEADER
 module xpns3m_2604_fit
   character(len=*), parameter :: name_xpns3m = "xpns3m_2604_fit"
 contains
@@ -6,7 +26,12 @@ contains
 !    of non-singlet_- combinations of quark and anti-quark densities.
 !    The expansion parameter is alpha_s/(4 pi), the scale mu_r = mu_f.
 !
-!   Expressions extracted from ancilliary material of 2604.09534
+!    The expressions have been extracted from the Mathematica files
+!    that form the ancilliary materials of 2604.09534. Permission to
+!    extract and include the code in hoppet in the form of this
+!    Fortran file has been explicitly granted by the authors of
+!    2604.09534. The Fortran code and its correctness are the sole
+!    responsibility of the hoppet authors.
 !
 ! =====================================================================
 !

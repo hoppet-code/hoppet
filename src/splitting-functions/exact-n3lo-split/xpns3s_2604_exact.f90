@@ -1,3 +1,23 @@
+!HoppetSTARTHEADER
+!
+! Copyright (c) 2008-2026, Hoppet Authors
+!
+!----------------------------------------------------------------------
+! This file is part of Hoppet <https://github.com/hoppet-code/hoppet>.
+!
+! Hoppet is free software; you can redistribute it and/or modify it
+! under the terms of the GNU General Public License as published by
+! the Free Software Foundation; either version 3 of the License, or
+! (at your option) any later version.
+!
+! Hoppet is distributed in the hope that it will be useful, but
+! WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+! General Public License for more details
+! <http://www.gnu.org/licenses/>.
+! ----------------------------------------------------------------------
+!
+!HoppetENDHEADER
 module xpns3s_2604_exact
   character(len=*), parameter :: name_xpns3s = "xpns3s_2604_exact"
 contains
