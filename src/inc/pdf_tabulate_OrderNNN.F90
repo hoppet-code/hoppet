@@ -159,9 +159,9 @@ subroutine EvalPdfTable1D_yQ_orderNNNN(tab,y,Q,res)
   integer, parameter :: NNQ = __HOPPET_InterpOrderQ__
   real(dp) :: y_wgts(0:NNY), lnlnQ_wgts(0:NNQ)
   integer  :: iylo, ilnlnQ, iQ, iflv, itab
-  integer :: iflv_max
+  !integer :: iflv_max
 
-  iflv_max = tab(1)%tab_iflv_max
+  !iflv_max = tab(1)%tab_iflv_max
 
   call EvalPdfTable_get_weights_orderNNNN(tab(1), y, Q, y_wgts, lnlnQ_wgts, iylo, ilnlnQ)
 
@@ -179,7 +179,7 @@ subroutine EvalPdfTable1D_yQ_orderNNNN(tab,y,Q,res)
     end do
 
     ! and then do any remaining flavours (separating things gains us a couple of ns)
-    do iflv = iflv_max+1, iflv_max
+    do iflv = iflv_max+1, tab(itab)%tab_iflv_max !iflv_max
       res(iflv, itab) = sum(tab(itab)%tab(iylo:iylo+NNY, iflv,ilnlnQ  ) * y_wgts) * lnlnQ_wgts(0)
       do iQ = 1, NNQ
         res(iflv, itab) = res(iflv, itab) + sum(tab(itab)%tab(iylo:iylo+NNY, iflv,ilnlnQ+iQ) * y_wgts) * lnlnQ_wgts(iQ)
