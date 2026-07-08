@@ -1685,7 +1685,7 @@ contains
     real(dp), intent(in), optional :: muR, muF
     integer, intent(in) :: iflav
     real(dp) :: res(1:3)
-    real(dp) :: muR_lcl, muF_lcl, mu_table
+    real(dp) :: muR_lcl, muF_lcl, mu_table, y
 
     if(.not.inc_flavour_decomposition) call wae_error('StrFct_flav', &
                'You did not initialise the Structure Functions with flavour decomposition. Exiting.')
@@ -1698,10 +1698,11 @@ contains
       if (order_setup.ge.2) res = res + F_NLO_flav (x, Q, muR_lcl, muF_lcl, iflav)
       if (order_setup.ge.3) call wae_error('StrFct_flav: Flavour decomposed structure functions only implemneted up to NLO.')
     else
-      ! if we haven't kept each order separate, then everything is in sf_tables(1:3)
-      res(1) = EvalPdfTable_xQf(sf_tables_flav(1), x, mu_table, iflav)
-      res(2) = EvalPdfTable_xQf(sf_tables_flav(2), x, mu_table, iflav)
-      res(3) = EvalPdfTable_xQf(sf_tables_flav(3), x, mu_table, iflav)
+       ! if we haven't kept each order separate, then everything is in sf_tables(1:3)
+       y = -log(x)
+      res(1) = EvalPdfTable_yQf(sf_tables_flav(1), y, mu_table, iflav)
+      res(2) = EvalPdfTable_yQf(sf_tables_flav(2), y, mu_table, iflav)
+      res(3) = EvalPdfTable_yQf(sf_tables_flav(3), y, mu_table, iflav)
     endif
     
   end function StrFct_Flav
@@ -1723,8 +1724,9 @@ contains
   function StrFct_allflav (x, Q, muR, muF) result(res)
     real(dp), intent(in) :: x, Q
     real(dp), intent(in), optional :: muR, muF
-    real(dp) :: res(1:3,-6:6)
+    real(dp) :: res(-6:6,1:3)
     real(dp) :: muR_lcl, muF_lcl, mu_table
+    real(dp) :: y
 
     if(.not.inc_flavour_decomposition) call wae_error('StrFct_flav', &
                'You did not initialise the Structure Functions with flavour decomposition. Exiting.')
@@ -1736,11 +1738,10 @@ contains
       if (order_setup.ge.1) res =        F_LO_allflav(x, Q, muR_lcl, muF_lcl)
       if (order_setup.ge.2) res = res + F_NLO_allflav(x, Q, muR_lcl, muF_lcl)
       if (order_setup.ge.3) call wae_error('StrFct_flav: Flavour decomposed structure functions only implemneted up to NLO.')
-    else
+   else
+      y = -log(x)
       ! if we haven't kept each order separate, then everything is in sf_tables(1:3)
-      call EvalPdfTable_xQ(sf_tables_flav(1), x, mu_table, res(1,:))
-      call EvalPdfTable_xQ(sf_tables_flav(2), x, mu_table, res(2,:))
-      call EvalPdfTable_xQ(sf_tables_flav(3), x, mu_table, res(3,:))
+      call EvalPdfTable_yQ(sf_tables_flav(1:3), y, mu_table, res(:,1:3))
     endif
     
   end function StrFct_allFlav
@@ -1791,7 +1792,7 @@ contains
     real(dp), intent(in)  :: x, Q, muR, muF
     integer, intent(in) :: iflav
     real(dp) :: res(1:3)
-    real(dp) :: muR_lcl, muF_lcl, mu_table
+    real(dp) :: muR_lcl, muF_lcl, mu_table, y
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
@@ -1803,9 +1804,10 @@ contains
          & 'You          did not initialise the Structure Functions&
          & with flavour          decomposition. Exiting.')
 
-    res(1) = EvalPdfTable_xQf(sf_tables_flav(1), x, mu_table, iflav)
-    res(2) = EvalPdfTable_xQf(sf_tables_flav(2), x, mu_table, iflav)
-    res(3) = EvalPdfTable_xQf(sf_tables_flav(3), x, mu_table, iflav)
+    y = -log(x)
+    res(1) = EvalPdfTable_yQf(sf_tables_flav(1), y, mu_table, iflav)
+    res(2) = EvalPdfTable_yQf(sf_tables_flav(2), y, mu_table, iflav)
+    res(3) = EvalPdfTable_yQf(sf_tables_flav(3), y, mu_table, iflav)
     
   end function F_LO_flav
 
@@ -1824,9 +1826,10 @@ contains
   !!
   function F_LO_allflav (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
-    real(dp) :: res(1:3,-6:6)
+    real(dp) :: res(-6:6,1:3)
     real(dp) :: muR_lcl, muF_lcl, mu_table
-
+    real(dp) :: y
+    
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
     if(.not.use_sep_orders) call wae_error('F_LO_flav: you did not   &
@@ -1837,9 +1840,9 @@ contains
          & 'You          did not initialise the Structure Functions&
          & with flavour          decomposition. Exiting.')
 
-    call EvalPdfTable_xQ(sf_tables_flav(1), x, mu_table, res(1,:))
-    call EvalPdfTable_xQ(sf_tables_flav(2), x, mu_table, res(2,:))
-    call EvalPdfTable_xQ(sf_tables_flav(3), x, mu_table, res(3,:))
+    y = -log(x)
+
+    call EvalPdfTable_yQ(sf_tables_flav(1:3), y, mu_table, res(:,1:3))
     
   end function F_LO_allflav
 
@@ -1862,6 +1865,7 @@ contains
     real(dp) :: res(-6:7), as2pi, LFQ2
     real(dp) :: C1f(-6:7), C0P0f(-6:7)
     real(dp) :: muR_lcl, muF_lcl, mu_table
+    real(dp) :: y
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
@@ -1874,16 +1878,16 @@ contains
     end if
 
     as2pi = alphasLocal(muR) / (twopi)
-    
+    y = -log(x)
     ! C_NLO x f (x) in C1f(:) 
-    call EvalPdfTable_xQ(sf_tables(2), x, mu_table, C1f)
+    call EvalPdfTable_yQ(sf_tables(2), y, mu_table, C1f)
     res = C1f
     
     ! if scale_choice = 0,1 then this term is already taken care of
     if (scale_choice_save.ge.scale_choice_arbitrary) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
-       call EvalPdfTable_xQ(sf_tables(3), x, mu_table, C0P0f)
+       call EvalPdfTable_yQ(sf_tables(3), y, mu_table, C0P0f)
        res = res - C0P0f * LFQ2
     endif
     
@@ -1911,7 +1915,7 @@ contains
     integer, intent(in) :: iflav
     real(dp) :: res(1:3), as2pi, LFQ2
     real(dp) :: C0P0f(1:3)
-    real(dp) :: muR_lcl, muF_lcl, mu_table
+    real(dp) :: muR_lcl, muF_lcl, mu_table,y
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
@@ -1929,19 +1933,20 @@ contains
     end if
 
     as2pi = alphasLocal(muR) / (twopi)
+    y = -log(x)
     
     ! C_NLO x f (x) in C1f(:)
-    res(1) = EvalPdfTable_xQf(sf_tables_flav(4), x, mu_table, iflav)
-    res(2) = EvalPdfTable_xQf(sf_tables_flav(5), x, mu_table, iflav)
-    res(3) = EvalPdfTable_xQf(sf_tables_flav(6), x, mu_table, iflav)
+    res(1) = EvalPdfTable_yQf(sf_tables_flav(4), y, mu_table, iflav)
+    res(2) = EvalPdfTable_yQf(sf_tables_flav(5), y, mu_table, iflav)
+    res(3) = EvalPdfTable_yQf(sf_tables_flav(6), y, mu_table, iflav)
     
     ! if scale_choice = 0,1 then this term is already taken care of
     if (scale_choice_save.ge.scale_choice_arbitrary) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
-       C0P0f(1) = EvalPdfTable_xQf(sf_tables_flav(7), x, mu_table, iflav)
-       C0P0f(2) = EvalPdfTable_xQf(sf_tables_flav(8), x, mu_table, iflav)
-       C0P0f(3) = EvalPdfTable_xQf(sf_tables_flav(9), x, mu_table, iflav)
+       C0P0f(1) = EvalPdfTable_yQf(sf_tables_flav(7), y, mu_table, iflav)
+       C0P0f(2) = EvalPdfTable_yQf(sf_tables_flav(8), y, mu_table, iflav)
+       C0P0f(3) = EvalPdfTable_yQf(sf_tables_flav(9), y, mu_table, iflav)
        res = res - C0P0f * LFQ2
     endif
     
@@ -1965,9 +1970,9 @@ contains
   !!
   function F_NLO_allflav (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
-    real(dp) :: res(1:3,-6:6), as2pi, LFQ2
-    real(dp) :: C0P0f(1:3,-6:6)
-    real(dp) :: muR_lcl, muF_lcl, mu_table
+    real(dp) :: res(-6:6,1:3), as2pi, LFQ2
+    real(dp) :: C0P0f(-6:6,1:3)
+    real(dp) :: muR_lcl, muF_lcl, mu_table, y
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
@@ -1985,19 +1990,16 @@ contains
     end if
 
     as2pi = alphasLocal(muR) / (twopi)
-    
-    ! C_NLO x f (x) in C1f(:)
-    call EvalPdfTable_xQ(sf_tables_flav(4), x, mu_table, res(1,:))
-    call EvalPdfTable_xQ(sf_tables_flav(5), x, mu_table, res(2,:))
-    call EvalPdfTable_xQ(sf_tables_flav(6), x, mu_table, res(3,:))
-    
+
+    y = -log(x)
+
+    call EvalPdfTable_yQ(sf_tables_flav(4:6), y, mu_table, res(:,1:3))
+        
     ! if scale_choice = 0,1 then this term is already taken care of
     if (scale_choice_save.ge.scale_choice_arbitrary) then
        LFQ2 = two*log(muF/Q)
        ! C_LO x P_LO x f (x) in C0P0f(:)
-       call EvalPdfTable_xQ(sf_tables_flav(7), x, mu_table, C0P0f(1,:))
-       call EvalPdfTable_xQ(sf_tables_flav(8), x, mu_table, C0P0f(2,:))
-       call EvalPdfTable_xQ(sf_tables_flav(9), x, mu_table, C0P0f(3,:))
+       call EvalPdfTable_yQ(sf_tables_flav(7:9), y, mu_table, C0P0f(:,1:3))
        res = res - C0P0f * LFQ2
     endif
     
@@ -2023,9 +2025,10 @@ contains
   function F_NNLO (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
-    real(dp) :: C1f(-6:7), C0P0f(-6:7), C2f(-6:7), C0P0sqf(-6:7)
-    real(dp) :: C0P1f(-6:7), C1P0f(-6:7)
-    real(dp) :: muR_lcl, muF_lcl, mu_table
+!    real(dp) :: C1f(-6:7), C0P0f(-6:7), C0P0sqf(-6:7)
+!    real(dp) :: C0P1f(-6:7), C1P0f(-6:7)
+    real(dp) :: convs(-6:7,5), C2f(-6:7)
+    real(dp) :: muR_lcl, muF_lcl, mu_table,y
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
 
@@ -2038,29 +2041,36 @@ contains
     end if
 
     as2pi = alphasLocal(muR) / (twopi)
-    
+    y = -log(x)
     ! C_NNLO x f (x) in C2f(:,3) 
-    call EvalPdfTable_xQ(sf_tables(4), x, mu_table, C2f)
+    call EvalPdfTable_yQ(sf_tables(4), y, mu_table, C2f)
     res = C2f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
     if (scale_choice_save.ge.scale_choice_arbitrary) then
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
-       ! C_NLO x f (x) in C1f
-       call EvalPdfTable_xQ(sf_tables(2), x, mu_table, C1f)
-       ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_xQ(sf_tables(3), x, mu_table, C0P0f)
-       ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_xQ(sf_tables(5), x, mu_table, C0P0sqf)
-       ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_xQ(sf_tables(6), x, mu_table, C0P1f)
-       ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_xQ(sf_tables(7), x, mu_table, C1P0f)
+!       ! C_NLO x f (x) in C1f
+!       call EvalPdfTable_yQ(sf_tables(2), y, mu_table, C1f)
+!       ! C_LO x P_LO x f (x) in C0P0f
+!       call EvalPdfTable_yQ(sf_tables(3), y, mu_table, C0P0f)
+!       
+!       ! C_LO x P_LO^2 x f (x) in C0P0sqf
+!       call EvalPdfTable_yQ(sf_tables(5), y, mu_table, C0P0sqf)
+!       ! C_LO x P_NLO x f (x) in C0P1f
+!       call EvalPdfTable_yQ(sf_tables(6), y, mu_table, C0P1f)
+!       ! C_NLO x P_LO x f (x) in C1P1f
+!       call EvalPdfTable_yQ(sf_tables(7), y, mu_table, C1P0f)
+!       ! add up all the different pieces
+!       res = res - C1P0f * LFQ2 + C0P0sqf * half * LFQ2**2 &
+!            & - twopi * beta0 * C0P0f * (LRQ2*LFQ2 - half*LFQ2**2) &
+!            & - C0P1f * LFQ2 + twopi * beta0 * C1f * LRQ2
+
+       call EvalPdfTable_yQ([sf_tables(2:3), sf_tables(5:7)], y, mu_table, convs(:,1:5))
        ! add up all the different pieces
-       res = res - C1P0f * LFQ2 + C0P0sqf * half * LFQ2**2 &
-            & - twopi * beta0 * C0P0f * (LRQ2*LFQ2 - half*LFQ2**2) &
-            & - C0P1f * LFQ2 + twopi * beta0 * C1f * LRQ2
+       res = res - convs(:,5) * LFQ2 + convs(:,3) * half * LFQ2**2 &
+            & - twopi * beta0 * convs(:,2) * (LRQ2*LFQ2 - half*LFQ2**2) &
+            & - convs(:,4) * LFQ2 + twopi * beta0 * convs(:,1) * LRQ2
     endif
     
     res = res * (as2pi)**2
@@ -2085,10 +2095,11 @@ contains
   function F_N3LO (x, Q, muR, muF) result(res)
     real(dp), intent(in)  :: x, Q, muR, muF
     real(dp) :: res(-6:7), as2pi, LRQ2, LFQ2
-    real(dp) :: C1f(-6:7), C0P0f(-6:7), C3f(-6:7), C0P0sqf(-6:7), C2f(-6:7)
-    real(dp) :: C0P1f(-6:7), C1P0f(-6:7), C0P0cbf(-6:7), C0P01f(-6:7), C0P10f(-6:7)
-    real(dp) :: C1P0sqf(-6:7), C1P1f(-6:7), C2P0f(-6:7), C0P2f(-6:7)
-    real(dp) :: muR_lcl, muF_lcl, mu_table
+!    real(dp) :: C1f(-6:7), C0P0f(-6:7), C0P0sqf(-6:7), C2f(-6:7)
+!    real(dp) :: C0P1f(-6:7), C1P0f(-6:7), C0P0cbf(-6:7), C0P01f(-6:7), C0P10f(-6:7)
+!    real(dp) :: C1P0sqf(-6:7), C1P1f(-6:7), C2P0f(-6:7), C0P2f(-6:7)
+    real(dp) :: convs(-6:7,13), C3f(-6:7)
+    real(dp) :: muR_lcl, muF_lcl, mu_table,y
 
     call GetStrFctScales(Q, muR, muF, muR_lcl, muF_lcl, mu_table)
     
@@ -2101,65 +2112,89 @@ contains
     end if
 
     as2pi = alphasLocal(muR) / (twopi)
-
+    y = -log(x)
     ! C_N3LO x f (x) in C2f(:,8) 
-    call EvalPdfTable_xQ(sf_tables(8), x, mu_table, C3f)
+    call EvalPdfTable_yQ(sf_tables(8), y, mu_table, C3f)
     res = C3f
 
     ! if scale_choice = 0,1 then these terms are already taken care of
     if (scale_choice_save.ge.scale_choice_arbitrary) then
        LRQ2 = two*log(muR/Q)
        LFQ2 = two*log(muF/Q)
-       ! C_NLO x f (x) in C1f
-       call EvalPdfTable_xQ(sf_tables(2), x, mu_table, C1f)
-       ! C_LO x P_LO x f (x) in C0P0f
-       call EvalPdfTable_xQ(sf_tables(3), x, mu_table, C0P0f)
-       ! C_NNLO x f (x) in C2f(:,3) 
-       call EvalPdfTable_xQ(sf_tables(4), x, mu_table, C2f)
-       ! C_LO x P_LO^2 x f (x) in C0P0sqf
-       call EvalPdfTable_xQ(sf_tables(5), x, mu_table, C0P0sqf)
-       ! C_LO x P_NLO x f (x) in C0P1f
-       call EvalPdfTable_xQ(sf_tables(6), x, mu_table, C0P1f)
-       ! C_NLO x P_LO x f (x) in C1P1f
-       call EvalPdfTable_xQ(sf_tables(7), x, mu_table, C1P0f)
-       
-       ! C_LO x P_LO^3 x f (x) in C0P0cbf
-       call EvalPdfTable_xQ(sf_tables(9), x, mu_table, C0P0cbf)
-       ! C_LO x P_LO x P_NLO x f (x) in C0P01f
-       call EvalPdfTable_xQ(sf_tables(10), x, mu_table, C0P01f)
-       ! C_LO x P_LO x P_NLO x f (x) in C0P10f
-       call EvalPdfTable_xQ(sf_tables(11), x, mu_table, C0P10f)
-       ! C_NLO x P_LO^2 x f (x) in C1P0sqf
-       call EvalPdfTable_xQ(sf_tables(12), x, mu_table, C1P0sqf)
-       ! C_NLO x P_NLO x f (x) in C1P1f
-       call EvalPdfTable_xQ(sf_tables(13), x, mu_table, C1P1f)
-       ! C_NNLO x P_LO x f (x) in C2P0f
-       call EvalPdfTable_xQ(sf_tables(14), x, mu_table, C2P0f)
-       ! C_LO x P_NNLO x f (x) in C0P2f
-       call EvalPdfTable_xQ(sf_tables(15), x, mu_table, C0P2f)
-    
+!       ! C_NLO x f (x) in C1f
+!       call EvalPdfTable_yQ(sf_tables(2), y, mu_table, C1f) 1
+!       ! C_LO x P_LO x f (x) in C0P0f
+!       call EvalPdfTable_yQ(sf_tables(3), y, mu_table, C0P0f) 2
+!       ! C_NNLO x f (x) in C2f(:,3) 
+!       call EvalPdfTable_yQ(sf_tables(4), y, mu_table, C2f) 3 
+!       ! C_LO x P_LO^2 x f (x) in C0P0sqf
+!       call EvalPdfTable_yQ(sf_tables(5), y, mu_table, C0P0sqf) 4 
+!       ! C_LO x P_NLO x f (x) in C0P1f
+!       call EvalPdfTable_yQ(sf_tables(6), y, mu_table, C0P1f) 5 
+!       ! C_NLO x P_LO x f (x) in C1P1f
+!       call EvalPdfTable_yQ(sf_tables(7), y, mu_table, C1P0f) 6 
+!       
+!       ! C_LO x P_LO^3 x f (x) in C0P0cbf
+!       call EvalPdfTable_yQ(sf_tables(9), y, mu_table, C0P0cbf) 7
+!       ! C_LO x P_LO x P_NLO x f (x) in C0P01f
+!       call EvalPdfTable_yQ(sf_tables(10), y, mu_table, C0P01f) 8 
+!       ! C_LO x P_LO x P_NLO x f (x) in C0P10f
+!       call EvalPdfTable_yQ(sf_tables(11), y, mu_table, C0P10f) 9
+!       ! C_NLO x P_LO^2 x f (x) in C1P0sqf
+!       call EvalPdfTable_yQ(sf_tables(12), y, mu_table, C1P0sqf) 10 
+!       ! C_NLO x P_NLO x f (x) in C1P1f
+!       call EvalPdfTable_yQ(sf_tables(13), y, mu_table, C1P1f) 11
+!       ! C_NNLO x P_LO x f (x) in C2P0f
+!       call EvalPdfTable_yQ(sf_tables(14), y, mu_table, C2P0f) 12
+!       ! C_LO x P_NNLO x f (x) in C0P2f
+!       call EvalPdfTable_yQ(sf_tables(15), y, mu_table, C0P2f) 13
+!    
+!       ! add up all the different pieces
+!       ! The commented lines are copy/pasted from mathematica
+!       ! CpN3LO fmuF + b1 CpNLO fmuF LRQ + 2 b0 CpNNLO fmuF LRQ 
+!       res = res + twopi**2 * beta1 * C1f * LRQ2 + two * twopi * beta0 * C2f * LRQ2 &
+!       ! + b0^2 CpNLO fmuF LRQ^2 - CpNNLO fmuF LFQ PLO 
+!           & + (twopi*beta0)**2 * C1f * LRQ2**2 - C2P0f * LFQ2 &
+!       ! + 1/2 b1 CpLO fmuF LFQ^2 PLO + 1/2 b0 CpNLO fmuF LFQ^2 PLO  
+!           & + half * twopi**2 * beta1 * C0P0f * LFQ2**2 + half * twopi * beta0 * C1P0f * LFQ2**2 &
+!       ! - 1/3 b0^2 CpLO fmuF LFQ^3 PLO - b1 CpLO fmuF LFQ LRQ PLO 
+!           & - (one/three)*(twopi*beta0)**2 * C0P0f * LFQ2**3 - twopi**2 * beta1 * C0P0f * LFQ2 * LRQ2 &
+!       ! - 2 b0 CpNLO fmuF LFQ LRQ PLO + b0^2 CpLO fmuF LFQ^2 LRQ PLO 
+!           & - two * twopi * beta0 * C1P0f * LFQ2 * LRQ2 + (twopi*beta0)**2 * C0P0f * LFQ2**2 * LRQ2 &
+!       ! - b0^2 CpLO fmuF LFQ LRQ^2 PLO + 1/2 CpNLO fmuF LFQ^2 PLO^2 
+!           & - (twopi*beta0)**2 * C0P0f * LFQ2 * LRQ2**2 + half * C1P0sqf * LFQ2**2 &
+!       ! - 1/2 b0 CpLO fmuF LFQ^3 PLO^2 + b0 CpLO fmuF LFQ^2 LRQ PLO^2  
+!           & - half * twopi*beta0 * C0P0sqf * LFQ2**3 + twopi*beta0 * C0P0sqf * LRQ2 * LFQ2**2 &
+!       ! - 1/6 CpLO fmuF LFQ^3 PLO^3 - CpNLO fmuF LFQ PNLO 
+!           & - (one/6.0_dp) * C0P0cbf * LFQ2**3 - C1P1f * LFQ2 &
+!       ! + b0 CpLO fmuF LFQ^2 PNLO - 2 b0 CpLO fmuF LFQ LRQ PNLO
+!           & + twopi*beta0 * C0P1f * LFQ2**2 - two*twopi*beta0 * C0P1f * LFQ2 * LRQ2 &
+!       ! + CpLO fmuF LFQ^2 PLO PNLO - CpLO fmuF LFQ PNNLO
+!           & + half*(C0P01f+C0P10f) * LFQ2**2 - C0P2f * LFQ2
+
+       call EvalPdfTable_yQ([sf_tables(2:7), sf_tables(9:15)], y, mu_table, convs(:,1:13))
        ! add up all the different pieces
        ! The commented lines are copy/pasted from mathematica
        ! CpN3LO fmuF + b1 CpNLO fmuF LRQ + 2 b0 CpNNLO fmuF LRQ 
-       res = res + twopi**2 * beta1 * C1f * LRQ2 + two * twopi * beta0 * C2f * LRQ2 &
+       res = res + twopi**2 * beta1 * convs(:,1) * LRQ2 + two * twopi * beta0 * convs(:,3) * LRQ2 &
        ! + b0^2 CpNLO fmuF LRQ^2 - CpNNLO fmuF LFQ PLO 
-           & + (twopi*beta0)**2 * C1f * LRQ2**2 - C2P0f * LFQ2 &
+           & + (twopi*beta0)**2 * convs(:,1) * LRQ2**2 - convs(:,12) * LFQ2 &
        ! + 1/2 b1 CpLO fmuF LFQ^2 PLO + 1/2 b0 CpNLO fmuF LFQ^2 PLO  
-           & + half * twopi**2 * beta1 * C0P0f * LFQ2**2 + half * twopi * beta0 * C1P0f * LFQ2**2 &
+           & + half * twopi**2 * beta1 * convs(:,2) * LFQ2**2 + half * twopi * beta0 * convs(:,6) * LFQ2**2 &
        ! - 1/3 b0^2 CpLO fmuF LFQ^3 PLO - b1 CpLO fmuF LFQ LRQ PLO 
-           & - (one/three)*(twopi*beta0)**2 * C0P0f * LFQ2**3 - twopi**2 * beta1 * C0P0f * LFQ2 * LRQ2 &
+           & - (one/three)*(twopi*beta0)**2 * convs(:,2) * LFQ2**3 - twopi**2 * beta1 * convs(:,2) * LFQ2 * LRQ2 &
        ! - 2 b0 CpNLO fmuF LFQ LRQ PLO + b0^2 CpLO fmuF LFQ^2 LRQ PLO 
-           & - two * twopi * beta0 * C1P0f * LFQ2 * LRQ2 + (twopi*beta0)**2 * C0P0f * LFQ2**2 * LRQ2 &
+           & - two * twopi * beta0 * convs(:,6) * LFQ2 * LRQ2 + (twopi*beta0)**2 * convs(:,2) * LFQ2**2 * LRQ2 &
        ! - b0^2 CpLO fmuF LFQ LRQ^2 PLO + 1/2 CpNLO fmuF LFQ^2 PLO^2 
-           & - (twopi*beta0)**2 * C0P0f * LFQ2 * LRQ2**2 + half * C1P0sqf * LFQ2**2 &
+           & - (twopi*beta0)**2 * convs(:,2) * LFQ2 * LRQ2**2 + half * convs(:,10) * LFQ2**2 &
        ! - 1/2 b0 CpLO fmuF LFQ^3 PLO^2 + b0 CpLO fmuF LFQ^2 LRQ PLO^2  
-           & - half * twopi*beta0 * C0P0sqf * LFQ2**3 + twopi*beta0 * C0P0sqf * LRQ2 * LFQ2**2 &
+           & - half * twopi*beta0 * convs(:,4) * LFQ2**3 + twopi*beta0 * convs(:,4) * LRQ2 * LFQ2**2 &
        ! - 1/6 CpLO fmuF LFQ^3 PLO^3 - CpNLO fmuF LFQ PNLO 
-           & - (one/6.0_dp) * C0P0cbf * LFQ2**3 - C1P1f * LFQ2 &
+           & - (one/6.0_dp) * convs(:,7) * LFQ2**3 - convs(:,11) * LFQ2 &
        ! + b0 CpLO fmuF LFQ^2 PNLO - 2 b0 CpLO fmuF LFQ LRQ PNLO
-           & + twopi*beta0 * C0P1f * LFQ2**2 - two*twopi*beta0 * C0P1f * LFQ2 * LRQ2 &
+           & + twopi*beta0 * convs(:,5) * LFQ2**2 - two*twopi*beta0 * convs(:,5) * LFQ2 * LRQ2 &
        ! + CpLO fmuF LFQ^2 PLO PNLO - CpLO fmuF LFQ PNNLO
-           & + half*(C0P01f+C0P10f) * LFQ2**2 - C0P2f * LFQ2
+           & + half*(convs(:,8)+convs(:,9)) * LFQ2**2 - convs(:,13) * LFQ2
 
     endif
 

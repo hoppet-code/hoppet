@@ -153,6 +153,18 @@ __Files added__
 
 --------- end 2025-10-cxx-OO branch ---------
 
+2026-07-08  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+        * examples/f90/structure_functions_example_flavour.f90:
+        * src/structure_functions.f90:
+
+	Work on speeding up structure function evaluations, in particular
+	in the allflav mode and when using arbitrary scales. Now we use
+	the 1D routines to evaluate an array of tables. This means only
+	evaluationg the grid weights once, and not recomputing lnlnQ and
+	y. Speed gain is modest but appreciable. Results are binary identical.
+
+	
 2026-06-30  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* examples/f90/structure_functions_example_flavour.f90:

@@ -14,7 +14,7 @@
 !! how can it be arranged in a fairly clean manner, without breaking
 !! things that already use the system (e.g. caesar resum)?
 !!
-!! One possibility is to use an running_coupling as a source of information.
+!! One possibility is to use a running_coupling as a source of information.
 !! One can then either take a copy of the running_coupling and use its routines
 !! or else just extract the relevant useful information
 !!
