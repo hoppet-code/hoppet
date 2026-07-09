@@ -59,7 +59,8 @@ program prec_and_timing
   real(dp)           :: ymax, pdfval(-6:6)
   real(dp)           :: time_start, time_init_done, time_prev_done, time_ev_done, time_interp_start, time_end
   real(dp), pointer  :: initial_condition(:,:)
-  type(pdf_table)    :: table
+  integer, parameter :: ntables = 10
+  type(pdf_table)    :: table, tables(ntables)
   logical            :: masses_are_MSbar = .false.
   real(dp)           :: muR_Q
   logical            :: output, outputgrid, output_benchmark, preev, auto_nrep
@@ -284,6 +285,7 @@ program prec_and_timing
 
   !call get_evaluation_times()
   call get_evaluation_times_new()
+  call get_1D_evaluation_times_new()
 
   if (trim(lhapdf_out) /= "") then
     call WriteLHAPDFFromPdfTable(table, coupling, lhapdf_out, &
@@ -467,7 +469,7 @@ contains
     real(dp) :: yvals(n), Qvals(n), y, Q
     integer :: i, irep, iQ, iy, nvals
     character(len=*), parameter :: fmt = '(a,f6.1," ",a)'
-
+    write(0,'(a,i7)') "# nrep_eval = ", nrep_eval
     ! set up the y and Q values
     do i = 1, n
       yvals(i) = i*ymax/n
@@ -582,6 +584,95 @@ contains
     write(0   ,fmt) "# Evaluation (1fl,ord2)", (time_end-time_start)/(nrep_eval*n**2)*1e9_dp, "ns"
 
   end subroutine get_evaluation_times_new
+
+  !-----------------------------------------------------------------
+  !! new (2025) routine for getting evaluation times, which uses a table
+  !! of y,Q values, to reduce the likelihood of being biased by some
+  !! special case.
+  subroutine get_1D_evaluation_times_new()
+    real(dp) :: pdf_g(ntables), pdf_g_sum(ntables), pdf_all(-6:6&
+         &,ntables), pdf_sum(-6:6 ,ntables)
+    integer, parameter :: n = 100
+    real(dp) :: yvals(n), Qvals(n), y, Q
+    integer :: i, irep, iQ, iy, nvals
+    character(len=*), parameter :: fmt = '(a,f6.1," ",a)'
+    write(0,'(a,i6,a)') "# Evaluating ", ntables, " tables at once. Timings are per table."
+    ! set up the y and Q values
+    do i = 1, n
+      yvals(i) = i*ymax/n
+      Qvals(i) = Qinit + i*(Qmax-Qinit)/n
+    end do
+    call AllocPdfTable(tables, table) ! Allocate tables
+
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable_yQ(tables,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav)", (time_end-time_start)/(ntables*nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav)", (time_end-time_start)/(ntables*nrep_eval*n**2)*1e9_dp, "ns"
+
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable1D_yQ_order22(tables,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o2)", (time_end-time_start)/(ntables*nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o2)", (time_end-time_start)/(ntables*nrep_eval*n**2)*1e9_dp, "ns"
+    
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable1D_yQ_order33(tables,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o3)", (time_end-time_start)/(ntables*nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o3)", (time_end-time_start)/(ntables*nrep_eval*n**2)*1e9_dp, "ns"
+    
+    ! then loop over 
+    pdf_sum = zero
+    call cpu_time(time_start)
+    do irep = 1, nrep_eval
+      do iQ = 1, n
+        Q = Qvals(iQ)
+        do iy = 1, n
+          y = yvals(iy)
+          call EvalPdfTable1D_yQ_order44(tables,y,Q,pdf_all)
+          pdf_sum = pdf_sum + pdf_all ! prevent compiler from optimising this out
+        end do
+      end do
+    end do
+    call cpu_time(time_end)
+    write(idev,fmt) "# Evaluation (all flav,o4)", (time_end-time_start)/(ntables*nrep_eval*n**2)*1e9_dp, "ns"
+    write(0   ,fmt) "# Evaluation (all flav,o4)", (time_end-time_start)/(ntables*nrep_eval*n**2)*1e9_dp, "ns"
+
+  end subroutine get_1D_evaluation_times_new
 
 
   ! old routine for getting evaluation times, which uses just a single y,Q combination

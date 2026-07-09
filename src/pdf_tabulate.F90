@@ -180,6 +180,9 @@ module pdf_tabulate
   public :: EvalPdfTable_yQ_order22
   public :: EvalPdfTable_yQ_order33
   public :: EvalPdfTable_yQ_order44
+  public :: EvalPdfTable1D_yQ_order22
+  public :: EvalPdfTable1D_yQ_order33
+  public :: EvalPdfTable1D_yQ_order44
   public :: EvalPdfTable_yQ_any_order
 
   abstract interface
