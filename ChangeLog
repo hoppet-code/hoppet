@@ -1,3 +1,11 @@
+2026-07-13 Gavin Salam and Sam D. Bates
+
+	* src/convolution.f90:
+	* unit-tests/test_convolution.F90:	
+	added approxDeltaFn(grid_def) routine, which returns a grid_conv
+	object that is a discretised approximation to a delta function,
+	and associated unit test. 
+
 2026-06-30  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* examples/f90/structure_functions_example_flavour.f90:
