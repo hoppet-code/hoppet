@@ -41,6 +41,7 @@ extern "C" char * hoppet_allocate_cstr(int size) {
 extern "C" int hoppet_cstr_len(char * cstr_ptr) {return strlen(cstr_ptr);}
 
 namespace hoppet {
+/// namespace for access to objects from the fortran/C++ streamlined interface 
 namespace sl {
   grid_def_view        grid;
   dglap_holder_view    dh;
