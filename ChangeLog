@@ -155,16 +155,23 @@ __Files added__
 
 2026-07-08  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
-        * examples/f90/structure_functions_example_flavour.f90:
-        * src/structure_functions.f90:
+	* examples/f90/structure_functions_example_flavour.f90:
+	* src/structure_functions.f90:
 
 	Work on speeding up structure function evaluations, in particular
 	in the allflav mode and when using arbitrary scales. Now we use
 	the 1D routines to evaluate an array of tables. This means only
-	evaluationg the grid weights once, and not recomputing lnlnQ and
+	evaluation the grid weights once, and not recomputing lnlnQ and
 	y. Speed gain is modest but appreciable. Results are binary identical.
-
 	
+2026-07-13 Gavin Salam and Sam D. Bates
+
+	* src/convolution.f90:
+	* unit-tests/test_convolution.F90:	
+	added approxDeltaFn(grid_def) routine, which returns a grid_conv
+	object that is a discretised approximation to a delta function,
+	and associated unit test. 
+
 2026-06-30  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
 
 	* examples/f90/structure_functions_example_flavour.f90:
