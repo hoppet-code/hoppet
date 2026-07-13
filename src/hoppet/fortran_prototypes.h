@@ -65,6 +65,7 @@ extern "C" {
   int    hoppet_cxx__grid_def__ny(const grid_def_f * griddef);
   void   hoppet_cxx__grid_def__y_values(const grid_def_f * griddef, double * yvals);
   void   hoppet_cxx__grid_def__x_values(const grid_def_f * griddef, double * xvals);
+  void   hoppet_cxx__grid_def__approx_delta_fn(const grid_def_f * griddef, double * delta_fn_result_data);
   bool   hoppet_cxx__grid_def__equiv(const grid_def_f * griddef1, const grid_def_f * griddef2);
   void   hoppet_cxx__grid_def__monotonic_indices(const grid_def_f * griddef, int * indices, int & nindices);
 }

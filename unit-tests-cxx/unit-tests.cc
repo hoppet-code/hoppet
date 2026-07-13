@@ -248,9 +248,19 @@ TEST_CASE( "grid_quant", "[hoppet]" ) {
             (5*(-5 - 32*x + 32*pow(x,3) + 5*pow(x,4)))/6.;
   };
   for (double y : {10.0, 8.0, 5.0, 2.0}) {
+    CAPTURE(y);
     REQUIRE_THAT( lumi.at_y(y), WithinRel( expected_lumi(y), 1e-5) );
   }
 
+  //---- delta function approximation ----------
+  hoppet::grid_quant delta_fn = grid100.approx_delta_fn();
+  hoppet::grid_conv pqq = grid100 * pqq_fn;
+  hoppet::grid_quant pqq_delta = pqq * delta_fn;
+  for (double y : {10.0, 8.0, 5.0, 3.0}) {
+    CAPTURE(y);
+    REQUIRE_THAT( pqq_delta.at_y(y), WithinAbs( pqq_fn(y, hoppet::cc_REAL), 1e-7) );
+  }
+  
 }
 
 

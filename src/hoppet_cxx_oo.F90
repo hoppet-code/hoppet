@@ -358,6 +358,21 @@ contains
     ptr = c_loc(f_ptr)
   end function hoppet_cxx__grid_quant__new
 
+
+  subroutine hoppet_cxx__grid_def__approx_delta_fn(grid_def_ptr, result_data) bind(C)
+    use convolution
+    implicit none
+    type(c_ptr), intent(in), value :: grid_def_ptr
+    type(c_ptr), intent(in), value :: result_data
+    !-----------
+    type(grid_def), pointer :: grid
+    real(dp), pointer :: result(:)
+
+    call c_f_pointer(grid_def_ptr, grid)
+    call c_f_pointer(result_data, result, shape=[grid%ny+1])
+    result = approxDeltaFn(grid)
+  end subroutine
+
   subroutine hoppet_cxx__grid_quant__delete(ptr) bind(C)
     implicit none
     type(c_ptr), intent(inout) :: ptr

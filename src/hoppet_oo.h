@@ -120,6 +120,8 @@ typedef std::size_t size_type;
 
 
 class grid_def_view; // forward declaration
+class grid_quant; // forward declaration
+
 
 //-----------------------------------------------------------------------------
 /// @brief A reference to an underlying Fortran object that holds a grid definition
@@ -214,6 +216,13 @@ public:
   using base_t::base_t; // ensures that constructors are inherited
   using view_t = grid_def_view;
   using ref_t = grid_def_ref;
+
+  /// return a grid_quant that approximates a delta function on this grid
+  /// 
+  /// @note the approximation is a discretisation of a delta function. 
+  /// It works only with negative order and grid-locking turned off,
+  /// and will give an error otherwise
+  grid_quant approx_delta_fn() const; 
 
 };
 
@@ -321,8 +330,6 @@ public:
 inline grid_def grid_def_default(double dy, double ymax, int order) {
   return grid_def(hoppet_cxx__grid_def__new_default(dy, ymax, order));
 }
-
-class grid_quant; // forward declaration
 
 //-----------------------------------------------------------------------------
 /// @brief A view of a grid_quant object, i.e. a function of y=ln(1/x) stored at fixed grid points in y
@@ -552,6 +559,15 @@ inline grid_quant operator*(const grid_def_view & grid, const F & fn) {
 }
 
 ///@}
+
+// actual implementation of approx_delta_fn, which comes late
+// because it returns a grid_quant, which is not yet defined in grid_def_view
+inline grid_quant grid_def_view::approx_delta_fn() const {
+  grid_quant result(*this);
+  hoppet_cxx__grid_def__approx_delta_fn(ptr(), result.data());
+  return result;
+}
+
 
 // actual implementation of luminosity, needs to be defined out of the grid_quant_view
 // class, because it returns a grid_quant (not yet defined there)
