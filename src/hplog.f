@@ -1062,6 +1062,7 @@
 ************************************************************************ 
       subroutine fillh1(y,H1,HY1,Hi1,n1,n2) 
 ** fillh1 evaluates the 1dhpl's of weight 1 
+      use, intrinsic :: ieee_arithmetic
       implicit double precision (a-h,o-z) 
       complex*16 H1 
       dimension H1(n1:n2) 
@@ -1069,7 +1070,9 @@
       dimension Hi1(n1:n2) 
       parameter (pi   = 3.14159265358979324d0) 
       if ( n1.eq.-1) then 
-        if ( y.ge.-1.d0 ) then 
+        HY1(-1) = ieee_value(0.0, ieee_quiet_nan)
+        Hi1(-1) = ieee_value(0.0, ieee_quiet_nan)
+        if ( y.gt.-1.d0 ) then 
           HY1(-1) = log(1.d0+y) 
           Hi1(-1) = 0.d0 
         elseif ( y.lt.-1.d0 ) then 
@@ -1078,7 +1081,8 @@
         endif 
         H1(-1) = dcmplx(HY1(-1),pi*Hi1(-1)) 
       endif 
-      if ( y.ge.0.d0 ) then 
+      HY1(0) = ieee_value(0.0, ieee_quiet_nan)
+      if ( y.gt.0.d0 ) then 
         HY1(0) = log(y) 
 *        Hi1(0) = 0.d0 
       elseif ( y.lt.0.d0 ) then 
@@ -1087,7 +1091,9 @@
       endif 
       H1(0) = dcmplx(HY1(0),pi*Hi1(0)) 
       if ( n2.eq.1 ) then 
-        if ( y.ge.1.d0 ) then 
+        HY1(1) = ieee_value(0.0, ieee_quiet_nan)
+        Hi1(1) = ieee_value(0.0, ieee_quiet_nan)
+        if ( y.gt.1.d0 ) then 
           HY1(1) = - log(-1.d0+y) 
           Hi1(1) = 1.d0 
         elseif ( y.lt.1.d0 ) then 
@@ -1106,6 +1112,7 @@
 ** take one of the pairs of values (0,1), (-1,0) or (-1,1) 
 ** 
 ** for y < 0 DOES NOT evaluates the immaginary part of H(0,y) = log(y) 
+      use, intrinsic :: ieee_arithmetic
       implicit double precision (a-h,o-z) 
       dimension HY1(n1:n2),HY2(n1:n2,n1:n2),HY3(n1:n2,n1:n2,n1:n2), 
      $          HY4(n1:n2,n1:n2,n1:n2,n1:n2) 
@@ -1124,9 +1131,10 @@
      $              )))))))))))))
          HY1(-1) = v 
       endif 
-      if (y.ge.0d0) then 
+      HY1(0) = ieee_value(0.0, ieee_quiet_nan)
+      if (y.gt.0d0) then 
          HY1(0) = log(y) 
-      else 
+      elseif (y.lt.0d0) then 
          HY1(0) = log(-y) 
 ** the immaginary part is evaluated in the calling routine eval1dhplat0 
 **       Hi1(0) = 1d0 
