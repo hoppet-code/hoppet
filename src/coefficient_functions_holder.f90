@@ -92,13 +92,13 @@ contains
     end if
     
     ! now allocate the arrays
-    if (nloop.ge.2) then
+    if (ch%nloop.ge.2) then
        allocate(ch%C_NLO(3,ch%nflo:ch%nfhi))
     endif
-    if (nloop.ge.3) then
+    if (ch%nloop.ge.3) then
        allocate(ch%C_NNLO(3,ch%nflo:ch%nfhi))
     endif
-    if (nloop.ge.4) then
+    if (ch%nloop.ge.4) then
        allocate(ch%C_N3LO(5,ch%nflo:ch%nfhi))
     endif
 
@@ -120,10 +120,10 @@ contains
           call InitC3NLO(grid, ch%C3NLO)
        end if
 
-       if (use_exact_cf) then
+       if (use_exact) then
          call InitCoefHolderExact(grid, ch)
        else
-         if (nloop.ge.3) then
+         if (ch%nloop.ge.3) then
             ! either with the exact functions
             !if (use_exact_cf) then
             !   call InitC2NNLO_e(grid, ch%C2NNLO)
@@ -136,7 +136,7 @@ contains
                call InitC3NNLO(grid, ch%C3NNLO) 
             !endif
          endif
-         if (nloop.ge.4) then
+         if (ch%nloop.ge.4) then
             !if (use_exact_cf) then
             !   call InitC2N3LO_e(grid, ch%C2N3LO)
             !   call InitCLN3LO_e(grid, ch%CLN3LO)

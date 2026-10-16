@@ -615,6 +615,8 @@ contains
     real(dp) :: f3(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: f2_fl11(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: fL_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2_fl11x(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL_fl11x(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO_f (0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PNLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
@@ -717,9 +719,12 @@ contains
           ! now the fl_11 piece
           f2_fl11 = ch%C2N3LO_fl11 * f
           fL_fl11 = ch%CLN3LO_fl11 * f
+          f2_fl11x = fl11_split(ch%C2N3LO_fl11, f)
+          fL_fl11x = fl11_split(ch%CLN3LO_fl11, f)
 
           sf_tables(1)%tab(:,:,iQ) = sf_tables(1)%tab(:,:,iQ) + &
-               & (as2pi**3) * structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
+               & (as2pi**3) * structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11, &
+               &                                              f2_fl11x, fL_fl11x)
        endif
     end do
   end subroutine set_structure_functions_upto
@@ -1203,6 +1208,8 @@ contains
     real(dp) :: f3(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: f2_fl11(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: fL_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2_fl11x(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL_fl11x(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO_f (0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PNLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
@@ -1251,9 +1258,12 @@ contains
        ! now the fl_11 piece
        f2_fl11 = ch%C2N3LO_fl11 * f
        fL_fl11 = ch%CLN3LO_fl11 * f
+       f2_fl11x = fl11_split(ch%C2N3LO_fl11, f)
+       fL_fl11x = fl11_split(ch%CLN3LO_fl11, f)
 
        !sf_tables(8)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
-       sf_tables(8)%tab(:,:,iQ) = structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
+       sf_tables(8)%tab(:,:,iQ) = structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11, &
+            &                                                     f2_fl11x, fL_fl11x)
      
     end do
 
@@ -1320,6 +1330,8 @@ contains
     real(dp) :: f3(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: f2_fl11(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: fL_fl11(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: f2_fl11x(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: fL_fl11x(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO_f (0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PNLO_f(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: PLO2_f(0:grid%ny,ncompmin:ncompmax)
@@ -1350,8 +1362,11 @@ contains
        f3 = (ch%C3N3LO * f)
        f2_fl11 = (ch%C2N3LO_fl11 * f)
        fL_fl11 = (ch%CLN3LO_fl11 * f)
+       f2_fl11x = fl11_split(ch%C2N3LO_fl11, f)
+       fL_fl11x = fl11_split(ch%CLN3LO_fl11, f)
        ! sf_tables(8)%tab(:,:,iQ) = structure_function_general(f2, fL, f3)
-       sf_tables(8)%tab(:,:,iQ) = structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11)
+       sf_tables(8)%tab(:,:,iQ) = structure_function_general_full(f2, fL, f3, f2_fl11, fL_fl11, &
+            &                                                     f2_fl11x, fL_fl11x)
 
        ! Now calculate the (C_LO x P_LO^3 x f) term
        f2 =  (ch%C2LO * PLO3_f)
@@ -1409,15 +1424,27 @@ contains
     real(dp) :: res(0:ubound(C2_f,dim=1), -6:7)
     C2_f_fl11 = zero
     CL_f_fl11 = zero
-    res = structure_function_general_full(C2_f, CL_f, C3_f, C2_f_fl11, CL_f_fl11)
+    res = structure_function_general_full(C2_f, CL_f, C3_f, C2_f_fl11, CL_f_fl11, C2_f_fl11, CL_f_fl11)
   end function structure_function_general
 
 
  !----------------------------------------------------------------------
  ! Structure function including N3LO fl_11 piece for neutral current
-  function structure_function_general_full(C2_f, CL_f, C3_f, C2_f_fl11, CL_f_fl11) result(res)
+  !
+  ! The fl11 terms (C2_f_fl11, CL_f_fl11: MVV's N3LO terms with the boson
+  ! on a closed quark loop or on another quark line, in MVV's photon
+  ! normalisation) are exact for photon exchange with the photon weights
+  ! e_q^2. For Z and gamma-Z the boson couples to the loop through its
+  ! vector coupling, so the couplings are g_V,q sum_f g_V,f (Z) and e_q
+  ! sum_f g_V,f + g_V,q sum_f e_f (gamma-Z) for the quark terms, (sum_f
+  ! g_V,f)^2 and 2 sum_f e_f sum_f g_V,f for the gluon term, rather than
+  ! v_q^2 + a_q^2 and 2 e_q v_q. These are built from C2_f_fl11x,
+  ! CL_f_fl11x (see fl11_split). The W cases have no fl11 terms.
+  function structure_function_general_full(C2_f, CL_f, C3_f, C2_f_fl11, CL_f_fl11, &
+       &                                   C2_f_fl11x, CL_f_fl11x) result(res)
     real(dp), intent(in) :: C2_f(0:,ncompmin:), CL_f(0:,ncompmin:), C3_f(0:,ncompmin:)
     real(dp), intent(in) :: C2_f_fl11(0:,ncompmin:), CL_f_fl11(0:,ncompmin:)
+    real(dp), intent(in) :: C2_f_fl11x(0:,ncompmin:), CL_f_fl11x(0:,ncompmin:)
     real(dp) :: C2_f_NC(0:grid%ny,ncompmin:ncompmax)
     real(dp) :: CL_f_NC(0:grid%ny,ncompmin:ncompmax)
     real(dp)             :: res(0:ubound(C2_f,dim=1), -6:7)
@@ -1433,12 +1460,12 @@ contains
 
     res = zero
     !--- deal with Z case -----------------------------------------
-    res(:,iF2Z) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*vi2_ai2_Z_down + &
-         &       (ulike(C2_f_NC) + ubarlike(C2_f_NC))*vi2_ai2_Z_up
+    res(:,iF2Z) = (dlike(C2_f) + dbarlike(C2_f))*vi2_ai2_Z_down + &
+         &       (ulike(C2_f) + ubarlike(C2_f))*vi2_ai2_Z_up + fl11_Z(C2_f_fl11x)
 
     ! temporarily put FL into F1;
-    res(:,iF1Z) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*vi2_ai2_Z_down + &
-         &       (ulike(CL_f_NC) + ubarlike(CL_f_NC))*vi2_ai2_Z_up
+    res(:,iF1Z) = (dlike(CL_f) + dbarlike(CL_f))*vi2_ai2_Z_down + &
+         &       (ulike(CL_f) + ubarlike(CL_f))*vi2_ai2_Z_up + fl11_Z(CL_f_fl11x)
     ! then convert to F1
     res(:,iF1Z) = (res(:,iF2Z) - res(:,iF1Z)) / two_xvals
 
@@ -1458,12 +1485,12 @@ contains
     
     !--- deal with gamma-Z case -----------------------------------------
     ! equations taken from section 19 of PDG (19.18)
-    res(:,iF2gZ) = (dlike(C2_f_NC) + dbarlike(C2_f_NC))*e_down*two_vi_Z_down + &
-         &        (ulike(C2_f_NC) + ubarlike(C2_f_NC))*e_up * two_vi_Z_up
+    res(:,iF2gZ) = (dlike(C2_f) + dbarlike(C2_f))*e_down*two_vi_Z_down + &
+         &        (ulike(C2_f) + ubarlike(C2_f))*e_up * two_vi_Z_up + fl11_gZ(C2_f_fl11x)
     
     ! temporarily put FL into F1;
-    res(:,iF1gZ) = (dlike(CL_f_NC) + dbarlike(CL_f_NC))*e_down*two_vi_Z_down + &
-         &        (ulike(CL_f_NC) + ubarlike(CL_f_NC))*e_up * two_vi_Z_up
+    res(:,iF1gZ) = (dlike(CL_f) + dbarlike(CL_f))*e_down*two_vi_Z_down + &
+         &        (ulike(CL_f) + ubarlike(CL_f))*e_up * two_vi_Z_up + fl11_gZ(CL_f_fl11x)
     ! then convert to F1
     res(:,iF1gZ) = (res(:,iF2gZ) - res(:,iF1gZ)) / two_xvals
     
@@ -1538,7 +1565,73 @@ contains
     !res(:,iF2EM) = half * res(:,iF2EM)
     !res(:,iF1EM) = half * res(:,iF1EM)
 
+  contains
+
+    ! fl11 terms of the Z structure functions from fx = fl11_split(...)
+    function fl11_Z(fx) result(fl11)
+      real(dp), intent(in) :: fx(0:,ncompmin:)
+      real(dp)             :: fl11(0:ubound(fx,dim=1))
+      real(dp) :: sum_e, sum_v, sum_e2
+      call fl11_sums(sum_e, sum_v, sum_e2)
+      fl11 = zero
+      ! MVV's functions vanish with sum_e (nf = 3), the Z terms cannot be built
+      if (sum_e == zero) return
+      fl11 = sum_v/(three*sum_e) * (half*two_vi_Z_down*(dlike(fx) + dbarlike(fx)) + &
+           &                        half*two_vi_Z_up  *(ulike(fx) + ubarlike(fx))) + &
+           & (sum_v/sum_e)**2 * two*sum_e2 * fx(:,0)
+    end function fl11_Z
+
+    ! fl11 terms of the gamma-Z structure functions from fx = fl11_split(...)
+    function fl11_gZ(fx) result(fl11)
+      real(dp), intent(in) :: fx(0:,ncompmin:)
+      real(dp)             :: fl11(0:ubound(fx,dim=1))
+      real(dp) :: sum_e, sum_v, sum_e2
+      call fl11_sums(sum_e, sum_v, sum_e2)
+      fl11 = zero
+      if (sum_e == zero) return
+      fl11 = sum_v/(three*sum_e) * (e_down*(dlike(fx) + dbarlike(fx)) + &
+           &                        e_up  *(ulike(fx) + ubarlike(fx))) + &
+           & one/three * (half*two_vi_Z_down*(dlike(fx) + dbarlike(fx)) + &
+           &              half*two_vi_Z_up  *(ulike(fx) + ubarlike(fx))) + &
+           & two*sum_v/sum_e * two*sum_e2 * fx(:,0)
+    end function fl11_gZ
+
+    ! sums of e_q, g_V,q and e_q^2 over the nf_lcl light flavours
+    subroutine fl11_sums(sum_e, sum_v, sum_e2)
+      real(dp), intent(out) :: sum_e, sum_v, sum_e2
+      integer :: nup, ndown
+      nup = nf_lcl/2; ndown = nf_lcl - nup
+      sum_e  = nup*e_up + ndown*e_down
+      sum_v  = half*(nup*two_vi_Z_up + ndown*two_vi_Z_down)
+      sum_e2 = nup*e_up**2 + ndown*e_down**2
+    end subroutine fl11_sums
+
   end function structure_function_general_full
+
+  !----------------------------------------------------------------------
+  ! The pieces of an fl11 coefficient function C (C2N3LO_fl11 or
+  ! CLN3LO_fl11) acting on f that are needed for the Z and gamma-Z
+  ! couplings: in the quark columns the non-singlet part, NS_plus x f(:,i)
+  ! (MVV's normalisation: 3 sum_f e_f F x q_i), in column 0 the
+  ! contribution of the gluon to each quark column (C x f with only the
+  ! gluon of f). The pure-singlet part is not needed: for photon exchange it
+  ! only restores the per-flavour coupling e_q sum_f e_f, which is applied
+  ! directly here.
+  function fl11_split(C, f) result(res)
+    type(split_mat), intent(in) :: C
+    real(dp),        intent(in) :: f(0:,ncompmin:)
+    real(dp) :: res(0:ubound(f,dim=1),ncompmin:ncompmax)
+    real(dp) :: fg(0:ubound(f,dim=1),ncompmin:ncompmax), cg(0:ubound(f,dim=1),ncompmin:ncompmax)
+    integer  :: i
+    res = zero
+    do i = -nf_lcl, nf_lcl
+       if (i /= 0) res(:,i) = C%NS_plus * f(:,i)
+    end do
+    fg = f
+    fg(:,-6:-1) = zero; fg(:,1:6) = zero
+    cg = C * fg
+    res(:,0) = cg(:,1)
+  end function fl11_split
   
 
   !----------------------------------------------------------------------
