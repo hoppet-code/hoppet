@@ -15,7 +15,7 @@
 	* src/splitting_functions_n3lo.f90:
 	
 	Updated PS 4-loop splitting function to the expressions from
-	2609.37563, both fit and exact. The fit are now default. Agreement
+	2609.37563, both fit and exact. The fits are now the default. Agreement
 	between fit and exact is better than relative 1e-7 across a large
 	range in x. The new expressions also agree with the old
 	approximations within their uncertainty bands.

@@ -46,7 +46,7 @@
   provided by Thomas Gehrmann and is included here in a slightly
   modified form, where the subroutines have been put in separate files
   to allow for parallel compilation. hplog6 also contains an explicit
-  `subrotuine hplog`, which behaves identically to `hplog` from
+  `subroutine hplog`, which behaves identically to `hplog` from
   hplog.f. This is done to avoid issues with multiple-defined
   subroutines in hplog.f and hplog6.
 
@@ -80,7 +80,7 @@
 * Bug fix to `src/mass-thresholds/AQg3mod.f90` thanks to report by
   meiyasan (issue #44 on github). The `coeff` array was declared with
   `dimension(65)`, but was then passed to `chebev` as an array with
-  `dimension(0:65)`. This led to unitialised memory on the
+  `dimension(0:65)`. This led to uninitialised memory on the
   stack. This could lead the unit tests to fail on certain systems
   (and could have caused undefined behaviour if using the Fortran
   version of the N3LO mass thresholds).
