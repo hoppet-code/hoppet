@@ -1,3 +1,28 @@
+2026-11-03  Alexander Karlberg  <karlberg@karlberg-Dell-Pro-7>
+
+	* src/splitting-functions/xpps3a_2609_fit.f90 (Added):
+	* src/splitting-functions/exact-n3lo-split/xpps3a_2609_exact.f90 (Added):
+	* src/splitting-functions/no-exact-n3lo-split/xpps3a_2609_exact.f90 (Added):
+	* src/splitting_functions_n3lo.f90:
+	
+	Updated PS 4-loop splitting function to the expressions from
+	2609.37563, both fit and exact. The fit are now default. Agreement
+	between fit and exact is better than relative 1e-7 across a large
+	range in x. The new expressions also agree with the old
+	approximations within their uncertainty bands.
+
+	* src/structure_functions.f90:
+
+	The fl11 piece of the N3LO gZ and Z F2 and FL structure functions
+	were not computed correctly. They were wrongly using the photon
+	structure throughout, but since this piece involves the boson
+	attaching to a closed fermion loop, the coupling needs to be
+	modified such that they reflect this. Impact on the gZ and Z N3LO
+	piece are modest (ranging from a few percent to tens of percent),
+	but on the total gZ and Z structure functions this translates into
+	a relative 1e-5-1e-6 typically. Bug discovered by Anthropic Claude
+	Opus 5.5.
+
 2026-07-13 Gavin Salam and Sam D. Bates
 
 	* src/convolution.f90:

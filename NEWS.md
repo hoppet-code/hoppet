@@ -2,6 +2,16 @@
 
 # Release 2.3.1, XX 2026
 
+## Major additions
+
+* hoppet now includes the exact and fitted n3lo pure singlet splitting
+  functions computed in 2609.37563. They have been extracted from the
+  mathematica files provided with the paper and translated into
+  Fortran90. 
+
+* The default behaviour of hoppet is to use the fitted versions for
+  the non-singlet splitting functions and approximations elsewhere.
+
 ## Minor additions
 
 * Added functionality to get the structure functions FL, F2, F3 as
