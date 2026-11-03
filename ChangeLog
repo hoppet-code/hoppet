@@ -1,3 +1,8 @@
+2026-11-03 Tue  Gavin + Alexander
+
+	* .github/workflows/main.yml:
+	changed the matrix-build set of gccs from 10,13,14 to 11,13,14,15 (10 seems no longer available)
+
 2026-11-03  Alexander Karlberg  <karlberg@karlberg-Dell-Pro-7>
 
 	* src/splitting-functions/xpps3a_2609_fit.f90 (Added):
