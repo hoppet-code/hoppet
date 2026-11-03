@@ -53,6 +53,7 @@ contains
     xq = ff(yValues(grid))
     
     call test_mvv_interfaces()
+    call test_approxDeltaFn()
 
     if (.not. do_test("test_InitGridConv")) return
 
@@ -95,6 +96,46 @@ contains
 
   end subroutine test_InitGridConv
 
+
+  !! some basic tests that the approxDeltaFn routine works as expected
+  !! 
+  !! The core test will be that the convolution of pqq with the approx delta function
+  !! gives the same result as the original pqq function, for a few test values of
+  !! y. The test values are chosen to be sensitive to the four separate grid pieces
+  subroutine test_approxDeltaFn()
+    use splitting_functions
+    use convolution_communicator
+    type(grid_def) :: unlocked_grid, gd(4), this_grid, test_grids(2)
+    real(dp) :: dy=0.1_dp, ymax = 10.0_dp    
+    integer  :: order = -5, i, igrid = 2
+    type(grid_conv) :: pqq
+    real(dp), allocatable :: delta(:), pqq_delta(:), ytest_vals(:)
+    real(dp) ::   y
+    call InitGridDef(gd(4),dy/27.0_dp,0.2_dp, order=order)
+    call InitGridDef(gd(3),dy/9.0_dp,0.5_dp,  order=order)
+    call InitGridDef(gd(2),dy/3.0_dp,2.0_dp,  order=order)
+    call InitGridDef(gd(1),dy,       ymax  ,  order=order)
+    call InitGridDef(unlocked_grid,gd(1:4),locked=.false.)
+
+    ! try out a single grid and a nested grid, to make sure the
+    ! approxDeltaFn works in both cases (different paths in the code)
+    test_grids = [unlocked_grid, gd(1)]
+    ytest_vals = [0.18_dp, 0.48_dp, 1.95_dp, 3.0_dp] ! values just inside the grid edges
+    do igrid = 1, size(test_grids)
+      this_grid = test_grids(igrid)
+      call InitGridConv(this_grid, pqq, sf_Pqq)
+      delta = approxDeltaFn(this_grid)
+      pqq_delta = pqq * delta
+      do i = 1, size(ytest_vals)
+        if (igrid == 2 .and. i < 4) cycle ! only test the last value for the coarse grid
+        y = ytest_vals(i)
+        call check_approx_eq("test_approxDeltaFn", pqq_delta.aty.(y.with.this_grid), sf_Pqq(y), 1e-7_dp)
+      end do
+      call Delete(pqq)
+    end do
+
+    call Delete(unlocked_grid)
+  end subroutine test_approxDeltaFn
 
 
   !! Routines to test the mvv_splitting_function type

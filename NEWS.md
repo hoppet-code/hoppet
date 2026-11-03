@@ -1,5 +1,35 @@
 # NEWS for HOPPET
 
+# Release 2.3.1, XX 2026
+
+## Major additions
+
+* hoppet now includes the exact and fitted n3lo pure singlet splitting
+  functions computed in 2609.37563. They have been extracted from the
+  mathematica files provided with the paper and translated into
+  Fortran90. 
+
+* The default behaviour of hoppet is to use the fitted versions for
+  the non-singlet splitting functions and approximations elsewhere.
+
+## Minor additions
+
+* Added functionality to get the structure functions FL, F2, F3 as
+  arrays in flavour up to NLO (before the user had to ask for a specific
+  flavour). The functions are `F_NLO_allflav(x, Q, muR, muF)` etc. and
+  they return an array res(3,-6:6) with FL(-6:6), F2(-6:6), F3(-6:6).
+	
+## Bug fixes
+
+* The fl11 piece of the N3LO gZ and Z F2 and FL structure functions
+  were not computed correctly. They were wrongly using the photon
+  structure throughout, but since this piece involves the boson
+  attaching to a closed fermion loop, the coupling needs to be
+  modified such that they reflect this. Impact on the gZ and Z N3LO
+  piece are modest (ranging from a few percent to tens of percent),
+  but on the total gZ and Z structure functions this translates into a
+  relative 1e-5-1e-6 typically.
+
 # Release 2.3.0, 27 May 2026
 
 ## Major additions

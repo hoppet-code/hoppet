@@ -15,8 +15,10 @@ jobs:
          os: [ubuntu-latest]
          #gcc_v: [10] # Version of GFortran we want to use.
          #gcc_v: [7,8,9,10] # Version of GFortran we want to use.
-         gcc_v: [10,13,14] # Version of GFortran we want to use.
-         #python-version: [3.9]
+         gcc_v: [11,13,14,15] # Version of GFortran we want to use.
+         include:
+           - os: ubuntu-22.04
+             gcc_v: 10
      env:
        FC: gfortran-${{matrix.gcc_v}}
        GCC_V: ${{matrix.gcc_v}}
@@ -112,8 +114,10 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:latest
     steps:
-    - name: Install Git
-      run: dnf -y install git    
+    - name: Install Git and util-linux (for lscpu)
+      run: |
+             dnf -y install git    
+             dnf install -y util-linux
     - uses: actions/checkout@v5
       with:
         submodules: recursive

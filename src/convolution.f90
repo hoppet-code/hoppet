@@ -145,7 +145,7 @@ module convolution
   interface Delete ! made public later...
      module procedure Delete_grid_def_0d, Delete_grid_def_1d
   end interface
-  public :: xValues, yValues
+  public :: xValues, yValues, approxDeltaFn
   public :: MonotonicUniqueIndices, MonotonicUniqueYValues, MonotonicUniqueXValues
 
   !-- quant routines -----------------------------------------------
@@ -662,6 +662,35 @@ contains
 
     res = exp(-yValues(grid))
   end function xValues
+
+
+  !======================================================================
+  !! Return an array that contains an approximate representation of delta(y) on the grid.
+  !! The approximation consists of a single non-zero value at y=0 in each of the subgrids.
+  !!
+  !! Beware: 
+  !! - there will be discretisation artefacts whenever probing the PDF close to y=0 
+  !!   (eg. after convolutions, y should be >> dy*|order| for the result to be insensitive 
+  !!   to the discretisation)
+  !! - this is should be used only with _unlocked_ grids and with negative values for the order
+  function approxDeltaFn(grid) result(res)
+    type(grid_def), intent(in) :: grid
+    real(dp)                   :: res(0:grid%ny)
+    !---------------------------------------------
+    integer :: isub
+
+    res = 0.0_dp
+    if (grid%nsub /= 0) then
+      if (grid%locked) call wae_error('approxDeltaFn: should not be used with locked grids')
+       do isub = 1, grid%nsub
+         if (grid%subgd(isub)%order >= 0) call wae_error('approxDeltaFn: should not be used with order >= 0')
+         res(grid%subiy(isub)) = 1.0_dp/grid%subgd(isub)%dy
+       end do
+    else
+      if (grid%order >= 0) call wae_error('approxDeltaFn: should not be used with order >= 0')
+      res(0) = 1.0_dp/grid%dy
+    end if
+  end function approxDeltaFn
 
   !======================================================================
   !! return an array containing a set of indices such that the y-values
