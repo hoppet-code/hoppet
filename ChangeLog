@@ -4,6 +4,9 @@
 	changed the matrix-build set of gccs from 10,13,14 to 11,13,14,15
 	and changed 10 to use ubuntu-22.04 + attempting to fix Intel CI
 
+	* src/pdf_tabulate.F90:
+	exposed get_lnlnQ_wgts(...) publicly, as per PR #46 from Alexand Puck Neuwirth
+
 2026-11-03  Alexander Karlberg  <karlberg@karlberg-Dell-Pro-7>
 
 	* src/splitting-functions/xpps3a_2609_fit.f90 (Added):
