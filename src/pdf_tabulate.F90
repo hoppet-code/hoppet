@@ -167,6 +167,7 @@ module pdf_tabulate
   public :: EvalPdfTable_Q
   public :: EvalPdfTable_yQf, EvalPdfTable_xQf
   public :: WriteLHAPDFFromPdfTable
+  public :: get_lnlnQ_wgts
   public :: Delete
 
   public :: PdfTableOverrideInterpOrders

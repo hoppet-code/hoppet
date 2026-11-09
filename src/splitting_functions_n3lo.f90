@@ -29,7 +29,7 @@ module splitting_functions_n3lo_e
   use hoppet_splitting_function_interfaces
   use xpgg3a; use xpgg3a_2410; use xpgq3a; use xpgq3a_2404; use&
        & xpgq3a_2512; use xpqg3a; use xpps3a; use xpns3s_2604_exact;&
-       & use xpns3p_2604_exact; use xpns3m_2604_exact
+       & use xpns3p_2604_exact; use xpns3m_2604_exact; use xpps3a_2609_exact
   implicit none
   private
 
@@ -65,7 +65,7 @@ contains
   function sf_P3PS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    type(mvv_splitting_function_imod)  :: p3  
+    type(mvv_splitting_function)  :: p3  
     integer, save        :: warn_n = 1
 
     call wae_warn(warn_n,'Exact N3LO splitting functions not yet available for PPS. Using approximation instead.')
@@ -73,7 +73,7 @@ contains
     call sf_VogtValidate
     res = zero
 
-    p3 = mvv_splitting_function_imod(P3PSA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    p3 = mvv_splitting_function(P3PSA_2609_exact, null(), null(), 0.5_dp**4)
 
     res = p3%f(y, cc_piece)
   end function sf_P3PS
@@ -113,7 +113,7 @@ contains
     else
        p3 = mvv_splitting_function_imod(P3GQA_2512, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
     endif
-    
+
     res = p3%f(y, cc_piece)
   end function sf_P3gq
 
@@ -136,7 +136,7 @@ contains
     real(dp), intent(in) :: y
     real(dp)             :: res
     type(mvv_splitting_function)  :: p3
-    
+
     call sf_VogtValidate
     res = zero
 
@@ -150,7 +150,7 @@ contains
     real(dp), intent(in) :: y
     real(dp)             :: res
     type(mvv_splitting_function)  :: p3
-    
+
     call sf_VogtValidate
     res = zero
 
@@ -176,8 +176,8 @@ module splitting_functions_n3lo_p
   use qcd; use dglap_choices; use warnings_and_errors
   use hoppet_splitting_function_interfaces
   use xpgg3a; use xpgg3a_2410; use xpgq3a; use xpgq3a_2404; use&
-      & xpgq3a_2512; use xpqg3a; use xpps3a; use xpns3s_2604_fit;&
-      & use xpns3p_2604_fit; use xpns3m_2604_fit
+       & xpgq3a_2512; use xpqg3a; use xpps3a; use xpns3s_2604_fit;&
+       & use xpns3p_2604_fit; use xpns3m_2604_fit; use xpps3a_2609_fit
   implicit none
   private
 
@@ -213,7 +213,7 @@ contains
   function sf_P3PS(y) result(res)
     real(dp), intent(in) :: y
     real(dp)             :: res
-    type(mvv_splitting_function_imod)  :: p3  
+    type(mvv_splitting_function)  :: p3  
     integer, save        :: warn_n = 1
 
     call wae_warn(warn_n,'Parametrised N3LO splitting functions not yet available for PPS. Using approximation instead.')
@@ -221,7 +221,7 @@ contains
     call sf_VogtValidate
     res = zero
 
-    p3 = mvv_splitting_function_imod(P3PSA, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
+    p3 = mvv_splitting_function(P3PSA_2609_fit, null(), null(), 0.5_dp**4)
 
     res = p3%f(y, cc_piece)
   end function sf_P3PS
@@ -261,7 +261,7 @@ contains
     else
        p3 = mvv_splitting_function_imod(P3GQA_2512, null(), null(), n3lo_splitting_variant, 0.5_dp**4)
     endif
-    
+
     res = p3%f(y, cc_piece)
   end function sf_P3gq
 
@@ -284,7 +284,7 @@ contains
     real(dp), intent(in) :: y
     real(dp)             :: res
     type(mvv_splitting_function)  :: p3
-    
+
     call sf_VogtValidate
     res = zero
 
@@ -298,7 +298,7 @@ contains
     real(dp), intent(in) :: y
     real(dp)             :: res
     type(mvv_splitting_function)  :: p3
-    
+
     call sf_VogtValidate
     res = zero
 

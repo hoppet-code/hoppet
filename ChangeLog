@@ -1,3 +1,80 @@
+2026-11-09  Alexander Karlberg  <karlberg@karlberg-Dell-Pro-7>
+
+	Release 2.3.1
+	
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.3.1
+
+2026-11-03 Tue  Gavin + Alexander
+
+	* .github/workflows/main.yml:
+	changed the matrix-build set of gccs from 10,13,14 to 11,13,14,15
+	and changed 10 to use ubuntu-22.04 + attempting to fix Intel CI
+
+	* src/pdf_tabulate.F90:
+	exposed get_lnlnQ_wgts(...) publicly, as per PR #46 from Alexand Puck Neuwirth
+
+2026-11-03  Alexander Karlberg  <karlberg@karlberg-Dell-Pro-7>
+
+	* src/splitting-functions/xpps3a_2609_fit.f90 (Added):
+	* src/splitting-functions/exact-n3lo-split/xpps3a_2609_exact.f90 (Added):
+	* src/splitting-functions/no-exact-n3lo-split/xpps3a_2609_exact.f90 (Added):
+	* src/splitting_functions_n3lo.f90:
+	
+	Updated PS 4-loop splitting function to the expressions from
+	2609.37563, both fit and exact. The fits are now the default. Agreement
+	between fit and exact is better than relative 1e-7 across a large
+	range in x. The new expressions also agree with the old
+	approximations within their uncertainty bands.
+
+	* src/structure_functions.f90:
+
+	The fl11 piece of the N3LO gZ and Z F2 and FL structure functions
+	were not computed correctly. They were wrongly using the photon
+	structure throughout, but since this piece involves the boson
+	attaching to a closed fermion loop, the coupling needs to be
+	modified such that they reflect this. Impact on the gZ and Z N3LO
+	piece are modest (ranging from a few percent to tens of percent),
+	but on the total gZ and Z structure functions this translates into
+	a relative 1e-5-1e-6 typically. Bug discovered by Anthropic Claude
+	Opus 5.5.
+
+2026-07-13 Gavin Salam and Sam D. Bates
+
+	* src/convolution.f90:
+	* unit-tests/test_convolution.F90:	
+	added approxDeltaFn(grid_def) routine, which returns a grid_conv
+	object that is a discretised approximation to a delta function,
+	and associated unit test. 
+
+2026-06-30  Alexander Karlberg  <karlberg@karlberg-ThinkPad-X1-Extreme-Gen-3>
+
+	* examples/f90/structure_functions_example_flavour.f90:
+	* src/structure_functions.f90:
+	Added functionality to get the structure functions FL, F2, F3 as
+	arrays in flavour up to NLO (before the user had to ask for a specific
+	flavour). The functions are `F_NLO_allflav(x, Q, muR, muF)`
+	etc. and they return an array res(3,-6:6) with FL(-6:6), F2(-6:6),
+	F3(-6:6).
+
+
+2026-05-27  Alexander Karlberg  <karlberg@Latitude-E7470>
+
+	* CMakeLists.txt:
+	* src/welcome_message.f90:
+	* pyproject.toml:
+	* pyinterface/hoppet.i:
+	* docs/python-auto/source/conf.py:
+	* docs/manual/HOPPET-doc.tex:
+	* docs/manual/preamble.tex:
+	changed version to 2.3.1-dev0
+
 2026-05-27  Alexander Karlberg  <karlberg@Latitude-E7470>
 
 	Release 2.3.0
